@@ -1,5 +1,105 @@
 @startuml lop-thuc-the
 
+' =====================================================================
+' Enum — vai trò, trạng thái, phân loại (dùng chung cho các lớp bên dưới)
+' =====================================================================
+enum VaiTro {
+  SINH_VIEN
+  GIANG_VIEN
+  BO_MON
+}
+
+enum TrangThaiDot {
+  DANG_MO
+  DA_DONG
+}
+
+enum TrangThaiDeTai {
+  NHAP
+  CHO_DUYET
+  DA_DUYET
+  TU_CHOI
+  DA_PHAN_CONG
+}
+
+enum LoaiNguoiDeXuat {
+  GIANG_VIEN
+  SINH_VIEN
+}
+
+enum TrangThaiDeCuong {
+  CHUA_NOP
+  CHO_DUYET
+  YEU_CAU_SUA
+  DA_DUYET
+}
+
+enum LoaiTaiLieu {
+  DE_CUONG
+  BAO_CAO_TIEN_DO
+  BAO_CAO_CUOI
+  KHO
+}
+
+enum KetQuaDuyet {
+  DA_DUYET
+  YEU_CAU_SUA
+}
+
+enum VaiTroHoiDong {
+  CHU_TICH
+  THU_KY
+  UY_VIEN
+}
+
+enum LoaiKiemTra {
+  TEN_DE_TAI
+  TAI_LIEU
+}
+
+enum TrangThaiKiemTra {
+  DANG_KIEM_TRA
+  HOAN_TAT
+  LOI
+}
+
+enum LoaiNguon {
+  HE_THONG
+  IMPORT
+}
+
+enum LoaiThongBao {
+  DUYET_DE_TAI
+  TU_CHOI_DE_TAI
+  DUYET_DE_CUONG
+  YEU_CAU_SUA_DE_CUONG
+  NHAN_XET_MOI
+  PHAN_CONG_HOI_DONG
+  LICH_BAO_VE
+  KET_QUA_BAO_VE
+}
+
+enum LoaiCauHinhNguong {
+  NGUONG_TEN_DE_TAI
+  NGUONG_TAI_LIEU
+}
+
+' =====================================================================
+' Tài khoản & phân quyền
+' =====================================================================
+class TaiKhoan <<Entity>> {
+  +maDangNhap : String
+  +email : String
+  +matKhauBam : String
+  +vaiTro : VaiTro
+  +biKhoa : Boolean
+}
+
+' =====================================================================
+' Lát cắt tracer (kế hoạch 01-02) — SinhVien, GiangVien, DotDoAn, DeTai,
+' KetQuaKiemTraTrungLap, ChiTietTrungLap. Giữ nguyên các lớp, bổ sung kiểu
+' enum cho các thuộc tính trạng thái/phân loại đã có sẵn dạng String.
+' =====================================================================
 class SinhVien <<Entity>> {
   +maSoSinhVien : String
   +hoTen : String
@@ -18,24 +118,26 @@ class GiangVien <<Entity>> {
 class DotDoAn <<Entity>> {
   +tenDot : String
   +khoa : String
+  +namHoc : String
   +ngayBatDau : Date
   +ngayKetThuc : Date
-  +trangThai : String
+  +trangThai : TrangThaiDot
 }
 
 class DeTai <<Entity>> {
   +tenDeTai : String
   +moTa : String
   +linhVuc : String
-  +trangThai : String
-  +loaiNguoiDeXuat : String
+  +trangThai : TrangThaiDeTai
+  +loaiNguoiDeXuat : LoaiNguoiDeXuat
 }
 
 class KetQuaKiemTraTrungLap <<Entity>> {
-  +loaiKiemTra : String
-  +trangThai : String
+  +loaiKiemTra : LoaiKiemTra
+  +trangThai : TrangThaiKiemTra
   +tyLeTong : Double
   +nguongApDung : Double
+  +doiTuongDuocKiemTra : String
   +thoiDiem : DateTime
 }
 
@@ -44,12 +146,164 @@ class ChiTietTrungLap <<Entity>> {
   +tyLe : Double
   +doanNguon : String
   +doanTrung : String
+  +viTri : String
 }
 
-DotDoAn "1" -- "*" DeTai : thuộc đợt
-GiangVien "0..1" -- "*" DeTai : đề xuất / hướng dẫn
-SinhVien "0..1" -- "0..1" DeTai : đăng ký
-DeTai "1" -- "*" KetQuaKiemTraTrungLap : có kết quả kiểm tra
-KetQuaKiemTraTrungLap "1" -- "*" ChiTietTrungLap : gồm chi tiết
+' =====================================================================
+' Đề cương & tài liệu (kế hoạch 01-05)
+' =====================================================================
+class MocTienDo <<Entity>> {
+  +tenMoc : String
+  +thuTu : Integer
+  +hanNop : Date
+}
+
+class DeCuong <<Entity>> {
+  +trangThai : TrangThaiDeCuong
+  +ngayNopDauTien : DateTime
+}
+
+class TaiLieuDoAn <<Entity>> {
+  +loai : LoaiTaiLieu
+  +soPhienBan : Integer
+  +tenGoc : String
+  +tenLuuTru : String
+  +kichThuoc : Long
+  +dinhDang : String
+  +thoiDiemNop : DateTime
+}
+
+class LuotDuyetDeCuong <<Entity>> {
+  +ketQua : KetQuaDuyet
+  +nhanXet : String
+  +thoiDiem : DateTime
+}
+
+class BaoCaoTienDo <<Entity>> {
+  +noiDung : String
+  +thoiDiemNop : DateTime
+  +nhanXet : String
+  +danhGia : String
+}
+
+' =====================================================================
+' Hội đồng & bảo vệ
+' =====================================================================
+class HoiDong <<Entity>> {
+  +tenHoiDong : String
+  +ngayBaoVe : Date
+  +gioBaoVe : Time
+  +phong : String
+}
+
+class ThanhVienHoiDong <<Entity>> {
+  +vaiTro : VaiTroHoiDong
+}
+
+class LichBaoVe <<Entity>> {
+  +thuTu : Integer
+  +diemTrungBinh : Decimal
+  +daChot : Boolean
+}
+
+class DiemBaoVe <<Entity>> {
+  +diem : Decimal
+  +nhanXet : String
+}
+
+' =====================================================================
+' Kho đồ án, thông báo, cấu hình
+' =====================================================================
+class DoAnKho <<Entity>> {
+  +khoa : String
+  +tenDeTai : String
+  +tuKhoa : String
+  +diem : Decimal
+  +nguon : LoaiNguon
+  +trangThaiIndex : String
+}
+
+class ThongBao <<Entity>> {
+  +loai : LoaiThongBao
+  +noiDung : String
+  +lienKet : String
+  +daDoc : Boolean
+  +thoiDiem : DateTime
+}
+
+class CauHinhNguong <<Entity>> {
+  +loai : LoaiCauHinhNguong
+  +giaTri : Decimal
+  +thoiDiemCapNhat : DateTime
+}
+
+' =====================================================================
+' Associations — Tài khoản & phân quyền
+' =====================================================================
+TaiKhoan "1" -- "0..1" SinhVien : "là tài khoản của"
+TaiKhoan "1" -- "0..1" GiangVien : "là tài khoản của"
+TaiKhoan "1" -- "*" ThongBao : "nhận"
+TaiKhoan "1" -- "*" CauHinhNguong : "cập nhật"
+
+' =====================================================================
+' Associations — tracer (giữ nguyên từ kế hoạch 01-02)
+' =====================================================================
+DotDoAn "1" -- "*" DeTai : "thuộc đợt"
+GiangVien "0..1" -- "*" DeTai : "đề xuất / hướng dẫn"
+SinhVien "0..1" -- "0..1" DeTai : "đăng ký"
+DeTai "1" -- "*" KetQuaKiemTraTrungLap : "có kết quả kiểm tra"
+KetQuaKiemTraTrungLap "1" -- "*" ChiTietTrungLap : "gồm chi tiết"
+
+' =====================================================================
+' Associations — đề cương, tài liệu, tiến độ
+' =====================================================================
+DotDoAn "1" -- "*" MocTienDo : "định nghĩa mốc"
+DeTai "1" -- "0..1" DeCuong : "có đề cương"
+DeCuong "1" -- "*" TaiLieuDoAn : "gồm các phiên bản (loại = ĐỀ_CƯƠNG)"
+DeCuong "1" -- "*" LuotDuyetDeCuong : "có các lượt duyệt"
+GiangVien "1" -- "*" LuotDuyetDeCuong : "duyệt"
+DeTai "1" -- "*" BaoCaoTienDo : "nộp báo cáo theo mốc"
+MocTienDo "1" -- "*" BaoCaoTienDo : "áp dụng cho"
+DeTai "1" -- "*" TaiLieuDoAn : "có tài liệu (báo cáo cuối, kho...)"
+TaiLieuDoAn "0..1" -- "1" KetQuaKiemTraTrungLap : "được kiểm tra trùng lặp (loại = TÀI_LIỆU)"
+
+' =====================================================================
+' Associations — hội đồng & bảo vệ
+' =====================================================================
+HoiDong "1" -- "*" ThanhVienHoiDong : "gồm thành viên"
+ThanhVienHoiDong "*" -- "1" GiangVien : "là"
+HoiDong "1" -- "*" LichBaoVe : "xếp lịch"
+LichBaoVe "1" -- "1" SinhVien : "của"
+LichBaoVe "0..1" -- "1" DeTai : "bảo vệ đề tài"
+LichBaoVe "1" -- "*" DiemBaoVe : "nhận điểm từ thành viên"
+GiangVien "1" -- "*" DiemBaoVe : "chấm"
+
+' =====================================================================
+' Associations — kho đồ án
+' =====================================================================
+DoAnKho "0..1" -- "0..1" DeTai : "gốc (null nếu import khóa cũ)"
+DoAnKho "0..1" -- "1" SinhVien : "của SV"
+DoAnKho "0..1" -- "1" GiangVien : "GVHD"
+
+' =====================================================================
+' Phụ thuộc lớp -> enum (giữ mọi enum trong cùng một thành phần liên
+' thông với sơ đồ; nếu để enum là node cô lập, engine layout Smetana -
+' bản đi kèm PlantUML dùng khi không có Graphviz `dot` - có lỗi
+' ArrayIndexOutOfBoundsException không xác định khi dựng sơ đồ có nhiều
+' thành phần liên thông rời rạc kích thước 1. Xem SUMMARY 01-05.)
+' =====================================================================
+TaiKhoan ..> VaiTro
+DotDoAn ..> TrangThaiDot
+DeTai ..> TrangThaiDeTai
+DeTai ..> LoaiNguoiDeXuat
+DeCuong ..> TrangThaiDeCuong
+TaiLieuDoAn ..> LoaiTaiLieu
+LuotDuyetDeCuong ..> KetQuaDuyet
+ThanhVienHoiDong ..> VaiTroHoiDong
+KetQuaKiemTraTrungLap ..> LoaiKiemTra
+KetQuaKiemTraTrungLap ..> TrangThaiKiemTra
+DoAnKho ..> LoaiNguon
+ThongBao ..> LoaiThongBao
+CauHinhNguong ..> LoaiCauHinhNguong
 
 @enduml

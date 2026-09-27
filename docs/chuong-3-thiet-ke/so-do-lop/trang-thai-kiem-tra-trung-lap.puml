@@ -1,0 +1,31 @@
+@startuml trang-thai-kiem-tra-trung-lap
+hide empty description
+
+[*] --> DANG_KIEM_TRA : Web API tạo bản ghi kiểm tra,\ntrả 202 (UC0.7 — nộp đề cương/báo cáo)
+
+DANG_KIEM_TRA --> HOAN_TAT : Dịch vụ AI trả kết quả thành công
+DANG_KIEM_TRA --> LOI : Timeout hoặc lỗi dịch vụ AI\n(NFR-09, UC0.7 — E1/E2)
+
+LOI --> DANG_KIEM_TRA : GVHD/Bộ môn yêu cầu kiểm tra lại
+
+HOAN_TAT --> [*]
+LOI --> [*]
+
+note right of DANG_KIEM_TRA
+  Bất biến bắt buộc: một bản ghi không bao giờ ở
+  mãi trạng thái Đang kiểm tra — timeout hoặc lỗi
+  luôn chuyển sang Lỗi (cho phép kiểm tra lại),
+  không có đường nào giữ nguyên Đang kiểm tra.
+end note
+
+note left of HOAN_TAT
+  Mỗi lần nộp một phiên bản TaiLieuDoAn mới tạo
+  MỘT bản ghi KetQuaKiemTraTrungLap MỚI gắn với
+  phiên bản đó (1 TaiLieuDoAn – 1 KetQuaKiemTraTrungLap).
+  Vì vậy kết quả của phiên bản cũ hơn không bao giờ
+  bị ghi đè bởi kết quả trả về muộn của phiên bản
+  mới hơn — chúng là hai bản ghi độc lập, UI chỉ
+  hiển thị bản ghi của phiên bản mới nhất.
+end note
+
+@enduml

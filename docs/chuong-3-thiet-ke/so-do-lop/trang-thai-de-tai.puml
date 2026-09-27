@@ -1,0 +1,31 @@
+@startuml trang-thai-de-tai
+hide empty description
+
+[*] --> NHAP : GV hoặc SV tạo đề tài (lưu nháp)
+
+NHAP --> CHO_DUYET : Người đề xuất gửi đề tài\n(UC1.1 — đợt đồ án đang mở)
+
+CHO_DUYET --> DA_DUYET : Bộ môn duyệt\n(đề tài GV đề xuất, chưa có SV — UC1.3)
+CHO_DUYET --> DA_PHAN_CONG : Bộ môn duyệt + phân công GVHD\n(đề tài đã có SV — UC1.3)
+CHO_DUYET --> TU_CHOI : Bộ môn từ chối kèm lý do\n(UC1.3)
+
+DA_DUYET --> CHO_DUYET : SV đăng ký đề tài còn trống\n(UC1.2)
+
+DA_PHAN_CONG --> [*]
+TU_CHOI --> [*]
+
+note right of DA_DUYET
+  Đường GV đề xuất: duyệt -> còn trống (đề tài
+  hiển thị cho SV đăng ký, UC1.2) -> SV đăng ký
+  -> quay lại Chờ duyệt để Bộ môn xác nhận/
+  phân công GVHD chính thức -> Đã phân công.
+end note
+
+note left of DA_PHAN_CONG
+  Đường SV đề xuất: đề tài đã có SV ngay từ đầu,
+  Bộ môn duyệt và phân công GVHD trong cùng một
+  thao tác (UC1.3) -> Đã phân công trực tiếp,
+  không qua trạng thái Đã duyệt.
+end note
+
+@enduml

@@ -1,0 +1,24 @@
+@startuml trang-thai-de-cuong
+hide empty description
+
+[*] --> CHUA_NOP : Đề tài chuyển Đã phân công (UC1.3)
+
+CHUA_NOP --> CHO_DUYET : SV nộp đề cương\n(tạo TaiLieuDoAn phiên bản 1 — UC2.1)
+
+CHO_DUYET --> DA_DUYET : GVHD duyệt (UC2.2)
+CHO_DUYET --> YEU_CAU_SUA : GVHD yêu cầu sửa kèm nhận xét\n(UC2.2)
+
+YEU_CAU_SUA --> CHO_DUYET : SV nộp lại\n(tạo TaiLieuDoAn phiên bản mới — UC2.2)
+
+DA_DUYET --> [*]
+
+note right of CHO_DUYET
+  Mỗi lần nộp (lần đầu hoặc nộp lại sau Yêu cầu
+  sửa) tạo một TaiLieuDoAn (loại = ĐỀ_CƯƠNG) phiên
+  bản mới; các phiên bản trước được giữ nguyên
+  (FR-DC-01, FR-DC-05). Mỗi lần nộp kích hoạt lại
+  UC0.7 (Kiểm tra trùng lặp tài liệu) cho phiên
+  bản vừa nộp.
+end note
+
+@enduml

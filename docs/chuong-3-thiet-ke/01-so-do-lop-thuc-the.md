@@ -4,15 +4,74 @@
 
 > **Mã PI:** 2.1 — **Yêu cầu:** DSGN-01
 
-Sơ đồ lớp thực thể dưới đây được xây dựng dần theo từng UC. Kế hoạch 01-02 (tracer) khởi tạo lát cắt UC1.1: `SinhVien`, `GiangVien`, `DotDoAn`, `DeTai`, `KetQuaKiemTraTrungLap`, `ChiTietTrungLap`. Kế hoạch 01-05 bổ sung các lớp còn lại (Đề cương, Báo cáo tiến độ, Hội đồng, Tài liệu đồ án) và máy trạng thái.
+Sơ đồ lớp thực thể mô hình hóa toàn bộ dữ liệu nghiệp vụ của hệ thống, đủ để phủ mọi yêu cầu chức năng ở §2.3 và mọi trường dữ liệu của các biểu mẫu MAU-01..MAU-07. Kế hoạch 01-02 (tracer) khởi tạo lát cắt UC1.1: `SinhVien`, `GiangVien`, `DotDoAn`, `DeTai`, `KetQuaKiemTraTrungLap`, `ChiTietTrungLap`. Kế hoạch 01-05 bổ sung 13 lớp còn lại — tài khoản & phân quyền, đề cương & tài liệu, tiến độ, hội đồng & bảo vệ, kho đồ án, thông báo và cấu hình ngưỡng — cùng ba máy trạng thái (đề tài, đề cương, kết quả kiểm tra trùng lặp).
 
-![Hình 3.x – Sơ đồ lớp thực thể (lát cắt UC1.1)](so-do-lop/lop-thuc-the.png)
+![Hình 3.1 – Sơ đồ lớp thực thể](so-do-lop/lop-thuc-the.png)
 
-| Lớp | Tên tiếng Việt | Mô tả |
-|-----|----------------|-------|
-| SinhVien | Sinh viên | Tài khoản sinh viên, có thể đề xuất hoặc đăng ký một đề tài |
-| GiangVien | Giảng viên | Tài khoản giảng viên, có thể đề xuất đề tài và được phân công hướng dẫn |
-| DotDoAn | Đợt đồ án | Khung thời gian một khóa mở đợt làm đồ án, chứa các đề tài của đợt đó |
-| DeTai | Đề tài | Đề tài đồ án, gắn với một đợt, có thể có người đề xuất là GV hoặc SV, trạng thái theo vòng đời Nháp → Chờ duyệt → Đã duyệt/Từ chối → Đã phân công |
-| KetQuaKiemTraTrungLap | Kết quả kiểm tra trùng lặp | Bản ghi một lần gọi kiểm tra trùng lặp (tên đề tài hoặc tài liệu) gắn với một đề tài, lưu tỷ lệ tổng và ngưỡng áp dụng tại thời điểm kiểm tra |
-| ChiTietTrungLap | Chi tiết trùng lặp | Từng dòng chi tiết của một kết quả kiểm tra: đối tượng trùng, tỷ lệ, đoạn nguồn/đoạn trùng tương ứng |
+### 3.1.1. Bảng lớp thực thể
+
+| Lớp | Tên tiếng Việt | Mô tả | Yêu cầu liên quan |
+|-----|----------------|-------|--------------------|
+| TaiKhoan | Tài khoản | Thông tin đăng nhập và phân quyền dùng chung cho cả 3 vai trò; `SinhVien`/`GiangVien` là hồ sơ nghiệp vụ gắn 1-1 với một `TaiKhoan` (tài khoản vai trò Bộ môn không có hồ sơ riêng) | FR-TK-01, FR-TK-03 |
+| SinhVien | Sinh viên | Hồ sơ sinh viên: mã số, họ tên, lớp, khoa; có thể đề xuất hoặc đăng ký một đề tài | FR-TK-04, FR-DT-01 |
+| GiangVien | Giảng viên | Hồ sơ giảng viên: mã số, họ tên, học vị; có thể đề xuất đề tài, được phân công hướng dẫn, làm thành viên hội đồng | FR-TK-04, FR-DT-01 |
+| DotDoAn | Đợt đồ án | Khung thời gian một khóa mở đợt làm đồ án; chứa các đề tài và các mốc tiến độ của đợt đó | FR-TK-05 |
+| MocTienDo | Mốc tiến độ | Một mốc báo cáo tiến độ cố định áp dụng cho toàn bộ đợt đồ án (mốc 1, mốc 2, mốc cuối...) | FR-TD-01 |
+| DeTai | Đề tài | Đề tài đồ án, gắn với một đợt, người đề xuất là GV hoặc SV, trạng thái theo vòng đời Nháp → Chờ duyệt → Đã duyệt/Từ chối → Đã phân công | FR-DT-01, FR-DT-03, FR-DT-04, FR-DT-05, FR-DT-06, FR-DT-07 |
+| DeCuong | Đề cương | Hồ sơ đề cương của một đề tài đã phân công; theo dõi trạng thái vòng lặp nộp – duyệt – sửa | FR-DC-01, FR-DC-04 |
+| TaiLieuDoAn | Tài liệu đồ án | Một phiên bản file được tải lên (đề cương, báo cáo tiến độ, báo cáo cuối); mỗi lần nộp lại tạo một bản ghi mới, giữ nguyên bản ghi cũ | FR-DC-01, FR-DC-02, FR-BV-01 |
+| LuotDuyetDeCuong | Lượt duyệt đề cương | Một quyết định duyệt/yêu cầu sửa của GVHD cho một vòng nộp đề cương, kèm nhận xét | FR-DC-04, FR-DC-05 |
+| BaoCaoTienDo | Báo cáo tiến độ | Báo cáo Sinh viên nộp theo từng mốc tiến độ, kèm nhận xét và đánh giá của GVHD | FR-TD-02, FR-TD-03, FR-TD-04 |
+| HoiDong | Hội đồng | Một hội đồng bảo vệ: tên, ngày/giờ/phòng bảo vệ | FR-BV-02 |
+| ThanhVienHoiDong | Thành viên hội đồng | Một Giảng viên tham gia một hội đồng với một vai trò cụ thể (chủ tịch, thư ký, ủy viên) | FR-BV-02, FR-BV-04 |
+| LichBaoVe | Lịch bảo vệ | Vị trí bảo vệ của một Sinh viên (và đề tài của SV đó) trong một hội đồng cụ thể, kèm điểm trung bình và trạng thái đã chốt | FR-BV-03, FR-BV-07 |
+| DiemBaoVe | Điểm bảo vệ | Điểm và nhận xét của từng thành viên hội đồng chấm cho một lịch bảo vệ | FR-BV-04, FR-BV-05, FR-BV-06 |
+| DoAnKho | Đồ án kho | Bản ghi kho dữ liệu đồ án: khóa, tên đề tài, SV, GVHD, từ khóa, điểm; nguồn Hệ thống (tự động khi chốt bảo vệ) hoặc Import (khóa cũ) | FR-KHO-01, FR-KHO-02, FR-KHO-03, FR-KHO-04 |
+| KetQuaKiemTraTrungLap | Kết quả kiểm tra trùng lặp | Bản ghi một lần gọi kiểm tra trùng lặp (tên đề tài hoặc tài liệu), lưu tỷ lệ tổng, ngưỡng áp dụng và đối tượng cụ thể được kiểm tra tại thời điểm đó | FR-DT-02, FR-AI-01, FR-AI-04 |
+| ChiTietTrungLap | Chi tiết trùng lặp | Từng dòng chi tiết của một kết quả kiểm tra: đối tượng trùng, tỷ lệ, đoạn nguồn/đoạn trùng và vị trí tương ứng | FR-AI-02, FR-AI-03 |
+| ThongBao | Thông báo | Thông báo in-app gửi cho một tài khoản khi có sự kiện liên quan (duyệt/từ chối, nhận xét mới, phân công hội đồng, lịch bảo vệ...) | FR-TB-01 |
+| CauHinhNguong | Cấu hình ngưỡng | Ngưỡng cảnh báo trùng lặp do Bộ môn cấu hình, riêng cho tên đề tài và cho nội dung tài liệu | FR-AI-05 |
+
+Ghi chú đọc bảng: cột "Yêu cầu liên quan" chỉ liệt kê các FR chính gắn trực tiếp với lớp; danh sách đầy đủ FR ↔ lớp ↔ bảng ↔ màn hình nằm ở `docs/truy-vet.md` (hoàn thiện ở kế hoạch 01-07).
+
+### 3.1.2. Biểu đồ trạng thái Đề tài
+
+![Hình 3.2 – Biểu đồ trạng thái Đề tài](so-do-lop/trang-thai-de-tai.png)
+
+| Từ | Sự kiện / tác nhân | Đến |
+|----|---------------------|-----|
+| (khởi tạo) | GV hoặc SV tạo đề tài mới (UC1.1) | NHAP |
+| NHAP | Người đề xuất gửi đề tài (đợt đồ án đang mở) | CHO_DUYET |
+| CHO_DUYET | Bộ môn duyệt — đề tài do GV đề xuất, chưa có SV đăng ký (UC1.3) | DA_DUYET |
+| CHO_DUYET | Bộ môn duyệt và phân công GVHD — đề tài đã có SV, do SV tự đề xuất hoặc GV đề xuất vừa được SV đăng ký (UC1.3) | DA_PHAN_CONG |
+| CHO_DUYET | Bộ môn từ chối kèm lý do (UC1.3) | TU_CHOI |
+| DA_DUYET | SV đăng ký đề tài còn trống (UC1.2) | CHO_DUYET |
+
+`DA_PHAN_CONG` và `TU_CHOI` là hai trạng thái kết thúc vòng đời đăng ký/duyệt đề tài.
+
+### 3.1.3. Biểu đồ trạng thái Đề cương
+
+![Hình 3.3 – Biểu đồ trạng thái Đề cương](so-do-lop/trang-thai-de-cuong.png)
+
+| Từ | Sự kiện / tác nhân | Đến |
+|----|---------------------|-----|
+| (khởi tạo) | Đề tài chuyển Đã phân công (UC1.3) | CHUA_NOP |
+| CHUA_NOP | SV nộp đề cương — tạo `TaiLieuDoAn` phiên bản 1 (UC2.1) | CHO_DUYET |
+| CHO_DUYET | GVHD duyệt (UC2.2) | DA_DUYET |
+| CHO_DUYET | GVHD yêu cầu sửa kèm nhận xét (UC2.2) | YEU_CAU_SUA |
+| YEU_CAU_SUA | SV nộp lại — tạo `TaiLieuDoAn` phiên bản mới (UC2.2) | CHO_DUYET |
+
+Mỗi lần vào lại `CHO_DUYET` (nộp lần đầu hoặc nộp lại) tạo một `TaiLieuDoAn` (loại `ĐỀ_CƯƠNG`) phiên bản mới và kích hoạt lại UC0.7 cho phiên bản đó; các phiên bản trước được giữ nguyên (FR-DC-01, FR-DC-05).
+
+### 3.1.4. Biểu đồ trạng thái Kết quả kiểm tra trùng lặp
+
+![Hình 3.4 – Biểu đồ trạng thái Kết quả kiểm tra trùng lặp](so-do-lop/trang-thai-kiem-tra-trung-lap.png)
+
+| Từ | Sự kiện / tác nhân | Đến |
+|----|---------------------|-----|
+| (khởi tạo) | Web API tạo bản ghi kiểm tra, trả 202 (UC0.7 — nộp đề cương/báo cáo) | DANG_KIEM_TRA |
+| DANG_KIEM_TRA | Dịch vụ AI trả kết quả thành công | HOAN_TAT |
+| DANG_KIEM_TRA | Timeout hoặc lỗi dịch vụ AI (NFR-09) | LOI |
+| LOI | GVHD/Bộ môn yêu cầu kiểm tra lại | DANG_KIEM_TRA |
+
+Bất biến bắt buộc: một bản ghi không bao giờ ở mãi trạng thái `DANG_KIEM_TRA` — timeout hoặc lỗi luôn chuyển sang `LOI` (cho phép kiểm tra lại). Mỗi phiên bản `TaiLieuDoAn` có đúng một `KetQuaKiemTraTrungLap` riêng (1-1, xem §3.1.1), nên kết quả của một phiên bản cũ hơn không bao giờ bị kết quả trả về muộn của phiên bản mới hơn ghi đè — đó luôn là hai bản ghi độc lập.
