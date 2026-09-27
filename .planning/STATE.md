@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 1
 current_phase_name: Analysis & Design
 status: executing
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-09-27T18:12:43.676Z"
+stopped_at: Completed 01-02-PLAN.md
+last_updated: "2026-09-27T18:54:38.856Z"
 last_activity: 2026-09-28
 last_activity_desc: Phase 1 execution started
-state_head: a25bd38e00b47cf2251542977345dd266ddca7c9
+state_head: 0f99f2a163de985471ff0d1040b9a4d0f2a3bb21
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 7
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-09-27)
 ## Current Position
 
 Phase: 1 (Analysis & Design) — EXECUTING
-Plan: 2 of 7
+Plan: 3 of 7
 Status: Ready to execute
 Last activity: 2026-09-28 — Phase 1 execution started
 
@@ -57,6 +57,7 @@ Progress: [░░░░░░░░░░] 0%
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 01 P01 | 12min | 3 tasks | 15 files |
+| Phase 01 P02 | 32min | 2 tasks | 29 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,9 @@ Recent decisions affecting current work:
 - [Roadmap]: AI client là stub ở Phase 2–3; Phase 4 thay stub bằng dịch vụ AI thật
 - [Roadmap]: Seed 300 đề tài + 50 file (DATA-02/03) làm cùng Phase 4 để làm corpus và tập hiệu chỉnh ngưỡng
 - [Phase 01]: 40 câu hỏi phỏng vấn (13 BM/14 GV/13 SV), mã CHUNG dùng lại cho câu hỏi chung; 1 file mẫu biên bản gộp 3 vai trò thay vì 3 file riêng
+- [Phase 01]: draw.io docker exporter needs --shm-size=1g or Electron renderer crashes on non-trivial diagrams (1-based page-index confirmed empirically)
+- [Phase 01]: AS-IS BPMN and step rows marked GIẢ ĐỊNH — chờ xác nhận (D-01/D-02: no interviews yet); removed only when a BB-*/TL-* source is cited (plan 01-07)
+- [Phase 01]: design-taste-frontend skill is out-of-scope for dashboards; D-12 (Ant Design admin) overrides its design-system guidance, only neutral anti-slop principles applied
 
 ### Pending Todos
 
@@ -93,6 +97,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-27T18:12:43.656Z
-Stopped at: Completed 01-01-PLAN.md
+Last session: 2026-09-27T18:54:38.750Z
+Stopped at: Completed 01-02-PLAN.md
 Resume file: None
