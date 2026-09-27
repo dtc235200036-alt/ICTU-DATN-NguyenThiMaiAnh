@@ -35,6 +35,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Phase Details
 
 ### Phase 1: Analysis & Design
+
 **Goal**: Bộ hồ sơ phân tích & thiết kế (CLO 1–2) hoàn chỉnh và truy vết được về PI 1.1–2.3, đủ để thi công mà không phải đoán quy trình, schema, kiến trúc hay giao diện
 **Mode:** mvp
 **Depends on**: Nothing (first phase)
@@ -46,7 +47,24 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Sơ đồ UC tổng quát đúng chuẩn UML có 3 tác nhân (SV, GV, Bộ môn) và 5 UC chính, mỗi UC có bản đặc tả (tác nhân, tiền/hậu điều kiện, luồng chính, luồng thay thế/ngoại lệ)
   4. Sơ đồ lớp thực thể và sơ đồ CSDL khớp nhau từng thực thể (kể cả Kết quả kiểm tra trùng lặp), và sơ đồ UML component/deployment thể hiện Web API, client React, dịch vụ AI là 3 thành phần tách biệt sau Apache
   5. Mockup Figma cho các màn hình chính của cả 3 vai trò, bao phủ 5 UC và màn hình kết quả kiểm tra trùng lặp
-**Plans**: TBD
+
+**Plans**: 7 plans
+Plans:
+**Wave 1**
+- [ ] 01-01-PLAN.md — Bộ công cụ khảo sát (Phụ lục A–D, bản in DOCX) + khu thu thập tài liệu gốc `tai-lieu-goc/` (wave 1)
+- [ ] 01-02-PLAN.md — TRACER: toolchain (PlantUML/draw.io/checker) + UC1.1 xuyên suốt BPMN → FR → UC → lớp → bảng → Figma MH-06 → truy vết; hoàn thiện UC1 chương 2 + quy ước (wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 01-03-PLAN.md — Khảo sát hiện trạng (bản nháp, 7 biểu mẫu) + BPMN tổng quan và 4 quy trình còn lại, AS-IS/TO-BE (wave 2)
+- [ ] 01-04-PLAN.md — Bảng yêu cầu chức năng/phi chức năng + sơ đồ UC tổng quát + đặc tả UC2–UC5, UC0 (wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 01-05-PLAN.md — Sơ đồ lớp + máy trạng thái, CSDL thesis_core/thesis_ai, kiến trúc SOA + sequence AI (wave 3)
+- [ ] 01-06-PLAN.md — 13 màn Figma còn lại (tổng 14) + script xuất PNG (wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 01-07-PLAN.md — Truy vết hoàn chỉnh + lắp chương; checkpoint dữ liệu khảo sát thật; đối chiếu + xuất ảnh mockup (wave 4, có checkpoint)
+
 **UI hint**: yes
 **Notes**:
 - Khảo sát thực tế (ANLS-01) phụ thuộc người thật (bộ môn, GV, SV): lên lịch phỏng vấn ngay T1.
@@ -54,6 +72,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - Chốt ngay ở T4 để tránh sửa lại về sau: MySQL `utf8mb4_vietnamese_ci`, chuẩn hóa Unicode NFC tại mọi biên nhập liệu, embedding tính sẵn và lưu trong schema riêng của dịch vụ AI.
 
 ### Phase 2: Platform, RBAC & Topic Management
+
 **Goal**: Hệ thống chạy thật sau Apache HTTPS; SV, GV và Bộ môn đăng nhập và đi trọn UC Quản lý đề tài, với mọi quyền truy cập được kiểm tra phía server
 **Mode:** mvp
 **Depends on**: Phase 1 (cần DSGN-01..03: sơ đồ lớp, CSDL, kiến trúc)
@@ -65,6 +84,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. GV đề xuất đề tài vào đợt đang mở; SV tự đề xuất hoặc đăng ký một đề tài GV còn trống; Bộ môn duyệt/từ chối kèm lý do và phân công GVHD; mọi vai trò xem danh sách đề tài theo trạng thái (nháp → chờ duyệt → đã duyệt/từ chối → đã phân công) và lọc theo đợt, GV
   4. Hệ thống chặn một SV có 2 đề tài đang hoạt động và chặn 2 SV cùng một đề tài, kể cả khi 2 SV đăng ký cùng lúc
   5. Gọi API trực tiếp (bỏ qua UI) bằng token sai vai trò hoặc để truy cập dữ liệu không thuộc quyền sở hữu đều bị từ chối, ví dụ SV không duyệt được đề tài, GV không sửa được đề tài của GV khác
+
 **Plans**: TBD
 **UI hint**: yes
 **Notes**:
@@ -73,6 +93,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - DEPL-02 dựng Apache ngay trong lát cắt đầu tiên (không đợi T9) để phát hiện sớm lỗi proxy, upload và timeout.
 
 ### Phase 3: Outline, Progress, Defense & Archive
+
 **Goal**: Sau khi đề tài được phân công, SV, GVHD và Bộ môn đi trọn quy trình đề cương → tiến độ → bảo vệ → lưu kho trên Web, có thông báo in-app ở mỗi bước chuyển trạng thái
 **Mode:** mvp
 **Depends on**: Phase 2
@@ -84,6 +105,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. SV nộp báo cáo cuối (lần nộp kích hoạt kiểm tra trùng lặp qua stub); Bộ môn lập hội đồng từ các GV, xếp ngày/giờ/phòng và danh sách SV; GV trong hội đồng chỉ thấy báo cáo của SV thuộc hội đồng mình và nhập điểm + nhận xét; hệ thống tính điểm bằng trung bình cộng, Bộ môn chốt, SV xem được lịch và kết quả của mình
   4. Đồ án đã chốt kết quả tự xuất hiện trong kho với đủ metadata; người dùng tìm/lọc kho theo khóa, từ khóa, GVHD và xem chi tiết; Bộ môn thêm/sửa/xóa và import bản ghi các khóa cũ, mỗi bản ghi mới phát sinh lời gọi index sang AI client
   5. Người dùng thấy thông báo in-app (số chưa đọc + danh sách) khi đề tài/đề cương được duyệt hoặc từ chối, khi có nhận xét mới, và khi được phân vào hội đồng hoặc có lịch bảo vệ
+
 **Plans**: TBD
 **UI hint**: yes
 **Notes**:
@@ -91,6 +113,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - Phase lớn nhất (14 yêu cầu): chia plan theo UC. Nếu trễ, giữ chuỗi đề cương → bảo vệ → kho chạy trước vì đó là đường demo chính.
 
 ### Phase 4: AI Similarity Service
+
 **Goal**: SV và GVHD nhận cảnh báo trùng lặp thật (đề tài tương tự kèm tỷ lệ khi đăng ký; đoạn trùng, đồ án trùng và tỷ lệ tương đồng khi nộp đề cương/báo cáo) với ngưỡng đã được kiểm chứng trên bộ dữ liệu có cặp trùng chủ đích
 **Mode:** mvp
 **Depends on**: Phase 3
@@ -102,6 +125,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Trên bộ 50 file thử nghiệm, các cặp chép nguyên văn và diễn đạt lại bị cảnh báo, còn cặp cùng lĩnh vực khác đề tài và cặp không liên quan nằm dưới ngưỡng; bảng kết quả kiểm chứng (điểm từng cặp, model embedding được chọn sau khi so sánh) được lưu để đưa vào báo cáo
   4. Bộ môn đổi ngưỡng cảnh báo cho tên đề tài và cho nội dung trên UI, và lần kiểm tra kế tiếp áp dụng ngưỡng mới
   5. Dịch vụ AI không truy cập được từ bên ngoài qua Apache và từ chối request thiếu API key nội bộ; bản ghi kho mới thêm được index ngay và xuất hiện trong lần kiểm tra kế tiếp mà không phải tính lại embedding toàn kho
+
 **Plans**: TBD
 **UI hint**: yes
 **Notes**:
@@ -111,6 +135,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - Nếu hết T8 mà hiệu chỉnh chưa đạt: ghi nhận giới hạn vào báo cáo và chuyển sang Phase 5, vì 5 UC chạy end-to-end quan trọng hơn độ hoàn hảo của AI.
 
 ### Phase 5: System Verification & Defense Package
+
 **Goal**: Hệ thống hoàn chỉnh chạy trên server với đầy đủ dữ liệu thử nghiệm, kịch bản demo chạy trơn tru, quyển báo cáo và slide sẵn sàng nộp và bảo vệ trước 07/12/2026
 **Mode:** mvp
 **Depends on**: Phase 4
@@ -121,6 +146,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Thời gian phản hồi kiểm tra trùng tên đề tài và kiểm tra tài liệu, đo trên server với toàn bộ kho, đạt ngưỡng NFR đã chốt ở ANLS-04; số liệu đo nằm trong chương Triển khai
   3. Quyển báo cáo 4 chương đúng khuôn mẫu trường (Cơ sở lý thuyết; Khảo sát & phân tích; Thiết kế; Triển khai kèm hướng dẫn cài đặt và kết quả thử nghiệm), mỗi deliverable truy vết được về mã PI 1.1–4.2
   4. Slide bảo vệ và kịch bản demo end-to-end hoàn chỉnh, đã được chạy tập lại ít nhất một lần trên hệ thống thật theo đúng kịch bản
+
 **Plans**: TBD
 **Notes**:
 - Chương 2–3 lấy trực tiếp từ hồ sơ Phase 1; chương 1 (Cơ sở lý thuyết) nên viết dần từ T4 để giảm tải T10.
@@ -133,7 +159,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Analysis & Design | 0/TBD | Not started | - |
+| 1. Analysis & Design | 0/7 | Not started | - |
 | 2. Platform, RBAC & Topic Management | 0/TBD | Not started | - |
 | 3. Outline, Progress, Defense & Archive | 0/TBD | Not started | - |
 | 4. AI Similarity Service | 0/TBD | Not started | - |
