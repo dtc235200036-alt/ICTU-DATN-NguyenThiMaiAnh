@@ -28,6 +28,15 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 | `ant-pagination`, `ant-pagination-item` | Pagination | MH-04, MH-05, MH-13 |
 | `ant-filter-bar`, `ant-filter-item` | Form (thanh lọc trên Table) | MH-05, MH-13 |
 | `login-layout`, `login-card` (`login-card` kế thừa `ant-card`) | Layout riêng cho màn đăng nhập (không có Sider/Header) | MH-01 |
+| `ant-drawer-mask`, `ant-drawer`, `ant-drawer-header`, `ant-drawer-body`, `ant-drawer-footer` | Drawer | MH-07 |
+| `ant-modal-mask`, `ant-modal`, `ant-modal-header`, `ant-modal-body`, `ant-modal-footer` | Modal | MH-07 |
+| `ant-tabs-nav`, `ant-tabs-tab`, `ant-tabs-tab-active` | Tabs | MH-08 |
+| `ant-upload-dragger`, `ant-upload-text`, `ant-upload-hint` | Upload.Dragger | MH-08 |
+| `ant-spin` | Spin | MH-08, MH-09 |
+| `ant-timeline`, `ant-timeline-item` | Timeline | MH-08 |
+| `ant-progress-circle-wrap`, `ant-progress-circle-value` | Progress (dạng vòng tròn) | MH-09 |
+| `dup-passage`, `dup-passage-high/medium/low`, `dup-passage-label`, `dup-thesis-list`, `dup-thesis-item` | Khối highlight đoạn trùng và danh sách đồ án trùng (không phải component AntD, quy ước riêng nêu ở §3.4.16) | MH-09, MH-14 |
+| `mockup-state-panel` | Khối minh họa trạng thái thay thế đặt sau `ant-layout` đóng, tránh chồng 2 lớp overlay (không phải component AntD) | MH-07, MH-08, MH-09 |
 
 **Sider menu theo vai trò** (chốt tại đây, kế hoạch 01-06 sao chép nguyên văn):
 
@@ -45,14 +54,14 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 | MH-04 | Dashboard Bộ môn (kèm tiến độ toàn khoa) | Bộ môn | UC3.1, UC3.4 | [mh-04.html](mockup/mh-04.html) | [mh-04.png](mockup/mh-04.png) | Đã dựng |
 | MH-05 | Danh sách đề tài (lọc trạng thái/đợt/GV) | Cả 3 vai trò | UC1.4, UC1.2 | [mh-05.html](mockup/mh-05.html) | [mh-05.png](mockup/mh-05.png) | Đã dựng |
 | MH-06 | Đề xuất / đăng ký đề tài có cảnh báo trùng tên | Giảng viên, Sinh viên | UC1.1, UC0.6 | [mh-06.html](mockup/mh-06.html) | [mh-06.png](mockup/mh-06.png) | Đã dựng |
-| MH-07 | Duyệt đề tài và phân công GVHD | Bộ môn | UC1.3 | — | — | Chưa dựng |
-| MH-08 | Nộp đề cương (phiên bản, trạng thái kiểm tra) | Sinh viên | UC2 | — | — | Chưa dựng |
-| MH-09 | Duyệt đề cương có panel kết quả trùng lặp | Giảng viên | UC2 | — | — | Chưa dựng |
+| MH-07 | Duyệt đề tài và phân công GVHD | Bộ môn | UC1.3 | [mh-07.html](mockup/mh-07.html) | [mh-07.png](mockup/mh-07.png) | Đã dựng |
+| MH-08 | Nộp đề cương / báo cáo cuối (phiên bản, trạng thái kiểm tra) | Sinh viên | UC2.1, UC2.3, UC4.1 | [mh-08.html](mockup/mh-08.html) | [mh-08.png](mockup/mh-08.png) | Đã dựng |
+| MH-09 | Duyệt đề cương có panel kết quả trùng lặp | Giảng viên | UC2.2 | [mh-09.html](mockup/mh-09.html) | [mh-09.png](mockup/mh-09.png) | Đã dựng |
 | MH-10 | Báo cáo tiến độ và nhận xét | Sinh viên, Giảng viên | UC3 | — | — | Chưa dựng |
 | MH-11 | Lập hội đồng và xếp lịch | Bộ môn | UC4 | — | — | Chưa dựng |
 | MH-12 | Chấm điểm bảo vệ | Giảng viên | UC4 | — | — | Chưa dựng |
 | MH-13 | Kho đồ án (tìm kiếm, lọc) | Cả 3 vai trò | UC5 | — | — | Chưa dựng |
-| MH-14 | Chi tiết kết quả kiểm tra trùng lặp | Giảng viên, Bộ môn | UC0.6 | — | — | Chưa dựng |
+| MH-14 | Chi tiết kết quả kiểm tra trùng lặp | Giảng viên, Bộ môn | UC0.7 | [mh-14.html](mockup/mh-14.html) | [mh-14.png](mockup/mh-14.png) | Đã dựng |
 
 ### 3.4.3. MH-01 – Đăng nhập
 
@@ -166,3 +175,79 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 - "Gửi đề xuất" tạo đề tài trạng thái "Chờ duyệt" (bước TB-DT-06)
 
 ![Hình 3.x – MH-06 · Đề xuất đề tài](mockup/mh-06.png)
+
+### 3.4.9. MH-07 – Duyệt đề tài và phân công GVHD
+
+**Vai trò:** Bộ môn · **UC:** UC1.3 · **FR:** FR-DT-04, FR-DT-05
+
+**Mục đích:** Cho Bộ môn xem chi tiết một đề tài đang "Chờ duyệt" kèm kết quả kiểm tra tên đã lưu từ lúc đề xuất, rồi quyết định duyệt kèm phân công GVHD hoặc từ chối kèm lý do.
+
+**Vùng (regions):** Sider Bộ môn (mục "Duyệt & phân công đề tài" đang chọn); bảng "Đề tài chờ duyệt" (Tên đề tài, Người đề xuất, Lĩnh vực, Ngày đề xuất, Kiểm tra tên, Hành động); Drawer phải mở sẵn cho dòng đang xem, gồm thông tin đề tài, `ant-alert-warning` chứa bảng kết quả kiểm tra tên đã lưu ở UC1.1 (top 3 đề tài tương tự kèm %), Select "Giảng viên hướng dẫn", footer Drawer có "Từ chối" / "Duyệt và phân công".
+
+**Trạng thái (states):**
+- Kiểm tra tên: `ant-tag-success` "Không trùng", `ant-tag-warning` "N đề tài tương tự", `ant-tag-default` "Chưa kiểm tra" (UC1.1 - E1, dịch vụ AI không phản hồi lúc đề xuất).
+- Hộp thoại xác nhận từ chối (minh họa bên dưới ảnh chính, UC1.3 - A1): `ant-modal` với TextArea "Lý do từ chối" bắt buộc và nút "Xác nhận từ chối".
+
+**Tương tác (interactions):**
+- "Duyệt và phân công" chuyển đề tài sang "Đã phân công", gửi thông báo in-app cho SV và GV được phân công.
+- "Từ chối" mở Modal yêu cầu nhập lý do bắt buộc; "Xác nhận từ chối" chuyển đề tài sang "Từ chối" kèm lý do.
+- Select "Giảng viên hướng dẫn" vẫn yêu cầu Bộ môn xác nhận thủ công kể cả khi GV đề xuất là người phù hợp duy nhất (UC1.3 - E1).
+
+![Hình 3.x – MH-07 · Duyệt đề tài và phân công GVHD](mockup/mh-07.png)
+
+### 3.4.10. MH-08 – Nộp đề cương / báo cáo cuối
+
+**Vai trò:** Sinh viên · **UC:** UC2.1, UC2.3, UC4.1 · **FR:** FR-DC-01, FR-DC-02, FR-DC-05, FR-BV-01
+
+**Mục đích:** Cho Sinh viên nộp phiên bản đề cương hoặc báo cáo cuối mới, xem lịch sử phiên bản kèm trạng thái kiểm tra trùng lặp, và xem lại nhận xét của GVHD qua các lần duyệt.
+
+**Vùng (regions):** Sider Sinh viên (mục "Đề cương" đang chọn); Tabs "Đề cương" / "Báo cáo cuối" (tab Đề cương đang chọn); `ant-upload-dragger` với luật "Chỉ nhận DOCX hoặc PDF, tối đa 20 MB" (NFR-06, §2.4); bảng "Lịch sử phiên bản" (Phiên bản, Ngày nộp, Trạng thái duyệt, Kết quả kiểm tra); `ant-timeline` "Nhận xét của GVHD".
+
+**Trạng thái (states):**
+- Cột Kết quả kiểm tra: `ant-spin` "Đang kiểm tra" (phiên bản vừa nộp, UC0.7 chưa hoàn tất) hoặc Tag "Hoàn tất - N%" liên kết sang MH-14.
+- Trạng thái duyệt: `ant-tag-error` "Yêu cầu sửa" (UC2.2 - A1, quay lại nộp), `ant-tag-processing` "Chờ duyệt".
+- File sai định dạng khi nộp (minh họa bên dưới ảnh chính, UC2.1 - E1): `ant-alert-error` giải thích hệ thống kiểm tra theo nội dung nhị phân chứ không theo đuôi file (NFR-06).
+
+**Tương tác (interactions):**
+- "Nộp phiên bản mới" tạo một phiên bản đề cương/báo cáo mới (không ghi đè), kích hoạt UC0.7 chạy bất đồng bộ.
+- Tag "Hoàn tất - N%" ở cột Kết quả kiểm tra mở MH-14 (chi tiết kết quả).
+- Tab "Báo cáo cuối" dùng lại đúng bố cục Upload + lịch sử phiên bản cho UC4.1 (báo cáo cuối chỉ nộp một lần, không có vòng lặp sửa-duyệt).
+
+![Hình 3.x – MH-08 · Nộp đề cương / báo cáo cuối](mockup/mh-08.png)
+
+### 3.4.11. MH-09 – Duyệt đề cương
+
+**Vai trò:** Giảng viên · **UC:** UC2.2 · **FR:** FR-DC-03, FR-DC-04
+
+**Mục đích:** Cho GVHD xem nội dung đề cương mới nhất cùng kết quả kiểm tra trùng lặp ngay trên cùng màn hình, rồi quyết định duyệt hoặc yêu cầu sửa kèm nhận xét.
+
+**Vùng (regions):** Sider Giảng viên (mục "Duyệt đề cương" đang chọn); trái: tên đề tài, Select phiên bản, link tải file, tóm tắt nội dung trích xuất, TextArea "Nhận xét", nút "Yêu cầu sửa" / "Duyệt đề cương"; phải: panel "Kết quả kiểm tra trùng lặp" với `ant-progress-circle` (tỷ lệ tổng), ngưỡng áp dụng của Bộ môn (UC0.4), bảng đồ án trùng nhiều nhất, nút "Xem chi tiết" mở MH-14.
+
+**Trạng thái (states):**
+- Vòng tròn Progress đổi màu theo mức so với ngưỡng Bộ môn cấu hình (xanh khi dưới ngưỡng cảnh báo).
+- Kết quả đang kiểm tra khi GVHD mở màn hình (minh họa bên dưới ảnh chính, UC2.2 - E1): panel chỉ hiển thị `ant-spin` và ghi chú "Đang kiểm tra, chưa có kết quả"; GVHD vẫn xem được nội dung và duyệt/yêu cầu sửa bình thường.
+
+**Tương tác (interactions):**
+- "Duyệt đề cương" chuyển đề cương sang "Đã duyệt", gửi thông báo in-app cho SV.
+- "Yêu cầu sửa" chuyển sang "Yêu cầu sửa" kèm nội dung TextArea "Nhận xét", SV quay lại UC2.1 để nộp phiên bản mới.
+- "Xem chi tiết" mở MH-14 (chi tiết kết quả kiểm tra trùng lặp, AISV-05/AISV-06).
+
+![Hình 3.x – MH-09 · Duyệt đề cương](mockup/mh-09.png)
+
+### 3.4.16. MH-14 – Chi tiết kết quả kiểm tra trùng lặp
+
+**Vai trò:** Giảng viên, Bộ môn · **UC:** UC0.7 (`<<include>>` từ UC2.2, UC4.1) · **FR:** FR-AI-02, FR-AI-03
+
+**Mục đích:** Trình bày đầy đủ kết quả kiểm tra trùng lặp tài liệu theo kiểu báo cáo Turnitin/Coopy: tỷ lệ tổng, danh sách đồ án trùng, và từng đoạn trùng highlight cạnh đoạn nguồn, để GVHD/Bộ môn đối chiếu trước khi duyệt hoặc chấm điểm.
+
+**Vùng (regions):** Thanh tóm tắt (`mockup-summary-bar`): tỷ lệ tổng, ngưỡng áp dụng, trạng thái, thời điểm kiểm tra, loại tài liệu; cột trái "Đồ án trùng" (`dup-thesis-list`, đóng vai trò bộ lọc, dòng đang chọn tô nền xanh nhạt) kèm ghi chú "Đã loại trừ phần mẫu chung: tiêu đề mẫu, mục lục, tài liệu tham khảo" (FR-AI-02); hai cột so sánh cạnh nhau "Đoạn trong tài liệu nộp" và "Đoạn nguồn" của đồ án đang chọn.
+
+**Trạng thái (states):**
+- Mỗi đoạn trùng dùng khối `dup-passage` với 3 mức: Cao (viền đỏ), Trung bình (viền cam), Thấp (viền xanh lá) - mỗi khối luôn có nhãn chữ ghi rõ mức và tỷ lệ % (không chỉ dựa vào màu) để đọc được cả khi in trắng đen hoặc với người khiếm thị màu.
+- Chọn một đồ án khác trong cột trái đổi nội dung cột "Đoạn nguồn" và các đoạn highlight tương ứng.
+
+**Tương tác (interactions):**
+- Click một dòng trong "Đồ án trùng" lọc lại cặp đoạn trùng hiển thị ở hai cột so sánh theo đúng nguồn đó.
+- Màn được mở từ link "Xem chi tiết" ở MH-09 và từ Tag "Hoàn tất - N%" ở MH-08/lịch sử phiên bản.
+
+![Hình 3.x – MH-14 · Chi tiết kết quả kiểm tra trùng lặp](mockup/mh-14.png)

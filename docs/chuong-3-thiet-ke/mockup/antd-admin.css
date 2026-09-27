@@ -55,9 +55,16 @@ body {
 .ant-layout {
   display: flex;
   width: 1440px;
-  min-height: 100vh;
   margin: 0 auto;
   background: var(--ant-color-bg-layout);
+  /* No min-height: 100vh on purpose. Chrome's headless --screenshot only
+     captures the declared window-size viewport (see tools/render-diagrams.sh);
+     a handful of screens (MH-07/08/09) append a second state-illustration
+     section (.mockup-state-panel) AFTER this layout closes, and a 100vh
+     min-height would force this layout to always fill the full declared H,
+     pushing that trailing section past the viewport. Sizing to content
+     (html/body already paint --ant-color-bg-layout) keeps single-state
+     screens looking identical while letting multi-state screens stack. */
 }
 
 .ant-layout-sider {
@@ -329,6 +336,12 @@ body {
   color: var(--ant-color-error);
 }
 
+.ant-btn-primary-danger {
+  background: var(--ant-color-error);
+  border-color: var(--ant-color-error);
+  color: #fff;
+}
+
 .ant-form-actions {
   display: flex;
   gap: 12px;
@@ -546,6 +559,69 @@ body {
   align-items: start;
 }
 
+.mockup-panel-3col {
+  display: grid;
+  grid-template-columns: 280px 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.mockup-summary-bar {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.mockup-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mockup-summary-item-label {
+  font-size: 12px;
+  color: var(--ant-color-text-tertiary);
+}
+
+.mockup-summary-item-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ant-color-text);
+}
+
+.dup-thesis-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dup-thesis-item {
+  padding: 10px 12px;
+  border-radius: var(--ant-radius);
+  margin-bottom: 8px;
+  border: 1px solid var(--ant-color-border);
+  font-size: 13px;
+  cursor: default;
+}
+
+.dup-thesis-item-active {
+  border-color: var(--ant-color-primary);
+  background: #e6f4ff;
+}
+
+.dup-thesis-item-title {
+  font-weight: 500;
+  color: var(--ant-color-text);
+  margin-bottom: 2px;
+}
+
+.dup-thesis-item-meta {
+  font-size: 12px;
+  color: var(--ant-color-text-tertiary);
+  display: flex;
+  justify-content: space-between;
+}
+
 /* ---------------------------------------------------------------------- */
 /* ant-statistic                                                          */
 /* ---------------------------------------------------------------------- */
@@ -759,6 +835,318 @@ body {
 .ant-filter-item label {
   font-size: 12px;
   color: var(--ant-color-text-secondary);
+}
+
+/* ---------------------------------------------------------------------- */
+/* ant-drawer: right-side overlay panel drawn open (one moment per PNG)    */
+/* ---------------------------------------------------------------------- */
+.ant-layout {
+  position: relative;
+}
+
+.ant-drawer-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 20;
+}
+
+.ant-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 480px;
+  background: var(--ant-color-bg-container);
+  z-index: 21;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -6px 0 24px rgba(0, 0, 0, 0.12);
+}
+
+.ant-drawer-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--ant-color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: none;
+}
+
+.ant-drawer-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ant-color-text);
+}
+
+.ant-drawer-close {
+  color: var(--ant-color-text-tertiary);
+}
+
+.ant-drawer-body {
+  padding: 24px;
+  overflow: auto;
+  flex: 1 1 auto;
+}
+
+.ant-drawer-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--ant-color-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex: none;
+}
+
+/* ---------------------------------------------------------------------- */
+/* ant-modal: centered overlay dialog drawn open as a second layer         */
+/* ---------------------------------------------------------------------- */
+.ant-modal-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ant-modal {
+  width: 480px;
+  background: var(--ant-color-bg-container);
+  border-radius: var(--ant-radius);
+  box-shadow: var(--ant-shadow-card);
+}
+
+.ant-modal-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--ant-color-border);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ant-color-text);
+}
+
+.ant-modal-body {
+  padding: 24px;
+}
+
+.ant-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--ant-color-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* ---------------------------------------------------------------------- */
+/* ant-tabs                                                                */
+/* ---------------------------------------------------------------------- */
+.ant-tabs-nav {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--ant-color-border);
+  margin-bottom: 20px;
+}
+
+.ant-tabs-tab {
+  padding: 0 4px 12px;
+  margin-right: 28px;
+  font-size: 14px;
+  color: var(--ant-color-text-secondary);
+  border-bottom: 2px solid transparent;
+}
+
+.ant-tabs-tab-active {
+  color: var(--ant-color-primary);
+  border-bottom-color: var(--ant-color-primary);
+  font-weight: 500;
+}
+
+/* ---------------------------------------------------------------------- */
+/* ant-upload (Dragger)                                                    */
+/* ---------------------------------------------------------------------- */
+.ant-upload-dragger {
+  border: 1px dashed var(--ant-color-border);
+  border-radius: var(--ant-radius);
+  background: var(--ant-color-bg-spotlight);
+  padding: 32px;
+  text-align: center;
+}
+
+.ant-upload-dragger-icon {
+  color: var(--ant-color-primary);
+  margin-bottom: 12px;
+}
+
+.ant-upload-text {
+  font-size: 14px;
+  color: var(--ant-color-text);
+  margin: 0 0 4px;
+}
+
+.ant-upload-hint {
+  font-size: 12px;
+  color: var(--ant-color-text-tertiary);
+  margin: 0;
+}
+
+/* ---------------------------------------------------------------------- */
+/* ant-spin                                                                */
+/* ---------------------------------------------------------------------- */
+.ant-spin {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ant-color-primary);
+  font-size: 12px;
+}
+
+/* ---------------------------------------------------------------------- */
+/* ant-timeline                                                            */
+/* ---------------------------------------------------------------------- */
+.ant-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ant-timeline-item {
+  position: relative;
+  padding: 0 0 20px 20px;
+  border-left: 2px solid var(--ant-color-border);
+}
+
+.ant-timeline-item:last-child {
+  border-left-color: transparent;
+  padding-bottom: 0;
+}
+
+.ant-timeline-item::before {
+  content: "";
+  position: absolute;
+  left: -5px;
+  top: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--ant-color-primary);
+}
+
+.ant-timeline-item-time {
+  font-size: 12px;
+  color: var(--ant-color-text-tertiary);
+  margin-bottom: 2px;
+}
+
+.ant-timeline-item-content {
+  font-size: 13px;
+  color: var(--ant-color-text);
+}
+
+/* ---------------------------------------------------------------------- */
+/* ant-progress (circle variant)                                          */
+/* ---------------------------------------------------------------------- */
+.ant-progress-circle-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+}
+
+.ant-progress-circle-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ant-progress-circle-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--ant-color-text);
+  line-height: 1.1;
+}
+
+.ant-progress-circle-label {
+  font-size: 11px;
+  color: var(--ant-color-text-tertiary);
+}
+
+/* ---------------------------------------------------------------------- */
+/* dup-passage: highlighted duplicate-check passages (MH-09, MH-14).       */
+/* Not an Ant Design component -- domain-specific highlight block. Uses   */
+/* a text label + left border accent (not color alone) so the similarity  */
+/* level reads for colour-blind users too.                                */
+/* ---------------------------------------------------------------------- */
+.dup-passage {
+  padding: 10px 12px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  border-left: 4px solid;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.dup-passage-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 4px;
+}
+
+.dup-passage-high {
+  background: #fff1f0;
+  border-left-color: #cf1322;
+}
+
+.dup-passage-high .dup-passage-label {
+  color: #cf1322;
+}
+
+.dup-passage-medium {
+  background: #fff7e6;
+  border-left-color: #d46b08;
+}
+
+.dup-passage-medium .dup-passage-label {
+  color: #d46b08;
+}
+
+.dup-passage-low {
+  background: #fcffe6;
+  border-left-color: #7cb305;
+}
+
+.dup-passage-low .dup-passage-label {
+  color: #7cb305;
+}
+
+/* ---------------------------------------------------------------------- */
+/* mockup-state-panel: a labelled alternative-state illustration placed    */
+/* in normal document flow BELOW the main ant-layout (not an overlay), so  */
+/* a second state (e.g. a Modal) can be shown without stacking two masks.  */
+/* ---------------------------------------------------------------------- */
+.mockup-state-panel {
+  width: 1440px;
+  margin: 0 auto;
+  padding: 32px 0 48px;
+  background: var(--ant-color-bg-layout);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mockup-state-label {
+  margin: 0 0 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ant-color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 /* ---------------------------------------------------------------------- */
