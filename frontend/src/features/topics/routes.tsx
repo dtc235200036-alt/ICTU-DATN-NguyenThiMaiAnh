@@ -3,14 +3,47 @@ import { Navigate } from 'react-router'
 import type { AppRoute } from '../../app/registry'
 import TopicDetailPage from './TopicDetailPage'
 import TopicFormPage from './TopicFormPage'
+import TopicListPage from './TopicListPage'
 
-// D-09: '/de-tai/de-xuat' phục vụ cả GV và SV cùng một trang; nhãn menu khác
-// nhau theo vai trò (GV "Đề xuất đề tài" / SV "Đề xuất / Đăng ký đề tài") nên
-// SV có thêm một mục menu riêng (route ẩn, không bao giờ được điều hướng tới
-// trực tiếp — onClick dùng menu.to trỏ thẳng về '/de-tai/de-xuat') vì một
-// MenuEntry chỉ mang được một nhãn. Plan 02-05 sẽ đổi menu.to của mục SV sang
-// trang danh sách đề tài.
+// D-09/MH-05: '/de-tai' là trang danh sách (mọi vai trò); '/de-tai/de-xuat'
+// phục vụ cả GV và SV cùng một trang đề xuất. Mỗi vai trò cần nhãn menu khác
+// nhau trỏ tới cùng một path — MenuEntry chỉ mang được một nhãn/route, nên
+// mỗi nhãn thêm dùng một route "shim" (path riêng, không bao giờ được điều
+// hướng tới trực tiếp) mà onClick dùng menu.to trỏ thẳng về path thật.
 export const routes: AppRoute[] = [
+  {
+    path: '/de-tai',
+    roles: ['SINH_VIEN', 'GIANG_VIEN', 'BO_MON'],
+    breadcrumb: ['Quản lý đề tài', 'Danh sách đề tài'],
+    element: <TopicListPage />,
+    menu: {
+      roles: ['BO_MON'],
+      label: 'Danh sách đề tài',
+      order: 35,
+    },
+  },
+  {
+    path: '/de-tai/cua-toi-sv-menu',
+    roles: ['SINH_VIEN'],
+    element: <Navigate to="/de-tai?pham_vi=cua_toi" replace />,
+    menu: {
+      roles: ['SINH_VIEN'],
+      label: 'Đề tài của tôi',
+      order: 20,
+      to: '/de-tai?pham_vi=cua_toi',
+    },
+  },
+  {
+    path: '/de-tai/cua-toi-gv-menu',
+    roles: ['GIANG_VIEN'],
+    element: <Navigate to="/de-tai?pham_vi=cua_toi" replace />,
+    menu: {
+      roles: ['GIANG_VIEN'],
+      label: 'Đề tài hướng dẫn',
+      order: 20,
+      to: '/de-tai?pham_vi=cua_toi',
+    },
+  },
   {
     path: '/de-tai/de-xuat',
     roles: ['SINH_VIEN', 'GIANG_VIEN'],
@@ -25,12 +58,12 @@ export const routes: AppRoute[] = [
   {
     path: '/de-tai/de-xuat-sv-menu',
     roles: ['SINH_VIEN'],
-    element: <Navigate to="/de-tai/de-xuat" replace />,
+    element: <Navigate to="/de-tai" replace />,
     menu: {
       roles: ['SINH_VIEN'],
       label: 'Đề xuất / Đăng ký đề tài',
       order: 30,
-      to: '/de-tai/de-xuat',
+      to: '/de-tai',
     },
   },
   {

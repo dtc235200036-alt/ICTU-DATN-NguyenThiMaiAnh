@@ -1,7 +1,7 @@
 from fastapi import HTTPException
-from sqlalchemy import select, update
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.deps import CurrentUser
 from app.core.roles import VaiTro
@@ -15,6 +15,7 @@ from app.models.de_tai import (
 )
 from app.models.dot_do_an import DANG_MO, DotDoAn
 from app.models.trung_lap import KetQuaKiemTraTrungLap
+from app.schemas.common import Page, nfc
 from app.schemas.topics import (
     CohortRef,
     PersonRef,
@@ -22,6 +23,8 @@ from app.schemas.topics import (
     SavedChiTietTrungLap,
     SavedTitleCheck,
     TopicCreate,
+    TopicListItem,
+    TopicListParams,
     TopicOut,
     TopicUpdate,
 )
@@ -107,7 +110,11 @@ def _saved_title_check_out(ket_qua: KetQuaKiemTraTrungLap | None) -> SavedTitleC
     )
 
 
-def _to_out(db: Session, user: CurrentUser, topic: DeTai) -> TopicOut:
+def _person_refs(
+    topic: DeTai,
+) -> tuple[PersonRef, PersonRef | None, PersonRef | None]:
+    """Trả (người đề xuất, GVHD, sinh viên) — dùng chung cho get_topic (TopicOut)
+    và list_topics (TopicListItem), tránh N+1 vì các quan hệ đã được eager-load."""
     if topic.loai_nguoi_de_xuat == SINH_VIEN and topic.sinh_vien is not None:
         nguoi_de_xuat = _person_ref(topic.sinh_vien, "ma_so_sinh_vien")
     elif topic.giang_vien is not None:
@@ -121,6 +128,11 @@ def _to_out(db: Session, user: CurrentUser, topic: DeTai) -> TopicOut:
     sinh_vien = (
         _person_ref(topic.sinh_vien, "ma_so_sinh_vien") if topic.sinh_vien is not None else None
     )
+    return nguoi_de_xuat, giang_vien_huong_dan, sinh_vien
+
+
+def _to_out(db: Session, user: CurrentUser, topic: DeTai) -> TopicOut:
+    nguoi_de_xuat, giang_vien_huong_dan, sinh_vien = _person_refs(topic)
 
     owner = is_owner(user, topic)
     la_nhap = topic.trang_thai == NHAP
@@ -253,3 +265,85 @@ def get_topic(db: Session, user: CurrentUser, topic_id: int) -> TopicOut:
     if not can_view(user, topic):
         raise HTTPException(status_code=403, detail=_FORBIDDEN_VIEW_DETAIL)
     return _to_out(db, user, topic)
+
+
+def _scope_predicate(user: CurrentUser, pham_vi: str):
+    """T-02-29/UC1.4 A1/D-08: dựng điều kiện phạm vi TRƯỚC, rồi mọi filter khác
+    chỉ được AND vào — không bao giờ mở rộng phạm vi. Bộ môn không giới hạn."""
+    if user.vai_tro == VaiTro.BO_MON:
+        return None
+
+    open_predicate = (DeTai.trang_thai == DA_DUYET) & (DeTai.sinh_vien_id.is_(None))
+    if user.vai_tro == VaiTro.SINH_VIEN:
+        own = DeTai.sinh_vien_id == user.sinh_vien_id
+    else:  # GIANG_VIEN
+        own = DeTai.giang_vien_id == user.giang_vien_id
+
+    if pham_vi == "cua_toi":
+        return own
+    return or_(own, open_predicate)
+
+
+def _list_item_out(topic: DeTai) -> TopicListItem:
+    nguoi_de_xuat, giang_vien_huong_dan, sinh_vien = _person_refs(topic)
+    return TopicListItem(
+        id=topic.id,
+        ten_de_tai=topic.ten_de_tai,
+        linh_vuc=topic.linh_vuc,
+        trang_thai=topic.trang_thai,
+        dot_do_an=CohortRef(
+            id=topic.dot_do_an.id,
+            ten_dot=topic.dot_do_an.ten_dot,
+            khoa=topic.dot_do_an.khoa,
+            trang_thai=topic.dot_do_an.trang_thai,
+        ),
+        nguoi_de_xuat=nguoi_de_xuat,
+        giang_vien_huong_dan=giang_vien_huong_dan,
+        sinh_vien=sinh_vien,
+    )
+
+
+def list_topics(db: Session, user: CurrentUser, params: TopicListParams) -> Page[TopicListItem]:
+    """UC1.4/TOPC-04/NFR-12: danh sách đề tài lọc theo trạng thái/đợt/GVHD/lĩnh
+    vực/từ khóa, luôn trong phạm vi server-side của vai trò gọi (T-02-29)."""
+    stmt = select(DeTai)
+
+    scope = _scope_predicate(user, params.pham_vi)
+    if scope is not None:
+        stmt = stmt.where(scope)
+
+    if params.dot_do_an_id is not None:
+        stmt = stmt.where(DeTai.dot_do_an_id == params.dot_do_an_id)
+    if params.trang_thai is not None:
+        stmt = stmt.where(DeTai.trang_thai == params.trang_thai)
+    if params.giang_vien_id is not None:
+        stmt = stmt.where(DeTai.giang_vien_id == params.giang_vien_id)
+    if params.linh_vuc is not None:
+        stmt = stmt.where(DeTai.linh_vuc == params.linh_vuc)
+    if params.q:
+        # T-02-32/T-02-33: autoescape=True chống LIKE-injection qua % và _.
+        stmt = stmt.where(DeTai.ten_de_tai.contains(nfc(params.q), autoescape=True))
+
+    total = db.execute(select(func.count()).select_from(stmt.subquery())).scalar_one()
+
+    if params.sap_xep == "ten":
+        stmt = stmt.order_by(DeTai.ten_de_tai.asc())
+    else:
+        stmt = stmt.order_by(DeTai.id.desc())
+
+    paged = (
+        stmt.options(
+            selectinload(DeTai.dot_do_an),
+            selectinload(DeTai.giang_vien),
+            selectinload(DeTai.sinh_vien),
+        )
+        .offset((params.page - 1) * params.page_size)
+        .limit(params.page_size)
+    )
+    rows = db.execute(paged).scalars().all()
+
+    items = [_list_item_out(row) for row in rows]
+
+    return Page[TopicListItem](
+        items=items, total=total, page=params.page, page_size=params.page_size
+    )

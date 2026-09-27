@@ -1,14 +1,19 @@
-from fastapi import APIRouter, Depends
+from typing import Literal
+
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
 from app.core.deps import CurrentUser, require_role
 from app.core.roles import ANY_ROLE, VaiTro
+from app.schemas.common import Page
 from app.schemas.topics import (
     TitleCheckRequest,
     TitleCheckResult,
     TitleMatch,
     TopicCreate,
+    TopicListItem,
+    TopicListParams,
     TopicOut,
     TopicUpdate,
 )
@@ -16,9 +21,41 @@ from app.services import title_check as title_check_service
 from app.services import topics as topics_service
 
 # UC1.1/AUTH-03: đề xuất/sửa/gửi chỉ GV và SV (Bộ môn không đề xuất đề tài);
-# xem chi tiết mở cho mọi vai trò đã xác thực, quyền xem thực sự do can_view
-# (T-02-23) quyết định ở tầng service, không phải ở require_role.
+# xem chi tiết/danh sách mở cho mọi vai trò đã xác thực, quyền xem/phạm vi
+# thực sự do can_view/list_topics (T-02-23/T-02-29) quyết định ở tầng service.
 router = APIRouter(prefix="/api/topics", tags=["topics"])
+
+_TrangThaiFilter = Literal["NHAP", "CHO_DUYET", "DA_DUYET", "TU_CHOI", "DA_PHAN_CONG"]
+_PhamViFilter = Literal["tat_ca", "cua_toi"]
+_SapXepFilter = Literal["moi_nhat", "ten"]
+
+
+@router.get("", response_model=Page[TopicListItem])
+def list_topics(
+    dot_do_an_id: int | None = Query(default=None),
+    trang_thai: _TrangThaiFilter | None = Query(default=None),
+    giang_vien_id: int | None = Query(default=None),
+    linh_vuc: str | None = Query(default=None),
+    q: str | None = Query(default=None),
+    pham_vi: _PhamViFilter = Query(default="tat_ca"),
+    sap_xep: _SapXepFilter = Query(default="moi_nhat"),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=100),
+    user: CurrentUser = Depends(require_role(*ANY_ROLE)),
+    db: Session = Depends(get_db),
+) -> Page[TopicListItem]:
+    params = TopicListParams(
+        dot_do_an_id=dot_do_an_id,
+        trang_thai=trang_thai,
+        giang_vien_id=giang_vien_id,
+        linh_vuc=linh_vuc,
+        q=q,
+        pham_vi=pham_vi,
+        sap_xep=sap_xep,
+        page=page,
+        page_size=page_size,
+    )
+    return topics_service.list_topics(db, user, params)
 
 
 @router.post("", response_model=TopicOut, status_code=201)

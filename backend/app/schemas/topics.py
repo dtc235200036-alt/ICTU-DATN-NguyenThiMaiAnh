@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import datetime, timezone
 
 from pydantic import BaseModel, Field, field_serializer
@@ -103,3 +104,32 @@ class TopicOut(BaseModel):
     ly_do_tu_choi: str | None = None
     quyen: QuyenOut
     kiem_tra_ten: SavedTitleCheck | None = None
+
+
+class TopicListItem(BaseModel):
+    """UC1.4/MH-05: một dòng trong danh sách đề tài — chỉ các trường bảng cần."""
+
+    id: int
+    ten_de_tai: str
+    linh_vuc: str | None = None
+    trang_thai: str
+    dot_do_an: CohortRef
+    nguoi_de_xuat: PersonRef
+    giang_vien_huong_dan: PersonRef | None = None
+    sinh_vien: PersonRef | None = None
+
+
+@dataclass
+class TopicListParams:
+    """Tham số truy vấn GET /api/topics — đã được FastAPI Query() validate/ép
+    kiểu (enum trang_thai/pham_vi/sap_xep) trước khi tới đây (T-02-33)."""
+
+    dot_do_an_id: int | None = None
+    trang_thai: str | None = None
+    giang_vien_id: int | None = None
+    linh_vuc: str | None = None
+    q: str | None = None
+    pham_vi: str = "tat_ca"
+    sap_xep: str = "moi_nhat"
+    page: int = 1
+    page_size: int = 10

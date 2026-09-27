@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 
 import { api } from '../../api/client'
@@ -66,6 +66,36 @@ export interface TopicOut {
   kiem_tra_ten: SavedTitleCheck | null
 }
 
+export interface TopicListItem {
+  id: number
+  ten_de_tai: string
+  linh_vuc: string | null
+  trang_thai: TopicOut['trang_thai']
+  dot_do_an: CohortRef
+  nguoi_de_xuat: PersonRef
+  giang_vien_huong_dan: PersonRef | null
+  sinh_vien: PersonRef | null
+}
+
+export interface PageResult<T> {
+  items: T[]
+  total: number
+  page: number
+  page_size: number
+}
+
+export interface TopicsQueryParams {
+  dot_do_an_id?: number
+  trang_thai?: string
+  giang_vien_id?: number
+  linh_vuc?: string
+  q?: string
+  pham_vi?: 'tat_ca' | 'cua_toi'
+  sap_xep?: 'moi_nhat' | 'ten'
+  page?: number
+  page_size?: number
+}
+
 export interface TopicFormInput {
   dot_do_an_id: number
   ten_de_tai: string
@@ -97,6 +127,19 @@ export function useTopic(id: number | undefined) {
       }
       return failureCount < 3
     },
+  })
+}
+
+// MH-05/UC1.4: danh sách đề tài lọc theo trạng thái/đợt/GVHD/lĩnh vực/từ khóa;
+// placeholderData giữ trang cũ khi đổi bộ lọc/trang để tránh flash rỗng.
+export function useTopics(params: TopicsQueryParams) {
+  return useQuery({
+    queryKey: [TOPIC_KEY, 'list', params],
+    queryFn: async () => {
+      const { data } = await api.get<PageResult<TopicListItem>>('/topics', { params })
+      return data
+    },
+    placeholderData: keepPreviousData,
   })
 }
 

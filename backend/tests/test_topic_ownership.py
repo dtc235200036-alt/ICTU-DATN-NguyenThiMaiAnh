@@ -104,3 +104,22 @@ def test_sv_proposal_visibility_enforced(client, make_account, auth_headers, db)
     assert kiem_tra_ten is not None
     assert kiem_tra_ten["trang_thai"] == "HOAN_TAT"
     assert kiem_tra_ten["nguong_ap_dung"] == 50.0
+
+    # T-02-29/UC1.4 A1: GET /api/topics scope không bao giờ lộ đề tài Chờ duyệt
+    # của SV khác cho SV B, kể cả khi cố lọc trực tiếp trạng thái + pham_vi=tat_ca
+    # (filter chỉ được AND vào phạm vi, không bao giờ mở rộng phạm vi).
+    list_resp_b = client.get("/api/topics", headers=auth_headers(sv_b))
+    assert list_resp_b.status_code == 200
+    assert topic_id not in [item["id"] for item in list_resp_b.json()["items"]]
+
+    list_resp_b_filtered = client.get(
+        "/api/topics?trang_thai=CHO_DUYET&pham_vi=tat_ca", headers=auth_headers(sv_b)
+    )
+    assert list_resp_b_filtered.status_code == 200
+    assert topic_id not in [item["id"] for item in list_resp_b_filtered.json()["items"]]
+
+    list_resp_bomon = client.get(
+        "/api/topics?trang_thai=CHO_DUYET", headers=auth_headers(bomon)
+    )
+    assert list_resp_bomon.status_code == 200
+    assert topic_id in [item["id"] for item in list_resp_bomon.json()["items"]]
