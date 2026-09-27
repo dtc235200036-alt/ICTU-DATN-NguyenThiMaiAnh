@@ -20,6 +20,35 @@ export interface QuyenOut {
   gui: boolean
 }
 
+export type TitleCheckStatus = 'HOAN_TAT' | 'LOI'
+
+export interface TitleMatch {
+  de_tai_id: number
+  ten_de_tai: string
+  khoa: string
+  giang_vien: string | null
+  ty_le: number
+}
+
+export interface TitleCheckResult {
+  trang_thai: TitleCheckStatus
+  nguong: number
+  matches: TitleMatch[]
+}
+
+export interface SavedChiTietTrungLap {
+  doi_tuong_trung: string
+  ty_le: number
+}
+
+export interface SavedTitleCheck {
+  trang_thai: TitleCheckStatus
+  ty_le_tong: number | null
+  nguong_ap_dung: number
+  thoi_diem: string
+  chi_tiet: SavedChiTietTrungLap[]
+}
+
 export interface TopicOut {
   id: number
   dot_do_an: CohortRef
@@ -33,6 +62,7 @@ export interface TopicOut {
   sinh_vien: PersonRef | null
   ly_do_tu_choi: string | null
   quyen: QuyenOut
+  kiem_tra_ten: SavedTitleCheck | null
 }
 
 export interface TopicFormInput {
@@ -82,6 +112,15 @@ export function useUpdateTopic() {
     onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({ queryKey: [TOPIC_KEY, variables.id] })
       void queryClient.invalidateQueries({ queryKey: [TOPIC_KEY] })
+    },
+  })
+}
+
+export function useCheckTitle() {
+  return useMutation({
+    mutationFn: async (ten_de_tai: string) => {
+      const { data } = await api.post<TitleCheckResult>('/topics/check-title', { ten_de_tai })
+      return data
     },
   })
 }

@@ -98,3 +98,9 @@ def test_sv_proposal_visibility_enforced(client, make_account, auth_headers, db)
 
     resp_bomon = client.get(f"/api/topics/{topic_id}", headers=auth_headers(bomon))
     assert resp_bomon.status_code == 200
+    # UC0.6/D-10: mọi submit lưu đúng 1 kết quả kiểm tra trùng tên, snapshot
+    # ngưỡng NGUONG_TEN_DE_TAI mặc định (50.00) từ migration 0004.
+    kiem_tra_ten = resp_bomon.json()["kiem_tra_ten"]
+    assert kiem_tra_ten is not None
+    assert kiem_tra_ten["trang_thai"] == "HOAN_TAT"
+    assert kiem_tra_ten["nguong_ap_dung"] == 50.0

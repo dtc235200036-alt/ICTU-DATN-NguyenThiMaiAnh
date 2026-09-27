@@ -35,6 +35,7 @@ services:
       BCRYPT_ROUNDS: ${BCRYPT_ROUNDS:-12}
       SEED_ON_START: ${SEED_ON_START:-true}
       SEED_DEFAULT_PASSWORD: ${SEED_DEFAULT_PASSWORD:-}
+      AI_STUB_MODE: ${AI_STUB_MODE:-normal}
       APP_ENV: production
       COOKIE_SECURE: "true"
     depends_on:

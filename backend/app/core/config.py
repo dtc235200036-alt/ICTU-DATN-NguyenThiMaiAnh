@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     LOGIN_MAX_FAILURES: int = 5
     LOGIN_WINDOW_MINUTES: int = 15
 
+    # D-10/UC0.6: AI client seam — Phase 2 chỉ có "stub" (Phase 4 thay bằng httpx).
+    AI_CLIENT: str = "stub"
+    AI_STUB_MODE: str = "normal"
+    TITLE_CHECK_TOP_K: int = 5
+
     @field_validator("JWT_SECRET")
     @classmethod
     def _jwt_secret_min_length(cls, v: str) -> str:

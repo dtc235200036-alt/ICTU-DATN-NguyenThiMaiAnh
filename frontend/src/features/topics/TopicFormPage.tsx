@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react'
-import { App as AntApp, Alert, Button, Card, Form, Input, Select } from 'antd'
+import { useEffect, useRef, useState } from 'react'
+import { App as AntApp, Alert, Button, Card, Form, Input, Select, Tag } from 'antd'
 import type { InputRef } from 'antd'
 import { useNavigate, useParams } from 'react-router'
 
@@ -7,8 +7,15 @@ import { getErrorMessage } from '../../api/client'
 import { useCohorts } from '../cohorts/api'
 import ForbiddenPage from '../auth/ForbiddenPage'
 import { LINH_VUC_OPTIONS } from './constants'
-import { useCreateTopic, useSubmitTopic, useTopic, useUpdateTopic } from './api'
-import type { TopicFormInput } from './api'
+import TitleCheckAlert from './TitleCheckAlert'
+import {
+  useCheckTitle,
+  useCreateTopic,
+  useSubmitTopic,
+  useTopic,
+  useUpdateTopic,
+} from './api'
+import type { TitleCheckResult, TopicFormInput } from './api'
 
 const { TextArea } = Input
 
@@ -39,6 +46,13 @@ export default function TopicFormPage() {
   const createMutation = useCreateTopic()
   const updateMutation = useUpdateTopic()
   const submitMutation = useSubmitTopic()
+  const checkTitleMutation = useCheckTitle()
+
+  // UC0.6/FR-DT-02: kết quả kiểm tra trùng tên tức thời (chưa lưu — bản lưu
+  // chỉ xảy ra khi thật sự gửi đề xuất, ở service topics.py).
+  const [checkResult, setCheckResult] = useState<TitleCheckResult | null>(null)
+  const [lastCheckedTitle, setLastCheckedTitle] = useState<string | null>(null)
+  const [acknowledged, setAcknowledged] = useState(false)
 
   useEffect(() => {
     if (editing && topic) {
@@ -48,6 +62,7 @@ export default function TopicFormPage() {
         linh_vuc: topic.linh_vuc ?? undefined,
         mo_ta: topic.mo_ta ?? undefined,
       })
+      setLastCheckedTitle(topic.ten_de_tai)
     }
   }, [editing, topic, form])
 
@@ -75,6 +90,45 @@ export default function TopicFormPage() {
   const isSaving =
     createMutation.isPending || updateMutation.isPending || submitMutation.isPending
 
+  // Mọi lần đổi tên đề tài làm kết quả cũ (và xác nhận "vẫn gửi") hết hiệu lực
+  // (UC1.1 A1/A2) — check tiếp theo chạy khi rời ô (onBlur) hoặc lúc gửi.
+  const handleTitleChange = () => {
+    if (acknowledged) {
+      setAcknowledged(false)
+    }
+  }
+
+  const handleTitleBlur = async () => {
+    const title = form.getFieldValue('ten_de_tai') as string | undefined
+    if (!title || title.length < 5 || title === lastCheckedTitle) {
+      return
+    }
+    try {
+      const result = await checkTitleMutation.mutateAsync(title)
+      setCheckResult(result)
+      setLastCheckedTitle(title)
+      setAcknowledged(false)
+    } catch {
+      // Lỗi mạng khi kiểm tra tức thời không chặn người dùng tiếp tục điền form.
+    }
+  }
+
+  const ensureTitleChecked = async (title: string): Promise<TitleCheckResult | null> => {
+    if (checkResult !== null && lastCheckedTitle === title) {
+      return checkResult
+    }
+    try {
+      const result = await checkTitleMutation.mutateAsync(title)
+      setCheckResult(result)
+      setLastCheckedTitle(title)
+      setAcknowledged(false)
+      return result
+    } catch (err) {
+      message.error(getErrorMessage(err))
+      return null
+    }
+  }
+
   const handleSaveDraft = async () => {
     let values: FormValues
     try {
@@ -100,14 +154,7 @@ export default function TopicFormPage() {
     }
   }
 
-  const handleSubmitProposal = async () => {
-    let values: FormValues
-    try {
-      values = await form.validateFields()
-    } catch {
-      return
-    }
-
+  const doSubmitProposal = async (values: FormValues) => {
     try {
       let savedId = topicId
       if (editing && topicId !== undefined) {
@@ -124,6 +171,35 @@ export default function TopicFormPage() {
     } catch (err) {
       message.error(getErrorMessage(err))
     }
+  }
+
+  const handleSubmitProposal = async () => {
+    let values: FormValues
+    try {
+      values = await form.validateFields()
+    } catch {
+      return
+    }
+
+    // UC1.1: kiểm tra lại nếu tên đã đổi kể từ lần kiểm tra gần nhất; nếu có
+    // cảnh báo chưa xác nhận thì dừng lại ở đây, để TitleCheckAlert hiển thị.
+    const result = await ensureTitleChecked(values.ten_de_tai)
+    if (result === null) {
+      return
+    }
+    if (result.trang_thai === 'HOAN_TAT' && result.matches.length > 0 && !acknowledged) {
+      return
+    }
+
+    await doSubmitProposal(values)
+  }
+
+  const handleEditTitle = () => {
+    titleInputRef.current?.focus()
+  }
+
+  const handleSendAnyway = () => {
+    setAcknowledged(true)
   }
 
   return (
@@ -160,8 +236,29 @@ export default function TopicFormPage() {
             { max: 255, message: 'Tên đề tài tối đa 255 ký tự' },
           ]}
         >
-          <Input ref={titleInputRef} maxLength={255} />
+          <Input
+            ref={titleInputRef}
+            maxLength={255}
+            onChange={handleTitleChange}
+            onBlur={handleTitleBlur}
+          />
         </Form.Item>
+
+        {checkResult && (
+          <>
+            {acknowledged && checkResult.matches.length > 0 ? (
+              <Tag color="warning" style={{ marginBottom: 16 }}>
+                Đã xác nhận gửi kèm cảnh báo
+              </Tag>
+            ) : (
+              <TitleCheckAlert
+                result={checkResult}
+                onEditTitle={handleEditTitle}
+                onSendAnyway={handleSendAnyway}
+              />
+            )}
+          </>
+        )}
 
         <Form.Item label="Lĩnh vực" name="linh_vuc">
           <Select
@@ -184,7 +281,7 @@ export default function TopicFormPage() {
           type="primary"
           onClick={handleSubmitProposal}
           disabled={noCohortOpen}
-          loading={isSaving}
+          loading={isSaving || checkTitleMutation.isPending}
         >
           Gửi đề xuất
         </Button>

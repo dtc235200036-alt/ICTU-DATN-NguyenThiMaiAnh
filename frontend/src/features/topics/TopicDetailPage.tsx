@@ -1,9 +1,24 @@
-import { App as AntApp, Alert, Button, Card, Descriptions, Skeleton, Tag } from 'antd'
+import { App as AntApp, Alert, Button, Card, Descriptions, Skeleton, Table, Tag } from 'antd'
+import type { ColumnsType } from 'antd/es/table'
 import { useNavigate, useParams } from 'react-router'
 
 import { getErrorMessage } from '../../api/client'
 import { TRANG_THAI_DE_TAI } from './constants'
 import { useSubmitTopic, useTopic } from './api'
+import type { SavedChiTietTrungLap } from './api'
+
+const chiTietColumns: ColumnsType<SavedChiTietTrungLap> = [
+  { title: 'Đề tài tương tự', dataIndex: 'doi_tuong_trung' },
+  { title: 'Tỷ lệ', dataIndex: 'ty_le', render: (ty_le: number) => `${ty_le}%` },
+]
+
+function formatThoiDiem(iso: string): string {
+  return new Intl.DateTimeFormat('vi-VN', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    dateStyle: 'short',
+    timeStyle: 'short',
+  }).format(new Date(iso))
+}
 
 /**
  * MH-06 chế độ chỉ đọc (§3.4.7 "Xem"): chi tiết một đề tài — Đợt đồ án, Lĩnh
@@ -83,6 +98,36 @@ export default function TopicDetailPage() {
         </Descriptions.Item>
         <Descriptions.Item label="Mô tả">{topic.mo_ta ?? '—'}</Descriptions.Item>
       </Descriptions>
+
+      {topic.kiem_tra_ten && (
+        <Card size="small" title="Kết quả kiểm tra trùng tên (UC0.6)" style={{ marginBottom: 16 }}>
+          {topic.kiem_tra_ten.trang_thai === 'LOI' ? (
+            <Tag>Chưa kiểm tra</Tag>
+          ) : topic.kiem_tra_ten.chi_tiet.length === 0 ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <Tag color="success">Không trùng</Tag>
+              <span>Ngưỡng áp dụng: {topic.kiem_tra_ten.nguong_ap_dung}%</span>
+            </div>
+          ) : (
+            <div>
+              <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
+                <Tag color="warning">{topic.kiem_tra_ten.chi_tiet.length} đề tài tương tự</Tag>
+                <span>Ngưỡng áp dụng: {topic.kiem_tra_ten.nguong_ap_dung}%</span>
+              </div>
+              <Table<SavedChiTietTrungLap>
+                size="small"
+                rowKey="doi_tuong_trung"
+                pagination={false}
+                columns={chiTietColumns}
+                dataSource={topic.kiem_tra_ten.chi_tiet}
+              />
+            </div>
+          )}
+          <div style={{ marginTop: 8, color: 'rgba(0,0,0,0.45)', fontSize: 12 }}>
+            Thời điểm kiểm tra: {formatThoiDiem(topic.kiem_tra_ten.thoi_diem)}
+          </div>
+        </Card>
+      )}
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
         <Button onClick={() => navigate(-1)}>Quay lại</Button>

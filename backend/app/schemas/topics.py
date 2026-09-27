@@ -1,4 +1,6 @@
-from pydantic import BaseModel, Field
+from datetime import datetime, timezone
+
+from pydantic import BaseModel, Field, field_serializer
 
 from app.schemas.common import NFCModel
 
@@ -42,6 +44,51 @@ class QuyenOut(BaseModel):
     gui: bool
 
 
+class TitleCheckRequest(NFCModel):
+    """UC0.6: kiểm tra trùng tên tức thời (không lưu kết quả) — dùng khi rời ô Tên đề tài."""
+
+    ten_de_tai: str = Field(min_length=5, max_length=255)
+
+
+class TitleMatch(BaseModel):
+    de_tai_id: int
+    ten_de_tai: str
+    khoa: str
+    giang_vien: str | None = None
+    ty_le: float
+
+
+class TitleCheckResult(BaseModel):
+    """§3.3.5 hình dạng /check-title sau khi Web API lọc theo cau_hinh_nguong."""
+
+    trang_thai: str
+    nguong: float
+    matches: list[TitleMatch]
+
+
+class SavedChiTietTrungLap(BaseModel):
+    doi_tuong_trung: str
+    ty_le: float
+
+
+class SavedTitleCheck(BaseModel):
+    """UC1.1/A2, MH-07: kết quả kiểm tra trùng tên đã lưu tại thời điểm gửi đề xuất."""
+
+    trang_thai: str
+    ty_le_tong: float | None = None
+    nguong_ap_dung: float
+    thoi_diem: datetime
+    chi_tiet: list[SavedChiTietTrungLap]
+
+    @field_serializer("thoi_diem")
+    def _serialize_utc(self, value: datetime) -> str:
+        # D-06/NFR-14 tương tự: thoi_diem lưu là UTC naive — gắn lại tzinfo=UTC
+        # trước khi xuất ISO-8601 để frontend quy đổi đúng sang Asia/Ho_Chi_Minh.
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
+        return value.isoformat()
+
+
 class TopicOut(BaseModel):
     id: int
     dot_do_an: CohortRef
@@ -55,3 +102,4 @@ class TopicOut(BaseModel):
     sinh_vien: PersonRef | None = None
     ly_do_tu_choi: str | None = None
     quyen: QuyenOut
+    kiem_tra_ten: SavedTitleCheck | None = None

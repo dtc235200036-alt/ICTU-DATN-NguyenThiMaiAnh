@@ -14,7 +14,18 @@ from app.models.de_tai import (
     SINH_VIEN,
 )
 from app.models.dot_do_an import DANG_MO, DotDoAn
-from app.schemas.topics import CohortRef, PersonRef, QuyenOut, TopicCreate, TopicOut, TopicUpdate
+from app.models.trung_lap import KetQuaKiemTraTrungLap
+from app.schemas.topics import (
+    CohortRef,
+    PersonRef,
+    QuyenOut,
+    SavedChiTietTrungLap,
+    SavedTitleCheck,
+    TopicCreate,
+    TopicOut,
+    TopicUpdate,
+)
+from app.services import title_check
 
 # T-02-25 (D-05): mọi thao tác ghi có thể vi phạm uk_de_tai_sv_hoat_dong (1 SV chỉ
 # có tối đa 1 đề tài đang hoạt động) đều bắt IntegrityError -> 409, không kiểm tra
@@ -81,7 +92,22 @@ def _person_ref(entity, ma_attr: str) -> PersonRef:
     return PersonRef(id=entity.id, ho_ten=entity.ho_ten or "", ma=getattr(entity, ma_attr))
 
 
-def _to_out(user: CurrentUser, topic: DeTai) -> TopicOut:
+def _saved_title_check_out(ket_qua: KetQuaKiemTraTrungLap | None) -> SavedTitleCheck | None:
+    if ket_qua is None:
+        return None
+    return SavedTitleCheck(
+        trang_thai=ket_qua.trang_thai,
+        ty_le_tong=float(ket_qua.ty_le_tong) if ket_qua.ty_le_tong is not None else None,
+        nguong_ap_dung=float(ket_qua.nguong_ap_dung),
+        thoi_diem=ket_qua.thoi_diem,
+        chi_tiet=[
+            SavedChiTietTrungLap(doi_tuong_trung=ct.doi_tuong_trung, ty_le=float(ct.ty_le))
+            for ct in ket_qua.chi_tiet
+        ],
+    )
+
+
+def _to_out(db: Session, user: CurrentUser, topic: DeTai) -> TopicOut:
     if topic.loai_nguoi_de_xuat == SINH_VIEN and topic.sinh_vien is not None:
         nguoi_de_xuat = _person_ref(topic.sinh_vien, "ma_so_sinh_vien")
     elif topic.giang_vien is not None:
@@ -99,6 +125,8 @@ def _to_out(user: CurrentUser, topic: DeTai) -> TopicOut:
     owner = is_owner(user, topic)
     la_nhap = topic.trang_thai == NHAP
     quyen = QuyenOut(sua=owner and la_nhap, gui=owner and la_nhap)
+
+    saved_check = _saved_title_check_out(title_check.latest_title_check(db, topic.id))
 
     return TopicOut(
         id=topic.id,
@@ -118,6 +146,7 @@ def _to_out(user: CurrentUser, topic: DeTai) -> TopicOut:
         sinh_vien=sinh_vien,
         ly_do_tu_choi=topic.ly_do_tu_choi,
         quyen=quyen,
+        kiem_tra_ten=saved_check,
     )
 
 
@@ -133,6 +162,10 @@ def create_topic(db: Session, user: CurrentUser, payload: TopicCreate) -> TopicO
         giang_vien_id = user.giang_vien_id
         sinh_vien_id = None
 
+    # UC1.1/D-10: tính kiểm tra trùng tên TRƯỚC khi mở transaction ghi (lời gọi
+    # AI có thể mất vài giây ở Phase 4) — chỉ khi gửi đề xuất ngay (gui=True).
+    check_result = title_check.kiem_tra_ten(db, payload.ten_de_tai) if payload.gui else None
+
     topic = DeTai(
         dot_do_an_id=payload.dot_do_an_id,
         giang_vien_id=giang_vien_id,
@@ -145,12 +178,15 @@ def create_topic(db: Session, user: CurrentUser, payload: TopicCreate) -> TopicO
     )
     db.add(topic)
     try:
+        db.flush()
+        if check_result is not None:
+            title_check.luu_ket_qua(db, topic.id, payload.ten_de_tai, check_result)
         db.commit()
     except IntegrityError:
         db.rollback()
         raise HTTPException(status_code=409, detail=_DUPLICATE_ACTIVE_TOPIC_DETAIL) from None
 
-    return _to_out(user, _get_or_404(db, topic.id))
+    return _to_out(db, user, _get_or_404(db, topic.id))
 
 
 def update_topic(db: Session, user: CurrentUser, topic_id: int, payload: TopicUpdate) -> TopicOut:
@@ -171,13 +207,18 @@ def update_topic(db: Session, user: CurrentUser, topic_id: int, payload: TopicUp
         db.rollback()
         raise HTTPException(status_code=409, detail=_DUPLICATE_ACTIVE_TOPIC_DETAIL) from None
 
-    return _to_out(user, _get_or_404(db, topic_id))
+    return _to_out(db, user, _get_or_404(db, topic_id))
 
 
 def submit_topic(db: Session, user: CurrentUser, topic_id: int) -> TopicOut:
     topic = _get_or_404(db, topic_id)
     if not is_owner(user, topic):
         raise HTTPException(status_code=403, detail=_FORBIDDEN_EDIT_DETAIL)
+
+    # UC1.1/D-10: tính trước khi UPDATE trạng thái; chỉ lưu kết quả nếu UPDATE
+    # thực sự đổi được trạng thái (persist cùng transaction với status change).
+    check_result = title_check.kiem_tra_ten(db, topic.ten_de_tai, exclude_id=topic.id)
+    ten_de_tai = topic.ten_de_tai
 
     # Điều kiện đợt đang mở nằm ngay trong UPDATE (không kiểm tra rồi ghi) — nếu
     # đợt vừa đóng giữa lúc kiểm tra và ghi, UPDATE này vẫn từ chối đúng (§3.2.5-b).
@@ -190,6 +231,8 @@ def submit_topic(db: Session, user: CurrentUser, topic_id: int) -> TopicOut:
     )
     try:
         result = db.execute(stmt)
+        if result.rowcount > 0:
+            title_check.luu_ket_qua(db, topic_id, ten_de_tai, check_result)
         db.commit()
     except IntegrityError:
         db.rollback()
@@ -202,11 +245,11 @@ def submit_topic(db: Session, user: CurrentUser, topic_id: int) -> TopicOut:
             raise HTTPException(status_code=409, detail=_SUBMIT_NOT_DRAFT_DETAIL)
         raise HTTPException(status_code=409, detail=_COHORT_CLOSED_DETAIL)
 
-    return _to_out(user, _get_or_404(db, topic_id))
+    return _to_out(db, user, _get_or_404(db, topic_id))
 
 
 def get_topic(db: Session, user: CurrentUser, topic_id: int) -> TopicOut:
     topic = _get_or_404(db, topic_id)
     if not can_view(user, topic):
         raise HTTPException(status_code=403, detail=_FORBIDDEN_VIEW_DETAIL)
-    return _to_out(user, topic)
+    return _to_out(db, user, topic)
