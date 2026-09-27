@@ -1,0 +1,22 @@
+@startuml uc1-quan-ly-de-tai
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Giảng viên" as GV
+actor "Sinh viên" as SV
+
+rectangle "UC1 – Quản lý đề tài" {
+  usecase "UC1.1 – Đề xuất đề tài" as UC1_1
+  usecase "UC0.6 – Kiểm tra trùng lặp tên đề tài" as UC0_6
+}
+
+GV --> UC1_1
+SV --> UC1_1
+UC1_1 ..> UC0_6 : <<include>>
+
+note right of UC0_6
+  UC0.6 thuộc nhóm UC0 – Chức năng chung,
+  đặc tả đầy đủ ở 11-dac-ta-uc0-chuc-nang-chung.md
+  (kế hoạch 01-04).
+end note
+@enduml

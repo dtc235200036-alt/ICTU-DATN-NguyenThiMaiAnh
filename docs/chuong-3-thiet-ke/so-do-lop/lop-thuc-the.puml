@@ -1,0 +1,55 @@
+@startuml lop-thuc-the
+
+class SinhVien <<Entity>> {
+  +maSoSinhVien : String
+  +hoTen : String
+  +email : String
+  +lop : String
+  +khoa : String
+}
+
+class GiangVien <<Entity>> {
+  +maGiangVien : String
+  +hoTen : String
+  +email : String
+  +hocVi : String
+}
+
+class DotDoAn <<Entity>> {
+  +tenDot : String
+  +khoa : String
+  +ngayBatDau : Date
+  +ngayKetThuc : Date
+  +trangThai : String
+}
+
+class DeTai <<Entity>> {
+  +tenDeTai : String
+  +moTa : String
+  +linhVuc : String
+  +trangThai : String
+  +loaiNguoiDeXuat : String
+}
+
+class KetQuaKiemTraTrungLap <<Entity>> {
+  +loaiKiemTra : String
+  +trangThai : String
+  +tyLeTong : Double
+  +nguongApDung : Double
+  +thoiDiem : DateTime
+}
+
+class ChiTietTrungLap <<Entity>> {
+  +doiTuongTrung : String
+  +tyLe : Double
+  +doanNguon : String
+  +doanTrung : String
+}
+
+DotDoAn "1" -- "*" DeTai : thuộc đợt
+GiangVien "0..1" -- "*" DeTai : đề xuất / hướng dẫn
+SinhVien "0..1" -- "0..1" DeTai : đăng ký
+DeTai "1" -- "*" KetQuaKiemTraTrungLap : có kết quả kiểm tra
+KetQuaKiemTraTrungLap "1" -- "*" ChiTietTrungLap : gồm chi tiết
+
+@enduml

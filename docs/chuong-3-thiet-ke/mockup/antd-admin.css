@@ -1,0 +1,505 @@
+/* docs/chuong-3-thiet-ke/mockup/antd-admin.css
+ * Shared Ant Design v5 admin tokens + component classes for every mockup screen
+ * (D-12: Ant Design admin look; D-13: desktop only, 1440px frame).
+ * Local rules only -- no CSS import rules, no web fonts, no remote resources (D-11/T-01-04).
+ * Class names mirror the Ant Design v5 component they represent so Phase 2-4
+ * developers can map each element to its React component 1:1.
+ */
+
+:root {
+  --ant-color-primary: #1677ff;
+  --ant-color-success: #52c41a;
+  --ant-color-warning: #faad14;
+  --ant-color-error: #ff4d4f;
+  --ant-color-border: #d9d9d9;
+  --ant-color-bg-layout: #f5f5f5;
+  --ant-color-bg-container: #ffffff;
+  --ant-sider-bg: #001529;
+  --ant-radius: 6px;
+  --ant-font-size: 14px;
+  --ant-control-height: 32px;
+
+  /* Derived tokens (not part of the 11 pinned above, but needed for a
+     consistent admin look without inventing ad-hoc values per screen). */
+  --ant-color-text: rgba(0, 0, 0, 0.88);
+  --ant-color-text-secondary: rgba(0, 0, 0, 0.65);
+  --ant-color-text-tertiary: rgba(0, 0, 0, 0.45);
+  --ant-color-bg-warning: #fffbe6;
+  --ant-color-border-warning: #ffe58f;
+  --ant-color-bg-spotlight: #fafafa;
+  --ant-sider-width: 220px;
+  --ant-header-height: 64px;
+  --ant-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02),
+    0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--ant-color-bg-layout);
+  color: var(--ant-color-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    "Noto Sans", sans-serif;
+  font-size: var(--ant-font-size);
+  line-height: 1.5714285714285714;
+}
+
+/* ---------------------------------------------------------------------- */
+/* ant-layout: page shell fixed at 1440px wide (D-13)                     */
+/* ---------------------------------------------------------------------- */
+.ant-layout {
+  display: flex;
+  width: 1440px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background: var(--ant-color-bg-layout);
+}
+
+.ant-layout-sider {
+  width: var(--ant-sider-width);
+  flex: 0 0 var(--ant-sider-width);
+  background: var(--ant-sider-bg);
+  color: rgba(255, 255, 255, 0.85);
+  padding: 16px 0;
+}
+
+.ant-layout-sider-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px 16px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  margin-bottom: 8px;
+}
+
+.ant-layout-sider-logo svg {
+  flex: none;
+}
+
+.ant-menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ant-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px;
+  height: 40px;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 14px;
+  cursor: default;
+}
+
+.ant-menu-item svg {
+  flex: none;
+  opacity: 0.85;
+}
+
+.ant-menu-item-selected {
+  color: #fff;
+  background: var(--ant-color-primary);
+  position: relative;
+}
+
+.ant-layout-main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* ---------------------------------------------------------------------- */
+/* ant-layout-header: breadcrumb, notification bell, user menu            */
+/* ---------------------------------------------------------------------- */
+.ant-layout-header {
+  height: var(--ant-header-height);
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: var(--ant-color-bg-container);
+  border-bottom: 1px solid var(--ant-color-border);
+}
+
+.ant-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ant-color-text-tertiary);
+  font-size: 14px;
+}
+
+.ant-breadcrumb-separator {
+  color: var(--ant-color-text-tertiary);
+}
+
+.ant-breadcrumb-current {
+  color: var(--ant-color-text);
+  font-weight: 500;
+}
+
+.ant-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.ant-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+
+.ant-badge-count {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--ant-color-error);
+  color: #fff;
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+}
+
+.ant-header-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ant-color-text);
+  font-size: 14px;
+}
+
+.ant-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--ant-color-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------- */
+/* ant-layout-content                                                     */
+/* ---------------------------------------------------------------------- */
+.ant-layout-content {
+  flex: 1 1 auto;
+  padding: 24px;
+  overflow: auto;
+}
+
+.ant-page-title {
+  margin: 0 0 20px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ant-color-text);
+}
+
+/* ---------------------------------------------------------------------- */
+/* ant-card (generic container -- form panel, table panel)                */
+/* ---------------------------------------------------------------------- */
+.ant-card {
+  background: var(--ant-color-bg-container);
+  border: 1px solid var(--ant-color-border);
+  border-radius: var(--ant-radius);
+  box-shadow: var(--ant-shadow-card);
+  padding: 24px;
+}
+
+.ant-card + .ant-card {
+  margin-top: 20px;
+}
+
+.ant-card-title {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ant-color-text);
+}
+
+/* ---------------------------------------------------------------------- */
+/* ant-form / ant-form-item                                                */
+/* ---------------------------------------------------------------------- */
+.ant-form-item {
+  margin-bottom: 20px;
+}
+
+.ant-form-item-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: var(--ant-color-text);
+}
+
+.ant-form-item-required::before {
+  content: "*";
+  color: var(--ant-color-error);
+  margin-right: 4px;
+}
+
+.ant-input,
+.ant-select-selector,
+.ant-input-textarea {
+  width: 100%;
+  min-height: var(--ant-control-height);
+  padding: 4px 11px;
+  border: 1px solid var(--ant-color-border);
+  border-radius: var(--ant-radius);
+  background: var(--ant-color-bg-container);
+  color: var(--ant-color-text);
+  font-size: var(--ant-font-size);
+  font-family: inherit;
+}
+
+.ant-input:focus,
+.ant-select-selector:focus,
+.ant-input-textarea:focus {
+  outline: none;
+  border-color: var(--ant-color-primary);
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.15);
+}
+
+.ant-input-textarea {
+  min-height: 88px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.ant-form-item-extra {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--ant-color-text-tertiary);
+}
+
+/* ---------------------------------------------------------------------- */
+/* ant-btn                                                                 */
+/* ---------------------------------------------------------------------- */
+.ant-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: var(--ant-control-height);
+  padding: 0 15px;
+  border-radius: var(--ant-radius);
+  border: 1px solid var(--ant-color-border);
+  background: var(--ant-color-bg-container);
+  color: var(--ant-color-text);
+  font-size: var(--ant-font-size);
+  font-weight: 400;
+  cursor: default;
+}
+
+.ant-btn-primary {
+  background: var(--ant-color-primary);
+  border-color: var(--ant-color-primary);
+  color: #fff;
+}
+
+.ant-btn-default {
+  background: var(--ant-color-bg-container);
+  border-color: var(--ant-color-border);
+  color: var(--ant-color-text);
+}
+
+.ant-btn-danger {
+  background: #fff;
+  border-color: var(--ant-color-error);
+  color: var(--ant-color-error);
+}
+
+.ant-form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* ---------------------------------------------------------------------- */
+/* ant-tag: trạng thái đề tài                                              */
+/* ---------------------------------------------------------------------- */
+.ant-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  height: 22px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 20px;
+  border: 1px solid transparent;
+}
+
+.ant-tag-default {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: var(--ant-color-border);
+  color: var(--ant-color-text-secondary);
+}
+
+.ant-tag-processing {
+  background: #e6f4ff;
+  border-color: #91caff;
+  color: #0958d9;
+}
+
+.ant-tag-warning {
+  background: var(--ant-color-bg-warning);
+  border-color: var(--ant-color-border-warning);
+  color: #ad6800;
+}
+
+.ant-tag-success {
+  background: #f6ffed;
+  border-color: #b7eb8f;
+  color: #389e0d;
+}
+
+.ant-tag-error {
+  background: #fff2f0;
+  border-color: #ffccc7;
+  color: #cf1322;
+}
+
+/* ---------------------------------------------------------------------- */
+/* ant-alert                                                               */
+/* ---------------------------------------------------------------------- */
+.ant-alert {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 16px;
+  border-radius: var(--ant-radius);
+  border: 1px solid transparent;
+  margin-bottom: 16px;
+}
+
+.ant-alert-icon {
+  flex: none;
+  margin-top: 2px;
+}
+
+.ant-alert-content {
+  flex: 1 1 auto;
+}
+
+.ant-alert-message {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--ant-color-text);
+}
+
+.ant-alert-description {
+  color: var(--ant-color-text-secondary);
+  font-size: 13px;
+}
+
+.ant-alert-warning {
+  background: var(--ant-color-bg-warning);
+  border-color: var(--ant-color-border-warning);
+}
+
+.ant-alert-warning .ant-alert-icon {
+  color: var(--ant-color-warning);
+}
+
+.ant-alert-error {
+  background: #fff2f0;
+  border-color: #ffccc7;
+}
+
+.ant-alert-error .ant-alert-icon {
+  color: var(--ant-color-error);
+}
+
+.ant-alert-info {
+  background: #e6f4ff;
+  border-color: #91caff;
+}
+
+.ant-alert-info .ant-alert-icon {
+  color: var(--ant-color-primary);
+}
+
+/* ---------------------------------------------------------------------- */
+/* ant-table                                                               */
+/* ---------------------------------------------------------------------- */
+.ant-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.ant-table th {
+  text-align: left;
+  padding: 10px 12px;
+  background: var(--ant-color-bg-spotlight);
+  color: var(--ant-color-text-secondary);
+  font-weight: 600;
+  border-bottom: 1px solid var(--ant-color-border);
+}
+
+.ant-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--ant-color-border);
+  color: var(--ant-color-text);
+  vertical-align: middle;
+}
+
+.ant-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ---------------------------------------------------------------------- */
+/* ant-progress: line with percent                                        */
+/* ---------------------------------------------------------------------- */
+.ant-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+}
+
+.ant-progress-outer {
+  flex: 1 1 auto;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.ant-progress-inner {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--ant-color-warning);
+}
+
+.ant-progress-inner-high {
+  background: var(--ant-color-error);
+}
+
+.ant-progress-text {
+  flex: none;
+  font-size: 12px;
+  color: var(--ant-color-text-secondary);
+  min-width: 34px;
+  text-align: right;
+}

@@ -1,0 +1,74 @@
+@startuml erd
+hide circle
+skinparam linetype ortho
+
+entity "sinh_vien" as sinh_vien {
+  *id : BIGINT <<PK>>
+  --
+  ma_so_sinh_vien : VARCHAR(20)
+  ho_ten : VARCHAR(150)
+  email : VARCHAR(150)
+  lop : VARCHAR(50)
+  khoa : VARCHAR(100)
+}
+
+entity "giang_vien" as giang_vien {
+  *id : BIGINT <<PK>>
+  --
+  ma_giang_vien : VARCHAR(20)
+  ho_ten : VARCHAR(150)
+  email : VARCHAR(150)
+  hoc_vi : VARCHAR(50)
+}
+
+entity "dot_do_an" as dot_do_an {
+  *id : BIGINT <<PK>>
+  --
+  ten_dot : VARCHAR(100)
+  khoa : VARCHAR(20)
+  ngay_bat_dau : DATE
+  ngay_ket_thuc : DATE
+  trang_thai : VARCHAR(20)
+}
+
+entity "de_tai" as de_tai {
+  *id : BIGINT <<PK>>
+  --
+  dot_do_an_id : BIGINT <<FK>>
+  giang_vien_id : BIGINT <<FK>>
+  sinh_vien_id : BIGINT <<FK>>
+  ten_de_tai : VARCHAR(255)
+  mo_ta : TEXT
+  linh_vuc : VARCHAR(100)
+  trang_thai : VARCHAR(20)
+  loai_nguoi_de_xuat : VARCHAR(10)
+}
+
+entity "ket_qua_kiem_tra_trung_lap" as ket_qua_kiem_tra_trung_lap {
+  *id : BIGINT <<PK>>
+  --
+  de_tai_id : BIGINT <<FK>>
+  loai_kiem_tra : VARCHAR(20)
+  trang_thai : VARCHAR(20)
+  ty_le_tong : DECIMAL(5,2)
+  nguong_ap_dung : DECIMAL(5,2)
+  thoi_diem : DATETIME
+}
+
+entity "chi_tiet_trung_lap" as chi_tiet_trung_lap {
+  *id : BIGINT <<PK>>
+  --
+  ket_qua_id : BIGINT <<FK>>
+  doi_tuong_trung : VARCHAR(255)
+  ty_le : DECIMAL(5,2)
+  doan_nguon : TEXT
+  doan_trung : TEXT
+}
+
+dot_do_an ||--o{ de_tai : "1 đợt có nhiều đề tài"
+giang_vien |o--o{ de_tai : "GV đề xuất/hướng dẫn 0..*"
+sinh_vien |o--o| de_tai : "SV đăng ký 0..1"
+de_tai ||--o{ ket_qua_kiem_tra_trung_lap : "1 đề tài có nhiều kết quả kiểm tra"
+ket_qua_kiem_tra_trung_lap ||--o{ chi_tiet_trung_lap : "1 kết quả có nhiều chi tiết"
+
+@enduml
