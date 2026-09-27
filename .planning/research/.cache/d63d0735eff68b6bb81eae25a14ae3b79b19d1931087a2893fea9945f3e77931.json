@@ -1,0 +1,1 @@
+{"content":"underthesea ~80% word segmentation accuracy vs pyvi ~58% (pyvi 2x faster). underthesea recommended when accuracy matters more than speed; requires Python >=3.10.","source":"web","provider":"websearch","confidence":"LOW","fetched_at":"2026-09-27T16:25:03.430Z","ttl":86400000,"kind":"web"}

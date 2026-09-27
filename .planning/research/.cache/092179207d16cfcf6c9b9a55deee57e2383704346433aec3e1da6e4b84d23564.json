@@ -1,0 +1,1 @@
+{"content":"asyncmy recommended over aiomysql for new MySQL 8.x projects: faster (Cython), better caching_sha2_password support; aiomysql fine for legacy MySQL 5.7.","source":"web","provider":"websearch","confidence":"MEDIUM","fetched_at":"2026-09-27T16:25:02.411Z","ttl":86400000,"kind":"web"}

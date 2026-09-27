@@ -1,0 +1,1 @@
+{"content":"bkai-foundation-models/vietnamese-bi-encoder (PhoBERT-base-v2 backbone) beats vietnamese-sbert on Zalo 2021 legal retrieval benchmark (Acc@1 73.3%, MRR@10 80.7%); requires word-segmented input.","source":"web","provider":"websearch","confidence":"MEDIUM","fetched_at":"2026-09-27T16:25:03.074Z","ttl":86400000,"kind":"web"}

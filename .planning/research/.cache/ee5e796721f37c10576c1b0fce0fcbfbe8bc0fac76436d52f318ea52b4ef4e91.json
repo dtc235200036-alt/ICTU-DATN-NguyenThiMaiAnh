@@ -1,0 +1,1 @@
+{"content":"FastAPI auth: PyJWT (not python-jose, abandoned) for tokens; custom Depends-based RBAC preferred over fastapi-users/fastapi-rbac for small fixed role sets.","source":"web","provider":"websearch","confidence":"MEDIUM","fetched_at":"2026-09-27T16:25:02.743Z","ttl":86400000,"kind":"web"}
