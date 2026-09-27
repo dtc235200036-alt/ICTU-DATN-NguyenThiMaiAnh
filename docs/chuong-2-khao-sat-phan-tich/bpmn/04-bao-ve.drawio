@@ -1,0 +1,160 @@
+<mxfile host="app.diagrams.net" version="24.0.0">
+  <diagram name="AS-IS" id="bv-page-asis">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="700" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="bv_apool" value="Nộp báo cáo và bảo vệ (AS-IS) — GIẢ ĐỊNH — chờ xác nhận" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=14;fontStyle=1;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="1430" height="600" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_alane_sv" value="Sinh viên" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=12;collapsible=0;" vertex="1" parent="bv_apool">
+          <mxGeometry x="0" y="0" width="1400" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_alane_gv" value="Giảng viên" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=12;collapsible=0;" vertex="1" parent="bv_apool">
+          <mxGeometry x="0" y="200" width="1400" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_alane_bm" value="Bộ môn" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=12;collapsible=0;" vertex="1" parent="bv_apool">
+          <mxGeometry x="0" y="400" width="1400" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_astart" value="Bắt đầu" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=standard;fillColor=#ffffff;fontSize=10;" vertex="1" parent="bv_alane_sv">
+          <mxGeometry x="40" y="80" width="40" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_a01" value="AS-BV-01: SV nộp báo cáo
+bản cứng và bản mềm" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="bv_alane_sv">
+          <mxGeometry x="120" y="65" width="260" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_a02" value="AS-BV-02: Khoa ra quyết định
+thành lập hội đồng và xếp lịch" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="bv_alane_bm">
+          <mxGeometry x="450" y="65" width="260" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_a03" value="AS-BV-03: GV trong hội đồng
+chấm điểm bằng phiếu giấy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="bv_alane_gv">
+          <mxGeometry x="780" y="65" width="260" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_a04" value="AS-BV-04: Thư ký tổng hợp
+điểm thủ công" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="bv_alane_bm">
+          <mxGeometry x="1100" y="65" width="220" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_aend" value="Kết thúc" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=end;fillColor=#ffffff;fontSize=10;" vertex="1" parent="bv_alane_bm">
+          <mxGeometry x="1350" y="80" width="40" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_ae1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="bv_astart" target="bv_a01">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_ae2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="bv_a01" target="bv_a02">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_ae3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="bv_a02" target="bv_a03">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_ae4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="bv_a03" target="bv_a04">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_ae5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="bv_a04" target="bv_aend">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="TO-BE" id="bv-page-tobe">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2700" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="bv_pool" value="Nộp báo cáo và bảo vệ (TO-BE)" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=14;fontStyle=1;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="2630" height="800" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_lane_sv" value="Sinh viên" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=12;collapsible=0;" vertex="1" parent="bv_pool">
+          <mxGeometry x="0" y="0" width="2600" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_lane_gv" value="Giảng viên" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=12;collapsible=0;" vertex="1" parent="bv_pool">
+          <mxGeometry x="0" y="200" width="2600" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_lane_bm" value="Bộ môn" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=12;collapsible=0;" vertex="1" parent="bv_pool">
+          <mxGeometry x="0" y="400" width="2600" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_lane_ht" value="Hệ thống (Web API + Dịch vụ AI)" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=12;collapsible=0;" vertex="1" parent="bv_pool">
+          <mxGeometry x="0" y="600" width="2600" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_start" value="Bắt đầu" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=standard;fillColor=#ffffff;fontSize=10;" vertex="1" parent="bv_lane_sv">
+          <mxGeometry x="40" y="80" width="40" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_t01" value="TB-BV-01: SV nộp báo cáo
+cuối (DOCX/PDF)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="bv_lane_sv">
+          <mxGeometry x="120" y="65" width="240" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_t02" value="TB-BV-02: Kiểm tra trùng lặp
+tài liệu (bất đồng bộ)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;shape=mxgraph.bpmn.service;" vertex="1" parent="bv_lane_ht">
+          <mxGeometry x="420" y="65" width="260" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_t03" value="TB-BV-03: Bộ môn lập hội đồng
+(chọn GV, xếp ngày/giờ/phòng, danh sách SV)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="bv_lane_bm">
+          <mxGeometry x="740" y="65" width="280" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_t04" value="TB-BV-04: Thông báo
+cho GV và SV" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;shape=mxgraph.bpmn.service;" vertex="1" parent="bv_lane_ht">
+          <mxGeometry x="1080" y="65" width="220" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_t05" value="TB-BV-05: GV trong hội đồng xem báo
+cáo của SV thuộc hội đồng mình, nhập điểm và nhận xét" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="bv_lane_gv">
+          <mxGeometry x="1360" y="65" width="280" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_t06" value="TB-BV-06: Tính điểm trung
+bình cộng các thành viên" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;shape=mxgraph.bpmn.service;" vertex="1" parent="bv_lane_ht">
+          <mxGeometry x="1700" y="65" width="240" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_t07" value="TB-BV-07: Bộ môn
+chốt kết quả" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="bv_lane_bm">
+          <mxGeometry x="2000" y="65" width="220" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_t08" value="TB-BV-08: SV xem
+lịch và kết quả" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="bv_lane_sv">
+          <mxGeometry x="2280" y="65" width="220" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_end" value="Kết thúc" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=end;fillColor=#ffffff;fontSize=10;" vertex="1" parent="bv_lane_sv">
+          <mxGeometry x="2560" y="80" width="40" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_t09" value="TB-BV-09: Kích hoạt tạo bản ghi kho
+(xem 05-kho-do-an.drawio)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;shape=mxgraph.bpmn.service;" vertex="1" parent="bv_lane_ht">
+          <mxGeometry x="2000" y="65" width="280" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_end_ht" value="Kết thúc" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=end;fillColor=#ffffff;fontSize=10;" vertex="1" parent="bv_lane_ht">
+          <mxGeometry x="2360" y="80" width="40" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="bv_start" target="bv_t01">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_e2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="bv_t01" target="bv_t02">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_e3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="bv_t02" target="bv_t03">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_e4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="bv_t03" target="bv_t04">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_e5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="bv_t04" target="bv_t05">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_e6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="bv_t05" target="bv_t06">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_e7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="bv_t06" target="bv_t07">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_e8" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="bv_t07" target="bv_t08">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_e9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="bv_t08" target="bv_end">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_e10" value="chốt kết quả" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;endArrow=blockThin;endFill=1;fontSize=10;" edge="1" parent="1" source="bv_t07" target="bv_t09">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="bv_e11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="bv_t09" target="bv_end_ht">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

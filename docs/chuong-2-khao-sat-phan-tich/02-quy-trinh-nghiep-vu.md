@@ -165,3 +165,74 @@ Sơ đồ tổng quan (`bpmn/00-tong-quan.drawio`) thể hiện toàn bộ chu�
 | TB-TD-03 | Giảng viên | GVHD nhận xét và đánh giá báo cáo | MAU-04 (phần nhận xét) | PROG-02 |
 | TB-TD-05 | Hệ thống | Timer "Quá hạn mốc" kích hoạt khi SV chưa nộp đúng hạn; hệ thống đánh dấu SV trễ mốc | Trạng thái báo cáo tiến độ | PROG-03 |
 | TB-TD-06 | Bộ môn | Bộ môn theo dõi dashboard tiến độ toàn khóa | Tổng hợp trạng thái tất cả SV | PROG-03 |
+
+### 2.2.5. Quy trình nộp báo cáo và tổ chức bảo vệ
+
+> GIẢ ĐỊNH — chờ xác nhận: chưa có phỏng vấn thật tại thời điểm viết (D-01, D-02). Phần AS-IS dưới đây là bản nháp; sẽ được đối chiếu sau khi có biên bản phỏng vấn (plan 01-07).
+
+#### Quy trình AS-IS
+
+![Hình 2.g – Quy trình nộp báo cáo và tổ chức bảo vệ (AS-IS) — GIẢ ĐỊNH — chờ xác nhận](bpmn/04-bao-ve-as-is.png)
+
+| Mã bước | Lane | Công việc | Dữ liệu / biểu mẫu | Ghi chú |
+|---------|------|-----------|---------------------|---------|
+| AS-BV-01 | Sinh viên | SV nộp báo cáo bản cứng và bản mềm | Bản in + file mềm định dạng chưa thống nhất | GIẢ ĐỊNH — chờ xác nhận |
+| AS-BV-02 | Bộ môn | Khoa ra quyết định thành lập hội đồng và xếp lịch | MAU-06 | GIẢ ĐỊNH — chờ xác nhận |
+| AS-BV-03 | Giảng viên | GV trong hội đồng chấm điểm bằng phiếu giấy | MAU-05 | GIẢ ĐỊNH — chờ xác nhận |
+| AS-BV-04 | Bộ môn | Thư ký tổng hợp điểm thủ công | Bảng tổng hợp điểm | GIẢ ĐỊNH — chờ xác nhận |
+
+**Điểm cải tiến của TO-BE so với AS-IS:**
+
+- Kiểm tra trùng lặp nội dung báo cáo cuối tự động trong phạm vi khoa (AISV-04), bổ sung cho Turnitin theo quy định trường, thay vì chỉ có Turnitin.
+- Bộ môn lập hội đồng và thông báo lịch qua hệ thống, GV/SV nhận thông báo in-app tức thời (NOTF-01), thay vì quyết định giấy và bảng tin.
+- Hệ thống tự tính điểm trung bình cộng các thành viên hội đồng (DEFN-04), thay vì thư ký tổng hợp thủ công dễ sai sót.
+- Sau khi chốt kết quả, đồ án được tự động đưa vào kho dữ liệu (liên kết trực tiếp sang §2.2.6), thay vì một quy trình lưu trữ tách rời không đồng bộ.
+
+#### Quy trình TO-BE
+
+![Hình 2.h – Quy trình nộp báo cáo và tổ chức bảo vệ (TO-BE)](bpmn/04-bao-ve-to-be.png)
+
+| Mã bước | Lane | Công việc | Dữ liệu / biểu mẫu | Ghi chú |
+|---------|------|-----------|---------------------|---------|
+| TB-BV-01 | Sinh viên | SV nộp báo cáo cuối (DOCX/PDF) | DEFN-01 | Kích hoạt kiểm tra trùng lặp nội dung |
+| TB-BV-02 | Hệ thống | Kiểm tra trùng lặp tài liệu (bất đồng bộ) | Nội dung báo cáo đã trích xuất | AISV-04..06, bổ sung cho Turnitin |
+| TB-BV-03 | Bộ môn | Bộ môn lập hội đồng (chọn GV thành viên, xếp ngày/giờ/phòng, danh sách SV) | MAU-06 | DEFN-02 |
+| TB-BV-04 | Hệ thống | Thông báo cho GV và SV | Thông báo in-app (NOTF-01) | — |
+| TB-BV-05 | Giảng viên | GV trong hội đồng xem báo cáo của SV thuộc hội đồng mình, nhập điểm và nhận xét | MAU-05 | DEFN-03; chỉ GV trong hội đồng đó được chấm |
+| TB-BV-06 | Hệ thống | Tính điểm trung bình cộng các thành viên | Điểm từng thành viên | DEFN-04 |
+| TB-BV-07 | Bộ môn | Bộ môn chốt kết quả | Điểm bảo vệ cuối cùng | DEFN-04 |
+| TB-BV-08 | Sinh viên | SV xem lịch và kết quả của mình | — | DEFN-04 |
+| TB-BV-09 | Hệ thống | Kích hoạt tạo bản ghi kho (xem §2.2.6, `bpmn/05-kho-do-an.drawio`) | Metadata đồ án | REPO-01 |
+
+### 2.2.6. Quy trình quản lý kho dữ liệu đồ án
+
+> GIẢ ĐỊNH — chờ xác nhận: chưa có phỏng vấn thật tại thời điểm viết (D-01, D-02). Phần AS-IS dưới đây là bản nháp; sẽ được đối chiếu sau khi có biên bản phỏng vấn (plan 01-07).
+
+#### Quy trình AS-IS
+
+![Hình 2.i – Quy trình quản lý kho dữ liệu đồ án (AS-IS) — GIẢ ĐỊNH — chờ xác nhận](bpmn/05-kho-do-an-as-is.png)
+
+| Mã bước | Lane | Công việc | Dữ liệu / biểu mẫu | Ghi chú |
+|---------|------|-----------|---------------------|---------|
+| AS-KHO-01 | Bộ môn | Bộ môn lưu bản cứng đồ án tại thư viện/văn phòng khoa | Bản in đồ án | GIẢ ĐỊNH — chờ xác nhận |
+| AS-KHO-02 | Bộ môn | Bản mềm lưu rải rác trên ổ dùng chung | File DOCX/PDF không chuẩn hóa | GIẢ ĐỊNH — chờ xác nhận |
+| AS-KHO-03 | Sinh viên | SV tra cứu đồ án cũ thủ công, hỏi trực tiếp Bộ môn | — | GIẢ ĐỊNH — chờ xác nhận; xem thêm §2.1.3.5 |
+
+**Điểm cải tiến của TO-BE so với AS-IS:**
+
+- Kho dữ liệu tìm kiếm/lọc theo khóa, từ khóa, GVHD (REPO-02), thay vì tra cứu thủ công qua hỏi trực tiếp Bộ môn.
+- Đồ án đã chốt kết quả được tự động đưa vào kho với đầy đủ metadata (REPO-01), thay vì lưu bản cứng/bản mềm rải rác không đồng bộ.
+- Nội dung mới (kể cả đồ án khóa cũ import thủ công) được đẩy sang dịch vụ AI để index ngay (REPO-03), làm cơ sở cho kiểm tra trùng lặp của các khóa sau.
+
+#### Quy trình TO-BE
+
+![Hình 2.j – Quy trình quản lý kho dữ liệu đồ án (TO-BE)](bpmn/05-kho-do-an-to-be.png)
+
+| Mã bước | Lane | Công việc | Dữ liệu / biểu mẫu | Ghi chú |
+|---------|------|-----------|---------------------|---------|
+| TB-KHO-01 | Hệ thống | Tạo bản ghi kho với metadata (khóa, đề tài, SV, GVHD, từ khóa, điểm, file) | MAU-07 | REPO-01; kích hoạt bởi TB-BV-09 |
+| TB-KHO-02 | Hệ thống | Đẩy văn bản sang dịch vụ AI để index | Nội dung đồ án | REPO-01, AISV-01/02 |
+| TB-KHO-03 | Bộ môn | Bộ môn thêm/sửa/xóa bản ghi, import đồ án khóa cũ | MAU-07 | REPO-03 |
+| TB-KHO-04 | Hệ thống | Index bản ghi mới | Nội dung bản ghi vừa thêm/sửa | REPO-03, AISV-01/02 |
+| TB-KHO-05 | Sinh viên | Tìm kiếm/lọc đồ án theo khóa, từ khóa, GVHD | Bộ lọc kho | REPO-02, dùng chung cho SV/GV/Bộ môn |
+| TB-KHO-06 | Sinh viên | Xem chi tiết đồ án | Bản ghi kho đầy đủ | REPO-02 |

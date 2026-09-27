@@ -1,0 +1,154 @@
+<mxfile host="app.diagrams.net" version="24.0.0">
+  <diagram name="AS-IS" id="kho-page-asis">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="700" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="kho_apool" value="Quản lý kho dữ liệu đồ án (AS-IS) — GIẢ ĐỊNH — chờ xác nhận" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=14;fontStyle=1;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="1030" height="600" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_alane_sv" value="Sinh viên" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=12;collapsible=0;" vertex="1" parent="kho_apool">
+          <mxGeometry x="0" y="0" width="1000" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_alane_gv" value="Giảng viên" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=12;collapsible=0;" vertex="1" parent="kho_apool">
+          <mxGeometry x="0" y="200" width="1000" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_alane_bm" value="Bộ môn" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=12;collapsible=0;" vertex="1" parent="kho_apool">
+          <mxGeometry x="0" y="400" width="1000" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_astart" value="Bắt đầu" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=standard;fillColor=#ffffff;fontSize=10;" vertex="1" parent="kho_alane_bm">
+          <mxGeometry x="40" y="80" width="40" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_a01" value="AS-KHO-01: Bộ môn lưu bản cứng
+đồ án tại thư viện/văn phòng khoa" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="kho_alane_bm">
+          <mxGeometry x="120" y="65" width="280" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_a02" value="AS-KHO-02: Bản mềm lưu rải rác
+trên ổ dùng chung" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="kho_alane_bm">
+          <mxGeometry x="440" y="65" width="260" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_a03" value="AS-KHO-03: SV tra cứu đồ án cũ
+thủ công, hỏi trực tiếp Bộ môn" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="kho_alane_sv">
+          <mxGeometry x="120" y="65" width="280" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_aend" value="Kết thúc" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=end;fillColor=#ffffff;fontSize=10;" vertex="1" parent="kho_alane_sv">
+          <mxGeometry x="440" y="80" width="40" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_anote_gv" value="GV cũng tra cứu thủ công qua Bộ môn, không có kênh riêng — GIẢ ĐỊNH — chờ xác nhận" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontStyle=2;fontColor=#666666;" vertex="1" parent="kho_alane_gv">
+          <mxGeometry x="120" y="80" width="480" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_ae1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="kho_astart" target="kho_a01">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_ae2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="kho_a01" target="kho_a02">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_ae3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="kho_a02" target="kho_a03">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_ae4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="kho_a03" target="kho_aend">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="TO-BE" id="kho-page-tobe">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="kho_pool" value="Quản lý kho dữ liệu đồ án (TO-BE)" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=14;fontStyle=1;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="1210" height="800" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_lane_sv" value="Sinh viên" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=12;collapsible=0;" vertex="1" parent="kho_pool">
+          <mxGeometry x="0" y="0" width="1180" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_lane_gv" value="Giảng viên" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=12;collapsible=0;" vertex="1" parent="kho_pool">
+          <mxGeometry x="0" y="200" width="1180" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_lane_bm" value="Bộ môn" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=12;collapsible=0;" vertex="1" parent="kho_pool">
+          <mxGeometry x="0" y="400" width="1180" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_lane_ht" value="Hệ thống (Web API + Dịch vụ AI)" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=12;collapsible=0;" vertex="1" parent="kho_pool">
+          <mxGeometry x="0" y="600" width="1180" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_start_c" value="Bắt đầu
+(SV/GV/Bộ môn)" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=standard;fillColor=#ffffff;fontSize=10;" vertex="1" parent="kho_lane_sv">
+          <mxGeometry x="40" y="65" width="40" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_t05" value="TB-KHO-05: Tìm kiếm/lọc đồ án
+theo khóa, từ khóa, GVHD" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="kho_lane_sv">
+          <mxGeometry x="120" y="55" width="260" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_t06" value="TB-KHO-06: Xem
+chi tiết đồ án" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="kho_lane_sv">
+          <mxGeometry x="420" y="55" width="220" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_end_c" value="Kết thúc" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=end;fillColor=#ffffff;fontSize=10;" vertex="1" parent="kho_lane_sv">
+          <mxGeometry x="680" y="65" width="40" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_note_gv" value="GV và Bộ môn cũng dùng chức năng tìm kiếm này (UC5, dùng chung cho cả 3 vai trò)" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontStyle=2;fontColor=#666666;" vertex="1" parent="kho_lane_gv">
+          <mxGeometry x="120" y="80" width="520" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_start_b" value="Bắt đầu" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=standard;fillColor=#ffffff;fontSize=10;" vertex="1" parent="kho_lane_bm">
+          <mxGeometry x="40" y="80" width="40" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_t03" value="TB-KHO-03: Bộ môn thêm/sửa/xóa
+bản ghi, import đồ án khóa cũ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="kho_lane_bm">
+          <mxGeometry x="120" y="65" width="280" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_start_a" value="Bắt đầu
+(Bộ môn chốt
+kết quả bảo vệ)" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=standard;fillColor=#ffffff;fontSize=9;" vertex="1" parent="kho_lane_ht">
+          <mxGeometry x="40" y="65" width="50" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_t01" value="TB-KHO-01: Tạo bản ghi kho
+với metadata (khóa, đề tài, SV,
+GVHD, từ khóa, điểm, file)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;shape=mxgraph.bpmn.service;" vertex="1" parent="kho_lane_ht">
+          <mxGeometry x="140" y="55" width="260" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_t02" value="TB-KHO-02: Đẩy văn bản sang
+dịch vụ AI để index" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;shape=mxgraph.bpmn.service;" vertex="1" parent="kho_lane_ht">
+          <mxGeometry x="440" y="60" width="260" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_end_a" value="Kết thúc" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=end;fillColor=#ffffff;fontSize=10;" vertex="1" parent="kho_lane_ht">
+          <mxGeometry x="740" y="75" width="40" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_t04" value="TB-KHO-04: Index
+bản ghi mới" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;shape=mxgraph.bpmn.service;" vertex="1" parent="kho_lane_ht">
+          <mxGeometry x="840" y="60" width="220" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_end_b" value="Kết thúc" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=end;fillColor=#ffffff;fontSize=10;" vertex="1" parent="kho_lane_ht">
+          <mxGeometry x="1100" y="75" width="40" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="kho_start_c" target="kho_t05">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_e2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="kho_t05" target="kho_t06">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_e3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="kho_t06" target="kho_end_c">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_e4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="kho_start_b" target="kho_t03">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_e5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="kho_t03" target="kho_t04">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_e6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="kho_t04" target="kho_end_b">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_e7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="kho_start_a" target="kho_t01">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_e8" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="kho_t01" target="kho_t02">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="kho_e9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="kho_t02" target="kho_end_a">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
