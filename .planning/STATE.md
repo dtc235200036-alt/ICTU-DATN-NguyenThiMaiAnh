@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 2
 current_phase_name: Platform, RBAC & Topic Management
 status: executing
-stopped_at: Completed 02-04-PLAN.md
-last_updated: "2026-09-27T23:22:40.574Z"
+stopped_at: Completed 02-05-PLAN.md
+last_updated: "2026-09-27T23:53:26.193Z"
 last_activity: 2026-09-28
 last_activity_desc: Phase 2 execution started
-state_head: 3460f5fb6a700e19d9526601975e95d9e764ac06
+state_head: d40d83cd9ac02cc2323a1c4fc531f07d1baf52bf
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 13
-  completed_plans: 10
+  completed_plans: 11
   percent: 0
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-09-27)
 ## Current Position
 
 Phase: 2 (Platform, RBAC & Topic Management) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 Status: Ready to execute
 Last activity: 2026-09-28 — Phase 2 execution started
 
@@ -66,6 +66,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02 P02 | 50min | 2 tasks | 17 files |
 | Phase 02 P03 | 45min | 2 tasks | 11 files |
 | Phase 02 P04 | 40min | 2 tasks | 27 files |
+| Phase 02 P05 | 30min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,8 @@ Recent decisions affecting current work:
 - [Phase 02]: [Phase 02]: AiClientStub scores deterministic Jaccard similarity over NFC-casefolded syllable sets (D-10 stub, verified 66.67% on the plan's fixed example pair) — Phase 4 swaps for a real semantic model behind the same {matches:[{ref_id,ty_le}]} seam
 - [Phase 02]: [Phase 02]: Title-check computed before the write transaction, persisted in the SAME commit as the topic status change (create_topic gui=True / submit_topic) — never a separate write, keeping the saved result and CHO_DUYET transition atomically consistent
 - [Phase 02]: [Phase 02]: react-query default retry(3) turns a definitive 403 into an infinite Skeleton for any consumer treating isLoading||!data as still-loading — useTopic now skips retry on 4xx; found via this plan's own human-check
+- [Phase 02]: [Phase 02] TopicListParams stays a plain dataclass (not Pydantic) — FastAPI Query() already validates/coerces trang_thai/pham_vi/sap_xep enums before the router builds it
+- [Phase 02]: [Phase 02] register_topic's rowcount=0 re-read only picks the user-facing error message — the accept/reject decision was already made atomically by the conditional UPDATE's WHERE clause, never a check-then-act gap
 
 ### Pending Todos
 
@@ -125,6 +128,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-27T23:22:40.541Z
-Stopped at: Completed 02-04-PLAN.md
+Last session: 2026-09-27T23:53:26.161Z
+Stopped at: Completed 02-05-PLAN.md
 Resume file: None

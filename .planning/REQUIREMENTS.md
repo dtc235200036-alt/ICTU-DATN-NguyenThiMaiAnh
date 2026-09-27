@@ -28,8 +28,8 @@
 
 - [x] **TOPC-01**: Giảng viên đề xuất đề tài (tên, mô tả, lĩnh vực) vào đợt đồ án đang mở
 - [x] **TOPC-02**: Sinh viên tự đề xuất đề tài hoặc đăng ký một đề tài GV đã đề xuất và đang còn trống
-- [ ] **TOPC-03**: Bộ môn duyệt/từ chối đề tài (có lý do) và phân công GVHD; mỗi SV chỉ có 1 đề tài đang hoạt động, mỗi đề tài chỉ có 1 SV
-- [ ] **TOPC-04**: Mọi vai trò xem danh sách đề tài theo trạng thái (nháp → chờ duyệt → đã duyệt/từ chối → đã phân công), lọc theo đợt và GV
+- [x] **TOPC-03**: Bộ môn duyệt/từ chối đề tài (có lý do) và phân công GVHD; mỗi SV chỉ có 1 đề tài đang hoạt động, mỗi đề tài chỉ có 1 SV
+- [x] **TOPC-04**: Mọi vai trò xem danh sách đề tài theo trạng thái (nháp → chờ duyệt → đã duyệt/từ chối → đã phân công), lọc theo đợt và GV
 
 ### Quản lý đề cương (UC2)
 
@@ -126,8 +126,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-04 | Phase 2 | Complete |
 | TOPC-01 | Phase 2 | Complete |
 | TOPC-02 | Phase 2 | Complete |
-| TOPC-03 | Phase 2 | Pending |
-| TOPC-04 | Phase 2 | Pending |
+| TOPC-03 | Phase 2 | Complete |
+| TOPC-04 | Phase 2 | Complete |
 | OUTL-01 | Phase 3 | Pending |
 | OUTL-02 | Phase 3 | Pending |
 | OUTL-03 | Phase 3 | Pending |
