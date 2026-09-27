@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 2
 current_phase_name: Platform, RBAC & Topic Management
 status: executing
-stopped_at: Completed 02-01-PLAN.md
-last_updated: "2026-09-27T22:04:41.136Z"
+stopped_at: Completed 02-02-PLAN.md
+last_updated: "2026-09-27T22:25:40.730Z"
 last_activity: 2026-09-28
 last_activity_desc: Phase 2 execution started
-state_head: 7d796fea88b757b320e9ba257135c8703e76a0d6
+state_head: ba95fb3bbbcb7ad19c8f57cfcb7fb450cbe8e739
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 13
-  completed_plans: 7
+  completed_plans: 8
   percent: 0
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-09-27)
 ## Current Position
 
 Phase: 2 (Platform, RBAC & Topic Management) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-09-28 — Phase 2 execution started
 
@@ -63,6 +63,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P05 | 36min | 3 tasks | 35 files |
 | Phase 01 P06 | 95min | 3 tasks | 29 files |
 | Phase 02 P01 | 40min | 2 tasks | 65 files |
+| Phase 02 P02 | 50min | 2 tasks | 17 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,8 @@ Recent decisions affecting current work:
 - [Phase 01]: mockup-state-panel pattern: alternate-state illustrations (Modal/Spin/error) placed in normal document flow after ant-layout closes, avoiding stacked overlays
 - [Phase 02]: Apache mod_proxy_http does not enforce LimitRequestBody for proxied /api/* traffic — enforced the 25MB body limit at the ASGI layer instead (app/core/body_limit.py)
 - [Phase 02]: PUBLIC_ROUTES extended to include FastAPI's own /api/docs and /api/openapi.json so the route-coverage test passes without weakening AUTH-03
+- [Phase 02]: Task 2 followed real RED->GREEN TDD cycle (test commit then feat commit) honoring task-level tdd="true" even though the plan frontmatter is type: execute
+- [Phase 02]: Account service 404s (not 403) when the target is BO_MON, uniformly making BO_MON accounts uncreatable/unalterable via /api/accounts without a special-cased error path
 
 ### Pending Todos
 
@@ -114,6 +117,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-27T22:04:41.106Z
-Stopped at: Completed 02-01-PLAN.md
+Last session: 2026-09-27T22:25:40.701Z
+Stopped at: Completed 02-02-PLAN.md
 Resume file: None

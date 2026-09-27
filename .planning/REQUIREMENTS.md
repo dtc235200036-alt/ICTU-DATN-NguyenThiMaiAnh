@@ -22,7 +22,7 @@
 - [x] **AUTH-01**: Người dùng đăng nhập bằng tài khoản (mã SV/GV hoặc email) + mật khẩu, nhận JWT
 - [x] **AUTH-02**: Phiên đăng nhập được giữ khi reload trình duyệt; người dùng đăng xuất được từ mọi trang
 - [x] **AUTH-03**: Hệ thống có 3 vai trò Sinh viên, Giảng viên, Bộ môn (admin); mỗi API kiểm tra vai trò và quyền sở hữu dữ liệu phía server (không chỉ ẩn nút trên UI)
-- [ ] **AUTH-04**: Bộ môn quản lý tài khoản SV/GV (tạo, sửa, khóa) và mở/đóng đợt đồ án theo khóa
+- [x] **AUTH-04**: Bộ môn quản lý tài khoản SV/GV (tạo, sửa, khóa) và mở/đóng đợt đồ án theo khóa
 
 ### Quản lý đề tài (UC1)
 
@@ -123,7 +123,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-01 | Phase 2 | Complete |
 | AUTH-02 | Phase 2 | Complete |
 | AUTH-03 | Phase 2 | Complete |
-| AUTH-04 | Phase 2 | Pending |
+| AUTH-04 | Phase 2 | Complete |
 | TOPC-01 | Phase 2 | Pending |
 | TOPC-02 | Phase 2 | Pending |
 | TOPC-03 | Phase 2 | Pending |
