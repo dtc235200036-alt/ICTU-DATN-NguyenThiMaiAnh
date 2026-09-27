@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 1
 current_phase_name: Analysis & Design
 status: executing
-stopped_at: Completed 01-04-PLAN.md
-last_updated: "2026-09-27T19:33:52.977Z"
+stopped_at: Completed 01-05-PLAN.md
+last_updated: "2026-09-27T19:58:07.931Z"
 last_activity: 2026-09-28
 last_activity_desc: Phase 1 execution started
-state_head: 177100440f16ea8c921b850c9a1bc3ee39329c3b
+state_head: 79df62b940510399aa8a51792fbb62ca7d6f511f
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 7
-  completed_plans: 4
+  completed_plans: 5
   percent: 0
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-09-27)
 ## Current Position
 
 Phase: 1 (Analysis & Design) — EXECUTING
-Plan: 5 of 7
+Plan: 6 of 7
 Status: Ready to execute
 Last activity: 2026-09-28 — Phase 1 execution started
 
@@ -60,6 +60,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P02 | 32min | 2 tasks | 29 files |
 | Phase 01 P03 | 25min | 3 tasks | 17 files |
 | Phase 01 P04 | 14min | 3 tasks | 34 files |
+| Phase 01 P05 | 36min | 3 tasks | 35 files |
 
 ## Accumulated Context
 
@@ -80,6 +81,9 @@ Recent decisions affecting current work:
 - [Phase 01]: MAU-03 (Đề cương) suy ra trực tiếp từ đề cương gốc thật (H01.DTC235200036...docx, mục 1-9), không gắn nhãn giả định; 6 biểu mẫu MAU còn lại cite TL-ID và gắn nhãn chờ xác nhận
 - [Phase 01]: [Phase 01]: FR module TK (tai khoan/phan quyen) added; docs/README.md convention table updated to match
 - [Phase 01]: [Phase 01]: Fixed stale 05-so-do-uc-tong-quat.md references (docs/README.md, docs/truy-vet.md) to the real 05-so-do-use-case.md filename
+- [Phase 01]: DeTai state machine uses two entry paths into DA_PHAN_CONG (GV-proposed via DA_DUYET+SV registration vs SV-proposed direct) reconciled from locked UC1.2/UC1.3 wording
+- [Phase 01]: 1 SV : 1 active topic enforced via MySQL generated column + UNIQUE index (NULL-permissive); 1 topic : 1 SV under concurrent registration via conditional UPDATE ... WHERE sinh_vien_id IS NULL
+- [Phase 01]: PlantUML enum blocks must be connected via a dependency line to their owning class - disconnected enum nodes crash the Smetana layout engine used when Graphviz dot is absent
 
 ### Pending Todos
 
@@ -103,6 +107,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-27T19:33:52.954Z
-Stopped at: Completed 01-04-PLAN.md
+Last session: 2026-09-27T19:58:07.906Z
+Stopped at: Completed 01-05-PLAN.md
 Resume file: None
