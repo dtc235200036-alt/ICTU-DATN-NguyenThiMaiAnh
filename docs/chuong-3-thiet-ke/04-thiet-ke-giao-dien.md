@@ -36,7 +36,10 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 | `ant-timeline`, `ant-timeline-item` | Timeline | MH-08 |
 | `ant-progress-circle-wrap`, `ant-progress-circle-value` | Progress (dạng vòng tròn) | MH-09 |
 | `dup-passage`, `dup-passage-high/medium/low`, `dup-passage-label`, `dup-thesis-list`, `dup-thesis-item` | Khối highlight đoạn trùng và danh sách đồ án trùng (không phải component AntD, quy ước riêng nêu ở §3.4.16) | MH-09, MH-14 |
-| `mockup-state-panel` | Khối minh họa trạng thái thay thế đặt sau `ant-layout` đóng, tránh chồng 2 lớp overlay (không phải component AntD) | MH-07, MH-08, MH-09 |
+| `mockup-state-panel` | Khối minh họa trạng thái thay thế đặt sau `ant-layout` đóng, tránh chồng 2 lớp overlay (không phải component AntD) | MH-07, MH-08, MH-09, MH-13 |
+| `ant-tooltip-wrap`, `ant-tooltip` | Tooltip (hiển thị thường trực vì ảnh tĩnh không có hover) | MH-11 |
+| `member-picker-row`, `member-picker-name` | Danh sách chọn thành viên kèm Select vai trò (không phải component AntD đơn lẻ) | MH-11 |
+| `ant-input-number` | InputNumber | MH-12 |
 
 **Sider menu theo vai trò** (chốt tại đây, kế hoạch 01-06 sao chép nguyên văn):
 
@@ -57,10 +60,10 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 | MH-07 | Duyệt đề tài và phân công GVHD | Bộ môn | UC1.3 | [mh-07.html](mockup/mh-07.html) | [mh-07.png](mockup/mh-07.png) | Đã dựng |
 | MH-08 | Nộp đề cương / báo cáo cuối (phiên bản, trạng thái kiểm tra) | Sinh viên | UC2.1, UC2.3, UC4.1 | [mh-08.html](mockup/mh-08.html) | [mh-08.png](mockup/mh-08.png) | Đã dựng |
 | MH-09 | Duyệt đề cương có panel kết quả trùng lặp | Giảng viên | UC2.2 | [mh-09.html](mockup/mh-09.html) | [mh-09.png](mockup/mh-09.png) | Đã dựng |
-| MH-10 | Báo cáo tiến độ và nhận xét | Sinh viên, Giảng viên | UC3 | — | — | Chưa dựng |
-| MH-11 | Lập hội đồng và xếp lịch | Bộ môn | UC4 | — | — | Chưa dựng |
-| MH-12 | Chấm điểm bảo vệ | Giảng viên | UC4 | — | — | Chưa dựng |
-| MH-13 | Kho đồ án (tìm kiếm, lọc) | Cả 3 vai trò | UC5 | — | — | Chưa dựng |
+| MH-10 | Báo cáo tiến độ và nhận xét | Sinh viên, Giảng viên | UC3.2, UC3.3 | [mh-10.html](mockup/mh-10.html) | [mh-10.png](mockup/mh-10.png) | Đã dựng |
+| MH-11 | Lập hội đồng và xếp lịch | Bộ môn | UC4.2, UC4.4 | [mh-11.html](mockup/mh-11.html) | [mh-11.png](mockup/mh-11.png) | Đã dựng |
+| MH-12 | Chấm điểm bảo vệ | Giảng viên | UC4.3 | [mh-12.html](mockup/mh-12.html) | [mh-12.png](mockup/mh-12.png) | Đã dựng |
+| MH-13 | Kho đồ án (tìm kiếm, lọc) | Cả 3 vai trò | UC5.1, UC5.3, UC5.4 | [mh-13.html](mockup/mh-13.html) | [mh-13.png](mockup/mh-13.png) | Đã dựng |
 | MH-14 | Chi tiết kết quả kiểm tra trùng lặp | Giảng viên, Bộ môn | UC0.7 | [mh-14.html](mockup/mh-14.html) | [mh-14.png](mockup/mh-14.png) | Đã dựng |
 
 ### 3.4.3. MH-01 – Đăng nhập
@@ -233,6 +236,77 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 - "Xem chi tiết" mở MH-14 (chi tiết kết quả kiểm tra trùng lặp, AISV-05/AISV-06).
 
 ![Hình 3.x – MH-09 · Duyệt đề cương](mockup/mh-09.png)
+
+### 3.4.12. MH-10 – Báo cáo tiến độ và nhận xét
+
+**Vai trò:** Sinh viên, Giảng viên · **UC:** UC3.2, UC3.3 · **FR:** FR-TD-02, FR-TD-03
+
+**Mục đích:** Cho GVHD xem báo cáo tiến độ của SV mình hướng dẫn theo từng mốc và ghi nhận xét/đánh giá; cho SV nộp báo cáo của mốc đang mở.
+
+**Vùng (regions):** Sider Giảng viên (mục "Nhận xét tiến độ" đang chọn); trái: `ant-timeline` các mốc đã nộp (tóm tắt nội dung, tệp đính kèm, ngày nộp, Tag Đúng hạn/Nộp trễ/Chưa đến hạn); phải: form nhận xét cho mốc đang chọn (TextArea "Nhận xét", Select "Đánh giá", nút "Gửi nhận xét").
+
+**Trạng thái (states):**
+- Modal "Nộp báo cáo tiến độ" (minh họa mở sẵn trong ảnh, phía Sinh viên, UC3.2): TextArea nội dung bắt buộc, Upload tệp đính kèm tùy chọn, nút "Nộp báo cáo".
+- Tag mốc: `ant-tag-success` Đúng hạn, `ant-tag-error` Nộp trễ (UC3.2 - E1, vẫn được nhận nhưng đánh dấu trễ để UC3.4 tính), `ant-tag-default` Chưa đến hạn.
+
+**Tương tác (interactions):**
+- "Gửi nhận xét" lưu nhận xét + đánh giá, gửi thông báo in-app cho SV.
+- "Nộp báo cáo" (trong Modal) ghi nhận báo cáo tiến độ của SV cho mốc đang mở; nộp lại trước khi có nhận xét sẽ ghi đè nội dung (UC3.2 - A1, không giữ lịch sử như đề cương).
+
+![Hình 3.x – MH-10 · Báo cáo tiến độ và nhận xét](mockup/mh-10.png)
+
+### 3.4.13. MH-11 – Lập hội đồng và xếp lịch
+
+**Vai trò:** Bộ môn · **UC:** UC4.2, UC4.4 · **FR:** FR-BV-02, FR-BV-03, FR-BV-05, FR-BV-06
+
+**Mục đích:** Cho Bộ môn tạo hội đồng (thành viên, ngày/giờ/phòng), xếp SV bảo vệ theo hội đồng, theo dõi trạng thái chấm điểm từng SV và chốt kết quả khi đủ điều kiện.
+
+**Vùng (regions):** Sider Bộ môn (mục "Hội đồng & lịch bảo vệ" đang chọn); trái: form Tên hội đồng/Ngày/Giờ/Phòng và danh sách thành viên (`member-picker-row`) mỗi người kèm Select vai trò (Chủ tịch/Thư ký/Ủy viên); phải: bảng SV bảo vệ (TT, Sinh viên/Đề tài, Giờ, Chấm điểm, Điểm TB, Hành động).
+
+**Trạng thái (states):**
+- Cột Chấm điểm hiển thị Tag "N/3 đã chấm"; khi chưa đủ, nút "Chốt kết quả" bị vô hiệu hóa (`disabled`) kèm `ant-tooltip` cố định "Chờ tất cả thành viên chấm" (UC4.4 - E1); khi đủ, nút bật màu xanh và Điểm TB hiển thị số đã tính (trung bình cộng, FR-BV-05).
+
+**Tương tác (interactions):**
+- "Lưu hội đồng và lịch" tạo/cập nhật hội đồng, gửi thông báo in-app cho SV và GV liên quan (UC4.2).
+- "Chốt kết quả" (chỉ bấm được khi đủ điểm) tính điểm trung bình cộng, khóa không cho sửa điểm thành viên, và tự động kích hoạt UC5.2 (lưu vào kho).
+
+![Hình 3.x – MH-11 · Lập hội đồng và xếp lịch](mockup/mh-11.png)
+
+### 3.4.14. MH-12 – Chấm điểm bảo vệ
+
+**Vai trò:** Giảng viên (thành viên hội đồng) · **UC:** UC4.3 · **FR:** FR-BV-04
+
+**Mục đích:** Cho một thành viên hội đồng chấm điểm và nhận xét cho từng SV thuộc đúng hội đồng mà GV đó tham gia, không thấy được SV của hội đồng khác.
+
+**Vùng (regions):** Sider Giảng viên (mục "Hội đồng bảo vệ" đang chọn); Select "Hội đồng của tôi" ở góc phải tiêu đề kèm ghi chú "Chỉ hiển thị các hội đồng mà bạn là thành viên"; trái: bảng SV trong hội đồng đang chọn; phải: khu chấm điểm cho SV đang chọn - link tải báo cáo cuối, tóm tắt kiểm tra trùng lặp kèm nút "Xem chi tiết" (→ MH-14), `ant-input-number` "Điểm (0-10)", TextArea "Nhận xét", nút "Lưu điểm".
+
+**Trạng thái (states):**
+- Select "Hội đồng của tôi" chỉ liệt kê hội đồng GV này là thành viên (UC4.3, ràng buộc phía server theo NFR-04 - cố truy cập hội đồng khác qua URL trực tiếp bị từ chối 403, UC4.3 - E1).
+
+**Tương tác (interactions):**
+- Chọn một SV trong bảng trái cập nhật khu chấm điểm bên phải.
+- "Lưu điểm" ghi nhận điểm và nhận xét của riêng thành viên này; điểm trung bình cộng chỉ được Bộ môn tính và chốt ở MH-11 sau khi đủ mọi thành viên (UC4.4).
+
+![Hình 3.x – MH-12 · Chấm điểm bảo vệ](mockup/mh-12.png)
+
+### 3.4.15. MH-13 – Kho đồ án
+
+**Vai trò:** Sinh viên, Giảng viên, Bộ môn · **UC:** UC5.1, UC5.3, UC5.4 · **FR:** FR-KHO-02, FR-KHO-03, FR-KHO-04
+
+**Mục đích:** Cho mọi vai trò tra cứu/lọc đồ án trong kho theo khóa, từ khóa, GVHD và lĩnh vực, xem chi tiết một bản ghi; cho Bộ môn thêm/sửa/xóa bản ghi và import hàng loạt đồ án khóa cũ.
+
+**Vùng (regions):** Sider Bộ môn (mục "Kho đồ án" đang chọn, ảnh minh họa dùng vai trò Bộ môn để thấy đủ 2 nút quản trị); `ant-filter-bar` (Khóa, Giảng viên hướng dẫn, Lĩnh vực, Từ khóa); bảng kết quả (Tên đề tài, Sinh viên, Khóa, GVHD, Điểm, Từ khóa dạng Tag, Chỉ mục AI); `ant-pagination`; hai nút Bộ môn "Import khóa cũ" / "Thêm bản ghi" ở góc phải tiêu đề.
+
+**Trạng thái (states):**
+- Cột Chỉ mục AI: `ant-tag-success` "Đã index" hoặc `ant-tag-default` "Chưa index" (UC5.2 - E1, dịch vụ AI không phản hồi lúc ingest tự động; Bộ môn có thể yêu cầu index lại qua UC5.3).
+- Xem chi tiết một bản ghi (minh họa bên dưới ảnh chính): Drawer với đầy đủ metadata (Sinh viên, Khóa, GVHD, Điểm bảo vệ, Từ khóa, Trạng thái chỉ mục AI), link tải báo cáo cuối, và nút "Xóa" / "Sửa" (UC5.3).
+
+**Tương tác (interactions):**
+- Click một dòng mở Drawer chi tiết bản ghi.
+- "Thêm bản ghi" mở form thêm bản ghi kho thủ công (UC5.3 - A1, dữ liệu lịch sử thiếu, vẫn đẩy sang dịch vụ AI để index như UC5.2).
+- "Import khóa cũ" mở luồng import hàng loạt theo mẫu quy định (UC5.4), báo cáo số bản ghi thành công/lỗi sau khi chạy.
+
+![Hình 3.x – MH-13 · Kho đồ án](mockup/mh-13.png)
 
 ### 3.4.16. MH-14 – Chi tiết kết quả kiểm tra trùng lặp
 

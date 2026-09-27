@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="mockup-size" content="1440x1000">
+<title>MH-10 · Báo cáo tiến độ và nhận xét</title>
+<link rel="stylesheet" href="antd-admin.css">
+</head>
+<body>
+<div class="ant-layout">
+  <aside class="ant-layout-sider">
+    <div class="ant-layout-sider-logo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
+        <rect x="3" y="3" width="18" height="18" rx="3"></rect>
+        <path d="M8 12h8M8 8h8M8 16h5"></path>
+      </svg>
+      <span>QL Đồ án CNTT</span>
+    </div>
+    <ul class="ant-menu">
+      <li class="ant-menu-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+        <span>Tổng quan</span>
+      </li>
+      <li class="ant-menu-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        <span>Đề tài hướng dẫn</span>
+      </li>
+      <li class="ant-menu-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+        <span>Đề xuất đề tài</span>
+      </li>
+      <li class="ant-menu-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path><path d="M14 2v6h6"></path><path d="m9 15 2 2 4-4"></path></svg>
+        <span>Duyệt đề cương</span>
+      </li>
+      <li class="ant-menu-item ant-menu-item-selected">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"></path><path d="M18.7 8.3 12 15l-3-3-4 4"></path></svg>
+        <span>Nhận xét tiến độ</span>
+      </li>
+      <li class="ant-menu-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"></path><path d="M8.5 14.5 4 21l3-1 1 3 3.5-6"></path><path d="M15.5 14.5 20 21l-3-1-1 3-3.5-6"></path></svg>
+        <span>Hội đồng bảo vệ</span>
+      </li>
+      <li class="ant-menu-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8V7l-3-4H6L3 7v1"></path><path d="M3 8h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path><path d="M12 12h.01"></path></svg>
+        <span>Kho đồ án</span>
+      </li>
+    </ul>
+  </aside>
+
+  <div class="ant-layout-main">
+    <header class="ant-layout-header">
+      <nav class="ant-breadcrumb">
+        <span>Quản lý tiến độ</span>
+        <span class="ant-breadcrumb-separator">/</span>
+        <span class="ant-breadcrumb-current">Nhận xét tiến độ</span>
+      </nav>
+      <div class="ant-header-actions">
+        <span class="ant-header-user">
+          <span class="ant-avatar">GV</span>
+          <span>ThS. Hà Thị Thanh Vân</span>
+        </span>
+      </div>
+    </header>
+
+    <main class="ant-layout-content">
+      <h1 class="ant-page-title">Báo cáo tiến độ - Trần Thị Mẫu B</h1>
+
+      <div class="mockup-panel-2col">
+        <div class="ant-card">
+          <h2 class="ant-card-title">Các mốc đã nộp</h2>
+          <ul class="ant-timeline">
+            <li class="ant-timeline-item">
+              <p class="ant-timeline-item-time">Mốc 1 · nộp 14/09/2026 <span class="ant-tag ant-tag-success" style="margin-left:6px;">Đúng hạn</span></p>
+              <p class="ant-timeline-item-content">Hoàn thành khảo sát dữ liệu học tập và xây dựng pipeline tiền xử lý. Tệp đính kèm: baocao-moc1.pdf</p>
+            </li>
+            <li class="ant-timeline-item">
+              <p class="ant-timeline-item-time">Mốc 2 · nộp 19/09/2026 <span class="ant-tag ant-tag-error" style="margin-left:6px;">Nộp trễ</span></p>
+              <p class="ant-timeline-item-content">Huấn luyện mô hình gợi ý bản nháp đầu tiên, độ chính xác 68%. Tệp đính kèm: baocao-moc2.docx</p>
+            </li>
+            <li class="ant-timeline-item">
+              <p class="ant-timeline-item-time">Mốc cuối · chưa nộp <span class="ant-tag ant-tag-default" style="margin-left:6px;">Chưa đến hạn</span></p>
+              <p class="ant-timeline-item-content">Hạn nộp 20/11/2026.</p>
+            </li>
+          </ul>
+        </div>
+
+        <div class="ant-card">
+          <h2 class="ant-card-title">Nhận xét cho Mốc 2</h2>
+          <p style="margin:0 0 16px;font-size:13px;color:var(--ant-color-text-secondary);">Nộp trễ 4 ngày so với hạn 15/09/2026.</p>
+          <div class="ant-form-item">
+            <label class="ant-form-item-label" for="f-nx">Nhận xét</label>
+            <textarea class="ant-input-textarea" id="f-nx" rows="4" placeholder="Nhập nhận xét cho báo cáo tiến độ..."></textarea>
+          </div>
+          <div class="ant-form-item">
+            <label class="ant-form-item-label" for="f-danhgia">Đánh giá</label>
+            <select class="ant-select-selector" id="f-danhgia">
+              <option>Đạt</option>
+              <option>Cần cải thiện</option>
+              <option>Chưa đạt</option>
+            </select>
+          </div>
+          <button class="ant-btn ant-btn-primary" type="button" style="width:100%;">Gửi nhận xét</button>
+        </div>
+      </div>
+    </main>
+
+    <div class="ant-modal-mask">
+      <div class="ant-modal">
+        <div class="ant-modal-header">Nộp báo cáo tiến độ - Mốc cuối</div>
+        <div class="ant-modal-body">
+          <div class="ant-form-item">
+            <label class="ant-form-item-label ant-form-item-required" for="f-noidung">Nội dung công việc đã thực hiện</label>
+            <textarea class="ant-input-textarea" id="f-noidung" rows="4" placeholder="Mô tả công việc đã hoàn thành trong mốc này..."></textarea>
+          </div>
+          <div class="ant-form-item">
+            <label class="ant-form-item-label" for="f-tep">Tệp đính kèm (tùy chọn)</label>
+            <div class="ant-upload-dragger" style="padding:16px;">
+              <p class="ant-upload-text" style="margin:0;font-size:13px;">Kéo thả file hoặc bấm để chọn (tùy chọn)</p>
+            </div>
+          </div>
+        </div>
+        <div class="ant-modal-footer">
+          <button class="ant-btn ant-btn-default" type="button">Hủy</button>
+          <button class="ant-btn ant-btn-primary" type="button">Nộp báo cáo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

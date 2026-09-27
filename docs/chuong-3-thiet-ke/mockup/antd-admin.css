@@ -316,6 +316,7 @@ body {
   font-size: var(--ant-font-size);
   font-weight: 400;
   cursor: default;
+  white-space: nowrap;
 }
 
 .ant-btn-primary {
@@ -620,6 +621,63 @@ body {
   color: var(--ant-color-text-tertiary);
   display: flex;
   justify-content: space-between;
+}
+
+/* ---------------------------------------------------------------------- */
+/* ant-tooltip: shown permanently (no hover in a static screenshot) next   */
+/* to the element it documents, e.g. a disabled button's reason.          */
+/* ---------------------------------------------------------------------- */
+.ant-tooltip-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.ant-tooltip {
+  position: absolute;
+  top: -34px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  z-index: 5;
+}
+
+.ant-btn[disabled],
+.ant-btn-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---------------------------------------------------------------------- */
+/* member-picker: GV picker with a per-member role Select (MH-11)          */
+/* ---------------------------------------------------------------------- */
+.member-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--ant-color-border);
+}
+
+.member-picker-row:last-child {
+  border-bottom: none;
+}
+
+.member-picker-name {
+  flex: 1 1 auto;
+  font-size: 13px;
+  color: var(--ant-color-text);
+}
+
+/* ---------------------------------------------------------------------- */
+/* ant-input-number                                                        */
+/* ---------------------------------------------------------------------- */
+.ant-input-number {
+  width: 120px;
 }
 
 /* ---------------------------------------------------------------------- */
