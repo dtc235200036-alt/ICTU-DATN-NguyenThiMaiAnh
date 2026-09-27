@@ -66,4 +66,51 @@ status_30mb="$(head -c 30000000 /dev/zero | curl -sk -H "Expect:" -o /dev/null -
 [ "$status_30mb" = "413" ] || fail "Body 30MB không bị từ chối 413 (nhận $status_30mb)"
 echo "OK: body 30MB bị từ chối 413"
 
+# (i) Set-Cookie của refresh_token có đủ HttpOnly, Secure, SameSite=Strict, Path=/api/auth
+login_headers="$(curl -sk -D - -o /tmp/ntma-login-body.json -X POST "$BASE/api/auth/login" \
+  -H 'Content-Type: application/json' -d "{\"dang_nhap\":\"bomon\",\"mat_khau\":\"${SEED_PW}\"}")"
+echo "$login_headers" | grep -qi 'set-cookie:.*refresh_token' || fail "Không thấy Set-Cookie refresh_token"
+echo "$login_headers" | grep -qi 'HttpOnly' || fail "Cookie refresh_token thiếu HttpOnly"
+echo "$login_headers" | grep -qi 'Secure' || fail "Cookie refresh_token thiếu Secure"
+echo "$login_headers" | grep -qi 'SameSite=Strict' || fail "Cookie refresh_token thiếu SameSite=Strict"
+echo "$login_headers" | grep -qi 'Path=/api/auth' || fail "Cookie refresh_token thiếu Path=/api/auth"
+rm -f /tmp/ntma-login-body.json
+echo "OK: Set-Cookie refresh_token có đủ HttpOnly, Secure, SameSite=Strict, Path=/api/auth"
+
+# (j) POST /api/auth/refresh dùng cookie jar -> 200 + access_token
+COOKIE_JAR="$(mktemp)"
+trap 'rm -f "${COOKIE_JAR}"' EXIT
+
+curl -sk -c "${COOKIE_JAR}" -o /dev/null -X POST "$BASE/api/auth/login" \
+  -H 'Content-Type: application/json' -d "{\"dang_nhap\":\"bomon\",\"mat_khau\":\"${SEED_PW}\"}"
+refresh_body="$(curl -sk -b "${COOKIE_JAR}" -c "${COOKIE_JAR}" -X POST "$BASE/api/auth/refresh")"
+echo "$refresh_body" | grep -q '"access_token"' || fail "POST /api/auth/refresh không trả access_token ($refresh_body)"
+echo "OK: POST /api/auth/refresh trả access_token"
+
+# (k) GET /api/auth/me với token -> 200; không token -> 401
+ACCESS_TOKEN="$(echo "$refresh_body" | python3 -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')"
+me_status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/auth/me" -H "Authorization: Bearer ${ACCESS_TOKEN}")"
+[ "$me_status" = "200" ] || fail "GET /api/auth/me với token hợp lệ không trả 200 (nhận $me_status)"
+me_status_no_token="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/auth/me")"
+[ "$me_status_no_token" = "401" ] || fail "GET /api/auth/me không token không trả 401 (nhận $me_status_no_token)"
+echo "OK: GET /api/auth/me trả 200 có token, 401 không token"
+
+# (l) POST /api/auth/logout -> 204 và xóa cookie; refresh sau đó -> 401
+logout_status="$(curl -sk -b "${COOKIE_JAR}" -c "${COOKIE_JAR}" -o /dev/null -w '%{http_code}' -X POST "$BASE/api/auth/logout")"
+[ "$logout_status" = "204" ] || fail "POST /api/auth/logout không trả 204 (nhận $logout_status)"
+after_logout_status="$(curl -sk -b "${COOKIE_JAR}" -o /dev/null -w '%{http_code}' -X POST "$BASE/api/auth/refresh")"
+[ "$after_logout_status" = "401" ] || fail "refresh sau logout không trả 401 (nhận $after_logout_status)"
+echo "OK: logout trả 204 và xóa cookie refresh (refresh sau đó trả 401)"
+
+# (m) 6 lần đăng nhập sai liên tiếp cho một mã đăng nhập ngẫu nhiên -> lần thứ 6 trả 429
+RAND_LOGIN="khong-ton-tai-$(date +%s%N)"
+for i in 1 2 3 4 5; do
+  curl -sk -o /dev/null -X POST "$BASE/api/auth/login" \
+    -H 'Content-Type: application/json' -d "{\"dang_nhap\":\"${RAND_LOGIN}\",\"mat_khau\":\"sai\"}"
+done
+sixth_status="$(curl -sk -o /dev/null -w '%{http_code}' -X POST "$BASE/api/auth/login" \
+  -H 'Content-Type: application/json' -d "{\"dang_nhap\":\"${RAND_LOGIN}\",\"mat_khau\":\"sai\"}")"
+[ "$sixth_status" = "429" ] || fail "Lần đăng nhập sai thứ 6 không trả 429 (nhận $sixth_status)"
+echo "OK: lần đăng nhập sai thứ 6 trả 429"
+
 echo "SMOKE TEST: tất cả kiểm tra đã qua."
