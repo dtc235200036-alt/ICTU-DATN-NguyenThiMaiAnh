@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 1
 current_phase_name: Analysis & Design
 status: executing
-stopped_at: Completed 01-03-PLAN.md
-last_updated: "2026-09-27T19:17:09.079Z"
+stopped_at: Completed 01-04-PLAN.md
+last_updated: "2026-09-27T19:33:52.977Z"
 last_activity: 2026-09-28
 last_activity_desc: Phase 1 execution started
-state_head: 9a58ae67561a2ce6611204786b4f36fe0906332d
+state_head: 177100440f16ea8c921b850c9a1bc3ee39329c3b
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 7
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-09-27)
 ## Current Position
 
 Phase: 1 (Analysis & Design) — EXECUTING
-Plan: 4 of 7
+Plan: 5 of 7
 Status: Ready to execute
 Last activity: 2026-09-28 — Phase 1 execution started
 
@@ -59,6 +59,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P01 | 12min | 3 tasks | 15 files |
 | Phase 01 P02 | 32min | 2 tasks | 29 files |
 | Phase 01 P03 | 25min | 3 tasks | 17 files |
+| Phase 01 P04 | 14min | 3 tasks | 34 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,8 @@ Recent decisions affecting current work:
 - [Phase 01]: design-taste-frontend skill is out-of-scope for dashboards; D-12 (Ant Design admin) overrides its design-system guidance, only neutral anti-slop principles applied
 - [Phase 01]: Overview BPMN (00-tong-quan) đặt 2 service task Hệ thống dùng chung (Kiểm tra trùng lặp, Thông báo in-app) fan-in từ Đề tài/Đề cương/Tiến độ/Bảo vệ thay vì lặp lại ở từng sơ đồ con
 - [Phase 01]: MAU-03 (Đề cương) suy ra trực tiếp từ đề cương gốc thật (H01.DTC235200036...docx, mục 1-9), không gắn nhãn giả định; 6 biểu mẫu MAU còn lại cite TL-ID và gắn nhãn chờ xác nhận
+- [Phase 01]: [Phase 01]: FR module TK (tai khoan/phan quyen) added; docs/README.md convention table updated to match
+- [Phase 01]: [Phase 01]: Fixed stale 05-so-do-uc-tong-quat.md references (docs/README.md, docs/truy-vet.md) to the real 05-so-do-use-case.md filename
 
 ### Pending Todos
 
@@ -100,6 +103,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-27T19:17:09.056Z
-Stopped at: Completed 01-03-PLAN.md
+Last session: 2026-09-27T19:33:52.954Z
+Stopped at: Completed 01-04-PLAN.md
 Resume file: None
