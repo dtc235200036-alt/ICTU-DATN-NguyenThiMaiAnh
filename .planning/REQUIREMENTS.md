@@ -74,7 +74,7 @@
 
 - [x] **DEPL-01**: CSDL MySQL 8 dùng utf8mb4, quản lý schema bằng migration (PI 3.1)
 - [x] **DEPL-02**: Hệ thống chạy trên server sau Apache reverse proxy với HTTPS; client React phục vụ tĩnh, `/api` proxy sang Web API (PI 4.1)
-- [ ] **DATA-01**: Seed 100 SV và 30 GV (PI 4.2)
+- [x] **DATA-01**: Seed 100 SV và 30 GV (PI 4.2)
 - [ ] **DATA-02**: Seed 300 đề tài thuộc các khóa, ingest vào dịch vụ AI (PI 4.2)
 - [ ] **DATA-03**: 50 file đề cương/báo cáo thử nghiệm, có các cặp trùng chủ đích (chép nguyên văn, diễn đạt lại, cùng lĩnh vực khác đề tài, không liên quan) và bảng kết quả kiểm chứng (PI 4.2)
 
@@ -151,7 +151,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | NOTF-01 | Phase 3 | Pending |
 | DEPL-01 | Phase 2 | Complete |
 | DEPL-02 | Phase 2 | Complete |
-| DATA-01 | Phase 2 | Pending |
+| DATA-01 | Phase 2 | Complete |
 | DATA-02 | Phase 4 | Pending |
 | DATA-03 | Phase 4 | Pending |
 | RPRT-01 | Phase 5 | Pending |

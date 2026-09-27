@@ -85,7 +85,7 @@ Plans:
   4. Hệ thống chặn một SV có 2 đề tài đang hoạt động và chặn 2 SV cùng một đề tài, kể cả khi 2 SV đăng ký cùng lúc
   5. Gọi API trực tiếp (bỏ qua UI) bằng token sai vai trò hoặc để truy cập dữ liệu không thuộc quyền sở hữu đều bị từ chối, ví dụ SV không duyệt được đề tài, GV không sửa được đề tài của GV khác
 
-**Plans**: 2/6 plans executed (tuần tự — dùng chung một stack Docker Compose và schema MySQL test)
+**Plans**: 3/6 plans executed (tuần tự — dùng chung một stack Docker Compose và schema MySQL test)
 Plans:
 **Wave 1**
 - [x] 02-01-PLAN.md — TRACER: docker compose (MySQL 8.4 + FastAPI + Apache HTTPS) → React MH-01 → /api/auth/login (Alembic 0001); refresh/logout/me, require_role trên mọi route, throttle, pytest trên MySQL thật
@@ -94,7 +94,7 @@ Plans:
 - [x] 02-02-PLAN.md — Khung ứng dụng (giữ phiên khi reload, đăng xuất mọi trang, menu theo vai trò, 403) + Bộ môn quản lý tài khoản SV/GV (khóa/mở khóa) + tra cứu GV
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 02-03-PLAN.md — Bộ môn mở/đóng đợt đồ án (Alembic 0002) + seed 100 SV / 30 GV / Bộ môn / đợt đang mở
+- [x] 02-03-PLAN.md — Bộ môn mở/đóng đợt đồ án (Alembic 0002) + seed 100 SV / 30 GV / Bộ môn / đợt đang mở
 
 **Wave 4** *(blocked on Wave 3 completion)*
 - [ ] 02-04-PLAN.md — Đề xuất đề tài GV/SV (MH-06, Alembic 0003, cột bổ sung ly_do_tu_choi ghi ngược vào ERD) + cảnh báo trùng tên qua AI stub (Alembic 0004, ngưỡng, lưu kết quả)
@@ -179,7 +179,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Analysis & Design | 6/7 | In Progress|  |
-| 2. Platform, RBAC & Topic Management | 2/6 | In Progress|  |
+| 2. Platform, RBAC & Topic Management | 3/6 | In Progress|  |
 | 3. Outline, Progress, Defense & Archive | 0/TBD | Not started | - |
 | 4. AI Similarity Service | 0/TBD | Not started | - |
 | 5. System Verification & Defense Package | 0/TBD | Not started | - |

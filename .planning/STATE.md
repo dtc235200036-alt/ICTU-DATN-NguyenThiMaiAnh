@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 2
 current_phase_name: Platform, RBAC & Topic Management
 status: executing
-stopped_at: Completed 02-02-PLAN.md
-last_updated: "2026-09-27T22:25:40.730Z"
+stopped_at: Completed 02-03-PLAN.md
+last_updated: "2026-09-27T22:48:16.014Z"
 last_activity: 2026-09-28
 last_activity_desc: Phase 2 execution started
-state_head: ba95fb3bbbcb7ad19c8f57cfcb7fb450cbe8e739
+state_head: ab755851a9b01ad6a864222c6db9903fd70d7ed2
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 13
-  completed_plans: 8
+  completed_plans: 9
   percent: 0
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-09-27)
 ## Current Position
 
 Phase: 2 (Platform, RBAC & Topic Management) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 Status: Ready to execute
 Last activity: 2026-09-28 — Phase 2 execution started
 
@@ -64,6 +64,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P06 | 95min | 3 tasks | 29 files |
 | Phase 02 P01 | 40min | 2 tasks | 65 files |
 | Phase 02 P02 | 50min | 2 tasks | 17 files |
+| Phase 02 P03 | 45min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,9 @@ Recent decisions affecting current work:
 - [Phase 02]: PUBLIC_ROUTES extended to include FastAPI's own /api/docs and /api/openapi.json so the route-coverage test passes without weakening AUTH-03
 - [Phase 02]: Task 2 followed real RED->GREEN TDD cycle (test commit then feat commit) honoring task-level tdd="true" even though the plan frontmatter is type: execute
 - [Phase 02]: Account service 404s (not 403) when the target is BO_MON, uniformly making BO_MON accounts uncreatable/unalterable via /api/accounts without a special-cased error path
+- [Phase 02]: [Phase 02]: dot_do_an router uses per-route require_role (GET any-role, writes BO_MON-only) instead of a shared router-level dependency, since accounts.py's uniform-role pattern doesn't fit mixed-permission routes
+- [Phase 02]: [Phase 02]: Faker(vi_VN) names built from last/middle/first-name provider calls composed in Vietnamese order, never .name()/address-style providers (Pitfall 5 — English token leak)
+- [Phase 02]: [Phase 02]: getErrorMessage() fixed to parse FastAPI/Pydantic's list-shaped 422 detail — app-wide fix, not cohort-specific, found via this plan's own human-check
 
 ### Pending Todos
 
@@ -117,6 +121,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-27T22:25:40.701Z
-Stopped at: Completed 02-02-PLAN.md
+Last session: 2026-09-27T22:48:15.983Z
+Stopped at: Completed 02-03-PLAN.md
 Resume file: None
