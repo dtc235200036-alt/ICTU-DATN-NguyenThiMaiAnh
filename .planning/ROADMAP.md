@@ -26,7 +26,7 @@ Lộ trình 10 tuần (28/09/2026 → 07/12/2026) gồm 5 phase. Đầu tiên l�
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Analysis & Design** - Phân tích & thiết kế: khảo sát, BPMN, yêu cầu, UC, sơ đồ lớp/CSDL, kiến trúc SOA, mockup Figma (T1–T5)
+- [ ] **Phase 1: Analysis & Design** - Phân tích & thiết kế: khảo sát, BPMN, yêu cầu, UC, sơ đồ lớp/CSDL, kiến trúc SOA, mockup giao diện HTML (T1–T5)
 - [ ] **Phase 2: Platform, RBAC & Topic Management** - Lát cắt chạy thật đầu tiên sau Apache HTTPS: đăng nhập 3 vai trò, phân quyền phía server, UC1 Quản lý đề tài (T6)
 - [ ] **Phase 3: Outline, Progress, Defense & Archive** - UC2–UC5 (đề cương, tiến độ, bảo vệ, kho đồ án) + thông báo in-app, lời gọi AI qua stub (T7)
 - [ ] **Phase 4: AI Similarity Service** - Dịch vụ AI riêng thay stub: cảnh báo trùng tên đề tài + đoạn trùng đề cương/báo cáo, hiệu chỉnh trên 300 đề tài và 50 file có cặp trùng chủ đích (T8)
@@ -46,13 +46,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Bảng yêu cầu chức năng chi tiết và bảng yêu cầu phi chức năng tồn tại, trong đó bảo mật, phân quyền, hiệu năng và thời gian phản hồi kiểm tra trùng lặp đều có ngưỡng đo được (đề xuất: ≤ 5 s cho tên đề tài, ≤ 30 s cho tài liệu)
   3. Sơ đồ UC tổng quát đúng chuẩn UML có 3 tác nhân (SV, GV, Bộ môn) và 5 UC chính, mỗi UC có bản đặc tả (tác nhân, tiền/hậu điều kiện, luồng chính, luồng thay thế/ngoại lệ)
   4. Sơ đồ lớp thực thể và sơ đồ CSDL khớp nhau từng thực thể (kể cả Kết quả kiểm tra trùng lặp), và sơ đồ UML component/deployment thể hiện Web API, client React, dịch vụ AI là 3 thành phần tách biệt sau Apache
-  5. Mockup Figma cho các màn hình chính của cả 3 vai trò, bao phủ 5 UC và màn hình kết quả kiểm tra trùng lặp
+  5. Mockup giao diện (HTML prototype) cho các màn hình chính của cả 3 vai trò, bao phủ 5 UC và màn hình kết quả kiểm tra trùng lặp
 
 **Plans**: 1/7 plans executed
 Plans:
 **Wave 1**
 - [x] 01-01-PLAN.md — Bộ công cụ khảo sát (Phụ lục A–D, bản in DOCX) + khu thu thập tài liệu gốc `tai-lieu-goc/` (wave 1)
-- [ ] 01-02-PLAN.md — TRACER: toolchain (PlantUML/draw.io/checker) + UC1.1 xuyên suốt BPMN → FR → UC → lớp → bảng → Figma MH-06 → truy vết; hoàn thiện UC1 chương 2 + quy ước (wave 1)
+- [ ] 01-02-PLAN.md — TRACER: toolchain (PlantUML/draw.io/headless Chrome/checker) + UC1.1 xuyên suốt BPMN → FR → UC → lớp → bảng → mockup HTML MH-06 → truy vết; hoàn thiện UC1 chương 2 + quy ước (wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 01-03-PLAN.md — Khảo sát hiện trạng (bản nháp, 7 biểu mẫu) + BPMN tổng quan và 4 quy trình còn lại, AS-IS/TO-BE (wave 2)
@@ -60,10 +60,10 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 01-05-PLAN.md — Sơ đồ lớp + máy trạng thái, CSDL thesis_core/thesis_ai, kiến trúc SOA + sequence AI (wave 3)
-- [ ] 01-06-PLAN.md — 13 màn Figma còn lại (tổng 14) + script xuất PNG (wave 3)
+- [ ] 01-06-PLAN.md — 13 màn mockup HTML/CSS còn lại (tổng 14, dùng skill ui-ux-pro-max + design-taste-frontend) + ảnh PNG chụp bằng headless Chrome (wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
-- [ ] 01-07-PLAN.md — Truy vết hoàn chỉnh + lắp chương; checkpoint dữ liệu khảo sát thật; đối chiếu + xuất ảnh mockup (wave 4, có checkpoint)
+- [ ] 01-07-PLAN.md — Truy vết hoàn chỉnh + lắp chương; checkpoint dữ liệu khảo sát thật; đối chiếu dữ liệu thật (cập nhật mockup nếu biểu mẫu thật đổi trường) (wave 4, có checkpoint)
 
 **UI hint**: yes
 **Notes**:

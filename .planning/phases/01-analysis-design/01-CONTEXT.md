@@ -50,8 +50,8 @@ Requirements: ANLS-01..05, DSGN-01..04. Khung thời gian T1–T5 (28/09–01/11
   - Nguồn sơ đồ và ảnh xuất đặt cạnh file markdown tương ứng.
 - **D-10:** Có **bảng truy vết** PI → mục tài liệu → requirement ID, để GVHD kiểm tra theo tiêu chí chấm. Vị trí gợi ý: `docs/truy-vet.md`.
 
-### Mockup Figma (DSGN-04)
-- **D-11:** **Claude dựng mockup trực tiếp trong Figma qua Figma MCP**, SV chỉnh sửa sau. Link file Figma ghi vào tài liệu chương 3.
+### Mockup giao diện (DSGN-04)
+- **D-11 (sửa 28/09/2026 theo yêu cầu người dùng — KHÔNG dùng Figma):** Mockup là **prototype HTML/CSS tĩnh** do Claude dựng bằng các skill thiết kế UI/UX đã cài (`ui-ux-pro-max`, `design-taste-frontend` — load skill trước khi thiết kế). Nguồn lưu trong repo (vd. `docs/chuong-3-thiet-ke/mockup/*.html` + CSS dùng chung), mỗi màn chụp PNG 1440px bằng headless Chrome (`/usr/bin/google-chrome --headless --screenshot`) để nhúng vào chương 3. Đây là "phần mềm thiết kế tương đương" theo PI 2.3. Không cần Figma MCP hay FIGMA_TOKEN.
 - **D-12:** Phong cách là **Ant Design admin** (sidebar + bảng + form), khớp với thư viện sẽ code ở Phase 2–4 để mockup sát sản phẩm thật.
 - **D-13:** Thiết kế **chỉ cho desktop**, khung 1440px.
 - **D-14:** Khoảng **12–15 màn chính**:

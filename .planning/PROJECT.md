@@ -22,7 +22,7 @@ Quy trình đồ án 5 UC chính chạy trọn vẹn end-to-end trên Web, và k
 - [ ] Sơ đồ UC tổng quát ≥5 UC chính + đặc tả từng UC (PI 1.3)
 - [ ] Sơ đồ lớp thực thể + sơ đồ CSDL tương ứng (PI 2.1)
 - [ ] Thiết kế kiến trúc SOA bằng UML: Web API, client, dịch vụ AI (PI 2.2)
-- [ ] Mockup Figma cho các giao diện chính (PI 2.3)
+- [ ] Mockup giao diện dạng HTML prototype (dựng bằng skill UI/UX, thay Figma) cho các giao diện chính (PI 2.3)
 
 **Phần mềm (CLO 3):**
 - [ ] CSDL MySQL (PI 3.1)
