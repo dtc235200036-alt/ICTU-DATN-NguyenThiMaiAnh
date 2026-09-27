@@ -76,11 +76,32 @@ api.interceptors.response.use(
   },
 )
 
+// Lỗi 422 của FastAPI khi Pydantic raise ValueError trong validator (vd.
+// model_validator kiểm tra ngày kết thúc >= ngày bắt đầu): detail là mảng
+// {type, loc, msg, ...}, msg có tiền tố "Value error, " cần bỏ đi để hiển thị
+// đúng thông điệp tiếng Việt gốc thay vì rơi về thông báo lỗi chung chung.
+interface PydanticErrorItem {
+  msg?: unknown
+}
+
+function _isPydanticErrorList(detail: unknown): detail is PydanticErrorItem[] {
+  return Array.isArray(detail) && detail.length > 0 && typeof detail[0] === 'object'
+}
+
 export function getErrorMessage(err: unknown): string {
   if (err instanceof AxiosError) {
     const detail = err.response?.data?.detail
     if (typeof detail === 'string') {
       return detail
+    }
+    if (_isPydanticErrorList(detail)) {
+      const messages = detail
+        .map((item) => (typeof item.msg === 'string' ? item.msg : null))
+        .filter((msg): msg is string => msg !== null)
+        .map((msg) => msg.replace(/^Value error,\s*/, ''))
+      if (messages.length > 0) {
+        return messages.join('; ')
+      }
     }
   }
   return 'Đã xảy ra lỗi. Vui lòng thử lại sau.'
