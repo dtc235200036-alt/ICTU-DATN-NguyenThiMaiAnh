@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="mockup-size" content="1440x1020">
+<title>MH-05 · Danh sách đề tài</title>
+<link rel="stylesheet" href="antd-admin.css">
+</head>
+<body>
+<div class="ant-layout">
+  <aside class="ant-layout-sider">
+    <div class="ant-layout-sider-logo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
+        <rect x="3" y="3" width="18" height="18" rx="3"></rect>
+        <path d="M8 12h8M8 8h8M8 16h5"></path>
+      </svg>
+      <span>QL Đồ án CNTT</span>
+    </div>
+    <ul class="ant-menu">
+      <li class="ant-menu-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+        <span>Tổng quan</span>
+      </li>
+      <li class="ant-menu-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        <span>Đề tài của tôi</span>
+      </li>
+      <li class="ant-menu-item ant-menu-item-selected">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+        <span>Đề xuất / Đăng ký đề tài</span>
+      </li>
+      <li class="ant-menu-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path><path d="M14 2v6h6"></path></svg>
+        <span>Đề cương</span>
+      </li>
+      <li class="ant-menu-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"></path><path d="M18.7 8.3 12 15l-3-3-4 4"></path></svg>
+        <span>Báo cáo tiến độ</span>
+      </li>
+      <li class="ant-menu-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"></path><path d="M8.5 14.5 4 21l3-1 1 3 3.5-6"></path><path d="M15.5 14.5 20 21l-3-1-1 3-3.5-6"></path></svg>
+        <span>Bảo vệ</span>
+      </li>
+      <li class="ant-menu-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8V7l-3-4H6L3 7v1"></path><path d="M3 8h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path><path d="M12 12h.01"></path></svg>
+        <span>Kho đồ án</span>
+      </li>
+    </ul>
+  </aside>
+
+  <div class="ant-layout-main">
+    <header class="ant-layout-header">
+      <nav class="ant-breadcrumb">
+        <span>Quản lý đề tài</span>
+        <span class="ant-breadcrumb-separator">/</span>
+        <span class="ant-breadcrumb-current">Danh sách đề tài</span>
+      </nav>
+      <div class="ant-header-actions">
+        <span class="ant-badge" title="Thông báo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-opacity="0.65" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span class="ant-badge-count">2</span>
+        </span>
+        <span class="ant-header-user">
+          <span class="ant-avatar">SV</span>
+          <span>Đinh Văn Sinh Viên</span>
+        </span>
+      </div>
+    </header>
+
+    <main class="ant-layout-content">
+      <div class="mockup-content-header">
+        <h1 class="ant-page-title">Danh sách đề tài</h1>
+        <a class="ant-btn ant-btn-primary" href="mh-06.html" style="text-decoration:none;">Đề xuất đề tài</a>
+      </div>
+
+      <div class="ant-card">
+        <div class="ant-filter-bar">
+          <div class="ant-filter-item">
+            <label for="f-dot">Đợt đồ án</label>
+            <select class="ant-select-selector" id="f-dot">
+              <option>Tất cả các đợt</option>
+              <option selected>Đợt K22A - Học kỳ 1 (2026-2027)</option>
+            </select>
+          </div>
+          <div class="ant-filter-item">
+            <label for="f-trangthai">Trạng thái</label>
+            <select class="ant-select-selector" id="f-trangthai">
+              <option>Tất cả</option>
+              <option>Nháp</option>
+              <option>Chờ duyệt</option>
+              <option>Đã duyệt</option>
+              <option>Từ chối</option>
+              <option>Đã phân công</option>
+            </select>
+          </div>
+          <div class="ant-filter-item">
+            <label for="f-gv">Giảng viên hướng dẫn</label>
+            <select class="ant-select-selector" id="f-gv">
+              <option>Tất cả</option>
+              <option>ThS. Hà Thị Thanh Vân</option>
+              <option>TS. Ngô Quang Huy</option>
+            </select>
+          </div>
+          <div class="ant-filter-item">
+            <label for="f-linhvuc">Lĩnh vực</label>
+            <select class="ant-select-selector" id="f-linhvuc">
+              <option>Tất cả</option>
+              <option>Trí tuệ nhân tạo &amp; NLP</option>
+              <option>Hệ thống thông tin</option>
+            </select>
+          </div>
+          <div class="ant-filter-item" style="min-width:240px;">
+            <label for="f-search">Tìm kiếm</label>
+            <input class="ant-input" id="f-search" type="text" placeholder="Tìm theo tên đề tài...">
+          </div>
+        </div>
+
+        <table class="ant-table">
+          <thead>
+            <tr>
+              <th>Tên đề tài</th>
+              <th>Lĩnh vực</th>
+              <th>Người đề xuất</th>
+              <th>GVHD</th>
+              <th>Sinh viên</th>
+              <th>Trạng thái</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Hệ thống hỗ trợ tra cứu tài liệu học thuật bằng tìm kiếm ngữ nghĩa</td>
+              <td>AI &amp; NLP</td>
+              <td>Đinh Văn Sinh Viên</td>
+              <td>ThS. Hà Thị Thanh Vân</td>
+              <td>Đinh Văn Sinh Viên</td>
+              <td><span class="ant-tag ant-tag-success">Đã phân công</span></td>
+              <td><a class="ant-btn ant-btn-default" href="#" style="text-decoration:none;">Xem</a></td>
+            </tr>
+            <tr>
+              <td>Ứng dụng gợi ý học liệu cá nhân hóa</td>
+              <td>AI &amp; NLP</td>
+              <td>ThS. Hà Thị Thanh Vân</td>
+              <td>ThS. Hà Thị Thanh Vân</td>
+              <td>Trần Thị Mẫu B</td>
+              <td><span class="ant-tag ant-tag-success">Đã phân công</span></td>
+              <td><a class="ant-btn ant-btn-default" href="#" style="text-decoration:none;">Xem</a></td>
+            </tr>
+            <tr>
+              <td>Hệ thống quản lý kho vận bằng mã QR</td>
+              <td>Hệ thống thông tin</td>
+              <td>TS. Ngô Quang Huy</td>
+              <td>TS. Ngô Quang Huy</td>
+              <td>—</td>
+              <td><span class="ant-tag ant-tag-warning">Đã duyệt</span></td>
+              <td><a class="ant-btn ant-btn-primary" href="#" style="text-decoration:none;">Đăng ký</a></td>
+            </tr>
+            <tr>
+              <td>Xây dựng chatbot tư vấn tuyển sinh</td>
+              <td>AI &amp; NLP</td>
+              <td>Phạm Văn Mẫu E</td>
+              <td>—</td>
+              <td>Phạm Văn Mẫu E</td>
+              <td><span class="ant-tag ant-tag-processing">Chờ duyệt</span></td>
+              <td><a class="ant-btn ant-btn-default" href="#" style="text-decoration:none;">Xem</a></td>
+            </tr>
+            <tr>
+              <td>Phân tích cảm xúc bình luận mạng xã hội tiếng Việt</td>
+              <td>AI &amp; NLP</td>
+              <td>Lê Thị Mẫu D</td>
+              <td>—</td>
+              <td>—</td>
+              <td><span class="ant-tag ant-tag-error">Từ chối</span></td>
+              <td><a class="ant-btn ant-btn-default" href="#" style="text-decoration:none;">Xem</a></td>
+            </tr>
+            <tr>
+              <td>Hệ thống giám sát an ninh mạng nội bộ</td>
+              <td>An toàn thông tin</td>
+              <td>TS. Ngô Quang Huy</td>
+              <td>—</td>
+              <td>—</td>
+              <td><span class="ant-tag ant-tag-default">Nháp</span></td>
+              <td><a class="ant-btn ant-btn-default" href="#" style="text-decoration:none;">Xem</a></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="ant-pagination">
+          <span class="ant-pagination-item ant-pagination-item-active">1</span>
+          <span class="ant-pagination-item">2</span>
+          <span class="ant-pagination-item">3</span>
+          <span class="ant-pagination-item">…</span>
+          <span class="ant-pagination-item">15</span>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+</body>
+</html>
