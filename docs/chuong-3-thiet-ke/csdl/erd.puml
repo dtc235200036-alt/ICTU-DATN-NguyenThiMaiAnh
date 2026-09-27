@@ -2,10 +2,27 @@
 hide circle
 skinparam linetype ortho
 
+' =====================================================================
+' Tài khoản & phân quyền
+' =====================================================================
+entity "tai_khoan" as tai_khoan {
+  *id : BIGINT <<PK>>
+  --
+  ma_dang_nhap : VARCHAR(50) <<UNIQUE>> <<NOT NULL>>
+  email : VARCHAR(150) <<UNIQUE>> <<NOT NULL>>
+  mat_khau_bam : VARCHAR(255) <<NOT NULL>>
+  vai_tro : ENUM('SINH_VIEN','GIANG_VIEN','BO_MON') <<NOT NULL>>
+  bi_khoa : BOOLEAN <<NOT NULL>> = FALSE
+}
+
+' =====================================================================
+' Lát cắt tracer (kế hoạch 01-02) — giữ nguyên 6 bảng
+' =====================================================================
 entity "sinh_vien" as sinh_vien {
   *id : BIGINT <<PK>>
   --
-  ma_so_sinh_vien : VARCHAR(20)
+  tai_khoan_id : BIGINT <<FK>> <<UNIQUE>>
+  ma_so_sinh_vien : VARCHAR(20) <<UNIQUE>>
   ho_ten : VARCHAR(150)
   email : VARCHAR(150)
   lop : VARCHAR(50)
@@ -15,7 +32,8 @@ entity "sinh_vien" as sinh_vien {
 entity "giang_vien" as giang_vien {
   *id : BIGINT <<PK>>
   --
-  ma_giang_vien : VARCHAR(20)
+  tai_khoan_id : BIGINT <<FK>> <<UNIQUE>>
+  ma_giang_vien : VARCHAR(20) <<UNIQUE>>
   ho_ten : VARCHAR(150)
   email : VARCHAR(150)
   hoc_vi : VARCHAR(50)
@@ -26,6 +44,7 @@ entity "dot_do_an" as dot_do_an {
   --
   ten_dot : VARCHAR(100)
   khoa : VARCHAR(20)
+  nam_hoc : VARCHAR(20)
   ngay_bat_dau : DATE
   ngay_ket_thuc : DATE
   trang_thai : VARCHAR(20)
@@ -34,9 +53,13 @@ entity "dot_do_an" as dot_do_an {
 entity "de_tai" as de_tai {
   *id : BIGINT <<PK>>
   --
-  dot_do_an_id : BIGINT <<FK>>
+  dot_do_an_id : BIGINT <<FK>> <<NOT NULL>>
   giang_vien_id : BIGINT <<FK>>
   sinh_vien_id : BIGINT <<FK>>
+  sinh_vien_id_dang_hoat_dong : BIGINT <<derived>> <<UNIQUE>>
+  ..GENERATED ALWAYS AS (CASE WHEN trang_thai
+    IN ('CHO_DUYET','DA_DUYET','DA_PHAN_CONG')
+    THEN sinh_vien_id END) STORED — xem §3.2.5..
   ten_de_tai : VARCHAR(255)
   mo_ta : TEXT
   linh_vuc : VARCHAR(100)
@@ -48,10 +71,12 @@ entity "ket_qua_kiem_tra_trung_lap" as ket_qua_kiem_tra_trung_lap {
   *id : BIGINT <<PK>>
   --
   de_tai_id : BIGINT <<FK>>
+  tai_lieu_do_an_id : BIGINT <<FK>> <<UNIQUE>>
   loai_kiem_tra : VARCHAR(20)
   trang_thai : VARCHAR(20)
   ty_le_tong : DECIMAL(5,2)
   nguong_ap_dung : DECIMAL(5,2)
+  doi_tuong_duoc_kiem_tra : VARCHAR(255)
   thoi_diem : DATETIME
 }
 
@@ -63,12 +88,193 @@ entity "chi_tiet_trung_lap" as chi_tiet_trung_lap {
   ty_le : DECIMAL(5,2)
   doan_nguon : TEXT
   doan_trung : TEXT
+  vi_tri : VARCHAR(50)
 }
 
+' =====================================================================
+' Đề cương, tài liệu, tiến độ (kế hoạch 01-05)
+' =====================================================================
+entity "moc_tien_do" as moc_tien_do {
+  *id : BIGINT <<PK>>
+  --
+  dot_do_an_id : BIGINT <<FK>> <<NOT NULL>>
+  ten_moc : VARCHAR(100)
+  thu_tu : INT
+  han_nop : DATE
+}
+
+entity "de_cuong" as de_cuong {
+  *id : BIGINT <<PK>>
+  --
+  de_tai_id : BIGINT <<FK>> <<UNIQUE>> <<NOT NULL>>
+  trang_thai : VARCHAR(20)
+  ngay_nop_dau_tien : DATETIME
+}
+
+entity "tai_lieu_do_an" as tai_lieu_do_an {
+  *id : BIGINT <<PK>>
+  --
+  de_tai_id : BIGINT <<FK>> <<NOT NULL>>
+  de_cuong_id : BIGINT <<FK>>
+  loai : VARCHAR(20)
+  so_phien_ban : INT
+  ten_goc : VARCHAR(255)
+  ten_luu_tru : VARCHAR(255) <<UNIQUE>>
+  kich_thuoc : BIGINT
+  dinh_dang : VARCHAR(10)
+  thoi_diem_nop : DATETIME
+  ..UNIQUE(de_tai_id, loai, so_phien_ban)..
+}
+
+entity "luot_duyet_de_cuong" as luot_duyet_de_cuong {
+  *id : BIGINT <<PK>>
+  --
+  de_cuong_id : BIGINT <<FK>> <<NOT NULL>>
+  tai_lieu_do_an_id : BIGINT <<FK>> <<NOT NULL>>
+  giang_vien_id : BIGINT <<FK>> <<NOT NULL>>
+  ket_qua : VARCHAR(20)
+  nhan_xet : TEXT
+  thoi_diem : DATETIME
+}
+
+entity "bao_cao_tien_do" as bao_cao_tien_do {
+  *id : BIGINT <<PK>>
+  --
+  de_tai_id : BIGINT <<FK>> <<NOT NULL>>
+  moc_tien_do_id : BIGINT <<FK>> <<NOT NULL>>
+  noi_dung : TEXT
+  thoi_diem_nop : DATETIME
+  nhan_xet : TEXT
+  danh_gia : VARCHAR(20)
+  ..UNIQUE(de_tai_id, moc_tien_do_id)..
+}
+
+' =====================================================================
+' Hội đồng & bảo vệ
+' =====================================================================
+entity "hoi_dong" as hoi_dong {
+  *id : BIGINT <<PK>>
+  --
+  ten_hoi_dong : VARCHAR(150)
+  ngay_bao_ve : DATE
+  gio_bao_ve : TIME
+  phong : VARCHAR(50)
+}
+
+entity "thanh_vien_hoi_dong" as thanh_vien_hoi_dong {
+  *id : BIGINT <<PK>>
+  --
+  hoi_dong_id : BIGINT <<FK>> <<NOT NULL>>
+  giang_vien_id : BIGINT <<FK>> <<NOT NULL>>
+  vai_tro : VARCHAR(20)
+  ..UNIQUE(hoi_dong_id, giang_vien_id)..
+}
+
+entity "lich_bao_ve" as lich_bao_ve {
+  *id : BIGINT <<PK>>
+  --
+  hoi_dong_id : BIGINT <<FK>> <<NOT NULL>>
+  de_tai_id : BIGINT <<FK>> <<NOT NULL>>
+  sinh_vien_id : BIGINT <<FK>> <<UNIQUE>> <<NOT NULL>>
+  thu_tu : INT
+  diem_trung_binh : DECIMAL(4,2)
+  da_chot : BOOLEAN = FALSE
+}
+
+entity "diem_bao_ve" as diem_bao_ve {
+  *id : BIGINT <<PK>>
+  --
+  lich_bao_ve_id : BIGINT <<FK>> <<NOT NULL>>
+  giang_vien_id : BIGINT <<FK>> <<NOT NULL>>
+  diem : DECIMAL(4,2)
+  nhan_xet : TEXT
+  ..UNIQUE(lich_bao_ve_id, giang_vien_id)..
+}
+
+' =====================================================================
+' Kho đồ án, thông báo, cấu hình
+' =====================================================================
+entity "do_an_kho" as do_an_kho {
+  *id : BIGINT <<PK>>
+  --
+  de_tai_id : BIGINT <<FK>>
+  sinh_vien_id : BIGINT <<FK>>
+  giang_vien_id : BIGINT <<FK>>
+  khoa : VARCHAR(20)
+  ten_de_tai : VARCHAR(255)
+  tu_khoa : VARCHAR(255)
+  diem : DECIMAL(4,2)
+  nguon : VARCHAR(20)
+  trang_thai_index : VARCHAR(20)
+}
+
+entity "thong_bao" as thong_bao {
+  *id : BIGINT <<PK>>
+  --
+  tai_khoan_id : BIGINT <<FK>> <<NOT NULL>>
+  loai : VARCHAR(30)
+  noi_dung : TEXT
+  lien_ket : VARCHAR(255)
+  da_doc : BOOLEAN = FALSE
+  thoi_diem : DATETIME
+}
+
+entity "cau_hinh_nguong" as cau_hinh_nguong {
+  *id : BIGINT <<PK>>
+  --
+  loai : VARCHAR(30) <<UNIQUE>>
+  gia_tri : DECIMAL(5,2)
+  tai_khoan_id : BIGINT <<FK>>
+  thoi_diem_cap_nhat : DATETIME
+}
+
+' =====================================================================
+' Quan hệ — tài khoản & phân quyền
+' =====================================================================
+tai_khoan ||--o| sinh_vien : "1 tài khoản là 0..1 SV"
+tai_khoan ||--o| giang_vien : "1 tài khoản là 0..1 GV"
+tai_khoan ||--o{ thong_bao : "1 tài khoản nhận nhiều thông báo"
+tai_khoan ||--o{ cau_hinh_nguong : "1 tài khoản cập nhật nhiều cấu hình"
+
+' =====================================================================
+' Quan hệ — tracer (giữ nguyên)
+' =====================================================================
 dot_do_an ||--o{ de_tai : "1 đợt có nhiều đề tài"
 giang_vien |o--o{ de_tai : "GV đề xuất/hướng dẫn 0..*"
 sinh_vien |o--o| de_tai : "SV đăng ký 0..1"
 de_tai ||--o{ ket_qua_kiem_tra_trung_lap : "1 đề tài có nhiều kết quả kiểm tra"
 ket_qua_kiem_tra_trung_lap ||--o{ chi_tiet_trung_lap : "1 kết quả có nhiều chi tiết"
+
+' =====================================================================
+' Quan hệ — đề cương, tài liệu, tiến độ
+' =====================================================================
+dot_do_an ||--o{ moc_tien_do : "1 đợt định nghĩa nhiều mốc"
+de_tai ||--o| de_cuong : "1 đề tài có 0..1 đề cương"
+de_cuong ||--o{ tai_lieu_do_an : "1 đề cương có nhiều phiên bản"
+de_tai ||--o{ tai_lieu_do_an : "1 đề tài có nhiều tài liệu (báo cáo, kho...)"
+de_cuong ||--o{ luot_duyet_de_cuong : "1 đề cương có nhiều lượt duyệt"
+tai_lieu_do_an ||--o| luot_duyet_de_cuong : "1 phiên bản có 0..1 lượt duyệt"
+giang_vien ||--o{ luot_duyet_de_cuong : "1 GV duyệt nhiều lượt"
+de_tai ||--o{ bao_cao_tien_do : "1 đề tài nộp nhiều báo cáo"
+moc_tien_do ||--o{ bao_cao_tien_do : "1 mốc áp dụng nhiều báo cáo"
+tai_lieu_do_an |o--o| ket_qua_kiem_tra_trung_lap : "1 phiên bản có 0..1 kết quả kiểm tra (loại = TÀI_LIỆU)"
+
+' =====================================================================
+' Quan hệ — hội đồng & bảo vệ
+' =====================================================================
+hoi_dong ||--o{ thanh_vien_hoi_dong : "1 hội đồng có nhiều thành viên"
+giang_vien ||--o{ thanh_vien_hoi_dong : "1 GV là thành viên nhiều hội đồng"
+hoi_dong ||--o{ lich_bao_ve : "1 hội đồng xếp nhiều lịch"
+de_tai ||--o| lich_bao_ve : "1 đề tài có 0..1 lịch bảo vệ"
+sinh_vien ||--o| lich_bao_ve : "1 SV có 0..1 lịch bảo vệ"
+lich_bao_ve ||--o{ diem_bao_ve : "1 lịch nhận nhiều điểm thành viên"
+giang_vien ||--o{ diem_bao_ve : "1 GV chấm nhiều điểm"
+
+' =====================================================================
+' Quan hệ — kho đồ án
+' =====================================================================
+de_tai |o--o| do_an_kho : "gốc (null nếu import khóa cũ)"
+sinh_vien |o--o{ do_an_kho : "của SV"
+giang_vien |o--o{ do_an_kho : "GVHD"
 
 @enduml

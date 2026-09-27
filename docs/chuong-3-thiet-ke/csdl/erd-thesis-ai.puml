@@ -1,0 +1,48 @@
+@startuml erd-thesis-ai
+hide circle
+skinparam linetype ortho
+
+' Schema riêng của Dịch vụ AI (`thesis_ai`). Không có khóa ngoại nào trỏ
+' sang schema `thesis_core` (xem erd.puml) — mọi tham chiếu ngược
+' (ma_nguon) chỉ là số logic do Web API gửi kèm khi gọi /ingest, không
+' phải ràng buộc FK thật, để giữ đúng ranh giới sở hữu dữ liệu (schema
+' ownership, §3.2.1 / §3.3.8).
+
+entity "chunk" as chunk {
+  *id : BIGINT <<PK>>
+  --
+  loai_nguon : ENUM('TOPIC','DOCUMENT') <<NOT NULL>>
+  ma_nguon : BIGINT <<NOT NULL>>
+  ..tham chiếu logic tới de_tai.id hoặc
+  tai_lieu_do_an.id bên thesis_core —
+  KHÔNG phải khóa ngoại..
+  thu_tu : INT <<NOT NULL>>
+  noi_dung : TEXT <<NOT NULL>>
+  bam_noi_dung : CHAR(64) <<NOT NULL>>
+  ..UNIQUE(loai_nguon, ma_nguon, thu_tu)..
+}
+
+entity "embedding" as embedding {
+  *id : BIGINT <<PK>>
+  --
+  chunk_id : BIGINT <<FK>> <<NOT NULL>>
+  ten_model : VARCHAR(100) <<NOT NULL>>
+  so_chieu : INT <<NOT NULL>>
+  vector : BLOB <<NOT NULL>>
+  ..vector float32 đóng gói nhị phân;
+  UNIQUE(chunk_id, ten_model)..
+}
+
+entity "index_metadata" as index_metadata {
+  *id : BIGINT <<PK>>
+  --
+  ten_model : VARCHAR(100) <<UNIQUE>> <<NOT NULL>>
+  so_vector : BIGINT <<NOT NULL>>
+  cap_nhat_luc : DATETIME <<NOT NULL>>
+  ..một dòng theo dõi mỗi mô hình embedding
+  đang phục vụ (kích thước FAISS index hiện tại)..
+}
+
+chunk ||--o{ embedding : "1 chunk có embedding theo 1..N mô hình"
+
+@enduml
