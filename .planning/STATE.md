@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 2
 current_phase_name: Platform, RBAC & Topic Management
 status: executing
-stopped_at: Phase 2 context gathered (auto); Phase 1 paused at 01-07 human checkpoint
-last_updated: "2026-09-27T21:34:38.896Z"
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-09-27T22:04:41.136Z"
 last_activity: 2026-09-28
 last_activity_desc: Phase 2 execution started
-state_head: 7a07b1fe39d686156540e70e28caf3e866bcb8d2
+state_head: 7d796fea88b757b320e9ba257135c8703e76a0d6
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 13
-  completed_plans: 6
+  completed_plans: 7
   percent: 0
 ---
 
@@ -28,8 +28,8 @@ See: .planning/PROJECT.md (updated 2026-09-27)
 ## Current Position
 
 Phase: 2 (Platform, RBAC & Topic Management) — EXECUTING
-Plan: 1 of 6
-Status: Executing Phase 2
+Plan: 2 of 6
+Status: Ready to execute
 Last activity: 2026-09-28 — Phase 2 execution started
 
 Progress: [░░░░░░░░░░] 0%
@@ -62,6 +62,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P04 | 14min | 3 tasks | 34 files |
 | Phase 01 P05 | 36min | 3 tasks | 35 files |
 | Phase 01 P06 | 95min | 3 tasks | 29 files |
+| Phase 02 P01 | 40min | 2 tasks | 65 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,8 @@ Recent decisions affecting current work:
 - [Phase 01]: design-taste-frontend lists dashboards/data tables as Out of Scope; D-12 (Ant Design admin) overrides its design-system guidance again in 01-06, only neutral anti-slop principles applied
 - [Phase 01]: Removed .ant-layout min-height:100vh from antd-admin.css: headless Chrome --screenshot only captures the declared viewport, so it was clipping Drawer/Modal overlays and trailing state-panel sections; screens now size to content
 - [Phase 01]: mockup-state-panel pattern: alternate-state illustrations (Modal/Spin/error) placed in normal document flow after ant-layout closes, avoiding stacked overlays
+- [Phase 02]: Apache mod_proxy_http does not enforce LimitRequestBody for proxied /api/* traffic — enforced the 25MB body limit at the ASGI layer instead (app/core/body_limit.py)
+- [Phase 02]: PUBLIC_ROUTES extended to include FastAPI's own /api/docs and /api/openapi.json so the route-coverage test passes without weakening AUTH-03
 
 ### Pending Todos
 
@@ -111,6 +114,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-27T20:39:18.315Z
-Stopped at: Phase 2 context gathered (auto); Phase 1 paused at 01-07 human checkpoint
-Resume file: .planning/phases/02-platform-rbac-topic-management/02-CONTEXT.md
+Last session: 2026-09-27T22:04:41.106Z
+Stopped at: Completed 02-01-PLAN.md
+Resume file: None

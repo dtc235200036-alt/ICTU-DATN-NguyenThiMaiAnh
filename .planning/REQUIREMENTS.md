@@ -19,9 +19,9 @@
 
 ### Xác thực & phân quyền
 
-- [ ] **AUTH-01**: Người dùng đăng nhập bằng tài khoản (mã SV/GV hoặc email) + mật khẩu, nhận JWT
-- [ ] **AUTH-02**: Phiên đăng nhập được giữ khi reload trình duyệt; người dùng đăng xuất được từ mọi trang
-- [ ] **AUTH-03**: Hệ thống có 3 vai trò Sinh viên, Giảng viên, Bộ môn (admin); mỗi API kiểm tra vai trò và quyền sở hữu dữ liệu phía server (không chỉ ẩn nút trên UI)
+- [x] **AUTH-01**: Người dùng đăng nhập bằng tài khoản (mã SV/GV hoặc email) + mật khẩu, nhận JWT
+- [x] **AUTH-02**: Phiên đăng nhập được giữ khi reload trình duyệt; người dùng đăng xuất được từ mọi trang
+- [x] **AUTH-03**: Hệ thống có 3 vai trò Sinh viên, Giảng viên, Bộ môn (admin); mỗi API kiểm tra vai trò và quyền sở hữu dữ liệu phía server (không chỉ ẩn nút trên UI)
 - [ ] **AUTH-04**: Bộ môn quản lý tài khoản SV/GV (tạo, sửa, khóa) và mở/đóng đợt đồ án theo khóa
 
 ### Quản lý đề tài (UC1)
@@ -72,8 +72,8 @@
 
 ### Triển khai & dữ liệu thử nghiệm (CLO 4)
 
-- [ ] **DEPL-01**: CSDL MySQL 8 dùng utf8mb4, quản lý schema bằng migration (PI 3.1)
-- [ ] **DEPL-02**: Hệ thống chạy trên server sau Apache reverse proxy với HTTPS; client React phục vụ tĩnh, `/api` proxy sang Web API (PI 4.1)
+- [x] **DEPL-01**: CSDL MySQL 8 dùng utf8mb4, quản lý schema bằng migration (PI 3.1)
+- [x] **DEPL-02**: Hệ thống chạy trên server sau Apache reverse proxy với HTTPS; client React phục vụ tĩnh, `/api` proxy sang Web API (PI 4.1)
 - [ ] **DATA-01**: Seed 100 SV và 30 GV (PI 4.2)
 - [ ] **DATA-02**: Seed 300 đề tài thuộc các khóa, ingest vào dịch vụ AI (PI 4.2)
 - [ ] **DATA-03**: 50 file đề cương/báo cáo thử nghiệm, có các cặp trùng chủ đích (chép nguyên văn, diễn đạt lại, cùng lĩnh vực khác đề tài, không liên quan) và bảng kết quả kiểm chứng (PI 4.2)
@@ -120,9 +120,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DSGN-02 | Phase 1 | Pending |
 | DSGN-03 | Phase 1 | Pending |
 | DSGN-04 | Phase 1 | Complete |
-| AUTH-01 | Phase 2 | Pending |
-| AUTH-02 | Phase 2 | Pending |
-| AUTH-03 | Phase 2 | Pending |
+| AUTH-01 | Phase 2 | Complete |
+| AUTH-02 | Phase 2 | Complete |
+| AUTH-03 | Phase 2 | Complete |
 | AUTH-04 | Phase 2 | Pending |
 | TOPC-01 | Phase 2 | Pending |
 | TOPC-02 | Phase 2 | Pending |
@@ -149,8 +149,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AISV-06 | Phase 4 | Pending |
 | AISV-07 | Phase 4 | Pending |
 | NOTF-01 | Phase 3 | Pending |
-| DEPL-01 | Phase 2 | Pending |
-| DEPL-02 | Phase 2 | Pending |
+| DEPL-01 | Phase 2 | Complete |
+| DEPL-02 | Phase 2 | Complete |
 | DATA-01 | Phase 2 | Pending |
 | DATA-02 | Phase 4 | Pending |
 | DATA-03 | Phase 4 | Pending |
