@@ -1,0 +1,36 @@
+@startuml act-uc1-de-xuat-dang-ky-de-tai
+title Hoạt động UC1.1/UC1.2/UC1.3 – Đề xuất/Đăng ký đến Duyệt và Phân công GVHD
+
+|Sinh viên|
+start
+:Nhập đề xuất đề tài mới\nhoặc chọn đăng ký đề tài GV đã đề xuất còn trống;
+
+|Hệ thống|
+:Kiểm tra trùng lặp tên đề tài theo ngữ nghĩa (UC0.6);
+if (Có đề tài tương tự vượt ngưỡng?) then (có)
+  |Giảng viên|
+  :Xem danh sách đề tài tương tự kèm tỷ lệ %;
+  :Sửa tên đề tài hoặc vẫn gửi;
+else (không)
+endif
+
+|Hệ thống|
+:Kiểm tra ràng buộc 1 SV - 1 đề tài\nvà 1 đề tài - 1 SV (nếu là đăng ký);
+:Ghi nhận đề tài, chuyển trạng thái "Chờ duyệt";
+
+|Bộ môn|
+if (Duyệt đề tài?) then (duyệt)
+  :Phân công Giảng viên hướng dẫn;
+  |Hệ thống|
+  :Chuyển trạng thái "Đã phân công";
+  :Gửi thông báo in-app cho SV và GV;
+else (từ chối)
+  |Bộ môn|
+  :Ghi lý do từ chối;
+  |Hệ thống|
+  :Chuyển trạng thái "Từ chối";
+  :Gửi thông báo in-app cho SV và GV;
+endif
+
+stop
+@enduml

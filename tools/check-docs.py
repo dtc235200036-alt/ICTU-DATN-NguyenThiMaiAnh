@@ -152,7 +152,13 @@ LINK_RE = re.compile(r"!?\[[^\]]*\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
 def cmd_links(args):
     for md in iter_files(args.paths, exts={".md"}, default_dirs=["docs"]):
         text = read_text(md)
+        in_fence = False
         for lineno, line in enumerate(text.splitlines(), start=1):
+            if line.strip().startswith("```"):
+                in_fence = not in_fence
+                continue
+            if in_fence:
+                continue
             for m in LINK_RE.finditer(line):
                 target = m.group(1)
                 if target.startswith("#"):
@@ -411,6 +417,293 @@ def cmd_trace(args):
 
 
 # ---------------------------------------------------------------------------
+# req-coverage (Task 2)
+# ---------------------------------------------------------------------------
+def cmd_req_coverage(args):
+    fr_md = "docs/chuong-2-khao-sat-phan-tich/03-yeu-cau-chuc-nang.md"
+    nfr_md = "docs/chuong-2-khao-sat-phan-tich/04-yeu-cau-phi-chuc-nang.md"
+    fr_text = read_text(fr_md) if os.path.isfile(fr_md) else ""
+    nfr_text = read_text(nfr_md) if os.path.isfile(nfr_md) else ""
+    for req_id in args.ids:
+        if req_id not in fr_text and req_id not in nfr_text:
+            fail(rel(fr_md), 0,
+                 f"{req_id}: khong xuat hien trong 03-yeu-cau-chuc-nang.md hoac 04-yeu-cau-phi-chuc-nang.md")
+
+
+# ---------------------------------------------------------------------------
+# truy-vet (Task 2)
+# ---------------------------------------------------------------------------
+PI_CODES = ["1.1", "1.2", "1.3", "2.1", "2.2", "2.3", "3.1", "3.2", "3.3", "3.4", "4.1", "4.2"]
+PHASE1_PI_CODES = ["1.1", "1.2", "1.3", "2.1", "2.2", "2.3"]
+REQ_ANLS_DSGN_CODES = ["ANLS-01", "ANLS-02", "ANLS-03", "ANLS-04", "ANLS-05",
+                       "DSGN-01", "DSGN-02", "DSGN-03", "DSGN-04"]
+PI_TABLE_HEADER = "| Mã PI | Nội dung PI | Yêu cầu | Mục tài liệu (minh chứng) | Trạng thái |"
+REQ_TABLE_HEADER = "| Yêu cầu | Mô tả | Tài liệu | Plan |"
+
+
+def _parse_pipe_table(lines, header):
+    rows = {}
+    in_table = False
+    for lineno, line in enumerate(lines, start=1):
+        if line.strip() == header:
+            in_table = True
+            continue
+        if in_table:
+            s = line.strip()
+            if not s.startswith("|"):
+                if rows:
+                    break
+                continue
+            if set(s.replace("|", "").strip()) <= {"-", " "}:
+                continue
+            cells = [c.strip() for c in s.strip("|").split("|")]
+            if cells and cells[0]:
+                rows[cells[0]] = (lineno, cells)
+    return rows
+
+
+def cmd_truy_vet(args):
+    path = "docs/truy-vet.md"
+    if not os.path.isfile(path):
+        fail(rel(path), 0, "khong tim thay docs/truy-vet.md")
+        return
+    lines = read_text(path).splitlines()
+
+    pi_rows = _parse_pipe_table(lines, PI_TABLE_HEADER)
+    for code in PI_CODES:
+        if code not in pi_rows:
+            fail(rel(path), 0, f"thieu dong PI {code} trong muc 1 (Truy vết theo tiêu chí PI)")
+
+    req_rows = _parse_pipe_table(lines, REQ_TABLE_HEADER)
+    for code in REQ_ANLS_DSGN_CODES:
+        if code not in req_rows:
+            fail(rel(path), 0, f"thieu dong yeu cau {code} trong muc 2 (Truy vết theo yêu cầu)")
+
+    for lineno, line in enumerate(lines, start=1):
+        for m in LINK_RE.finditer(line):
+            target = m.group(1)
+            if target.startswith("#"):
+                continue
+            if re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*://", target) or target.startswith("mailto:"):
+                continue
+            path_part = target.split("#", 1)[0]
+            if not path_part:
+                continue
+            resolved = os.path.normpath(os.path.join(os.path.dirname(path), path_part))
+            if not os.path.isfile(resolved) and not os.path.isdir(resolved):
+                fail(rel(path), lineno, f"lien ket hong: {target}")
+
+    if args.complete:
+        for code in PHASE1_PI_CODES:
+            if code not in pi_rows:
+                continue
+            lineno, cells = pi_rows[code]
+            status = cells[4] if len(cells) > 4 else ""
+            mucdoc = cells[3] if len(cells) > 3 else ""
+            if status != "Đạt":
+                fail(rel(path), lineno, f"PI {code}: trang thai phai la 'Đạt' khi --complete, hien tai '{status}'")
+            if not LINK_RE.findall(mucdoc):
+                fail(rel(path), lineno, f"PI {code}: muc tai lieu chua lien ket file nao")
+        for code in REQ_ANLS_DSGN_CODES:
+            if code not in req_rows:
+                continue
+            lineno, cells = req_rows[code]
+            tailieu = cells[2] if len(cells) > 2 else ""
+            if not tailieu.strip():
+                fail(rel(path), lineno, f"{code}: cot Tai lieu dang trong")
+
+
+# ---------------------------------------------------------------------------
+# bpmn (Task 2)
+# ---------------------------------------------------------------------------
+def _default_drawio_files():
+    found = []
+    if os.path.isdir("docs"):
+        for root, _dirs, files in os.walk("docs"):
+            if os.path.basename(root) == "bpmn":
+                for f in files:
+                    if f.endswith(".drawio"):
+                        found.append(os.path.join(root, f))
+    return sorted(found)
+
+
+def cmd_bpmn(args):
+    files = args.files if args.files else _default_drawio_files()
+    if not files:
+        fail(rel("docs"), 0, "khong tim thay file .drawio nao trong docs/**/bpmn/")
+        return
+    for path in files:
+        if not os.path.isfile(path):
+            fail(rel(path), 0, "khong tim thay file")
+            continue
+        try:
+            pages = load_drawio_pages(path)
+        except ET.ParseError as exc:
+            fail(rel(path), 0, f"khong parse duoc XML: {exc}")
+            continue
+        names = {name for name, _xml in pages}
+        for required in ("AS-IS", "TO-BE"):
+            if required not in names:
+                fail(rel(path), 0, f"thieu trang '{required}'")
+        for name, xml_root in pages:
+            if xml_root is None:
+                fail(rel(path), 0, f"trang '{name}': khong doc duoc noi dung (co the do nen chua ho tro)")
+                continue
+            lane_labels = []
+            has_start = False
+            has_end = False
+            for cell in xml_root.iter("mxCell"):
+                style = cell.get("style") or ""
+                value = cell.get("value") or ""
+                if "swimlane" in style and cell.get("vertex") == "1":
+                    lane_labels.append(value.strip())
+                if "mxgraph.bpmn.event" in style:
+                    if "outline=standard" in style:
+                        has_start = True
+                    if "outline=end" in style:
+                        has_end = True
+            for required_lane in ("Sinh viên", "Giảng viên", "Bộ môn"):
+                if not any(lbl == required_lane for lbl in lane_labels):
+                    fail(rel(path), 0, f"trang '{name}': thieu lane '{required_lane}'")
+            if not has_start:
+                fail(rel(path), 0, f"trang '{name}': khong co start event")
+            if not has_end:
+                fail(rel(path), 0, f"trang '{name}': khong co end event")
+            if name == "TO-BE" and not any(lbl.startswith("Hệ thống") for lbl in lane_labels):
+                fail(rel(path), 0, f"trang '{name}': thieu lane bat dau bang 'Hệ thống'")
+
+
+# ---------------------------------------------------------------------------
+# mockup (Task 2)
+# ---------------------------------------------------------------------------
+INVENTORY_HEADER = "| Mã MH | Tên màn hình | Vai trò | UC | Tệp nguồn | Ảnh | Trạng thái |"
+
+
+def _parse_inventory(path):
+    lines = read_text(path).splitlines()
+    rows = {}
+    in_table = False
+    for line in lines:
+        if line.strip() == INVENTORY_HEADER:
+            in_table = True
+            continue
+        if in_table:
+            s = line.strip()
+            if not s.startswith("|"):
+                if rows:
+                    break
+                continue
+            if set(s.replace("|", "").strip()) <= {"-", " "}:
+                continue
+            cells = [c.strip() for c in s.strip("|").split("|")]
+            if len(cells) >= 7 and cells[0]:
+                rows[cells[0]] = cells
+    return rows
+
+
+def cmd_mockup(args):
+    giao_dien_md = "docs/chuong-3-thiet-ke/04-thiet-ke-giao-dien.md"
+    if not os.path.isfile(giao_dien_md):
+        fail(rel(giao_dien_md), 0, "khong tim thay 04-thiet-ke-giao-dien.md")
+        return
+    rows = _parse_inventory(giao_dien_md)
+    gd_text = read_text(giao_dien_md)
+
+    if args.all:
+        ids = [f"MH-{i:02d}" for i in range(1, 15)]
+    elif args.mh_ids:
+        ids = list(args.mh_ids)
+    else:
+        ids = [mh for mh, cells in rows.items() if len(cells) > 6 and cells[6] == "Đã dựng"]
+
+    for mh_id in ids:
+        cells = rows.get(mh_id)
+        if not cells:
+            fail(rel(giao_dien_md), 0, f"{mh_id}: khong co dong trong danh muc man hinh")
+            continue
+        status = cells[6] if len(cells) > 6 else ""
+        if status != "Đã dựng":
+            fail(rel(giao_dien_md), 0, f"{mh_id}: trang thai phai la 'Đã dựng', hien tai '{status}'")
+            continue
+
+        html_m = re.search(r"\[[^\]]*\]\(([^)]*\.html)\)", cells[4]) if len(cells) > 4 else None
+        png_m = re.search(r"\[[^\]]*\]\(([^)]*\.png)\)", cells[5]) if len(cells) > 5 else None
+        if not html_m or not png_m:
+            fail(rel(giao_dien_md), 0, f"{mh_id}: dong khong lien ket ca html va png")
+            continue
+
+        html_path = os.path.normpath(os.path.join(os.path.dirname(giao_dien_md), html_m.group(1)))
+        png_path = os.path.normpath(os.path.join(os.path.dirname(giao_dien_md), png_m.group(1)))
+
+        if not os.path.isfile(html_path):
+            fail(rel(giao_dien_md), 0, f"{mh_id}: khong tim thay {html_m.group(1)}")
+            continue
+        html_text = read_text(html_path)
+
+        title_m = re.search(r"<title>([^<]*)</title>", html_text)
+        if not title_m or not title_m.group(1).strip().upper().startswith(mh_id.upper()):
+            fail(rel(html_path), 0, f"title phai bat dau bang {mh_id}")
+        if "antd-admin.css" not in html_text:
+            fail(rel(html_path), 0, "khong lien ket antd-admin.css")
+
+        size_m = re.search(r'name="mockup-size"[^>]*content="(\d+)x(\d+)"', html_text)
+        if not size_m:
+            fail(rel(html_path), 0, "thieu meta mockup-size")
+        else:
+            mw, mh_height = int(size_m.group(1)), int(size_m.group(2))
+            if mw != 1440:
+                fail(rel(html_path), 0, f"mockup-size width phai la 1440, hien tai {mw}")
+            if mh_height < 900:
+                fail(rel(html_path), 0, f"mockup-size height phai >= 900, hien tai {mh_height}")
+
+        if re.search(r"<script", html_text, re.IGNORECASE):
+            fail(rel(html_path), 0, "co <script>, khong duoc phep")
+        if "@import" in html_text:
+            fail(rel(html_path), 0, "co CSS import rule, khong duoc phep")
+        if re.search(r'(src|href)\s*=\s*"https?:', html_text, re.IGNORECASE) or \
+           re.search(r'url\(\s*"?https?:', html_text, re.IGNORECASE):
+            fail(rel(html_path), 0, "co tai nguyen tu xa (http/https), khong duoc phep")
+
+        if not os.path.isfile(png_path) or os.path.getsize(png_path) == 0:
+            fail(rel(giao_dien_md), 0, f"{mh_id}: khong tim thay hoac rong {png_m.group(1)}")
+        else:
+            with open(png_path, "rb") as fh:
+                header = fh.read(24)
+            if header[1:4] != b"PNG":
+                fail(rel(png_path), 0, "khong phai file PNG hop le")
+            else:
+                png_w, png_h = struct.unpack(">II", header[16:24])
+                if png_w != 1440:
+                    fail(rel(png_path), 0, f"PNG width phai la 1440, hien tai {png_w}")
+                if size_m and png_h != int(size_m.group(2)):
+                    fail(rel(png_path), 0,
+                         f"PNG height ({png_h}) khong khop mockup-size height ({size_m.group(2)})")
+
+        heading_re = re.compile(rf"^###\s*3\.4\.\d+\.\s*{re.escape(mh_id)}\s*[–-]", re.MULTILINE)
+        if not heading_re.search(gd_text):
+            fail(rel(giao_dien_md), 0, f"{mh_id}: khong co heading '### 3.4.<n>. {mh_id} - ...'")
+        img_re = re.compile(rf"!\[[^\]]*\]\({re.escape(png_m.group(1))}\)")
+        if not img_re.search(gd_text):
+            fail(rel(giao_dien_md), 0, f"{mh_id}: khong nhung anh {png_m.group(1)} bang cu phap Markdown")
+
+
+# ---------------------------------------------------------------------------
+# all (Task 2)
+# ---------------------------------------------------------------------------
+def cmd_all(args):
+    N = argparse.Namespace
+    cmd_render(N(paths=[]))
+    cmd_links(N(paths=[]))
+    cmd_pi_tags(N(paths=[]))
+    cmd_privacy(N(paths=[]))
+    cmd_class_erd(N())
+    cmd_bpmn(N(files=[]))
+    cmd_mockup(N(all=True, mh_ids=[]))
+    cmd_truy_vet(N(complete=True))
+    cmd_trace(N(fr_ids=[], all=True))
+
+
+# ---------------------------------------------------------------------------
 # main
 # ---------------------------------------------------------------------------
 def build_parser():
@@ -440,6 +733,26 @@ def build_parser():
     sp.add_argument("fr_ids", nargs="*")
     sp.add_argument("--all", action="store_true")
     sp.set_defaults(func=cmd_trace)
+
+    sp = sub.add_parser("req-coverage", help="Kiem tra ID yeu cau xuat hien trong bang yeu cau chuc nang/phi chuc nang")
+    sp.add_argument("ids", nargs="*")
+    sp.set_defaults(func=cmd_req_coverage)
+
+    sp = sub.add_parser("truy-vet", help="Kiem tra docs/truy-vet.md day du PI va yeu cau, lien ket hop le")
+    sp.add_argument("--complete", action="store_true")
+    sp.set_defaults(func=cmd_truy_vet)
+
+    sp = sub.add_parser("bpmn", help="Kiem tra file .drawio co trang AS-IS/TO-BE, du lane, start/end event")
+    sp.add_argument("files", nargs="*")
+    sp.set_defaults(func=cmd_bpmn)
+
+    sp = sub.add_parser("mockup", help="Kiem tra man hinh mockup: trang thai, lien ket, meta, PNG, muc luc")
+    sp.add_argument("mh_ids", nargs="*")
+    sp.add_argument("--all", action="store_true")
+    sp.set_defaults(func=cmd_mockup)
+
+    sp = sub.add_parser("all", help="Chay toan bo: render, links, pi-tags, privacy, class-erd, bpmn, mockup, truy-vet, trace")
+    sp.set_defaults(func=cmd_all)
 
     return p
 

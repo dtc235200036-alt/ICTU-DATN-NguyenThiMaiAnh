@@ -6,9 +6,9 @@ Bảng này giúp GVHD kiểm tra tiến độ theo đúng tiêu chí PI của �
 
 | Mã PI | Nội dung PI | Yêu cầu | Mục tài liệu (minh chứng) | Trạng thái |
 |---|---|---|---|---|
-| 1.1 | Mô tả được quy trình nghiệp vụ | ANLS-01, ANLS-02 | [khao-sat/](chuong-2-khao-sat-phan-tich/khao-sat/) (Phụ lục A–D, plan 01-01); [02-quy-trinh-nghiep-vu.md](chuong-2-khao-sat-phan-tich/02-quy-trinh-nghiep-vu.md) (BPMN TO-BE lát cắt UC1.1; AS-IS + 4 quy trình còn lại ở plan 01-03) | Đang thực hiện |
+| 1.1 | Mô tả được quy trình nghiệp vụ | ANLS-01, ANLS-02 | [khao-sat/](chuong-2-khao-sat-phan-tich/khao-sat/) (Phụ lục A–D, plan 01-01); [02-quy-trinh-nghiep-vu.md](chuong-2-khao-sat-phan-tich/02-quy-trinh-nghiep-vu.md) (AS-IS giả định + TO-BE đầy đủ UC1; 4 quy trình còn lại ở plan 01-03) | Đang thực hiện |
 | 1.2 | Mô tả được yêu cầu chức năng và phi chức năng | ANLS-03, ANLS-04 | [03-yeu-cau-chuc-nang.md](chuong-2-khao-sat-phan-tich/03-yeu-cau-chuc-nang.md) (module DT; các module khác ở plan 01-04; yêu cầu phi chức năng ở plan 01-04) | Đang thực hiện |
-| 1.3 | Xây dựng được sơ đồ UC và đặc tả UC | ANLS-05 | [06-dac-ta-uc1-quan-ly-de-tai.md](chuong-2-khao-sat-phan-tich/06-dac-ta-uc1-quan-ly-de-tai.md) (UC1 lát cắt UC1.1; UC1.2–UC1.4 ở Task 2; sơ đồ UC tổng quát 5 UC + UC2–UC5, UC0 ở plan 01-04) | Đang thực hiện |
+| 1.3 | Xây dựng được sơ đồ UC và đặc tả UC | ANLS-05 | [06-dac-ta-uc1-quan-ly-de-tai.md](chuong-2-khao-sat-phan-tich/06-dac-ta-uc1-quan-ly-de-tai.md) (UC1 đầy đủ: UC1.1–UC1.4 + activity diagram; sơ đồ UC tổng quát 5 UC + UC2–UC5, UC0 ở plan 01-04) | Đang thực hiện |
 | 2.1 | Thiết kế được cấu trúc dữ liệu | DSGN-01, DSGN-02 | [01-so-do-lop-thuc-the.md](chuong-3-thiet-ke/01-so-do-lop-thuc-the.md), [02-thiet-ke-csdl.md](chuong-3-thiet-ke/02-thiet-ke-csdl.md) (lát cắt UC1.1; đầy đủ ở plan 01-05) | Đang thực hiện |
 | 2.2 | Thiết kế được kiến trúc phần mềm | DSGN-03 | (chưa có tài liệu — plan 01-05) | Chưa thực hiện |
 | 2.3 | Thiết kế mockup được giao diện | DSGN-04 | [04-thiet-ke-giao-dien.md](chuong-3-thiet-ke/04-thiet-ke-giao-dien.md) (MH-06/14 màn đã dựng; 13 màn còn lại ở plan 01-06) | Đang thực hiện |

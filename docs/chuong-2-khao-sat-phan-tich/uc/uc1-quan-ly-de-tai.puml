@@ -4,19 +4,35 @@ skinparam packageStyle rectangle
 
 actor "Giảng viên" as GV
 actor "Sinh viên" as SV
+actor "Bộ môn" as BM
 
 rectangle "UC1 – Quản lý đề tài" {
   usecase "UC1.1 – Đề xuất đề tài" as UC1_1
+  usecase "UC1.2 – Đăng ký đề tài có sẵn" as UC1_2
+  usecase "UC1.3 – Duyệt đề tài và phân công GVHD" as UC1_3
+  usecase "UC1.4 – Xem và lọc danh sách đề tài" as UC1_4
   usecase "UC0.6 – Kiểm tra trùng lặp tên đề tài" as UC0_6
 }
 
 GV --> UC1_1
 SV --> UC1_1
+SV --> UC1_2
+BM --> UC1_3
+GV --> UC1_4
+SV --> UC1_4
+BM --> UC1_4
+
 UC1_1 ..> UC0_6 : <<include>>
 
 note right of UC0_6
   UC0.6 thuộc nhóm UC0 – Chức năng chung,
   đặc tả đầy đủ ở 11-dac-ta-uc0-chuc-nang-chung.md
   (kế hoạch 01-04).
+end note
+
+note bottom of UC1_2
+  Ràng buộc 1 SV - 1 đề tài đang hoạt động
+  và 1 đề tài - 1 SV (FR-DT-06) được kiểm
+  tra trong đặc tả UC1.2, không tách UC riêng.
 end note
 @enduml
