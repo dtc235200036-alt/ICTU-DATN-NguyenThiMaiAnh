@@ -12,7 +12,10 @@ export interface NguoiDung {
   giang_vien_id: number | null
 }
 
+export type AuthStatus = 'checking' | 'authenticated' | 'anonymous'
+
 interface AuthState {
+  status: AuthStatus
   accessToken: string | null
   user: NguoiDung | null
   setSession: (token: string, user: NguoiDung) => void
@@ -20,10 +23,13 @@ interface AuthState {
 }
 
 // D-07: access token và user sống chỉ trong bộ nhớ (zustand, không persist)
-// — không bao giờ ghi vào localStorage/sessionStorage.
+// — không bao giờ ghi vào bộ nhớ trình duyệt (Web Storage).
+// status bắt đầu 'checking' để AuthBootstrap biết cần gọi /auth/refresh trước
+// khi quyết định điều hướng tới /dang-nhap hay giữ nguyên trang hiện tại.
 export const useAuthStore = create<AuthState>((set) => ({
+  status: 'checking',
   accessToken: null,
   user: null,
-  setSession: (token, user) => set({ accessToken: token, user }),
-  clear: () => set({ accessToken: null, user: null }),
+  setSession: (token, user) => set({ status: 'authenticated', accessToken: token, user }),
+  clear: () => set({ status: 'anonymous', accessToken: null, user: null }),
 }))

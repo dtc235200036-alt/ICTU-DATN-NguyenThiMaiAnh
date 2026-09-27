@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Alert, Button, Card, Form, Input, Typography } from 'antd'
-import { useNavigate } from 'react-router'
+import { Navigate, useLocation, useNavigate } from 'react-router'
 
 import { api, getErrorMessage } from '../../api/client'
 import { useAuthStore } from '../../stores/auth'
@@ -12,11 +12,25 @@ interface LoginFormValues {
   mat_khau: string
 }
 
+interface FromLocationState {
+  from?: {
+    pathname: string
+    search?: string
+  }
+}
+
 export default function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const status = useAuthStore((s) => s.status)
   const setSession = useAuthStore((s) => s.setSession)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // D-07: đã có phiên hợp lệ (vd. mở lại tab /dang-nhap) — không hiển thị lại form.
+  if (status === 'authenticated') {
+    return <Navigate to="/tong-quan" replace />
+  }
 
   const onFinish = async (values: LoginFormValues) => {
     setLoading(true)
@@ -24,7 +38,10 @@ export default function LoginPage() {
     try {
       const { data } = await api.post('/auth/login', values)
       setSession(data.access_token, data.nguoi_dung)
-      navigate('/tong-quan')
+      const state = location.state as FromLocationState | null
+      const from = state?.from
+      const target = from ? `${from.pathname}${from.search ?? ''}` : '/tong-quan'
+      navigate(target, { replace: true })
     } catch (err) {
       setError(getErrorMessage(err))
     } finally {
