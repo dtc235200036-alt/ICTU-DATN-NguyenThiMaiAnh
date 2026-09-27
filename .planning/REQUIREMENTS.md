@@ -15,7 +15,7 @@
 - [ ] **DSGN-01**: Có sơ đồ lớp thực thể (Sinh viên, Giảng viên, Đề tài, Đề cương, Báo cáo tiến độ, Hội đồng, Tài liệu đồ án, Kết quả kiểm tra trùng lặp, …) (PI 2.1)
 - [ ] **DSGN-02**: Có sơ đồ CSDL khớp với sơ đồ lớp thực thể (PI 2.1)
 - [ ] **DSGN-03**: Có thiết kế kiến trúc SOA bằng UML (component/deployment) thể hiện Web API, client React và dịch vụ AI tách biệt (PI 2.2)
-- [ ] **DSGN-04**: Có mockup giao diện (HTML prototype, thay cho Figma — phần mềm tương đương theo PI 2.3) cho các giao diện chính của 3 vai trò (PI 2.3)
+- [x] **DSGN-04**: Có mockup giao diện (HTML prototype, thay cho Figma — phần mềm tương đương theo PI 2.3) cho các giao diện chính của 3 vai trò (PI 2.3)
 
 ### Xác thực & phân quyền
 
@@ -119,7 +119,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DSGN-01 | Phase 1 | Pending |
 | DSGN-02 | Phase 1 | Pending |
 | DSGN-03 | Phase 1 | Pending |
-| DSGN-04 | Phase 1 | Pending |
+| DSGN-04 | Phase 1 | Complete |
 | AUTH-01 | Phase 2 | Pending |
 | AUTH-02 | Phase 2 | Pending |
 | AUTH-03 | Phase 2 | Pending |

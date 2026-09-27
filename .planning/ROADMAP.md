@@ -48,7 +48,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Sơ đồ lớp thực thể và sơ đồ CSDL khớp nhau từng thực thể (kể cả Kết quả kiểm tra trùng lặp), và sơ đồ UML component/deployment thể hiện Web API, client React, dịch vụ AI là 3 thành phần tách biệt sau Apache
   5. Mockup giao diện (HTML prototype) cho các màn hình chính của cả 3 vai trò, bao phủ 5 UC và màn hình kết quả kiểm tra trùng lặp
 
-**Plans**: 5/7 plans executed
+**Plans**: 6/7 plans executed
 Plans:
 **Wave 1**
 - [x] 01-01-PLAN.md — Bộ công cụ khảo sát (Phụ lục A–D, bản in DOCX) + khu thu thập tài liệu gốc `tai-lieu-goc/` (wave 1)
@@ -60,7 +60,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [x] 01-05-PLAN.md — Sơ đồ lớp + máy trạng thái, CSDL thesis_core/thesis_ai, kiến trúc SOA + sequence AI (wave 3)
-- [ ] 01-06-PLAN.md — 13 màn mockup HTML/CSS còn lại (tổng 14, dùng skill ui-ux-pro-max + design-taste-frontend) + ảnh PNG chụp bằng headless Chrome (wave 3)
+- [x] 01-06-PLAN.md — 13 màn mockup HTML/CSS còn lại (tổng 14, dùng skill ui-ux-pro-max + design-taste-frontend) + ảnh PNG chụp bằng headless Chrome (wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 - [ ] 01-07-PLAN.md — Truy vết hoàn chỉnh + lắp chương; checkpoint dữ liệu khảo sát thật; đối chiếu dữ liệu thật (cập nhật mockup nếu biểu mẫu thật đổi trường) (wave 4, có checkpoint)
@@ -159,7 +159,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Analysis & Design | 5/7 | In Progress|  |
+| 1. Analysis & Design | 6/7 | In Progress|  |
 | 2. Platform, RBAC & Topic Management | 0/TBD | Not started | - |
 | 3. Outline, Progress, Defense & Archive | 0/TBD | Not started | - |
 | 4. AI Similarity Service | 0/TBD | Not started | - |

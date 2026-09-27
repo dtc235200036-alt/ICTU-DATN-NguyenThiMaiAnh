@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 1
 current_phase_name: Analysis & Design
 status: executing
-stopped_at: Completed 01-05-PLAN.md
-last_updated: "2026-09-27T19:58:07.931Z"
+stopped_at: Completed 01-06-PLAN.md
+last_updated: "2026-09-27T20:28:04.235Z"
 last_activity: 2026-09-28
 last_activity_desc: Phase 1 execution started
-state_head: 79df62b940510399aa8a51792fbb62ca7d6f511f
+state_head: 2fb918531f2b1a3dd1318600ed31763381cd6ad1
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 7
-  completed_plans: 5
+  completed_plans: 6
   percent: 0
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-09-27)
 ## Current Position
 
 Phase: 1 (Analysis & Design) — EXECUTING
-Plan: 6 of 7
+Plan: 7 of 7
 Status: Ready to execute
 Last activity: 2026-09-28 — Phase 1 execution started
 
@@ -61,6 +61,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P03 | 25min | 3 tasks | 17 files |
 | Phase 01 P04 | 14min | 3 tasks | 34 files |
 | Phase 01 P05 | 36min | 3 tasks | 35 files |
+| Phase 01 P06 | 95min | 3 tasks | 29 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,9 @@ Recent decisions affecting current work:
 - [Phase 01]: DeTai state machine uses two entry paths into DA_PHAN_CONG (GV-proposed via DA_DUYET+SV registration vs SV-proposed direct) reconciled from locked UC1.2/UC1.3 wording
 - [Phase 01]: 1 SV : 1 active topic enforced via MySQL generated column + UNIQUE index (NULL-permissive); 1 topic : 1 SV under concurrent registration via conditional UPDATE ... WHERE sinh_vien_id IS NULL
 - [Phase 01]: PlantUML enum blocks must be connected via a dependency line to their owning class - disconnected enum nodes crash the Smetana layout engine used when Graphviz dot is absent
+- [Phase 01]: design-taste-frontend lists dashboards/data tables as Out of Scope; D-12 (Ant Design admin) overrides its design-system guidance again in 01-06, only neutral anti-slop principles applied
+- [Phase 01]: Removed .ant-layout min-height:100vh from antd-admin.css: headless Chrome --screenshot only captures the declared viewport, so it was clipping Drawer/Modal overlays and trailing state-panel sections; screens now size to content
+- [Phase 01]: mockup-state-panel pattern: alternate-state illustrations (Modal/Spin/error) placed in normal document flow after ant-layout closes, avoiding stacked overlays
 
 ### Pending Todos
 
@@ -107,6 +111,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-27T19:58:07.906Z
-Stopped at: Completed 01-05-PLAN.md
+Last session: 2026-09-27T20:28:04.209Z
+Stopped at: Completed 01-06-PLAN.md
 Resume file: None
