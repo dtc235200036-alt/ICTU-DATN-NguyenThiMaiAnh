@@ -4,7 +4,7 @@
 
 UC3 – Quản lý tiến độ thực hiện được tách thành 4 UC con: UC3.1 Thiết lập mốc tiến độ, UC3.2 Nộp báo cáo tiến độ, UC3.3 Nhận xét và đánh giá báo cáo tiến độ, UC3.4 Theo dõi tiến độ toàn khoa.
 
-![Hình 2.d – Sơ đồ UC3 – Quản lý tiến độ thực hiện](uc/uc3-quan-ly-tien-do.png)
+![Hình 2.18 – Sơ đồ UC3 – Quản lý tiến độ thực hiện](uc/uc3-quan-ly-tien-do.png)
 
 #### UC3.1 – Thiết lập mốc tiến độ
 

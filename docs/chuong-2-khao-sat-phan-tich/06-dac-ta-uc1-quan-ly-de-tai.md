@@ -4,7 +4,7 @@
 
 UC1 – Quản lý đề tài được tách thành 4 UC con để mỗi UC có một luồng nghiệp vụ độc lập, dễ đặc tả và dễ lập trình theo lát cắt: UC1.1 Đề xuất đề tài, UC1.2 Đăng ký đề tài có sẵn, UC1.3 Duyệt đề tài và phân công GVHD, UC1.4 Xem và lọc danh sách đề tài.
 
-![Hình 2.y – Sơ đồ UC1 – Quản lý đề tài](uc/uc1-quan-ly-de-tai.png)
+![Hình 2.14 – Sơ đồ UC1 – Quản lý đề tài](uc/uc1-quan-ly-de-tai.png)
 
 #### UC1.1 – Đề xuất đề tài
 
@@ -121,4 +121,4 @@ UC1 – Quản lý đề tài được tách thành 4 UC con để mỗi UC có 
 
 - Không có ngoại lệ đáng kể (UC chỉ đọc dữ liệu).
 
-![Hình 2.z – Hoạt động UC1.1/UC1.2/UC1.3 – Đề xuất/Đăng ký đến Duyệt và Phân công GVHD](uc/act-uc1-de-xuat-dang-ky-de-tai.png)
+![Hình 2.15 – Hoạt động UC1.1/UC1.2/UC1.3 – Đề xuất/Đăng ký đến Duyệt và Phân công GVHD](uc/act-uc1-de-xuat-dang-ky-de-tai.png)

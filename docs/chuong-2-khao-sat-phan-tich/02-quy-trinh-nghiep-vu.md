@@ -14,7 +14,7 @@ Sơ đồ tổng quan (`bpmn/00-tong-quan.drawio`) thể hiện toàn bộ chu�
 
 #### Quy trình AS-IS
 
-![Hình 2.a – Quy trình tổng quan (AS-IS) — GIẢ ĐỊNH — chờ xác nhận](bpmn/00-tong-quan-as-is.png)
+![Hình 2.1 – Quy trình tổng quan (AS-IS) — GIẢ ĐỊNH — chờ xác nhận](bpmn/00-tong-quan-as-is.png)
 
 | Mã bước | Lane | Công việc | Dữ liệu / biểu mẫu | Ghi chú |
 |---------|------|-----------|---------------------|---------|
@@ -32,7 +32,7 @@ Sơ đồ tổng quan (`bpmn/00-tong-quan.drawio`) thể hiện toàn bộ chu�
 
 #### Quy trình TO-BE
 
-![Hình 2.b – Quy trình tổng quan (TO-BE)](bpmn/00-tong-quan-to-be.png)
+![Hình 2.2 – Quy trình tổng quan (TO-BE)](bpmn/00-tong-quan-to-be.png)
 
 | Mã bước | Lane | Công việc | Dữ liệu / biểu mẫu | Ghi chú |
 |---------|------|-----------|---------------------|---------|
@@ -51,7 +51,7 @@ Sơ đồ tổng quan (`bpmn/00-tong-quan.drawio`) thể hiện toàn bộ chu�
 
 #### Quy trình AS-IS
 
-![Hình 2.w – Quy trình quản lý đề tài (AS-IS) — GIẢ ĐỊNH — chờ xác nhận](bpmn/01-de-tai-as-is.png)
+![Hình 2.3 – Quy trình quản lý đề tài (AS-IS) — GIẢ ĐỊNH — chờ xác nhận](bpmn/01-de-tai-as-is.png)
 
 | Mã bước | Lane | Công việc | Dữ liệu / biểu mẫu | Ghi chú |
 |---------|------|-----------|---------------------|---------|
@@ -71,7 +71,7 @@ Sơ đồ tổng quan (`bpmn/00-tong-quan.drawio`) thể hiện toàn bộ chu�
 
 #### Quy trình TO-BE
 
-![Hình 2.x – Quy trình quản lý đề tài (TO-BE)](bpmn/01-de-tai-to-be.png)
+![Hình 2.4 – Quy trình quản lý đề tài (TO-BE)](bpmn/01-de-tai-to-be.png)
 
 | Mã bước | Lane | Công việc | Dữ liệu / biểu mẫu | Ghi chú |
 |---------|------|-----------|---------------------|---------|
@@ -101,7 +101,7 @@ Sơ đồ tổng quan (`bpmn/00-tong-quan.drawio`) thể hiện toàn bộ chu�
 
 #### Quy trình AS-IS
 
-![Hình 2.c – Quy trình quản lý đề cương (AS-IS) — GIẢ ĐỊNH — chờ xác nhận](bpmn/02-de-cuong-as-is.png)
+![Hình 2.5 – Quy trình quản lý đề cương (AS-IS) — GIẢ ĐỊNH — chờ xác nhận](bpmn/02-de-cuong-as-is.png)
 
 | Mã bước | Lane | Công việc | Dữ liệu / biểu mẫu | Ghi chú |
 |---------|------|-----------|---------------------|---------|
@@ -119,7 +119,7 @@ Sơ đồ tổng quan (`bpmn/00-tong-quan.drawio`) thể hiện toàn bộ chu�
 
 #### Quy trình TO-BE
 
-![Hình 2.d – Quy trình quản lý đề cương (TO-BE)](bpmn/02-de-cuong-to-be.png)
+![Hình 2.6 – Quy trình quản lý đề cương (TO-BE)](bpmn/02-de-cuong-to-be.png)
 
 | Mã bước | Lane | Công việc | Dữ liệu / biểu mẫu | Ghi chú |
 |---------|------|-----------|---------------------|---------|
@@ -140,7 +140,7 @@ Sơ đồ tổng quan (`bpmn/00-tong-quan.drawio`) thể hiện toàn bộ chu�
 
 #### Quy trình AS-IS
 
-![Hình 2.e – Quy trình theo dõi tiến độ (AS-IS) — GIẢ ĐỊNH — chờ xác nhận](bpmn/03-tien-do-as-is.png)
+![Hình 2.7 – Quy trình theo dõi tiến độ (AS-IS) — GIẢ ĐỊNH — chờ xác nhận](bpmn/03-tien-do-as-is.png)
 
 | Mã bước | Lane | Công việc | Dữ liệu / biểu mẫu | Ghi chú |
 |---------|------|-----------|---------------------|---------|
@@ -156,7 +156,7 @@ Sơ đồ tổng quan (`bpmn/00-tong-quan.drawio`) thể hiện toàn bộ chu�
 
 #### Quy trình TO-BE
 
-![Hình 2.f – Quy trình theo dõi tiến độ (TO-BE)](bpmn/03-tien-do-to-be.png)
+![Hình 2.8 – Quy trình theo dõi tiến độ (TO-BE)](bpmn/03-tien-do-to-be.png)
 
 | Mã bước | Lane | Công việc | Dữ liệu / biểu mẫu | Ghi chú |
 |---------|------|-----------|---------------------|---------|
@@ -172,7 +172,7 @@ Sơ đồ tổng quan (`bpmn/00-tong-quan.drawio`) thể hiện toàn bộ chu�
 
 #### Quy trình AS-IS
 
-![Hình 2.g – Quy trình nộp báo cáo và tổ chức bảo vệ (AS-IS) — GIẢ ĐỊNH — chờ xác nhận](bpmn/04-bao-ve-as-is.png)
+![Hình 2.9 – Quy trình nộp báo cáo và tổ chức bảo vệ (AS-IS) — GIẢ ĐỊNH — chờ xác nhận](bpmn/04-bao-ve-as-is.png)
 
 | Mã bước | Lane | Công việc | Dữ liệu / biểu mẫu | Ghi chú |
 |---------|------|-----------|---------------------|---------|
@@ -190,7 +190,7 @@ Sơ đồ tổng quan (`bpmn/00-tong-quan.drawio`) thể hiện toàn bộ chu�
 
 #### Quy trình TO-BE
 
-![Hình 2.h – Quy trình nộp báo cáo và tổ chức bảo vệ (TO-BE)](bpmn/04-bao-ve-to-be.png)
+![Hình 2.10 – Quy trình nộp báo cáo và tổ chức bảo vệ (TO-BE)](bpmn/04-bao-ve-to-be.png)
 
 | Mã bước | Lane | Công việc | Dữ liệu / biểu mẫu | Ghi chú |
 |---------|------|-----------|---------------------|---------|
@@ -210,7 +210,7 @@ Sơ đồ tổng quan (`bpmn/00-tong-quan.drawio`) thể hiện toàn bộ chu�
 
 #### Quy trình AS-IS
 
-![Hình 2.i – Quy trình quản lý kho dữ liệu đồ án (AS-IS) — GIẢ ĐỊNH — chờ xác nhận](bpmn/05-kho-do-an-as-is.png)
+![Hình 2.11 – Quy trình quản lý kho dữ liệu đồ án (AS-IS) — GIẢ ĐỊNH — chờ xác nhận](bpmn/05-kho-do-an-as-is.png)
 
 | Mã bước | Lane | Công việc | Dữ liệu / biểu mẫu | Ghi chú |
 |---------|------|-----------|---------------------|---------|
@@ -226,7 +226,7 @@ Sơ đồ tổng quan (`bpmn/00-tong-quan.drawio`) thể hiện toàn bộ chu�
 
 #### Quy trình TO-BE
 
-![Hình 2.j – Quy trình quản lý kho dữ liệu đồ án (TO-BE)](bpmn/05-kho-do-an-to-be.png)
+![Hình 2.12 – Quy trình quản lý kho dữ liệu đồ án (TO-BE)](bpmn/05-kho-do-an-to-be.png)
 
 | Mã bước | Lane | Công việc | Dữ liệu / biểu mẫu | Ghi chú |
 |---------|------|-----------|---------------------|---------|

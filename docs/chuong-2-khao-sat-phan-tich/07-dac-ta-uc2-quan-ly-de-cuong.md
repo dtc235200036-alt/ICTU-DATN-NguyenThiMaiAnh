@@ -4,7 +4,7 @@
 
 UC2 – Quản lý đề cương được tách thành 3 UC con: UC2.1 Nộp đề cương, UC2.2 Duyệt hoặc yêu cầu sửa đề cương, UC2.3 Xem lịch sử phiên bản và nhận xét.
 
-![Hình 2.b – Sơ đồ UC2 – Quản lý đề cương](uc/uc2-quan-ly-de-cuong.png)
+![Hình 2.16 – Sơ đồ UC2 – Quản lý đề cương](uc/uc2-quan-ly-de-cuong.png)
 
 #### UC2.1 – Nộp đề cương
 
@@ -92,4 +92,4 @@ UC2 – Quản lý đề cương được tách thành 3 UC con: UC2.1 Nộp đ�
 
 - Không có ngoại lệ đáng kể (UC chỉ đọc dữ liệu).
 
-![Hình 2.c – Hoạt động UC2.1/UC2.2 – Nộp và duyệt đề cương](uc/act-uc2-nop-duyet-de-cuong.png)
+![Hình 2.17 – Hoạt động UC2.1/UC2.2 – Nộp và duyệt đề cương](uc/act-uc2-nop-duyet-de-cuong.png)

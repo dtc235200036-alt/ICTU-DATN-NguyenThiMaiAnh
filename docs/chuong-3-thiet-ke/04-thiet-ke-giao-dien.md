@@ -81,7 +81,7 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 **Tương tác (interactions):**
 - "Đăng nhập" xác thực mật khẩu (bcrypt), phát hành JWT; sai thông tin hoặc tài khoản khóa hiển thị lại form kèm `ant-alert-error`.
 
-![Hình 3.x – MH-01 · Đăng nhập](mockup/mh-01.png)
+![Hình 3.11 – MH-01 · Đăng nhập](mockup/mh-01.png)
 
 ### 3.4.4. MH-02 – Dashboard Sinh viên
 
@@ -99,7 +99,7 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 - "Xem chi tiết đề tài" mở MH-05 (xem chi tiết đề tài của mình).
 - Bấm vào một thông báo trong panel đánh dấu thông báo đó đã đọc (UC0.5).
 
-![Hình 3.x – MH-02 · Dashboard Sinh viên](mockup/mh-02.png)
+![Hình 3.12 – MH-02 · Dashboard Sinh viên](mockup/mh-02.png)
 
 ### 3.4.5. MH-03 – Dashboard Giảng viên
 
@@ -117,7 +117,7 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 - Nút "Xem" ở dòng báo cáo tiến độ mở MH-10 (Báo cáo tiến độ và nhận xét).
 - Nút "Chấm điểm" ở dòng hội đồng mở MH-12 (Chấm điểm bảo vệ).
 
-![Hình 3.x – MH-03 · Dashboard Giảng viên](mockup/mh-03.png)
+![Hình 3.13 – MH-03 · Dashboard Giảng viên](mockup/mh-03.png)
 
 ### 3.4.6. MH-04 – Dashboard Bộ môn (kèm tiến độ toàn khoa)
 
@@ -135,7 +135,7 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 - "Thiết lập mốc" mở form thêm/sửa mốc tiến độ (UC3.1, màn CRUD phụ ngoài bộ mockup chính theo D-14).
 - Đổi Select đợt đồ án tải lại toàn bộ số liệu và bảng theo đợt mới.
 
-![Hình 3.x – MH-04 · Dashboard Bộ môn](mockup/mh-04.png)
+![Hình 3.14 – MH-04 · Dashboard Bộ môn](mockup/mh-04.png)
 
 ### 3.4.7. MH-05 – Danh sách đề tài
 
@@ -154,7 +154,7 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 - "Đăng ký" trên một đề tài "Đã duyệt" còn trống thực hiện UC1.2 (đăng ký đề tài có sẵn).
 - "Xem" mở chi tiết đề tài (không có mockup riêng, dùng lại bố cục MH-06 ở chế độ chỉ đọc).
 
-![Hình 3.x – MH-05 · Danh sách đề tài](mockup/mh-05.png)
+![Hình 3.15 – MH-05 · Danh sách đề tài](mockup/mh-05.png)
 
 ### 3.4.8. MH-06 – Đề xuất đề tài
 
@@ -177,7 +177,7 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 - "Vẫn gửi đề xuất" đóng cảnh báo và tiếp tục điền các trường còn lại (luồng thay thế A2, UC1.1)
 - "Gửi đề xuất" tạo đề tài trạng thái "Chờ duyệt" (bước TB-DT-06)
 
-![Hình 3.x – MH-06 · Đề xuất đề tài](mockup/mh-06.png)
+![Hình 3.16 – MH-06 · Đề xuất đề tài](mockup/mh-06.png)
 
 ### 3.4.9. MH-07 – Duyệt đề tài và phân công GVHD
 
@@ -196,7 +196,7 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 - "Từ chối" mở Modal yêu cầu nhập lý do bắt buộc; "Xác nhận từ chối" chuyển đề tài sang "Từ chối" kèm lý do.
 - Select "Giảng viên hướng dẫn" vẫn yêu cầu Bộ môn xác nhận thủ công kể cả khi GV đề xuất là người phù hợp duy nhất (UC1.3 - E1).
 
-![Hình 3.x – MH-07 · Duyệt đề tài và phân công GVHD](mockup/mh-07.png)
+![Hình 3.17 – MH-07 · Duyệt đề tài và phân công GVHD](mockup/mh-07.png)
 
 ### 3.4.10. MH-08 – Nộp đề cương / báo cáo cuối
 
@@ -216,7 +216,7 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 - Tag "Hoàn tất - N%" ở cột Kết quả kiểm tra mở MH-14 (chi tiết kết quả).
 - Tab "Báo cáo cuối" dùng lại đúng bố cục Upload + lịch sử phiên bản cho UC4.1 (báo cáo cuối chỉ nộp một lần, không có vòng lặp sửa-duyệt).
 
-![Hình 3.x – MH-08 · Nộp đề cương / báo cáo cuối](mockup/mh-08.png)
+![Hình 3.18 – MH-08 · Nộp đề cương / báo cáo cuối](mockup/mh-08.png)
 
 ### 3.4.11. MH-09 – Duyệt đề cương
 
@@ -235,7 +235,7 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 - "Yêu cầu sửa" chuyển sang "Yêu cầu sửa" kèm nội dung TextArea "Nhận xét", SV quay lại UC2.1 để nộp phiên bản mới.
 - "Xem chi tiết" mở MH-14 (chi tiết kết quả kiểm tra trùng lặp, AISV-05/AISV-06).
 
-![Hình 3.x – MH-09 · Duyệt đề cương](mockup/mh-09.png)
+![Hình 3.19 – MH-09 · Duyệt đề cương](mockup/mh-09.png)
 
 ### 3.4.12. MH-10 – Báo cáo tiến độ và nhận xét
 
@@ -253,7 +253,7 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 - "Gửi nhận xét" lưu nhận xét + đánh giá, gửi thông báo in-app cho SV.
 - "Nộp báo cáo" (trong Modal) ghi nhận báo cáo tiến độ của SV cho mốc đang mở; nộp lại trước khi có nhận xét sẽ ghi đè nội dung (UC3.2 - A1, không giữ lịch sử như đề cương).
 
-![Hình 3.x – MH-10 · Báo cáo tiến độ và nhận xét](mockup/mh-10.png)
+![Hình 3.20 – MH-10 · Báo cáo tiến độ và nhận xét](mockup/mh-10.png)
 
 ### 3.4.13. MH-11 – Lập hội đồng và xếp lịch
 
@@ -270,7 +270,7 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 - "Lưu hội đồng và lịch" tạo/cập nhật hội đồng, gửi thông báo in-app cho SV và GV liên quan (UC4.2).
 - "Chốt kết quả" (chỉ bấm được khi đủ điểm) tính điểm trung bình cộng, khóa không cho sửa điểm thành viên, và tự động kích hoạt UC5.2 (lưu vào kho).
 
-![Hình 3.x – MH-11 · Lập hội đồng và xếp lịch](mockup/mh-11.png)
+![Hình 3.21 – MH-11 · Lập hội đồng và xếp lịch](mockup/mh-11.png)
 
 ### 3.4.14. MH-12 – Chấm điểm bảo vệ
 
@@ -287,7 +287,7 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 - Chọn một SV trong bảng trái cập nhật khu chấm điểm bên phải.
 - "Lưu điểm" ghi nhận điểm và nhận xét của riêng thành viên này; điểm trung bình cộng chỉ được Bộ môn tính và chốt ở MH-11 sau khi đủ mọi thành viên (UC4.4).
 
-![Hình 3.x – MH-12 · Chấm điểm bảo vệ](mockup/mh-12.png)
+![Hình 3.22 – MH-12 · Chấm điểm bảo vệ](mockup/mh-12.png)
 
 ### 3.4.15. MH-13 – Kho đồ án
 
@@ -306,7 +306,7 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 - "Thêm bản ghi" mở form thêm bản ghi kho thủ công (UC5.3 - A1, dữ liệu lịch sử thiếu, vẫn đẩy sang dịch vụ AI để index như UC5.2).
 - "Import khóa cũ" mở luồng import hàng loạt theo mẫu quy định (UC5.4), báo cáo số bản ghi thành công/lỗi sau khi chạy.
 
-![Hình 3.x – MH-13 · Kho đồ án](mockup/mh-13.png)
+![Hình 3.23 – MH-13 · Kho đồ án](mockup/mh-13.png)
 
 ### 3.4.16. MH-14 – Chi tiết kết quả kiểm tra trùng lặp
 
@@ -324,4 +324,4 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 - Click một dòng trong "Đồ án trùng" lọc lại cặp đoạn trùng hiển thị ở hai cột so sánh theo đúng nguồn đó.
 - Màn được mở từ link "Xem chi tiết" ở MH-09 và từ Tag "Hoàn tất - N%" ở MH-08/lịch sử phiên bản.
 
-![Hình 3.x – MH-14 · Chi tiết kết quả kiểm tra trùng lặp](mockup/mh-14.png)
+![Hình 3.24 – MH-14 · Chi tiết kết quả kiểm tra trùng lặp](mockup/mh-14.png)

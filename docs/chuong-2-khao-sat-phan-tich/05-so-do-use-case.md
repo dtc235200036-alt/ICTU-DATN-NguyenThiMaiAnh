@@ -4,7 +4,7 @@
 
 Hệ thống có 3 tác nhân (Sinh viên, Giảng viên, Bộ môn — hội đồng bảo vệ dùng tài khoản Giảng viên được phân công, không phải một tác nhân riêng) và 5 use case chính, mỗi use case chính được tách thành các use case con (D-06) đặc tả riêng ở §2.6.1–§2.6.5. Nhóm UC0 – Chức năng chung (§2.6.6) gồm các chức năng dùng lại từ nhiều use case chính, trong đó UC0.6 và UC0.7 là hai điểm tích hợp với dịch vụ AI, được `<<include>>` từ UC1 và từ UC2/UC4.
 
-![Hình 2.a – Sơ đồ use case tổng quát](uc/uc-tong-quat.png)
+![Hình 2.13 – Sơ đồ use case tổng quát](uc/uc-tong-quat.png)
 
 ### Bảng tác nhân
 

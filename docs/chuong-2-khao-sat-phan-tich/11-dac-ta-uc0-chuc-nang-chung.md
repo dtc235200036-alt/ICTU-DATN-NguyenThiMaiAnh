@@ -4,7 +4,7 @@
 
 UC0 – Chức năng chung gồm 7 UC con dùng chung bởi nhiều use case chính: UC0.1 Đăng nhập và đăng xuất, UC0.2 Quản lý tài khoản SV/GV, UC0.3 Quản lý đợt đồ án, UC0.4 Cấu hình ngưỡng cảnh báo trùng lặp, UC0.5 Xem thông báo, UC0.6 Kiểm tra trùng lặp tên đề tài, UC0.7 Kiểm tra trùng lặp tài liệu. UC0.6 và UC0.7 có tác nhân chính là **Hệ thống** (Dịch vụ AI) — chúng không được người dùng gọi trực tiếp mà được `<<include>>` từ UC1.1 (UC0.6) và từ UC2.1/UC4.1 (UC0.7).
 
-![Hình 2.h – Sơ đồ UC0 – Chức năng chung](uc/uc0-chuc-nang-chung.png)
+![Hình 2.22 – Sơ đồ UC0 – Chức năng chung](uc/uc0-chuc-nang-chung.png)
 
 #### UC0.1 – Đăng nhập và đăng xuất
 

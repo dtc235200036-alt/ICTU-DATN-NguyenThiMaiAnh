@@ -4,7 +4,7 @@
 
 UC5 – Quản lý kho dữ liệu đồ án được tách thành 4 UC con: UC5.1 Tra cứu và xem chi tiết đồ án, UC5.2 Lưu đồ án vào kho, UC5.3 Quản lý bản ghi kho, UC5.4 Import đồ án các khóa cũ.
 
-![Hình 2.g – Sơ đồ UC5 – Quản lý kho dữ liệu đồ án](uc/uc5-quan-ly-kho-do-an.png)
+![Hình 2.21 – Sơ đồ UC5 – Quản lý kho dữ liệu đồ án](uc/uc5-quan-ly-kho-do-an.png)
 
 #### UC5.1 – Tra cứu và xem chi tiết đồ án
 

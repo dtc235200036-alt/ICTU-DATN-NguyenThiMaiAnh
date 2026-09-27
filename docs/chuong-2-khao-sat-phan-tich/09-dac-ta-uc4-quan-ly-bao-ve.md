@@ -4,7 +4,7 @@
 
 UC4 – Quản lý bảo vệ được tách thành 5 UC con: UC4.1 Nộp báo cáo cuối, UC4.2 Lập hội đồng và xếp lịch, UC4.3 Chấm điểm và nhận xét, UC4.4 Chốt kết quả bảo vệ, UC4.5 Xem lịch và kết quả bảo vệ.
 
-![Hình 2.e – Sơ đồ UC4 – Quản lý bảo vệ](uc/uc4-quan-ly-bao-ve.png)
+![Hình 2.19 – Sơ đồ UC4 – Quản lý bảo vệ](uc/uc4-quan-ly-bao-ve.png)
 
 #### UC4.1 – Nộp báo cáo cuối
 
@@ -146,4 +146,4 @@ UC4 – Quản lý bảo vệ được tách thành 5 UC con: UC4.1 Nộp báo c
 
 - Không có ngoại lệ đáng kể (UC chỉ đọc dữ liệu).
 
-![Hình 2.f – Hoạt động UC4 – Tổ chức bảo vệ](uc/act-uc4-to-chuc-bao-ve.png)
+![Hình 2.20 – Hoạt động UC4 – Tổ chức bảo vệ](uc/act-uc4-to-chuc-bao-ve.png)

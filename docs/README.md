@@ -175,3 +175,32 @@ python3 tools/check-docs.py bpmn
 python3 tools/check-docs.py mockup MH-06
 python3 tools/check-docs.py all
 ```
+
+## 13. Mục lục tài liệu
+
+Bảng dưới liệt kê mọi file của Chương 2, Chương 3 và Phụ lục khảo sát, cùng mã PI/yêu cầu và trạng thái hoàn thiện (cập nhật bởi plan 01-07).
+
+| Tệp | Mục | Mã PI | Yêu cầu | Trạng thái |
+|---|---|---|---|---|
+| [chuong-2-khao-sat-phan-tich/00-gioi-thieu-chuong.md](chuong-2-khao-sat-phan-tich/00-gioi-thieu-chuong.md) | Giới thiệu Chương 2 | 1.1, 1.2, 1.3 | ANLS-01..05 | Đạt |
+| [chuong-2-khao-sat-phan-tich/khao-sat/ke-hoach-khao-sat.md](chuong-2-khao-sat-phan-tich/khao-sat/ke-hoach-khao-sat.md) | Phụ lục A | 1.1 | ANLS-01 | Đạt |
+| [chuong-2-khao-sat-phan-tich/khao-sat/bo-cau-hoi-phong-van.md](chuong-2-khao-sat-phan-tich/khao-sat/bo-cau-hoi-phong-van.md) | Phụ lục B | 1.1 | ANLS-01 | Đạt |
+| [chuong-2-khao-sat-phan-tich/khao-sat/phieu-khao-sat.md](chuong-2-khao-sat-phan-tich/khao-sat/phieu-khao-sat.md) | Phụ lục C | 1.1 | ANLS-01 | Đạt |
+| [chuong-2-khao-sat-phan-tich/khao-sat/mau-bien-ban-phong-van.md](chuong-2-khao-sat-phan-tich/khao-sat/mau-bien-ban-phong-van.md) | Phụ lục D | 1.1 | ANLS-01 | Đạt |
+| [chuong-2-khao-sat-phan-tich/01-khao-sat-hien-trang.md](chuong-2-khao-sat-phan-tich/01-khao-sat-hien-trang.md) | 2.1 | 1.1 | ANLS-01 | Chờ dữ liệu khảo sát thật |
+| [chuong-2-khao-sat-phan-tich/02-quy-trinh-nghiep-vu.md](chuong-2-khao-sat-phan-tich/02-quy-trinh-nghiep-vu.md) | 2.2 | 1.1 | ANLS-02 | AS-IS chờ xác nhận, TO-BE Đạt |
+| [chuong-2-khao-sat-phan-tich/03-yeu-cau-chuc-nang.md](chuong-2-khao-sat-phan-tich/03-yeu-cau-chuc-nang.md) | 2.3 | 1.2 | ANLS-03 | Đạt |
+| [chuong-2-khao-sat-phan-tich/04-yeu-cau-phi-chuc-nang.md](chuong-2-khao-sat-phan-tich/04-yeu-cau-phi-chuc-nang.md) | 2.4 | 1.2 | ANLS-04 | Đạt |
+| [chuong-2-khao-sat-phan-tich/05-so-do-use-case.md](chuong-2-khao-sat-phan-tich/05-so-do-use-case.md) | 2.5 | 1.3 | ANLS-05 | Đạt |
+| [chuong-2-khao-sat-phan-tich/06-dac-ta-uc1-quan-ly-de-tai.md](chuong-2-khao-sat-phan-tich/06-dac-ta-uc1-quan-ly-de-tai.md) | 2.6.1 | 1.3 | ANLS-05 | Đạt |
+| [chuong-2-khao-sat-phan-tich/07-dac-ta-uc2-quan-ly-de-cuong.md](chuong-2-khao-sat-phan-tich/07-dac-ta-uc2-quan-ly-de-cuong.md) | 2.6.2 | 1.3 | ANLS-05 | Đạt |
+| [chuong-2-khao-sat-phan-tich/08-dac-ta-uc3-quan-ly-tien-do.md](chuong-2-khao-sat-phan-tich/08-dac-ta-uc3-quan-ly-tien-do.md) | 2.6.3 | 1.3 | ANLS-05 | Đạt |
+| [chuong-2-khao-sat-phan-tich/09-dac-ta-uc4-quan-ly-bao-ve.md](chuong-2-khao-sat-phan-tich/09-dac-ta-uc4-quan-ly-bao-ve.md) | 2.6.4 | 1.3 | ANLS-05 | Đạt |
+| [chuong-2-khao-sat-phan-tich/10-dac-ta-uc5-quan-ly-kho-do-an.md](chuong-2-khao-sat-phan-tich/10-dac-ta-uc5-quan-ly-kho-do-an.md) | 2.6.5 | 1.3 | ANLS-05 | Đạt |
+| [chuong-2-khao-sat-phan-tich/11-dac-ta-uc0-chuc-nang-chung.md](chuong-2-khao-sat-phan-tich/11-dac-ta-uc0-chuc-nang-chung.md) | 2.6.6 | 1.3 | ANLS-05 | Đạt |
+| [chuong-3-thiet-ke/00-gioi-thieu-chuong.md](chuong-3-thiet-ke/00-gioi-thieu-chuong.md) | Giới thiệu Chương 3 | 2.1, 2.2, 2.3 | DSGN-01..04 | Đạt |
+| [chuong-3-thiet-ke/01-so-do-lop-thuc-the.md](chuong-3-thiet-ke/01-so-do-lop-thuc-the.md) | 3.1 | 2.1 | DSGN-01 | Đạt |
+| [chuong-3-thiet-ke/02-thiet-ke-csdl.md](chuong-3-thiet-ke/02-thiet-ke-csdl.md) | 3.2 | 2.1 | DSGN-02 | Đạt |
+| [chuong-3-thiet-ke/03-kien-truc-he-thong.md](chuong-3-thiet-ke/03-kien-truc-he-thong.md) | 3.3 | 2.2 | DSGN-03 | Đạt |
+| [chuong-3-thiet-ke/04-thiet-ke-giao-dien.md](chuong-3-thiet-ke/04-thiet-ke-giao-dien.md) | 3.4 | 2.3 | DSGN-04 | Đạt (14/14 màn hình) |
+| [truy-vet.md](truy-vet.md) | Bảng truy vết | 1.1–2.3 | ANLS-01..05, DSGN-01..04 | Đang cập nhật (PI 1.1 chờ Task 3) |
