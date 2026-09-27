@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from sqlalchemy import func, or_, select, update
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.deps import CurrentUser
@@ -43,6 +43,12 @@ _FORBIDDEN_EDIT_DETAIL = "Bạn không có quyền chỉnh sửa đề tài này
 _FORBIDDEN_VIEW_DETAIL = "Bạn không có quyền xem đề tài này"
 _NOT_DRAFT_DETAIL = "Chỉ sửa được đề tài ở trạng thái Nháp"
 _SUBMIT_NOT_DRAFT_DETAIL = "Đề tài không ở trạng thái Nháp"
+
+# UC1.2 E1/A1 (§3.2.5): thông điệp cố định — test_topic_registration khớp
+# nguyên văn hai chuỗi này để phân biệt Race A (đề tài) và Race B (SV).
+_REGISTER_CONFLICT_DETAIL = "Đề tài vừa được người khác đăng ký hoặc không còn trống"
+_REGISTER_DEADLOCK_DETAIL = "Xung đột khi đăng ký, vui lòng thử lại"
+_MYSQL_DEADLOCK_CODES = (1213, 1205)  # ER_LOCK_DEADLOCK, ER_LOCK_WAIT_TIMEOUT
 
 
 def is_owner(user: CurrentUser, topic: DeTai) -> bool:
@@ -131,12 +137,44 @@ def _person_refs(
     return nguoi_de_xuat, giang_vien_huong_dan, sinh_vien
 
 
+def _sv_has_active_topic(db: Session, user: CurrentUser) -> bool:
+    """D-05: SV chỉ đăng ký được khi chưa có đề tài đang hoạt động — tính MỘT
+    lần cho mỗi lần gọi (get_topic) hoặc mỗi trang (list_topics), không phải
+    một lần mỗi dòng, để tránh N+1."""
+    if user.vai_tro != VaiTro.SINH_VIEN or user.sinh_vien_id is None:
+        return False
+    return (
+        db.execute(
+            select(DeTai.id).where(DeTai.sinh_vien_id_dang_hoat_dong == user.sinh_vien_id)
+        ).first()
+        is not None
+    )
+
+
+def _can_register(user: CurrentUser, topic: DeTai, has_active: bool) -> bool:
+    """UC1.2/T-02-31: chỉ SV, đề tài do GV đề xuất, Đã duyệt, chưa có SV, đợt
+    còn mở, và người gọi chưa có đề tài đang hoạt động."""
+    if user.vai_tro != VaiTro.SINH_VIEN or user.sinh_vien_id is None or has_active:
+        return False
+    return (
+        topic.loai_nguoi_de_xuat == GIANG_VIEN
+        and topic.trang_thai == DA_DUYET
+        and topic.sinh_vien_id is None
+        and topic.dot_do_an.trang_thai == DANG_MO
+    )
+
+
 def _to_out(db: Session, user: CurrentUser, topic: DeTai) -> TopicOut:
     nguoi_de_xuat, giang_vien_huong_dan, sinh_vien = _person_refs(topic)
 
     owner = is_owner(user, topic)
     la_nhap = topic.trang_thai == NHAP
-    quyen = QuyenOut(sua=owner and la_nhap, gui=owner and la_nhap)
+    has_active = _sv_has_active_topic(db, user)
+    quyen = QuyenOut(
+        sua=owner and la_nhap,
+        gui=owner and la_nhap,
+        dang_ky=_can_register(user, topic, has_active),
+    )
 
     saved_check = _saved_title_check_out(title_check.latest_title_check(db, topic.id))
 
@@ -284,7 +322,7 @@ def _scope_predicate(user: CurrentUser, pham_vi: str):
     return or_(own, open_predicate)
 
 
-def _list_item_out(topic: DeTai) -> TopicListItem:
+def _list_item_out(topic: DeTai, user: CurrentUser, has_active: bool) -> TopicListItem:
     nguoi_de_xuat, giang_vien_huong_dan, sinh_vien = _person_refs(topic)
     return TopicListItem(
         id=topic.id,
@@ -300,6 +338,7 @@ def _list_item_out(topic: DeTai) -> TopicListItem:
         nguoi_de_xuat=nguoi_de_xuat,
         giang_vien_huong_dan=giang_vien_huong_dan,
         sinh_vien=sinh_vien,
+        co_the_dang_ky=_can_register(user, topic, has_active),
     )
 
 
@@ -342,8 +381,53 @@ def list_topics(db: Session, user: CurrentUser, params: TopicListParams) -> Page
     )
     rows = db.execute(paged).scalars().all()
 
-    items = [_list_item_out(row) for row in rows]
+    has_active = _sv_has_active_topic(db, user)
+    items = [_list_item_out(row, user, has_active) for row in rows]
 
     return Page[TopicListItem](
         items=items, total=total, page=params.page, page_size=params.page_size
     )
+
+
+def register_topic(db: Session, user: CurrentUser, topic_id: int) -> TopicOut:
+    """UC1.2/D-05/§3.2.5-b: MỘT UPDATE có điều kiện (row lock), không đọc rồi
+    ghi — InnoDB khóa hàng đang cập nhật nên request thứ hai chờ commit đầu
+    tiên rồi mới thấy sinh_vien_id đã có, rowcount=0 (T-02-30/T-02-31)."""
+    stmt = (
+        update(DeTai)
+        .where(DeTai.id == topic_id)
+        .where(DeTai.sinh_vien_id.is_(None))
+        .where(DeTai.trang_thai == DA_DUYET)
+        .where(DeTai.loai_nguoi_de_xuat == GIANG_VIEN)
+        .where(DeTai.dot_do_an_id.in_(select(DotDoAn.id).where(DotDoAn.trang_thai == DANG_MO)))
+        .values(sinh_vien_id=user.sinh_vien_id, trang_thai=CHO_DUYET)
+    )
+    try:
+        result = db.execute(stmt)
+        db.commit()
+    except IntegrityError:
+        # uk_de_tai_sv_hoat_dong: SV này đã có đề tài đang hoạt động (Race B,
+        # UC1.2 A1) — vi phạm lộ ra ngay tại UPDATE, không cần đọc lại.
+        db.rollback()
+        raise HTTPException(status_code=409, detail=_DUPLICATE_ACTIVE_TOPIC_DETAIL) from None
+    except OperationalError as exc:
+        db.rollback()
+        orig_args = getattr(exc.orig, "args", None) or ()
+        code = orig_args[0] if orig_args else None
+        if code in _MYSQL_DEADLOCK_CODES:
+            raise HTTPException(status_code=409, detail=_REGISTER_DEADLOCK_DETAIL) from None
+        raise
+
+    if result.rowcount == 0:
+        # Không phải check-then-act: UPDATE đã tự quyết định thất bại; đọc lại
+        # CHỈ để chọn đúng thông điệp lỗi cho người dùng (UC1.2 E1).
+        db.expire_all()
+        topic = db.get(DeTai, topic_id)
+        if topic is None:
+            raise HTTPException(status_code=404, detail=_TOPIC_NOT_FOUND_DETAIL)
+        cohort = db.get(DotDoAn, topic.dot_do_an_id)
+        if cohort is not None and cohort.trang_thai != DANG_MO:
+            raise HTTPException(status_code=409, detail=_COHORT_CLOSED_DETAIL)
+        raise HTTPException(status_code=409, detail=_REGISTER_CONFLICT_DETAIL)
+
+    return _to_out(db, user, _get_or_404(db, topic_id))

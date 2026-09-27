@@ -1,12 +1,13 @@
-import { Button, Card, Input, Select, Table, Tag } from 'antd'
+import { App as AntApp, Button, Card, Input, Popconfirm, Select, Table, Tag } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 
+import { getErrorMessage } from '../../api/client'
 import { useLecturers } from '../accounts/api'
 import { useCohorts } from '../cohorts/api'
 import { useAuthStore } from '../../stores/auth'
 import { LINH_VUC_OPTIONS, TRANG_THAI_DE_TAI } from './constants'
-import { useTopics } from './api'
+import { useRegisterTopic, useTopics } from './api'
 import type { PersonRef, TopicListItem } from './api'
 
 const { Search } = Input
@@ -31,6 +32,8 @@ export default function TopicListPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
+  const { message } = AntApp.useApp()
+  const registerMutation = useRegisterTopic()
 
   const phamVi = searchParams.get('pham_vi') === 'cua_toi' ? 'cua_toi' : 'tat_ca'
   const dotDoAnId = searchParams.get('dot_do_an_id') ?? undefined
@@ -74,6 +77,16 @@ export default function TopicListPage() {
 
   const canPropose = user?.vai_tro === 'SINH_VIEN' || user?.vai_tro === 'GIANG_VIEN'
 
+  const handleRegister = async (record: TopicListItem) => {
+    try {
+      await registerMutation.mutateAsync(record.id)
+      message.success('Đăng ký thành công — đề tài đang chờ Bộ môn duyệt')
+      navigate(`/de-tai/${record.id}`)
+    } catch (err) {
+      message.error(getErrorMessage(err))
+    }
+  }
+
   const columns: ColumnsType<TopicListItem> = [
     {
       title: 'Tên đề tài',
@@ -115,9 +128,22 @@ export default function TopicListPage() {
       title: 'Hành động',
       key: 'hanh_dong',
       render: (_value, record) => (
-        <Button size="small" onClick={() => navigate(`/de-tai/${record.id}`)}>
-          Xem
-        </Button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Button size="small" onClick={() => navigate(`/de-tai/${record.id}`)}>
+            Xem
+          </Button>
+          {record.co_the_dang_ky && (
+            <Popconfirm
+              title="Đăng ký đề tài này?"
+              description="Sau khi đăng ký, đề tài chuyển sang Chờ duyệt để Bộ môn xác nhận và phân công GVHD."
+              onConfirm={() => handleRegister(record)}
+            >
+              <Button size="small" type="primary" loading={registerMutation.isPending}>
+                Đăng ký
+              </Button>
+            </Popconfirm>
+          )}
+        </div>
       ),
     },
   ]

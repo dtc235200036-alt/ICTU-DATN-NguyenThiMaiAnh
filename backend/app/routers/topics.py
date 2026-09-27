@@ -118,3 +118,13 @@ def get_topic(
     db: Session = Depends(get_db),
 ) -> TopicOut:
     return topics_service.get_topic(db, user, topic_id)
+
+
+@router.post("/{topic_id}/register", response_model=TopicOut)
+def register_topic(
+    topic_id: int,
+    user: CurrentUser = Depends(require_role(VaiTro.SINH_VIEN)),
+    db: Session = Depends(get_db),
+) -> TopicOut:
+    """UC1.2: chỉ SV đăng ký đề tài GV đã đề xuất còn trống — T-02-31."""
+    return topics_service.register_topic(db, user, topic_id)

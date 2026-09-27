@@ -19,6 +19,7 @@ export interface CohortRef {
 export interface QuyenOut {
   sua: boolean
   gui: boolean
+  dang_ky: boolean
 }
 
 export type TitleCheckStatus = 'HOAN_TAT' | 'LOI'
@@ -75,6 +76,7 @@ export interface TopicListItem {
   nguoi_de_xuat: PersonRef
   giang_vien_huong_dan: PersonRef | null
   sinh_vien: PersonRef | null
+  co_the_dang_ky: boolean
 }
 
 export interface PageResult<T> {
@@ -184,6 +186,21 @@ export function useSubmitTopic() {
   return useMutation({
     mutationFn: async (id: number) => {
       const { data } = await api.post<TopicOut>(`/topics/${id}/submit`)
+      return data
+    },
+    onSuccess: (_data, id) => {
+      void queryClient.invalidateQueries({ queryKey: [TOPIC_KEY, id] })
+      void queryClient.invalidateQueries({ queryKey: [TOPIC_KEY] })
+    },
+  })
+}
+
+// UC1.2: SV đăng ký một đề tài GV đã đề xuất còn trống (MH-05/MH-06 chi tiết).
+export function useRegisterTopic() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const { data } = await api.post<TopicOut>(`/topics/${id}/register`)
       return data
     },
     onSuccess: (_data, id) => {

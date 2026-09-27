@@ -1,4 +1,15 @@
-import { App as AntApp, Alert, Button, Card, Descriptions, Result, Skeleton, Table, Tag } from 'antd'
+import {
+  App as AntApp,
+  Alert,
+  Button,
+  Card,
+  Descriptions,
+  Popconfirm,
+  Result,
+  Skeleton,
+  Table,
+  Tag,
+} from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { AxiosError } from 'axios'
 import { useNavigate, useParams } from 'react-router'
@@ -6,7 +17,7 @@ import { useNavigate, useParams } from 'react-router'
 import { getErrorMessage } from '../../api/client'
 import ForbiddenPage from '../auth/ForbiddenPage'
 import { TRANG_THAI_DE_TAI } from './constants'
-import { useSubmitTopic, useTopic } from './api'
+import { useRegisterTopic, useSubmitTopic, useTopic } from './api'
 import type { SavedChiTietTrungLap } from './api'
 
 const chiTietColumns: ColumnsType<SavedChiTietTrungLap> = [
@@ -35,6 +46,7 @@ export default function TopicDetailPage() {
 
   const { data: topic, isLoading, isError, error } = useTopic(topicId)
   const submitMutation = useSubmitTopic()
+  const registerMutation = useRegisterTopic()
 
   if (isError) {
     // T-02-23: server trả 403 khi người xem không phải chủ sở hữu/Bộ môn và đề
@@ -68,6 +80,16 @@ export default function TopicDetailPage() {
     try {
       await submitMutation.mutateAsync(topicId)
       message.success('Đã gửi đề xuất đề tài')
+    } catch (err) {
+      message.error(getErrorMessage(err))
+    }
+  }
+
+  const handleRegister = async () => {
+    if (topicId === undefined) return
+    try {
+      await registerMutation.mutateAsync(topicId)
+      message.success('Đăng ký thành công — đề tài đang chờ Bộ môn duyệt')
     } catch (err) {
       message.error(getErrorMessage(err))
     }
@@ -154,6 +176,17 @@ export default function TopicDetailPage() {
           <Button type="primary" loading={submitMutation.isPending} onClick={handleSubmit}>
             Gửi đề xuất
           </Button>
+        )}
+        {topic.quyen.dang_ky && (
+          <Popconfirm
+            title="Đăng ký đề tài này?"
+            description="Sau khi đăng ký, đề tài chuyển sang Chờ duyệt để Bộ môn xác nhận và phân công GVHD."
+            onConfirm={handleRegister}
+          >
+            <Button type="primary" loading={registerMutation.isPending}>
+              Đăng ký
+            </Button>
+          </Popconfirm>
         )}
       </div>
     </Card>

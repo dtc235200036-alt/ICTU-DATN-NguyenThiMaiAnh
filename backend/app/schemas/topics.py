@@ -43,6 +43,7 @@ class CohortRef(BaseModel):
 class QuyenOut(BaseModel):
     sua: bool
     gui: bool
+    dang_ky: bool = False
 
 
 class TitleCheckRequest(NFCModel):
@@ -117,6 +118,7 @@ class TopicListItem(BaseModel):
     nguoi_de_xuat: PersonRef
     giang_vien_huong_dan: PersonRef | None = None
     sinh_vien: PersonRef | None = None
+    co_the_dang_ky: bool = False
 
 
 @dataclass
