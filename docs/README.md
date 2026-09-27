@@ -29,7 +29,7 @@ docs/
 │   ├── mockup/                        Prototype HTML/CSS tĩnh + PNG (D-11)
 │   ├── 01-so-do-lop-thuc-the.md        §3.1 Sơ đồ lớp thực thể
 │   ├── 02-thiet-ke-csdl.md             §3.2 Thiết kế CSDL
-│   ├── 03-kien-truc.md                 §3.3 Kiến trúc SOA (plan 01-05)
+│   ├── 03-kien-truc-he-thong.md        §3.3 Kiến trúc SOA (plan 01-05)
 │   └── 04-thiet-ke-giao-dien.md        §3.4 Thiết kế giao diện (mockup)
 └── (tai-lieu-goc/ nằm ở gốc repo, không phải trong docs/ — xem README riêng của nó)
 ```

@@ -30,7 +30,7 @@ Bảng này giúp GVHD kiểm tra tiến độ theo đúng tiêu chí PI của �
 | ANLS-05 | Sơ đồ UC tổng quát 5 UC chính + đặc tả từng UC | 05-so-do-use-case.md, 06..11-dac-ta-uc\*.md | 01-02, 01-04 |
 | DSGN-01 | Sơ đồ lớp thực thể | 01-so-do-lop-thuc-the.md, so-do-lop/lop-thuc-the.puml | 01-02, 01-05 |
 | DSGN-02 | Sơ đồ CSDL khớp với sơ đồ lớp thực thể | 02-thiet-ke-csdl.md, csdl/erd.puml | 01-02, 01-05 |
-| DSGN-03 | Thiết kế kiến trúc SOA bằng UML | 03-kien-truc.md | 01-05 |
+| DSGN-03 | Thiết kế kiến trúc SOA bằng UML | 03-kien-truc-he-thong.md | 01-05 |
 | DSGN-04 | Mockup giao diện HTML prototype | 04-thiet-ke-giao-dien.md, mockup/ | 01-02, 01-06 |
 
 ## 3. Ma trận truy vết chức năng
