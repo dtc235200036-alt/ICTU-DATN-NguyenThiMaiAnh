@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
 
 import { api } from '../../api/client'
 
@@ -86,6 +87,16 @@ export function useTopic(id: number | undefined) {
       return data
     },
     enabled: id !== undefined,
+    // T-02-23: 403/404 là kết quả cuối cùng của server (không phải lỗi mạng
+    // tạm thời) — không retry, để TopicDetailPage chuyển sang ForbiddenPage
+    // ngay thay vì kẹt ở Skeleton qua nhiều lần thử lại.
+    retry: (failureCount, error) => {
+      const status = error instanceof AxiosError ? error.response?.status : undefined
+      if (status !== undefined && status < 500) {
+        return false
+      }
+      return failureCount < 3
+    },
   })
 }
 

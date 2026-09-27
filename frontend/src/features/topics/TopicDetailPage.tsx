@@ -1,8 +1,10 @@
-import { App as AntApp, Alert, Button, Card, Descriptions, Skeleton, Table, Tag } from 'antd'
+import { App as AntApp, Alert, Button, Card, Descriptions, Result, Skeleton, Table, Tag } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
+import { AxiosError } from 'axios'
 import { useNavigate, useParams } from 'react-router'
 
 import { getErrorMessage } from '../../api/client'
+import ForbiddenPage from '../auth/ForbiddenPage'
 import { TRANG_THAI_DE_TAI } from './constants'
 import { useSubmitTopic, useTopic } from './api'
 import type { SavedChiTietTrungLap } from './api'
@@ -31,8 +33,22 @@ export default function TopicDetailPage() {
   const navigate = useNavigate()
   const { message } = AntApp.useApp()
 
-  const { data: topic, isLoading } = useTopic(topicId)
+  const { data: topic, isLoading, isError, error } = useTopic(topicId)
   const submitMutation = useSubmitTopic()
+
+  if (isError) {
+    // T-02-23: server trả 403 khi người xem không phải chủ sở hữu/Bộ môn và đề
+    // tài chưa đủ điều kiện xem công khai — không được kẹt ở Skeleton mãi mãi.
+    const status = error instanceof AxiosError ? error.response?.status : undefined
+    if (status === 403) {
+      return <ForbiddenPage />
+    }
+    return (
+      <Card>
+        <Result status="error" title="Không tải được đề tài" subTitle={getErrorMessage(error)} />
+      </Card>
+    )
+  }
 
   if (isLoading || !topic) {
     return (
