@@ -40,7 +40,7 @@ Mỗi mục lớn của quyển báo cáo là **một file Markdown**, để cu�
 
 | Loại | Mẫu mã | Ví dụ | Ghi chú |
 |---|---|---|---|
-| Yêu cầu chức năng | `FR-<module>-NN` | `FR-DT-01` | module ∈ {DT, DC (đề cương), TD (tiến độ), BV (bảo vệ), KHO, TB (bảo vệ hội đồng), AI} |
+| Yêu cầu chức năng | `FR-<module>-NN` | `FR-DT-01` | module ∈ {TK (tài khoản/phân quyền), DT (đề tài), DC (đề cương), TD (tiến độ), BV (bảo vệ), KHO, TB (thông báo), AI} |
 | Yêu cầu phi chức năng | `NFR-NN` | `NFR-01` | Đánh số liên tục, không theo module |
 | Use case con | `UCx.y` | `UC1.1` | x = UC chính (1..5), y = UC con; `UC0.y` dành cho chức năng chung (vd. UC0.6 kiểm tra trùng lặp tên) |
 | Bước quy trình BPMN | `<TB|AS>-<module>-NN` | `TB-DT-02`, `AS-DT-01` | TB = TO-BE, AS = AS-IS; NN liên tục trong một trang sơ đồ |
