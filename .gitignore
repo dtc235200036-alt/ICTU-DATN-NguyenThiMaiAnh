@@ -6,3 +6,8 @@ __pycache__/
 .gsd/
 .planning/state.json
 .planning/milestone.lock
+deploy/certs/*.crt
+deploy/certs/*.key
+frontend/dist/
+.pytest_cache/
+*.tsbuildinfo

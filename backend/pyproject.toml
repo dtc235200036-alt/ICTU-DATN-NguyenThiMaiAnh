@@ -1,0 +1,32 @@
+[project]
+name = "ntma-backend"
+version = "0.1.0"
+description = "NTMA Web API - He thong quan ly do an sinh vien, Khoa CNTT ICTU"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.141",
+    "uvicorn[standard]>=0.54",
+    "sqlalchemy==2.0.54",
+    "pymysql[rsa]>=1.2",
+    "alembic>=1.20",
+    "pyjwt>=2.15",
+    "bcrypt>=5.0",
+    "pydantic-settings>=2.15",
+    "faker>=40.39",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4,<9",
+    "httpx>=0.28",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
