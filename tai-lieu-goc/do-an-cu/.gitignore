@@ -1,0 +1,14 @@
+# Đồ án/khóa luận các khóa trước chứa dữ liệu cá nhân của bên thứ ba (tên,
+# mã sinh viên, có thể cả nội dung có bản quyền của SV/GVHD khác) — không
+# phải dữ liệu của người thực hiện đồ án này. Vì vậy các file nhị phân
+# (PDF/DOCX/DOC/ZIP) trong thư mục này KHÔNG được commit vào git theo mặc
+# định; chỉ dòng "sổ đăng ký tệp" (tên file, khóa, băm SHA-256) trong
+# tai-lieu-goc/README.md được commit để vẫn truy vết được đã thu thập gì.
+#
+# Muốn commit các file này (chỉ nên làm nếu repo chắc chắn KHÔNG có remote
+# công khai), xóa file .gitignore này rồi `git add` lại thư mục.
+
+*.pdf
+*.docx
+*.doc
+*.zip
