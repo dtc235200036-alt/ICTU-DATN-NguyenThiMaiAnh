@@ -1,0 +1,39 @@
+@startuml seq-check-title
+autonumber
+
+actor "Sinh viên / Giảng viên" as User
+participant "Client React" as Client
+participant "Apache" as Apache
+participant "Web API" as WebAPI
+participant "Dịch vụ AI" as AIService
+database "thesis_core" as DBCore
+
+User -> Client : Nhập tên đề tài (UC1.1, MH-06)
+Client -> Apache : POST /api/de-tai (JWT)
+Apache -> WebAPI : proxy_pass /api/*
+
+WebAPI -> WebAPI : Kiểm tra vai trò (NFR-04)\nChuẩn hóa NFC tên đề tài (NFR-14)
+
+WebAPI -> AIService : POST /check-title\nheader X-API-Key\nbody {text, top_k}
+
+alt Dịch vụ AI phản hồi trong NFR-08 (<= 5 giây)
+  AIService -> AIService : Chuẩn hóa NFC, tách từ,\ntính embedding tên đề tài
+  AIService -> AIService : So sánh FAISS (chỉ mục\ntên đề tài, tính sẵn lúc ingest)
+  AIService --> WebAPI : 200 {matches: [{de_tai_id, ten, ty_le}], ...}
+  WebAPI -> DBCore : INSERT ket_qua_kiem_tra_trung_lap\n(loai=TEN_DE_TAI, trang_thai=HOAN_TAT)
+else Timeout hoặc lỗi (UC0.6 — E1/E2)
+  AIService --> WebAPI : (không phản hồi / lỗi / 401 thiếu API key)
+  WebAPI -> DBCore : INSERT ket_qua_kiem_tra_trung_lap\n(trang_thai=LOI, ghi "chưa kiểm tra")
+  note right of WebAPI
+    Không chặn đề xuất đề tài — UC1.1 tiếp tục
+    bình thường, Bộ môn thấy trạng thái "chưa
+    kiểm tra" khi duyệt (UC1.3).
+  end note
+end
+
+WebAPI -> DBCore : INSERT de_tai (trang_thai=CHO_DUYET)
+WebAPI --> Apache : 201 {de_tai, canh_bao: [...]}
+Apache --> Client : 201
+Client --> User : Hiển thị danh sách đề tài tương tự\nkèm tỷ lệ % (nếu có, MH-06)
+
+@enduml

@@ -1,0 +1,50 @@
+@startuml deployment
+skinparam linetype ortho
+
+node "Máy người dùng" as UserMachine {
+  component "Trình duyệt\n(Chrome/Edge, 1440px)" as Browser
+}
+
+node "Máy chủ Linux" as Server {
+
+  component "Apache HTTP Server" as Apache {
+    portin "443 HTTPS" as P443
+    portin "80 HTTP" as P80
+  }
+
+  component "uvicorn — Web API" as WebAPI
+  component "uvicorn — Dịch vụ AI" as AIService
+
+  database "MySQL 8" as MySQL {
+    folder "thesis_core" as SchemaCore
+    folder "thesis_ai" as SchemaAI
+  }
+
+  folder "Thư mục lưu trữ tải lên\n(ngoài DocumentRoot)" as UploadDir
+  folder "Client build tĩnh\n(DocumentRoot)" as ClientBuild
+}
+
+Browser --> P443 : HTTPS
+P80 --> P443 : "Redirect permanent (NFR-01)"
+Apache --> ClientBuild : "DocumentRoot"
+Apache --> WebAPI : "ProxyPass /api\n127.0.0.1:8001"
+WebAPI --> MySQL : "3306"
+WebAPI --> UploadDir
+WebAPI --> AIService : "127.0.0.1:8002\nREST nội bộ, X-API-Key"
+AIService --> MySQL : "3306"
+
+note right of AIService
+  uvicorn AI service bind 127.0.0.1:8002 —
+  không có ProxyPass nào của Apache trỏ tới
+  cổng này, không thể truy cập từ ngoài máy chủ
+  (AISV-01, NFR-07).
+end note
+
+note right of MySQL
+  Một instance MySQL, hai schema tách biệt:
+  thesis_core (Web API sở hữu) và thesis_ai
+  (Dịch vụ AI sở hữu). Không có FK băng qua
+  hai schema.
+end note
+
+@enduml

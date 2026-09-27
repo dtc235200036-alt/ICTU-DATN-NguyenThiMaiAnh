@@ -1,0 +1,85 @@
+@startuml component
+skinparam componentStyle rectangle
+left to right direction
+
+component "Client React\n(build tĩnh)" as Client
+
+component "Apache HTTP Server\n(mod_ssl, mod_proxy)" as Apache
+
+package "Web API (FastAPI)" {
+  component "Xác thực & phân quyền" as WA_Auth
+  component "Đề tài" as WA_DeTai
+  component "Đề cương" as WA_DeCuong
+  component "Tiến độ" as WA_TienDo
+  component "Bảo vệ" as WA_BaoVe
+  component "Kho" as WA_Kho
+  component "Thông báo" as WA_ThongBao
+  component "Lưu trữ tệp & trích xuất văn bản" as WA_Storage
+  component "AI client" as WA_AIClient
+}
+
+package "Dịch vụ AI kiểm tra trùng lặp (FastAPI)" {
+  component "Chuẩn hóa NFC & tách từ" as AI_NFC
+  component "Lọc phần mẫu chung & chia đoạn" as AI_Filter
+  component "Mô hình embedding" as AI_Embed
+  component "Chỉ mục vector (FAISS)" as AI_Index
+
+  () "/ingest" as P_ingest
+  () "/check-title" as P_checktitle
+  () "/check-document" as P_checkdoc
+  () "/reindex" as P_reindex
+  () "/health" as P_health
+
+  P_ingest -- AI_Filter
+  P_checktitle -- AI_Embed
+  P_checkdoc -- AI_Filter
+  P_reindex -- AI_Index
+  P_health -- AI_Index
+  AI_NFC -- AI_Filter
+  AI_Embed -- AI_Index
+}
+
+database "MySQL\nthesis_core" as DB_core
+database "MySQL\nthesis_ai" as DB_ai
+artifact "Kho tệp tải lên" as FileStore
+
+Client --> Apache : HTTPS (443)
+Apache --> WA_Auth : "/api/* (REST + JWT)"
+
+WA_AIClient ..> P_ingest : "REST nội bộ\n(X-API-Key)"
+WA_AIClient ..> P_checktitle : "REST nội bộ\n(X-API-Key, đồng bộ)"
+WA_AIClient ..> P_checkdoc : "REST nội bộ\n(X-API-Key, bất đồng bộ)"
+WA_AIClient ..> P_reindex : "REST nội bộ\n(X-API-Key)"
+
+WA_DeTai --> WA_AIClient
+WA_DeCuong --> WA_AIClient
+WA_BaoVe --> WA_AIClient
+WA_Kho --> WA_AIClient
+WA_DeCuong --> WA_Storage
+WA_BaoVe --> WA_Storage
+WA_Storage --> FileStore : "lưu/đọc file DOCX/PDF"
+
+WA_Auth --> DB_core : "SQLAlchemy"
+WA_DeTai --> DB_core
+WA_DeCuong --> DB_core
+WA_TienDo --> DB_core
+WA_BaoVe --> DB_core
+WA_Kho --> DB_core
+WA_ThongBao --> DB_core
+
+AI_Embed --> DB_ai : "SQLAlchemy (embedding, chunk)"
+AI_Index --> DB_ai : "nạp lại lúc khởi động"
+
+note bottom of Apache
+  Apache chỉ có route tới build tĩnh của Client
+  và "/api/*" sang Web API. Không có route công
+  khai nào tới Dịch vụ AI (AISV-01).
+end note
+
+note bottom of WA_AIClient
+  Web API là client REST nội bộ duy nhất của
+  Dịch vụ AI. Không có kết nối trực tiếp nào
+  từ Apache hoặc Client tới Dịch vụ AI.
+end note
+
+@enduml

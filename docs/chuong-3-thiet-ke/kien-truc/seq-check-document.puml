@@ -1,0 +1,64 @@
+@startuml seq-check-document
+autonumber
+
+actor "Sinh viên" as User
+participant "Client React" as Client
+participant "Apache" as Apache
+participant "Web API" as WebAPI
+participant "Web API\n(tác vụ nền)" as BgTask
+participant "Dịch vụ AI" as AIService
+database "thesis_core" as DBCore
+
+User -> Client : Chọn file DOCX/PDF và nộp\n(UC2.1 đề cương / UC4.1 báo cáo cuối)
+Client -> Apache : POST /api/.../nop (multipart, JWT)
+Apache -> WebAPI : proxy_pass /api/*
+
+WebAPI -> WebAPI : Kiểm tra magic bytes (DOCX/PDF)\nvà dung lượng <= 20MB (NFR-06)
+WebAPI -> WebAPI : Lưu file với tên do server sinh\nTrích xuất văn bản, chuẩn hóa NFC
+WebAPI -> DBCore : INSERT tai_lieu_do_an (phiên bản mới)
+WebAPI -> DBCore : INSERT ket_qua_kiem_tra_trung_lap\n(loai=TAI_LIEU, trang_thai=DANG_KIEM_TRA,\ngắn với tai_lieu_do_an_id vừa tạo)
+WebAPI --> Apache : 202 {kiem_tra_id, trang_thai: "DANG_KIEM_TRA"}
+Apache --> Client : 202
+Client --> User : "Đang kiểm tra trùng lặp..."
+
+WebAPI -> BgTask : Kích hoạt tác vụ nền (fire-and-forget)
+
+BgTask -> AIService : POST /check-document\nheader X-API-Key\nbody {ref_id, text}
+
+alt Dịch vụ AI xử lý thành công trong NFR-09 (<= 30 giây)
+  AIService -> AIService : Trích văn bản đã nhận, loại bỏ\nphần mẫu chung, chia đoạn
+  AIService -> AIService : Embedding từng đoạn, so sánh\nFAISS với toàn bộ kho, tổng hợp
+  AIService --> BgTask : 200 {ty_le_tong, do_an_trung: [...],\nchi_tiet: [{doan_nguon, doan_trung, vi_tri, ty_le}]}
+  BgTask -> DBCore : UPDATE ket_qua_kiem_tra_trung_lap\n(trang_thai=HOAN_TAT, ty_le_tong=...)
+  BgTask -> DBCore : INSERT chi_tiet_trung_lap (nhiều dòng)
+  BgTask -> AIService : POST /ingest {id, type=DOCUMENT, text}\n(sau khi GVHD/Bộ môn duyệt/chốt)
+else Timeout hoặc lỗi nội bộ (UC0.7 — E1/E2)
+  AIService --> BgTask : (timeout / lỗi trích xuất / lỗi nội bộ)
+  BgTask -> DBCore : UPDATE ket_qua_kiem_tra_trung_lap\n(trang_thai=LOI)
+  note right of BgTask
+    Không chặn quy trình duyệt — GVHD/Bộ môn vẫn
+    xem tài liệu gốc và có thể yêu cầu kiểm tra
+    lại (LOI -> DANG_KIEM_TRA, §3.1.4).
+  end note
+end
+
+loop Client polling
+  Client -> Apache : GET /api/.../kiem-tra/{id} (JWT)
+  Apache -> WebAPI : proxy_pass
+  WebAPI -> DBCore : SELECT ket_qua_kiem_tra_trung_lap WHERE id
+  WebAPI --> Client : {trang_thai: DANG_KIEM_TRA | HOAN_TAT | LOI}
+end
+Client --> User : Hiển thị tỷ lệ tổng, đồ án trùng,\nđoạn trùng cạnh đoạn nguồn (MH-09, MH-14)
+
+note over DBCore
+  Bất biến phiên bản: mỗi tai_lieu_do_an (phiên bản)
+  có ĐÚNG MỘT ket_qua_kiem_tra_trung_lap riêng
+  (UNIQUE(tai_lieu_do_an_id), §3.2.5). Khi SV nộp
+  phiên bản mới trong lúc phiên bản cũ còn
+  DANG_KIEM_TRA, hai bản ghi độc lập được tạo —
+  kết quả trả về muộn của phiên bản cũ hơn không
+  bao giờ ghi đè kết quả của phiên bản mới hơn;
+  UI luôn hiển thị kết quả của phiên bản mới nhất.
+end note
+
+@enduml

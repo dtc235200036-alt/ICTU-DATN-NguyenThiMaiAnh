@@ -1,0 +1,94 @@
+## 3.3. Thiết kế kiến trúc hệ thống
+
+> **Mã PI:** 2.2 — **Yêu cầu:** DSGN-03
+
+### 3.3.1. Mô hình SOA tổng quan
+
+Hệ thống gồm **ba thành phần triển khai độc lập** (three separately deployable components), đúng nghĩa kiến trúc hướng dịch vụ (SOA) chứ không phải một khối đơn (monolith) chia thư mục:
+
+1. **Client React** — SPA build tĩnh, chỉ gọi Web API, không bao giờ biết địa chỉ hay khóa của Dịch vụ AI.
+2. **Web API (FastAPI)** — sở hữu toàn bộ 5 UC nghiệp vụ chính, sở hữu schema `thesis_core`, sở hữu lưu trữ tệp, và là **client REST duy nhất** của Dịch vụ AI.
+3. **Dịch vụ AI kiểm tra trùng lặp (FastAPI)** — sở hữu schema `thesis_ai` riêng, chỉ nói REST, không có route công khai qua Apache.
+
+Cả ba đứng sau **Apache**, nhưng Apache chỉ có route tới build tĩnh của Client và tới `/api/*` (Web API). **Dịch vụ AI hoàn toàn nội bộ**: không có `ProxyPass` nào của Apache trỏ tới cổng của nó, và uvicorn của nó chỉ bind vào `127.0.0.1` — đây là lý do kiến trúc thỏa AISV-01/NFR-07 mà không cần thêm tường lửa: đơn giản là không có đường vào từ ngoài máy chủ. Việc tách dịch vụ AI khỏi Web API (thay vì gọi hàm nội bộ trong cùng tiến trình) phục vụ đúng yêu cầu chấm điểm PI 2.2 — chứng minh khả năng thiết kế hệ thống nhiều dịch vụ với ranh giới sở hữu dữ liệu rõ ràng (schema ownership, §3.2.1) — và tách rời được vòng đời phát triển: nghiệp vụ CRUD (Web API) và mô hình embedding/chỉ mục (Dịch vụ AI) có thể xây dựng, kiểm thử và triển khai độc lập nhau (Phase 2–4).
+
+### 3.3.2. Sơ đồ thành phần
+
+![Hình 3.7 – Sơ đồ thành phần](kien-truc/component.png)
+
+Web API được chia thành các thành phần con theo module nghiệp vụ (Xác thực & phân quyền, Đề tài, Đề cương, Tiến độ, Bảo vệ, Kho, Thông báo, Lưu trữ tệp & trích xuất văn bản) cộng một thành phần **AI client** tập trung mọi lệnh gọi ra Dịch vụ AI — mọi router nghiệp vụ cần kiểm tra trùng lặp đều đi qua thành phần này, không tự mở kết nối HTTP riêng. Dịch vụ AI được chia thành 4 thành phần con (Chuẩn hóa NFC & tách từ, Lọc phần mẫu chung & chia đoạn, Mô hình embedding, Chỉ mục vector FAISS) sau 5 giao diện cung cấp `/ingest`, `/check-title`, `/check-document`, `/reindex`, `/health`.
+
+### 3.3.3. Sơ đồ triển khai
+
+![Hình 3.8 – Sơ đồ triển khai](kien-truc/deployment.png)
+
+Một máy chủ Linux chạy cả ba tiến trình: Apache (443/80), uvicorn Web API (127.0.0.1:8001), uvicorn Dịch vụ AI (127.0.0.1:8002), và MySQL 8 (3306) với hai schema `thesis_core`/`thesis_ai`. Thư mục lưu trữ tệp tải lên nằm **ngoài** `DocumentRoot` của Apache (không thể tải trực tiếp qua URL tĩnh — chỉ Web API đọc/ghi). Client build tĩnh phục vụ trực tiếp từ `DocumentRoot`.
+
+### 3.3.4. Giao tiếp giữa các thành phần
+
+| Kênh | Giao thức | Xác thực | Dữ liệu trao đổi |
+|---|---|---|---|
+| Trình duyệt ↔ Apache | HTTPS (443), HTTP (80) chỉ để redirect | — (TLS) | HTML/JS/CSS tĩnh, JSON qua `/api/*` |
+| Apache ↔ Web API | HTTP nội bộ (proxy_pass tới 127.0.0.1:8001) | JWT người dùng (Bearer, trong Authorization header, xác thực ở Web API) | REST JSON, multipart (upload file) |
+| Web API ↔ Dịch vụ AI | HTTP nội bộ (httpx tới 127.0.0.1:8002) | API key nội bộ tĩnh (header `X-API-Key`) — **JWT người dùng dừng lại ở Web API, không bao giờ được chuyển tiếp** | REST JSON, chỉ văn bản (text đã trích xuất) — không bao giờ gửi file |
+| Web API ↔ `thesis_core` | SQLAlchemy ORM qua driver MySQL (127.0.0.1:3306) | Tài khoản DB riêng của Web API | SQL |
+| Dịch vụ AI ↔ `thesis_ai` | SQLAlchemy ORM qua driver MySQL (127.0.0.1:3306) | Tài khoản DB riêng của Dịch vụ AI | SQL |
+| Web API ↔ lưu trữ tệp | Ghi/đọc file hệ thống (local disk) | Quyền hệ điều hành của tiến trình Web API | Byte nhị phân DOCX/PDF |
+
+### 3.3.5. Hợp đồng API dịch vụ AI
+
+Toàn bộ payload chỉ chứa văn bản đã trích xuất — Dịch vụ AI không bao giờ nhận hay trả về file nhị phân (Anti-Pattern 2, `research/ARCHITECTURE.md`).
+
+| Endpoint | Phương thức | Mục đích | Đầu vào | Đầu ra |
+|---|---|---|---|---|
+| `/ingest` | POST | Đẩy một đề tài hoặc tài liệu mới vào corpus (push-on-write) | `{id, type: TOPIC\|DOCUMENT, text}` | `{chunk_count, indexed: true}` |
+| `/check-title` | POST | So sánh ngữ nghĩa tên đề tài (đồng bộ, UC0.6) | `{text, top_k}` | `{matches: [{ref_id, ty_le}], ...}` |
+| `/check-document` | POST | So sánh nội dung tài liệu, phát hiện đoạn trùng (bất đồng bộ về phía Web API, UC0.7) | `{ref_id, text}` | `{ty_le_tong, do_an_trung: [...], chi_tiet: [{doan_nguon, doan_trung, vi_tri, ty_le}]}` |
+| `/reindex` | POST | Nạp lại/xây lại chỉ mục hàng loạt (seed ban đầu hoặc đổi mô hình embedding) | `{items: [{id, type, text}, ...]}` hoặc rỗng (xây lại từ `thesis_ai` hiện có) | `{indexed_count}` |
+| `/health` | GET | Kiểm tra tình trạng dịch vụ (readiness của mô hình + chỉ mục) | — | `{status, model_loaded, index_size}` |
+
+Mọi endpoint (trừ `/health`) yêu cầu header `X-API-Key` hợp lệ; thiếu hoặc sai trả về `401` (NFR-07).
+
+### 3.3.6. Nhóm API của Web API
+
+Bảng dưới liệt kê hình dạng ở mức nhóm route theo từng UC — đường dẫn chính xác là quyết định của Phase 2 khi hiện thực FastAPI router:
+
+| Nhóm | UC | Mô tả |
+|---|---|---|
+| auth | UC0.1 | Đăng nhập, làm mới phiên, đăng xuất |
+| accounts | UC0.2 | Bộ môn quản lý tài khoản SV/GV |
+| cohorts (đợt đồ án) | UC0.3 | Bộ môn mở/đóng đợt |
+| thresholds (ngưỡng) | UC0.4 | Bộ môn cấu hình ngưỡng cảnh báo |
+| notifications | UC0.5 | Danh sách thông báo, đánh dấu đã đọc |
+| topics (đề tài) | UC1.1–UC1.4 | Đề xuất, đăng ký, duyệt/phân công, danh sách đề tài |
+| outlines (đề cương) | UC2.1–UC2.3 | Nộp, duyệt/yêu cầu sửa, lịch sử phiên bản |
+| progress (tiến độ) | UC3.1–UC3.4 | Mốc tiến độ, nộp báo cáo, nhận xét, dashboard |
+| defense (bảo vệ) | UC4.1–UC4.5 | Nộp báo cáo cuối, hội đồng, lịch, chấm điểm, chốt kết quả |
+| archive (kho) | UC5.1–UC5.4 | Tìm kiếm, quản lý bản ghi, import |
+
+### 3.3.7. Luồng kiểm tra trùng lặp (D-07)
+
+Hai luồng AI có đặc tính hiệu năng khác nhau nên dùng hai mẫu tương tác khác nhau (Pattern 1, `research/ARCHITECTURE.md`):
+
+**Kiểm tra tên đề tài — đồng bộ** (`/check-title`, chỉ so sánh một chuỗi ngắn với chỉ mục trong bộ nhớ, ≤ 5 giây theo NFR-08 nên chờ đồng bộ không ảnh hưởng trải nghiệm):
+
+![Hình 3.9 – Sơ đồ tuần tự kiểm tra trùng tên đề tài (đồng bộ)](kien-truc/seq-check-title.png)
+
+**Kiểm tra tài liệu — bất đồng bộ** (`/check-document`, phải trích xuất + chia đoạn + embedding nhiều đoạn của một file, có thể tới 30 giây theo NFR-09 — nếu chờ đồng bộ sẽ chặn request nộp bài, vi phạm NFR-10):
+
+![Hình 3.10 – Sơ đồ tuần tự kiểm tra trùng lặp tài liệu (bất đồng bộ)](kien-truc/seq-check-document.png)
+
+Cả hai sơ đồ đều thể hiện: header `X-API-Key` trên mọi lệnh gọi Web API → Dịch vụ AI (JWT người dùng dừng ở Web API); nhánh `alt` xử lý khi Dịch vụ AI không phản hồi hoặc lỗi (không chặn nghiệp vụ chính); và với luồng bất đồng bộ — trạng thái `202 Accepted` trả về ngay, client polling trạng thái, và bất biến phiên bản (mỗi `tai_lieu_do_an` có đúng một `ket_qua_kiem_tra_trung_lap`, §3.2.5) đảm bảo kết quả trả về muộn của một phiên bản cũ không bao giờ ghi đè kết quả của phiên bản mới hơn.
+
+### 3.3.8. Quyết định kiến trúc
+
+| Quyết định | Lý do |
+|---|---|
+| **Schema ownership** — `thesis_core` (Web API) và `thesis_ai` (Dịch vụ AI) là hai schema tách biệt, không FK băng qua | Giữ ranh giới dịch vụ là thật; đổi schema một bên không âm thầm phá vỡ bên kia (Anti-Pattern 1, `research/ARCHITECTURE.md`) |
+| **Push-on-write qua `/ingest`**, không để Dịch vụ AI tự đọc `thesis_core` | Dịch vụ AI không cần biết schema hay có quyền truy cập CSDL của Web API (Pattern 2) |
+| **JWT dừng ở Web API**, Web API ↔ Dịch vụ AI dùng API key nội bộ riêng | Dịch vụ AI không có khái niệm người dùng/vai trò; giảm bán kính ảnh hưởng nếu API key nội bộ rò rỉ so với JWT người dùng (Anti-Pattern 3) |
+| **Embedding tính sẵn lúc `/ingest`**, không tính lại khi có bản ghi mới | NFR-11 — thêm 1 bản ghi không kéo theo tính lại N bản ghi cũ (Pattern 3) |
+| **NFC ở mọi điểm nhập liệu** (form, văn bản trích xuất DOCX/PDF, import CSV, cả hai phía Web API và Dịch vụ AI) | So sánh chuỗi và so sánh ngữ nghĩa cho cùng kết quả bất kể dạng Unicode nguồn (NFR-14) |
+| **`BackgroundTasks` trong tiến trình** cho luồng bất đồng bộ, chưa dùng hàng đợi ngoài (Celery/Redis) | Đủ ở quy mô đồ án (300 đề tài, 50 tài liệu, một server); sơ đồ tuần tự vẫn thể hiện đúng lời gọi dịch vụ bất đồng bộ — hàng đợi ngoài là điểm mở rộng khi lên production thật, không đổi hợp đồng API |
+
+**Đường mở rộng khi lên quy mô thật** (ngoài phạm vi đồ án): thay `BackgroundTasks` bằng Celery/RQ + Redis để việc kiểm tra sống sót qua việc khởi động lại tiến trình và chạy trên worker riêng; lưu chỉ mục FAISS xuống đĩa hoặc chuyển sang một CSDL vector chuyên dụng nếu số lượng vector vượt quá vài trăm nghìn.
