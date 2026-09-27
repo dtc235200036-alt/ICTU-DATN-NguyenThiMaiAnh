@@ -7,8 +7,8 @@
 
 ### Phân tích & thiết kế (tài liệu — CLO 1, 2)
 
-- [ ] **ANLS-01**: Có kết quả khảo sát quy trình quản lý đồ án thực tế của Khoa CNTT (đăng ký đề tài, duyệt đề cương, theo dõi tiến độ, nộp báo cáo, bảo vệ) kèm các form mẫu dữ liệu (PI 1.1)
-- [ ] **ANLS-02**: Có sơ đồ BPMN và mô tả chi tiết cho quy trình nghiệp vụ (PI 1.1)
+- [x] **ANLS-01**: Có kết quả khảo sát quy trình quản lý đồ án thực tế của Khoa CNTT (đăng ký đề tài, duyệt đề cương, theo dõi tiến độ, nộp báo cáo, bảo vệ) kèm các form mẫu dữ liệu (PI 1.1)
+- [x] **ANLS-02**: Có sơ đồ BPMN và mô tả chi tiết cho quy trình nghiệp vụ (PI 1.1)
 - [ ] **ANLS-03**: Có bảng yêu cầu chức năng chi tiết (PI 1.2)
 - [ ] **ANLS-04**: Có bảng yêu cầu phi chức năng: bảo mật, phân quyền, hiệu năng, thời gian phản hồi của kiểm tra trùng lặp có ngưỡng đo được (PI 1.2)
 - [ ] **ANLS-05**: Có sơ đồ UC tổng quát đúng chuẩn với 5 UC chính + đặc tả cho từng UC (PI 1.3)
@@ -111,8 +111,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ANLS-01 | Phase 1 | Pending |
-| ANLS-02 | Phase 1 | Pending |
+| ANLS-01 | Phase 1 | Complete |
+| ANLS-02 | Phase 1 | Complete |
 | ANLS-03 | Phase 1 | Pending |
 | ANLS-04 | Phase 1 | Pending |
 | ANLS-05 | Phase 1 | Pending |
