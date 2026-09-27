@@ -130,6 +130,7 @@ class DeTai <<Entity>> {
   +linhVuc : String
   +trangThai : TrangThaiDeTai
   +loaiNguoiDeXuat : LoaiNguoiDeXuat
+  +lyDoTuChoi : String
 }
 
 class KetQuaKiemTraTrungLap <<Entity>> {

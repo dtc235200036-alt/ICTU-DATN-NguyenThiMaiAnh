@@ -91,6 +91,7 @@ Lược đồ `thesis_core` gồm 19 bảng, khớp 1-1 với 19 lớp thực th
 | linh_vuc | VARCHAR(100) | Có | — | Lĩnh vực |
 | trang_thai | VARCHAR(20) | Không | — | `NHAP`/`CHO_DUYET`/`DA_DUYET`/`TU_CHOI`/`DA_PHAN_CONG` (§3.1.2) |
 | loai_nguoi_de_xuat | VARCHAR(10) | Không | — | `GIANG_VIEN` / `SINH_VIEN` |
+| ly_do_tu_choi | TEXT | Có | — | Lý do Bộ môn từ chối đề tài (FR-DT-04, UC1.3 – A1); cột bổ sung khi thi công Phase 2 |
 
 #### `de_cuong`
 
