@@ -85,7 +85,25 @@ Plans:
   4. Hệ thống chặn một SV có 2 đề tài đang hoạt động và chặn 2 SV cùng một đề tài, kể cả khi 2 SV đăng ký cùng lúc
   5. Gọi API trực tiếp (bỏ qua UI) bằng token sai vai trò hoặc để truy cập dữ liệu không thuộc quyền sở hữu đều bị từ chối, ví dụ SV không duyệt được đề tài, GV không sửa được đề tài của GV khác
 
-**Plans**: TBD
+**Plans**: 6 plans (tuần tự — dùng chung một stack Docker Compose và schema MySQL test)
+Plans:
+**Wave 1**
+- [ ] 02-01-PLAN.md — TRACER: docker compose (MySQL 8.4 + FastAPI + Apache HTTPS) → React MH-01 → /api/auth/login (Alembic 0001); refresh/logout/me, require_role trên mọi route, throttle, pytest trên MySQL thật
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 02-02-PLAN.md — Khung ứng dụng (giữ phiên khi reload, đăng xuất mọi trang, menu theo vai trò, 403) + Bộ môn quản lý tài khoản SV/GV (khóa/mở khóa) + tra cứu GV
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 02-03-PLAN.md — Bộ môn mở/đóng đợt đồ án (Alembic 0002) + seed 100 SV / 30 GV / Bộ môn / đợt đang mở
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 02-04-PLAN.md — Đề xuất đề tài GV/SV (MH-06, Alembic 0003, cột bổ sung ly_do_tu_choi ghi ngược vào ERD) + cảnh báo trùng tên qua AI stub (Alembic 0004, ngưỡng, lưu kết quả)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+- [ ] 02-05-PLAN.md — Danh sách/lọc đề tài theo vai trò (MH-05) + SV đăng ký đề tài có sẵn với test đồng thời (1 SV:1 đề tài, 1 đề tài:1 SV)
+
+**Wave 6** *(blocked on Wave 5 completion)*
+- [ ] 02-06-PLAN.md — Bộ môn duyệt/phân công GVHD/từ chối (MH-07) + dashboard 3 vai trò (MH-02/03/04) + e2e UC1 và smoke qua Apache
 **UI hint**: yes
 **Notes**:
 - Lời gọi kiểm tra trùng tên đề tài đi qua AI client stub (trả kết quả giả lập) cho đến Phase 4.
@@ -160,7 +178,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Analysis & Design | 6/7 | In Progress|  |
-| 2. Platform, RBAC & Topic Management | 0/TBD | Not started | - |
+| 2. Platform, RBAC & Topic Management | 0/6 | Planned | - |
 | 3. Outline, Progress, Defense & Archive | 0/TBD | Not started | - |
 | 4. AI Similarity Service | 0/TBD | Not started | - |
 | 5. System Verification & Defense Package | 0/TBD | Not started | - |
