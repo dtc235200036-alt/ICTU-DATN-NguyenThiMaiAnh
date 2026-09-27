@@ -1,0 +1,38 @@
+@startuml uc0-chuc-nang-chung
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Sinh viên" as SV
+actor "Giảng viên" as GV
+actor "Bộ môn" as BM
+
+rectangle "UC0 – Chức năng chung" {
+  usecase "UC0.1 – Đăng nhập và đăng xuất" as UC0_1
+  usecase "UC0.2 – Quản lý tài khoản SV/GV" as UC0_2
+  usecase "UC0.3 – Quản lý đợt đồ án" as UC0_3
+  usecase "UC0.4 – Cấu hình ngưỡng cảnh báo trùng lặp" as UC0_4
+  usecase "UC0.5 – Xem thông báo" as UC0_5
+  usecase "UC0.6 – Kiểm tra trùng lặp tên đề tài" as UC0_6
+  usecase "UC0.7 – Kiểm tra trùng lặp tài liệu" as UC0_7
+}
+
+SV --> UC0_1
+GV --> UC0_1
+BM --> UC0_1
+
+BM --> UC0_2
+BM --> UC0_3
+BM --> UC0_4
+
+SV --> UC0_5
+GV --> UC0_5
+BM --> UC0_5
+
+note bottom of UC0_6
+  UC0.6, UC0.7: tác nhân chính là Hệ thống
+  (Dịch vụ AI) — đây là các UC được
+  <<include>> từ UC1 (UC0.6) và UC2/UC4
+  (UC0.7), không có tác nhân người dùng
+  trực tiếp gọi thẳng trên sơ đồ này.
+end note
+@enduml

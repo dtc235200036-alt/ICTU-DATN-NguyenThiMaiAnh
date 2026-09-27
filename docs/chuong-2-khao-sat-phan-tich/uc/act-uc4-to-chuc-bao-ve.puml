@@ -1,0 +1,40 @@
+@startuml act-uc4-to-chuc-bao-ve
+title Hoạt động UC4 – Tổ chức bảo vệ (nộp báo cáo cuối đến chốt kết quả và lưu kho)
+
+|Sinh viên|
+start
+:Nộp báo cáo cuối (DOCX/PDF);
+
+|Hệ thống|
+:Kiểm tra trùng lặp tài liệu bất đồng bộ (UC0.7);
+
+|Bộ môn|
+:Lập hội đồng (chọn các Giảng viên làm thành viên);
+:Xếp lịch (ngày, giờ, phòng) và danh sách Sinh viên bảo vệ;
+
+|Hệ thống|
+:Gửi thông báo in-app cho Sinh viên và các thành viên hội đồng;
+
+|Giảng viên (hội đồng)|
+:Xem báo cáo của Sinh viên thuộc hội đồng mình;
+:Chấm điểm và nhập nhận xét;
+
+|Hệ thống|
+if (Tất cả thành viên hội đồng đã chấm?) then (chưa)
+  :Chờ các thành viên còn lại;
+  detach
+else (rồi)
+  :Tính điểm bảo vệ = trung bình cộng điểm các thành viên;
+endif
+
+|Bộ môn|
+:Chốt kết quả bảo vệ;
+
+|Hệ thống|
+:Gửi thông báo in-app cho Sinh viên;
+:Tự động tạo bản ghi kho dữ liệu đồ án (UC5.2);
+
+|Sinh viên|
+:Xem lịch và kết quả bảo vệ;
+stop
+@enduml
