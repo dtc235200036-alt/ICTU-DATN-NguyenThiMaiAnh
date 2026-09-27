@@ -16,7 +16,7 @@ docs/
 │   ├── 02-quy-trinh-nghiep-vu.md       §2.2 Mô hình hóa quy trình nghiệp vụ (BPMN)
 │   ├── 03-yeu-cau-chuc-nang.md         §2.3 Yêu cầu chức năng
 │   ├── 04-yeu-cau-phi-chuc-nang.md     §2.4 Yêu cầu phi chức năng (plan 01-04)
-│   ├── 05-so-do-uc-tong-quat.md        §2.5 Sơ đồ UC tổng quát (plan 01-04)
+│   ├── 05-so-do-use-case.md            §2.5 Sơ đồ UC tổng quát (plan 01-04)
 │   ├── 06-dac-ta-uc1-quan-ly-de-tai.md          §2.6.1 Đặc tả UC1
 │   ├── 07-dac-ta-uc2-de-cuong.md                §2.6.2 Đặc tả UC2 (plan 01-04)
 │   ├── 08-dac-ta-uc3-tien-do.md                 §2.6.3 Đặc tả UC3 (plan 01-04)

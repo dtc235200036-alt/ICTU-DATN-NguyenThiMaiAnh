@@ -1,0 +1,27 @@
+@startuml uc2-quan-ly-de-cuong
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Sinh viên" as SV
+actor "Giảng viên" as GV
+
+rectangle "UC2 – Quản lý đề cương" {
+  usecase "UC2.1 – Nộp đề cương" as UC2_1
+  usecase "UC2.2 – Duyệt hoặc yêu cầu sửa đề cương" as UC2_2
+  usecase "UC2.3 – Xem lịch sử phiên bản và nhận xét" as UC2_3
+  usecase "UC0.7 – Kiểm tra trùng lặp tài liệu" as UC0_7
+}
+
+SV --> UC2_1
+GV --> UC2_2
+SV --> UC2_3
+GV --> UC2_3
+
+UC2_1 ..> UC0_7 : <<include>>
+
+note right of UC0_7
+  UC0.7 thuộc nhóm UC0 – Chức năng chung,
+  đặc tả đầy đủ ở 11-dac-ta-uc0-chuc-nang-chung.md
+  (kế hoạch 01-04, Task 3).
+end note
+@enduml

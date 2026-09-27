@@ -1,0 +1,34 @@
+@startuml act-uc2-nop-duyet-de-cuong
+title Hoạt động UC2.1/UC2.2 – Nộp và duyệt đề cương (kèm vòng lặp sửa–nộp lại)
+
+|Sinh viên|
+start
+repeat
+  :Chọn file đề cương (DOCX/PDF) và nộp;
+
+  |Hệ thống|
+  if (Định dạng/dung lượng hợp lệ?) then (không)
+    |Sinh viên|
+    :Nhận thông báo lỗi, sửa lại file;
+  else (có)
+    :Lưu thành một phiên bản đề cương mới;
+    :Kiểm tra trùng lặp tài liệu bất đồng bộ (UC0.7),\ntrạng thái "Đang kiểm tra" -> "Hoàn tất";
+
+    |Giảng viên hướng dẫn|
+    :Xem đề cương cùng kết quả kiểm tra trùng lặp;
+    if (Quyết định?) then (yêu cầu sửa)
+      :Ghi nhận xét yêu cầu sửa;
+      |Hệ thống|
+      :Chuyển trạng thái đề cương = "Yêu cầu sửa";
+      :Gửi thông báo in-app cho Sinh viên;
+      |Sinh viên|
+    else (duyệt)
+      |Hệ thống|
+      :Chuyển trạng thái đề cương = "Đã duyệt";
+      :Gửi thông báo in-app cho Sinh viên;
+      stop
+    endif
+  endif
+repeat while (Đề cương đã được duyệt?) is (chưa – nộp lại) not (rồi)
+
+@enduml

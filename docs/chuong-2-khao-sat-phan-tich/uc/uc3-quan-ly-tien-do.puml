@@ -1,0 +1,22 @@
+@startuml uc3-quan-ly-tien-do
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Sinh viên" as SV
+actor "Giảng viên" as GV
+actor "Bộ môn" as BM
+
+rectangle "UC3 – Quản lý tiến độ thực hiện" {
+  usecase "UC3.1 – Thiết lập mốc tiến độ" as UC3_1
+  usecase "UC3.2 – Nộp báo cáo tiến độ" as UC3_2
+  usecase "UC3.3 – Nhận xét và đánh giá báo cáo tiến độ" as UC3_3
+  usecase "UC3.4 – Theo dõi tiến độ toàn khoa" as UC3_4
+}
+
+BM --> UC3_1
+SV --> UC3_2
+GV --> UC3_3
+BM --> UC3_4
+
+UC3_1 ..> UC3_2 : <<precede>>
+@enduml
