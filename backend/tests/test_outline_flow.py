@@ -284,7 +284,7 @@ def test_background_check_always_terminates(
 
     from app.services import ai_client as ai_client_module
 
-    def _boom(self, ref_id, text, top_k=5):
+    def _boom(self, ref_id, text, top_k=5, **kw):
         raise RuntimeError("boom")
 
     monkeypatch.setattr(ai_client_module.AiClientStub, "check_document", _boom)
