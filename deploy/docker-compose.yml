@@ -146,6 +146,12 @@ services:
       TORCH_THREADS: ${AI_TORCH_THREADS:-4}
     volumes:
       - ai-models:/models
+    # IN-07 (04-REVIEW): hệ thống file gốc chỉ đọc — lỗi thực thi mã trong
+    # tiến trình xử lý văn bản không sửa được /app; chỉ /models (volume) và
+    # /tmp (tmpfs) ghi được.
+    read_only: true
+    tmpfs:
+      - /tmp
     networks:
       - ntma-internal
     expose:

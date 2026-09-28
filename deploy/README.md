@@ -221,7 +221,7 @@ bash deploy/sql.sh "SELECT COUNT(*) FROM dot_do_an WHERE khoa IN ('K98','K99')" 
 
 Phase 4 thêm hai service vào `deploy/docker-compose.yml`:
 
-- **`ai`** — FastAPI của `ai-service/` (một worker uvicorn, chỉ mục FAISS trong bộ nhớ). Chỉ nằm trên mạng nội bộ của compose: **không publish cổng, không có route Apache**; Web API gọi `http://ai:8002` kèm header `X-API-Key`. Giới hạn bộ nhớ `AI_MEM_LIMIT` (mặc định `2g`; đo thực tế đỉnh ≈ 850 MiB). Trọng số mô hình cache trên volume **`ai-models`** (`/models`).
+- **`ai`** — FastAPI của `ai-service/` (một worker uvicorn, chỉ mục FAISS trong bộ nhớ). Chỉ nằm trên mạng nội bộ của compose: **không publish cổng, không có route Apache**; Web API gọi `http://ai:8002` kèm header `X-API-Key`. Giới hạn bộ nhớ `AI_MEM_LIMIT` (mặc định `2g`; đo thực tế đỉnh ≈ 850 MiB). Trọng số mô hình cache trên volume **`ai-models`** (`/models`). Hệ thống file gốc chỉ đọc (`read_only`, `/tmp` là tmpfs) và mã nguồn trong image thuộc `root` — tiến trình `appuser` chỉ ghi được `/models` và `/tmp` (IN-07).
 - **`ai-db-init`** — chạy một lần trước `ai`: tạo schema `thesis_ai` và hai tài khoản MySQL chỉ có quyền trên schema đó, chỉ kết nối được từ subnet `ntma-internal` (`172.28.238.%`): `thesis_ai` (SELECT/INSERT/UPDATE/DELETE — tiến trình phục vụ request) và `thesis_ai_migrate` (DDL). Không tài khoản nào đọc được `thesis_core` (WR-03).
 - **`ai-migrate`** — one-shot, cùng image với `ai`: `alembic upgrade head` của `thesis_ai` bằng tài khoản `thesis_ai_migrate`; `ai` chỉ khởi động sau khi bước này xong và chạy bằng tài khoản `thesis_ai` (không DDL/DROP, `AI_MIGRATE_ON_START=0`).
 

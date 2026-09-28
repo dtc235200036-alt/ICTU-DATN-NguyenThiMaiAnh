@@ -5,25 +5,31 @@
 FROM python:3.12-slim
 COPY --from=ghcr.io/astral-sh/uv:0.11.19 /uv /uvx /usr/local/bin/
 
-# Tạo appuser TRƯỚC và cài venv bằng chính appuser (COPY --chown) thay vì
-# `chown -R /app` sau cùng: chown đệ quy nhân đôi lớp venv (~1.3 GB torch CPU).
-# /models thuộc appuser để named volume mount lần đầu kế thừa quyền sở hữu.
+# Tạo appuser TRƯỚC và cài venv bằng chính appuser thay vì `chown -R` sau
+# cùng: chown đệ quy nhân đôi lớp venv (~1.3 GB torch CPU). /models thuộc
+# appuser để named volume mount lần đầu kế thừa quyền sở hữu.
+# IN-07 (04-REVIEW): mã nguồn (/app, /app/app, …) thuộc root — tiến trình
+# appuser chỉ ghi được /app/.venv (lúc build) và /models; compose còn chạy
+# container với read_only + tmpfs /tmp.
 RUN useradd --uid 10001 --create-home --shell /usr/sbin/nologin appuser \
- && mkdir -p /app /models \
- && chown appuser:appuser /app /models
+ && mkdir -p /app/.venv /models \
+ && chown appuser:appuser /app/.venv /models
 
 ENV PATH="/app/.venv/bin:${PATH}" \
     HF_HOME=/models \
     UV_LINK_MODE=copy \
-    PYTHONUNBUFFERED=1
+    UV_CACHE_DIR=/tmp/uv-cache \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
-USER appuser
 WORKDIR /app
-
-COPY --chown=appuser:appuser pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock ./
+USER appuser
 RUN uv sync --frozen --no-dev --no-install-project --no-cache
 
-COPY --chown=appuser:appuser . .
+USER root
+COPY . .
+USER appuser
 RUN uv sync --frozen --no-dev --no-cache
 
 # Làm nóng underthesea một lần lúc build để tài nguyên nó cần (nếu có) nằm
