@@ -29,9 +29,12 @@ function renderKiemTraTag(summary: TitleCheckSummary) {
 
 function formatNgayDeXuat(iso: string | null): string {
   if (!iso) return '—'
+  // DD/MM/YYYY (Asia/Ho_Chi_Minh) — dateStyle:'short' rút gọn năm còn 2 chữ số.
   return new Intl.DateTimeFormat('vi-VN', {
     timeZone: 'Asia/Ho_Chi_Minh',
-    dateStyle: 'short',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
   }).format(new Date(iso))
 }
 
@@ -201,7 +204,7 @@ export default function TopicApprovalPage() {
             <h2 style={{ margin: '0 0 4px', fontSize: 15 }}>{detail.ten_de_tai}</h2>
             <p style={{ margin: '0 0 16px', fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>
               Người đề xuất: {renderPerson(detail.nguoi_de_xuat)} · Lĩnh vực:{' '}
-              {detail.linh_vuc ?? '—'} · Đợt {detail.dot_do_an.ten_dot}
+              {detail.linh_vuc ?? '—'} · Đợt {detail.dot_do_an.khoa}
             </p>
             <p style={{ margin: '0 0 16px', fontSize: 13 }}>{detail.mo_ta ?? '—'}</p>
 
