@@ -464,20 +464,32 @@ def update_committee(db: Session, hoi_dong_id: int, payload: CommitteeIn) -> Com
 
 
 def delete_committee(db: Session, hoi_dong_id: int) -> None:
-    hoi_dong = db.get(HoiDong, hoi_dong_id)
+    """WR-04: khóa dòng hội đồng (add_schedule khóa cùng dòng trước khi chèn
+    lịch), đếm lịch bằng đọc có khóa; FK là tuyến cuối — 409, không 500."""
+    hoi_dong = db.execute(
+        select(HoiDong).where(HoiDong.id == hoi_dong_id).with_for_update()
+    ).scalar_one_or_none()
     if hoi_dong is None:
         raise HTTPException(status_code=404, detail=_COMMITTEE_NOT_FOUND_DETAIL)
 
     has_students = db.execute(
-        select(func.count()).select_from(LichBaoVe).where(LichBaoVe.hoi_dong_id == hoi_dong_id)
+        select(func.count())
+        .select_from(LichBaoVe)
+        .where(LichBaoVe.hoi_dong_id == hoi_dong_id)
+        .with_for_update(read=True)
     ).scalar_one()
     if has_students > 0:
+        db.rollback()
         raise HTTPException(status_code=409, detail=_COMMITTEE_HAS_STUDENTS_DETAIL)
 
-    for member in list(hoi_dong.thanh_vien):
-        db.delete(member)
-    db.delete(hoi_dong)
-    db.commit()
+    try:
+        for member in list(hoi_dong.thanh_vien):
+            db.delete(member)
+        db.delete(hoi_dong)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=_COMMITTEE_HAS_STUDENTS_DETAIL) from None
 
 
 def list_committees(db: Session) -> list[CommitteeListItem]:

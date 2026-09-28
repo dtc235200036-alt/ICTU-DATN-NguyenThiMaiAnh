@@ -374,13 +374,32 @@ def update_milestone(db: Session, moc_id: int, payload: MilestoneUpdate) -> Mile
 
 
 def delete_milestone(db: Session, moc_id: int) -> None:
+    """WR-04: khóa đợt rồi khóa DÒNG mốc (submit_report giữ khóa chia sẻ trên
+    cùng dòng mốc), đếm báo cáo bằng đọc có khóa; FK vẫn là tuyến cuối —
+    IntegrityError thành 409 thay vì 500."""
     moc = _get_milestone_or_404(db, moc_id)
     _open_cohort_locked(db, moc.dot_do_an_id)
-    if _report_counts(db, [moc.id]).get(moc.id, 0) > 0:
+    locked = db.execute(
+        select(MocTienDo).where(MocTienDo.id == moc_id).with_for_update()
+    ).scalar_one_or_none()
+    if locked is None:
+        db.rollback()
+        raise HTTPException(status_code=404, detail=_MILESTONE_NOT_FOUND)
+    n_reports = db.execute(
+        select(func.count())
+        .select_from(BaoCaoTienDo)
+        .where(BaoCaoTienDo.moc_tien_do_id == moc_id)
+        .with_for_update(read=True)
+    ).scalar_one()
+    if n_reports > 0:
         db.rollback()
         raise HTTPException(status_code=409, detail=_MILESTONE_HAS_REPORTS)
-    db.delete(moc)
-    db.commit()
+    try:
+        db.delete(locked)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=_MILESTONE_HAS_REPORTS) from None
 
 
 # ---------------------------------------------------------------------------
@@ -423,7 +442,11 @@ def submit_report(
     topic = _own_assigned_topic(db, user, lock=True)
     if topic is None:
         raise HTTPException(status_code=409, detail=_NO_ASSIGNED_TOPIC)
-    moc = db.get(MocTienDo, moc_id)
+    # WR-04: khóa CHIA SẺ dòng mốc — delete_milestone (khóa ghi) không thể xóa
+    # mốc giữa lúc kiểm tra và lúc chèn báo cáo.
+    moc = db.execute(
+        select(MocTienDo).where(MocTienDo.id == moc_id).with_for_update(read=True)
+    ).scalar_one_or_none()
     if moc is None or moc.dot_do_an_id != topic.dot_do_an_id:
         db.rollback()
         raise HTTPException(status_code=404, detail=_MILESTONE_NOT_FOUND)
