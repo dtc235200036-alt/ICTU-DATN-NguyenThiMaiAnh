@@ -113,4 +113,50 @@ sixth_status="$(curl -sk -o /dev/null -w '%{http_code}' -X POST "$BASE/api/auth/
 [ "$sixth_status" = "429" ] || fail "Lần đăng nhập sai thứ 6 không trả 429 (nhận $sixth_status)"
 echo "OK: lần đăng nhập sai thứ 6 trả 429"
 
+# (n) Dashboard theo vai trò: mỗi vai trò tự xem được /api/dashboard/* của
+# chính mình (D-09); vai trò khác luôn bị 403 (T-02-38).
+TOKEN_BOMON="$(curl -sk -X POST "$BASE/api/auth/login" -H 'Content-Type: application/json' \
+  -d "{\"dang_nhap\":\"bomon\",\"mat_khau\":\"${SEED_PW}\"}" \
+  | python3 -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')"
+TOKEN_GV001="$(curl -sk -X POST "$BASE/api/auth/login" -H 'Content-Type: application/json' \
+  -d "{\"dang_nhap\":\"GV001\",\"mat_khau\":\"${SEED_PW}\"}" \
+  | python3 -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')"
+TOKEN_SV001="$(curl -sk -X POST "$BASE/api/auth/login" -H 'Content-Type: application/json' \
+  -d "{\"dang_nhap\":\"DTC225200001\",\"mat_khau\":\"${SEED_PW}\"}" \
+  | python3 -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')"
+
+status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/dashboard/bo-mon" -H "Authorization: Bearer ${TOKEN_BOMON}")"
+[ "$status" = "200" ] || fail "bomon xem /api/dashboard/bo-mon không trả 200 (nhận $status)"
+status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/dashboard/giang-vien" -H "Authorization: Bearer ${TOKEN_GV001}")"
+[ "$status" = "200" ] || fail "GV001 xem /api/dashboard/giang-vien không trả 200 (nhận $status)"
+status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/dashboard/sinh-vien" -H "Authorization: Bearer ${TOKEN_SV001}")"
+[ "$status" = "200" ] || fail "DTC225200001 xem /api/dashboard/sinh-vien không trả 200 (nhận $status)"
+echo "OK: mỗi vai trò xem được dashboard của chính mình"
+
+status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/dashboard/bo-mon" -H "Authorization: Bearer ${TOKEN_SV001}")"
+[ "$status" = "403" ] || fail "DTC225200001 xem /api/dashboard/bo-mon không trả 403 (nhận $status)"
+status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/dashboard/sinh-vien" -H "Authorization: Bearer ${TOKEN_GV001}")"
+[ "$status" = "403" ] || fail "GV001 xem /api/dashboard/sinh-vien không trả 403 (nhận $status)"
+status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/dashboard/giang-vien" -H "Authorization: Bearer ${TOKEN_BOMON}")"
+[ "$status" = "403" ] || fail "bomon xem /api/dashboard/giang-vien không trả 403 (nhận $status)"
+echo "OK: dashboard của vai trò khác bị từ chối 403"
+
+status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/accounts?vai_tro=SINH_VIEN" -H "Authorization: Bearer ${TOKEN_SV001}")"
+[ "$status" = "403" ] || fail "DTC225200001 xem /api/accounts không trả 403 (nhận $status)"
+status="$(curl -sk -o /dev/null -w '%{http_code}' -X POST "$BASE/api/cohorts" -H "Authorization: Bearer ${TOKEN_SV001}" -H 'Content-Type: application/json' -d '{}')"
+[ "$status" = "403" ] || fail "DTC225200001 tạo đợt đồ án không trả 403 (nhận $status)"
+status="$(curl -sk -o /dev/null -w '%{http_code}' -X POST "$BASE/api/topic-approvals/1/approve" -H "Authorization: Bearer ${TOKEN_SV001}" -H 'Content-Type: application/json' -d '{}')"
+[ "$status" = "403" ] || fail "DTC225200001 duyệt đề tài không trả 403 (nhận $status)"
+echo "OK: DTC225200001 bị 403 trên accounts/cohorts/topic-approvals"
+
+status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/topic-approvals" -H "Authorization: Bearer ${TOKEN_GV001}")"
+[ "$status" = "403" ] || fail "GV001 xem /api/topic-approvals không trả 403 (nhận $status)"
+status="$(curl -sk -o /dev/null -w '%{http_code}' -X POST "$BASE/api/topics/1/register" -H "Authorization: Bearer ${TOKEN_GV001}")"
+[ "$status" = "403" ] || fail "GV001 đăng ký đề tài không trả 403 (nhận $status)"
+echo "OK: GV001 bị 403 trên topic-approvals/register"
+
+status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/topics" -H "Authorization: Bearer ${TOKEN_SV001}")"
+[ "$status" = "200" ] || fail "DTC225200001 xem /api/topics không trả 200 (nhận $status)"
+echo "OK: DTC225200001 xem /api/topics -> 200"
+
 echo "SMOKE TEST: tất cả kiểm tra đã qua."
