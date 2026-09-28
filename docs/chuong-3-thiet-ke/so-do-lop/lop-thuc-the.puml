@@ -93,6 +93,7 @@ class TaiKhoan <<Entity>> {
   +matKhauBam : String
   +vaiTro : VaiTro
   +biKhoa : Boolean
+  +phienBanToken : Long
 }
 
 ' =====================================================================

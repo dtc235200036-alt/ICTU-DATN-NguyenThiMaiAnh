@@ -31,6 +31,7 @@ Lược đồ `thesis_core` gồm 19 bảng, khớp 1-1 với 19 lớp thực th
 | mat_khau_bam | VARCHAR(255) | Không | — | Mật khẩu băm bcrypt (NFR-02) |
 | vai_tro | ENUM('SINH_VIEN','GIANG_VIEN','BO_MON') | Không | — | Vai trò quyết định quyền truy cập (NFR-04) |
 | bi_khoa | BOOLEAN | Không | — | Tài khoản bị Bộ môn khóa (NFR-05) |
+| phien_ban_token | BIGINT | Không | — | Phiên bản token (mặc định 0), tăng khi đăng xuất để thu hồi mọi JWT cũ (NFR bảo mật phiên) |
 
 #### `sinh_vien`
 

@@ -13,6 +13,7 @@ entity "tai_khoan" as tai_khoan {
   mat_khau_bam : VARCHAR(255) <<NOT NULL>>
   vai_tro : ENUM('SINH_VIEN','GIANG_VIEN','BO_MON') <<NOT NULL>>
   bi_khoa : BOOLEAN <<NOT NULL>> = FALSE
+  phien_ban_token : BIGINT <<NOT NULL>> = 0
 }
 
 ' =====================================================================
