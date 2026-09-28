@@ -6,12 +6,12 @@ import os
 import unicodedata
 import uuid
 import zipfile
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
 
 import pymupdf as fitz
-from docx import Document
 from fastapi import HTTPException, UploadFile
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -31,7 +31,17 @@ _TOM_TAT_MAX_CHARS = 600
 
 _PDF_MAGIC = b"%PDF-"
 _DOCX_MARKER = "word/document.xml"
-_MAX_DOCX_UNCOMPRESSED_BYTES = 150 * 1024 * 1024
+# CR-01 (03-REVIEW): trần giải nén thấp + parse luồng (không dựng DOM) —
+# XML nén ~1000:1 nên một DOCX ~1 MB có thể chứa hàng trăm MB XML; DOM của
+# python-docx/lxml tốn gấp nhiều lần kích thước XML.
+_MAX_DOCX_UNCOMPRESSED_BYTES = 25 * 1024 * 1024  # tổng giải nén mọi phần
+_MAX_DOCX_XML_BYTES = 15 * 1024 * 1024  # riêng word/document.xml
+_W_NS = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+_W_P = _W_NS + "p"
+_W_T = _W_NS + "t"
+_W_TAB = _W_NS + "tab"
+_W_BR = _W_NS + "br"
+_W_CR = _W_NS + "cr"
 
 _FILE_TOO_LARGE_DETAIL = "File vượt quá dung lượng tối đa 20 MB (NFR-06)"
 _FILE_EMPTY_DETAIL = "File rỗng, vui lòng chọn file khác"
@@ -50,6 +60,10 @@ class ValidatedFile:
     dinh_dang: str
     ext: str
     ten_goc: str
+    # CR-01: văn bản trích xuất NGAY khi validate (trước mọi khóa hàng) —
+    # store() dùng lại, không parse trong transaction đang giữ FOR UPDATE.
+    text: str | None = None
+    text_extracted: bool = False
 
 
 def _safe_basename(filename: str) -> str:
@@ -90,8 +104,51 @@ def read_and_validate(upload: UploadFile) -> ValidatedFile:
         raise HTTPException(status_code=422, detail=_FILE_BAD_FORMAT_DETAIL)
 
     return ValidatedFile(
-        content=content, dinh_dang=dinh_dang, ext=ext.lstrip("."), ten_goc=ten_goc
+        content=content,
+        dinh_dang=dinh_dang,
+        ext=ext.lstrip("."),
+        ten_goc=ten_goc,
+        text=extract_text(content, dinh_dang),
+        text_extracted=True,
     )
+
+
+def _extract_docx_text(content: bytes) -> str | None:
+    """CR-01: đọc word/document.xml theo luồng (iterparse, expat — không tải
+    DTD/thực thể ngoài) và xóa từng phần tử ngay khi xong, nên bộ nhớ chỉ tỉ
+    lệ với độ sâu cây, không với kích thước XML. Ngữ nghĩa như python-docx
+    `paragraph.text`: w:t nối liền, w:tab -> tab, w:br/w:cr -> xuống dòng."""
+    with zipfile.ZipFile(BytesIO(content)) as zf:
+        info = zf.getinfo(_DOCX_MARKER)
+        total = sum(i.file_size for i in zf.infolist())
+        if info.file_size > _MAX_DOCX_XML_BYTES or total > _MAX_DOCX_UNCOMPRESSED_BYTES:
+            return None
+        paragraphs: list[str] = []
+        buf: list[str] = []
+        stack: list[ET.Element] = []
+        # ZipExtFile giới hạn đầu ra ở file_size đã khai báo (đã kiểm ở trên).
+        with zf.open(info) as fh:
+            for event, el in ET.iterparse(fh, events=("start", "end")):
+                if event == "start":
+                    stack.append(el)
+                    continue
+                stack.pop()
+                tag = el.tag
+                if tag == _W_T:
+                    buf.append(el.text or "")
+                elif tag == _W_TAB:
+                    buf.append("\t")
+                elif tag in (_W_BR, _W_CR):
+                    buf.append("\n")
+                elif tag == _W_P:
+                    paragraphs.append("".join(buf))
+                    buf.clear()
+                # Mọi phần tử con đã xử lý xong trước "end" của cha -> gỡ khỏi
+                # cha ngay (luôn là con cuối nên remove là O(1) thực tế).
+                if stack:
+                    stack[-1].remove(el)
+                el.clear()
+    return "\n".join(paragraphs)
 
 
 def extract_text(content: bytes, dinh_dang: str) -> str | None:
@@ -99,14 +156,9 @@ def extract_text(content: bytes, dinh_dang: str) -> str | None:
     việc nộp; mọi lỗi/kết quả rỗng trả về None (caller đánh dấu trich_xuat_loi)."""
     try:
         if dinh_dang == DINH_DANG_DOCX:
-            total_uncompressed = 0
-            with zipfile.ZipFile(BytesIO(content)) as zf:
-                for info in zf.infolist():
-                    total_uncompressed += info.file_size
-            if total_uncompressed > _MAX_DOCX_UNCOMPRESSED_BYTES:
+            text = _extract_docx_text(content)
+            if text is None:
                 return None
-            document = Document(BytesIO(content))
-            text = "\n".join(p.text for p in document.paragraphs)
         elif dinh_dang == DINH_DANG_PDF:
             with fitz.open(stream=content, filetype="pdf") as pdf:
                 text = "\n".join(page.get_text() for page in pdf)
@@ -169,7 +221,7 @@ def store(
     tmp_path.write_bytes(vf.content)
     os.replace(tmp_path, final_path)
 
-    text = extract_text(vf.content, vf.dinh_dang)
+    text = vf.text if vf.text_extracted else extract_text(vf.content, vf.dinh_dang)
 
     doc = TaiLieuDoAn(
         de_tai_id=de_tai_id,

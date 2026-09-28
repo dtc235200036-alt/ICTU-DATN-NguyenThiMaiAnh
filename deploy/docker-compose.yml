@@ -74,6 +74,9 @@ services:
       - "8001"
     volumes:
       - uploads-data:/data/uploads
+    # CR-01 (03-REVIEW): trần bộ nhớ — một upload độc hại chỉ có thể làm
+    # container api bị OOM-kill (restart: unless-stopped), không kéo sập host.
+    mem_limit: ${API_MEM_LIMIT:-1g}
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/api/health')"]
       interval: 5s
