@@ -252,10 +252,11 @@ def list_outlines(
         .outerjoin(DeCuong, DeCuong.de_tai_id == DeTai.id)
         .where(DeTai.trang_thai == DA_PHAN_CONG)
     )
+    # IN-03: tài khoản thiếu hồ sơ -> -1 (không khớp gì), không bao giờ `IS NULL`.
     if user.vai_tro == VaiTro.SINH_VIEN:
-        stmt = stmt.where(DeTai.sinh_vien_id == user.sinh_vien_id)
+        stmt = stmt.where(DeTai.sinh_vien_id == (user.sinh_vien_id or -1))
     elif user.vai_tro == VaiTro.GIANG_VIEN:
-        stmt = stmt.where(DeTai.giang_vien_id == user.giang_vien_id)
+        stmt = stmt.where(DeTai.giang_vien_id == (user.giang_vien_id or -1))
 
     if dot_do_an_id is not None:
         stmt = stmt.where(DeTai.dot_do_an_id == dot_do_an_id)

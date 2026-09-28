@@ -37,8 +37,13 @@ _HOI_DONG_SAP_TOI = 5
 # tham số cho phép xem đề tài của người khác.
 
 
+# IN-03: tài khoản chưa có hồ sơ SV/GV -> id không tồn tại, để bộ lọc phạm vi
+# không bao giờ biên dịch thành `IS NULL` (lộ đề tài chưa có SV/GVHD).
+_NO_PROFILE_ID = -1
+
+
 def get_sv_dashboard(db: Session, user: CurrentUser) -> SvDashboardOut:
-    sv_id = user.sinh_vien_id
+    sv_id = user.sinh_vien_id if user.sinh_vien_id is not None else _NO_PROFILE_ID
 
     topic = (
         db.execute(
@@ -160,7 +165,7 @@ def _sv_defense(db: Session, user: CurrentUser) -> SvDefenseOut | None:
 
 
 def get_gv_dashboard(db: Session, user: CurrentUser) -> GvDashboardOut:
-    gv_id = user.giang_vien_id
+    gv_id = user.giang_vien_id if user.giang_vien_id is not None else _NO_PROFILE_ID
 
     so_sinh_vien_huong_dan = db.execute(
         select(func.count())
