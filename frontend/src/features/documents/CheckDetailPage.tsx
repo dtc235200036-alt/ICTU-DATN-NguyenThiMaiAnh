@@ -196,12 +196,20 @@ export default function CheckDetailPage() {
       <p style={{ margin: '0 0 20px', fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>{subtitle}</p>
 
       <Card style={{ marginBottom: 20 }}>
-        <Descriptions column={5} size="small">
+        <Descriptions column={3} size="small">
           <Descriptions.Item label="Tỷ lệ tổng">
             {formatPercent(data.ty_le_tong)}
           </Descriptions.Item>
+          <Descriptions.Item label="Trùng nhiều nhất với một đồ án">
+            {formatPercent(data.ty_le_nguon_cao_nhat)}
+          </Descriptions.Item>
           <Descriptions.Item label="Ngưỡng áp dụng">
             {formatPercent(data.nguong_ap_dung)}
+            {data.vuot_nguong !== null ? (
+              <Tag color={data.vuot_nguong ? 'error' : 'success'} style={{ marginLeft: 8 }}>
+                {data.vuot_nguong ? 'Vượt ngưỡng cảnh báo' : 'Dưới ngưỡng cảnh báo'}
+              </Tag>
+            ) : null}
           </Descriptions.Item>
           <Descriptions.Item label="Trạng thái">
             <CheckStatusTag kiemTra={data} />

@@ -36,6 +36,9 @@ class KetQuaKiemTraTrungLap(Base):
     loai_kiem_tra: Mapped[str] = mapped_column(String(20), nullable=False)
     trang_thai: Mapped[str] = mapped_column(String(20), nullable=False)
     ty_le_tong: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
+    # CR-01 (04-REVIEW, 0012): tỷ lệ trùng với MỘT đồ án nguồn cao nhất — đúng
+    # thống kê NGUONG_TAI_LIEU được hiệu chỉnh; ty_le_tong chỉ để hiển thị.
+    ty_le_nguon_cao_nhat: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
     nguong_ap_dung: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False)
     doi_tuong_duoc_kiem_tra: Mapped[str | None] = mapped_column(String(255))
     thoi_diem: Mapped[datetime] = mapped_column(DateTime, nullable=False)
@@ -66,5 +69,7 @@ class ChiTietTrungLap(Base):
     # gian đó; không FK (tham chiếu đa hình, nguồn có thể bị xóa sau này).
     loai_nguon: Mapped[str | None] = mapped_column(String(20))
     nguon_id: Mapped[int | None] = mapped_column(BigInteger)
+    # CR-01 (0012): tỷ lệ theo nguồn (do_an_trung của AI) của nguồn chứa đoạn.
+    ty_le_nguon: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
 
     ket_qua: Mapped[KetQuaKiemTraTrungLap] = relationship(back_populates="chi_tiet")

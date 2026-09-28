@@ -27,7 +27,12 @@ export type CheckStatus = 'DANG_KIEM_TRA' | 'HOAN_TAT' | 'LOI'
 export interface CheckSummary {
   id: number
   trang_thai: CheckStatus
+  /** Chỉ để hiển thị: tỷ lệ câu bị gắn cờ trên toàn tài liệu (mọi nguồn cộng lại) */
   ty_le_tong: number | null
+  /** CR-01: tỷ lệ trùng với MỘT đồ án nguồn cao nhất — thống kê được hiệu chỉnh */
+  ty_le_nguon_cao_nhat: number | null
+  /** CR-01: Web API quyết định (ty_le_nguon_cao_nhat >= nguong_ap_dung); null khi chưa hoàn tất */
+  vuot_nguong: boolean | null
   nguong_ap_dung: number
   thoi_diem: string
 }

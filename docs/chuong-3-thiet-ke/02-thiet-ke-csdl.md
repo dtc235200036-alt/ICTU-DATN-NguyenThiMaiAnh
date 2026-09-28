@@ -212,7 +212,8 @@ Lược đồ `thesis_core` gồm 19 bảng, khớp 1-1 với 19 lớp thực th
 | tai_lieu_do_an_id | BIGINT | Có | FK, UNIQUE → tai_lieu_do_an | Đặt khi `loai_kiem_tra = TAI_LIEU`; UNIQUE đảm bảo mỗi phiên bản tài liệu có đúng 1 kết quả (§3.2.5) |
 | loai_kiem_tra | VARCHAR(20) | Không | — | `TEN_DE_TAI` / `TAI_LIEU` |
 | trang_thai | VARCHAR(20) | Không | — | `DANG_KIEM_TRA`/`HOAN_TAT`/`LOI` (§3.1.4) |
-| ty_le_tong | DECIMAL(5,2) | Có | — | Tỷ lệ tương đồng tổng (%) |
+| ty_le_tong | DECIMAL(5,2) | Có | — | Tỷ lệ tương đồng tổng (%) — với kiểm tra tài liệu: phần ký tự của mọi câu bị gắn cờ (cộng mọi nguồn), **chỉ để hiển thị** |
+| ty_le_nguon_cao_nhat | DECIMAL(5,2) | Có | — | Kiểm tra tài liệu: tỷ lệ trùng với **một** đồ án nguồn cao nhất (`do_an_trung` của Dịch vụ AI). Đây là thống kê `NGUONG_TAI_LIEU` được hiệu chỉnh: "Vượt ngưỡng cảnh báo" khi `ty_le_nguon_cao_nhat >= nguong_ap_dung` (Web API tính, trả `vuot_nguong`). Bổ sung khi sửa lỗi review Phase 4 (CR-01, Alembic 0012); dòng cũ được điền bằng phần ký tự đoạn của nguồn lớn nhất × tỷ lệ tổng |
 | nguong_ap_dung | DECIMAL(5,2) | Không | — | Ngưỡng cấu hình tại thời điểm kiểm tra (chụp lại từ `cau_hinh_nguong`) |
 | doi_tuong_duoc_kiem_tra | VARCHAR(255) | Có | — | Mô tả đối tượng cụ thể được kiểm tra (tên đề tài nhập, hoặc số phiên bản tài liệu) |
 | thoi_diem | DATETIME | Không | — | Thời điểm tạo bản ghi |
@@ -230,6 +231,7 @@ Lược đồ `thesis_core` gồm 19 bảng, khớp 1-1 với 19 lớp thực th
 | vi_tri | VARCHAR(50) | Có | — | Vị trí đoạn trong tài liệu (trang/đoạn) |
 | loai_nguon | VARCHAR(20) | Có | CHECK | Không gian id của nguồn trùng theo Dịch vụ AI: `TOPIC` (de_tai), `ARCHIVE` (do_an_kho), `DOCUMENT` (tai_lieu_do_an); NULL với dòng cũ |
 | nguon_id | BIGINT | Có | — | Id của nguồn trong không gian `loai_nguon` (tham chiếu đa hình, không FK). Dùng để tra nhãn đúng bảng và để quyết định SV có được xem `doan_trung` hay không (chỉ khi nguồn là đồ án đã vào kho) |
+| ty_le_nguon | DECIMAL(5,2) | Có | — | Tỷ lệ trùng với riêng nguồn của đoạn này (`do_an_trung` của Dịch vụ AI, không gian `DOCUMENT`) — cột "Tỷ lệ" của "Đồ án trùng" trên MH-09/MH-14 đọc thẳng giá trị này (CR-01, Alembic 0012); NULL với dòng cũ |
 
 #### `thong_bao`
 
@@ -248,7 +250,7 @@ Lược đồ `thesis_core` gồm 19 bảng, khớp 1-1 với 19 lớp thực th
 | Cột | Kiểu | Null | Khóa | Mô tả |
 |---|---|---|---|---|
 | id | BIGINT | Không | PK | Định danh cấu hình |
-| loai | VARCHAR(30) | Không | UNIQUE | Mỗi loại đúng 1 dòng hiện hành: `NGUONG_TEN_DE_TAI` — tên đề tài có độ tương đồng ngữ nghĩa từ giá trị này trở lên được cảnh báo khi đề xuất/đăng ký (UC0.6); `NGUONG_TAI_LIEU` — tỷ lệ trùng tổng của đề cương/báo cáo từ giá trị này trở lên là "Vượt ngưỡng cảnh báo" (UC0.7, chụp vào `nguong_ap_dung`); `NGUONG_DOAN_TRUNG` — một câu có độ tương đồng ngữ nghĩa với đồ án đã lưu từ giá trị này trở lên được tính là đoạn trùng (gửi sang Dịch vụ AI dưới tên `nguong_doan`; bổ sung khi thi công Phase 4, D-04). Giá trị mặc định lấy từ hiệu chỉnh (Alembic 0010: 67,8 / 10,4 / 67,7); Bộ môn sửa cả ba trên màn hình UC0.4 (`GET/PUT /api/thresholds`), Web API đọc lại theo từng request nên lần kiểm tra kế tiếp dùng giá trị mới |
+| loai | VARCHAR(30) | Không | UNIQUE | Mỗi loại đúng 1 dòng hiện hành: `NGUONG_TEN_DE_TAI` — tên đề tài có độ tương đồng ngữ nghĩa từ giá trị này trở lên được cảnh báo khi đề xuất/đăng ký (UC0.6); `NGUONG_TAI_LIEU` — đề cương/báo cáo có tỷ lệ trùng với **một** đồ án nguồn (`ty_le_nguon_cao_nhat`) từ giá trị này trở lên là "Vượt ngưỡng cảnh báo" (UC0.7, chụp vào `nguong_ap_dung`; ngưỡng được hiệu chỉnh trên đúng thống kê này, tỷ lệ tổng chỉ để hiển thị); `NGUONG_DOAN_TRUNG` — một câu có độ tương đồng ngữ nghĩa với đồ án đã lưu từ giá trị này trở lên được tính là đoạn trùng (gửi sang Dịch vụ AI dưới tên `nguong_doan`; bổ sung khi thi công Phase 4, D-04). Giá trị mặc định lấy từ hiệu chỉnh (Alembic 0010: 67,8 / 10,4 / 67,7); Bộ môn sửa cả ba trên màn hình UC0.4 (`GET/PUT /api/thresholds`), Web API đọc lại theo từng request nên lần kiểm tra kế tiếp dùng giá trị mới |
 | gia_tri | DECIMAL(5,2) | Không | — | Giá trị ngưỡng % (0–100, FR-AI-05) |
 | tai_khoan_id | BIGINT | Có | FK → tai_khoan | Người (Bộ môn) cập nhật lần gần nhất |
 | thoi_diem_cap_nhat | DATETIME | Không | — | Thời điểm lưu cấu hình |

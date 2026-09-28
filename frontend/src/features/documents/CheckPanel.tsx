@@ -114,7 +114,9 @@ export default function CheckPanel({ taiLieuId, canRecheck, pendingText }: Check
       />
     )
   } else {
-    const overThreshold = (data.ty_le_tong ?? 0) > data.nguong_ap_dung
+    // CR-01: quyết định vượt ngưỡng do Web API tính theo tỷ lệ trùng với một
+    // đồ án nguồn (đúng thống kê đã hiệu chỉnh), không so ty_le_tong ở đây.
+    const overThreshold = data.vuot_nguong === true
     const soDoan = data.chi_tiet.length
     const soNguyenVan = data.chi_tiet.filter((seg) => parseViTri(seg.vi_tri).tinHieu === 'NGUYEN_VAN').length
     body = (
@@ -133,6 +135,8 @@ export default function CheckPanel({ taiLieuId, canRecheck, pendingText }: Check
             color: 'rgba(0,0,0,0.45)',
           }}
         >
+          Trùng nhiều nhất với một đồ án: <strong>{formatPercent(data.ty_le_nguon_cao_nhat)}</strong>
+          {' · '}
           Ngưỡng áp dụng của Bộ môn: <strong>{formatPercent(data.nguong_ap_dung)}</strong> (UC0.4)
           {' · '}
           <Tag color={overThreshold ? 'error' : 'success'}>

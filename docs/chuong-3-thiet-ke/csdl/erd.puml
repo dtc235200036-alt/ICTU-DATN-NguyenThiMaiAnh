@@ -77,6 +77,7 @@ entity "ket_qua_kiem_tra_trung_lap" as ket_qua_kiem_tra_trung_lap {
   loai_kiem_tra : VARCHAR(20)
   trang_thai : VARCHAR(20)
   ty_le_tong : DECIMAL(5,2)
+  ty_le_nguon_cao_nhat : DECIMAL(5,2)
   nguong_ap_dung : DECIMAL(5,2)
   doi_tuong_duoc_kiem_tra : VARCHAR(255)
   thoi_diem : DATETIME
@@ -93,6 +94,7 @@ entity "chi_tiet_trung_lap" as chi_tiet_trung_lap {
   vi_tri : VARCHAR(50)
   loai_nguon : VARCHAR(20)
   nguon_id : BIGINT
+  ty_le_nguon : DECIMAL(5,2)
 }
 
 ' =====================================================================

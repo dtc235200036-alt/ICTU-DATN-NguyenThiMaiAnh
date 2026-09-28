@@ -224,7 +224,7 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 
 **Mục đích:** Cho GVHD xem nội dung đề cương mới nhất cùng kết quả kiểm tra trùng lặp ngay trên cùng màn hình, rồi quyết định duyệt hoặc yêu cầu sửa kèm nhận xét.
 
-**Vùng (regions):** Sider Giảng viên (mục "Duyệt đề cương" đang chọn); trái: tên đề tài, Select phiên bản, link tải file, tóm tắt nội dung trích xuất, TextArea "Nhận xét", nút "Yêu cầu sửa" / "Duyệt đề cương"; phải: panel "Kết quả kiểm tra trùng lặp" với `ant-progress-circle` (tỷ lệ tổng), ngưỡng áp dụng của Bộ môn (UC0.4), bảng đồ án trùng nhiều nhất, nút "Xem chi tiết" mở MH-14.
+**Vùng (regions):** Sider Giảng viên (mục "Duyệt đề cương" đang chọn); trái: tên đề tài, Select phiên bản, link tải file, tóm tắt nội dung trích xuất, TextArea "Nhận xét", nút "Yêu cầu sửa" / "Duyệt đề cương"; phải: panel "Kết quả kiểm tra trùng lặp" với `ant-progress-circle` (tỷ lệ tổng), tỷ lệ trùng với một đồ án cao nhất, ngưỡng áp dụng của Bộ môn (UC0.4) và nhãn "Vượt/Dưới ngưỡng cảnh báo" (so tỷ lệ trùng với một đồ án với ngưỡng — CR-01), bảng đồ án trùng nhiều nhất, nút "Xem chi tiết" mở MH-14.
 
 **Trạng thái (states):**
 - Vòng tròn Progress đổi màu theo mức so với ngưỡng Bộ môn cấu hình (xanh khi dưới ngưỡng cảnh báo).
@@ -314,7 +314,7 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 
 **Mục đích:** Trình bày đầy đủ kết quả kiểm tra trùng lặp tài liệu theo kiểu báo cáo Turnitin/Coopy: tỷ lệ tổng, danh sách đồ án trùng, và từng đoạn trùng highlight cạnh đoạn nguồn, để GVHD/Bộ môn đối chiếu trước khi duyệt hoặc chấm điểm.
 
-**Vùng (regions):** Thanh tóm tắt (`mockup-summary-bar`): tỷ lệ tổng, ngưỡng áp dụng, trạng thái, thời điểm kiểm tra, loại tài liệu; cột trái "Đồ án trùng" (`dup-thesis-list`, đóng vai trò bộ lọc, dòng đang chọn tô nền xanh nhạt) kèm ghi chú "Đã loại trừ phần mẫu chung: tiêu đề mẫu, mục lục, tài liệu tham khảo" (FR-AI-02); hai cột so sánh cạnh nhau "Đoạn trong tài liệu nộp" và "Đoạn nguồn" của đồ án đang chọn.
+**Vùng (regions):** Thanh tóm tắt (`mockup-summary-bar`): tỷ lệ tổng, tỷ lệ trùng với một đồ án cao nhất, ngưỡng áp dụng kèm nhãn vượt/dưới ngưỡng, trạng thái, thời điểm kiểm tra, loại tài liệu; cột trái "Đồ án trùng" (`dup-thesis-list`, đóng vai trò bộ lọc, dòng đang chọn tô nền xanh nhạt) kèm ghi chú "Đã loại trừ phần mẫu chung: tiêu đề mẫu, mục lục, tài liệu tham khảo" (FR-AI-02); hai cột so sánh cạnh nhau "Đoạn trong tài liệu nộp" và "Đoạn nguồn" của đồ án đang chọn.
 
 **Trạng thái (states):**
 - Mỗi đoạn trùng dùng khối `dup-passage` với 3 mức: Cao (viền đỏ), Trung bình (viền cam), Thấp (viền xanh lá) - mỗi khối luôn có nhãn chữ ghi rõ mức và tỷ lệ % (không chỉ dựa vào màu) để đọc được cả khi in trắng đen hoặc với người khiếm thị màu.

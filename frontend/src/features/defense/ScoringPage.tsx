@@ -45,13 +45,14 @@ function committeeLabel(item: Pick<MyCommittee, 'ten_hoi_dong' | 'ngay_bao_ve' |
 function CheckSummaryBlock({ detail }: { detail: ScoringDetail }) {
   const kiemTra = detail.kiem_tra
   if (kiemTra && kiemTra.trang_thai === 'HOAN_TAT' && detail.bao_cao_cuoi) {
-    const over = (kiemTra.ty_le_tong ?? 0) > kiemTra.nguong_ap_dung
+    // CR-01: vượt ngưỡng = tỷ lệ trùng với một đồ án nguồn >= ngưỡng (Web API tính).
+    const over = kiemTra.vuot_nguong === true
     return (
       <div>
         <Text>
-          {`Tỷ lệ tổng ${formatPercent(kiemTra.ty_le_tong)} - ${over ? 'vượt' : 'dưới'} ngưỡng ${formatPercent(
-            kiemTra.nguong_ap_dung,
-          )} của Bộ môn.`}
+          {`Tỷ lệ tổng ${formatPercent(kiemTra.ty_le_tong)}; trùng nhiều nhất với một đồ án ${formatPercent(
+            kiemTra.ty_le_nguon_cao_nhat,
+          )} - ${over ? 'vượt' : 'dưới'} ngưỡng ${formatPercent(kiemTra.nguong_ap_dung)} của Bộ môn.`}
         </Text>{' '}
         <Link to={`/kiem-tra-trung-lap/${detail.bao_cao_cuoi.id}`}>Xem chi tiết</Link>
       </div>

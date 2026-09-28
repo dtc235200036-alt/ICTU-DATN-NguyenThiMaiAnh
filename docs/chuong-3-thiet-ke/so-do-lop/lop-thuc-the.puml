@@ -145,6 +145,7 @@ class KetQuaKiemTraTrungLap <<Entity>> {
   +loaiKiemTra : LoaiKiemTra
   +trangThai : TrangThaiKiemTra
   +tyLeTong : Double
+  +tyLeNguonCaoNhat : Double
   +nguongApDung : Double
   +doiTuongDuocKiemTra : String
   +thoiDiem : DateTime
@@ -158,6 +159,7 @@ class ChiTietTrungLap <<Entity>> {
   +viTri : String
   +loaiNguon : KhongGianNguon
   +nguonId : Long
+  +tyLeNguon : Double
 }
 
 ' =====================================================================

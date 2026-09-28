@@ -19,11 +19,18 @@ class DocumentOut(BaseModel):
 
 
 class CheckSummary(BaseModel):
-    """UC0.7: trạng thái tóm tắt của một kết quả kiểm tra trùng lặp tài liệu."""
+    """UC0.7: trạng thái tóm tắt của một kết quả kiểm tra trùng lặp tài liệu.
+
+    CR-01 (04-REVIEW): `vuot_nguong` do Web API tính MỘT lần theo đúng quy tắc
+    đã hiệu chỉnh — tỷ lệ trùng với một đồ án nguồn cao nhất
+    (`ty_le_nguon_cao_nhat`) >= `nguong_ap_dung`; `ty_le_tong` chỉ để hiển thị.
+    None khi chưa HOAN_TAT."""
 
     id: int
     trang_thai: str
     ty_le_tong: float | None = None
+    ty_le_nguon_cao_nhat: float | None = None
+    vuot_nguong: bool | None = None
     nguong_ap_dung: float
     thoi_diem: UtcDateTime
 
@@ -50,6 +57,8 @@ class CheckDetail(BaseModel):
     id: int
     trang_thai: str
     ty_le_tong: float | None = None
+    ty_le_nguon_cao_nhat: float | None = None
+    vuot_nguong: bool | None = None
     nguong_ap_dung: float
     thoi_diem: UtcDateTime
     tai_lieu: DocumentOut

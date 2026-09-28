@@ -48,8 +48,34 @@ _RECHECK_NO_TEXT_DETAIL = "Không trích xuất được nội dung file — hã
 # ghi kèm vào vi_tri (VARCHAR(50)) — không cần cột mới.
 _TIN_HIEU_NHAN = {"NGUYEN_VAN": "trùng nguyên văn", "NGU_NGHIA": "trùng ngữ nghĩa"}
 _VI_TRI_MAX = 50
-# Số đồ án trùng nhiều nhất trong do_an_trung (MH-14 liệt kê top-k).
-_TOP_K = 5
+# Số đồ án nguồn tối đa trong do_an_trung (trần top_k của /check-document):
+# CR-01 lưu tỷ lệ theo nguồn cho từng đoạn nên lấy đủ rộng để mọi nguồn có
+# đoạn trùng đều có tỷ lệ theo nguồn của AI.
+_TOP_K = 20
+
+
+def _pct(value) -> float:
+    return round(min(max(float(value), 0.0), 100.0), 2)
+
+
+def _source_shares(raw: dict) -> dict[int, float]:
+    """CR-01: do_an_trung của AI = {ref_id: tỷ lệ tài liệu nộp khớp với
+    riêng nguồn đó} — thống kê NGUONG_TAI_LIEU được hiệu chỉnh (plan 04-04)."""
+    shares: dict[int, float] = {}
+    for item in raw.get("do_an_trung") or []:
+        ref_id = int(item["ref_id"])
+        shares[ref_id] = max(shares.get(ref_id, 0.0), _pct(item["ty_le"]))
+    return shares
+
+
+def vuot_nguong(ket_qua: KetQuaKiemTraTrungLap) -> bool | None:
+    """CR-01: quyết định "Vượt ngưỡng cảnh báo" DUY NHẤT của Web API —
+    tỷ lệ trùng với một đồ án nguồn cao nhất >= ngưỡng áp dụng (định nghĩa
+    "từ giá trị này trở lên", cùng phép so sánh với hiệu chỉnh và title_check).
+    None khi chưa có kết quả."""
+    if ket_qua.trang_thai != HOAN_TAT or ket_qua.ty_le_nguon_cao_nhat is None:
+        return None
+    return float(ket_qua.ty_le_nguon_cao_nhat) >= float(ket_qua.nguong_ap_dung)
 
 
 def _get_threshold(db: Session) -> float:
@@ -200,6 +226,7 @@ def run(ket_qua_id: int) -> None:
                 ChiTietTrungLap.ket_qua_id == ket_qua_id
             )
         )
+        shares = _source_shares(raw)
         for item in raw.get("chi_tiet", []):
             # /check-document so khớp trong không gian DOCUMENT (§3.3.5); một
             # item mang "loai" tường minh (ARCHIVE) được tôn trọng (WR-06).
@@ -217,6 +244,8 @@ def run(ket_qua_id: int) -> None:
                     vi_tri=_vi_tri_with_signal(item.get("vi_tri"), item.get("tin_hieu")),
                     loai_nguon=loai,
                     nguon_id=ref_id,
+                    # do_an_trung của AI nằm trong không gian DOCUMENT.
+                    ty_le_nguon=shares.get(ref_id) if loai == NGUON_DOCUMENT else None,
                 )
             )
 
@@ -225,7 +254,11 @@ def run(ket_qua_id: int) -> None:
             .where(KetQuaKiemTraTrungLap.id == ket_qua_id)
             .where(KetQuaKiemTraTrungLap.trang_thai == DANG_KIEM_TRA)
             .where(KetQuaKiemTraTrungLap.thoi_diem == stamp)
-            .values(trang_thai=HOAN_TAT, ty_le_tong=raw.get("ty_le_tong", 0.0))
+            .values(
+                trang_thai=HOAN_TAT,
+                ty_le_tong=_pct(raw.get("ty_le_tong", 0.0)),
+                ty_le_nguon_cao_nhat=max(shares.values(), default=0.0),
+            )
         )
         if task_db.execute(stmt).rowcount != 1:
             # Lần chạy đã hết hạn (LOI) hoặc bị kiểm tra lại thay thế — bỏ kết quả.
@@ -289,6 +322,12 @@ def summary(ket_qua: KetQuaKiemTraTrungLap) -> CheckSummary:
         id=ket_qua.id,
         trang_thai=ket_qua.trang_thai,
         ty_le_tong=float(ket_qua.ty_le_tong) if ket_qua.ty_le_tong is not None else None,
+        ty_le_nguon_cao_nhat=(
+            float(ket_qua.ty_le_nguon_cao_nhat)
+            if ket_qua.ty_le_nguon_cao_nhat is not None
+            else None
+        ),
+        vuot_nguong=vuot_nguong(ket_qua),
         nguong_ap_dung=float(ket_qua.nguong_ap_dung),
         thoi_diem=ket_qua.thoi_diem,
     )
@@ -321,31 +360,38 @@ def _published_sources(db: Session, rows: list[ChiTietTrungLap]) -> set[tuple[st
 def _per_source_share(
     ket_qua: KetQuaKiemTraTrungLap | None, rows: list[ChiTietTrungLap]
 ) -> list[CheckMatch]:
-    """MH-14/MH-09 "Đồ án trùng": tỷ lệ theo từng đồ án nguồn = phần của tỷ lệ
-    tổng ứng với số ký tự đoạn nộp khớp nguồn đó (04-07).
+    """MH-14/MH-09 "Đồ án trùng": tỷ lệ theo từng đồ án nguồn.
 
-    Dịch vụ AI tính ty_le_tong = ký tự câu bị gắn cờ / tổng ký tự (sau loại khuôn
-    mẫu) và mỗi câu chỉ thuộc một nguồn, nên share(nguồn) = ty_le_tong × ký tự
-    đoạn của nguồn / ký tự mọi đoạn — không cần lưu thêm cột (tỷ lệ theo nguồn
-    của AI không được lưu). Sai khác nhỏ do đoạn được ghép bằng dấu cách, hoặc
-    khi AI cắt quá CHI_TIET_TOI_DA đoạn. Không có ty_le_tong / ký tự đoạn (dữ
-    liệu cũ) thì quay về điểm đoạn cao nhất như trước."""
+    CR-01 (04-REVIEW): đọc thẳng tỷ lệ theo nguồn của AI đã lưu ở
+    chi_tiet_trung_lap.ty_le_nguon (0012) — cùng thống kê với quyết định vượt
+    ngưỡng, không ước lượng lại. Hai nguồn trùng nhãn thì cộng. Dòng cũ không
+    có ty_le_nguon: ước lượng của 04-07 (ty_le_tong × ký tự đoạn của nguồn / ký
+    tự mọi đoạn), rồi tới điểm đoạn cao nhất khi thiếu cả ty_le_tong."""
+    stored: dict[str, dict[tuple[str | None, int | None], float]] = {}
     chars: dict[str, int] = {}
     best: dict[str, float] = {}
     for row in rows:
         label = row.doi_tuong_trung
         chars[label] = chars.get(label, 0) + len(row.doan_nguon or "")
         best[label] = max(best.get(label, 0.0), float(row.ty_le))
+        if row.ty_le_nguon is not None:
+            stored.setdefault(label, {})[(row.loai_nguon, row.nguon_id)] = float(
+                row.ty_le_nguon
+            )
     total_chars = sum(chars.values())
     ty_le_tong = (
         float(ket_qua.ty_le_tong)
         if ket_qua is not None and ket_qua.ty_le_tong is not None
         else None
     )
-    if ty_le_tong is not None and total_chars > 0:
-        shares = {k: round(ty_le_tong * n / total_chars, 1) for k, n in chars.items()}
-    else:
-        shares = best
+    shares: dict[str, float] = {}
+    for label in chars:
+        if label in stored:
+            shares[label] = round(min(sum(stored[label].values()), 100.0), 2)
+        elif ty_le_tong is not None and total_chars > 0:
+            shares[label] = round(ty_le_tong * chars[label] / total_chars, 1)
+        else:
+            shares[label] = best[label]
     return sorted(
         (CheckMatch(doi_tuong_trung=k, ty_le=v) for k, v in shares.items()),
         key=lambda m: (-m.ty_le, m.doi_tuong_trung),
@@ -402,6 +448,12 @@ def detail(db: Session, doc: TaiLieuDoAn, user: CurrentUser) -> CheckDetail:
             if ket_qua is not None and ket_qua.ty_le_tong is not None
             else None
         ),
+        ty_le_nguon_cao_nhat=(
+            float(ket_qua.ty_le_nguon_cao_nhat)
+            if ket_qua is not None and ket_qua.ty_le_nguon_cao_nhat is not None
+            else None
+        ),
+        vuot_nguong=vuot_nguong(ket_qua) if ket_qua is not None else None,
         nguong_ap_dung=float(ket_qua.nguong_ap_dung) if ket_qua is not None else 0.0,
         thoi_diem=ket_qua.thoi_diem if ket_qua is not None else now_utc(),
         tai_lieu=to_document_out(doc),

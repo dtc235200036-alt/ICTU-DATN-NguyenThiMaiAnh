@@ -44,9 +44,11 @@ DEFINITIONS: tuple[_Definition, ...] = (
     ),
     _Definition(
         NGUONG_TAI_LIEU,
-        "Ngưỡng cảnh báo tài liệu (tỷ lệ tổng)",
-        "Đề cương/báo cáo có tỷ lệ trùng tổng từ giá trị này trở lên được hiển thị"
-        " \"Vượt ngưỡng cảnh báo\" cho GVHD và sinh viên.",
+        "Ngưỡng cảnh báo tài liệu (tỷ lệ trùng với một đồ án)",
+        "Đề cương/báo cáo có phần trùng với MỘT đồ án nguồn chiếm từ giá trị này"
+        " trở lên được hiển thị \"Vượt ngưỡng cảnh báo\" cho GVHD và sinh viên."
+        " Tỷ lệ tổng (cộng mọi nguồn) chỉ để tham khảo: các câu khớp rải rác với"
+        " nhiều đồ án cùng lĩnh vực không bị coi là sao chép.",
         10.40,
     ),
     _Definition(

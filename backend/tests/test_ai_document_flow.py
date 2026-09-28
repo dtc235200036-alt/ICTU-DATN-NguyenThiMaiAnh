@@ -97,7 +97,9 @@ def test_document_check_uses_ai_contract(
 
     fake.answer = {
         "ty_le_tong": 42.5,
-        "do_an_trung": [{"ref_id": src_doc_id, "ty_le": 42.5}],
+        # CR-01: tổng 42.5 % (> ngưỡng stub 30) nhưng trải trên hai nguồn —
+        # không nguồn nào tới ngưỡng -> KHÔNG vượt ngưỡng (ca P19 của 04-04).
+        "do_an_trung": [{"ref_id": src_doc_id, "ty_le": 25.0}, {"ref_id": 999_999, "ty_le": 17.5}],
         "chi_tiet": [
             {
                 "ref_id": src_doc_id,
@@ -147,6 +149,8 @@ def test_document_check_uses_ai_contract(
     detail = check_of(v2_id, gv)
     assert detail["trang_thai"] == "HOAN_TAT"
     assert detail["ty_le_tong"] == 42.5
+    assert detail["ty_le_nguon_cao_nhat"] == 25.0
+    assert detail["nguong_ap_dung"] == 30.0 and detail["vuot_nguong"] is False
     by_vi_tri = {seg["vi_tri"]: seg for seg in detail["chi_tiet"]}
     assert set(by_vi_tri) == {"Câu 3–4 · trùng nguyên văn", "Câu 7 · trùng ngữ nghĩa"}
     assert by_vi_tri["Câu 3–4 · trùng nguyên văn"]["doi_tuong_trung"] == f"{topic_src.ten_de_tai} (KTEST)"
