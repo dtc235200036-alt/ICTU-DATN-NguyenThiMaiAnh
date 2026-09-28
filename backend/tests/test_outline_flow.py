@@ -257,6 +257,18 @@ def test_background_check_always_terminates(
     assert check_detail["trang_thai"] == "HOAN_TAT"
     assert check_detail["ty_le_tong"] > 0
     assert any(topic_a.ten_de_tai in seg["doi_tuong_trung"] for seg in check_detail["chi_tiet"])
+    # WR-07: nguồn là đề cương chưa công bố của SV khác -> SV không thấy đoạn
+    # nguồn; GVHD thấy đủ
+    assert all(seg["doan_trung"] is None and seg["doan_trung_an"] for seg in check_detail["chi_tiet"])
+    gv_view = client.get(f"/api/documents/{b_doc_id}/check", headers=auth_headers(gv_b)).json()
+    assert all(seg["doan_trung"] and not seg["doan_trung_an"] for seg in gv_view["chi_tiet"])
+    # ... còn khi đề tài nguồn đã vào kho (đồ án công bố) thì SV thấy đoạn nguồn
+    from app.models.kho import DoAnKho
+
+    db.add(DoAnKho(de_tai_id=topic_a.id, ten_de_tai=topic_a.ten_de_tai, nguon="IMPORT", trang_thai_index="DA_INDEX"))
+    db.commit()
+    sv_view = client.get(f"/api/documents/{b_doc_id}/check", headers=auth_headers(sv_b)).json()
+    assert all(seg["doan_trung"] and not seg["doan_trung_an"] for seg in sv_view["chi_tiet"])
 
     # Yêu cầu sửa để SV B có thể nộp lại
     resp = client.post(

@@ -30,7 +30,7 @@ def get_check(
     if ket_qua is None:
         raise HTTPException(status_code=404, detail=_NO_CHECK_DETAIL)
     document_check.expire_if_stale(db, ket_qua)
-    return document_check.detail(db, doc)
+    return document_check.detail(db, doc, user)
 
 
 @router.get("/{tai_lieu_do_an_id}/download")

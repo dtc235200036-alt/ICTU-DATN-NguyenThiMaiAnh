@@ -43,6 +43,8 @@ export interface CheckSegment {
   doan_trung: string | null
   vi_tri: string | null
   ty_le: number
+  /** WR-07: nguồn là tài liệu chưa công bố của SV khác — SV không xem được đoạn nguồn */
+  doan_trung_an: boolean
 }
 
 export interface CheckDetail extends CheckSummary {

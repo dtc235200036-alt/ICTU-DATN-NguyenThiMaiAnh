@@ -39,6 +39,9 @@ class CheckSegment(BaseModel):
     doan_trung: str | None = None
     vi_tri: str | None = None
     ty_le: float
+    # WR-07: True khi doan_trung bị ẩn với người xem (SV) vì nguồn là tài liệu
+    # chưa công bố của sinh viên khác (không phải đồ án đã vào kho).
+    doan_trung_an: bool = False
 
 
 class CheckDetail(BaseModel):

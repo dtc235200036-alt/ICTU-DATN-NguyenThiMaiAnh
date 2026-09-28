@@ -200,7 +200,14 @@ export default function CheckDetailPage() {
                   <Col xs={24} md={12}>
                     <Card size="small" title={`Đoạn nguồn (${seg.doi_tuong_trung})`}>
                       <div style={{ marginBottom: 8 }}>{mucTrungTag(seg.ty_le)}</div>
-                      <p style={{ margin: 0, fontSize: 13 }}>{seg.doan_trung ?? '—'}</p>
+                      {seg.doan_trung_an ? (
+                        <p style={{ margin: 0, fontSize: 13, fontStyle: 'italic', color: 'rgba(0, 0, 0, 0.45)' }}>
+                          Nguồn là tài liệu chưa công bố của sinh viên khác — chỉ GVHD và Bộ môn xem được nội
+                          dung đoạn này.
+                        </p>
+                      ) : (
+                        <p style={{ margin: 0, fontSize: 13 }}>{seg.doan_trung ?? '—'}</p>
+                      )}
                     </Card>
                   </Col>
                 </Row>

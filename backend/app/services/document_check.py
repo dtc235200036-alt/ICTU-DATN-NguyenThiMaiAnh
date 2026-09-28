@@ -12,6 +12,8 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.core.config import get_settings
 from app.core.db import SessionLocal
+from app.core.deps import CurrentUser
+from app.core.roles import VaiTro
 from app.core.timeutil import now_utc
 from app.models.cau_hinh_nguong import NGUONG_TAI_LIEU, CauHinhNguong
 from app.models.de_cuong import TaiLieuDoAn
@@ -228,9 +230,37 @@ def summary(ket_qua: KetQuaKiemTraTrungLap) -> CheckSummary:
     )
 
 
-def detail(db: Session, doc: TaiLieuDoAn) -> CheckDetail:
+def _published_sources(db: Session, rows: list[ChiTietTrungLap]) -> set[tuple[str, int]]:
+    """WR-07: nguồn nào là đồ án ĐÃ CÔNG BỐ trong kho — một bản ghi ARCHIVE,
+    hoặc một tài liệu (DOCUMENT) của đề tài đã có dòng do_an_kho (đồ án khóa
+    trước được nạp vào hệ thống, hoặc đồ án đã chốt bảo vệ)."""
+    visible = {
+        (NGUON_ARCHIVE, row.nguon_id)
+        for row in rows
+        if row.loai_nguon == NGUON_ARCHIVE and row.nguon_id is not None
+    }
+    doc_ids = {
+        row.nguon_id
+        for row in rows
+        if row.loai_nguon == NGUON_DOCUMENT and row.nguon_id is not None
+    }
+    if doc_ids:
+        archived = db.execute(
+            select(TaiLieuDoAn.id)
+            .join(DoAnKho, DoAnKho.de_tai_id == TaiLieuDoAn.de_tai_id)
+            .where(TaiLieuDoAn.id.in_(doc_ids))
+        ).scalars()
+        visible |= {(NGUON_DOCUMENT, doc_id) for doc_id in archived}
+    return visible
+
+
+def detail(db: Session, doc: TaiLieuDoAn, user: CurrentUser) -> CheckDetail:
     """Router đã gọi expire_if_stale + kiểm tra tồn tại (404) trước khi gọi
-    hàm này — vẫn phòng thủ khi ket_qua vắng mặt để hàm luôn trả được kết quả."""
+    hàm này — vẫn phòng thủ khi ket_qua vắng mặt để hàm luôn trả được kết quả.
+
+    WR-07: với SINH_VIEN, `doan_trung` (văn bản của tài liệu nguồn) chỉ được
+    trả khi nguồn là đồ án đã vào kho; nguồn là đề cương/báo cáo chưa công bố
+    của sinh viên khác chỉ lộ tên đề tài, khóa và tỷ lệ. GV/Bộ môn thấy đủ."""
     ket_qua = get_check_for_doc(db, doc)
     topic = db.get(DeTai, doc.de_tai_id)
     ten_de_tai = topic.ten_de_tai if topic is not None else ""
@@ -243,15 +273,25 @@ def detail(db: Session, doc: TaiLieuDoAn) -> CheckDetail:
         )
 
     chi_tiet_rows = list(ket_qua.chi_tiet) if ket_qua is not None else []
+    redact = user.vai_tro == VaiTro.SINH_VIEN
+    published = _published_sources(db, chi_tiet_rows) if redact else set()
+
+    def _hidden(row: ChiTietTrungLap) -> bool:
+        if not redact or row.doan_trung is None:
+            return False
+        return (row.loai_nguon, row.nguon_id) not in published
+
     chi_tiet = [
         CheckSegment(
             doi_tuong_trung=row.doi_tuong_trung,
             doan_nguon=row.doan_nguon,
-            doan_trung=row.doan_trung,
+            doan_trung=None if hidden else row.doan_trung,
             vi_tri=row.vi_tri,
             ty_le=float(row.ty_le),
+            doan_trung_an=hidden,
         )
         for row in chi_tiet_rows
+        for hidden in [_hidden(row)]
     ]
 
     grouped: dict[str, float] = {}
