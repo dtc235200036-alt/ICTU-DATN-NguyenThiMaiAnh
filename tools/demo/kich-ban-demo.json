@@ -1,0 +1,608 @@
+{
+  "ten": "Kịch bản demo bảo vệ — 5 UC × 3 vai trò (bản chạy tự động)",
+  "ghi_chu": "Bản máy chạy được của kịch bản demo bảo vệ: cùng mã bước (B01…B16), tài khoản, tệp và chữ mong đợi. Chạy sau `bash deploy/demo-state.sh`; kịch bản GHI dữ liệu (đề xuất, duyệt, nộp, chấm, chốt) nên chạy lại `bash deploy/demo-state.sh` sau đó. Cột thoi_diem là mốc dự kiến khi trình bày có lời nói (tổng ~14:30); thời gian máy chạy nhỏ hơn nhiều.",
+  "tong_thoi_gian_du_kien": "14:30",
+  "chuan_bi": {
+    "lenh": [
+      "bash deploy/verify-all.sh --quick",
+      "bash deploy/demo-state.sh"
+    ],
+    "trinh_duyet": "Chrome/Edge 1440 px, 3 cửa sổ/hồ sơ riêng: Sinh viên, Giảng viên, Bộ môn",
+    "mat_khau": "SEED_DEFAULT_PASSWORD trong deploy/.env (không ghi mật khẩu vào tài liệu)"
+  },
+  "tai_khoan": {
+    "bomon": "Bộ môn CNTT",
+    "DTC225200011": "SV chưa có đề tài — đề xuất trực tiếp",
+    "DTC225200012": "SV có đề cương chép nguyên văn chờ duyệt",
+    "DTC225200013": "SV đang báo cáo tiến độ",
+    "DTC225200014": "SV đã bảo vệ, còn thiếu điểm GV014",
+    "DTC225200015": "SV đã chốt điểm, đã vào kho",
+    "GV011": "GVHD của 011–015",
+    "GV014": "Ủy viên Hội đồng demo K22"
+  },
+  "du_lieu": {
+    "ten_de_tai_dien_dat_lai": "Sử dụng SQL Server để hạch toán thu chi doanh nghiệp cho công ty cổ phần Hoàng Long",
+    "de_tai_kho_se_khop": "Ứng dụng SQL Server trong quản lý kế toán tại công ty CP Hoàng Long (K21) — ≈ 82 %",
+    "tep_nop_truc_tiep": "seed-data/tai-lieu/P03-B.pdf (CHEP_NGUYEN_VAN, nguồn: Ứng dụng Swift trong điểm danh sinh viên tại trường cao đẳng … (K18))",
+    "de_cuong_012": "seed-data/tai-lieu/P02-B.docx (CHEP_NGUYEN_VAN, 48 %, nguồn: Ứng dụng PyTorch trong giải đáp thắc mắc tuyển sinh … (K22))"
+  },
+  "buoc": [
+    {
+      "id": "B01",
+      "thoi_diem": "00:00",
+      "mo_ta": "Bộ môn mở Tổng quan toàn khoa",
+      "vai_tro": "bomon",
+      "man_hinh": "MH-04",
+      "yeu_cau": "PROG-03, AUTH-03",
+      "y_can_noi": "Ba vai trò, một đợt K22 đang mở; số liệu toàn khoa và mốc tiến độ lấy trực tiếp từ CSDL.",
+      "hanh_dong": [
+        {
+          "mo": "/tong-quan"
+        },
+        {
+          "cho_chu": "Tổng quan toàn khoa"
+        },
+        {
+          "cho_chu": "Mốc 1 – Phân tích và thiết kế hệ thống"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Thẻ thống kê (đề tài chờ duyệt, SV chưa có đề tài, đã phân công 4), bảng tiến độ, mốc của đợt"
+    },
+    {
+      "id": "B02",
+      "thoi_diem": "01:00",
+      "mo_ta": "SV 011 đề xuất đề tài bằng tên diễn đạt lại một đồ án trong kho",
+      "vai_tro": "DTC225200011",
+      "man_hinh": "MH-06",
+      "yeu_cau": "TOPC-02, AISV-03, NFR-08",
+      "y_can_noi": "So khớp ngữ nghĩa, không phải trùng chữ: tên khác hẳn câu chữ vẫn bị nhận ra; kết quả < 1 s; chỉ cảnh báo, không chặn.",
+      "hanh_dong": [
+        {
+          "mo": "/de-tai/de-xuat"
+        },
+        {
+          "cho_chu": "Thông tin đề tài"
+        },
+        {
+          "go": {
+            "o": "Đợt đồ án",
+            "chu": "Đợt đồ án tốt nghiệp K22 - HK1 (2026-2027) (K22)"
+          }
+        },
+        {
+          "go": {
+            "o": "Tên đề tài",
+            "chu": "Sử dụng SQL Server để hạch toán thu chi doanh nghiệp cho công ty cổ phần Hoàng Long"
+          }
+        },
+        {
+          "cho_chu": "Phát hiện 1 đề tài tương tự trong kho",
+          "toi_da_giay": 10
+        },
+        {
+          "cho_chu": "Ứng dụng SQL Server trong quản lý kế toán tại công ty CP Hoàng Long"
+        },
+        {
+          "cho_chu": "81.92%"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Cảnh báo vàng: nguồn Kho đồ án, K21, GVHD, tỷ lệ tương đồng 81.92 %"
+    },
+    {
+      "id": "B03",
+      "thoi_diem": "02:30",
+      "mo_ta": "SV 011 chọn Vẫn gửi đề xuất và gửi",
+      "vai_tro": "DTC225200011",
+      "man_hinh": "MH-06",
+      "yeu_cau": "TOPC-02",
+      "y_can_noi": "Kết quả kiểm tra tên được lưu kèm đề tài để Bộ môn xem lại khi duyệt.",
+      "hanh_dong": [
+        {
+          "bam": "Vẫn gửi đề xuất"
+        },
+        {
+          "go": {
+            "o": "Lĩnh vực",
+            "chu": "Hệ thống thông tin"
+          }
+        },
+        {
+          "bam": "Gửi đề xuất"
+        },
+        {
+          "cho_chu": "Đã gửi đề xuất đề tài",
+          "toi_da_giay": 15
+        },
+        {
+          "cho_chu": "Chờ duyệt"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Chi tiết đề tài: Chờ duyệt, Kết quả kiểm tra trùng tên (UC0.6) 81.92 %"
+    },
+    {
+      "id": "B04",
+      "thoi_diem": "03:15",
+      "mo_ta": "Bộ môn duyệt đề tài của 011 và phân công GV011",
+      "vai_tro": "bomon",
+      "man_hinh": "MH-07",
+      "yeu_cau": "TOPC-03, NOTF-01",
+      "y_can_noi": "Bộ môn thấy lại kết quả kiểm tra tên đã lưu; duyệt kèm phân công GVHD, SV nhận thông báo.",
+      "hanh_dong": [
+        {
+          "mo": "/duyet-de-tai"
+        },
+        {
+          "bam": {
+            "chu": "Xem chi tiết",
+            "hang": "Sử dụng SQL Server để hạch toán thu chi doanh nghiệp"
+          }
+        },
+        {
+          "cho_chu": "Kết quả kiểm tra tên đã lưu lúc đề xuất"
+        },
+        {
+          "go": {
+            "o": "Chọn giảng viên hướng dẫn",
+            "chu": "Đặng Hữu Minh"
+          }
+        },
+        {
+          "bam": "Duyệt và phân công"
+        },
+        {
+          "cho_chu": "Đã duyệt và phân công GVHD",
+          "toi_da_giay": 10
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Thông báo 'Đã duyệt và phân công GVHD'; danh sách chờ duyệt trống"
+    },
+    {
+      "id": "B05",
+      "thoi_diem": "04:15",
+      "mo_ta": "SV 011 nộp đề cương P03-B.pdf (chép nguyên văn) — Đang kiểm tra rồi Hoàn tất, mở kết quả",
+      "vai_tro": "DTC225200011",
+      "man_hinh": "MH-08, MH-14",
+      "yeu_cau": "OUTL-01, AISV-04, AISV-06, NFR-09, NFR-10",
+      "y_can_noi": "Nộp trả về ngay (< 2 s), kiểm tra chạy nền ở dịch vụ AI; trong lúc chờ chuyển sang màn hình GVHD.",
+      "hanh_dong": [
+        {
+          "mo": "/de-cuong"
+        },
+        {
+          "cho_chu": "Kéo thả file vào đây hoặc bấm để chọn file"
+        },
+        {
+          "tai_len": {
+            "o": "input[type=file]",
+            "tep": "seed-data/tai-lieu/P03-B.pdf"
+          }
+        },
+        {
+          "cho_chu": "Đã chọn: P03-B.pdf"
+        },
+        {
+          "bam": "Nộp phiên bản mới"
+        },
+        {
+          "cho_chu": "hệ thống đang kiểm tra trùng lặp",
+          "toi_da_giay": 10
+        },
+        {
+          "cho_chu": "Hoàn tất - ",
+          "toi_da_giay": 60
+        },
+        {
+          "chup": "B05-hoan-tat.png"
+        },
+        {
+          "bam": "Xem kết quả"
+        },
+        {
+          "cho_chu": "Chi tiết kết quả kiểm tra trùng lặp"
+        },
+        {
+          "cho_chu": "Vượt ngưỡng cảnh báo"
+        },
+        {
+          "cho_chu": "Ứng dụng Swift trong điểm danh sinh viên"
+        },
+        {
+          "cuon": 0
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Thông báo 'Đã nộp phiên bản mới — hệ thống đang kiểm tra trùng lặp'; v1 Đang kiểm tra → Hoàn tất – x %; Xem kết quả: Vượt ngưỡng cảnh báo, đồ án nguồn K18"
+    },
+    {
+      "id": "B06",
+      "thoi_diem": "06:00",
+      "mo_ta": "GV011 mở đề cương chờ duyệt của 012 — khung kết quả trùng lặp",
+      "vai_tro": "GV011",
+      "man_hinh": "MH-09",
+      "yeu_cau": "OUTL-02, AISV-05",
+      "y_can_noi": "GVHD thấy tỷ lệ tổng, ngưỡng của Bộ môn và đồ án trùng nhiều nhất ngay cạnh nội dung đề cương.",
+      "hanh_dong": [
+        {
+          "mo": "/duyet-de-cuong"
+        },
+        {
+          "bam": {
+            "chu": "Duyệt",
+            "hang": "DTC225200012"
+          }
+        },
+        {
+          "cho_chu": "Duyệt đề cương - Lê Bảo Ánh"
+        },
+        {
+          "cho_chu": "Vượt ngưỡng cảnh báo"
+        },
+        {
+          "cho_chu": "Ứng dụng PyTorch trong giải đáp thắc mắc tuyển sinh"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "48 % tỷ lệ tổng, Vượt ngưỡng cảnh báo, đồ án trùng nhiều nhất (K22)"
+    },
+    {
+      "id": "B07",
+      "thoi_diem": "07:00",
+      "mo_ta": "GV011 xem chi tiết — đoạn nộp cạnh đoạn nguồn, cụm trùng tô sáng",
+      "vai_tro": "GV011",
+      "man_hinh": "MH-14",
+      "yeu_cau": "AISV-05, AISV-06",
+      "y_can_noi": "Chỉ rõ đoạn trùng, đồ án nguồn và tỷ lệ; phần mẫu chung (bìa, mục lục, TLTK) đã bị loại trước khi so.",
+      "hanh_dong": [
+        {
+          "bam": "Xem chi tiết"
+        },
+        {
+          "cho_chu": "Chi tiết kết quả kiểm tra trùng lặp"
+        },
+        {
+          "cho_chu": "Trùng nguyên văn"
+        },
+        {
+          "cho_chu": "Đoạn nguồn (Ứng dụng PyTorch"
+        },
+        {
+          "cuon": 0
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Mức trùng Cao (100 %), Trùng nguyên văn, đoạn nộp | đoạn nguồn tô sáng"
+    },
+    {
+      "id": "B08",
+      "thoi_diem": "08:00",
+      "mo_ta": "GV011 yêu cầu 012 sửa đề cương kèm nhận xét",
+      "vai_tro": "GV011",
+      "man_hinh": "MH-09",
+      "yeu_cau": "OUTL-03, NOTF-01",
+      "y_can_noi": "Quyết định vẫn là của GVHD; SV nhận thông báo và nộp phiên bản mới.",
+      "hanh_dong": [
+        {
+          "mo": "/duyet-de-cuong"
+        },
+        {
+          "bam": {
+            "chu": "Duyệt",
+            "hang": "DTC225200012"
+          }
+        },
+        {
+          "cho_chu": "Duyệt đề cương - Lê Bảo Ánh"
+        },
+        {
+          "go": {
+            "o": "Nhận xét",
+            "chu": "Đề cương trùng nguyên văn 48 % với đồ án K22 về trợ lý ảo tuyển sinh. Em viết lại phần tổng quan và mục tiêu theo đề tài của mình."
+          }
+        },
+        {
+          "bam": "Yêu cầu sửa"
+        },
+        {
+          "cho_chu": "Đã yêu cầu sửa",
+          "toi_da_giay": 10
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Thông báo 'Đã yêu cầu sửa'; đề cương 012 chuyển Yêu cầu sửa"
+    },
+    {
+      "id": "B09",
+      "thoi_diem": "09:00",
+      "mo_ta": "SV 013 xem báo cáo tiến độ theo mốc",
+      "vai_tro": "DTC225200013",
+      "man_hinh": "MH-10",
+      "yeu_cau": "PROG-01",
+      "y_can_noi": "Mốc do Bộ môn đặt; trạng thái Đúng hạn / Nộp trễ / Trễ mốc do server tính theo ngày.",
+      "hanh_dong": [
+        {
+          "mo": "/tien-do"
+        },
+        {
+          "cho_chu": "Nhận xét của GVHD"
+        },
+        {
+          "cho_chu": "Mốc 2 – Cài đặt các chức năng chính"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Mốc 1 Đúng hạn + nhận xét Đạt, Mốc 2 Đúng hạn chờ nhận xét, Mốc 3 Chưa đến hạn"
+    },
+    {
+      "id": "B10",
+      "thoi_diem": "09:45",
+      "mo_ta": "GV011 nhận xét báo cáo mốc 2 của 013",
+      "vai_tro": "GV011",
+      "man_hinh": "MH-10",
+      "yeu_cau": "PROG-02, NOTF-01",
+      "y_can_noi": "Nhận xét + đánh giá gửi thông báo cho SV; báo cáo đã nhận xét thì không nộp đè được.",
+      "hanh_dong": [
+        {
+          "mo": "/nhan-xet-tien-do"
+        },
+        {
+          "bam": "Dương Quang Anh (DTC225200013)"
+        },
+        {
+          "cho_chu": "Nhận xét cho Mốc 2 – Cài đặt các chức năng chính"
+        },
+        {
+          "go": {
+            "o": "Nhận xét",
+            "chu": "Đã có chức năng tìm phòng theo bản đồ; cần bổ sung kiểm thử cho chức năng đăng tin."
+          }
+        },
+        {
+          "bam": "Gửi nhận xét"
+        },
+        {
+          "cho_chu": "Đã gửi nhận xét cho Mốc 2",
+          "toi_da_giay": 10
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Thông báo 'Đã gửi nhận xét cho Mốc 2 …'"
+    },
+    {
+      "id": "B11",
+      "thoi_diem": "10:30",
+      "mo_ta": "GV014 (ủy viên Hội đồng demo K22) chấm điểm SV 014",
+      "vai_tro": "GV014",
+      "man_hinh": "MH-12",
+      "yeu_cau": "DEFN-03",
+      "y_can_noi": "Chỉ thành viên hội đồng mới thấy và chấm; GVHD của SV bị loại khỏi hội đồng khi xếp lịch.",
+      "hanh_dong": [
+        {
+          "mo": "/cham-diem"
+        },
+        {
+          "bam": "Dương Phú Hương"
+        },
+        {
+          "cho_chu": "Chấm điểm - Dương Phú Hương"
+        },
+        {
+          "go": {
+            "o": "Điểm (0-10)",
+            "chu": "8.5"
+          }
+        },
+        {
+          "go": {
+            "o": "Nhận xét",
+            "chu": "Hệ thống chạy ổn định, cần bổ sung phân quyền chi tiết cho ban chủ nhiệm câu lạc bộ."
+          }
+        },
+        {
+          "bam": "Lưu điểm"
+        },
+        {
+          "cho_chu": "Đã lưu điểm",
+          "toi_da_giay": 10
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Thông báo 'Đã lưu điểm'; cột Điểm của tôi = 8.5"
+    },
+    {
+      "id": "B12",
+      "thoi_diem": "11:15",
+      "mo_ta": "Bộ môn chốt kết quả bảo vệ của 014 — tự lưu kho",
+      "vai_tro": "bomon",
+      "man_hinh": "MH-11",
+      "yeu_cau": "DEFN-04, REPO-01",
+      "y_can_noi": "Điểm = trung bình 3 thành viên; chốt xong không sửa được và đồ án tự vào kho + chỉ mục AI.",
+      "hanh_dong": [
+        {
+          "mo": "/hoi-dong"
+        },
+        {
+          "bam": "Hội đồng demo K22"
+        },
+        {
+          "cho_chu": "3/3 đã chấm"
+        },
+        {
+          "bam": {
+            "chu": "Chốt kết quả",
+            "hang": "DTC225200014"
+          }
+        },
+        {
+          "cho_chu": "Chốt kết quả bảo vệ?"
+        },
+        {
+          "bam": {
+            "chu": "Đồng ý",
+            "pham_vi": ".ant-popover"
+          }
+        },
+        {
+          "cho_chu": "đồ án đã vào kho",
+          "toi_da_giay": 15
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Thông báo 'Đã chốt kết quả — điểm 8.33; đồ án đã vào kho'; dòng 014 Đã chốt"
+    },
+    {
+      "id": "B13",
+      "thoi_diem": "12:00",
+      "mo_ta": "Bộ môn tìm đồ án vừa lưu kho theo từ khóa + khóa K22; mở hộp thoại import khóa cũ",
+      "vai_tro": "bomon",
+      "man_hinh": "MH-13",
+      "yeu_cau": "REPO-02, REPO-03",
+      "y_can_noi": "Kho là nguồn so sánh của AI; bản ghi mới được index ngay; khóa cũ nhập bằng CSV.",
+      "hanh_dong": [
+        {
+          "mo": "/kho-do-an"
+        },
+        {
+          "go": {
+            "o": "Khóa",
+            "chu": "K22"
+          }
+        },
+        {
+          "go": {
+            "o": "Tên đề tài hoặc từ khóa",
+            "chu": "câu lạc bộ",
+            "enter": true
+          }
+        },
+        {
+          "cho_on_dinh": true
+        },
+        {
+          "cho_chu": "Xây dựng hệ thống quản lý câu lạc bộ sinh viên Trường Đại học Công nghệ Thông tin và Truyền thông"
+        },
+        {
+          "chup": "B13-kho-tim-kiem.png"
+        },
+        {
+          "bam": "Import khóa cũ"
+        },
+        {
+          "cho_chu": "ma_so_sinh_vien"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Kết quả lọc: đồ án của 014 (K22, điểm 8.33); hộp thoại Import đồ án khóa cũ"
+    },
+    {
+      "id": "B14",
+      "thoi_diem": "12:45",
+      "mo_ta": "Bộ môn xem cấu hình ngưỡng trùng lặp (chỉ xem, không lưu)",
+      "vai_tro": "bomon",
+      "man_hinh": "—",
+      "yeu_cau": "AISV-07",
+      "y_can_noi": "Ba ngưỡng đã hiệu chỉnh trên bộ dữ liệu thử; đổi ngưỡng chỉ áp dụng cho lần kiểm tra sau.",
+      "hanh_dong": [
+        {
+          "mo": "/cau-hinh-nguong"
+        },
+        {
+          "cho_chu": "Ngưỡng tên đề tài"
+        },
+        {
+          "cho_chu": "Ngưỡng cảnh báo tài liệu"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Ba ngưỡng kèm giải thích, giá trị đề xuất, người cập nhật"
+    },
+    {
+      "id": "B15",
+      "thoi_diem": "13:15",
+      "mo_ta": "Bảo mật: SV 013 mở trang của Bộ môn -> 403; http:// tự chuyển sang https://",
+      "vai_tro": "DTC225200013",
+      "man_hinh": "—",
+      "yeu_cau": "AUTH-03, NFR-01, NFR-04",
+      "y_can_noi": "Phân quyền kiểm ở server (API trả 403), giao diện chỉ phản ánh; mọi truy cập đi qua HTTPS.",
+      "hanh_dong": [
+        {
+          "mo": "/tai-khoan"
+        },
+        {
+          "cho_chu": "Bạn không có quyền truy cập trang này"
+        },
+        {
+          "chup": true
+        },
+        {
+          "mo": "http://localhost/tong-quan"
+        },
+        {
+          "url_bat_dau": "https://"
+        },
+        {
+          "cho_chu": "Đăng xuất"
+        }
+      ],
+      "man_hinh_mong_doi": "403 — Bạn không có quyền truy cập trang này; thanh địa chỉ về https://",
+      "cho_phep_http": [
+        403
+      ]
+    },
+    {
+      "id": "B16",
+      "thoi_diem": "13:45",
+      "mo_ta": "Kết: Bộ môn quay lại Tổng quan — số liệu đã cập nhật sau buổi demo",
+      "vai_tro": "bomon",
+      "man_hinh": "MH-04",
+      "yeu_cau": "PROG-03, TOPC-04",
+      "y_can_noi": "Toàn bộ 5 UC vừa chạy trên cùng một hệ thống; khôi phục trạng thái demo bằng một lệnh.",
+      "hanh_dong": [
+        {
+          "mo": "/tong-quan"
+        },
+        {
+          "cho_chu": "Tổng quan toàn khoa"
+        },
+        {
+          "cho_chu": "Đề tài đã phân công"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Đề tài đã phân công 5, không còn đề tài chờ duyệt"
+    }
+  ]
+}

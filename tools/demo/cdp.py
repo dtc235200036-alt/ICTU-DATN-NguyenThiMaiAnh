@@ -58,7 +58,8 @@ _JS_TIM = r"""
       const hs = [...document.querySelectorAll('tr, .ant-list-item, .ant-card, .ant-collapse-item')]
         .filter((h) => hienThi(h) && chuan(h.innerText).includes(hang));
       if (!hs.length) return null;
-      goc = hs[0];
+      // Lấy khung NHỎ NHẤT chứa chữ (hàng bảng), không phải thẻ Card bao cả bảng.
+      goc = hs.filter((h) => !hs.some((k) => k !== h && h.contains(k)))[0];
     }
     if (phamVi) {
       const ds = [...goc.querySelectorAll(phamVi)].filter(hienThi);
@@ -82,6 +83,9 @@ _JS_TIM = r"""
     khop = khop.filter((el) => !khop.some((k) => k !== el && el.contains(k)));
     // Ưu tiên phần tử bấm được gần nhất.
     const bamDuoc = (el) => el.closest('button, a, [role=button], [role=menuitem], [role=tab], [role=option], .ant-menu-item, .ant-tabs-tab, .ant-select-item-option, .ant-dropdown-menu-item, .ant-radio-button-wrapper, .ant-checkbox-wrapper, .ant-collapse-header') || el;
+    // Có phần tử bấm được (nút, link, tab...) thì bỏ các chữ trùng tên chỉ để hiển thị (tiêu đề...).
+    const coTheBam = khop.filter((el) => el.closest('button, a, [role=button], [role=menuitem], [role=tab], [role=option], .ant-menu-item, .ant-tabs-tab, .ant-select-item-option, .ant-dropdown-menu-item'));
+    if (coTheBam.length) khop = coTheBam;
     const trongLopPhu = khop.filter((el) => el.closest(LOP_PHU));
     const ds = trongLopPhu.length ? trongLopPhu : khop;
     return bamDuoc(ds[ds.length && trongLopPhu.length ? ds.length - 1 : 0]);
@@ -480,6 +484,9 @@ class TrinhDuyet:
         for t in ("keyDown", "keyUp"):
             await self.gui("Input.dispatchKeyEvent", {"type": t, "key": key, "code": key,
                                                       "windowsVirtualKeyCode": ma})
+
+    async def url(self) -> str:
+        return str(await self.js("location.href"))
 
     async def do_rong(self) -> int:
         """document.documentElement.scrollWidth (NFR-16: <= chiều rộng khung nhìn)."""

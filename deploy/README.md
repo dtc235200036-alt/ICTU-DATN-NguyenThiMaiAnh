@@ -43,11 +43,12 @@ bash deploy/verify-all.sh --report   # đầy đủ + ghi kết quả cho chươ
 ```
 
 - `--quick`: tình trạng stack (mysql/api/ai healthy, apache chạy, `ai-db-init`/`ai-migrate` exit 0, `ai` có `HF_HUB_OFFLINE=1` và không publish cổng), số liệu DATA-01/02/03 (100 SV, 30 GV, 300 đề tài kho K18–K22 đều `DA_INDEX`, `/health` ≥ 300 vector tiêu đề, 50 tệp, 25 đồ án nguồn có báo cáo), `smoke-test.sh`.
-- Đầy đủ: thêm `uv --directory backend run pytest -q`, `uv --directory ai-service run pytest -q`, `e2e-uc1.sh`, `e2e-uc2-5.sh`, `e2e-ai.sh`, `ai-nfr.sh --json`, `nfr-he-thong.sh --json`, `tools/check-erd-db.py`, và kiểm tra không còn dữ liệu kiểm thử (đợt/bản ghi kho K95–K99, tài khoản bị khóa).
+- Đầy đủ: thêm `uv --directory backend run pytest -q`, `uv --directory ai-service run pytest -q`, `e2e-uc1.sh`, `e2e-uc2-5.sh`, `e2e-ai.sh`, `ai-nfr.sh --json`, `nfr-he-thong.sh --json`, `tools/check-erd-db.py`, kiểm tra không còn dữ liệu kiểm thử (đợt/bản ghi kho K95–K99, tài khoản bị khóa) và bước **nfr-16**: chạy `tools/demo/kich-ban-anh.json --chi-doc` (23 màn hình, 3 vai trò) bằng Chrome headless 1440 px qua HTTPS — FAIL nếu có lỗi JS/console, HTTP ≥ 400 ngoài dự kiến hoặc tràn ngang (bỏ qua, dùng `anh-chup.json` đã commit, khi chưa có trạng thái demo).
+- Mọi chế độ (05-05): ghi chữ ký hàng của tài khoản demo (`demo-state.sh --dem`: số hàng + md5 cột trạng thái/điểm) **trước** các bộ kiểm thử và so lại ở bước cuối **"trạng thái demo"** — lệch là FAIL (các bộ tự động không được đụng trạng thái demo).
 - `--report`: ghi `docs/chuong-4-trien-khai/ket-qua-kiem-thu/tong-hop.json` (commit, máy, từng bước + trạng thái + giây, số test pytest, `du_lieu`, bảng NFR-01…NFR-19 với `dat` true/false/null) và `nhat-ky-verify-all.log` (nhật ký đầy đủ), đồng thời ghi lại trang `docs/chuong-4-trien-khai/thu-nghiem-ai/04-hieu-nang-va-bao-mat.md` (`ai-nfr.sh --report`). Mọi thứ ghi ra đều đã che: giá trị `deploy/.env` dài ≥ 8 ký tự thành `***` (khóa bí mật) hoặc `<TEN_KHOA>`, chuỗi dạng JWT thành `***`.
 - In bảng các bước (trạng thái + giây) và thoát khác 0 nếu có bước lỗi.
 
-`nfr-he-thong.sh [--json PATH]` đo NFR mức hệ thống qua Apache HTTPS: NFR-01 (301 → https), NFR-02 (bcrypt cost ≥ 12, mật khẩu không có trong log), NFR-03 (token ký bằng helper của app với `exp` quá khứ → 401), NFR-04 (SV gọi route Bộ môn → 403), NFR-05 (Bộ môn khóa → đăng nhập bị từ chối, mở khóa → đăng nhập lại được), NFR-08 qua HTTPS (20 lần kiểm tra tên, P95 ≤ 5 s), NFR-12 (20 lần tra cứu kho + 20 lần danh sách đề tài, P95 ≤ 1 s), NFR-13 (collation `utf8mb4_vietnamese_ci` ở mọi cột/bảng của `thesis_core` và `thesis_ai`, `alembic_version` mới nhất), NFR-14 (NFC = NFD), NFR-15 (ProxyTimeout > 30 s, SPA tĩnh, `/api` qua proxy), NFR-17/18/19 (số liệu seed). NFR-06 do `smoke-test.sh` + pytest chứng minh, NFR-07/09/10/11 do `ai-nfr.sh`, NFR-16 (Chrome 1440 px) do lần chụp màn hình của plan 05-05.
+`nfr-he-thong.sh [--json PATH]` đo NFR mức hệ thống qua Apache HTTPS: NFR-01 (301 → https), NFR-02 (bcrypt cost ≥ 12, mật khẩu không có trong log), NFR-03 (token ký bằng helper của app với `exp` quá khứ → 401), NFR-04 (SV gọi route Bộ môn → 403), NFR-05 (Bộ môn khóa → đăng nhập bị từ chối, mở khóa → đăng nhập lại được), NFR-08 qua HTTPS (20 lần kiểm tra tên, P95 ≤ 5 s), NFR-12 (20 lần tra cứu kho + 20 lần danh sách đề tài, P95 ≤ 1 s), NFR-13 (collation `utf8mb4_vietnamese_ci` ở mọi cột/bảng của `thesis_core` và `thesis_ai`, `alembic_version` mới nhất), NFR-14 (NFC = NFD), NFR-15 (ProxyTimeout > 30 s, SPA tĩnh, `/api` qua proxy), NFR-17/18/19 (số liệu seed). NFR-06 do `smoke-test.sh` + pytest chứng minh, NFR-07/09/10/11 do `ai-nfr.sh`, NFR-16 (Chrome 1440 px) do bước `nfr-16` của verify-all (hoặc `ket-qua-kiem-thu/anh-chup.json`).
 
 **Tài khoản dành riêng cho `nfr-he-thong.sh` — không dùng cho demo thủ công:** `DTC225200094` (SV, bị khóa/mở khóa trong lúc chạy) cùng `bomon`; khóa **K95** dành riêng (script không tạo đợt nào, nhưng dọn nếu có). Script luôn mở khóa lại `DTC225200094` và xóa thông báo phát sinh của nó (trap, kể cả khi lỗi). Không chạy song song với các script kiểm thử khác.
 
@@ -122,6 +123,8 @@ Test pytest chạy trực tiếp trên máy host, kết nối tới MySQL của 
 | `install.sh` | Cài đặt / nâng cấp toàn bộ bằng một lệnh (xem "Cài đặt nhanh") |
 | `verify-all.sh [--quick] [--report]` | Chạy tuần tự mọi bộ kiểm thử + đo NFR, bảng kết quả, ghi `docs/chuong-4-trien-khai/ket-qua-kiem-thu/` |
 | `nfr-he-thong.sh [--json PATH]` | Đo NFR mức hệ thống qua Apache HTTPS (NFR-01..05, 08, 12..15, 17..19) |
+| `demo-state.sh [--chi-xoa \| --dem]` | Đưa hệ thống về trạng thái demo bảo vệ (xem "Kịch bản demo bảo vệ (Phase 5)") |
+| `tools/demo/chay-kich-ban.py <kịch bản.json>` | Chạy kịch bản JSON trên giao diện thật bằng Chrome headless (CDP), chụp ảnh 1440 px, ghi `--json` / `--log` |
 
 ## Reset toàn bộ
 
@@ -133,7 +136,46 @@ Hoặc cài lại sạch trong một lệnh (xóa cả cache mô hình rồi t�
 
 Lệnh này xóa cả volume `mysql-data` **và** `uploads-data` (file đề cương/báo cáo đã nộp) — lần khởi động sau sẽ tạo lại schema và seed dữ liệu từ đầu. Muốn giữ file tải lên, sao lưu trước theo mục "File tải lên" bên dưới.
 
+## Kịch bản demo bảo vệ (Phase 5) — trạng thái demo và chạy lại kịch bản
+
+Dùng cho buổi bảo vệ; thay thế các mục "Kịch bản demo UC1", "UC2–UC5" và "Kịch bản demo AI" bên dưới (giữ lại làm hướng dẫn thao tác chi tiết theo từng phase). Bản trình bày cho người đọc (`docs/kich-ban-demo.md`, lời nói theo từng bước) sẽ viết cùng quyển báo cáo; bản máy chạy được là `tools/demo/kich-ban-demo.json` (B01…B16, mốc thời gian dự kiến, tài khoản, tệp, chữ mong đợi, ý cần nói).
+
+**Tài khoản demo dành riêng** (không bộ kiểm thử tự động nào ghi vào; đợt: "Đợt đồ án tốt nghiệp K22 - HK1 (2026-2027)", mật khẩu `SEED_DEFAULT_PASSWORD`):
+
+| Tài khoản | Trạng thái sau `demo-state.sh` | Dùng trong demo |
+|---|---|---|
+| `DTC225200011` | chưa có đề tài | đề xuất tên diễn đạt lại → cảnh báo AI → gửi; nộp `seed-data/tai-lieu/P03-B.pdf` → Đang kiểm tra → Hoàn tất |
+| `DTC225200012` | đề cương v1 = `P02-B.docx` (chép nguyên văn), Hoàn tất 48 %, chờ GV011 duyệt | MH-09 / MH-14 đoạn tô sáng, Yêu cầu sửa |
+| `DTC225200013` | đề cương đã duyệt, 2 báo cáo tiến độ (mốc 1 đã nhận xét, mốc 2 chờ) | UC3 |
+| `DTC225200014` | báo cáo cuối đã kiểm tra, "Hội đồng demo K22", 2/3 điểm | GV014 chấm, Bộ môn chốt → tự vào kho |
+| `DTC225200015` | đủ 3 điểm, đã chốt (8.5), đã trong Kho đồ án | UC4 kết quả, UC5 tra cứu |
+| `GV011` / `GV012` / `GV013` / `GV014` | GVHD của 011–015 / chủ tịch / thư ký / ủy viên hội đồng demo | |
+
+```bash
+bash deploy/demo-state.sh             # xóa trạng thái demo cũ + dựng lại (~20 s; xóa ~3 s, dựng ~13 s)
+bash deploy/demo-state.sh --chi-xoa   # chỉ xóa (5 SV demo không còn đề tài, hội đồng demo bị xóa)
+bash deploy/demo-state.sh --dem       # chỉ đọc: chữ ký hàng demo (verify-all dùng)
+```
+
+`demo-state.sh` chỉ chọn hàng của 5 SV demo trong đợt K22 và hội đồng tên "Hội đồng demo K22", gỡ TOPIC/DOCUMENT/ARCHIVE của chúng khỏi chỉ mục AI rồi xóa theo thứ tự khóa ngoại; **dừng, không xóa gì** nếu hội đồng demo có lịch/thành viên ngoài tài khoản demo. Mốc tiến độ của đợt K22 được get-or-create (không bao giờ xóa) và đặt hạn +3/+17/+45 ngày theo ngày chạy (kẹp trong đợt). Tệp nộp lấy từ các cặp đã hiệu chỉnh Đạt, **bỏ qua** cặp CHEP_NGUYEN_VAN/KHONG_LIEN_QUAN đầu tiên vì `e2e-ai.sh` dùng chúng.
+
+Chạy lại kịch bản trên giao diện thật (Chrome headless qua `https://localhost`, 1440×900; cần `/usr/bin/google-chrome` hoặc `CHROME=...` và gói Python `websockets` có sẵn trên máy):
+
+```bash
+# Tập dượt tự động B01…B16 (ghi dữ liệu) — thêm một mục vào nhật ký
+bash deploy/demo-state.sh && python3 tools/demo/chay-kich-ban.py tools/demo/kich-ban-demo.json \
+  --out-dir /tmp/ntma-tap-duot --log docs/chuong-4-trien-khai/ket-qua-kiem-thu/tap-duot-demo.md && bash deploy/demo-state.sh
+
+# Chụp lại 27 ảnh chương 4 (uc0…uc5) + bảng kê anh-chup.json (NFR-16)
+bash deploy/demo-state.sh && python3 tools/demo/chay-kich-ban.py tools/demo/kich-ban-anh.json \
+  --out-dir docs/chuong-4-trien-khai/anh --json docs/chuong-4-trien-khai/ket-qua-kiem-thu/anh-chup.json && bash deploy/demo-state.sh
+```
+
+Một bước FAIL khi hết giờ chờ chữ mong đợi, có exception JS / lỗi console, HTTP ≥ 400 không khai báo trong `cho_phep_http`, hoặc trang tràn ngang; ảnh lúc lỗi ghi ở `/tmp/ntma-loi-<bước>.png`. Mật khẩu đọc từ `NTMA_MAT_KHAU` hoặc `deploy/.env`, không bao giờ in ra; Chrome debug chỉ bind 127.0.0.1 (cổng tạm) và bị tắt + xóa hồ sơ tạm khi xong. **Luôn chạy `bash deploy/demo-state.sh` sau kịch bản** và không chạy song song với `verify-all.sh`.
+
 ## Kịch bản demo UC1 (thao tác trên trình duyệt)
+
+> Cho buổi bảo vệ dùng mục "Kịch bản demo bảo vệ (Phase 5)" ở trên; mục này giữ lại làm hướng dẫn thao tác chi tiết.
 
 Mở `https://localhost`, chấp nhận cảnh báo chứng chỉ tự ký, rồi thực hiện tuần
 tự (ROADMAP Phase 2, SC1–SC5):
@@ -172,6 +214,8 @@ tự (ROADMAP Phase 2, SC1–SC5):
     công + danh sách chờ duyệt mới nhất).
 
 ## Kịch bản demo UC2–UC5 (thao tác trên trình duyệt)
+
+> Cho buổi bảo vệ dùng mục "Kịch bản demo bảo vệ (Phase 5)" ở trên; mục này giữ lại làm hướng dẫn thao tác chi tiết.
 
 Tiếp nối kịch bản UC1: cần một SV có đề tài **Đã phân công** (ví dụ bước 5–6
 ở trên: `DTC225200002` tự đề xuất, `bomon` "Duyệt và phân công" cho `GV001`).
@@ -356,13 +400,15 @@ bash deploy/sql.sh "SELECT COUNT(*) FROM dot_do_an WHERE khoa IN ('K96','K97','K
 
 ### Kịch bản demo AI (thao tác trên trình duyệt)
 
-Chuẩn bị: stack đã dựng, `bash deploy/seed-ai.sh` đã chạy. Dùng các tài khoản demo **không** thuộc danh sách dành riêng ở trên (vd. `DTC225200010`, `DTC225200011`, `GV005`); mật khẩu `SEED_DEFAULT_PASSWORD`.
+> Cho buổi bảo vệ dùng mục "Kịch bản demo bảo vệ (Phase 5)" ở trên; mục này giữ lại làm hướng dẫn thao tác chi tiết.
+
+Chuẩn bị: stack đã dựng, `bash deploy/seed-ai.sh` đã chạy. Dùng các tài khoản **không** thuộc danh sách dành riêng (tự động: DTC225200094–100, GV023, GV025–GV030; demo bảo vệ: DTC225200011–015, GV011–GV014), vd. `DTC225200010`, `DTC225200016`, `GV005`; mật khẩu `SEED_DEFAULT_PASSWORD`.
 
 1. **SC1 — tên đề tài diễn đạt lại.** Đăng nhập `DTC225200010` → **Đề xuất / Đăng ký đề tài** → nhập tên "Sử dụng SQL Server để hạch toán thu chi doanh nghiệp cho công ty cổ phần Hoàng Long" rồi rời ô → cảnh báo "Phát hiện … đề tài tương tự trong kho" với đồ án kho "Ứng dụng SQL Server trong quản lý kế toán tại công ty CP Hoàng Long (K21)" kèm tỷ lệ (≈ 82%). Dán cùng tên ở dạng Unicode tổ hợp (NFD, vd. gõ bằng bộ gõ khác) cho cùng kết quả. Một tên cùng lĩnh vực nhưng khác đề tài không bị cảnh báo trùng kho.
 2. **SC2 — tài liệu chép nguyên văn.** Để `DTC225200010` có đề tài đã phân công GVHD `GV005` (Bộ môn duyệt đề xuất ở bước 1 hoặc cho SV đăng ký một đề tài GV đã duyệt). Ở **Đề cương**, nộp `seed-data/tai-lieu/P01-B.pdf` → trạng thái "Đang kiểm tra" rồi "Hoàn tất - 50.3%" (không cần tải lại trang). Bấm "Xem kết quả" (MH-14): tỷ lệ tổng 50.3%, ngưỡng 10.4%, đồ án trùng "Phát triển mô hình thống kê điểm số … Metabase (K21)" 50.3%; mỗi đoạn đặt cạnh đoạn nguồn, cụm từ trùng được tô, nhãn "Trùng nguyên văn", ghi chú đã loại trừ phần mẫu chung (FR-AI-02). Đăng nhập `GV005` → **Duyệt đề cương** → "Duyệt": panel MH-09 hiện cùng tỷ lệ, "Vượt ngưỡng cảnh báo" và "Số đoạn trùng: 7 (7 trùng nguyên văn)". Nộp một file diễn đạt lại (vd. `P11-B.docx`) cho một SV khác: các đoạn mang nhãn "Trùng ngữ nghĩa", ít cụm từ được tô hơn.
 3. **SC3 — bảng kiểm chứng trên 50 file.** Mở `docs/chuong-4-trien-khai/thu-nghiem-ai/03-hieu-chinh-nguong.md`: điểm từng cặp của 25 cặp (chép nguyên văn, diễn đạt lại bị cảnh báo; cùng lĩnh vực, không liên quan dưới ngưỡng) trên tập hiệu chỉnh và tập kiểm chứng giữ lại, cùng mô hình đã chốt (`02-so-sanh-mo-hinh-embedding.md`).
-4. **SC4 — Bộ môn đổi ngưỡng.** Đăng nhập `bomon` → **Ngưỡng trùng lặp**: ba ngưỡng kèm giải thích, giá trị đề xuất và người cập nhật. Đặt "Ngưỡng tên đề tài" = 99 → "Lưu cấu hình" → xác nhận. `DTC225200011` kiểm tra lại tên ở bước 1 → không còn cảnh báo. Bộ môn bấm "Khôi phục giá trị đề xuất" → lưu → cảnh báo trở lại. Kết quả đã kiểm tra trước đó vẫn hiện ngưỡng lúc kiểm tra.
-5. **SC5 — bản ghi mới được index ngay; dịch vụ AI không lộ ra ngoài.** `bomon` → **Kho đồ án** → thêm bản ghi "Xây dựng hệ thống quản lý phòng thí nghiệm hóa học cho trường cao đẳng y tế" (khóa K22) → cột index chuyển "Đã index" sau vài giây. `DTC225200011` kiểm tra tên "Phát triển phần mềm quản lý phòng thí nghiệm hóa học tại trường cao đẳng y tế" → thấy ngay bản ghi vừa thêm (≈ 90%), không phải tính lại embedding toàn kho (e2e-ai kiểm `encode_calls` +1). Xóa bản ghi sau demo (vector của nó được gỡ khỏi chỉ mục ngay sau khi xóa). Phần cô lập: chạy `bash deploy/ai-nfr.sh` (hoặc `e2e-ai.sh`) — host không kết nối được cổng 8002, thiếu/sai khóa → 401, Apache không có route tới dịch vụ AI, tài khoản DB `thesis_ai` bị từ chối trên `thesis_core`; kèm số đo thời gian kiểm tra tên (P95 ≈ 0,05 s) và nộp → hoàn tất (P95 ≈ 3 s; báo cáo ~350 000 ký tự ≈ 42 s, kiểm tra tên chen giữa vẫn < 0,4 s).
+4. **SC4 — Bộ môn đổi ngưỡng.** Đăng nhập `bomon` → **Ngưỡng trùng lặp**: ba ngưỡng kèm giải thích, giá trị đề xuất và người cập nhật. Đặt "Ngưỡng tên đề tài" = 99 → "Lưu cấu hình" → xác nhận. `DTC225200010` kiểm tra lại tên ở bước 1 → không còn cảnh báo. Bộ môn bấm "Khôi phục giá trị đề xuất" → lưu → cảnh báo trở lại. Kết quả đã kiểm tra trước đó vẫn hiện ngưỡng lúc kiểm tra.
+5. **SC5 — bản ghi mới được index ngay; dịch vụ AI không lộ ra ngoài.** `bomon` → **Kho đồ án** → thêm bản ghi "Xây dựng hệ thống quản lý phòng thí nghiệm hóa học cho trường cao đẳng y tế" (khóa K22) → cột index chuyển "Đã index" sau vài giây. `DTC225200010` kiểm tra tên "Phát triển phần mềm quản lý phòng thí nghiệm hóa học tại trường cao đẳng y tế" → thấy ngay bản ghi vừa thêm (≈ 90%), không phải tính lại embedding toàn kho (e2e-ai kiểm `encode_calls` +1). Xóa bản ghi sau demo (vector của nó được gỡ khỏi chỉ mục ngay sau khi xóa). Phần cô lập: chạy `bash deploy/ai-nfr.sh` (hoặc `e2e-ai.sh`) — host không kết nối được cổng 8002, thiếu/sai khóa → 401, Apache không có route tới dịch vụ AI, tài khoản DB `thesis_ai` bị từ chối trên `thesis_core`; kèm số đo thời gian kiểm tra tên (P95 ≈ 0,05 s) và nộp → hoàn tất (P95 ≈ 3 s; báo cáo ~350 000 ký tự ≈ 42 s, kiểm tra tên chen giữa vẫn < 0,4 s).
 
 Dọn dữ liệu demo sau khi xong (đề tài/đề cương của tài khoản demo) theo cách thông thường của UC1–UC2; các file đã nộp nằm trong volume `uploads-data`.
 

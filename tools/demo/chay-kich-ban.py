@@ -18,6 +18,7 @@ Hành động (mỗi phần tử một khóa):
     {"bam": "chữ"} | {"bam": {"chu", "pham_vi", "hang"}}
     {"tai_len": {"o": selector input[type=file], "tep": đường dẫn (tương đối gốc repo)}}
     {"cuon": "chữ" | số}  {"phim": "Escape"}  {"cho": giây}  {"cho_on_dinh": true}
+    {"url_bat_dau": "https://"}          khẳng định URL hiện tại (vd. sau chuyển hướng HTTP -> HTTPS)
     {"chup": true | "ten-tep.png" | {"tep", "toan_trang": true}}
 
 Bước có "ghi_du_lieu": true (thay đổi dữ liệu, hoặc cần bước ghi trước nó) bị
@@ -93,6 +94,10 @@ async def chay_hanh_dong(td: TrinhDuyet, hd: dict, buoc: dict, out_dir: Path, an
         await td.phim(hd["phim"])
     elif "cho" in hd:
         await asyncio.sleep(float(hd["cho"]))
+    elif "url_bat_dau" in hd:
+        u = await td.url()
+        if not u.startswith(hd["url_bat_dau"]):
+            raise LoiTrinhDuyet(f"URL hiện tại {u!r} không bắt đầu bằng {hd['url_bat_dau']!r}")
     elif "cho_on_dinh" in hd:
         await td.cho_on_dinh()
     elif "chup" in hd:
