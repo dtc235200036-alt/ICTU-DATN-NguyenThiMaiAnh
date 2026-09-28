@@ -489,15 +489,10 @@ dat = {c["ma_cap"] for c in json.load(open(f"{root}/ai-service/calibration/ket-q
 for loai in ("CHEP_NGUYEN_VAN", "KHONG_LIEN_QUAN"):
     cap = next(c for c in manifest["cap"] if c["loai"] == loai and c["ma_cap"] in dat)
     print("\t".join([loai, cap["ma_cap"], f"{root}/seed-data/{cap['B']['tep']}", f"{cap['A']['ten_de_tai']} ({cap['A']['khoa']})"]))
-# CR-01: cặp cùng lĩnh vực có tỷ lệ TỔNG cao nhất (P19: 23.96 % tổng, 0 % theo nguồn).
-ket = {c["ma_cap"]: c for c in json.load(open(f"{root}/ai-service/calibration/ket-qua-chi-tiet.json", encoding="utf-8"))["cap"]}
-cap = max((c for c in manifest["cap"] if c["loai"] == "CUNG_LINH_VUC" and c["ma_cap"] in dat), key=lambda c: ket[c["ma_cap"]]["ty_le_tong"])
-print("\t".join(["CUNG_LINH_VUC", cap["ma_cap"], f"{root}/seed-data/{cap['B']['tep']}", f"{cap['A']['ten_de_tai']} ({cap['A']['khoa']})"]))
 PY
-  local chep_ma chep_file chep_label khac_ma khac_file clv_ma clv_file
+  local chep_ma chep_file chep_label khac_ma khac_file
   IFS=$'\t' read -r _ chep_ma chep_file chep_label < <(grep '^CHEP_NGUYEN_VAN' "$TMP/pairs.tsv")
   IFS=$'\t' read -r _ khac_ma khac_file _ < <(grep '^KHONG_LIEN_QUAN' "$TMP/pairs.tsv")
-  IFS=$'\t' read -r _ clv_ma clv_file _ < <(grep '^CUNG_LINH_VUC' "$TMP/pairs.tsv")
   [ -f "$chep_file" ] && [ -f "$khac_file" ] || fail "Không thấy tệp B của cặp ${chep_ma}/${khac_ma}"
   nguong="$(sql "SELECT gia_tri FROM cau_hinh_nguong WHERE loai='NGUONG_TAI_LIEU'")"
 
@@ -591,21 +586,39 @@ PY
     || fail "${khac_ma}-B (không liên quan) bị cảnh báo: tổng/nguồn/vượt = ${ty_b} với ngưỡng ${nguong}%"
   ok "${khac_ma}-B (không liên quan) HOAN_TAT: tổng/theo nguồn ${ty_b% *}% < ${nguong}%, không cảnh báo"
 
-  # (3b) CR-01: bài cùng lĩnh vực có tỷ lệ TỔNG cao (khớp rải rác nhiều đồ án)
-  # nhưng không trùng đồ án nào -> KHÔNG "Vượt ngưỡng cảnh báo".
-  local doc_c ty_c
-  review_changes "$token_gv" "${topic_b}" "$doc_b"
-  doc_c="$(submit_outline "$token_sv_b" "${topic_b}" "$clv_file")"
-  wait_check "$token_sv_b" "$doc_c" "$TMP/check-c.json"
-  ty_c="$(python3 - "$TMP/check-c.json" "$nguong" <<'PY'
+  # (3b) CR-01: quyết định vượt ngưỡng theo tỷ lệ trùng với MỘT đồ án, không
+  # theo tỷ lệ tổng. Hạ tạm NGUONG_TAI_LIEU xuống giữa tỷ lệ theo nguồn cao
+  # nhất và tỷ lệ tổng của chính bài không liên quan ở (3) (khớp rải rác nhiều
+  # đồ án), nộp lại bài đó: tổng >= ngưỡng nhưng không nguồn nào tới ngưỡng
+  # -> "Dưới ngưỡng cảnh báo". Ngưỡng gốc được khôi phục (kể cả khi lỗi — trap).
+  local doc_c ty_c nguong_tam
+  nguong_tam="$(python3 -c "t, n, _ = '$ty_b'.split(); t, n = float(t), float(n); print(round((t + n) / 2, 2) if t - n >= 1 else '')")"
+  if [ -n "$nguong_tam" ]; then
+    THRESH_SNAPSHOT="$(sql "SELECT loai, gia_tri, IFNULL(tai_khoan_id,'NULL'), thoi_diem_cap_nhat FROM cau_hinh_nguong WHERE loai IN ('NGUONG_TEN_DE_TAI','NGUONG_TAI_LIEU','NGUONG_DOAN_TRUNG') ORDER BY loai")"
+    python3 - "${THRESH_SNAPSHOT}" "$nguong_tam" > "$TMP/thresh-put.json" <<'PY'
 import json, sys
-d = json.load(open(sys.argv[1], encoding="utf-8")); nguong = float(sys.argv[2])
-if d["vuot_nguong"] is not False or (d["ty_le_nguon_cao_nhat"] or 0) >= nguong:
-    print(f"tổng {d['ty_le_tong']}%, theo nguồn {d['ty_le_nguon_cao_nhat']}%, vuot_nguong {d['vuot_nguong']}"); sys.exit(1)
-print(f"tổng {d['ty_le_tong']}% ({'>=' if d['ty_le_tong'] >= nguong else '<'} {nguong}%), theo nguồn {d['ty_le_nguon_cao_nhat']}%")
+body = {r.split("\t")[0]: float(r.split("\t")[1]) for r in sys.argv[1].splitlines() if r.strip()}
+body["NGUONG_TAI_LIEU"] = float(sys.argv[2])
+print(json.dumps(body))
 PY
-)" || fail "${clv_ma}-B (cùng lĩnh vực) bị cảnh báo: ${ty_c}"
-  ok "${clv_ma}-B (cùng lĩnh vực) HOAN_TAT: ${ty_c} -> Dưới ngưỡng cảnh báo (quy tắc theo nguồn, CR-01)"
+    res="$(call PUT /api/thresholds "$(bash "${SCRIPT_DIR}/api-login.sh" bomon)" -H 'Content-Type: application/json' --data-binary "@$TMP/thresh-put.json")"
+    [ "${res%% *}" = "200" ] || fail "Bộ môn PUT /api/thresholds trả ${res%% *}: $(cat "$TMP/body")"
+    review_changes "$token_gv" "${topic_b}" "$doc_b"
+    doc_c="$(submit_outline "$token_sv_b" "${topic_b}" "$khac_file")"
+    wait_check "$token_sv_b" "$doc_c" "$TMP/check-c.json"
+    restore_thresholds || fail "Khôi phục ngưỡng gốc thất bại"
+    ty_c="$(python3 - "$TMP/check-c.json" <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1], encoding="utf-8")); n = d["nguong_ap_dung"]
+ok = d["ty_le_tong"] >= n and d["ty_le_nguon_cao_nhat"] < n and d["vuot_nguong"] is False
+print(f"ngưỡng {n}%: tổng {d['ty_le_tong']}% >= ngưỡng, theo nguồn cao nhất {d['ty_le_nguon_cao_nhat']}% < ngưỡng, vuot_nguong {d['vuot_nguong']}")
+sys.exit(0 if ok else 1)
+PY
+)" || fail "${khac_ma}-B với ngưỡng tạm: ${ty_c}"
+    ok "${khac_ma}-B nộp lại với ngưỡng tạm ${nguong_tam}%: ${ty_c} -> Dưới ngưỡng cảnh báo (CR-01)"
+  else
+    echo "BỎ QUA (3b): ${khac_ma}-B không có chênh lệch tổng/theo nguồn đủ lớn (${ty_b})"
+  fi
 
   # (4) Nộp lại cùng file sau Yêu cầu sửa -> không khớp phiên bản trước của mình (loai_tru).
   local doc_a2 ty_a2

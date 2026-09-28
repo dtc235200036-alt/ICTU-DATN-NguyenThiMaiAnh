@@ -40,40 +40,44 @@ Số câu B của tập hiệu chỉnh theo nhãn: chép nguyên văn 183, diễ
 
 Ngưỡng áp dụng: đoạn 67.7 %, nguyên văn 88.7 %, tài liệu 10.4 %. Cột *Đoạn trùng* đếm các đoạn trùng mà `check_document` trả về (nguyên văn / ngữ nghĩa).
 
+*Bị cảnh báo?* dùng **đúng quy tắc triển khai** (sửa lỗi review CR-01): tỷ lệ theo nguồn **cao nhất** (`do_an_trung[0]`, bất kỳ đồ án nào trong kho) ≥ 10.4 % — Web API không biết đồ án nguồn A của cặp. Cột *theo đồ án nguồn A* là tỷ lệ tới A (thống kê dùng để khớp ngưỡng), chỉ để đối chiếu.
+
+Trên tập hiệu chỉnh, theo thống kê triển khai: âm lớn nhất 3.69 %, dương nhỏ nhất 20.79 % — ngưỡng 10.4 % vẫn nằm trong khoảng tách.
+
 #### Tập hiệu chỉnh (HIEU_CHINH) — dùng để khớp ngưỡng
 
-| Mã cặp | Loại | Tập | Định dạng A→B | Tỷ lệ tổng (%) | Tỷ lệ theo đồ án nguồn (%) | A dẫn đầu? | Đoạn trùng (nguyên văn / ngữ nghĩa) | Bị cảnh báo? | Kỳ vọng | Kết quả |
-|---|---|---|---|---:|---:|---|---|---|---|---|
-| P01 | Chép nguyên văn | HIEU_CHINH | DOCX→PDF | 50.30 | 50.30 | Có | 7 / 0 | Có | Cảnh báo | Đạt |
-| P02 | Chép nguyên văn | HIEU_CHINH | PDF→DOCX | 48.04 | 48.04 | Có | 5 / 0 | Có | Cảnh báo | Đạt |
-| P04 | Chép nguyên văn | HIEU_CHINH | PDF→DOCX | 49.33 | 44.89 | Có | 4 / 1 | Có | Cảnh báo | Đạt |
-| P05 | Chép nguyên văn | HIEU_CHINH | DOCX→PDF | 44.83 | 44.83 | Có | 13 / 0 | Có | Cảnh báo | Đạt |
-| P07 | Chép nguyên văn | HIEU_CHINH | DOCX→PDF | 57.76 | 46.07 | Có | 6 / 3 | Có | Cảnh báo | Đạt |
-| P08 | Diễn đạt lại | HIEU_CHINH | DOCX→PDF | 21.23 | 21.23 | Có | 0 / 5 | Có | Cảnh báo | Đạt |
-| P11 | Diễn đạt lại | HIEU_CHINH | PDF→DOCX | 25.54 | 20.79 | Có | 0 / 6 | Có | Cảnh báo | Đạt |
-| P12 | Diễn đạt lại | HIEU_CHINH | DOCX→PDF | 33.16 | 31.54 | Có | 0 / 14 | Có | Cảnh báo | Đạt |
-| P13 | Diễn đạt lại | HIEU_CHINH | PDF→DOCX | 30.29 | 30.29 | Có | 0 / 4 | Có | Cảnh báo | Đạt |
-| P14 | Diễn đạt lại | HIEU_CHINH | DOCX→PDF | 34.09 | 34.09 | Có | 0 / 18 | Có | Cảnh báo | Đạt |
-| P15 | Cùng lĩnh vực | HIEU_CHINH | DOCX→PDF | 4.78 | 0.00 | Không | 0 / 4 | Không | Không cảnh báo | Đạt |
-| P16 | Cùng lĩnh vực | HIEU_CHINH | PDF→DOCX | 0.00 | 0.00 | Không | 0 / 0 | Không | Không cảnh báo | Đạt |
-| P17 | Cùng lĩnh vực | HIEU_CHINH | DOCX→PDF | 0.00 | 0.00 | Không | 0 / 0 | Không | Không cảnh báo | Đạt |
-| P20 | Cùng lĩnh vực | HIEU_CHINH | PDF→DOCX | 0.00 | 0.00 | Không | 0 / 0 | Không | Không cảnh báo | Đạt |
-| P23 | Không liên quan | HIEU_CHINH | DOCX→PDF | 0.00 | 0.00 | Không | 0 / 0 | Không | Không cảnh báo | Đạt |
-| P24 | Không liên quan | HIEU_CHINH | PDF→DOCX | 3.47 | 0.00 | Không | 0 / 1 | Không | Không cảnh báo | Đạt |
-| P25 | Không liên quan | HIEU_CHINH | DOCX→PDF | 1.25 | 0.00 | Không | 0 / 1 | Không | Không cảnh báo | Đạt |
+| Mã cặp | Loại | Tập | Định dạng A→B | Tỷ lệ tổng (%) | Theo nguồn cao nhất (%) | Theo đồ án nguồn A (%) | A dẫn đầu? | Đoạn trùng (nguyên văn / ngữ nghĩa) | Bị cảnh báo? | Kỳ vọng | Kết quả |
+|---|---|---|---|---:|---:|---:|---|---|---|---|---|
+| P01 | Chép nguyên văn | HIEU_CHINH | DOCX→PDF | 50.30 | 50.30 | 50.30 | Có | 7 / 0 | Có | Cảnh báo | Đạt |
+| P02 | Chép nguyên văn | HIEU_CHINH | PDF→DOCX | 48.04 | 48.04 | 48.04 | Có | 5 / 0 | Có | Cảnh báo | Đạt |
+| P04 | Chép nguyên văn | HIEU_CHINH | PDF→DOCX | 49.33 | 44.89 | 44.89 | Có | 4 / 1 | Có | Cảnh báo | Đạt |
+| P05 | Chép nguyên văn | HIEU_CHINH | DOCX→PDF | 44.83 | 44.83 | 44.83 | Có | 13 / 0 | Có | Cảnh báo | Đạt |
+| P07 | Chép nguyên văn | HIEU_CHINH | DOCX→PDF | 57.76 | 46.07 | 46.07 | Có | 6 / 3 | Có | Cảnh báo | Đạt |
+| P08 | Diễn đạt lại | HIEU_CHINH | DOCX→PDF | 21.23 | 21.23 | 21.23 | Có | 0 / 5 | Có | Cảnh báo | Đạt |
+| P11 | Diễn đạt lại | HIEU_CHINH | PDF→DOCX | 25.54 | 20.79 | 20.79 | Có | 0 / 6 | Có | Cảnh báo | Đạt |
+| P12 | Diễn đạt lại | HIEU_CHINH | DOCX→PDF | 33.16 | 31.54 | 31.54 | Có | 0 / 14 | Có | Cảnh báo | Đạt |
+| P13 | Diễn đạt lại | HIEU_CHINH | PDF→DOCX | 30.29 | 30.29 | 30.29 | Có | 0 / 4 | Có | Cảnh báo | Đạt |
+| P14 | Diễn đạt lại | HIEU_CHINH | DOCX→PDF | 34.09 | 34.09 | 34.09 | Có | 0 / 18 | Có | Cảnh báo | Đạt |
+| P15 | Cùng lĩnh vực | HIEU_CHINH | DOCX→PDF | 4.78 | 3.69 | 0.00 | Không | 0 / 4 | Không | Không cảnh báo | Đạt |
+| P16 | Cùng lĩnh vực | HIEU_CHINH | PDF→DOCX | 0.00 | 0.00 | 0.00 | Không | 0 / 0 | Không | Không cảnh báo | Đạt |
+| P17 | Cùng lĩnh vực | HIEU_CHINH | DOCX→PDF | 0.00 | 0.00 | 0.00 | Không | 0 / 0 | Không | Không cảnh báo | Đạt |
+| P20 | Cùng lĩnh vực | HIEU_CHINH | PDF→DOCX | 0.00 | 0.00 | 0.00 | Không | 0 / 0 | Không | Không cảnh báo | Đạt |
+| P23 | Không liên quan | HIEU_CHINH | DOCX→PDF | 0.00 | 0.00 | 0.00 | Không | 0 / 0 | Không | Không cảnh báo | Đạt |
+| P24 | Không liên quan | HIEU_CHINH | PDF→DOCX | 3.47 | 3.47 | 0.00 | Không | 0 / 1 | Không | Không cảnh báo | Đạt |
+| P25 | Không liên quan | HIEU_CHINH | DOCX→PDF | 1.25 | 1.25 | 0.00 | Không | 0 / 1 | Không | Không cảnh báo | Đạt |
 
 #### Tập kiểm chứng (KIEM_CHUNG) — giữ lại, không dùng để khớp
 
-| Mã cặp | Loại | Tập | Định dạng A→B | Tỷ lệ tổng (%) | Tỷ lệ theo đồ án nguồn (%) | A dẫn đầu? | Đoạn trùng (nguyên văn / ngữ nghĩa) | Bị cảnh báo? | Kỳ vọng | Kết quả |
-|---|---|---|---|---:|---:|---|---|---|---|---|
-| P03 | Chép nguyên văn | KIEM_CHUNG | DOCX→PDF | 51.03 | 49.32 | Có | 16 / 1 | Có | Cảnh báo | Đạt |
-| P06 | Chép nguyên văn | KIEM_CHUNG | PDF→DOCX | 49.74 | 46.93 | Có | 5 / 1 | Có | Cảnh báo | Đạt |
-| P09 | Diễn đạt lại | KIEM_CHUNG | PDF→DOCX | 17.38 | 13.36 | Có | 0 / 4 | Có | Cảnh báo | Đạt |
-| P10 | Diễn đạt lại | KIEM_CHUNG | DOCX→PDF | 20.88 | 20.88 | Có | 0 / 4 | Có | Cảnh báo | Đạt |
-| P18 | Cùng lĩnh vực | KIEM_CHUNG | PDF→DOCX | 2.86 | 0.00 | Không | 0 / 1 | Không | Không cảnh báo | Đạt |
-| P19 | Cùng lĩnh vực | KIEM_CHUNG | DOCX→PDF | 23.96 | 0.00 | Không | 0 / 14 | Không | Không cảnh báo | Đạt |
-| P21 | Không liên quan | KIEM_CHUNG | DOCX→PDF | 6.00 | 0.00 | Không | 0 / 5 | Không | Không cảnh báo | Đạt |
-| P22 | Không liên quan | KIEM_CHUNG | PDF→DOCX | 0.00 | 0.00 | Không | 0 / 0 | Không | Không cảnh báo | Đạt |
+| Mã cặp | Loại | Tập | Định dạng A→B | Tỷ lệ tổng (%) | Theo nguồn cao nhất (%) | Theo đồ án nguồn A (%) | A dẫn đầu? | Đoạn trùng (nguyên văn / ngữ nghĩa) | Bị cảnh báo? | Kỳ vọng | Kết quả |
+|---|---|---|---|---:|---:|---:|---|---|---|---|---|
+| P03 | Chép nguyên văn | KIEM_CHUNG | DOCX→PDF | 51.03 | 49.32 | 49.32 | Có | 16 / 1 | Có | Cảnh báo | Đạt |
+| P06 | Chép nguyên văn | KIEM_CHUNG | PDF→DOCX | 49.74 | 46.93 | 46.93 | Có | 5 / 1 | Có | Cảnh báo | Đạt |
+| P09 | Diễn đạt lại | KIEM_CHUNG | PDF→DOCX | 17.38 | 13.36 | 13.36 | Có | 0 / 4 | Có | Cảnh báo | Đạt |
+| P10 | Diễn đạt lại | KIEM_CHUNG | DOCX→PDF | 20.88 | 20.88 | 20.88 | Có | 0 / 4 | Có | Cảnh báo | Đạt |
+| P18 | Cùng lĩnh vực | KIEM_CHUNG | PDF→DOCX | 2.86 | 2.86 | 0.00 | Không | 0 / 1 | Không | Không cảnh báo | Đạt |
+| P19 | Cùng lĩnh vực | KIEM_CHUNG | DOCX→PDF | 23.96 | 22.81 | 0.00 | Không | 0 / 14 | Có | Không cảnh báo | Không đạt |
+| P21 | Không liên quan | KIEM_CHUNG | DOCX→PDF | 6.00 | 1.51 | 0.00 | Không | 0 / 5 | Không | Không cảnh báo | Đạt |
+| P22 | Không liên quan | KIEM_CHUNG | PDF→DOCX | 0.00 | 0.00 | 0.00 | Không | 0 / 0 | Không | Không cảnh báo | Đạt |
 
 #### Độ chính xác theo tập và loại cặp
 
@@ -81,15 +85,15 @@ Ngưỡng áp dụng: đoạn 67.7 %, nguyên văn 88.7 %, tài liệu 10.4 %. C
 |---|---|---|
 | Chép nguyên văn | 5/5 (1.000) | 2/2 (1.000) |
 | Diễn đạt lại | 5/5 (1.000) | 2/2 (1.000) |
-| Cùng lĩnh vực | 4/4 (1.000) | 2/2 (1.000) |
+| Cùng lĩnh vực | 4/4 (1.000) | 1/2 (0.500) |
 | Không liên quan | 3/3 (1.000) | 2/2 (1.000) |
-| **Tất cả** | **17/17 (1.000)** | **8/8 (1.000)** |
+| **Tất cả** | **17/17 (1.000)** | **7/8 (0.875)** |
 
 | Cổng | Điều kiện | Kết quả |
 |---|---|---|
 | G1 (cứng) | mọi cặp CHEP_NGUYEN_VAN bị cảnh báo (cứng) | Đạt |
-| G2 (cứng) | mọi cặp KHONG_LIEN_QUAN có tỷ lệ theo đồ án nguồn và tỷ lệ tổng < ngưỡng tài liệu (cứng) | Đạt |
-| G3 (mềm) | độ chính xác cặp trên KIEM_CHUNG ≥ 0.85 (mềm) — thực tế 1.000 | Đạt |
+| G2 (cứng) | mọi cặp KHONG_LIEN_QUAN có tỷ lệ theo nguồn cao nhất và tỷ lệ tổng < ngưỡng tài liệu (cứng) | Đạt |
+| G3 (mềm) | độ chính xác cặp trên KIEM_CHUNG ≥ 0.85 (mềm) — thực tế 0.875 | Đạt |
 
 #### Tỷ lệ câu bị gắn cờ theo nhãn (mức câu)
 
@@ -137,8 +141,8 @@ Trung bình tỷ lệ tổng tăng thêm khi không lọc: **+15.14 điểm %** 
 
 | Thao tác | Số lần | P50 (ms) | P95 (ms) | Lớn nhất (ms) | Giới hạn NFR (P95) |
 |---|---:|---:|---:|---:|---|
-| `check_title` (kho 300 đề tài) | 20 | 41.0 | 49.4 | 56.0 | ≤ 5 000 ms (NFR-08) |
-| `score_document` + `check_document` (một tệp B) | 20 | 1079.0 | 2982.6 | 3027.1 | ≤ 30 000 ms toàn luồng nộp (NFR-09) |
+| `check_title` (kho 300 đề tài) | 20 | 38.0 | 49.0 | 49.9 | ≤ 5 000 ms (NFR-08) |
+| `score_document` + `check_document` (một tệp B) | 20 | 1127.4 | 2710.3 | 2737.6 | ≤ 30 000 ms toàn luồng nộp (NFR-09) |
 
 ### Giới hạn
 
@@ -146,9 +150,12 @@ Trung bình tỷ lệ tổng tăng thêm khi không lọc: **+15.14 điểm %** 
 - **[ASSUMED] Danh sách mẫu chung.** Bước lọc dùng danh sách mặc định (bìa, lời cam đoan, lời cảm ơn, mục lục, tài liệu tham khảo, phụ lục…) vì mẫu đề cương/báo cáo chính thức của khoa chưa được thu thập. Khi có mẫu chính thức phải cập nhật `app/nlp/boilerplate.py` rồi chạy lại `tune` và `evaluate`.
 - **Mẫu nhỏ.** Ngưỡng tài liệu được khớp trên 17 cặp; tập kiểm chứng chỉ có 8 cặp, nên mỗi cặp sai làm độ chính xác giảm 0.125.
 - **Độ trễ đo trên máy phát triển**, trong tiến trình và trên máy dùng chung; con số chính thức cho NFR-08/NFR-09 do plan 04-06 (container) và Phase 5 (server) đo.
-- **Tỷ lệ tổng khác tỷ lệ theo đồ án nguồn.** Cặp không được kỳ vọng cảnh báo có tỷ lệ tổng cao nhất là P19 (cùng lĩnh vực, KIEM_CHUNG): 23.96 % tổng nhưng chỉ 0.00 % theo đồ án nguồn, vì các đoạn khớp rải rác trên nhiều đồ án khác cùng lĩnh vực. Vì vậy quyết định cảnh báo dựa trên tỷ lệ theo **từng** đồ án (`do_an_trung`) so với ngưỡng tài liệu, còn tỷ lệ tổng chỉ để hiển thị kèm.
+- **Cảnh báo theo từng đồ án, không theo tỷ lệ tổng.** Tỷ lệ tổng cộng mọi nguồn: cặp P21 (không liên quan) có 6.00 % tổng nhưng chỉ 1.51 % với đồ án trùng nhiều nhất, vì các câu khớp rải rác trên nhiều đồ án. Quyết định cảnh báo vì vậy dùng tỷ lệ theo nguồn cao nhất (`do_an_trung`), tỷ lệ tổng chỉ để hiển thị.
+- **Cặp cùng lĩnh vực có tỷ lệ tổng cao nhất** là P19 (KIEM_CHUNG): 23.96 % tổng, 22.81 % với một đồ án khác trong kho (tới đồ án nguồn A của cặp: 0.00 %) — bị cảnh báo theo quy tắc triển khai. Phiên bản trước của trang này đánh giá bằng tỷ lệ tới A (chỉ bộ dữ liệu có chủ đích mới biết) nên ghi cặp này là không cảnh báo; đó không phải điều hệ thống chạy thật làm được.
 - **Mức câu còn yếu với diễn đạt lại.** AUC của tín hiệu ngữ nghĩa ở mức câu trên tập hiệu chỉnh chỉ 0.7983. Với ngưỡng cố định, tỷ lệ câu diễn đạt lại bị gắn cờ là 0.563 (hiệu chỉnh) và 0.400 (kiểm chứng); tỷ lệ câu tự viết bị gắn cờ là 0.041 và 0.092. Phát hiện ở mức tài liệu vẫn đúng vì phần diễn đạt lại dồn thành đoạn liền nhau cùng nguồn, nhưng từng đoạn trùng ngữ nghĩa nên được giảng viên đọc lại trước khi kết luận.
 - **Tên đề tài trên tập kiểm chứng:** 2 truy vấn phân loại sai (TV015 cùng lĩnh vực 73.03 %, TV038 diễn đạt lại 66.90 %). Đề tài cùng lĩnh vực có khuôn tên giống nhau nên cảnh báo tên đề tài chỉ là **gợi ý** để giảng viên xem lại, không phải kết luận (khớp với nhận xét ở mục 4.x.2).
+- **Cặp kiểm chứng phân loại sai** (độ chính xác 0.875); ngưỡng **không** được khớp lại trên tập này:
+  - P19 (Cùng lĩnh vực, DOCX→PDF): tỷ lệ tổng 23.96 %, theo nguồn cao nhất 22.81 % (tới A 0.00 %) so với ngưỡng 10.4 %, đoạn trùng 0 nguyên văn / 14 ngữ nghĩa, cosine lớn nhất của câu tự viết 95.92 %. Nguyên nhân có thể: câu tự viết cùng lĩnh vực có cosine cao với một đồ án khác cùng chủ đề (mẫu câu chung của lĩnh vực) thành chuỗi ≥ 2 câu liên tiếp, đẩy tỷ lệ theo nguồn cao nhất vượt ngưỡng tài liệu.
 
 ### Chạy lại
 

@@ -300,7 +300,10 @@ def apply_thresholds(ps: PairScore, nguong_doan: float, nguong_nguyen_van: float
     res = pipeline.check_document(ps.scores, nguong_doan, nguong_nguyen_van, ALL, ALL)
     share = next((d["ty_le"] for d in res["do_an_trung"] if d["ref_id"] == ps.pair.a_id), 0.0)
     top = res["do_an_trung"][0]["ref_id"] if res["do_an_trung"] else None
-    return {"res": res, "ty_le_nguon": share, "top_ref": top}
+    # CR-01 (04-REVIEW): lúc chạy thật Web API không biết "đồ án nguồn A" của
+    # cặp — quy tắc triển khai là tỷ lệ theo nguồn CAO NHẤT >= ngưỡng tài liệu.
+    top_share = res["do_an_trung"][0]["ty_le"] if res["do_an_trung"] else 0.0
+    return {"res": res, "ty_le_nguon": share, "top_ref": top, "ty_le_nguon_cao_nhat": top_share}
 
 
 def best_title(corpus: Corpus, encoder, text: str) -> tuple[float, int | None]:
@@ -565,7 +568,9 @@ def cmd_evaluate(args) -> int:
         for ps in scored:
             p, r = ps.pair, apply_thresholds(ps, nd, nv)
             res = r["res"]
-            flagged = r["ty_le_nguon"] >= ntl
+            # CR-01: đánh giá đúng quy tắc triển khai (tỷ lệ theo nguồn cao nhất,
+            # >=), không phải tỷ lệ tới A mà chỉ bộ dữ liệu có chủ đích mới biết.
+            flagged = r["ty_le_nguon_cao_nhat"] >= ntl
             cap.append(
                 {
                     "ma_cap": p.ma_cap,
@@ -577,6 +582,7 @@ def cmd_evaluate(args) -> int:
                     "so_dong_loai_tru": res["so_doan_loai_tru"],
                     "ty_le_tong": res["ty_le_tong"],
                     "ty_le_nguon": r["ty_le_nguon"],
+                    "ty_le_nguon_cao_nhat": r["ty_le_nguon_cao_nhat"],
                     "nguon_dung_dau": r["top_ref"] == p.a_id,
                     "so_doan_trung": len(res["chi_tiet"]),
                     "so_doan_nguyen_van": sum(1 for d in res["chi_tiet"] if d["tin_hieu"] == pipeline.NGUYEN_VAN),
@@ -614,7 +620,15 @@ def cmd_evaluate(args) -> int:
         chep = [c for c in cap if c["loai"] == CHEP]
         khong = [c for c in cap if c["loai"] == KHONG]
         g1 = all(c["bi_canh_bao"] for c in chep)
-        g2 = all(c["ty_le_nguon"] < ntl and c["ty_le_tong"] < ntl for c in khong)
+        g2 = all(c["ty_le_nguon_cao_nhat"] < ntl and c["ty_le_tong"] < ntl for c in khong)
+        # CR-01: ngưỡng (khớp trên tỷ lệ tới A của tập hiệu chỉnh) có còn tách
+        # được tập hiệu chỉnh theo thống kê triển khai không.
+        hc = _split(cap, HIEU_CHINH)
+        khoang_tach = {
+            "am_lon_nhat": max((c["ty_le_nguon_cao_nhat"] for c in hc if not c["ky_vong"]), default=0.0),
+            "duong_nho_nhat": min((c["ty_le_nguon_cao_nhat"] for c in hc if c["ky_vong"]), default=0.0),
+        }
+        khoang_tach["nguong_nam_trong"] = khoang_tach["am_lon_nhat"] < ntl <= khoang_tach["duong_nho_nhat"]
         acc_kc = _acc(_split(cap, KIEM_CHUNG))
         acc_hc = _acc(_split(cap, HIEU_CHINH))
         g3 = acc_kc["ty_le"] is not None and acc_kc["ty_le"] >= 0.85
@@ -715,11 +729,12 @@ def cmd_evaluate(args) -> int:
             "accuracy_hieu_chinh": acc_hc["ty_le"],
             "mo_ta": {
                 "g1": "mọi cặp CHEP_NGUYEN_VAN bị cảnh báo (cứng)",
-                "g2": "mọi cặp KHONG_LIEN_QUAN có tỷ lệ theo đồ án nguồn và tỷ lệ tổng < ngưỡng tài liệu (cứng)",
+                "g2": "mọi cặp KHONG_LIEN_QUAN có tỷ lệ theo nguồn cao nhất và tỷ lệ tổng < ngưỡng tài liệu (cứng)",
                 "g3": "độ chính xác cặp trên KIEM_CHUNG ≥ 0.85 (mềm)",
             },
         },
         "accuracy_theo_tap_loai": acc_theo_loai,
+        "khoang_tach_nguon_cao_nhat_hieu_chinh": khoang_tach,
         "cap": cap,
         "truy_van": truy_van,
         "title_accuracy": title_acc,
@@ -935,16 +950,26 @@ def render_report(nguong: dict, kq: dict) -> str:
     a(f"Ngưỡng áp dụng: đoạn {nguong['nguong_doan']} %, nguyên văn {nguong['nguong_nguyen_van']} %, "
       f"tài liệu {nguong['nguong_tai_lieu']} %. Cột *Đoạn trùng* đếm các đoạn trùng mà `check_document` trả về "
       "(nguyên văn / ngữ nghĩa).")
+    a("")
+    a("*Bị cảnh báo?* dùng **đúng quy tắc triển khai** (sửa lỗi review CR-01): tỷ lệ theo nguồn **cao nhất** "
+      f"(`do_an_trung[0]`, bất kỳ đồ án nào trong kho) ≥ {nguong['nguong_tai_lieu']} % — Web API không biết đồ án "
+      "nguồn A của cặp. Cột *theo đồ án nguồn A* là tỷ lệ tới A (thống kê dùng để khớp ngưỡng), chỉ để đối chiếu.")
+    kt = kq["khoang_tach_nguon_cao_nhat_hieu_chinh"]
+    a("")
+    a(f"Trên tập hiệu chỉnh, theo thống kê triển khai: âm lớn nhất {kt['am_lon_nhat']:.2f} %, dương nhỏ nhất "
+      f"{kt['duong_nho_nhat']:.2f} % — ngưỡng {nguong['nguong_tai_lieu']} % "
+      f"{'vẫn nằm trong khoảng tách' if kt['nguong_nam_trong'] else '**không** còn nằm trong khoảng tách'}.")
     for tap, ten in ((HIEU_CHINH, "Tập hiệu chỉnh (HIEU_CHINH) — dùng để khớp ngưỡng"),
                      (KIEM_CHUNG, "Tập kiểm chứng (KIEM_CHUNG) — giữ lại, không dùng để khớp")):
         a("")
         a(f"#### {ten}")
         a("")
-        a("| Mã cặp | Loại | Tập | Định dạng A→B | Tỷ lệ tổng (%) | Tỷ lệ theo đồ án nguồn (%) | A dẫn đầu? | "
-          "Đoạn trùng (nguyên văn / ngữ nghĩa) | Bị cảnh báo? | Kỳ vọng | Kết quả |")
-        a("|---|---|---|---|---:|---:|---|---|---|---|---|")
+        a("| Mã cặp | Loại | Tập | Định dạng A→B | Tỷ lệ tổng (%) | Theo nguồn cao nhất (%) | Theo đồ án nguồn A (%) "
+          "| A dẫn đầu? | Đoạn trùng (nguyên văn / ngữ nghĩa) | Bị cảnh báo? | Kỳ vọng | Kết quả |")
+        a("|---|---|---|---|---:|---:|---:|---|---|---|---|---|")
         for c in _split(kq["cap"], tap):
             a(f"| {c['ma_cap']} | {TEN_LOAI[c['loai']]} | {c['tap']} | {c['dinh_dang']} | {_pct(c['ty_le_tong'])} | "
+              f"{_pct(c['ty_le_nguon_cao_nhat'])} | "
               f"{_pct(c['ty_le_nguon'])} | {_yn(c['nguon_dung_dau'])} | {c['so_doan_nguyen_van']} / "
               f"{c['so_doan_ngu_nghia']} | {_yn(c['bi_canh_bao'])} | {'Cảnh báo' if c['ky_vong'] else 'Không cảnh báo'} | "
               f"{'Đạt' if c['dat'] else 'Không đạt'} |")
@@ -1045,11 +1070,17 @@ def render_report(nguong: dict, kq: dict) -> str:
       "NFR-09 do plan 04-06 (container) và Phase 5 (server) đo.")
     neg_pairs = [c for c in kq["cap"] if not c["ky_vong"]]
     worst = max(neg_pairs, key=lambda c: c["ty_le_tong"])
-    a(f"- **Tỷ lệ tổng khác tỷ lệ theo đồ án nguồn.** Cặp không được kỳ vọng cảnh báo có tỷ lệ tổng cao nhất là "
-      f"{worst['ma_cap']} ({TEN_LOAI[worst['loai']].lower()}, {worst['tap']}): {worst['ty_le_tong']:.2f} % tổng nhưng "
-      f"chỉ {worst['ty_le_nguon']:.2f} % theo đồ án nguồn, vì các đoạn khớp rải rác trên nhiều đồ án khác cùng lĩnh "
-      "vực. Vì vậy quyết định cảnh báo dựa trên tỷ lệ theo **từng** đồ án (`do_an_trung`) so với ngưỡng tài liệu, còn "
-      "tỷ lệ tổng chỉ để hiển thị kèm.")
+    spread = max(neg_pairs, key=lambda c: c["ty_le_tong"] - c["ty_le_nguon_cao_nhat"])
+    a(f"- **Cảnh báo theo từng đồ án, không theo tỷ lệ tổng.** Tỷ lệ tổng cộng mọi nguồn: cặp {spread['ma_cap']} "
+      f"({TEN_LOAI[spread['loai']].lower()}) có {spread['ty_le_tong']:.2f} % tổng nhưng chỉ "
+      f"{spread['ty_le_nguon_cao_nhat']:.2f} % với đồ án trùng nhiều nhất, vì các câu khớp rải rác trên nhiều đồ án. "
+      "Quyết định cảnh báo vì vậy dùng tỷ lệ theo nguồn cao nhất (`do_an_trung`), tỷ lệ tổng chỉ để hiển thị.")
+    a(f"- **Cặp cùng lĩnh vực có tỷ lệ tổng cao nhất** là {worst['ma_cap']} ({worst['tap']}): "
+      f"{worst['ty_le_tong']:.2f} % tổng, {worst['ty_le_nguon_cao_nhat']:.2f} % với một đồ án khác trong kho "
+      f"(tới đồ án nguồn A của cặp: {worst['ty_le_nguon']:.2f} %) — "
+      f"{'bị cảnh báo' if worst['bi_canh_bao'] else 'không bị cảnh báo'} theo quy tắc triển khai. Phiên bản trước của "
+      "trang này đánh giá bằng tỷ lệ tới A (chỉ bộ dữ liệu có chủ đích mới biết) nên ghi cặp này là không cảnh báo; "
+      "đó không phải điều hệ thống chạy thật làm được.")
     cau = kq["cau"]
     a(f"- **Mức câu còn yếu với diễn đạt lại.** AUC của tín hiệu ngữ nghĩa ở mức câu trên tập hiệu chỉnh chỉ "
       f"{ck['ngu_nghia_cau']['auc']:.4f}. Với ngưỡng cố định, tỷ lệ câu diễn đạt lại bị gắn cờ là "
@@ -1072,10 +1103,11 @@ def render_report(nguong: dict, kq: dict) -> str:
                 cause = ("tỷ lệ theo đồ án nguồn thấp hơn ngưỡng tài liệu: một phần câu diễn đạt lại có cosine dưới "
                          "ngưỡng đoạn nên không được tính")
             else:
-                cause = ("câu tự viết cùng lĩnh vực có cosine cao với A (mẫu câu chung của lĩnh vực), đẩy tỷ lệ theo "
-                         "đồ án nguồn vượt ngưỡng tài liệu")
+                cause = ("câu tự viết cùng lĩnh vực có cosine cao với một đồ án khác cùng chủ đề (mẫu câu chung của "
+                         "lĩnh vực) thành chuỗi ≥ 2 câu liên tiếp, đẩy tỷ lệ theo nguồn cao nhất vượt ngưỡng tài liệu")
             a(f"  - {c['ma_cap']} ({TEN_LOAI[c['loai']]}, {c['dinh_dang']}): tỷ lệ tổng {c['ty_le_tong']:.2f} %, "
-              f"theo đồ án nguồn {c['ty_le_nguon']:.2f} % so với ngưỡng {nguong['nguong_tai_lieu']} %, "
+              f"theo nguồn cao nhất {c['ty_le_nguon_cao_nhat']:.2f} % (tới A {c['ty_le_nguon']:.2f} %) so với ngưỡng "
+              f"{nguong['nguong_tai_lieu']} %, "
               f"đoạn trùng {c['so_doan_nguyen_van']} nguyên văn / {c['so_doan_ngu_nghia']} ngữ nghĩa, cosine lớn nhất "
               f"của câu tự viết {c['max_ngu_nghia_cau_tu_viet']:.2f} %. Nguyên nhân có thể: {cause}.")
     a("")

@@ -49,11 +49,11 @@
     "g1": true,
     "g2": true,
     "g3": true,
-    "accuracy_kiem_chung": 1.0,
+    "accuracy_kiem_chung": 0.875,
     "accuracy_hieu_chinh": 1.0,
     "mo_ta": {
       "g1": "mọi cặp CHEP_NGUYEN_VAN bị cảnh báo (cứng)",
-      "g2": "mọi cặp KHONG_LIEN_QUAN có tỷ lệ theo đồ án nguồn và tỷ lệ tổng < ngưỡng tài liệu (cứng)",
+      "g2": "mọi cặp KHONG_LIEN_QUAN có tỷ lệ theo nguồn cao nhất và tỷ lệ tổng < ngưỡng tài liệu (cứng)",
       "g3": "độ chính xác cặp trên KIEM_CHUNG ≥ 0.85 (mềm)"
     }
   },
@@ -92,9 +92,9 @@
         "ty_le": 1.0
       },
       "CUNG_LINH_VUC": {
-        "dat": 2,
+        "dat": 1,
         "tong": 2,
-        "ty_le": 1.0
+        "ty_le": 0.5
       },
       "KHONG_LIEN_QUAN": {
         "dat": 2,
@@ -102,6 +102,11 @@
         "ty_le": 1.0
       }
     }
+  },
+  "khoang_tach_nguon_cao_nhat_hieu_chinh": {
+    "am_lon_nhat": 3.69,
+    "duong_nho_nhat": 20.79,
+    "nguong_nam_trong": true
   },
   "cap": [
     {
@@ -114,6 +119,7 @@
       "so_dong_loai_tru": 112,
       "ty_le_tong": 50.3,
       "ty_le_nguon": 50.3,
+      "ty_le_nguon_cao_nhat": 50.3,
       "nguon_dung_dau": true,
       "so_doan_trung": 7,
       "so_doan_nguyen_van": 7,
@@ -133,6 +139,7 @@
       "so_dong_loai_tru": 66,
       "ty_le_tong": 48.04,
       "ty_le_nguon": 48.04,
+      "ty_le_nguon_cao_nhat": 48.04,
       "nguon_dung_dau": true,
       "so_doan_trung": 5,
       "so_doan_nguyen_van": 5,
@@ -152,6 +159,7 @@
       "so_dong_loai_tru": 121,
       "ty_le_tong": 51.03,
       "ty_le_nguon": 49.32,
+      "ty_le_nguon_cao_nhat": 49.32,
       "nguon_dung_dau": true,
       "so_doan_trung": 17,
       "so_doan_nguyen_van": 16,
@@ -171,6 +179,7 @@
       "so_dong_loai_tru": 65,
       "ty_le_tong": 49.33,
       "ty_le_nguon": 44.89,
+      "ty_le_nguon_cao_nhat": 44.89,
       "nguon_dung_dau": true,
       "so_doan_trung": 5,
       "so_doan_nguyen_van": 4,
@@ -190,6 +199,7 @@
       "so_dong_loai_tru": 118,
       "ty_le_tong": 44.83,
       "ty_le_nguon": 44.83,
+      "ty_le_nguon_cao_nhat": 44.83,
       "nguon_dung_dau": true,
       "so_doan_trung": 13,
       "so_doan_nguyen_van": 13,
@@ -209,6 +219,7 @@
       "so_dong_loai_tru": 67,
       "ty_le_tong": 49.74,
       "ty_le_nguon": 46.93,
+      "ty_le_nguon_cao_nhat": 46.93,
       "nguon_dung_dau": true,
       "so_doan_trung": 6,
       "so_doan_nguyen_van": 5,
@@ -228,6 +239,7 @@
       "so_dong_loai_tru": 108,
       "ty_le_tong": 57.76,
       "ty_le_nguon": 46.07,
+      "ty_le_nguon_cao_nhat": 46.07,
       "nguon_dung_dau": true,
       "so_doan_trung": 9,
       "so_doan_nguyen_van": 6,
@@ -247,6 +259,7 @@
       "so_dong_loai_tru": 112,
       "ty_le_tong": 21.23,
       "ty_le_nguon": 21.23,
+      "ty_le_nguon_cao_nhat": 21.23,
       "nguon_dung_dau": true,
       "so_doan_trung": 5,
       "so_doan_nguyen_van": 0,
@@ -266,6 +279,7 @@
       "so_dong_loai_tru": 65,
       "ty_le_tong": 17.38,
       "ty_le_nguon": 13.36,
+      "ty_le_nguon_cao_nhat": 13.36,
       "nguon_dung_dau": true,
       "so_doan_trung": 4,
       "so_doan_nguyen_van": 0,
@@ -285,6 +299,7 @@
       "so_dong_loai_tru": 109,
       "ty_le_tong": 20.88,
       "ty_le_nguon": 20.88,
+      "ty_le_nguon_cao_nhat": 20.88,
       "nguon_dung_dau": true,
       "so_doan_trung": 4,
       "so_doan_nguyen_van": 0,
@@ -304,6 +319,7 @@
       "so_dong_loai_tru": 66,
       "ty_le_tong": 25.54,
       "ty_le_nguon": 20.79,
+      "ty_le_nguon_cao_nhat": 20.79,
       "nguon_dung_dau": true,
       "so_doan_trung": 6,
       "so_doan_nguyen_van": 0,
@@ -323,6 +339,7 @@
       "so_dong_loai_tru": 117,
       "ty_le_tong": 33.16,
       "ty_le_nguon": 31.54,
+      "ty_le_nguon_cao_nhat": 31.54,
       "nguon_dung_dau": true,
       "so_doan_trung": 14,
       "so_doan_nguyen_van": 0,
@@ -342,6 +359,7 @@
       "so_dong_loai_tru": 67,
       "ty_le_tong": 30.29,
       "ty_le_nguon": 30.29,
+      "ty_le_nguon_cao_nhat": 30.29,
       "nguon_dung_dau": true,
       "so_doan_trung": 4,
       "so_doan_nguyen_van": 0,
@@ -361,6 +379,7 @@
       "so_dong_loai_tru": 123,
       "ty_le_tong": 34.09,
       "ty_le_nguon": 34.09,
+      "ty_le_nguon_cao_nhat": 34.09,
       "nguon_dung_dau": true,
       "so_doan_trung": 18,
       "so_doan_nguyen_van": 0,
@@ -380,6 +399,7 @@
       "so_dong_loai_tru": 121,
       "ty_le_tong": 4.78,
       "ty_le_nguon": 0.0,
+      "ty_le_nguon_cao_nhat": 3.69,
       "nguon_dung_dau": false,
       "so_doan_trung": 4,
       "so_doan_nguyen_van": 0,
@@ -399,6 +419,7 @@
       "so_dong_loai_tru": 65,
       "ty_le_tong": 0.0,
       "ty_le_nguon": 0.0,
+      "ty_le_nguon_cao_nhat": 0.0,
       "nguon_dung_dau": false,
       "so_doan_trung": 0,
       "so_doan_nguyen_van": 0,
@@ -418,6 +439,7 @@
       "so_dong_loai_tru": 108,
       "ty_le_tong": 0.0,
       "ty_le_nguon": 0.0,
+      "ty_le_nguon_cao_nhat": 0.0,
       "nguon_dung_dau": false,
       "so_doan_trung": 0,
       "so_doan_nguyen_van": 0,
@@ -437,6 +459,7 @@
       "so_dong_loai_tru": 65,
       "ty_le_tong": 2.86,
       "ty_le_nguon": 0.0,
+      "ty_le_nguon_cao_nhat": 2.86,
       "nguon_dung_dau": false,
       "so_doan_trung": 1,
       "so_doan_nguyen_van": 0,
@@ -456,13 +479,14 @@
       "so_dong_loai_tru": 119,
       "ty_le_tong": 23.96,
       "ty_le_nguon": 0.0,
+      "ty_le_nguon_cao_nhat": 22.81,
       "nguon_dung_dau": false,
       "so_doan_trung": 14,
       "so_doan_nguyen_van": 0,
       "so_doan_ngu_nghia": 14,
-      "bi_canh_bao": false,
+      "bi_canh_bao": true,
       "ky_vong": false,
-      "dat": true,
+      "dat": false,
       "max_ngu_nghia_cau_tu_viet": 95.92
     },
     {
@@ -475,6 +499,7 @@
       "so_dong_loai_tru": 64,
       "ty_le_tong": 0.0,
       "ty_le_nguon": 0.0,
+      "ty_le_nguon_cao_nhat": 0.0,
       "nguon_dung_dau": false,
       "so_doan_trung": 0,
       "so_doan_nguyen_van": 0,
@@ -494,6 +519,7 @@
       "so_dong_loai_tru": 116,
       "ty_le_tong": 6.0,
       "ty_le_nguon": 0.0,
+      "ty_le_nguon_cao_nhat": 1.51,
       "nguon_dung_dau": false,
       "so_doan_trung": 5,
       "so_doan_nguyen_van": 0,
@@ -513,6 +539,7 @@
       "so_dong_loai_tru": 65,
       "ty_le_tong": 0.0,
       "ty_le_nguon": 0.0,
+      "ty_le_nguon_cao_nhat": 0.0,
       "nguon_dung_dau": false,
       "so_doan_trung": 0,
       "so_doan_nguyen_van": 0,
@@ -532,6 +559,7 @@
       "so_dong_loai_tru": 112,
       "ty_le_tong": 0.0,
       "ty_le_nguon": 0.0,
+      "ty_le_nguon_cao_nhat": 0.0,
       "nguon_dung_dau": false,
       "so_doan_trung": 0,
       "so_doan_nguyen_van": 0,
@@ -551,6 +579,7 @@
       "so_dong_loai_tru": 64,
       "ty_le_tong": 3.47,
       "ty_le_nguon": 0.0,
+      "ty_le_nguon_cao_nhat": 3.47,
       "nguon_dung_dau": false,
       "so_doan_trung": 1,
       "so_doan_nguyen_van": 0,
@@ -570,6 +599,7 @@
       "so_dong_loai_tru": 117,
       "ty_le_tong": 1.25,
       "ty_le_nguon": 0.0,
+      "ty_le_nguon_cao_nhat": 1.25,
       "nguon_dung_dau": false,
       "so_doan_trung": 1,
       "so_doan_nguyen_van": 0,
@@ -1699,15 +1729,15 @@
     },
     "check_title_ms": {
       "n": 20,
-      "p50": 41.0,
-      "p95": 49.4,
-      "max": 56.0
+      "p50": 38.0,
+      "p95": 49.0,
+      "max": 49.9
     },
     "check_document_ms": {
       "n": 20,
-      "p50": 1079.0,
-      "p95": 2982.6,
-      "max": 3027.1
+      "p50": 1127.4,
+      "p95": 2710.3,
+      "max": 2737.6
     },
     "nfr": {
       "NFR-08_check_title_p95_ms": 5000,
