@@ -68,6 +68,7 @@ _COMMITTEE_HAS_STUDENTS_DETAIL = "Hội đồng đã có sinh viên — gỡ sin
 
 _SCHEDULE_NOT_FOUND_DETAIL = "Không tìm thấy lịch bảo vệ"
 _NOT_ELIGIBLE_NO_REPORT_DETAIL = "Sinh viên chưa nộp báo cáo cuối"
+_NOT_ELIGIBLE_OUTLINE_DETAIL = "Đề cương của sinh viên chưa được duyệt — chưa thể xếp lịch bảo vệ"
 _ALREADY_SCHEDULED_ELSEWHERE_DETAIL = "Sinh viên đã được xếp vào một hội đồng khác"
 _SCHEDULE_LOCKED_DETAIL = "Lịch bảo vệ đã có điểm hoặc đã chốt kết quả — không thể gỡ khỏi lịch"
 
@@ -166,8 +167,13 @@ def submit_final_report(
     if de_cuong is None or de_cuong.trang_thai != DC_DA_DUYET:
         raise HTTPException(status_code=409, detail=_OUTLINE_NOT_APPROVED_DETAIL)
 
+    # WR-03: đọc có khóa — add_schedule khóa cùng dòng de_tai trước khi chèn
+    # lịch, nên ở đây luôn thấy lịch vừa commit (không phải snapshot cũ).
     already_scheduled = db.execute(
-        select(func.count()).select_from(LichBaoVe).where(LichBaoVe.sinh_vien_id == user.sinh_vien_id)
+        select(func.count())
+        .select_from(LichBaoVe)
+        .where(LichBaoVe.sinh_vien_id == user.sinh_vien_id)
+        .with_for_update(read=True)
     ).scalar_one()
     if already_scheduled > 0:
         raise HTTPException(status_code=409, detail=_ALREADY_SCHEDULED_SELF_DETAIL)
@@ -762,13 +768,29 @@ def add_schedule(db: Session, hoi_dong_id: int, de_tai_id: int) -> ScheduleRow:
     if hoi_dong is None:
         raise HTTPException(status_code=404, detail=_COMMITTEE_NOT_FOUND_DETAIL)
 
+    # WR-03: khóa dòng de_tai SAU hoi_dong — serialize với submit_final_report
+    # (khóa cùng dòng), nên không có phiên bản báo cáo cuối nào lọt vào sau
+    # khi SV đã được xếp lịch.
     topic = db.execute(
-        select(DeTai).where(DeTai.id == de_tai_id).options(selectinload(DeTai.sinh_vien))
+        select(DeTai)
+        .where(DeTai.id == de_tai_id)
+        .options(selectinload(DeTai.sinh_vien))
+        .with_for_update()
     ).scalar_one_or_none()
     if topic is None:
         raise HTTPException(status_code=404, detail=_TOPIC_NOT_FOUND_DETAIL)
-    if topic.giang_vien_id is None:
+    if (
+        topic.trang_thai != DA_PHAN_CONG
+        or topic.giang_vien_id is None
+        or topic.sinh_vien_id is None
+    ):
         raise HTTPException(status_code=409, detail=_NOT_ASSIGNED_DETAIL)
+
+    de_cuong_trang_thai = db.execute(
+        select(DeCuong.trang_thai).where(DeCuong.de_tai_id == de_tai_id)
+    ).scalar_one_or_none()
+    if de_cuong_trang_thai != DC_DA_DUYET:
+        raise HTTPException(status_code=409, detail=_NOT_ELIGIBLE_OUTLINE_DETAIL)
 
     has_report = db.execute(
         select(func.count())
