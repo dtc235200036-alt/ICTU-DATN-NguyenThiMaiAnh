@@ -125,7 +125,7 @@ Plans:
   4. Đồ án đã chốt kết quả tự xuất hiện trong kho với đủ metadata; người dùng tìm/lọc kho theo khóa, từ khóa, GVHD và xem chi tiết; Bộ môn thêm/sửa/xóa và import bản ghi các khóa cũ, mỗi bản ghi mới phát sinh lời gọi index sang AI client
   5. Người dùng thấy thông báo in-app (số chưa đọc + danh sách) khi đề tài/đề cương được duyệt hoặc từ chối, khi có nhận xét mới, và khi được phân vào hội đồng hoặc có lịch bảo vệ
 
-**Plans**: 3/7 plans executed (tuần tự — dùng chung một stack Docker Compose và schema MySQL test; thứ tự theo D-09: đề cương → bảo vệ → kho, rồi tiến độ và thông báo)
+**Plans**: 4/7 plans executed (tuần tự — dùng chung một stack Docker Compose và schema MySQL test; thứ tự theo D-09: đề cương → bảo vệ → kho, rồi tiến độ và thông báo)
 Plans:
 **Wave 1**
 - [x] 03-01-PLAN.md — TRACER: SV nộp đề cương → lưu (volume riêng) + trích xuất → kiểm tra stub nền DANG_KIEM_TRA→HOAN_TAT → GVHD duyệt → thông báo (Alembic 0006, cột bổ sung noi_dung_trich_xuat/trich_xuat_loi ghi ngược ERD); vòng yêu cầu sửa, tải file, kiểm tra lại, 4 test; deploy/e2e-uc2-5.sh
@@ -137,7 +137,7 @@ Plans:
 - [x] 03-03-PLAN.md — SV nộp báo cáo cuối (kiểm tra trùng lặp nền) + Bộ môn lập hội đồng, xếp lịch, chặn GVHD ngồi hội đồng SV mình (Alembic 0007, MH-11)
 
 **Wave 4** *(blocked on Wave 3 completion)*
-- [ ] 03-04-PLAN.md — GV hội đồng chấm điểm (403 ngoài hội đồng), Bộ môn chốt TB cộng → tự lưu kho + ingest AI stub, SV xem lịch/kết quả (Alembic 0008, MH-12)
+- [x] 03-04-PLAN.md — GV hội đồng chấm điểm (403 ngoài hội đồng), Bộ môn chốt TB cộng → tự lưu kho + ingest AI stub, SV xem lịch/kết quả (Alembic 0008, MH-12)
 
 **Wave 5** *(blocked on Wave 4 completion)*
 - [ ] 03-05-PLAN.md — Kho đồ án: tìm/lọc theo khóa, từ khóa, GVHD, xem chi tiết + tải báo cáo; Bộ môn thêm/sửa/xóa, index lại, import CSV khóa cũ (MH-13)
@@ -220,6 +220,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Analysis & Design | 6/7 | In Progress|  |
 | 2. Platform, RBAC & Topic Management | 6/6 | In Progress|  |
-| 3. Outline, Progress, Defense & Archive | 3/7 | In Progress|  |
+| 3. Outline, Progress, Defense & Archive | 4/7 | In Progress|  |
 | 4. AI Similarity Service | 0/TBD | Not started | - |
 | 5. System Verification & Defense Package | 0/TBD | Not started | - |

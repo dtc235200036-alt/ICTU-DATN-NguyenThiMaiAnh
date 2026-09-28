@@ -47,12 +47,12 @@
 
 - [x] **DEFN-01**: SV nộp báo cáo cuối (DOCX/PDF); lần nộp này chạy kiểm tra trùng lặp nội dung
 - [x] **DEFN-02**: Bộ môn lập hội đồng (chọn các GV làm thành viên), xếp lịch (ngày, giờ, phòng) và danh sách SV bảo vệ
-- [ ] **DEFN-03**: GV được phân vào hội đồng xem báo cáo của SV thuộc hội đồng mình và nhập điểm + nhận xét
-- [ ] **DEFN-04**: Hệ thống tính điểm bảo vệ bằng trung bình cộng điểm các thành viên; bộ môn chốt kết quả; SV xem lịch và kết quả của mình
+- [x] **DEFN-03**: GV được phân vào hội đồng xem báo cáo của SV thuộc hội đồng mình và nhập điểm + nhận xét
+- [x] **DEFN-04**: Hệ thống tính điểm bảo vệ bằng trung bình cộng điểm các thành viên; bộ môn chốt kết quả; SV xem lịch và kết quả của mình
 
 ### Kho dữ liệu đồ án (UC5)
 
-- [ ] **REPO-01**: Đồ án đã chốt kết quả được đưa vào kho với metadata (khóa, đề tài, SV, GVHD, từ khóa, điểm, file)
+- [x] **REPO-01**: Đồ án đã chốt kết quả được đưa vào kho với metadata (khóa, đề tài, SV, GVHD, từ khóa, điểm, file)
 - [ ] **REPO-02**: Người dùng tìm kiếm/lọc đồ án trong kho theo khóa, từ khóa, GVHD và xem chi tiết
 - [ ] **REPO-03**: Bộ môn thêm/sửa/xóa bản ghi kho, kể cả import đồ án các khóa cũ; mỗi bản ghi mới được đẩy sang dịch vụ AI để index
 
@@ -136,9 +136,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROG-03 | Phase 3 | Pending |
 | DEFN-01 | Phase 3 | Complete |
 | DEFN-02 | Phase 3 | Complete |
-| DEFN-03 | Phase 3 | Pending |
-| DEFN-04 | Phase 3 | Pending |
-| REPO-01 | Phase 3 | Pending |
+| DEFN-03 | Phase 3 | Complete |
+| DEFN-04 | Phase 3 | Complete |
+| REPO-01 | Phase 3 | Complete |
 | REPO-02 | Phase 3 | Pending |
 | REPO-03 | Phase 3 | Pending |
 | AISV-01 | Phase 4 | Pending |

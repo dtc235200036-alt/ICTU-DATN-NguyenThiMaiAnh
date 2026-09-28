@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 3
 current_phase_name: Outline, Progress, Defense & Archive
 status: executing
-stopped_at: Completed 03-03-PLAN.md (UC4.1/4.2 defense — final report + committee/schedule with GVHD exclusion)
-last_updated: "2026-09-28T03:48:25.228Z"
+stopped_at: Completed 03-04-PLAN.md (UC4.3-4.5 scoring/finalize + UC5.2 auto-archive/ingest)
+last_updated: "2026-09-28T04:09:01.731Z"
 last_activity: 2026-09-28
-last_activity_desc: Phase 3 plan 03-01 complete (UC2 outline tracer + revision loop, 2/2 tasks, 4 tests)
-state_head: 24effca29b42a9e779498f5aad24a214756a60ca
+last_activity_desc: Phase 3 plan 03-04 complete (UC4.3-4.5 scoring/finalize + UC5.2 auto-archive, 2/2 tasks)
+state_head: cc4daa5c8cc3832ba060ef143f3fdebb3950bfc8
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 27
-  completed_plans: 17
+  completed_plans: 19
   percent: 0
 ---
 
@@ -28,9 +28,9 @@ See: .planning/PROJECT.md (updated 2026-09-27)
 ## Current Position
 
 Phase: 3 (Outline, Progress, Defense & Archive) — EXECUTING
-Plan: 4 of 7
+Plan: 5 of 7
 Status: Ready to execute
-Last activity: 2026-09-28 — Plan 03-01 complete (UC2 outline tracer + revision loop)
+Last activity: 2026-09-28 — Plan 03-04 complete (committee scoring, chốt, auto-archive + ingest)
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -71,6 +71,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03 P01 | 42min | 2 tasks | 39 files |
 | Phase 03 P02 | 55min | 2 tasks | 14 files |
 | Phase 03 P03 | 38min | 2 tasks | 13 files |
+| Phase 03 P04 | 22min | 2 tasks | 17 files |
 
 ## Accumulated Context
 
@@ -122,6 +123,10 @@ Recent decisions affecting current work:
 - [Phase 03]: [Phase 03]: GVHD-exclusion (D-06) checked in add_schedule AND update_committee, both under a hoi_dong row lock + UNIQUE(lich_bao_ve.sinh_vien_id) as final defense — never a UI-only warning
 - [Phase 03]: [Phase 03]: gio_du_kien (per-student defense slot time) is always computed server-side (SLOT_MINUTES=30 offset from hoi_dong.gio_bao_ve by thu_tu), never stored
 - [Phase 03]: [Phase 03]: FinalReportTab reuses VersionHistory with docLabel='báo cáo cuối' (no review-loop UI) instead of a new version-table component
+- [Phase 03]: 03-04: finalize mean = Decimal sum/n quantize(0.01, ROUND_HALF_UP) under lich_bao_ve FOR UPDATE; conditional UPDATE WHERE da_chot = FALSE; archive row + KET_QUA_BAO_VE in the same transaction
+- [Phase 03]: 03-04: AI ingest of a finalized thesis runs post-commit in BackgroundTasks (archive.run_ingest, own SessionLocal); payload DOCUMENT with latest BAO_CAO_CUOI text else TOPIC ten_de_tai+tu_khoa; failure leaves CHUA_INDEX
+- [Phase 03]: 03-04: committee members get read access to BAO_CAO_CUOI only (documents.is_committee_member_for_topic), never outline/progress docs
+- [Phase 03]: 03-04: do_an_kho gains additive ma_so_sinh_vien/ho_ten_sinh_vien snapshot columns (written back to ERD/class diagram/§3.2.3)
 
 ### Pending Todos
 
@@ -145,6 +150,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-28T03:48:25.184Z
-Stopped at: Completed 03-03-PLAN.md (UC4.1/4.2 defense — final report + committee/schedule with GVHD exclusion)
+Last session: 2026-09-28T04:09:01.685Z
+Stopped at: Completed 03-04-PLAN.md (UC4.3-4.5 scoring/finalize + UC5.2 auto-archive/ingest)
 Resume file: None
