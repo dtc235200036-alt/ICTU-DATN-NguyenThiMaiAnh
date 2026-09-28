@@ -530,8 +530,81 @@ print(next((gv["id"] for gv in d if gv.get("ma_giang_vien") == "GV029"), ""))' 2
   ok "do_an_kho id=${DO_AN_KHO_ID}: nguồn HE_THONG, đã index (DA_INDEX)"
 }
 
+uc5_archive() {
+  # --- UC5.1/5.3/5.4 (plan 03-05): tra cứu, tải báo cáo đã lưu kho, sửa +
+  # index lại, import CSV khóa cũ (thành công một phần), RBAC ghi ---
+  [ -n "$DO_AN_KHO_ID" ] || fail "uc5_archive cần DO_AN_KHO_ID từ uc4_defense"
+  local status found
+  status="$(call GET "/api/archive?khoa=K98" "${TOKEN_SV097}")"
+  [ "$status" = "200" ] || fail "DTC225200097 không tra cứu được kho (mã ${status})"
+  found="$(jget "next((f\"{i['diem']}|{i['co_file']}\" for i in d['items'] if i['id'] == ${DO_AN_KHO_ID}), '')")"
+  [ "$found" = "8.5|True" ] || fail "Kho K98 không có đồ án vừa chốt với điểm 8.5 + file (nhận '${found}')"
+  ok "DTC225200097 tra cứu kho K98 thấy đồ án vừa chốt (điểm 8.5, có file)"
+
+  local archived_path="$TMP/kho-bao-cao.pdf"
+  status="$(curl -sk -o "$archived_path" -w '%{http_code}' "$BASE/api/archive/${DO_AN_KHO_ID}/file" \
+    -H "Authorization: Bearer ${TOKEN_SV097}")"
+  [ "$status" = "200" ] || fail "DTC225200097 không tải được báo cáo đã lưu kho (mã ${status})"
+  [ "$(sha256sum "$archived_path" | awk '{print $1}')" = "$(sha256sum "$TMP/bao-cao-cuoi.pdf" | awk '{print $1}')" ] \
+    || fail "Báo cáo tải từ kho không khớp sha256 với báo cáo cuối đã nộp"
+  ok "DTC225200097 tải báo cáo cuối từ kho -> bytes khớp sha256 với file đã nộp"
+
+  local put_body
+  status="$(call GET "/api/archive/${DO_AN_KHO_ID}" "${TOKEN_BOMON}")"
+  [ "$status" = "200" ] || fail "Bộ môn không đọc được chi tiết bản ghi kho (mã ${status})"
+  put_body="$(jget "json.dumps({'khoa': d['khoa'], 'ten_de_tai': d['ten_de_tai'], 'ma_so_sinh_vien': d['sinh_vien']['ma'], 'ho_ten_sinh_vien': d['sinh_vien']['ho_ten'], 'giang_vien_id': (d['giang_vien'] or {}).get('id'), 'tu_khoa': 'kiểm thử, tự động', 'diem': d['diem']}, ensure_ascii=False)")"
+  [ -n "$put_body" ] || fail "Không dựng được payload sửa bản ghi kho"
+  status="$(call PUT "/api/archive/${DO_AN_KHO_ID}" "${TOKEN_BOMON}" -H 'Content-Type: application/json' -d "$put_body")"
+  [ "$status" = "200" ] || fail "Bộ môn sửa từ khóa bản ghi kho không trả 200 (mã ${status}, $(cat "$TMP/body"))"
+  local idx attempt
+  idx=""
+  for attempt in $(seq 1 20); do
+    call GET "/api/archive/${DO_AN_KHO_ID}" "${TOKEN_BOMON}" >/dev/null
+    idx="$(jget "d['trang_thai_index'] + '|' + (d['tu_khoa'] or '')")"
+    [ "$idx" = "DA_INDEX|kiểm thử, tự động" ] && break
+    sleep 0.5
+  done
+  [ "$idx" = "DA_INDEX|kiểm thử, tự động" ] || fail "Bản ghi kho sau khi sửa không về DA_INDEX (nhận ${idx})"
+  ok "Bộ môn sửa từ khóa 'kiểm thử, tự động' -> index lại nền -> DA_INDEX"
+
+  local csv_path="$TMP/kho-khoa-cu.csv"
+  cat >"$csv_path" <<'CSVEOF'
+khoa,ten_de_tai,ma_so_sinh_vien,ho_ten_sinh_vien,ma_giang_vien,tu_khoa,diem
+K98,E2E kho - Nhận diện biển số xe bằng học sâu,,Người Kiểm Thử,GV029,"học sâu, biển số",8.25
+K98,E2E kho - Quản lý ký túc xá trực tuyến,,,,,"7,5"
+K98,,,,,,
+CSVEOF
+  status="$(call POST /api/archive/import "${TOKEN_BOMON}" -F "file=@${csv_path};type=text/csv")"
+  [ "$status" = "200" ] || fail "Bộ môn import CSV không trả 200 (mã ${status}, $(cat "$TMP/body"))"
+  local imp
+  imp="$(jget "f\"{d['tong_dong']}|{d['thanh_cong']}|\" + ','.join(str(e['dong']) + ':' + e['ly_do'] for e in d['loi'])")"
+  [ "$imp" = "3|2|4:Thiếu tên đề tài" ] || fail "Kết quả import CSV sai (nhận ${imp})"
+  ok "Bộ môn import CSV 3 dòng -> 2 thành công, dòng 4 bị bỏ qua (Thiếu tên đề tài)"
+
+  status="$(call GET /api/archive "${TOKEN_GV025}" --get --data-urlencode "q=biển số" --data-urlencode "khoa=K98")"
+  [ "$status" = "200" ] || fail "GV025 tìm kiếm kho theo từ khóa không trả 200 (mã ${status})"
+  local imported_id
+  imported_id="$(jget "d['items'][0]['id'] if d['total'] == 1 and d['items'][0]['nguon'] == 'IMPORT' else ''")"
+  [ -n "$imported_id" ] || fail "Tìm 'biển số' không ra đúng một bản ghi import ($(cat "$TMP/body"))"
+  ok "GV025 tìm 'biển số' trong kho -> đúng bản ghi vừa import (id=${imported_id})"
+
+  status="$(call POST /api/archive "${TOKEN_SV097}" -H 'Content-Type: application/json' \
+    -d '{"khoa":"K98","ten_de_tai":"SV thêm trái phép"}')"
+  [ "$status" = "403" ] || fail "DTC225200097 thêm bản ghi kho không bị từ chối 403 (mã ${status})"
+  status="$(call POST /api/archive/import "${TOKEN_GV025}" -F "file=@${csv_path};type=text/csv")"
+  [ "$status" = "403" ] || fail "GV025 import CSV không bị từ chối 403 (mã ${status})"
+  ok "DTC225200097 thêm bản ghi + GV025 import CSV đều bị từ chối 403"
+
+  status="$(call DELETE "/api/archive/${imported_id}" "${TOKEN_BOMON}")"
+  [ "$status" = "204" ] || fail "Bộ môn xóa bản ghi import không trả 204 (mã ${status})"
+  status="$(call GET "/api/archive/${imported_id}" "${TOKEN_BOMON}")"
+  [ "$status" = "404" ] || fail "Bản ghi đã xóa vẫn đọc được (mã ${status})"
+  ok "Bộ môn xóa một bản ghi import -> 204, đọc lại -> 404"
+}
+
 setup_assigned_topic
 uc2_outline
 uc4_defense
+uc5_archive
 
-echo "OK: e2e UC2-4 (đề cương -> bảo vệ -> lưu kho) hoàn tất — dữ liệu đợt K98 sẽ được dọn khi script kết thúc (trap)"
+echo "OK: e2e UC2-5 (đề cương -> bảo vệ -> lưu kho -> tra cứu/quản lý kho) hoàn tất — dữ liệu đợt K98 sẽ được dọn khi script kết thúc (trap)"

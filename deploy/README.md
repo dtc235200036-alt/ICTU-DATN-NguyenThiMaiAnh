@@ -131,6 +131,41 @@ kiểm tra trùng lặp) khi kết thúc, kể cả khi có bước thất bại
 Widget đề cương/tiến độ/hội đồng/thông báo trên các dashboard (MH-02/03/04)
 sẽ được bổ sung ở Phase 3 khi các UC tương ứng có dữ liệu thật.
 
+## Định dạng CSV import kho đồ án
+
+Bộ môn nhập đồ án các khóa cũ vào kho (UC5.4, D-07) từ màn hình "Kho đồ án" →
+"Import khóa cũ" hoặc `POST /api/archive/import` (multipart, trường `file`).
+
+| Cột | Bắt buộc | Giới hạn | Ghi chú |
+|---|---|---|---|
+| `khoa` | có | ≤ 20 ký tự | Ví dụ `K19` |
+| `ten_de_tai` | có | ≤ 255 ký tự | |
+| `ma_so_sinh_vien` | không | ≤ 20 ký tự | Nếu trùng mã một SV đã có tài khoản, bản ghi được liên kết với SV đó (và tự điền họ tên khi để trống) |
+| `ho_ten_sinh_vien` | không | ≤ 150 ký tự | |
+| `ma_giang_vien` | không | mã GV đã có | Mã không tồn tại → dòng bị từ chối |
+| `tu_khoa` | không | ≤ 255 ký tự | Nhiều từ khóa phân tách bằng dấu phẩy, đặt trong ngoặc kép |
+| `diem` | không | 0–10, tối đa 2 chữ số thập phân | Chấp nhận `8.5` hoặc `8,5` |
+
+Quy tắc:
+
+- Mã hóa **UTF-8** (có hoặc không có BOM — "CSV UTF-8" của Excel/LibreOffice đều được); dòng đầu là tiêu đề cột; phân tách bằng dấu phẩy (nếu dòng tiêu đề chỉ có dấu chấm phẩy thì hệ thống tự dùng `;`). Cột không có trong bảng trên bị bỏ qua; dòng trống hoàn toàn bị bỏ qua.
+- Tối đa **2 MB** và **2000 dòng dữ liệu** mỗi file; vượt giới hạn, sai mã hóa hoặc thiếu cột bắt buộc → cả file bị từ chối (422).
+- Dòng trùng (`khoa`, `ten_de_tai`) với một bản ghi đã có trong kho hoặc với một dòng phía trên trong cùng file bị từ chối ("Trùng bản ghi (khóa, tên đề tài)").
+- **Import thành công một phần** (UC5.4 E1): các dòng hợp lệ được lưu (nguồn "Import khóa cũ", văn bản chuẩn hóa NFC), các dòng lỗi bị bỏ qua và liệt kê kèm **số dòng** (dòng tiêu đề = 1) và lý do: "Thiếu khóa", "Thiếu tên đề tài", "Khóa quá 20 ký tự", "Điểm không hợp lệ (0–10)", "Không tìm thấy giảng viên mã …", "Trùng bản ghi (khóa, tên đề tài)".
+- Mỗi bản ghi mới được đẩy sang Dịch vụ AI để index chạy nền ("Đã index"); lỗi AI để lại "Chưa index", Bộ môn bấm "Index lại" trong chi tiết bản ghi.
+- Bản ghi import chỉ có metadata, chưa kèm file báo cáo (file các khóa cũ được nạp cùng bộ dữ liệu Phase 4, DATA-03).
+
+File mẫu (3 dòng):
+
+```csv
+khoa,ten_de_tai,ma_so_sinh_vien,ho_ten_sinh_vien,ma_giang_vien,tu_khoa,diem
+K19,Xây dựng hệ thống quản lý thư viện số,DTC195200011,Trần Văn Bình,GV001,"thư viện, quản lý",8.5
+K18,Ứng dụng học máy dự đoán kết quả học tập,,Lê Thị Hoa,,"học máy, dự đoán","7,75"
+```
+
+Để thử báo lỗi theo dòng, thêm một dòng thiếu tên đề tài, ví dụ `K18,,,,,,` —
+kết quả sẽ là "Đã nhập 2/3 dòng" kèm "Dòng 4: Thiếu tên đề tài".
+
 ## Ghi chú kiến trúc triển khai
 
 - Container `api` không publish cổng ra host — chỉ Apache (`apache` service) mới có thể gọi tới `api:8001` qua mạng nội bộ của compose.
