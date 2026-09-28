@@ -137,7 +137,7 @@ khi đổi `AI_MODEL_PROFILE`), rồi dựng lại chỉ mục bộ nhớ; trả
 ```json
 {"status": "ok", "model_loaded": true, "index_size": 5321,
  "index_size_tieu_de": 301, "index_size_tai_lieu": 5020,
- "ten_model": "bkai-foundation-models/vietnamese-bi-encoder",
+ "ten_model": "bkai-foundation-models/vietnamese-bi-encoder@84f9d9ada0d1",
  "encode_calls": 17, "thieu_embedding": 0}
 ```
 
@@ -205,6 +205,11 @@ uv run python calibration/calibrate.py evaluate --data ../seed-data \
 
 ## Ghi chú vận hành
 
+- **Mô hình chốt theo commit** (WR-01): `app/embedding.py` `PROFILES` mang
+  commit Hugging Face của bake-off (bkai `84f9d9ada0d1…`, e5 `d12875059715…`),
+  truyền `revision=` cho `SentenceTransformer` và `download_model`; `ten_model`
+  = `repo@sha12`. Đổi commit ⇒ vector cũ không còn khớp tên ⇒ `/health` báo
+  `thieu_embedding > 0` ⇒ chạy `/reindex` rồi hiệu chỉnh lại ngưỡng.
 - **Đúng một worker uvicorn** (`--workers 1`): chỉ mục là trạng thái trong tiến
   trình mà `/ingest` sửa tại chỗ — worker thứ hai sẽ phục vụ chỉ mục cũ.
 - **torch chỉ từ index CPU** (`[tool.uv.sources]` → `pytorch-cpu`, lock mang

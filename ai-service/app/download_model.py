@@ -28,13 +28,15 @@ def main() -> int:
 
     from sentence_transformers import SentenceTransformer
 
-    model_id = PROFILES[args.profile].model
-    model = SentenceTransformer(model_id, device="cpu")
+    spec = PROFILES[args.profile]
+    model_id = spec.model
+    # WR-01: đúng commit đã chốt, không phải nhánh main.
+    model = SentenceTransformer(model_id, revision=spec.revision, device="cpu")
     if args.profile == "bkai":
         from underthesea import word_tokenize
 
         word_tokenize("Làm nóng bộ tách từ", format="text")
-    print(f"OK {model_id} -> {os.environ.get('HF_HOME', '~/.cache/huggingface')} ({type(model).__name__})")
+    print(f"OK {spec.ten_model} -> {os.environ.get('HF_HOME', '~/.cache/huggingface')} ({type(model).__name__})")
     return 0
 
 

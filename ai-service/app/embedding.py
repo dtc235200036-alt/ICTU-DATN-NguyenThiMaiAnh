@@ -31,11 +31,32 @@ class Profile:
     model: str
     segment: bool
     prefix: str
+    # WR-01 (04-REVIEW): commit Hugging Face đã chốt ở bake-off (04-03) — mô
+    # hình KHÔNG bao giờ lấy theo nhánh main. Ngưỡng hiệu chỉnh (04-04) chỉ
+    # đúng với đúng trọng số này.
+    revision: str | None = None
+
+    @property
+    def ten_model(self) -> str:
+        """Khóa của embedding trong thesis_ai: repo@12 ký tự đầu của commit.
+        Đổi trọng số => đổi tên => rebuild coi vector cũ là thiếu (thieu_embedding
+        > 0) và /reindex mã hóa lại, không trộn hai không gian vector."""
+        return f"{self.model}@{self.revision[:12]}" if self.revision else self.model
 
 
 PROFILES: dict[str, Profile] = {
-    "bkai": Profile("bkai-foundation-models/vietnamese-bi-encoder", True, ""),
-    "e5": Profile("intfloat/multilingual-e5-base", False, "query: "),
+    "bkai": Profile(
+        "bkai-foundation-models/vietnamese-bi-encoder",
+        True,
+        "",
+        "84f9d9ada0d1a3c37557398b9ae9fcedcdf40be0",
+    ),
+    "e5": Profile(
+        "intfloat/multilingual-e5-base",
+        False,
+        "query: ",
+        "d128750597153bb5987e10b1c3493a34e5a4502a",
+    ),
     "fake": Profile("fake-hashing-256", False, ""),
 }
 
@@ -71,7 +92,7 @@ class Encoder:
             raise ValueError(f"Profile không hợp lệ: {profile}")
         self.profile = profile
         self._spec = PROFILES[profile]
-        self.name = self._spec.model
+        self.name = self._spec.ten_model
         self.encode_calls = 0
         self._lock = threading.Lock()
         self._calls_lock = threading.Lock()
@@ -84,7 +105,9 @@ class Encoder:
 
             torch.set_num_threads(torch_threads)
             # Trọng số lấy từ cache HF_HOME (volume /models trong container).
-            self._model = SentenceTransformer(self._spec.model, device="cpu")
+            self._model = SentenceTransformer(
+                self._spec.model, revision=self._spec.revision, device="cpu"
+            )
             get_dim = getattr(self._model, "get_embedding_dimension", None) or getattr(
                 self._model, "get_sentence_embedding_dimension"
             )
