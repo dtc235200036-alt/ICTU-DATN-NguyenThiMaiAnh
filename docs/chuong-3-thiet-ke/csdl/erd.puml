@@ -150,6 +150,7 @@ entity "bao_cao_tien_do" as bao_cao_tien_do {
   thoi_diem_nop : DATETIME
   nhan_xet : TEXT
   danh_gia : VARCHAR(20)
+  tai_lieu_do_an_id : BIGINT <<FK>>
   ..UNIQUE(de_tai_id, moc_tien_do_id)..
 }
 
@@ -263,6 +264,7 @@ tai_lieu_do_an ||--o| luot_duyet_de_cuong : "1 phiên bản có 0..1 lượt duy
 giang_vien ||--o{ luot_duyet_de_cuong : "1 GV duyệt nhiều lượt"
 de_tai ||--o{ bao_cao_tien_do : "1 đề tài nộp nhiều báo cáo"
 moc_tien_do ||--o{ bao_cao_tien_do : "1 mốc áp dụng nhiều báo cáo"
+tai_lieu_do_an |o--o| bao_cao_tien_do : "tệp đính kèm tùy chọn (PROG-01)"
 tai_lieu_do_an |o--o| ket_qua_kiem_tra_trung_lap : "1 phiên bản có 0..1 kết quả kiểm tra (loại = TÀI_LIỆU)"
 
 ' =====================================================================

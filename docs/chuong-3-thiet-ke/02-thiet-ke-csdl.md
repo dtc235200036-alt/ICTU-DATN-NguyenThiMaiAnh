@@ -142,7 +142,8 @@ Lược đồ `thesis_core` gồm 19 bảng, khớp 1-1 với 19 lớp thực th
 | noi_dung | TEXT | Có | — | Nội dung mô tả tiến độ |
 | thoi_diem_nop | DATETIME | Không | — | Thời điểm nộp |
 | nhan_xet | TEXT | Có | — | Nhận xét của GVHD |
-| danh_gia | VARCHAR(20) | Có | — | Mức đánh giá của GVHD |
+| danh_gia | VARCHAR(20) | Có | — | Mức đánh giá của GVHD: `DAT` (Đạt) / `CAN_CAI_THIEN` (Cần cải thiện) / `CHUA_DAT` (Chưa đạt) |
+| tai_lieu_do_an_id | BIGINT | Có | FK → tai_lieu_do_an | Tệp đính kèm tùy chọn (phiên bản loại BAO_CAO_TIEN_DO); cột bổ sung khi thi công Phase 3 (PROG-01) |
 
 #### `hoi_dong`
 

@@ -321,6 +321,91 @@ with zipfile.ZipFile('$fake_docx', 'w') as zf:
   ok "/data/uploads không tồn tại/không lộ trong container apache (D-02)"
 }
 
+uc3_progress() {
+  # UC3.1-UC3.4 (plan 03-06): mốc do Bộ môn đặt, SV nộp theo mốc (tệp tùy
+  # chọn), GVHD nhận xét + thông báo, dashboard toàn khoa với cờ trễ mốc.
+  local yesterday next_week status m2
+  yesterday="$(TZ=Asia/Ho_Chi_Minh date -d yesterday +%F)"
+  next_week="$(TZ=Asia/Ho_Chi_Minh date -d '+7 days' +%F)"
+
+  status="$(call POST /api/progress/milestones "${TOKEN_BOMON}" -H 'Content-Type: application/json' \
+    -d "{\"dot_do_an_id\":${DOT_DO_AN_ID},\"ten_moc\":\"Mốc 1 (E2E)\",\"han_nop\":\"${yesterday}\"}")"
+  [ "$status" = "201" ] || fail "Bộ môn không tạo được Mốc 1 (mã ${status}, $(cat "$TMP/body"))"
+  status="$(call POST /api/progress/milestones "${TOKEN_BOMON}" -H 'Content-Type: application/json' \
+    -d "{\"dot_do_an_id\":${DOT_DO_AN_ID},\"ten_moc\":\"Mốc 2 (E2E)\",\"han_nop\":\"${next_week}\"}")"
+  [ "$status" = "201" ] || fail "Bộ môn không tạo được Mốc 2 (mã ${status}, $(cat "$TMP/body"))"
+  m2="$(jget "d['id']")"
+  ok "Bộ môn thiết lập 2 mốc tiến độ cho đợt K98 (hạn ${yesterday} và ${next_week})"
+
+  local pdf_path="$TMP/tien-do-moc-2.pdf"
+  uv --directory "${SCRIPT_DIR}/../backend" run python - "$pdf_path" <<'PYEOF'
+import sys
+import pymupdf
+
+doc = pymupdf.open()
+page = doc.new_page()
+page.insert_text((72, 72), "Progress report for milestone 2 - end-to-end test")
+doc.save(sys.argv[1])
+doc.close()
+PYEOF
+  [ -s "$pdf_path" ] || fail "Không sinh được file PDF báo cáo tiến độ kiểm thử"
+
+  status="$(call POST "/api/progress/reports/${m2}" "${TOKEN_SV098}" \
+    -F "noi_dung=Đã hoàn thành thiết kế CSDL và API (E2E)" -F "file=@${pdf_path};type=application/pdf")"
+  [ "$status" = "200" ] || fail "DTC225200098 không nộp được báo cáo Mốc 2 (mã ${status}, $(cat "$TMP/body"))"
+  ok "DTC225200098 nộp báo cáo Mốc 2 kèm PDF"
+
+  status="$(call GET /api/progress/me "${TOKEN_SV098}")"
+  [ "$status" = "200" ] || fail "GET /api/progress/me lỗi (mã ${status})"
+  local states
+  states="$(jget "'|'.join(m['trang_thai'] + ':' + ('file' if (m['bao_cao'] or {}).get('tep') else '-') for m in d['de_tai']['moc'])")"
+  [ "$states" = "TRE_MOC:-|DUNG_HAN:file" ] || fail "Trạng thái mốc sai (nhận '${states}', mong đợi 'TRE_MOC:-|DUNG_HAN:file')"
+  ok "SV thấy Mốc 1 Trễ mốc, Mốc 2 Đúng hạn có tệp đính kèm (D-05)"
+
+  status="$(call GET /api/progress/students "${TOKEN_GV029}")"
+  [ "$status" = "200" ] || fail "GV029 không lấy được danh sách SV (mã ${status})"
+  local cho
+  cho="$(jget "next((str(i['so_cho_nhan_xet']) + '|' + str(i['tre_moc']) for i in d if i['de_tai_id'] == ${DE_TAI_ID}), '')")"
+  [ "$cho" = "1|True" ] || fail "GV029 không thấy SV với 1 báo cáo chờ nhận xét + trễ mốc (nhận '${cho}')"
+  ok "GV029 thấy DTC225200098: 1 báo cáo chờ nhận xét, cờ trễ mốc"
+
+  local bao_cao_id
+  status="$(call GET "/api/progress/topics/${DE_TAI_ID}" "${TOKEN_GV029}")"
+  [ "$status" = "200" ] || fail "GV029 không xem được tiến độ đề tài (mã ${status})"
+  bao_cao_id="$(jget "next(m['bao_cao']['id'] for m in d['moc'] if m['id'] == ${m2})")"
+  [ -n "$bao_cao_id" ] || fail "Không đọc được id báo cáo Mốc 2"
+
+  status="$(call POST "/api/progress/reports/${bao_cao_id}/review" "${TOKEN_GV025}" \
+    -H 'Content-Type: application/json' -d '{"nhan_xet":"Không phải GVHD","danh_gia":"DAT"}')"
+  [ "$status" = "403" ] || fail "GV025 (không phải GVHD) nhận xét không bị từ chối 403 (mã ${status})"
+  ok "GV025 (không phải GVHD) bị từ chối 403 khi nhận xét"
+
+  status="$(call POST "/api/progress/reports/${bao_cao_id}/review" "${TOKEN_GV029}" \
+    -H 'Content-Type: application/json' -d '{"nhan_xet":"Đúng kế hoạch, tiếp tục (E2E)","danh_gia":"DAT"}')"
+  [ "$status" = "200" ] || fail "GV029 nhận xét không trả 200 (mã ${status}, $(cat "$TMP/body"))"
+  ok "GV029 nhận xét Mốc 2: Đạt"
+
+  status="$(call GET /api/notifications "${TOKEN_SV098}")"
+  [ "$(jget "1 if any(i['loai'] == 'TIEN_DO_NHAN_XET' for i in d['items']) else 0")" = "1" ] \
+    || fail "DTC225200098 không có thông báo TIEN_DO_NHAN_XET"
+  ok "DTC225200098 có thông báo nhận xét tiến độ (NOTF-01)"
+
+  status="$(call POST "/api/progress/reports/${m2}" "${TOKEN_SV098}" -F "noi_dung=Nộp lại sau nhận xét")"
+  [ "$status" = "409" ] || fail "Nộp lại sau khi GVHD nhận xét không bị từ chối 409 (mã ${status})"
+  ok "Nộp lại Mốc 2 sau khi GVHD nhận xét bị từ chối 409"
+
+  status="$(call GET "/api/progress/dashboard?dot_do_an_id=${DOT_DO_AN_ID}&chi_tre_moc=true" "${TOKEN_BOMON}")"
+  [ "$status" = "200" ] || fail "Bộ môn không xem được tiến độ toàn khoa (mã ${status})"
+  local flagged
+  flagged="$(jget "str(any(r['de_tai']['id'] == ${DE_TAI_ID} and r['tre_moc'] for r in d['items'])) + '|' + str(d['so_sv_tre_moc'])")"
+  [ "$flagged" = "True|1" ] || fail "Dashboard toàn khoa không đánh dấu SV trễ mốc (nhận '${flagged}')"
+  ok "Bộ môn thấy DTC225200098 bị đánh dấu Trễ mốc trên tiến độ toàn khoa"
+
+  status="$(call GET /api/progress/dashboard "${TOKEN_SV097}")"
+  [ "$status" = "403" ] || fail "DTC225200097 xem tiến độ toàn khoa không bị từ chối 403 (mã ${status})"
+  ok "DTC225200097 bị từ chối 403 trên tiến độ toàn khoa"
+}
+
 uc4_defense() {
   local pdf_path="$TMP/bao-cao-cuoi.pdf"
   uv --directory "${SCRIPT_DIR}/../backend" run python - "$pdf_path" <<'PYEOF'
@@ -604,7 +689,8 @@ CSVEOF
 
 setup_assigned_topic
 uc2_outline
+uc3_progress
 uc4_defense
 uc5_archive
 
-echo "OK: e2e UC2-5 (đề cương -> bảo vệ -> lưu kho -> tra cứu/quản lý kho) hoàn tất — dữ liệu đợt K98 sẽ được dọn khi script kết thúc (trap)"
+echo "OK: e2e UC2-5 (đề cương -> tiến độ -> bảo vệ -> lưu kho -> tra cứu/quản lý kho) hoàn tất — dữ liệu đợt K98 sẽ được dọn khi script kết thúc (trap)"

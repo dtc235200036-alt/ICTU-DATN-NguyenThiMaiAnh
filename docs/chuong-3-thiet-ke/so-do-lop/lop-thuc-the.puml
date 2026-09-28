@@ -270,6 +270,7 @@ DeCuong "1" -- "*" LuotDuyetDeCuong : "có các lượt duyệt"
 GiangVien "1" -- "*" LuotDuyetDeCuong : "duyệt"
 DeTai "1" -- "*" BaoCaoTienDo : "nộp báo cáo theo mốc"
 MocTienDo "1" -- "*" BaoCaoTienDo : "áp dụng cho"
+BaoCaoTienDo "0..1" -- "0..1" TaiLieuDoAn : "đính kèm"
 DeTai "1" -- "*" TaiLieuDoAn : "có tài liệu (báo cáo cuối, kho...)"
 TaiLieuDoAn "0..1" -- "1" KetQuaKiemTraTrungLap : "được kiểm tra trùng lặp (loại = TÀI_LIỆU)"
 
