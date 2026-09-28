@@ -81,6 +81,8 @@ export default function ArchivePage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const user = useAuthStore((s) => s.user)
   const isBoMon = user?.vai_tro === 'BO_MON'
+  // WR-10: server không trả điểm của SV khác cho vai trò Sinh viên.
+  const isSinhVien = user?.vai_tro === 'SINH_VIEN'
 
   const khoa = searchParams.get('khoa') ?? undefined
   const giangVienId = searchParams.get('giang_vien_id') ?? undefined
@@ -201,6 +203,11 @@ export default function ArchivePage() {
       },
     },
   ]
+  if (isSinhVien) {
+    const diemIdx = columns.findIndex((col) => 'dataIndex' in col && col.dataIndex === 'diem')
+    if (diemIdx >= 0) columns.splice(diemIdx, 1)
+  }
+
   if (isBoMon) {
     columns.push({
       title: 'Chỉ mục AI',

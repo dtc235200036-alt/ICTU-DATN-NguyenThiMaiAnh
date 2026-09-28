@@ -23,10 +23,11 @@ def list_archive(
     q: str | None = Query(default=None, max_length=255),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=10, ge=1, le=100),
-    _user: CurrentUser = Depends(require_role(*ANY_ROLE)),
+    user: CurrentUser = Depends(require_role(*ANY_ROLE)),
     db: Session = Depends(get_db),
 ) -> Page[ArchiveListItem]:
-    return archive.list_archive(db, khoa, giang_vien_id, q, page, page_size)
+    # WR-10: SV không thấy điểm của sinh viên khác.
+    return archive.list_archive(db, khoa, giang_vien_id, q, page, page_size, viewer=user)
 
 
 @router.get("/khoa", response_model=list[str])
@@ -65,10 +66,10 @@ def create_record(
 @router.get("/{kho_id}", response_model=ArchiveDetail)
 def get_record(
     kho_id: int,
-    _user: CurrentUser = Depends(require_role(*ANY_ROLE)),
+    user: CurrentUser = Depends(require_role(*ANY_ROLE)),
     db: Session = Depends(get_db),
 ) -> ArchiveDetail:
-    return archive.get_detail(db, kho_id)
+    return archive.get_detail(db, kho_id, viewer=user)
 
 
 @router.get("/{kho_id}/file")

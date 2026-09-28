@@ -24,6 +24,8 @@ from sqlalchemy.exc import DataError, IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.db import SessionLocal
+from app.core.deps import CurrentUser
+from app.core.roles import VaiTro
 from app.models.bao_ve import LichBaoVe
 from app.models.de_cuong import LOAI_BAO_CAO_CUOI, TaiLieuDoAn
 from app.models.de_tai import DeTai
@@ -151,7 +153,15 @@ def _get_or_404(db: Session, kho_id: int) -> DoAnKho:
     return kho
 
 
-def _item_fields(kho: DoAnKho, co_file: bool) -> dict:
+def _diem_visible(kho: DoAnKho, viewer: CurrentUser | None) -> bool:
+    """WR-10: điểm là dữ liệu cá nhân — SINH_VIEN chỉ thấy điểm của CHÍNH
+    mình; GV/Bộ môn thấy mọi điểm (siêu dữ liệu kho, D-07)."""
+    if viewer is None or viewer.vai_tro != VaiTro.SINH_VIEN:
+        return True
+    return viewer.sinh_vien_id is not None and kho.sinh_vien_id == viewer.sinh_vien_id
+
+
+def _item_fields(kho: DoAnKho, co_file: bool, viewer: CurrentUser | None = None) -> dict:
     sinh_vien = (
         ArchiveStudent(ma=kho.ma_so_sinh_vien, ho_ten=kho.ho_ten_sinh_vien)
         if kho.ma_so_sinh_vien or kho.ho_ten_sinh_vien
@@ -166,7 +176,9 @@ def _item_fields(kho: DoAnKho, co_file: bool) -> dict:
         giang_vien=(
             PersonRef(id=gv.id, ho_ten=gv.ho_ten or "", ma=gv.ma_giang_vien) if gv is not None else None
         ),
-        diem=float(kho.diem) if kho.diem is not None else None,
+        diem=(
+            float(kho.diem) if kho.diem is not None and _diem_visible(kho, viewer) else None
+        ),
         tu_khoa=kho.tu_khoa,
         nguon=kho.nguon,
         trang_thai_index=kho.trang_thai_index,
@@ -181,6 +193,7 @@ def list_archive(
     q: str | None,
     page: int,
     page_size: int,
+    viewer: CurrentUser | None = None,
 ) -> Page[ArchiveListItem]:
     """UC5.1/REPO-02: lọc AND theo khóa, GVHD, từ khóa (contains trên tên đề
     tài HOẶC từ khóa; autoescape=True — "%"/"_" là ký tự thường, T-03-27);
@@ -223,7 +236,7 @@ def list_archive(
             .scalars()
             .all()
         )
-    items = [ArchiveListItem(**_item_fields(r, r.de_tai_id in with_file)) for r in rows]
+    items = [ArchiveListItem(**_item_fields(r, r.de_tai_id in with_file, viewer)) for r in rows]
     return Page[ArchiveListItem](items=items, total=total, page=page, page_size=page_size)
 
 
@@ -237,18 +250,19 @@ def khoa_options(db: Session) -> list[str]:
     )
 
 
-def _detail_out(db: Session, kho: DoAnKho) -> ArchiveDetail:
+def _detail_out(db: Session, kho: DoAnKho, viewer: CurrentUser | None = None) -> ArchiveDetail:
     doc = latest_final_report(db, kho.de_tai_id)
     return ArchiveDetail(
-        **_item_fields(kho, doc is not None),
+        **_item_fields(kho, doc is not None, viewer),
         de_tai_id=kho.de_tai_id,
         sinh_vien_id=kho.sinh_vien_id,
         file=documents.to_document_out(doc) if doc is not None else None,
     )
 
 
-def get_detail(db: Session, kho_id: int) -> ArchiveDetail:
-    return _detail_out(db, _get_or_404(db, kho_id))
+def get_detail(db: Session, kho_id: int, viewer: CurrentUser | None = None) -> ArchiveDetail:
+    """`viewer` None = lời gọi nội bộ của Bộ môn (sau thêm/sửa) — thấy đủ."""
+    return _detail_out(db, _get_or_404(db, kho_id), viewer)
 
 
 def file_path_or_404(db: Session, kho_id: int) -> tuple[Path, str, str]:
