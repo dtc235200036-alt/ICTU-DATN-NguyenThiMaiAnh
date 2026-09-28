@@ -1,34 +1,48 @@
 """UC4 — Bảo vệ: nộp báo cáo cuối (UC4.1), lập hội đồng + xếp lịch (UC4.2,
-D-06). GVHD của một SV không bao giờ được ngồi hội đồng của chính SV đó —
-chặn ở server (409), không chỉ cảnh báo UI."""
+D-06), chấm điểm (UC4.3), chốt kết quả + tự lưu kho (UC4.4/UC5.2) và SV xem
+lịch/kết quả (UC4.5). GVHD của một SV không bao giờ được ngồi hội đồng của
+chính SV đó — chặn ở server (409), không chỉ cảnh báo UI; chỉ thành viên hội
+đồng mới xem/chấm SV của hội đồng mình (UC4.3 E1, 403)."""
 from datetime import date, datetime, time, timedelta
+from decimal import ROUND_HALF_UP, Decimal
 
 from fastapi import HTTPException
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.deps import CurrentUser
 from app.core.roles import VaiTro
+from app.core.timeutil import today_vn
 from app.models.bao_ve import CHU_TICH, SLOT_MINUTES, THU_KY, DiemBaoVe, HoiDong, LichBaoVe, ThanhVienHoiDong
 from app.models.de_cuong import DC_CHUA_NOP, DC_DA_DUYET, LOAI_BAO_CAO_CUOI, DeCuong, TaiLieuDoAn
 from app.models.de_tai import DA_PHAN_CONG, DeTai
 from app.models.tai_khoan import GiangVien, SinhVien, TaiKhoan
-from app.models.thong_bao import HOI_DONG_PHAN_CONG, LICH_BAO_VE
+from app.models.thong_bao import HOI_DONG_PHAN_CONG, KET_QUA_BAO_VE, LICH_BAO_VE
 from app.schemas.defense import (
     CommitteeIn,
     CommitteeListItem,
     CommitteeOut,
     EligibleStudent,
+    FinalizeOut,
     FinalReportDetail,
     FinalReportVersion,
     MemberIn,
     MemberOut,
+    MyCommittee,
+    MyCommitteeRow,
+    MyDefenseMember,
+    MyDefenseOut,
+    MyDefenseResult,
+    MyDefenseSchedule,
+    MyScore,
     QuyenBaoCaoCuoiOut,
     ScheduleRow,
+    ScoreRequest,
+    ScoringDetail,
 )
 from app.schemas.topics import PersonRef
-from app.services import document_check, documents, notifications
+from app.services import archive, document_check, documents, notifications
 from app.services.documents import ValidatedFile, to_document_out
 
 _TOPIC_NOT_FOUND_DETAIL = "Không tìm thấy đề tài"
@@ -53,6 +67,21 @@ _SCHEDULE_NOT_FOUND_DETAIL = "Không tìm thấy lịch bảo vệ"
 _NOT_ELIGIBLE_NO_REPORT_DETAIL = "Sinh viên chưa nộp báo cáo cuối"
 _ALREADY_SCHEDULED_ELSEWHERE_DETAIL = "Sinh viên đã được xếp vào một hội đồng khác"
 _SCHEDULE_LOCKED_DETAIL = "Lịch bảo vệ đã có điểm hoặc đã chốt kết quả — không thể gỡ khỏi lịch"
+
+_NOT_MEMBER_DETAIL = "Bạn không thuộc hội đồng của sinh viên này (UC4.3 - E1)"
+_SCORE_FINALIZED_DETAIL = "Kết quả đã được chốt — không thể sửa điểm"
+_FINALIZED_DETAIL = "Kết quả đã được chốt"
+_FINALIZED_REASON = "Kết quả đã chốt"
+_BO_MON_NO_SCORE_REASON = "Chỉ thành viên hội đồng được chấm điểm"
+_ARCHIVE_DUPLICATE_DETAIL = "Đề tài đã có trong kho đồ án"
+
+
+def _not_yet_detail(ngay: date) -> str:
+    return f"Chưa đến ngày bảo vệ ({ngay.strftime('%d/%m/%Y')})"
+
+
+def _not_enough_scores_detail(n: int, m: int) -> str:
+    return f"Chưa đủ thành viên hội đồng chấm điểm ({n}/{m})"
 
 
 def _person_ref(entity, ma_attr: str) -> PersonRef | None:
@@ -85,15 +114,18 @@ def _compute_slot_time(gio_bao_ve: time, thu_tu: int | None) -> str:
 # ---------------------------------------------------------------------------
 
 
-def _can_view_final_report(user: CurrentUser, topic: DeTai) -> bool:
-    """T-03-17: SV chủ đề tài, GVHD hoặc Bộ môn (plan 03-04 bổ sung thành
-    viên hội đồng khi bảng điểm ra đời)."""
+def _can_view_final_report(db: Session, user: CurrentUser, topic: DeTai) -> bool:
+    """T-03-17/T-03-20: SV chủ đề tài, GVHD, Bộ môn hoặc thành viên hội đồng
+    đang giữ lịch bảo vệ của đề tài (cùng quy tắc documents.can_view cho
+    BAO_CAO_CUOI — DEFN-03)."""
     if user.vai_tro == VaiTro.BO_MON:
         return True
     if user.vai_tro == VaiTro.SINH_VIEN and user.sinh_vien_id is not None:
         return topic.sinh_vien_id == user.sinh_vien_id
     if user.vai_tro == VaiTro.GIANG_VIEN and user.giang_vien_id is not None:
-        return topic.giang_vien_id == user.giang_vien_id
+        if topic.giang_vien_id == user.giang_vien_id:
+            return True
+        return documents.is_committee_member_for_topic(db, user.giang_vien_id, topic.id)
     return False
 
 
@@ -158,7 +190,7 @@ def get_final_report(db: Session, user: CurrentUser, de_tai_id: int) -> FinalRep
     ).scalar_one_or_none()
     if topic is None:
         raise HTTPException(status_code=404, detail=_TOPIC_NOT_FOUND_DETAIL)
-    if not _can_view_final_report(user, topic):
+    if not _can_view_final_report(db, user, topic):
         raise HTTPException(status_code=403, detail=_VIEW_FORBIDDEN_DETAIL)
 
     de_cuong = db.execute(
@@ -802,3 +834,305 @@ def remove_schedule(db: Session, lich_bao_ve_id: int) -> None:
             lien_ket="/bao-ve",
         )
     db.commit()
+
+
+# ---------------------------------------------------------------------------
+# UC4.3 — chấm điểm (DEFN-03, D-06)
+# ---------------------------------------------------------------------------
+
+_VAI_TRO_ORDER = {CHU_TICH: 0, THU_KY: 1}
+
+
+def _is_member(db: Session, hoi_dong_id: int, giang_vien_id: int | None) -> bool:
+    if giang_vien_id is None:
+        return False
+    count = db.execute(
+        select(func.count())
+        .select_from(ThanhVienHoiDong)
+        .where(ThanhVienHoiDong.hoi_dong_id == hoi_dong_id)
+        .where(ThanhVienHoiDong.giang_vien_id == giang_vien_id)
+    ).scalar_one()
+    return count > 0
+
+
+def my_committees(db: Session, user: CurrentUser) -> list[MyCommittee]:
+    """MH-12 "Hội đồng của tôi": chỉ hội đồng người gọi là thành viên; mỗi SV
+    kèm CHỈ điểm của chính người gọi (không bao giờ điểm thành viên khác)."""
+    if user.giang_vien_id is None:
+        return []
+    memberships = (
+        db.execute(
+            select(ThanhVienHoiDong)
+            .join(HoiDong, HoiDong.id == ThanhVienHoiDong.hoi_dong_id)
+            .where(ThanhVienHoiDong.giang_vien_id == user.giang_vien_id)
+            .order_by(HoiDong.ngay_bao_ve, HoiDong.gio_bao_ve, HoiDong.id)
+            .options(
+                selectinload(ThanhVienHoiDong.hoi_dong)
+                .selectinload(HoiDong.lich)
+                .selectinload(LichBaoVe.sinh_vien),
+                selectinload(ThanhVienHoiDong.hoi_dong)
+                .selectinload(HoiDong.lich)
+                .selectinload(LichBaoVe.de_tai),
+            )
+        )
+        .scalars()
+        .all()
+    )
+
+    lich_ids = [l.id for m in memberships for l in m.hoi_dong.lich]
+    my_scores: dict[int, Decimal] = {}
+    if lich_ids:
+        rows = db.execute(
+            select(DiemBaoVe.lich_bao_ve_id, DiemBaoVe.diem)
+            .where(DiemBaoVe.lich_bao_ve_id.in_(lich_ids))
+            .where(DiemBaoVe.giang_vien_id == user.giang_vien_id)
+        ).all()
+        my_scores = {lich_id: diem for lich_id, diem in rows}
+
+    result: list[MyCommittee] = []
+    for m in memberships:
+        hd = m.hoi_dong
+        result.append(
+            MyCommittee(
+                id=hd.id,
+                ten_hoi_dong=hd.ten_hoi_dong,
+                ngay_bao_ve=hd.ngay_bao_ve,
+                gio_bao_ve=hd.gio_bao_ve,
+                phong=hd.phong,
+                vai_tro_cua_toi=m.vai_tro,
+                lich=[
+                    MyCommitteeRow(
+                        id=l.id,
+                        thu_tu=l.thu_tu,
+                        gio_du_kien=_compute_slot_time(hd.gio_bao_ve, l.thu_tu),
+                        sinh_vien=_person_ref(l.sinh_vien, "ma_so_sinh_vien"),
+                        ten_de_tai=l.de_tai.ten_de_tai,
+                        diem_cua_toi=float(my_scores[l.id]) if l.id in my_scores else None,
+                        da_chot=l.da_chot,
+                    )
+                    for l in hd.lich
+                ],
+            )
+        )
+    return result
+
+
+def get_schedule_for_scoring(db: Session, user: CurrentUser, lich_id: int) -> ScoringDetail:
+    """MH-12 "Chấm điểm - {SV}": GV phải là thành viên hội đồng của lịch này
+    (403 UC4.3 E1); Bộ môn xem được nhưng không chấm."""
+    lich = db.execute(
+        select(LichBaoVe)
+        .where(LichBaoVe.id == lich_id)
+        .options(
+            selectinload(LichBaoVe.hoi_dong),
+            selectinload(LichBaoVe.sinh_vien),
+            selectinload(LichBaoVe.de_tai),
+        )
+    ).scalar_one_or_none()
+    if lich is None:
+        raise HTTPException(status_code=404, detail=_SCHEDULE_NOT_FOUND_DETAIL)
+
+    is_gv = user.vai_tro == VaiTro.GIANG_VIEN
+    if is_gv and not _is_member(db, lich.hoi_dong_id, user.giang_vien_id):
+        raise HTTPException(status_code=403, detail=_NOT_MEMBER_DETAIL)
+    if not is_gv and user.vai_tro != VaiTro.BO_MON:
+        raise HTTPException(status_code=403, detail=_NOT_MEMBER_DETAIL)
+
+    hd = lich.hoi_dong
+    doc = _latest_final_report_or_none(db, lich.de_tai_id)
+    kiem_tra = None
+    if doc is not None and doc.ket_qua_kiem_tra is not None:
+        document_check.expire_if_stale(db, doc.ket_qua_kiem_tra)
+        kiem_tra = document_check.summary(doc.ket_qua_kiem_tra)
+
+    diem_cua_toi = None
+    if is_gv:
+        mine = db.execute(
+            select(DiemBaoVe)
+            .where(DiemBaoVe.lich_bao_ve_id == lich.id)
+            .where(DiemBaoVe.giang_vien_id == user.giang_vien_id)
+        ).scalar_one_or_none()
+        if mine is not None:
+            diem_cua_toi = MyScore(diem=float(mine.diem), nhan_xet=mine.nhan_xet)
+
+    ly_do: str | None = None
+    if not is_gv:
+        ly_do = _BO_MON_NO_SCORE_REASON
+    elif lich.da_chot:
+        ly_do = _FINALIZED_REASON
+    elif hd.ngay_bao_ve > today_vn():
+        ly_do = _not_yet_detail(hd.ngay_bao_ve)
+
+    return ScoringDetail(
+        id=lich.id,
+        hoi_dong_id=hd.id,
+        ten_hoi_dong=hd.ten_hoi_dong,
+        ngay_bao_ve=hd.ngay_bao_ve,
+        phong=hd.phong,
+        gio_du_kien=_compute_slot_time(hd.gio_bao_ve, lich.thu_tu),
+        sinh_vien=_person_ref(lich.sinh_vien, "ma_so_sinh_vien"),
+        de_tai_id=lich.de_tai_id,
+        ten_de_tai=lich.de_tai.ten_de_tai,
+        bao_cao_cuoi=to_document_out(doc) if doc is not None else None,
+        kiem_tra=kiem_tra,
+        diem_cua_toi=diem_cua_toi,
+        da_chot=lich.da_chot,
+        co_the_cham=ly_do is None,
+        ly_do_khong_cham=ly_do,
+    )
+
+
+def score(db: Session, user: CurrentUser, lich_id: int, payload: ScoreRequest) -> ScoringDetail:
+    """UC4.3/T-03-21: khóa dòng lich_bao_ve (serialize với finalize) — thành
+    viên (403), chưa chốt (409), đã đến ngày bảo vệ (409); upsert điểm của
+    chính người gọi (UNIQUE(lich_bao_ve_id, giang_vien_id))."""
+    lich = db.execute(
+        select(LichBaoVe).where(LichBaoVe.id == lich_id).with_for_update()
+    ).scalar_one_or_none()
+    if lich is None:
+        raise HTTPException(status_code=404, detail=_SCHEDULE_NOT_FOUND_DETAIL)
+    if not _is_member(db, lich.hoi_dong_id, user.giang_vien_id):
+        db.rollback()
+        raise HTTPException(status_code=403, detail=_NOT_MEMBER_DETAIL)
+    if lich.da_chot:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=_SCORE_FINALIZED_DETAIL)
+    hd = db.get(HoiDong, lich.hoi_dong_id)
+    if hd.ngay_bao_ve > today_vn():
+        db.rollback()
+        raise HTTPException(status_code=409, detail=_not_yet_detail(hd.ngay_bao_ve))
+
+    existing = db.execute(
+        select(DiemBaoVe)
+        .where(DiemBaoVe.lich_bao_ve_id == lich_id)
+        .where(DiemBaoVe.giang_vien_id == user.giang_vien_id)
+    ).scalar_one_or_none()
+    if existing is not None:
+        existing.diem = payload.diem
+        existing.nhan_xet = payload.nhan_xet
+    else:
+        db.add(
+            DiemBaoVe(
+                lich_bao_ve_id=lich_id,
+                giang_vien_id=user.giang_vien_id,
+                diem=payload.diem,
+                nhan_xet=payload.nhan_xet,
+            )
+        )
+    db.commit()
+    return get_schedule_for_scoring(db, user, lich_id)
+
+
+# ---------------------------------------------------------------------------
+# UC4.4 — chốt kết quả (DEFN-04, §3.2.5 d) + UC5.2 tự lưu kho (REPO-01)
+# ---------------------------------------------------------------------------
+
+
+def finalize(db: Session, lich_id: int) -> tuple[FinalizeOut, int]:
+    """T-03-22: khóa dòng lich_bao_ve; chỉ chốt khi số dòng diem_bao_ve bằng
+    số thành viên hội đồng; điểm TB = trung bình cộng làm tròn 2 chữ số
+    (ROUND_HALF_UP); da_chot lật bằng MỘT conditional UPDATE; cùng
+    transaction chèn do_an_kho + thông báo KET_QUA_BAO_VE. Router đẩy
+    archive.run_ingest vào BackgroundTasks SAU commit."""
+    lich = db.execute(
+        select(LichBaoVe).where(LichBaoVe.id == lich_id).with_for_update()
+    ).scalar_one_or_none()
+    if lich is None:
+        raise HTTPException(status_code=404, detail=_SCHEDULE_NOT_FOUND_DETAIL)
+    if lich.da_chot:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=_FINALIZED_DETAIL)
+
+    n_members = db.execute(
+        select(func.count())
+        .select_from(ThanhVienHoiDong)
+        .where(ThanhVienHoiDong.hoi_dong_id == lich.hoi_dong_id)
+    ).scalar_one()
+    scores = (
+        db.execute(select(DiemBaoVe.diem).where(DiemBaoVe.lich_bao_ve_id == lich_id))
+        .scalars()
+        .all()
+    )
+    if n_members == 0 or len(scores) != n_members:
+        db.rollback()
+        raise HTTPException(
+            status_code=409, detail=_not_enough_scores_detail(len(scores), n_members)
+        )
+
+    avg = (sum((Decimal(d) for d in scores), Decimal("0")) / Decimal(len(scores))).quantize(
+        Decimal("0.01"), rounding=ROUND_HALF_UP
+    )
+    result = db.execute(
+        update(LichBaoVe)
+        .where(LichBaoVe.id == lich_id)
+        .where(LichBaoVe.da_chot.is_(False))
+        .values(da_chot=True, diem_trung_binh=avg)
+    )
+    if result.rowcount == 0:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=_FINALIZED_DETAIL)
+    db.refresh(lich)
+
+    try:
+        kho = archive.insert_from_defense(db, lich)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=_ARCHIVE_DUPLICATE_DETAIL) from None
+
+    sv = db.get(SinhVien, lich.sinh_vien_id)
+    if sv is not None:
+        notifications.create(
+            db,
+            sv.tai_khoan_id,
+            KET_QUA_BAO_VE,
+            f"Kết quả bảo vệ của bạn đã được chốt: {avg}",
+            lien_ket="/bao-ve",
+        )
+    kho_id = kho.id
+    db.commit()
+    return FinalizeOut(lich=_build_schedule_row(db, lich_id), do_an_kho_id=kho_id), kho_id
+
+
+# ---------------------------------------------------------------------------
+# UC4.5 — SV xem lịch và kết quả bảo vệ
+# ---------------------------------------------------------------------------
+
+
+def my_defense(db: Session, user: CurrentUser) -> MyDefenseOut:
+    """T-03-23: lịch (hội đồng, ngày, giờ, phòng, thành viên) luôn trả khi đã
+    xếp; ket_qua CHỈ khi da_chot — không bao giờ lộ điểm tạm tính/từng thành viên."""
+    if user.sinh_vien_id is None:
+        return MyDefenseOut()
+    lich = db.execute(
+        select(LichBaoVe)
+        .where(LichBaoVe.sinh_vien_id == user.sinh_vien_id)
+        .options(
+            selectinload(LichBaoVe.hoi_dong)
+            .selectinload(HoiDong.thanh_vien)
+            .selectinload(ThanhVienHoiDong.giang_vien)
+        )
+    ).scalar_one_or_none()
+    if lich is None:
+        return MyDefenseOut()
+
+    hd = lich.hoi_dong
+    members = sorted(hd.thanh_vien, key=lambda m: (_VAI_TRO_ORDER.get(m.vai_tro, 2), m.id))
+    schedule = MyDefenseSchedule(
+        ten_hoi_dong=hd.ten_hoi_dong,
+        ngay_bao_ve=hd.ngay_bao_ve,
+        gio_du_kien=_compute_slot_time(hd.gio_bao_ve, lich.thu_tu),
+        phong=hd.phong,
+        thu_tu=lich.thu_tu,
+        thanh_vien=[
+            MyDefenseMember(
+                ho_ten=m.giang_vien.ho_ten if m.giang_vien is not None else "",
+                hoc_vi=m.giang_vien.hoc_vi if m.giang_vien is not None else None,
+                vai_tro=m.vai_tro,
+            )
+            for m in members
+        ],
+    )
+    ket_qua = None
+    if lich.da_chot and lich.diem_trung_binh is not None:
+        ket_qua = MyDefenseResult(diem_trung_binh=float(lich.diem_trung_binh))
+    return MyDefenseOut(lich=schedule, ket_qua=ket_qua)

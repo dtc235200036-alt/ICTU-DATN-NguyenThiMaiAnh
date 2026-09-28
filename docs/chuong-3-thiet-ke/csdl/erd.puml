@@ -210,6 +210,8 @@ entity "do_an_kho" as do_an_kho {
   diem : DECIMAL(4,2)
   nguon : VARCHAR(20)
   trang_thai_index : VARCHAR(20)
+  ma_so_sinh_vien : VARCHAR(20)
+  ho_ten_sinh_vien : VARCHAR(150)
 }
 
 entity "thong_bao" as thong_bao {

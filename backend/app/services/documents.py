@@ -20,9 +20,10 @@ from app.core.config import get_settings
 from app.core.deps import CurrentUser
 from app.core.roles import VaiTro
 from app.core.timeutil import now_utc
+from app.models.bao_ve import LichBaoVe, ThanhVienHoiDong
 from app.models.de_cuong import DOCX as DINH_DANG_DOCX
 from app.models.de_cuong import PDF as DINH_DANG_PDF
-from app.models.de_cuong import TaiLieuDoAn
+from app.models.de_cuong import LOAI_BAO_CAO_CUOI, TaiLieuDoAn
 from app.models.de_tai import DeTai
 from app.schemas.documents import DocumentOut
 
@@ -188,9 +189,23 @@ def store(
     return doc
 
 
+def is_committee_member_for_topic(db: Session, giang_vien_id: int, de_tai_id: int) -> bool:
+    """DEFN-03/UC4.3 E1: GV là thành viên (thanh_vien_hoi_dong) của hội đồng
+    đang giữ lich_bao_ve của đề tài này."""
+    count = db.execute(
+        select(func.count())
+        .select_from(ThanhVienHoiDong)
+        .join(LichBaoVe, LichBaoVe.hoi_dong_id == ThanhVienHoiDong.hoi_dong_id)
+        .where(LichBaoVe.de_tai_id == de_tai_id)
+        .where(ThanhVienHoiDong.giang_vien_id == giang_vien_id)
+    ).scalar_one()
+    return count > 0
+
+
 def can_view(db: Session, user: CurrentUser, doc: TaiLieuDoAn) -> bool:
-    """T-03-04: Bộ môn luôn xem được; SV chủ đề tài; GV là GVHD của đề tài
-    (plan 03-04 bổ sung thành viên hội đồng)."""
+    """T-03-04: Bộ môn luôn xem được; SV chủ đề tài; GV là GVHD của đề tài;
+    T-03-20 (plan 03-04): thành viên hội đồng bảo vệ của đề tài — CHỈ với báo
+    cáo cuối (BAO_CAO_CUOI), không bao giờ với đề cương/báo cáo tiến độ."""
     if user.vai_tro == VaiTro.BO_MON:
         return True
     topic = db.get(DeTai, doc.de_tai_id)
@@ -199,7 +214,11 @@ def can_view(db: Session, user: CurrentUser, doc: TaiLieuDoAn) -> bool:
     if user.vai_tro == VaiTro.SINH_VIEN and user.sinh_vien_id is not None:
         return topic.sinh_vien_id == user.sinh_vien_id
     if user.vai_tro == VaiTro.GIANG_VIEN and user.giang_vien_id is not None:
-        return topic.giang_vien_id == user.giang_vien_id
+        if topic.giang_vien_id == user.giang_vien_id:
+            return True
+        return doc.loai == LOAI_BAO_CAO_CUOI and is_committee_member_for_topic(
+            db, user.giang_vien_id, topic.id
+        )
     return False
 
 

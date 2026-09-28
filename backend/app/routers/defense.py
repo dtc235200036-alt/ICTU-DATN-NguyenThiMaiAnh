@@ -9,14 +9,20 @@ from app.schemas.defense import (
     CommitteeListItem,
     CommitteeOut,
     EligibleStudent,
+    FinalizeOut,
     FinalReportDetail,
+    MyCommittee,
+    MyDefenseOut,
     ScheduleIn,
     ScheduleRow,
+    ScoreRequest,
+    ScoringDetail,
 )
+from app.services import archive, document_check, documents
 from app.services import defense as defense_service
-from app.services import document_check, documents
 
-# UC4/DEFN-01..02: nộp báo cáo cuối (SV) + hội đồng/lịch bảo vệ (Bộ môn) —
+# UC4/DEFN-01..04: nộp báo cáo cuối (SV) + hội đồng/lịch bảo vệ (Bộ môn) +
+# chấm điểm (thành viên hội đồng) + chốt kết quả (Bộ môn) + lịch/kết quả (SV) —
 # mỗi route khai báo require_role riêng (route-coverage test bao trùm cả
 # router này, giống outlines.py/documents.py).
 router = APIRouter(prefix="/api/defense", tags=["defense"])
@@ -115,3 +121,52 @@ def remove_schedule(
     db: Session = Depends(get_db),
 ) -> None:
     defense_service.remove_schedule(db, lich_bao_ve_id)
+
+
+@router.get("/my-committees", response_model=list[MyCommittee])
+def my_committees(
+    user: CurrentUser = Depends(require_role(VaiTro.GIANG_VIEN)),
+    db: Session = Depends(get_db),
+) -> list[MyCommittee]:
+    return defense_service.my_committees(db, user)
+
+
+@router.get("/schedules/{lich_bao_ve_id}", response_model=ScoringDetail)
+def get_schedule_for_scoring(
+    lich_bao_ve_id: int,
+    user: CurrentUser = Depends(require_role(VaiTro.GIANG_VIEN, VaiTro.BO_MON)),
+    db: Session = Depends(get_db),
+) -> ScoringDetail:
+    return defense_service.get_schedule_for_scoring(db, user, lich_bao_ve_id)
+
+
+@router.put("/schedules/{lich_bao_ve_id}/score", response_model=ScoringDetail)
+def score(
+    lich_bao_ve_id: int,
+    payload: ScoreRequest,
+    user: CurrentUser = Depends(require_role(VaiTro.GIANG_VIEN)),
+    db: Session = Depends(get_db),
+) -> ScoringDetail:
+    return defense_service.score(db, user, lich_bao_ve_id, payload)
+
+
+@router.post("/schedules/{lich_bao_ve_id}/finalize", response_model=FinalizeOut)
+def finalize(
+    lich_bao_ve_id: int,
+    background_tasks: BackgroundTasks,
+    _user: CurrentUser = Depends(require_role(VaiTro.BO_MON)),
+    db: Session = Depends(get_db),
+) -> FinalizeOut:
+    out, do_an_kho_id = defense_service.finalize(db, lich_bao_ve_id)
+    # UC5.2 E1/T-03-24: index AI chạy SAU commit, session riêng — lỗi AI chỉ
+    # để lại CHUA_INDEX, không bao giờ chặn chốt kết quả.
+    background_tasks.add_task(archive.run_ingest, [do_an_kho_id])
+    return out
+
+
+@router.get("/me", response_model=MyDefenseOut)
+def my_defense(
+    user: CurrentUser = Depends(require_role(VaiTro.SINH_VIEN)),
+    db: Session = Depends(get_db),
+) -> MyDefenseOut:
+    return defense_service.my_defense(db, user)

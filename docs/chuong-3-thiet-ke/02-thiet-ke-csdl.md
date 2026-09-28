@@ -198,7 +198,9 @@ Lược đồ `thesis_core` gồm 19 bảng, khớp 1-1 với 19 lớp thực th
 | tu_khoa | VARCHAR(255) | Có | — | Từ khóa tìm kiếm |
 | diem | DECIMAL(4,2) | Có | — | Điểm bảo vệ |
 | nguon | VARCHAR(20) | Không | — | `HE_THONG` (tự động khi chốt bảo vệ) / `IMPORT` (khóa cũ) |
-| trang_thai_index | VARCHAR(20) | Không | — | Trạng thái đã đẩy sang Dịch vụ AI để index (FR-KHO-05) |
+| trang_thai_index | VARCHAR(20) | Không | — | Trạng thái đã đẩy sang Dịch vụ AI để index (FR-KHO-05): `CHUA_INDEX` (chưa index / lỗi AI, Bộ môn index lại sau — UC5.2 E1) / `DA_INDEX` |
+| ma_so_sinh_vien | VARCHAR(20) | Có | — | Ảnh chụp mã SV tại thời điểm lưu kho — bản ghi import khóa cũ không có tài khoản SV; cột bổ sung khi thi công Phase 3 |
+| ho_ten_sinh_vien | VARCHAR(150) | Có | — | Ảnh chụp họ tên SV tại thời điểm lưu kho — bản ghi import khóa cũ không có tài khoản SV; cột bổ sung khi thi công Phase 3 |
 
 #### `ket_qua_kiem_tra_trung_lap`
 

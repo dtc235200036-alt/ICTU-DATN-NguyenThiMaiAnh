@@ -406,7 +406,7 @@ def test_scoring_is_committee_scoped_and_finalize_is_one_way(
     body = resp.json()
     assert body["lich"]["da_chot"] is True and body["lich"]["diem_trung_binh"] == 8.5
 
-    db.expire_all()
+    db.rollback()  # kết thúc snapshot REPEATABLE READ của phiên test trước khi đọc lại
     rows = db.execute(select(DoAnKho)).scalars().all()
     assert len(rows) == 1
     kho = rows[0]

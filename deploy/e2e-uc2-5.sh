@@ -104,6 +104,9 @@ TOKEN_GV029=""
 TOKEN_SV097=""
 TOKEN_SV098=""
 DE_TAI_ID=""
+# uc4_defense (plan 03-04) đặt; uc5_archive (plan 03-05) dùng lại.
+LICH_BAO_VE_ID=""
+DO_AN_KHO_ID=""
 
 setup_assigned_topic() {
   TOKEN_BOMON="$(bash "${SCRIPT_DIR}/api-login.sh" bomon)"
@@ -453,10 +456,82 @@ print(next((gv["id"] for gv in d if gv.get("ma_giang_vien") == "GV029"), ""))' 2
   status="$(call DELETE "/api/defense/committees/${hoi_dong_b_id}" "${TOKEN_BOMON}")"
   [ "$status" = "204" ] || fail "Bộ môn xóa hội đồng B (chưa có SV) không trả 204 (mã ${status})"
   ok "Bộ môn xóa hội đồng B (chưa có SV) -> 204"
+
+  # --- UC4.3–4.5 + UC5.2 (plan 03-04): chấm điểm, chốt, lưu kho ---
+  status="$(call GET "/api/defense/committees/${hoi_dong_a_id}" "${TOKEN_BOMON}")"
+  [ "$status" = "200" ] || fail "Bộ môn không đọc được hội đồng A (mã ${status})"
+  LICH_BAO_VE_ID="$(jget "next(r['id'] for r in d['lich'] if r['de_tai_id'] == ${DE_TAI_ID})")"
+  [ -n "$LICH_BAO_VE_ID" ] || fail "Không tìm được lich_bao_ve của đề tài trong hội đồng A"
+
+  status="$(call GET "/api/defense/schedules/${LICH_BAO_VE_ID}" "${TOKEN_GV025}")"
+  [ "$status" = "403" ] || fail "GV025 (ngoài hội đồng) xem lịch chấm điểm không bị từ chối 403 (mã ${status})"
+  status="$(call GET "/api/documents/${report_doc_id}/download" "${TOKEN_GV025}")"
+  [ "$status" = "403" ] || fail "GV025 (ngoài hội đồng) tải báo cáo cuối không bị từ chối 403 (mã ${status})"
+  ok "GV025 (ngoài hội đồng) bị từ chối 403 trên lịch chấm điểm + tải báo cáo cuối (UC4.3 E1)"
+
+  status="$(call GET /api/defense/my-committees "${TOKEN_GV026}")"
+  [ "$status" = "200" ] || fail "GV026 không lấy được danh sách hội đồng của tôi (mã ${status})"
+  local in_mine
+  in_mine="$(jget "1 if any(r['id'] == ${LICH_BAO_VE_ID} for h in d for r in h['lich']) else 0")"
+  [ "$in_mine" = "1" ] || fail "Hội đồng của GV026 không có SV đã xếp lịch"
+  status="$(call GET "/api/documents/${report_doc_id}/download" "${TOKEN_GV026}")"
+  [ "$status" = "200" ] || fail "GV026 (thành viên hội đồng) không tải được báo cáo cuối (mã ${status})"
+  ok "GV026 thấy SV trong hội đồng của mình và tải được báo cáo cuối -> 200"
+
+  status="$(call PUT "/api/defense/schedules/${LICH_BAO_VE_ID}/score" "${TOKEN_GV026}" \
+    -H 'Content-Type: application/json' -d '{"diem":8.0,"nhan_xet":"Trình bày rõ ràng"}')"
+  [ "$status" = "200" ] || fail "GV026 chấm 8.0 không trả 200 (mã ${status}, $(cat "$TMP/body"))"
+  status="$(call PUT "/api/defense/schedules/${LICH_BAO_VE_ID}/score" "${TOKEN_GV027}" \
+    -H 'Content-Type: application/json' -d '{"diem":8.5,"nhan_xet":"Cần bổ sung phần so sánh"}')"
+  [ "$status" = "200" ] || fail "GV027 chấm 8.5 không trả 200 (mã ${status}, $(cat "$TMP/body"))"
+  ok "GV026 chấm 8.0, GV027 chấm 8.5 (kèm nhận xét) -> 200"
+
+  status="$(call POST "/api/defense/schedules/${LICH_BAO_VE_ID}/finalize" "${TOKEN_BOMON}")"
+  [ "$status" = "409" ] || fail "Chốt khi mới 2/3 thành viên chấm không bị từ chối 409 (mã ${status})"
+  ok "Bộ môn chốt khi mới 2/3 thành viên chấm -> 409 ($(jget "d['detail']"))"
+
+  status="$(call PUT "/api/defense/schedules/${LICH_BAO_VE_ID}/score" "${TOKEN_GV028}" \
+    -H 'Content-Type: application/json' -d '{"diem":9.0}')"
+  [ "$status" = "200" ] || fail "GV028 chấm 9.0 không trả 200 (mã ${status}, $(cat "$TMP/body"))"
+  ok "GV028 chấm 9.0 -> 200"
+
+  status="$(call POST "/api/defense/schedules/${LICH_BAO_VE_ID}/finalize" "${TOKEN_BOMON}")"
+  [ "$status" = "200" ] || fail "Bộ môn chốt kết quả không trả 200 (mã ${status}, $(cat "$TMP/body"))"
+  local diem_tb
+  diem_tb="$(jget "d['lich']['diem_trung_binh']")"
+  [ "$diem_tb" = "8.5" ] || fail "Điểm trung bình sau chốt không phải 8.5 (nhận ${diem_tb})"
+  DO_AN_KHO_ID="$(jget "d['do_an_kho_id']")"
+  [ -n "$DO_AN_KHO_ID" ] || fail "Không đọc được do_an_kho_id sau khi chốt"
+  ok "Bộ môn chốt kết quả -> 200, điểm TB 8.5, lưu kho (do_an_kho_id=${DO_AN_KHO_ID})"
+
+  status="$(call GET /api/defense/me "${TOKEN_SV098}")"
+  [ "$status" = "200" ] || fail "DTC225200098 không lấy được lịch/kết quả bảo vệ (mã ${status})"
+  diem_tb="$(jget "(d.get('ket_qua') or {}).get('diem_trung_binh')")"
+  [ "$diem_tb" = "8.5" ] || fail "DTC225200098 không thấy điểm 8.5 sau chốt (nhận ${diem_tb})"
+  status="$(call GET /api/notifications "${TOKEN_SV098}")"
+  local has_ket_qua
+  has_ket_qua="$(jget "1 if any(i['loai'] == 'KET_QUA_BAO_VE' for i in d['items']) else 0")"
+  [ "$has_ket_qua" = "1" ] || fail "DTC225200098 không có thông báo kết quả bảo vệ"
+  ok "DTC225200098 thấy điểm 8.5 + thông báo KET_QUA_BAO_VE (UC4.5, NOTF-01)"
+
+  status="$(call PUT "/api/defense/schedules/${LICH_BAO_VE_ID}/score" "${TOKEN_GV026}" \
+    -H 'Content-Type: application/json' -d '{"diem":9.5}')"
+  [ "$status" = "409" ] || fail "GV026 sửa điểm sau chốt không bị từ chối 409 (mã ${status})"
+  ok "GV026 sửa điểm sau chốt bị từ chối 409"
+
+  local kho_row attempt
+  kho_row=""
+  for attempt in $(seq 1 20); do
+    kho_row="$(bash "${SCRIPT_DIR}/sql.sh" "SELECT CONCAT(nguon,'|',trang_thai_index) FROM do_an_kho WHERE id=${DO_AN_KHO_ID} AND de_tai_id=${DE_TAI_ID}")"
+    [ "$kho_row" = "HE_THONG|DA_INDEX" ] && break
+    sleep 0.5
+  done
+  [ "$kho_row" = "HE_THONG|DA_INDEX" ] || fail "Bản ghi kho không ở HE_THONG|DA_INDEX (nhận ${kho_row})"
+  ok "do_an_kho id=${DO_AN_KHO_ID}: nguồn HE_THONG, đã index (DA_INDEX)"
 }
 
 setup_assigned_topic
 uc2_outline
 uc4_defense
 
-echo "OK: e2e UC2-4 hoàn tất — dữ liệu đợt K98 sẽ được dọn khi script kết thúc (trap)"
+echo "OK: e2e UC2-4 (đề cương -> bảo vệ -> lưu kho) hoàn tất — dữ liệu đợt K98 sẽ được dọn khi script kết thúc (trap)"

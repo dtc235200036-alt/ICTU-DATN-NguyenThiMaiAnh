@@ -225,6 +225,8 @@ class DoAnKho <<Entity>> {
   +diem : Decimal
   +nguon : LoaiNguon
   +trangThaiIndex : String
+  +maSoSinhVien : String
+  +hoTenSinhVien : String
 }
 
 class ThongBao <<Entity>> {
