@@ -248,7 +248,7 @@ Lược đồ `thesis_core` gồm 19 bảng, khớp 1-1 với 19 lớp thực th
 | Cột | Kiểu | Null | Khóa | Mô tả |
 |---|---|---|---|---|
 | id | BIGINT | Không | PK | Định danh cấu hình |
-| loai | VARCHAR(30) | Không | UNIQUE | `NGUONG_TEN_DE_TAI` / `NGUONG_TAI_LIEU` / `NGUONG_DOAN_TRUNG` (ngưỡng ngữ nghĩa từng đoạn, Phase 4) — mỗi loại đúng 1 dòng hiện hành; giá trị mặc định lấy từ hiệu chỉnh (Alembic 0010: 67,8 / 10,4 / 67,7) |
+| loai | VARCHAR(30) | Không | UNIQUE | Mỗi loại đúng 1 dòng hiện hành: `NGUONG_TEN_DE_TAI` — tên đề tài có độ tương đồng ngữ nghĩa từ giá trị này trở lên được cảnh báo khi đề xuất/đăng ký (UC0.6); `NGUONG_TAI_LIEU` — tỷ lệ trùng tổng của đề cương/báo cáo từ giá trị này trở lên là "Vượt ngưỡng cảnh báo" (UC0.7, chụp vào `nguong_ap_dung`); `NGUONG_DOAN_TRUNG` — một câu có độ tương đồng ngữ nghĩa với đồ án đã lưu từ giá trị này trở lên được tính là đoạn trùng (gửi sang Dịch vụ AI dưới tên `nguong_doan`; bổ sung khi thi công Phase 4, D-04). Giá trị mặc định lấy từ hiệu chỉnh (Alembic 0010: 67,8 / 10,4 / 67,7); Bộ môn sửa cả ba trên màn hình UC0.4 (`GET/PUT /api/thresholds`), Web API đọc lại theo từng request nên lần kiểm tra kế tiếp dùng giá trị mới |
 | gia_tri | DECIMAL(5,2) | Không | — | Giá trị ngưỡng % (0–100, FR-AI-05) |
 | tai_khoan_id | BIGINT | Có | FK → tai_khoan | Người (Bộ môn) cập nhật lần gần nhất |
 | thoi_diem_cap_nhat | DATETIME | Không | — | Thời điểm lưu cấu hình |
@@ -319,8 +319,14 @@ Schema `thesis_ai` thuộc sở hữu riêng của Dịch vụ AI, tách biệt 
 
 | Bảng | Cột chính | Mô tả |
 |---|---|---|
-| chunk | id, loai_nguon, ma_nguon, thu_tu, noi_dung, bam_noi_dung | Một đoạn văn bản đã tách (tiêu đề = 1 chunk loại `TOPIC`; tài liệu = nhiều chunk loại `DOCUMENT` theo đoạn văn). `ma_nguon` là số tham chiếu logic tới `de_tai.id` hoặc `tai_lieu_do_an.id` bên `thesis_core`, gửi kèm trong payload `/ingest` — **không phải khóa ngoại thật**, giữ đúng ranh giới schema |
-| embedding | id, chunk_id (FK → chunk), ten_model, so_chieu, vector | Vector embedding của một chunk theo một mô hình cụ thể; `vector` là mảng `float32` đóng gói nhị phân trong `BLOB`; UNIQUE(chunk_id, ten_model) để tránh tính trùng embedding cho cùng một chunk + mô hình |
+| chunk | id, loai_nguon, ma_nguon, thu_tu, noi_dung, bam_noi_dung | Một đơn vị văn bản đã tách. `loai_nguon` là `VARCHAR(20)` + CHECK `TOPIC` / `ARCHIVE` / `DOCUMENT` (quy ước VARCHAR + CHECK của dự án thay cho ENUM). Tên đề tài hiện hành (`TOPIC`) và tên đồ án trong kho (`ARCHIVE`) là 1 chunk; đề cương/báo cáo (`DOCUMENT`) là nhiều chunk **mức câu** sau khi lọc phần mẫu chung. `ma_nguon` là số tham chiếu logic theo `loai_nguon` — `de_tai.id`, `do_an_kho.id` hoặc `tai_lieu_do_an.id` bên `thesis_core` (ba không gian id riêng), gửi kèm trong payload `/ingest` — **không phải khóa ngoại thật**, giữ đúng ranh giới schema. `bam_noi_dung` (SHA-256) để ingest lại nội dung không đổi thì không encode lại |
+| embedding | id, chunk_id (FK → chunk), ten_model, so_chieu, vector | Vector embedding của một chunk theo một mô hình cụ thể (`ten_model`, vd. `bkai-foundation-models/vietnamese-bi-encoder`); `vector` là mảng `float32` đóng gói nhị phân trong `BLOB`; UNIQUE(chunk_id, ten_model) để tránh tính trùng embedding cho cùng một chunk + mô hình; đổi mô hình thì `/reindex` encode bổ sung các chunk còn thiếu vector của mô hình mới |
 | index_metadata | id, ten_model, so_vector, cap_nhat_luc | Một dòng theo dõi mỗi mô hình embedding đang phục vụ: tổng số vector hiện có trong chỉ mục FAISS trong bộ nhớ và thời điểm cập nhật gần nhất — dùng để phát hiện lệch giữa CSDL và chỉ mục trong bộ nhớ sau khi khởi động lại dịch vụ |
 
-Chi tiết luồng `/ingest` (push-on-write) và cách chỉ mục FAISS được xây lại từ `thesis_ai` khi Dịch vụ AI khởi động nằm ở §3.3.5/§3.3.8.
+Điều chỉnh khi thi công Phase 4 (bổ sung, không đổi ranh giới schema):
+
+- **Ba không gian id.** Cặp (`loai_nguon`, `ma_nguon`) mới xác định một nguồn; cùng số `12` có thể là đề tài 12, bản ghi kho 12 và tài liệu 12 — Web API luôn ánh xạ ngược theo `loai` trả về (WR-06).
+- **Ngữ nghĩa thay thế của `/ingest`.** Ingest lại (`loai_nguon`, `ma_nguon`) xóa toàn bộ chunk cũ của nguồn đó rồi ghi chunk mới trong một transaction; văn bản rỗng để lại nguồn không còn chunk (cách Web API gỡ vector khi dọn dữ liệu kiểm thử). Mỗi lần ingest có thay đổi gọi mô hình đúng một lần (NFR-11).
+- **Dựng lại từ CSDL lúc khởi động.** Chỉ mục FAISS (`IndexFlatIP`) và ma trận MinHash nằm trong bộ nhớ, được dựng lại từ `chunk` + `embedding` của mô hình hiện hành khi Dịch vụ AI khởi động — không encode lại; chữ ký MinHash không được lưu mà tính lại từ `noi_dung`.
+
+Chi tiết luồng `/ingest` (push-on-write) và hợp đồng API nằm ở §3.3.5/§3.3.8.

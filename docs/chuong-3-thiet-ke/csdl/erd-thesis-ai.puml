@@ -11,15 +11,22 @@ skinparam linetype ortho
 entity "chunk" as chunk {
   *id : BIGINT <<PK>>
   --
-  loai_nguon : ENUM('TOPIC','DOCUMENT') <<NOT NULL>>
+  loai_nguon : VARCHAR(20) <<NOT NULL>>
+  ..CHECK loai_nguon IN ('TOPIC','ARCHIVE','DOCUMENT')
+  — quy ước VARCHAR + CHECK của dự án
+  (thay ENUM, điều chỉnh khi thi công Phase 4)..
   ma_nguon : BIGINT <<NOT NULL>>
-  ..tham chiếu logic tới de_tai.id hoặc
-  tai_lieu_do_an.id bên thesis_core —
-  KHÔNG phải khóa ngoại..
+  ..tham chiếu logic theo loai_nguon:
+  TOPIC → de_tai.id, ARCHIVE → do_an_kho.id,
+  DOCUMENT → tai_lieu_do_an.id (thesis_core)
+  — KHÔNG phải khóa ngoại..
   thu_tu : INT <<NOT NULL>>
   noi_dung : TEXT <<NOT NULL>>
+  ..một câu (chunk mức câu) của tài liệu, hoặc
+  cả tên đề tài với TOPIC/ARCHIVE..
   bam_noi_dung : CHAR(64) <<NOT NULL>>
-  ..UNIQUE(loai_nguon, ma_nguon, thu_tu)..
+  ..UNIQUE(loai_nguon, ma_nguon, thu_tu);
+  INDEX(loai_nguon, ma_nguon)..
 }
 
 entity "embedding" as embedding {

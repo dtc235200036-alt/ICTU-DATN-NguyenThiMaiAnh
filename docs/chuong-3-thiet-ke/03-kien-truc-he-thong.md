@@ -41,11 +41,13 @@ Toàn bộ payload chỉ chứa văn bản đã trích xuất — Dịch vụ AI
 
 | Endpoint | Phương thức | Mục đích | Đầu vào | Đầu ra |
 |---|---|---|---|---|
-| `/ingest` | POST | Đẩy một đề tài hoặc tài liệu mới vào corpus (push-on-write) | `{id, type: TOPIC\|DOCUMENT, text}` | `{chunk_count, indexed: true}` |
-| `/check-title` | POST | So sánh ngữ nghĩa tên đề tài (đồng bộ, UC0.6) | `{text, top_k}` | `{matches: [{ref_id, ty_le}], ...}` |
-| `/check-document` | POST | So sánh nội dung tài liệu, phát hiện đoạn trùng (bất đồng bộ về phía Web API, UC0.7) | `{ref_id, text}` | `{ty_le_tong, do_an_trung: [...], chi_tiet: [{doan_nguon, doan_trung, vi_tri, ty_le}]}` |
-| `/reindex` | POST | Nạp lại/xây lại chỉ mục hàng loạt (seed ban đầu hoặc đổi mô hình embedding) | `{items: [{id, type, text}, ...]}` hoặc rỗng (xây lại từ `thesis_ai` hiện có) | `{indexed_count}` |
-| `/health` | GET | Kiểm tra tình trạng dịch vụ (readiness của mô hình + chỉ mục) | — | `{status, model_loaded, index_size}` |
+| `/ingest` | POST | Đẩy một đề tài, bản ghi kho hoặc tài liệu mới vào corpus (push-on-write); ngữ nghĩa **thay thế** theo (`type`, `id`) — ingest lại thay toàn bộ chunk cũ, văn bản rỗng gỡ nguồn khỏi chỉ mục | `{id, type: TOPIC\|ARCHIVE\|DOCUMENT, text}` | `{chunk_count, indexed: true}` |
+| `/check-title` | POST | So sánh ngữ nghĩa tên đề tài với đề tài hiện hành (TOPIC) và kho (ARCHIVE) (đồng bộ, UC0.6) | `{text, top_k, nguong?}` — `nguong` = NGUONG_TEN_DE_TAI hiện hành | `{matches: [{ref_id, loai: TOPIC\|ARCHIVE, ty_le}]}` |
+| `/check-document` | POST | So sánh nội dung tài liệu, phát hiện đoạn trùng (bất đồng bộ về phía Web API, UC0.7) | `{ref_id, text, top_k, nguong_doan?, nguong_nguyen_van?, loai_tru?: [id]}` — `nguong_doan` = NGUONG_DOAN_TRUNG hiện hành, `loai_tru` = các phiên bản của cùng đề tài | `{ty_le_tong, do_an_trung: [{ref_id, ty_le}], chi_tiet: [{ref_id, doan_nguon, doan_trung, vi_tri, ty_le, tin_hieu: NGUYEN_VAN\|NGU_NGHIA, diem_ngu_nghia, diem_nguyen_van}], so_doan, so_doan_loai_tru}` |
+| `/reindex` | POST | Nạp lại/xây lại chỉ mục hàng loạt (seed ban đầu hoặc đổi mô hình embedding) | `{items: [{id, type, text}, ...]}` hoặc rỗng (encode chunk còn thiếu vector của mô hình hiện hành rồi xây lại từ `thesis_ai`) | `{indexed_count}` |
+| `/health` | GET | Kiểm tra tình trạng dịch vụ (readiness của mô hình + chỉ mục) | — | `{status, model_loaded, index_size, index_size_tieu_de, index_size_tai_lieu, ten_model, encode_calls, thieu_embedding}` |
+
+Hợp đồng được **điều chỉnh khi thi công Phase 4 (bổ sung, không phá hợp đồng)**: thêm loại nguồn `ARCHIVE` và ngữ nghĩa thay thế của `/ingest`; tham số tùy chọn `nguong` (`/check-title`) và `nguong_doan`, `nguong_nguyen_van`, `loai_tru` (`/check-document`) — thiếu thì dịch vụ dùng giá trị mặc định đã hiệu chỉnh, ngoài 0–100 trả `422`; trường trả về `loai` (kết quả tên), `tin_hieu`, `diem_ngu_nghia`, `diem_nguyen_van`, `so_doan`, `so_doan_loai_tru` (kết quả tài liệu — dùng để giải thích vì sao một đoạn bị đánh dấu trên MH-14) và các chỉ số theo dõi của `/health`. `ty_le_tong` = tỷ lệ ký tự của các câu bị gắn cờ trên tổng ký tự câu nội dung (sau khi lọc phần mẫu chung); `vi_tri` = số thứ tự câu (`Câu a–b`). Client cũ bỏ qua các trường mới vẫn đúng.
 
 Mọi endpoint (trừ `/health`) yêu cầu header `X-API-Key` hợp lệ; thiếu hoặc sai trả về `401` (NFR-07).
 
@@ -90,5 +92,7 @@ Cả hai sơ đồ đều thể hiện: header `X-API-Key` trên mọi lệnh g�
 | **Embedding tính sẵn lúc `/ingest`**, không tính lại khi có bản ghi mới | NFR-11 — thêm 1 bản ghi không kéo theo tính lại N bản ghi cũ (Pattern 3) |
 | **NFC ở mọi điểm nhập liệu** (form, văn bản trích xuất DOCX/PDF, import CSV, cả hai phía Web API và Dịch vụ AI) | So sánh chuỗi và so sánh ngữ nghĩa cho cùng kết quả bất kể dạng Unicode nguồn (NFR-14) |
 | **`BackgroundTasks` trong tiến trình** cho luồng bất đồng bộ, chưa dùng hàng đợi ngoài (Celery/Redis) | Đủ ở quy mô đồ án (300 đề tài, 50 tài liệu, một server); sơ đồ tuần tự vẫn thể hiện đúng lời gọi dịch vụ bất đồng bộ — hàng đợi ngoài là điểm mở rộng khi lên production thật, không đổi hợp đồng API |
+| **Ngưỡng gửi theo từng request** (D-04) — `cau_hinh_nguong` ở Web API là nguồn chính; Web API đọc lại khi mỗi lần kiểm tra và gửi `nguong` / `nguong_doan` sang Dịch vụ AI | Dịch vụ AI không giữ trạng thái chính sách; Bộ môn đổi ngưỡng trên UC0.4 thì lần kiểm tra kế tiếp áp dụng ngay, còn kết quả đã ghi giữ snapshot `nguong_ap_dung` (không hồi tố) |
+| **Một worker uvicorn, chỉ mục trong bộ nhớ** cho Dịch vụ AI (FAISS `IndexFlatIP` chính xác + ma trận MinHash, dựng lại từ `thesis_ai` lúc khởi động) | `/ingest` sửa chỉ mục tại chỗ trong tiến trình — worker thứ hai sẽ phục vụ chỉ mục cũ; ở quy mô vài nghìn câu, tìm kiếm chính xác dưới 0,1 s nên không cần chỉ mục xấp xỉ hay dịch vụ vector riêng |
 
 **Đường mở rộng khi lên quy mô thật** (ngoài phạm vi đồ án): thay `BackgroundTasks` bằng Celery/RQ + Redis để việc kiểm tra sống sót qua việc khởi động lại tiến trình và chạy trên worker riêng; lưu chỉ mục FAISS xuống đĩa hoặc chuyển sang một CSDL vector chuyên dụng nếu số lượng vector vượt quá vài trăm nghìn.

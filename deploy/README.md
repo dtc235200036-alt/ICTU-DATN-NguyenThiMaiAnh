@@ -65,6 +65,8 @@ Test pytest chạy trực tiếp trên máy host, kết nối tới MySQL của 
 | `dom-check.sh <path> <text>` | Kiểm tra DOM đã render (headless Chrome) qua HTTPS chứa một chuỗi mong đợi |
 | `smoke-test.sh` | Bộ kiểm tra qua Apache HTTPS (redirect, health, SPA fallback, header bảo mật, đăng nhập, giới hạn kích thước request, phiên/refresh/logout, throttle đăng nhập, 403 chéo vai trò trên route Phase 2–3) |
 | `e2e-uc1.sh` / `e2e-uc2-5.sh` | Kịch bản end-to-end UC1 và UC2–UC5 qua Apache (xem "Kiểm thử tự động") |
+| `seed-ai.sh` | Nạp kho cho dịch vụ AI (300 đề tài kho, 25 đồ án nguồn có báo cáo, backfill chỉ mục) — idempotent (xem "Dịch vụ AI kiểm tra trùng lặp") |
+| `e2e-ai.sh` / `ai-nfr.sh` | Kịch bản end-to-end dịch vụ AI thật (SC1–SC5) và đo NFR-07..NFR-11 — **không chạy song song** |
 | `tools/check-erd-db.py` | Đối chiếu tên cột giữa `docs/chuong-3-thiet-ke/csdl/erd.puml` và schema `thesis_core` thật |
 
 ## Reset toàn bộ
@@ -181,6 +183,10 @@ uv --directory backend run pytest -q
 bash deploy/smoke-test.sh
 bash deploy/e2e-uc1.sh
 bash deploy/e2e-uc2-5.sh
+bash deploy/seed-ai.sh      # một lần sau khi dựng stack (idempotent)
+bash deploy/e2e-ai.sh
+bash deploy/ai-nfr.sh
+uv --directory ai-service run pytest -q
 python3 tools/check-erd-db.py
 ```
 
@@ -210,6 +216,88 @@ khoản trên phát sinh từ lúc script bắt đầu. Sau khi chạy không c�
 ```bash
 bash deploy/sql.sh "SELECT COUNT(*) FROM dot_do_an WHERE khoa IN ('K98','K99')"   # 0
 ```
+
+## Dịch vụ AI kiểm tra trùng lặp
+
+Phase 4 thêm hai service vào `deploy/docker-compose.yml`:
+
+- **`ai`** — FastAPI của `ai-service/` (một worker uvicorn, chỉ mục FAISS trong bộ nhớ). Chỉ nằm trên mạng nội bộ của compose: **không publish cổng, không có route Apache**; Web API gọi `http://ai:8002` kèm header `X-API-Key`. Giới hạn bộ nhớ `AI_MEM_LIMIT` (mặc định `2g`; đo thực tế đỉnh ≈ 850 MiB). Trọng số mô hình cache trên volume **`ai-models`** (`/models`).
+- **`ai-db-init`** — chạy một lần trước `ai`: tạo schema `thesis_ai` và tài khoản MySQL `thesis_ai` chỉ có quyền trên schema đó (không đọc được `thesis_core`).
+
+### Biến môi trường (`deploy/.env`)
+
+| Khóa | Ý nghĩa |
+|---|---|
+| `AI_API_KEY` | Khóa nội bộ Web API ↔ Dịch vụ AI (sinh ngẫu nhiên bởi `init.sh`) |
+| `AI_DB_PASSWORD` | Mật khẩu tài khoản MySQL `thesis_ai` (sinh bởi `init.sh`) |
+| `AI_CLIENT` | `http` (mặc định — gọi dịch vụ AI thật) hoặc `stub` — **phương án dự phòng D-07**: Web API quay về bộ giả lập Jaccard của Phase 2/3, không cần container `ai` hoạt động |
+| `AI_STUB_MODE` | Chỉ có hiệu lực khi `AI_CLIENT=stub`: `normal` hoặc `loi` (mô phỏng dịch vụ AI không phản hồi, UC0.6/UC0.7 - E2) |
+| `AI_MODEL_PROFILE` | Mô hình embedding đã chốt: `bkai` (`bkai-foundation-models/vietnamese-bi-encoder` + tách từ underthesea); `e5` là phương án thay thế |
+| `AI_MEM_LIMIT` | Giới hạn bộ nhớ container `ai` (mặc định `2g`) |
+
+`init.sh` sinh các khóa này khi tạo `.env` mới, và **bổ sung các khóa còn thiếu vào một `.env` đã có** (giữ nguyên giá trị cũ) — chạy lại `bash deploy/init.sh` sau khi cập nhật từ Phase 3. Chỉ ghi giá trị trong `deploy/.env` (chmod 600, đã gitignore), không đưa vào tài liệu hay commit.
+
+### Lần khởi động đầu, máy chủ không có Internet
+
+Lần đầu `ai` khởi động sẽ tải trọng số mô hình (~515 MiB) từ Hugging Face vào volume `ai-models`, nên healthcheck có thể mất vài phút. Máy chủ không có Internet: làm nóng volume ở nơi có mạng trước (hoặc sao chép volume sang):
+
+```bash
+docker compose -f deploy/docker-compose.yml run --rm ai python -m app.download_model
+```
+
+### Nạp dữ liệu và bảo trì chỉ mục
+
+```bash
+bash deploy/seed-ai.sh
+```
+
+Idempotent — chạy lại không tạo trùng: import 300 đề tài kho khóa K18–K22 (`seed-data/de-tai-kho.csv`) qua đúng API import của Bộ môn, tạo 25 đồ án nguồn khóa cũ có báo cáo cuối (`python -m app.seed_ai_corpus`, dữ liệu DATA-03), rồi backfill chỉ mục; kết thúc khi `/health` có vector.
+
+Bảo trì:
+
+```bash
+# Đẩy lại mọi đề tài / bản ghi kho / tài liệu còn thiếu trong chỉ mục (vd. sau khi dịch vụ AI tạm ngừng)
+docker compose -f deploy/docker-compose.yml exec -T api python -m app.services.ai_index backfill
+# Sau khi đổi AI_MODEL_PROFILE: encode các chunk còn thiếu vector của mô hình mới rồi dựng lại chỉ mục
+docker compose -f deploy/docker-compose.yml exec -T api python -c "import os,urllib.request as u; r=u.Request('http://ai:8002/reindex', data=b'{}', headers={'X-API-Key': os.environ['AI_API_KEY'], 'Content-Type': 'application/json'}); print(u.urlopen(r, timeout=1800).read().decode())"
+```
+
+Ngưỡng cảnh báo (tên đề tài, cảnh báo tài liệu, đoạn trùng) do Bộ môn sửa ở menu **Ngưỡng trùng lặp** (`/cau-hinh-nguong`, UC0.4); giá trị đề xuất lấy từ hiệu chỉnh (`ai-service/calibration/nguong-de-xuat.json`, trang chương 4 `docs/chuong-4-trien-khai/thu-nghiem-ai/03-hieu-chinh-nguong.md`). Ngưỡng nguyên văn (MinHash) là tham số kỹ thuật của dịch vụ AI, không sửa trên giao diện.
+
+### Kiểm thử dịch vụ AI
+
+```bash
+bash deploy/e2e-ai.sh
+bash deploy/ai-nfr.sh --report docs/chuong-4-trien-khai/thu-nghiem-ai/04-hieu-nang-va-bao-mat.md
+```
+
+- `e2e-ai.sh` — bảo mật dịch vụ AI, tên đề tài diễn đạt lại (cả NFC và NFD), Bộ môn đổi ngưỡng thì lần kiểm tra kế tiếp áp dụng (script luôn khôi phục ba ngưỡng gốc kể cả khi lỗi, và báo FAIL nếu đọc lại không khớp), push-on-write, tài liệu chép nguyên văn / không liên quan. Khóa kiểm thử **K97**.
+- `ai-nfr.sh` — đo NFR-07..NFR-11 và bộ nhớ; `--report` ghi đè trang số liệu chương 4. Khóa kiểm thử **K96**.
+
+**Tài khoản dành riêng — không dùng cho demo thủ công:** `DTC225200095`, `DTC225200096` (SV), `GV023` (GVHD), cùng `bomon`; khóa **K96** và **K97**. `e2e-ai.sh` và `ai-nfr.sh` **dùng chung `DTC225200095` và `GV023` nên không bao giờ chạy song song** (`ai-nfr.sh` từ chối chạy nếu `DTC225200095` đang giữ một đề tài hoạt động). Hai script tự dọn dữ liệu, file và vector đã tạo; sau khi chạy:
+
+```bash
+bash deploy/sql.sh "SELECT COUNT(*) FROM dot_do_an WHERE khoa IN ('K96','K97','K98','K99')"   # 0
+```
+
+### Hạn chế đã biết
+
+- **Xóa bản ghi kho không xóa vector của nó khỏi chỉ mục AI.** Hợp đồng §3.3.5 không có endpoint xóa (hoãn lại). Bản ghi đã xóa không còn xuất hiện trong kết quả vì Web API bỏ qua mọi `ref_id` không còn tồn tại, nhưng vector vẫn chiếm chỗ trong chỉ mục; gỡ thủ công khi cần: `docker compose -f deploy/docker-compose.yml exec -T api python -m app.services.ai_index purge --loai ARCHIVE --ids <id>`.
+- **Danh sách phần mẫu chung là giả định `[ASSUMED]`** (bìa, lời cam đoan, mục lục, danh mục, tài liệu tham khảo, phụ lục…) cho tới khi có mẫu đề cương/báo cáo chính thức của Khoa — khi có mẫu, cập nhật `ai-service/app/nlp/boilerplate.py` rồi chạy lại hiệu chỉnh (`calibration/calibrate.py tune|evaluate`).
+- **Số liệu chất lượng phát hiện đo trên dữ liệu tổng hợp** (`seed-data/`, sinh bằng `tools/datagen`), không phải đồ án thật của sinh viên; cảnh báo tên đề tài và đoạn trùng ngữ nghĩa là **gợi ý** để giảng viên xem lại, không phải kết luận.
+- Tỷ lệ theo từng đồ án trùng trên MH-14/MH-09 được tính lại từ số ký tự các đoạn đã lưu (phần của tỷ lệ tổng); lệch nhỏ so với dịch vụ AI nếu một tài liệu có hơn 50 đoạn trùng (`CHI_TIET_TOI_DA`).
+
+### Kịch bản demo AI (thao tác trên trình duyệt)
+
+Chuẩn bị: stack đã dựng, `bash deploy/seed-ai.sh` đã chạy. Dùng các tài khoản demo **không** thuộc danh sách dành riêng ở trên (vd. `DTC225200010`, `DTC225200011`, `GV005`); mật khẩu `SEED_DEFAULT_PASSWORD`.
+
+1. **SC1 — tên đề tài diễn đạt lại.** Đăng nhập `DTC225200010` → **Đề xuất / Đăng ký đề tài** → nhập tên "Sử dụng SQL Server để hạch toán thu chi doanh nghiệp cho công ty cổ phần Hoàng Long" rồi rời ô → cảnh báo "Phát hiện … đề tài tương tự trong kho" với đồ án kho "Ứng dụng SQL Server trong quản lý kế toán tại công ty CP Hoàng Long (K21)" kèm tỷ lệ (≈ 82%). Dán cùng tên ở dạng Unicode tổ hợp (NFD, vd. gõ bằng bộ gõ khác) cho cùng kết quả. Một tên cùng lĩnh vực nhưng khác đề tài không bị cảnh báo trùng kho.
+2. **SC2 — tài liệu chép nguyên văn.** Để `DTC225200010` có đề tài đã phân công GVHD `GV005` (Bộ môn duyệt đề xuất ở bước 1 hoặc cho SV đăng ký một đề tài GV đã duyệt). Ở **Đề cương**, nộp `seed-data/tai-lieu/P01-B.pdf` → trạng thái "Đang kiểm tra" rồi "Hoàn tất - 50.3%" (không cần tải lại trang). Bấm "Xem kết quả" (MH-14): tỷ lệ tổng 50.3%, ngưỡng 10.4%, đồ án trùng "Phát triển mô hình thống kê điểm số … Metabase (K21)" 50.3%; mỗi đoạn đặt cạnh đoạn nguồn, cụm từ trùng được tô, nhãn "Trùng nguyên văn", ghi chú đã loại trừ phần mẫu chung (FR-AI-02). Đăng nhập `GV005` → **Duyệt đề cương** → "Duyệt": panel MH-09 hiện cùng tỷ lệ, "Vượt ngưỡng cảnh báo" và "Số đoạn trùng: 7 (7 trùng nguyên văn)". Nộp một file diễn đạt lại (vd. `P11-B.docx`) cho một SV khác: các đoạn mang nhãn "Trùng ngữ nghĩa", ít cụm từ được tô hơn.
+3. **SC3 — bảng kiểm chứng trên 50 file.** Mở `docs/chuong-4-trien-khai/thu-nghiem-ai/03-hieu-chinh-nguong.md`: điểm từng cặp của 25 cặp (chép nguyên văn, diễn đạt lại bị cảnh báo; cùng lĩnh vực, không liên quan dưới ngưỡng) trên tập hiệu chỉnh và tập kiểm chứng giữ lại, cùng mô hình đã chốt (`02-so-sanh-mo-hinh-embedding.md`).
+4. **SC4 — Bộ môn đổi ngưỡng.** Đăng nhập `bomon` → **Ngưỡng trùng lặp**: ba ngưỡng kèm giải thích, giá trị đề xuất và người cập nhật. Đặt "Ngưỡng tên đề tài" = 99 → "Lưu cấu hình" → xác nhận. `DTC225200011` kiểm tra lại tên ở bước 1 → không còn cảnh báo. Bộ môn bấm "Khôi phục giá trị đề xuất" → lưu → cảnh báo trở lại. Kết quả đã kiểm tra trước đó vẫn hiện ngưỡng lúc kiểm tra.
+5. **SC5 — bản ghi mới được index ngay; dịch vụ AI không lộ ra ngoài.** `bomon` → **Kho đồ án** → thêm bản ghi "Xây dựng hệ thống quản lý phòng thí nghiệm hóa học cho trường cao đẳng y tế" (khóa K22) → cột index chuyển "Đã index" sau vài giây. `DTC225200011` kiểm tra tên "Phát triển phần mềm quản lý phòng thí nghiệm hóa học tại trường cao đẳng y tế" → thấy ngay bản ghi vừa thêm (≈ 90%), không phải tính lại embedding toàn kho (e2e-ai kiểm `encode_calls` +1). Xóa bản ghi sau demo (vector còn trong chỉ mục nhưng không xuất hiện trong kết quả — xem Hạn chế). Phần cô lập: chạy `bash deploy/ai-nfr.sh` (hoặc `e2e-ai.sh`) — host không kết nối được cổng 8002, thiếu/sai khóa → 401, Apache không có route tới dịch vụ AI, tài khoản DB `thesis_ai` bị từ chối trên `thesis_core`; kèm số đo thời gian kiểm tra tên (P95 ≈ 0,05 s) và nộp → hoàn tất (P95 ≈ 4 s).
+
+Dọn dữ liệu demo sau khi xong (đề tài/đề cương của tài khoản demo) theo cách thông thường của UC1–UC2; các file đã nộp nằm trong volume `uploads-data`.
 
 ## File tải lên
 
@@ -264,4 +352,4 @@ kết quả sẽ là "Đã nhập 2/3 dòng" kèm "Dòng 4: Thiếu tên đề t
 ## Ghi chú kiến trúc triển khai
 
 - Container `api` không publish cổng ra host — chỉ Apache (`apache` service) mới có thể gọi tới `api:8001` qua mạng nội bộ của compose.
-- Dịch vụ AI (Phase 4) sẽ không có route Apache nào trỏ tới — kiến trúc SOA giữ Dịch vụ AI hoàn toàn nội bộ (§3.3.1).
+- Dịch vụ AI (Phase 4) không có route Apache nào trỏ tới và không publish cổng ra host — chỉ container `api` gọi `http://ai:8002` qua mạng nội bộ kèm `X-API-Key` (§3.3.1, NFR-07).
