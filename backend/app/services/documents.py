@@ -71,7 +71,13 @@ def _safe_basename(filename: str) -> str:
     file client gửi không bao giờ được dùng để dựng đường dẫn thật."""
     normalized = unicodedata.normalize("NFC", filename)
     base = normalized.replace("\\", "/").rsplit("/", 1)[-1]
-    return base[:255]
+    if len(base) <= 255:
+        return base
+    # IN-02: cắt phần tên, GIỮ đuôi file — đuôi quyết định định dạng được kiểm.
+    suffix = Path(base).suffix
+    if len(suffix) >= 255:
+        return base[:255]
+    return base[: 255 - len(suffix)] + suffix
 
 
 def read_and_validate(upload: UploadFile) -> ValidatedFile:
