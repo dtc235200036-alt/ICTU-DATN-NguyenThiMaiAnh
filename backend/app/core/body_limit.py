@@ -8,6 +8,13 @@ vẫn khai báo `LimitRequestBody 26214400` (bảo vệ DocumentRoot tĩnh và l
 liệu ý định), còn middleware này thực thi lại đúng ngưỡng đó ở tầng ứng dụng
 để hành vi quan sát được qua Apache (`deploy/smoke-test.sh`, check h) đúng
 như §3.3 mô tả: 21MB đi qua, 30MB nhận 413.
+
+CR-01: `Content-Length` là header do client tự khai — nếu client dùng
+`Transfer-Encoding: chunked` (hoặc đơn giản là không gửi header này), giá trị
+sẽ là `None` và bản kiểm tra dựa-vào-header-đơn-thuần bị bỏ qua hoàn toàn.
+Vì vậy middleware đếm số byte THỰC SỰ đọc được qua `receive()` bất kể header
+có mặt hay không — đây mới là tuyến phòng thủ thật sự; kiểm tra header chỉ là
+một fast-path để từ chối sớm, không phải tuyến phòng thủ duy nhất.
 """
 from starlette.responses import PlainTextResponse
 from starlette.types import ASGIApp, Receive, Scope, Send
@@ -30,12 +37,43 @@ class MaxBodySizeMiddleware:
         content_length = headers.get(b"content-length")
         if content_length is not None:
             try:
-                too_large = int(content_length) > self.max_bytes
+                if int(content_length) > self.max_bytes:
+                    await self._reject(scope, receive, send)
+                    return
             except ValueError:
-                too_large = False
-            if too_large:
-                response = PlainTextResponse("Payload Too Large", status_code=413)
-                await response(scope, receive, send)
-                return
+                pass
 
-        await self.app(scope, receive, send)
+        # Fast-path trên không bắt được request chunked / thiếu header. Bọc
+        # receive() để đếm byte thật đã đọc — đây là chốt chặn không phụ
+        # thuộc Content-Length, đóng lỗ hổng CR-01.
+        total = 0
+        rejected = False
+
+        async def limited_receive() -> dict:
+            nonlocal total, rejected
+            if rejected:
+                # Đã trả 413; coi như client ngắt kết nối để app dừng đọc
+                # tiếp phần thân còn lại thay vì tiếp tục buffer vô hạn.
+                return {"type": "http.disconnect"}
+            message = await receive()
+            if message["type"] == "http.request":
+                total += len(message.get("body", b""))
+                if total > self.max_bytes:
+                    rejected = True
+                    await self._reject(scope, receive, send)
+                    return {"type": "http.disconnect"}
+            return message
+
+        async def guarded_send(message: dict) -> None:
+            if rejected:
+                # Response 413 đã được gửi trực tiếp qua `send` gốc trong
+                # limited_receive; bỏ qua mọi message app cố gửi thêm sau khi
+                # nhận http.disconnect để tránh gửi chồng 2 response.
+                return
+            await send(message)
+
+        await self.app(scope, limited_receive, guarded_send)
+
+    async def _reject(self, scope: Scope, receive: Receive, send: Send) -> None:
+        response = PlainTextResponse("Payload Too Large", status_code=413)
+        await response(scope, receive, send)
