@@ -6,6 +6,7 @@ thúc ở HOAN_TAT hoặc LOI — không bao giờ để lại DANG_KIEM_TRA
 import logging
 from datetime import datetime, timedelta
 
+from fastapi import HTTPException
 from sqlalchemy import select, update
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session, selectinload
@@ -332,8 +333,6 @@ def request_recheck(db: Session, ket_qua: KetQuaKiemTraTrungLap) -> None:
         .where(KetQuaKiemTraTrungLap.trang_thai == LOI)
         .values(trang_thai=DANG_KIEM_TRA, thoi_diem=now_utc())
     )
-    from fastapi import HTTPException
-
     result = db.execute(stmt)
     if result.rowcount == 0:
         db.rollback()
