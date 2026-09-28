@@ -1,301 +1,301 @@
 ﻿khoa,ten_de_tai,ma_so_sinh_vien,ho_ten_sinh_vien,ma_giang_vien,tu_khoa,diem
-K18,Xây dựng và triển khai phần mềm trực tuyến quản lý tin tức cho UBND huyện Sông Công,DTC185290001,Lê Bích Thảo,GV016,"ứng dụng web, quản lý",8.0
-K18,Phát triển hệ thống hỗ trợ xếp thời khóa biểu tại trường THPT Ngô Quyền sử dụng ReactJS,DTC185290002,Đặng Quang An,GV021,"giáo dục, LMS, học trực tuyến, đánh giá",6.7
-K18,Phát triển ứng dụng điện thoại phản ánh hiện trường đô thị tại sở TT&TT tỉnh Phú Thọ trên nền tảng Firebase,DTC185290003,Vũ Phương Dung,GV015,"iOS, đa nền tảng",9.1
-K18,Ứng dụng YOLOv8 trong hỗ trợ chẩn đoán ảnh X-quang phổi cho bệnh viện đa khoa tỉnh Hà Giang,DTC185290004,Hồ Minh Vinh,GV022,"xử lý ảnh, trí tuệ nhân tạo, học sâu, thị giác máy tính",9.4
-K18,Ứng dụng Wazuh trong thu thập và phân tích nhật ký hệ thống tại công ty CP Hưng Thịnh,DTC185290005,Hoàng Quang Bình,GV020,"bảo mật, mã hóa, xác thực, an toàn thông tin",7.1
-K18,Thiết kế và xây dựng nền tảng hỗ trợ ôn tập thi trung học phổ thông cho trường THCS Ngô Quyền sử dụng WebRTC,DTC185290006,Lý Bích Linh,GV017,"học trực tuyến, giáo dục, e-learning, đánh giá",6.6
-K18,Nghiên cứu và phát triển ứng dụng di động hỗ trợ gọi xe công nghệ cho người thuê trọ tại Đại Từ,DTC185290007,Trần Công Sơn,GV010,"Android, đa nền tảng, iOS",9.3
-K18,Nghiên cứu và phát triển hệ thống báo cáo phân tích số liệu dịch bệnh tại trạm y tế cấp xã Sơn Cẩm trên nền tảng Power BI,DTC185290008,Võ Phương Hằng,GV020,"kho dữ liệu, trực quan hóa",5.2
-K18,Phát triển thiết bị IoT phát hiện khói và nhiệt bất thường cho công ty trách nhiệm hữu hạn Nam Việt sử dụng MQTT,DTC185290009,Bùi Ngọc Lan,GV014,"giám sát từ xa, IoT, vi điều khiển, hệ thống nhúng",7.0
-K18,Ứng dụng Kotlin trong hướng dẫn du lịch cho cơ sở lưu trú Tân Tiến,DTC185290010,Hồ Văn Hải,GV014,"ứng dụng di động, iOS, thông báo đẩy, đa nền tảng",6.2
-K18,Thiết kế và cài đặt hệ thống tưới cây tự động tại hợp tác xã nông nghiệp Quyết Thắng,DTC185290011,Ngô Công Tú,GV018,"vi điều khiển, giám sát từ xa",6.3
-K18,Thiết kế và xây dựng mô hình học máy ước lượng doanh số theo thời gian cho siêu thị mini Đại Phát,DTC185290012,Đinh Văn Bình,GV014,"trí tuệ nhân tạo, học máy, dự báo, khai phá dữ liệu",9.3
-K18,Thiết kế và xây dựng thiết bị IoT theo dõi môi trường chuồng nuôi cho trang trại Hưng Thịnh sử dụng ESP32,DTC185290013,Phạm Mạnh An,GV013,"vi điều khiển, giám sát từ xa, cảm biến, IoT",7.8
-K18,Nghiên cứu và phát triển phần mềm trực tuyến tiếp nhận hồ sơ xét tuyển qua mạng tại trường mầm non Tích Lương sử dụng VueJS,DTC185290014,Đặng Khánh Phương,GV019,"quản lý, cơ sở dữ liệu, giao diện người dùng, RESTful API",6.7
-K18,Thiết kế và cài đặt nền tảng hỗ trợ quản lý khóa học trực tuyến tại trường trung học cơ sở Quang Trung trên nền tảng Django,DTC185290015,Bùi Tuấn Long,GV016,"giáo dục, LMS, e-learning, học trực tuyến",5.9
-K18,Thiết kế và xây dựng công cụ hỗ trợ nhận diện phần mềm độc hại cho công ty trách nhiệm hữu hạn Phúc An trên nền tảng Wazuh,DTC185290016,Hồ Đức Lâm,GV015,"bảo mật, an toàn thông tin, xác thực, phát hiện tấn công",6.1
-K18,Phát triển ứng dụng hỗ trợ quản lý vận tải hàng hóa tại công ty TNHH Hoàng Long sử dụng ERPNext,DTC185290017,Đỗ Thùy Yến,GV006,"quy trình nghiệp vụ, báo cáo",7.9
-K18,Thiết kế và xây dựng ứng dụng phân tích dữ liệu tổng hợp dữ liệu bán hàng tại siêu thị mini Thành Công,DTC185290018,Vũ Quang Hoàng,GV014,"dự báo, trực quan hóa, kho dữ liệu",6.2
-K18,Phát triển ứng dụng quản lý bán hàng tại quầy tại cửa hàng tiện lợi Phúc An sử dụng ERPNext,DTC185290019,Vũ Phương Nhung,GV010,"quản lý, ERP",8.4
-K18,Nghiên cứu và phát triển hệ thống IoT theo dõi vi khí hậu trong nhà màng cho trang trại An Khang sử dụng Node-RED,DTC185290020,Vũ Thị Châu,GV019,"IoT, hệ thống nhúng",7.2
-K18,Xây dựng và triển khai hệ thống kiểm thử bảo mật website cho công ty TNHH Thành Công trên nền tảng OpenVAS,DTC185290021,Lê Thanh Ngân,GV018,"mã hóa, xác thực",7.0
-K18,Thiết kế và xây dựng ứng dụng trí tuệ nhân tạo phân tích cảm xúc bình luận cho siêu thị quy mô nhỏ Trường Thịnh trên nền tảng PhoBERT,DTC185290022,Huỳnh Phương Phương,GV013,"xử lý ngôn ngữ tự nhiên, học sâu, học máy, trí tuệ nhân tạo",8.9
-K18,Thiết kế và xây dựng hệ thống quản lý nhân sự và tiền lương cho công ty cổ phần Tân Tiến,DTC185290023,Nông Công Toàn,GV013,"quy trình nghiệp vụ, quản trị doanh nghiệp",9.5
-K18,Xây dựng và triển khai ứng dụng hỗ trợ chăm sóc và theo dõi khách hàng tại công ty CP Thành Công trên nền tảng ERPNext,DTC185290024,Ma Đức Huy,GV013,"quản trị doanh nghiệp, báo cáo, quản lý, ERP",5.2
-K18,Nghiên cứu và phát triển mô hình học máy hỗ trợ tóm tắt văn bản tiếng Việt cho ủy ban nhân dân xã Phúc Hà,DTC185290025,Đinh Minh Quân,GV014,"học sâu, học máy, trí tuệ nhân tạo, xử lý ngôn ngữ tự nhiên",8.5
-K18,Xây dựng và triển khai mô hình học máy tư vấn tuyển sinh bằng chatbot cho trường THPT Trần Phú,DTC185290026,Trần Văn Huy,GV018,"xử lý ngôn ngữ tự nhiên, trí tuệ nhân tạo, học máy",7.8
-K18,Thiết kế và cài đặt hệ thống hỗ trợ dự đoán khách hàng rời bỏ tại công ty CP Phúc An,DTC185290027,Triệu Thành Khánh,GV017,"trực quan hóa, phân tích dữ liệu, khai phá dữ liệu",5.3
-K18,Xây dựng thiết bị IoT đo bụi mịn và khí thải môi trường tại sở TT&TT tỉnh Phú Thọ,DTC185290028,Đinh Duy Long,GV009,"cảm biến, IoT",8.5
-K18,Xây dựng và triển khai cổng thông tin quản lý thư viện cho trường mẫu giáo Đồng Bẩm sử dụng NodeJS,DTC185290029,Hà Bích Hà,GV002,"ứng dụng web, giao diện người dùng, cơ sở dữ liệu, quản lý",8.5
-K18,Phát triển website hỗ trợ chia sẻ học liệu số tại trường THPT Trần Phú sử dụng Moodle,DTC185290030,Lương Tuấn Nam,GV018,"học trực tuyến, LMS, đánh giá",5.6
-K18,Thiết kế và xây dựng ứng dụng điện thoại hỗ trợ hẹn giờ khám chữa bệnh tại trạm y tế xã Cam Giá trên nền tảng React Native,DTC185290031,Ma Thị Quỳnh,GV017,"Android, đa nền tảng",9.5
-K18,Phát triển ứng dụng trí tuệ nhân tạo điểm danh bằng nhận diện khuôn mặt tại trường THCS Trần Phú trên nền tảng YOLOv8,DTC185290032,Võ Thị Thảo,GV015,"thị giác máy tính, trí tuệ nhân tạo, học máy",6.4
-K18,Thiết kế và cài đặt ứng dụng kết nối nhà trường với phụ huynh tại trường THCS Nguyễn Huệ sử dụng ReactJS,DTC185290033,Đinh Công Long,GV019,"LMS, đánh giá",8.1
-K18,Xây dựng ứng dụng web đăng tin rao vặt bất động sản cho công ty TNHH Nam Việt,DTC185290034,Võ Thị Châu,GV011,"cơ sở dữ liệu, ứng dụng web, RESTful API, quản lý",6.7
-K18,Phát triển giải pháp bảo vệ tệp tin bằng mật mã tại DNTN An Khang,DTC185290035,Huỳnh Mai Yến,GV001,"an toàn thông tin, xác thực, phát hiện tấn công, bảo mật",6.7
-K18,Xây dựng và triển khai ứng dụng trí tuệ nhân tạo nhận dạng biển số xe tại khách sạn Hưng Thịnh sử dụng YOLOv8,DTC185290036,Hà Bích Oanh,GV012,"xử lý ảnh, trí tuệ nhân tạo, thị giác máy tính, học máy",7.9
-K18,Phát triển ứng dụng quản lý văn bản đi đến cho sở TT&TT tỉnh Phú Thọ,DTC185290037,Lý Duy Dũng,GV022,"quản trị doanh nghiệp, báo cáo",9.4
-K18,Xây dựng mô hình học sâu chẩn đoán bệnh cây qua ảnh lá cho trang trại Phúc An,DTC185290038,Nguyễn Trung Sơn,GV006,"học sâu, học máy, trí tuệ nhân tạo",7.1
-K18,Nghiên cứu và phát triển hệ thống dự phòng dữ liệu tự động tại công ty TNHH Hoàng Long,DTC185290039,Huỳnh Trung Sơn,GV018,"phát hiện tấn công, xác thực, bảo mật",7.9
-K18,Thiết kế và xây dựng mô hình học máy hỗ trợ gợi ý sản phẩm cho cửa hàng tiện lợi Trường Thịnh trên nền tảng PyTorch,DTC185290040,Vũ Tuấn Toàn,GV012,"dự báo, khai phá dữ liệu",7.5
-K18,Ứng dụng WebRTC trong thi trắc nghiệm trực tuyến cho trường THPT Nguyễn Trãi,DTC185290041,Võ Hữu Bình,GV018,"học trực tuyến, đánh giá",9.1
-K18,Phát triển ứng dụng hỗ trợ học tiếng Anh giao tiếp cho trường THPT Hoàng Văn Thụ,DTC185290042,Đặng Trung Kiên,GV003,"học trực tuyến, đánh giá, e-learning",7.2
-K18,Phát triển hệ thống phân tích lượt khách du lịch tại khách sạn Minh Phát,DTC185290043,Nguyễn Minh Kiên,GV001,"khai phá dữ liệu, phân tích dữ liệu, trực quan hóa",8.1
-K18,Thiết kế và cài đặt hệ thống quản lý bãi đỗ xe thông minh cho bến xe liên tỉnh Bắc Giang,DTC185290044,Lương Đức Sơn,GV013,"vi điều khiển, giám sát từ xa",7.5
-K18,Xây dựng và triển khai bộ điều khiển giám sát ao nuôi thủy sản cho vùng chè Đồng Bẩm,DTC185290045,Bùi Ngọc Trang,GV014,"vi điều khiển, hệ thống nhúng, giám sát từ xa, cảm biến",8.8
-K18,Thiết kế và cài đặt ứng dụng web lưu trữ và tra cứu hồ sơ học sinh tại trung tâm ngoại ngữ Nam Việt,DTC185290046,Đặng Thanh Diệp,GV010,"ứng dụng web, cơ sở dữ liệu",7.1
-K18,Nghiên cứu và phát triển hệ thống quản lý tài sản cố định tại UBND huyện Na Rì sử dụng ERPNext,DTC185290047,Nguyễn Thị Phương,GV002,"quản trị doanh nghiệp, ERP, quản lý",7.2
-K18,Ứng dụng pfSense trong cấu hình tường lửa cho trường trung học cơ sở Ngô Quyền,DTC185290048,Trần Thu Lan,GV011,"xác thực, mã hóa, bảo mật",7.1
-K18,Ứng dụng Node-RED trong đo mực nước sông suối từ xa cho ủy ban nhân dân huyện Phú Bình,DTC185290049,Nông Công Dũng,GV022,"hệ thống nhúng, cảm biến",6.7
-K18,Thiết kế và xây dựng phân hệ ERP chấm công và quản lý ca làm việc cho xưởng cơ khí Việt Tiến trên nền tảng Laravel,DTC185290050,Trần Công Hoàng,GV022,"quy trình nghiệp vụ, báo cáo, quản trị doanh nghiệp, ERP",7.6
-K18,Nghiên cứu và phát triển phân hệ ERP quản lý mua hàng cho DNTN Bắc Sơn,DTC185290051,Lương Phương Trang,GV013,"ERP, báo cáo, quản trị doanh nghiệp, quy trình nghiệp vụ",7.1
-K18,Ứng dụng Kotlin trong học từ vựng tiếng Anh cho trung tâm ngoại ngữ Minh Phát,DTC185290052,Dương Đức Bình,GV019,"Android, iOS, đa nền tảng",8.4
-K18,Nghiên cứu và phát triển phần mềm trực tuyến đặt chỗ lưu trú trực tuyến tại bến xe liên tỉnh Lạng Sơn,DTC185290053,Vũ Hữu Nam,GV010,"RESTful API, ứng dụng web, quản lý",5.9
-K18,Phát triển hệ thống hỗ trợ giảng dạy trực tuyến có tương tác cho trung tâm GDTX Võ Nhai,DTC185290054,Triệu Công Phong,GV002,"e-learning, đánh giá, học trực tuyến",7.8
-K18,Thiết kế và xây dựng ứng dụng phân tích dữ liệu phân tích nhu cầu tuyển dụng tại UBND xã Gia Sàng trên nền tảng Power BI,DTC185290055,Nguyễn Mạnh Sơn,GV010,"khai phá dữ liệu, kho dữ liệu",6.0
-K18,Ứng dụng Swift trong điểm danh sinh viên tại trường mẫu giáo Đồng Bẩm,DTC185290056,Đinh Thu Hà,GV022,"Android, đa nền tảng",6.6
-K18,Ứng dụng NodeJS trong kinh doanh bán lẻ qua mạng cho siêu thị mini Trường Thịnh,DTC185290057,Trần Xuân Thắng,GV005,"giao diện người dùng, RESTful API, ứng dụng web",6.8
-K18,Xây dựng và triển khai ứng dụng Android tìm phòng trọ cho hộ gia đình tại Phú Bình sử dụng Firebase,DTC185290058,Ngô Khánh Châu,GV007,"iOS, ứng dụng di động, thông báo đẩy",8.1
-K18,Xây dựng cổng thông tin tìm kiếm việc làm tại công ty TNHH Tân Tiến sử dụng Laravel,DTC185290059,Huỳnh Thành Hùng,GV013,"RESTful API, ứng dụng web, giao diện người dùng",7.3
-K18,Ứng dụng Spring Boot trong hạch toán thu chi doanh nghiệp cho công ty CP Đại Phát,DTC185290060,Võ Thị Hằng,GV005,"quản trị doanh nghiệp, quy trình nghiệp vụ, quản lý",9.5
-K19,Ứng dụng Odoo trong tính lương và theo dõi hồ sơ nhân viên cho DNTN Tân Tiến,DTC195290001,Lương Thùy Giang,GV018,"ERP, quản lý",9.4
-K19,Thiết kế và cài đặt hệ thống thu ngân và lập hóa đơn bán lẻ tại siêu thị mini Hoàng Long sử dụng SQL Server,DTC195290002,Huỳnh Hồng Diệp,GV008,"báo cáo, quy trình nghiệp vụ, quản lý",5.0
-K19,Nghiên cứu và phát triển bộ điều khiển giám sát nhiệt độ nhà kính tại HTX nông nghiệp Tân Cương,DTC195290003,Bùi Quang Hùng,GV010,"vi điều khiển, hệ thống nhúng, IoT",6.6
-K19,Xây dựng mô hình học sâu dự báo doanh thu bán hàng cho chuỗi cửa hàng Hưng Thịnh,DTC195290004,Hồ Hữu Khánh,GV012,"khai phá dữ liệu, học máy, trí tuệ nhân tạo, dự báo",9.1
-K19,Thiết kế và cài đặt thiết bị IoT hỗ trợ cảnh báo mực nước lũ cho UBND xã Đồng Bẩm,DTC195290005,Vũ Công Quân,GV013,"giám sát từ xa, vi điều khiển",5.4
-K19,Xây dựng và triển khai ứng dụng theo dõi nhập xuất tồn kho cho công ty trách nhiệm hữu hạn Việt Tiến sử dụng Spring Boot,DTC195290006,Dương Đức Quân,GV010,"quản trị doanh nghiệp, ERP, báo cáo, quy trình nghiệp vụ",6.1
-K19,Thiết kế và xây dựng website tuyển sinh trực tuyến cho trường THCS Chu Văn An,DTC195290007,Hoàng Công Dũng,GV020,"giao diện người dùng, cơ sở dữ liệu, RESTful API",8.4
-K19,Phát triển ứng dụng đa nền tảng theo dõi sức khỏe cá nhân tại trung tâm y tế huyện Võ Nhai,DTC195290008,Lê Mạnh Lâm,GV011,"thông báo đẩy, iOS",5.7
-K19,Thiết kế và xây dựng ứng dụng di động đặt và giao đồ ăn cho điểm du lịch Võ Nhai,DTC195290009,Huỳnh Hồng Uyên,GV018,"đa nền tảng, ứng dụng di động",8.3
-K19,Xây dựng và triển khai mô hình hỗ trợ thống kê ca bệnh truyền nhiễm tại trạm y tế xã Đồng Bẩm sử dụng Pandas,DTC195290010,Nguyễn Phương Hoa,GV004,"khai phá dữ liệu, kho dữ liệu, phân tích dữ liệu",7.4
-K19,Xây dựng phân hệ ERP luân chuyển công văn nội bộ cho UBND xã Hóa Thượng,DTC195290011,Phan Minh Huy,GV015,"ERP, báo cáo, quản lý",7.7
-K19,Xây dựng và triển khai website hỗ trợ đăng tải tin bài trên cổng điện tử cho UBND huyện Yên Sơn trên nền tảng ReactJS,DTC195290012,Ngô Mạnh Huy,GV014,"ứng dụng web, RESTful API, cơ sở dữ liệu",5.8
-K19,Thiết kế và xây dựng website đặt phòng khách sạn tại cơ sở lưu trú An Khang trên nền tảng Django,DTC195290013,Đỗ Trung Kiên,GV001,"cơ sở dữ liệu, ứng dụng web, giao diện người dùng, RESTful API",5.0
-K19,Ứng dụng Arduino trong giám sát chuồng trại chăn nuôi cho nông trại Minh Phát,DTC195290014,Hà Đức Sơn,GV012,"hệ thống nhúng, giám sát từ xa, vi điều khiển",6.2
-K19,Phát triển giải pháp IoT đo đếm công suất điện từ xa cho công ty CP Hoàng Long,DTC195290015,Ma Duy Lâm,GV004,"cảm biến, hệ thống nhúng",5.6
-K19,Phát triển hệ thống báo cáo hỗ trợ hiển thị số liệu quản trị trên bảng điều khiển cho DNTN Hoàng Long sử dụng Pandas,DTC195290016,Lương Phương Hà,GV007,"dự báo, trực quan hóa, phân tích dữ liệu, khai phá dữ liệu",7.6
-K19,Ứng dụng Laravel trong theo dõi thiết bị và khấu hao tài sản cho UBND xã Quyết Thắng,DTC195290017,Ngô Công Dũng,GV022,"quản lý, quản trị doanh nghiệp, quy trình nghiệp vụ, báo cáo",5.0
-K19,Phát triển mô hình thống kê sản lượng điện sử dụng tại công ty trách nhiệm hữu hạn Tân Tiến sử dụng Apache Spark,DTC195290018,Lý Ngọc Hoa,GV003,"kho dữ liệu, dự báo, khai phá dữ liệu",9.3
-K19,Xây dựng ứng dụng đa nền tảng đặt xe đưa đón theo yêu cầu cho các gia đình ở Na Rì,DTC195290019,Dương Đức Nam,GV021,"thông báo đẩy, Android, đa nền tảng, iOS",5.3
-K19,Xây dựng ứng dụng Android ghi nhận chuyên cần của người học cho trường mẫu giáo Phúc Xuân,DTC195290020,Đỗ Quang Hải,GV015,"iOS, đa nền tảng, ứng dụng di động, Android",7.4
-K19,Nghiên cứu và phát triển hệ thống rà quét lỗ hổng ứng dụng web cho doanh nghiệp tư nhân An Khang,DTC195290021,Huỳnh Bích Hằng,GV008,"mã hóa, phát hiện tấn công",7.9
-K19,Phát triển website tổ chức lớp học ảo cho trung tâm GDTX Ba Bể,DTC195290022,Lý Ngọc Uyên,GV007,"đánh giá, e-learning, học trực tuyến",7.7
-K19,Phát triển hệ thống đặt hàng nhà cung cấp tại DNTN Thành Công trên nền tảng ERPNext,DTC195290023,Ma Xuân Hùng,GV014,"ERP, báo cáo, quản trị doanh nghiệp, quy trình nghiệp vụ",8.0
-K19,Phát triển thiết bị IoT hỗ trợ cảnh báo cháy sớm tại DNTN An Khang sử dụng Node-RED,DTC195290024,Nông Tuấn Tú,GV021,"IoT, giám sát từ xa, hệ thống nhúng",6.2
-K19,Phát triển giải pháp IoT hỗ trợ giám sát nhiệt độ kho lạnh cho công ty TNHH An Khang sử dụng MQTT,DTC195290025,Nông Xuân Thắng,GV014,"giám sát từ xa, vi điều khiển, hệ thống nhúng",8.3
-K19,Nghiên cứu và phát triển công cụ đăng nhập bằng mật khẩu và mã OTP cho công ty CP Bắc Sơn,DTC195290026,Hồ Bích Nhung,GV005,"mã hóa, an toàn thông tin",5.6
-K19,Ứng dụng Metabase trong phân tích biến động giá nông sản cho trang trại Trường Thịnh,DTC195290027,Nông Phương Anh,GV009,"khai phá dữ liệu, phân tích dữ liệu, dự báo",7.7
-K19,Ứng dụng Django trong tổ chức kiểm tra trắc nghiệm qua mạng cho trung tâm ngoại ngữ Thành Công,DTC195290028,Ma Duy Dũng,GV016,"giáo dục, LMS, học trực tuyến",6.5
-K19,Thiết kế và xây dựng nền tảng hỗ trợ luyện tập lập trình với trình chấm tự động cho trung tâm giáo dục thường xuyên Chợ Mới sử dụng NodeJS,DTC195290029,Bùi Thu Huyền,GV017,"LMS, học trực tuyến, giáo dục, e-learning",8.6
-K19,Xây dựng nền tảng tổ chức lớp học qua mạng tại trung tâm GDTX Chợ Mới,DTC195290030,Phan Thành An,GV011,"giáo dục, LMS, học trực tuyến, e-learning",7.4
-K19,Xây dựng nền tảng hỗ trợ trao đổi thông tin qua sổ liên lạc điện tử cho trường THCS Chu Văn An trên nền tảng Django,DTC195290031,Trần Xuân Sơn,GV006,"học trực tuyến, đánh giá, e-learning, LMS",7.8
-K19,Thiết kế và xây dựng mô hình học sâu hỗ trợ cảnh báo ngã cho người già tại trung tâm y tế huyện Phú Lương sử dụng TensorFlow,DTC195290032,Phạm Thùy Châu,GV016,"học sâu, học máy",6.2
-K19,Thiết kế và cài đặt ứng dụng web bán hàng trực tuyến cho hệ thống cửa hàng Việt Tiến,DTC195290033,Phạm Trung Hùng,GV006,"cơ sở dữ liệu, RESTful API, ứng dụng web",8.3
-K19,Xây dựng và triển khai website khai thác kho học liệu điện tử tại trường trung học phổ thông Nguyễn Huệ,DTC195290034,Lương Hồng Diệp,GV012,"giáo dục, đánh giá, LMS",5.4
-K19,Xây dựng ứng dụng di động kết nối tiêu thụ nông sản tại hợp tác xã nông nghiệp Tân Cương,DTC195290035,Phạm Trung An,GV015,"thông báo đẩy, Android, đa nền tảng",8.5
-K19,Ứng dụng Suricata trong phát hiện mã độc cho công ty trách nhiệm hữu hạn Trường Thịnh,DTC195290036,Võ Duy Tú,GV001,"xác thực, an toàn thông tin, phát hiện tấn công",9.3
-K19,Thiết kế và cài đặt mô hình học máy nhận biết loại rác bằng camera tại ủy ban nhân dân huyện Đại Từ,DTC195290037,Lý Thùy Giang,GV021,"học máy, học sâu, xử lý ảnh",7.9
-K19,Nghiên cứu và phát triển ứng dụng di động đặt lịch khám bệnh tại trạm y tế xã Đồng Bẩm,DTC195290038,Đỗ Ngọc Anh,GV011,"Android, đa nền tảng, iOS",8.0
-K19,Xây dựng và triển khai ứng dụng di động hỗ trợ tiếp nhận kiến nghị của người dân tại ủy ban nhân dân huyện Na Rì trên nền tảng Swift,DTC195290039,Lương Bích Dung,GV006,"Android, iOS, đa nền tảng",8.8
-K19,Ứng dụng Spring Boot trong theo dõi giờ công nhân viên tại xưởng cơ khí Thành Công,DTC195290040,Hồ Ngọc Yến,GV011,"báo cáo, ERP, quản trị doanh nghiệp",6.4
-K19,Xây dựng ứng dụng trí tuệ nhân tạo phát hiện bệnh trên lá cây trồng tại vùng chè Phúc Hà sử dụng OpenCV,DTC195290041,Võ Khánh Hạnh,GV003,"học máy, trí tuệ nhân tạo",7.5
-K19,Thiết kế và cài đặt mô hình thống kê lượng du khách theo mùa tại khu du lịch Phú Bình trên nền tảng Apache Spark,DTC195290042,Hà Thị Lan,GV016,"dự báo, phân tích dữ liệu",5.6
-K19,Thiết kế và xây dựng hệ thống hỗ trợ đo chất lượng nước ao nuôi cá cho trang trại Hoàng Long,DTC195290043,Đinh Văn Đạt,GV002,"cảm biến, IoT, vi điều khiển",7.0
-K19,Nghiên cứu và phát triển công cụ chứng thực tài liệu bằng chữ ký số tại UBND xã Hóa Thượng sử dụng OpenSSL,DTC195290044,Nông Khánh Lan,GV018,"xác thực, bảo mật",8.6
-K19,Xây dựng ứng dụng điện thoại quản lý đơn thuốc và giờ dùng thuốc cho cơ sở khám chữa bệnh đa khoa Hưng Thịnh,DTC195290045,Ngô Thị Hoa,GV004,"iOS, ứng dụng di động, đa nền tảng",7.9
-K19,Xây dựng cổng thông tin quản lý sách và mượn trả tài liệu cho trường trung học cơ sở Nguyễn Trãi,DTC195290046,Ma Tuấn Kiên,GV002,"ứng dụng web, quản lý, giao diện người dùng",9.5
-K19,Phát triển công cụ giám sát và cảnh báo tấn công mạng cho công ty TNHH Tân Tiến,DTC195290047,Hà Quang Hoàng,GV001,"mã hóa, an toàn thông tin, bảo mật",6.4
-K19,Ứng dụng Odoo trong lập kế hoạch và theo dõi đơn hàng sản xuất cho xưởng cơ khí Phúc An,DTC195290048,Hà Thị Anh,GV001,"báo cáo, quản lý",7.3
-K19,Nghiên cứu và phát triển phần mềm trực tuyến giải quyết hồ sơ một cửa điện tử cho sở thông tin và truyền thông tỉnh Lạng Sơn trên nền tảng ReactJS,DTC195290049,Hà Bích Anh,GV004,"quản lý, ứng dụng web, RESTful API",6.2
-K19,Xây dựng ứng dụng Android hỗ trợ giới thiệu điểm tham quan tại khách sạn Bắc Sơn sử dụng Flutter,DTC195290050,Triệu Văn Sơn,GV010,"thông báo đẩy, iOS",5.4
-K19,Thiết kế và xây dựng hệ thống lọc email giả mạo cho công ty TNHH Trường Thịnh sử dụng Wazuh,DTC195290051,Trần Phương Thảo,GV012,"bảo mật, phát hiện tấn công",5.6
-K19,Phát triển nền tảng quản lý ngân hàng câu hỏi tại trường THPT Nguyễn Trãi,DTC195290052,Võ Mạnh Nam,GV019,"giáo dục, đánh giá, LMS, học trực tuyến",9.5
-K19,Ứng dụng Pandas trong cảnh báo sớm người học bỏ học cho trung tâm GDTX Sông Công,DTC195290053,Lê Thu Giang,GV010,"phân tích dữ liệu, trực quan hóa, khai phá dữ liệu, kho dữ liệu",5.2
-K19,Nghiên cứu và phát triển hệ thống IoT hỗ trợ quan trắc chất lượng không khí tại ủy ban nhân dân xã Gia Sàng,DTC195290054,Phạm Hữu Thắng,GV003,"IoT, vi điều khiển, giám sát từ xa",5.2
-K19,Thiết kế và xây dựng bảng điều khiển tích hợp dữ liệu kinh doanh cho chuỗi cửa hàng Nam Việt sử dụng Metabase,DTC195290055,Trần Văn Phong,GV012,"kho dữ liệu, phân tích dữ liệu",9.1
-K19,Nghiên cứu và phát triển website hỗ trợ kết nối nhà tuyển dụng và người tìm việc cho công ty TNHH Phúc An trên nền tảng Spring Boot,DTC195290056,Huỳnh Khánh Linh,GV020,"ứng dụng web, giao diện người dùng, quản lý",5.9
-K19,Phát triển mô hình sao lưu và phục hồi dữ liệu cho doanh nghiệp tư nhân An Khang,DTC195290057,Trần Minh Vinh,GV019,"phát hiện tấn công, bảo mật, an toàn thông tin",9.0
-K19,Xây dựng và triển khai thiết bị IoT điều khiển nhà thông minh cho người dân TP Hòa Bình,DTC195290058,Đỗ Bích Diệp,GV006,"giám sát từ xa, IoT, cảm biến, hệ thống nhúng",7.3
-K19,Xây dựng phân hệ ERP điều phối xe giao hàng cho DNTN Phúc An,DTC195290059,Triệu Hồng Lan,GV008,"quản lý, quản trị doanh nghiệp",8.9
-K19,Ứng dụng PyTorch trong đọc biển kiểm soát phương tiện cho bến xe khách Cao Bằng,DTC195290060,Đặng Mạnh Lâm,GV022,"học máy, trí tuệ nhân tạo, xử lý ảnh",8.1
-K20,Thiết kế và cài đặt hệ thống quản lý vận tải hàng hóa cho công ty trách nhiệm hữu hạn Đại Phát,DTC205290001,Lê Công Hải,GV021,"báo cáo, quy trình nghiệp vụ, ERP",5.3
-K20,Thiết kế và cài đặt phần mềm quản lý nhân sự và tiền lương cho DNTN Việt Tiến trên nền tảng Spring Boot,DTC205290002,Lý Ngọc Loan,GV007,"báo cáo, ERP",6.4
-K20,Phát triển hệ thống hỗ trợ dự phòng dữ liệu tự động cho công ty TNHH Phúc An,DTC205290003,Vũ Thị Hạnh,GV008,"mã hóa, xác thực",6.8
-K20,Ứng dụng Django trong đặt vé xe khách tại nhà hàng Hoàng Long,DTC205290004,Đặng Tuấn Nam,GV011,"RESTful API, cơ sở dữ liệu, quản lý, giao diện người dùng",9.4
-K20,Ứng dụng Firebase trong nhắc lịch uống thuốc tại bệnh viện tuyến tỉnh Lào Cai,DTC205290005,Huỳnh Thu Diệp,GV003,"ứng dụng di động, iOS",8.9
-K20,Thiết kế và xây dựng hệ thống chia sẻ bài giảng video tại trung tâm ngoại ngữ Tân Tiến sử dụng Django,DTC205290006,Hồ Thu Quỳnh,GV006,"giáo dục, đánh giá",7.5
-K20,Xây dựng ứng dụng điện thoại ghi nhận chỉ số sức khỏe hằng ngày tại trung tâm y tế huyện Định Hóa,DTC205290007,Nông Ngọc Giang,GV020,"Android, thông báo đẩy, đa nền tảng, ứng dụng di động",9.3
-K20,Thiết kế và cài đặt ứng dụng quản lý khóa học trực tuyến cho trường mầm non Đồng Bẩm trên nền tảng ReactJS,DTC205290008,Đinh Xuân Lâm,GV020,"đánh giá, học trực tuyến, giáo dục, LMS",8.1
-K20,Ứng dụng ESP32 trong điều khiển tưới tiêu thông minh tại vùng trồng chè Cam Giá,DTC205290009,Hoàng Mai Quỳnh,GV006,"giám sát từ xa, cảm biến",8.1
-K20,Xây dựng cổng thông tin đặt chỗ lưu trú trực tuyến tại bến xe liên tỉnh Bắc Giang,DTC205290010,Nông Hữu Kiên,GV020,"RESTful API, ứng dụng web, giao diện người dùng",5.7
-K20,Thiết kế và cài đặt hệ thống thi trắc nghiệm trực tuyến cho trường THPT Nguyễn Huệ sử dụng ReactJS,DTC205290011,Bùi Thu Oanh,GV005,"học trực tuyến, e-learning, LMS, giáo dục",8.3
-K20,Thiết kế và cài đặt bộ điều khiển theo dõi hành trình xe bằng GPS cho công ty CP Hưng Thịnh,DTC205290012,Triệu Xuân Toàn,GV010,"giám sát từ xa, IoT",6.5
-K20,Xây dựng nền tảng luyện thi tốt nghiệp THPT cho trường THCS Quang Trung,DTC205290013,Nguyễn Thùy Lan,GV020,"e-learning, LMS, học trực tuyến, giáo dục",5.3
-K20,Thiết kế và xây dựng công cụ thiết lập kênh truyền bảo mật giữa các văn phòng cho công ty TNHH Thành Công trên nền tảng OpenSSL,DTC205290014,Triệu Quang Lâm,GV008,"phát hiện tấn công, xác thực",8.0
-K20,Ứng dụng Apache Spark trong dự đoán nguy cơ thôi học cho trường THCS Quang Trung,DTC205290015,Lê Duy Phong,GV008,"khai phá dữ liệu, trực quan hóa",7.8
-K20,Nghiên cứu và phát triển bộ điều khiển hướng dẫn chỗ đỗ xe còn trống tại bến xe khách Hà Giang,DTC205290016,Lý Xuân Hoàng,GV013,"IoT, vi điều khiển",6.2
-K20,Thiết kế và xây dựng hệ thống giải đáp thắc mắc tuyển sinh qua trợ lý ảo cho trung tâm đào tạo ngoại ngữ Minh Phát trên nền tảng PhoBERT,DTC205290017,Vũ Phương Diệp,GV005,"học sâu, học máy, xử lý ngôn ngữ tự nhiên, trí tuệ nhân tạo",7.1
-K20,Xây dựng và triển khai hệ thống IoT đo mực nước sông suối từ xa cho UBND xã Tân Cương,DTC205290018,Dương Thu Phương,GV017,"giám sát từ xa, IoT, vi điều khiển, cảm biến",6.0
-K20,Xây dựng hệ thống ôn tập bằng thẻ ghi nhớ tại trường THPT Lý Tự Trọng,DTC205290019,Lê Bích Loan,GV016,"giáo dục, học trực tuyến",7.4
-K20,Thiết kế và xây dựng nền tảng lập lịch giảng dạy tự động cho trường trung học cơ sở Lê Hồng Phong,DTC205290020,Hồ Đức Hải,GV003,"LMS, học trực tuyến, giáo dục",6.0
-K20,Phát triển mô hình học sâu hỗ trợ phân loại ý kiến khách hàng theo sắc thái tại siêu thị mini Thành Công,DTC205290021,Lương Thanh Hoa,GV007,"học sâu, học máy",7.1
-K20,Ứng dụng PyTorch trong chuyển ảnh chữ viết tay thành văn bản cho trung tâm GDTX Võ Nhai,DTC205290022,Ma Khánh Trang,GV021,"học máy, thị giác máy tính, xử lý ảnh",7.5
-K20,Xây dựng ứng dụng web đặt sân thể thao cho bến xe khách Cao Bằng sử dụng Spring Boot,DTC205290023,Phạm Thị Loan,GV004,"giao diện người dùng, RESTful API, cơ sở dữ liệu, ứng dụng web",5.4
-K20,Phát triển hệ thống phân loại rác thải qua hình ảnh cho UBND xã Phúc Xuân sử dụng OpenCV,DTC205290024,Nguyễn Đức Phong,GV021,"xử lý ảnh, thị giác máy tính, học sâu",5.0
-K20,Xây dựng và triển khai ứng dụng biên soạn đề thi từ kho câu hỏi tại trung tâm GDTX Ba Bể,DTC205290025,Hồ Minh Toàn,GV001,"học trực tuyến, giáo dục, LMS",7.1
-K20,Phát triển bảng điều khiển hỗ trợ phân tích hành vi mua sắm cho chuỗi cửa hàng Thành Công,DTC205290026,Nông Duy Sơn,GV017,"phân tích dữ liệu, trực quan hóa",7.6
-K20,Xây dựng hệ thống phân tích kết quả học tập tại trường trung học phổ thông Nguyễn Trãi,DTC205290027,Triệu Ngọc Yến,GV016,"trực quan hóa, khai phá dữ liệu, dự báo",8.3
-K20,Xây dựng ứng dụng quản lý mua hàng tại công ty cổ phần An Khang trên nền tảng Spring Boot,DTC205290028,Ma Phương Hạnh,GV002,"quản lý, quản trị doanh nghiệp, ERP",7.9
-K20,Ứng dụng Swift trong mua bán nông sản trực tiếp tại nông trại Bắc Sơn,DTC205290029,Hồ Thanh Châu,GV016,"ứng dụng di động, đa nền tảng",8.6
-K20,Thiết kế và cài đặt bộ điều khiển tự động hóa thiết bị gia đình cho cư dân thành phố Bắc Giang trên nền tảng Raspberry Pi,DTC205290030,Hà Thanh Giang,GV001,"cảm biến, hệ thống nhúng",5.3
-K20,Ứng dụng Spring Boot trong quản lý tin tức cho UBND huyện Võ Nhai,DTC205290031,Phạm Thùy Hạnh,GV021,"giao diện người dùng, ứng dụng web, cơ sở dữ liệu",6.8
-K20,Xây dựng ứng dụng điện thoại hẹn giờ khám chữa bệnh tại bệnh viện tuyến tỉnh Thái Nguyên,DTC205290032,Đặng Mạnh Quân,GV018,"ứng dụng di động, iOS",5.5
-K20,Thiết kế và xây dựng ứng dụng trí tuệ nhân tạo hỗ trợ chấm công qua khuôn mặt tại trường trung học phổ thông Lý Tự Trọng,DTC205290033,Lê Quang Hùng,GV021,"thị giác máy tính, học sâu",6.3
-K20,Nghiên cứu và phát triển ứng dụng Android theo dõi thu chi cá nhân cho người thuê trọ tại Na Rì,DTC205290034,Đinh Văn Tú,GV021,"đa nền tảng, iOS",6.5
-K20,Xây dựng nền tảng hỗ trợ luyện nói tiếng Anh trực tuyến cho trung tâm GDTX Na Rì,DTC205290035,Đinh Thùy Ngân,GV020,"đánh giá, e-learning, giáo dục",8.3
-K20,Phát triển ứng dụng điện thoại gọi món giao tận nơi tại bến xe liên tỉnh Phú Thọ sử dụng React Native,DTC205290036,Đặng Thu Nhung,GV004,"đa nền tảng, thông báo đẩy",8.1
-K20,Nghiên cứu và phát triển thiết bị IoT giám sát điện năng tiêu thụ cho doanh nghiệp tư nhân Thành Công,DTC205290037,Hoàng Thị Yến,GV018,"vi điều khiển, hệ thống nhúng",8.8
-K20,Ứng dụng SQL Server trong quản lý kế toán tại công ty CP Hoàng Long,DTC205290038,Ngô Khánh Hà,GV007,"ERP, quản lý",8.9
-K20,Thiết kế và cài đặt ứng dụng học lập trình có chấm bài tự động tại trung tâm ngoại ngữ Trường Thịnh,DTC205290039,Bùi Văn Lâm,GV006,"giáo dục, e-learning, học trực tuyến",6.8
-K20,Xây dựng và triển khai giải pháp thiết lập bộ lọc lưu lượng mạng tại trung tâm GDTX Phú Lương,DTC205290040,Hoàng Hữu Thắng,GV010,"bảo mật, an toàn thông tin, xác thực, phát hiện tấn công",8.6
-K20,Xây dựng và triển khai ứng dụng Android ghi nhớ từ mới tiếng Anh tại trường THCS Lê Hồng Phong sử dụng Firebase,DTC205290041,Trần Xuân Huy,GV002,"iOS, đa nền tảng, Android",7.9
-K20,Ứng dụng Apache Airflow trong phân tích dữ liệu tiêu thụ điện tại DNTN An Khang,DTC205290042,Nguyễn Công Hải,GV012,"kho dữ liệu, phân tích dữ liệu, trực quan hóa",8.9
-K20,Phát triển công cụ tập trung hóa log máy chủ cho doanh nghiệp tư nhân Trường Thịnh,DTC205290043,Ngô Hồng Thảo,GV019,"phát hiện tấn công, bảo mật",7.8
-K20,Thiết kế và cài đặt ứng dụng phân tích dữ liệu nhận diện khách hàng có nguy cơ ngừng dùng dịch vụ cho doanh nghiệp tư nhân An Khang,DTC205290044,Ma Mai Uyên,GV003,"dự báo, khai phá dữ liệu",8.2
-K20,Phát triển phân hệ ERP quản lý quan hệ khách hàng tại công ty CP An Khang,DTC205290045,Đinh Văn Hùng,GV013,"quy trình nghiệp vụ, quản lý, ERP, báo cáo",9.1
-K20,Nghiên cứu và phát triển hệ thống hỗ trợ quản lý nhà thuốc tại trung tâm y tế huyện Sông Công,DTC205290046,Hà Mạnh Hải,GV009,"quy trình nghiệp vụ, quản lý, ERP",9.5
-K20,Xây dựng bảng điều khiển tổng hợp dữ liệu bán hàng cho siêu thị mini Minh Phát trên nền tảng Apache Airflow,DTC205290047,Huỳnh Phương Lan,GV013,"khai phá dữ liệu, trực quan hóa, phân tích dữ liệu",9.2
-K20,Xây dựng ứng dụng quản lý sản xuất cho xưởng may An Khang trên nền tảng SQL Server,DTC205290048,Hồ Phương Giang,GV020,"quy trình nghiệp vụ, quản lý, báo cáo, ERP",8.2
-K20,Xây dựng ứng dụng web tìm kiếm việc làm tại công ty CP An Khang,DTC205290049,Hà Mạnh Hoàng,GV020,"quản lý, giao diện người dùng, RESTful API, cơ sở dữ liệu",9.2
-K20,Phát triển công cụ hỗ trợ phát hiện thư điện tử lừa đảo tại DNTN Thành Công trên nền tảng Wazuh,DTC205290050,Đỗ Thị Hoa,GV007,"phát hiện tấn công, xác thực",6.7
-K20,Xây dựng và triển khai hệ thống thông tin kinh doanh bán lẻ qua mạng tại cửa hàng tiện lợi Phúc An,DTC205290051,Đặng Bích Châu,GV015,"RESTful API, ứng dụng web, giao diện người dùng",7.1
-K20,Xây dựng ứng dụng di động hỗ trợ hướng dẫn du lịch cho bến xe khách Thái Nguyên,DTC205290052,Hoàng Công Dũng,GV005,"thông báo đẩy, ứng dụng di động, đa nền tảng, Android",6.9
-K20,Thiết kế và cài đặt hệ thống hỗ trợ quản lý kho hàng tại công ty cổ phần Nam Việt trên nền tảng ERPNext,DTC205290053,Phạm Quang Tú,GV013,"quy trình nghiệp vụ, ERP",7.2
-K20,Xây dựng mô hình học sâu đề xuất mặt hàng theo sở thích tại siêu thị mini Hoàng Long,DTC205290054,Vũ Đức Tú,GV013,"khai phá dữ liệu, học máy, dự báo",9.3
-K20,Ứng dụng Django trong đặt bàn nhà hàng tại khu du lịch Na Rì,DTC205290055,Hoàng Khánh Loan,GV012,"cơ sở dữ liệu, ứng dụng web, quản lý, RESTful API",7.5
-K20,Phát triển công cụ phát hiện té ngã ở người cao tuổi tại trạm y tế xã Phúc Hà,DTC205290056,Lương Minh Bình,GV007,"học máy, thị giác máy tính, học sâu, trí tuệ nhân tạo",9.2
-K20,Xây dựng và triển khai giải pháp quản lý định danh và phân quyền truy cập tại công ty cổ phần Tân Tiến trên nền tảng Keycloak,DTC205290057,Ma Phương Yến,GV022,"mã hóa, bảo mật, phát hiện tấn công, an toàn thông tin",7.3
-K20,Ứng dụng VueJS trong mua bán nhà đất qua tin đăng cho công ty TNHH Trường Thịnh,DTC205290058,Trần Văn Lâm,GV022,"RESTful API, cơ sở dữ liệu, ứng dụng web",8.6
-K20,Nghiên cứu và phát triển ứng dụng đa nền tảng hỗ trợ gọi xe công nghệ cho cư dân thành phố Hà Giang,DTC205290059,Hồ Ngọc Uyên,GV011,"Android, thông báo đẩy, ứng dụng di động, đa nền tảng",9.0
-K20,Nghiên cứu và phát triển hệ thống thống kê vụ va chạm giao thông tại UBND huyện Yên Sơn,DTC205290060,Hồ Thanh Anh,GV022,"khai phá dữ liệu, phân tích dữ liệu, dự báo, trực quan hóa",8.5
+K18,Ứng dụng pfSense trong cấu hình tường lửa cho trường trung học cơ sở Ngô Quyền,DTC185290001,Phan Bích Giang,GV001,"an toàn thông tin, mã hóa",6.5
+K18,Thiết kế và xây dựng mô hình học máy ước lượng doanh số theo thời gian cho siêu thị mini Đại Phát,DTC185290002,Đinh Khánh Hằng,GV004,"trí tuệ nhân tạo, học máy, dự báo",6.3
+K18,Nghiên cứu và phát triển hệ thống hỗ trợ đo chất lượng nước ao nuôi cá tại HTX nông nghiệp Hóa Thượng,DTC185290003,Bùi Hữu Huy,GV009,"IoT, giám sát từ xa, cảm biến",8.8
+K18,Thiết kế và xây dựng ứng dụng điện thoại hỗ trợ hẹn giờ khám chữa bệnh tại trạm y tế xã Cam Giá trên nền tảng React Native,DTC185290004,Võ Văn Hùng,GV015,"iOS, Android, ứng dụng di động",5.4
+K18,Phát triển mô hình học sâu hỗ trợ phân tích cảm xúc bình luận cho siêu thị quy mô nhỏ Minh Phát,DTC185290005,Nông Bích Yến,GV022,"xử lý ngôn ngữ tự nhiên, học máy",7.1
+K18,Xây dựng và triển khai phần mềm trực tuyến quản lý tin tức cho UBND huyện Sông Công,DTC185290006,Triệu Thanh Lan,GV013,"giao diện người dùng, cơ sở dữ liệu, quản lý",5.2
+K18,Ứng dụng Wazuh trong thu thập và phân tích nhật ký hệ thống tại công ty CP Hưng Thịnh,DTC185290007,Đặng Minh Dũng,GV006,"bảo mật, xác thực, an toàn thông tin, phát hiện tấn công",6.6
+K18,Ứng dụng TensorFlow trong chấm công qua khuôn mặt cho trường trung học phổ thông Lê Hồng Phong,DTC185290008,Phan Khánh Uyên,GV022,"trí tuệ nhân tạo, xử lý ảnh, thị giác máy tính",5.2
+K18,Phát triển thiết bị IoT phát hiện khói và nhiệt bất thường cho công ty trách nhiệm hữu hạn Nam Việt sử dụng MQTT,DTC185290009,Lý Tuấn Hùng,GV001,"giám sát từ xa, vi điều khiển, hệ thống nhúng",6.7
+K18,Thiết kế và cài đặt hệ thống hỗ trợ dự đoán khách hàng rời bỏ tại công ty CP Phúc An,DTC185290010,Lý Mạnh Kiên,GV003,"khai phá dữ liệu, phân tích dữ liệu, trực quan hóa",9.1
+K18,Nghiên cứu và phát triển hệ thống báo cáo phân tích số liệu dịch bệnh tại trạm y tế cấp xã Sơn Cẩm trên nền tảng Power BI,DTC185290011,Bùi Khánh Lan,GV022,"khai phá dữ liệu, trực quan hóa",5.0
+K18,Thiết kế và cài đặt giải pháp mã hóa dữ liệu lưu trữ tại DNTN Phúc An trên nền tảng OpenSSL,DTC185290012,Ngô Ngọc Dung,GV010,"an toàn thông tin, xác thực, bảo mật",7.6
+K18,Thiết kế và cài đặt hệ thống tưới cây tự động tại hợp tác xã nông nghiệp Quyết Thắng,DTC185290013,Phan Thành Sơn,GV017,"vi điều khiển, giám sát từ xa, cảm biến, IoT",5.3
+K18,Xây dựng và triển khai website chia sẻ học liệu số cho trường trung học phổ thông Hoàng Văn Thụ,DTC185290014,Võ Duy Hiếu,GV001,"đánh giá, giáo dục",5.7
+K18,Xây dựng và triển khai cổng thông tin quản lý thư viện cho trường cao đẳng nghề Hà Giang sử dụng NodeJS,DTC185290015,Hồ Hồng Uyên,GV010,"ứng dụng web, giao diện người dùng, quản lý, RESTful API",7.4
+K18,Nghiên cứu và phát triển phần mềm trực tuyến tiếp nhận hồ sơ xét tuyển qua mạng tại trường CĐ nghề Bắc Giang sử dụng VueJS,DTC185290016,Hoàng Tuấn Phong,GV019,"RESTful API, cơ sở dữ liệu, giao diện người dùng, quản lý",7.9
+K18,Phát triển hệ thống kết nối nhà trường với phụ huynh cho trường THCS Nguyễn Trãi trên nền tảng NodeJS,DTC185290017,Nông Ngọc Anh,GV013,"LMS, giáo dục, học trực tuyến",8.8
+K18,Xây dựng ứng dụng web đăng tin rao vặt bất động sản cho công ty TNHH Nam Việt,DTC185290018,Triệu Hồng Hà,GV008,"RESTful API, giao diện người dùng",8.4
+K18,Xây dựng và triển khai ứng dụng trí tuệ nhân tạo nhận dạng biển số xe tại bến xe khách Lạng Sơn sử dụng YOLOv8,DTC185290019,Huỳnh Công Sơn,GV020,"học máy, trí tuệ nhân tạo, học sâu",7.0
+K18,Xây dựng và triển khai hệ thống kiểm thử bảo mật website cho công ty TNHH Thành Công trên nền tảng OpenVAS,DTC185290020,Nguyễn Phương Phương,GV002,"xác thực, bảo mật, an toàn thông tin, mã hóa",7.4
+K18,Nghiên cứu và phát triển bộ điều khiển đo bụi mịn và khí thải môi trường tại sở TT&TT tỉnh Cao Bằng,DTC185290021,Ma Thị Diệp,GV003,"cảm biến, vi điều khiển",7.2
+K18,Nghiên cứu và phát triển ứng dụng di động hỗ trợ gọi xe công nghệ cho người thuê trọ tại Đại Từ,DTC185290022,Nguyễn Thành Vinh,GV010,"Android, ứng dụng di động, đa nền tảng",8.0
+K18,Nghiên cứu và phát triển hệ thống hỗ trợ giảng dạy trực tuyến có tương tác tại trung tâm ngoại ngữ Tân Tiến sử dụng Moodle,DTC185290023,Nông Hữu Quân,GV003,"e-learning, học trực tuyến, đánh giá, giáo dục",7.1
+K18,Thiết kế và xây dựng phần mềm quản lý quan hệ khách hàng cho công ty TNHH Việt Tiến sử dụng Spring Boot,DTC185290024,Đinh Trung Vinh,GV008,"quản trị doanh nghiệp, quy trình nghiệp vụ, quản lý",8.9
+K18,Ứng dụng YOLOv8 trong hỗ trợ chẩn đoán ảnh X-quang phổi cho bệnh viện đa khoa tỉnh Hà Giang,DTC185290025,Phan Công Hải,GV003,"học máy, thị giác máy tính",8.5
+K18,Nghiên cứu và phát triển mô hình học máy hỗ trợ tóm tắt văn bản tiếng Việt cho ủy ban nhân dân xã Phúc Hà,DTC185290026,Ma Ngọc Hằng,GV017,"xử lý ngôn ngữ tự nhiên, học sâu",7.3
+K18,Nghiên cứu và phát triển hệ thống dự phòng dữ liệu tự động tại công ty TNHH Hoàng Long,DTC185290027,Ma Hữu Hùng,GV021,"phát hiện tấn công, bảo mật, xác thực",5.5
+K18,Nghiên cứu và phát triển mô hình học máy giải đáp thắc mắc tuyển sinh qua trợ lý ảo cho trường THPT Lê Quý Đôn,DTC185290028,Dương Khánh Linh,GV004,"xử lý ngôn ngữ tự nhiên, trí tuệ nhân tạo, học máy, học sâu",7.7
+K18,Xây dựng và triển khai nền tảng thi trắc nghiệm trực tuyến cho trung tâm GDTX Phú Lương,DTC185290029,Huỳnh Quang An,GV020,"giáo dục, LMS, đánh giá",8.2
+K18,Ứng dụng ERPNext trong quản lý mua hàng cho công ty TNHH Việt Tiến,DTC185290030,Hồ Tuấn Khánh,GV005,"quản lý, quy trình nghiệp vụ, báo cáo, ERP",8.6
+K18,Nghiên cứu và phát triển hệ thống IoT theo dõi vi khí hậu trong nhà màng cho trang trại An Khang sử dụng Node-RED,DTC185290031,Hoàng Phương Phương,GV020,"cảm biến, IoT, vi điều khiển, hệ thống nhúng",8.2
+K18,Thiết kế và cài đặt ứng dụng web lưu trữ và tra cứu hồ sơ học sinh tại trung tâm ngoại ngữ Nam Việt,DTC185290032,Võ Bích Anh,GV018,"RESTful API, ứng dụng web, giao diện người dùng",8.2
+K18,Ứng dụng Node-RED trong đo mực nước sông suối từ xa cho ủy ban nhân dân huyện Phú Bình,DTC185290033,Hồ Phương Anh,GV019,"vi điều khiển, giám sát từ xa, hệ thống nhúng, cảm biến",7.8
+K18,Thiết kế và xây dựng hệ thống quản lý nhân sự và tiền lương cho công ty cổ phần Tân Tiến,DTC185290034,Đinh Công Long,GV019,"quản trị doanh nghiệp, ERP, quản lý, quy trình nghiệp vụ",8.1
+K18,Nghiên cứu và phát triển hệ thống hỗ trợ ôn tập thi trung học phổ thông tại trường CĐ nghề Tuyên Quang,DTC185290035,Võ Thị Châu,GV011,"giáo dục, e-learning, LMS, học trực tuyến",6.7
+K18,Thiết kế và cài đặt ứng dụng quản lý kế toán cho công ty TNHH Đại Phát,DTC185290036,Huỳnh Mai Yến,GV001,"ERP, quy trình nghiệp vụ, báo cáo, quản trị doanh nghiệp",6.7
+K18,Ứng dụng SQL Server trong điều phối xe giao hàng cho công ty CP Đại Phát,DTC185290037,Hà Bích Oanh,GV012,"quản lý, quy trình nghiệp vụ, báo cáo, ERP",7.9
+K18,Nghiên cứu và phát triển phân hệ ERP theo dõi thiết bị và khấu hao tài sản tại sở thông tin và truyền thông tỉnh Lạng Sơn,DTC185290038,Lý Duy Dũng,GV022,"quản trị doanh nghiệp, báo cáo",9.4
+K18,Ứng dụng SQL Server trong theo dõi giờ công nhân viên cho KCN Võ Nhai,DTC185290039,Nguyễn Trung Sơn,GV006,"quản trị doanh nghiệp, ERP, quy trình nghiệp vụ",7.1
+K18,Xây dựng và triển khai ứng dụng Android tìm phòng trọ cho hộ gia đình tại Phú Bình sử dụng Firebase,DTC185290040,Huỳnh Trung Sơn,GV018,"đa nền tảng, thông báo đẩy, Android",7.9
+K18,Xây dựng cổng thông tin tìm kiếm việc làm tại công ty TNHH Tân Tiến sử dụng Laravel,DTC185290041,Vũ Tuấn Toàn,GV012,"quản lý, giao diện người dùng",7.5
+K18,Xây dựng thiết bị IoT quản lý bãi đỗ xe thông minh cho doanh nghiệp vận tải Phúc An trên nền tảng ESP32,DTC185290042,Võ Hữu Bình,GV018,"cảm biến, giám sát từ xa",9.1
+K18,Thiết kế và xây dựng mô hình tổng hợp dữ liệu bán hàng tại siêu thị mini Thành Công,DTC185290043,Đặng Trung Kiên,GV003,"khai phá dữ liệu, kho dữ liệu, phân tích dữ liệu",7.2
+K18,Phát triển ứng dụng quản lý bán hàng tại quầy cho cửa hàng tiện lợi Phúc An trên nền tảng ERPNext,DTC185290044,Nguyễn Minh Kiên,GV001,"quản trị doanh nghiệp, ERP, quản lý",8.1
+K18,Ứng dụng Kotlin trong học từ vựng tiếng Anh cho trung tâm ngoại ngữ Minh Phát,DTC185290045,Lương Đức Sơn,GV013,"iOS, đa nền tảng",7.5
+K18,Thiết kế và xây dựng công cụ hỗ trợ nhận diện phần mềm độc hại cho công ty trách nhiệm hữu hạn Phúc An trên nền tảng Wazuh,DTC185290046,Bùi Ngọc Trang,GV014,"mã hóa, xác thực, phát hiện tấn công, bảo mật",8.8
+K18,Ứng dụng Swift trong điểm danh sinh viên tại trường cao đẳng nghề Hà Giang,DTC185290047,Đặng Thanh Diệp,GV010,"ứng dụng di động, iOS",7.1
+K18,Thiết kế và cài đặt ứng dụng xếp thời khóa biểu tại trường trung học cơ sở Trần Phú trên nền tảng ReactJS,DTC185290048,Nguyễn Thị Phương,GV002,"học trực tuyến, e-learning, giáo dục",7.2
+K18,Phát triển ứng dụng điện thoại phản ánh hiện trường đô thị tại sở TT&TT tỉnh Phú Thọ trên nền tảng Firebase,DTC185290049,Trần Thu Lan,GV011,"thông báo đẩy, iOS, Android",7.1
+K18,Ứng dụng NodeJS trong kinh doanh bán lẻ qua mạng cho siêu thị mini Trường Thịnh,DTC185290050,Nông Công Dũng,GV022,"RESTful API, quản lý",6.7
+K18,Xây dựng ứng dụng luân chuyển công văn nội bộ tại ủy ban nhân dân huyện Phú Lương trên nền tảng SQL Server,DTC185290051,Trần Công Hoàng,GV022,"quy trình nghiệp vụ, báo cáo, quản trị doanh nghiệp, ERP",7.6
+K18,Thiết kế và xây dựng ứng dụng phân tích dữ liệu phân tích nhu cầu tuyển dụng tại UBND xã Gia Sàng trên nền tảng Power BI,DTC185290052,Lương Phương Trang,GV013,"phân tích dữ liệu, kho dữ liệu, khai phá dữ liệu, dự báo",7.1
+K18,Ứng dụng Kotlin trong hướng dẫn du lịch cho cơ sở lưu trú Tân Tiến,DTC185290053,Dương Đức Bình,GV019,"Android, iOS, đa nền tảng",8.4
+K18,Thiết kế và xây dựng thiết bị IoT theo dõi môi trường chuồng nuôi cho trang trại Hưng Thịnh sử dụng ESP32,DTC185290054,Vũ Hữu Nam,GV010,"hệ thống nhúng, IoT, cảm biến",5.9
+K18,Thiết kế và xây dựng mô hình học máy hỗ trợ gợi ý sản phẩm cho cửa hàng tiện lợi Trường Thịnh trên nền tảng PyTorch,DTC185290055,Triệu Công Phong,GV002,"học máy, dự báo, khai phá dữ liệu",7.8
+K18,Nghiên cứu và phát triển ứng dụng web đặt chỗ lưu trú trực tuyến tại khu du lịch Võ Nhai,DTC185290056,Nguyễn Mạnh Sơn,GV010,"quản lý, giao diện người dùng",6.0
+K18,Thiết kế và cài đặt hệ thống quản lý khóa học trực tuyến cho trường THPT Nguyễn Huệ sử dụng NodeJS,DTC185290057,Đinh Thu Hà,GV022,"học trực tuyến, đánh giá",6.6
+K18,Phát triển hệ thống phân tích lượt khách du lịch tại khách sạn Minh Phát,DTC185290058,Trần Xuân Thắng,GV005,"kho dữ liệu, dự báo, phân tích dữ liệu",6.8
+K18,Phát triển nền tảng hỗ trợ học tiếng Anh giao tiếp cho trường THCS Ngô Quyền,DTC185290059,Ngô Khánh Châu,GV007,"giáo dục, e-learning, LMS",8.1
+K18,Xây dựng mô hình học sâu chẩn đoán bệnh cây qua ảnh lá cho trang trại Phúc An,DTC185290060,Huỳnh Thành Hùng,GV013,"trí tuệ nhân tạo, học máy, thị giác máy tính",7.3
+K19,Nghiên cứu và phát triển hệ thống rà quét lỗ hổng ứng dụng web cho doanh nghiệp tư nhân An Khang,DTC195290001,Nguyễn Thanh Thảo,GV016,"xác thực, phát hiện tấn công, mã hóa",7.2
+K19,Ứng dụng Suricata trong phát hiện mã độc cho công ty trách nhiệm hữu hạn Trường Thịnh,DTC195290002,Lương Thùy Giang,GV018,"bảo mật, an toàn thông tin, phát hiện tấn công, xác thực",9.4
+K19,Phát triển thiết bị IoT hỗ trợ cảnh báo cháy sớm tại DNTN An Khang sử dụng Node-RED,DTC195290003,Huỳnh Hồng Diệp,GV008,"giám sát từ xa, hệ thống nhúng, vi điều khiển",5.0
+K19,Phát triển hệ thống hỗ trợ hiển thị số liệu quản trị trên bảng điều khiển cho DNTN Hoàng Long sử dụng Pandas,DTC195290004,Bùi Quang Hùng,GV010,"trực quan hóa, dự báo, phân tích dữ liệu",6.6
+K19,Thiết kế và cài đặt ứng dụng trao đổi thông tin qua sổ liên lạc điện tử tại trung tâm GDTX Võ Nhai sử dụng ReactJS,DTC195290005,Hồ Hữu Khánh,GV012,"giáo dục, e-learning, đánh giá, LMS",9.1
+K19,Thiết kế và xây dựng hệ thống lọc email giả mạo cho công ty TNHH Trường Thịnh sử dụng Wazuh,DTC195290006,Vũ Công Quân,GV013,"phát hiện tấn công, mã hóa",5.4
+K19,Thiết kế và cài đặt mô hình học máy nhận biết loại rác bằng camera tại ủy ban nhân dân huyện Đại Từ,DTC195290007,Dương Đức Quân,GV010,"học sâu, học máy, thị giác máy tính, trí tuệ nhân tạo",6.1
+K19,Xây dựng và triển khai website hỗ trợ đăng tải tin bài trên cổng điện tử cho UBND huyện Yên Sơn trên nền tảng ReactJS,DTC195290008,Hoàng Công Dũng,GV020,"giao diện người dùng, cơ sở dữ liệu, RESTful API",8.4
+K19,Nghiên cứu và phát triển công cụ chứng thực tài liệu bằng chữ ký số tại UBND xã Hóa Thượng sử dụng OpenSSL,DTC195290009,Lê Mạnh Lâm,GV011,"xác thực, mã hóa",5.7
+K19,Phát triển mô hình thống kê sản lượng điện sử dụng tại công ty trách nhiệm hữu hạn Tân Tiến sử dụng Apache Spark,DTC195290010,Huỳnh Hồng Uyên,GV018,"kho dữ liệu, phân tích dữ liệu",8.3
+K19,Ứng dụng Metabase trong phân tích biến động giá nông sản cho trang trại Trường Thịnh,DTC195290011,Nguyễn Phương Hoa,GV004,"khai phá dữ liệu, kho dữ liệu, phân tích dữ liệu",7.4
+K19,Phát triển công cụ giám sát và cảnh báo tấn công mạng cho công ty TNHH Tân Tiến,DTC195290012,Phan Minh Huy,GV015,"an toàn thông tin, phát hiện tấn công, mã hóa",7.7
+K19,Ứng dụng Arduino trong giám sát chuồng trại chăn nuôi cho nông trại Minh Phát,DTC195290013,Ngô Mạnh Huy,GV014,"IoT, hệ thống nhúng, vi điều khiển",5.8
+K19,Thiết kế và cài đặt nền tảng hỗ trợ luyện tập lập trình với trình chấm tự động cho trường trung học phổ thông Lê Hồng Phong,DTC195290014,Đỗ Trung Kiên,GV001,"giáo dục, e-learning, đánh giá, LMS",5.0
+K19,Ứng dụng Django trong đặt phòng khách sạn tại cơ sở lưu trú Phúc An,DTC195290015,Hà Đức Sơn,GV012,"RESTful API, giao diện người dùng, cơ sở dữ liệu",6.2
+K19,Xây dựng ứng dụng di động kết nối tiêu thụ nông sản tại hợp tác xã nông nghiệp Tân Cương,DTC195290016,Ma Duy Lâm,GV004,"Android, thông báo đẩy",5.6
+K19,Xây dựng nền tảng tổ chức lớp học ảo tại trung tâm GDTX Chợ Mới,DTC195290017,Lương Phương Hà,GV007,"LMS, giáo dục, e-learning, học trực tuyến",7.6
+K19,Thiết kế và cài đặt ứng dụng web bán hàng trực tuyến cho hệ thống cửa hàng Việt Tiến,DTC195290018,Ngô Công Dũng,GV022,"cơ sở dữ liệu, quản lý, RESTful API, giao diện người dùng",5.0
+K19,Xây dựng ứng dụng Android ghi nhận chuyên cần của người học cho trường cao đẳng nghề Vĩnh Phúc sử dụng Kotlin,DTC195290019,Lý Ngọc Hoa,GV003,"đa nền tảng, thông báo đẩy, Android",9.3
+K19,Thiết kế và cài đặt mô hình thống kê lượng du khách theo mùa tại trung tâm thể thao Thành Công trên nền tảng Apache Spark,DTC195290020,Dương Đức Nam,GV021,"dự báo, khai phá dữ liệu, kho dữ liệu, trực quan hóa",5.3
+K19,Thiết kế và cài đặt hệ thống tổ chức kiểm tra trắc nghiệm qua mạng cho trường trung học cơ sở Quang Trung,DTC195290021,Đỗ Quang Hải,GV015,"giáo dục, đánh giá, e-learning, học trực tuyến",7.4
+K19,Xây dựng và triển khai hệ thống thu ngân và lập hóa đơn bán lẻ cho cửa hàng tiện lợi Minh Phát,DTC195290022,Huỳnh Bích Hằng,GV008,"quản lý, báo cáo",7.9
+K19,Xây dựng hệ thống quản lý tài sản cố định tại sở TT&TT tỉnh Hòa Bình trên nền tảng Odoo,DTC195290023,Lý Ngọc Uyên,GV007,"báo cáo, ERP, quản trị doanh nghiệp",7.7
+K19,Thiết kế và xây dựng mô hình học sâu hỗ trợ cảnh báo ngã cho người già tại trung tâm y tế huyện Phú Lương sử dụng TensorFlow,DTC195290024,Ma Xuân Hùng,GV014,"học máy, thị giác máy tính, học sâu, trí tuệ nhân tạo",8.0
+K19,Xây dựng và triển khai ứng dụng quản lý sản xuất cho khu công nghiệp Phú Bình,DTC195290025,Nông Tuấn Tú,GV021,"ERP, báo cáo, quy trình nghiệp vụ",6.2
+K19,Nghiên cứu và phát triển ứng dụng di động đặt lịch khám bệnh tại trạm y tế xã Đồng Bẩm,DTC195290026,Nông Xuân Thắng,GV014,"đa nền tảng, iOS, thông báo đẩy",8.3
+K19,Thiết kế và cài đặt thiết bị IoT hỗ trợ cảnh báo mực nước lũ cho UBND xã Đồng Bẩm,DTC195290027,Hồ Bích Nhung,GV005,"vi điều khiển, IoT",5.6
+K19,Phát triển giải pháp IoT đo đếm công suất điện từ xa cho công ty CP Hoàng Long,DTC195290028,Nông Phương Anh,GV009,"cảm biến, IoT, hệ thống nhúng",7.7
+K19,Xây dựng ứng dụng đa nền tảng đặt xe đưa đón theo yêu cầu cho các gia đình ở Na Rì,DTC195290029,Ma Duy Dũng,GV016,"iOS, thông báo đẩy, Android",6.5
+K19,Xây dựng hệ thống quản lý vận tải hàng hóa tại DNTN Nam Việt,DTC195290030,Bùi Thu Huyền,GV017,"quy trình nghiệp vụ, quản trị doanh nghiệp, quản lý, ERP",8.6
+K19,Thiết kế và xây dựng website tuyển sinh trực tuyến cho trường THCS Chu Văn An,DTC195290031,Phan Thành An,GV011,"cơ sở dữ liệu, RESTful API, quản lý, ứng dụng web",7.4
+K19,Thiết kế và xây dựng hệ thống hỗ trợ đặt hàng nhà cung cấp tại DNTN An Khang,DTC195290032,Trần Xuân Sơn,GV006,"quản trị doanh nghiệp, báo cáo, ERP, quy trình nghiệp vụ",7.8
+K19,Nghiên cứu và phát triển công cụ đăng nhập bằng mật khẩu và mã OTP cho công ty CP Bắc Sơn,DTC195290033,Phạm Thùy Châu,GV016,"bảo mật, an toàn thông tin",6.2
+K19,Xây dựng ứng dụng trí tuệ nhân tạo phát hiện bệnh trên lá cây trồng tại vùng chè Phúc Hà sử dụng OpenCV,DTC195290034,Phạm Trung Hùng,GV006,"xử lý ảnh, trí tuệ nhân tạo, học máy",8.3
+K19,Xây dựng và triển khai giải pháp IoT hỗ trợ giám sát ao nuôi thủy sản cho vùng chè Cam Giá trên nền tảng ESP32,DTC195290035,Lương Hồng Diệp,GV012,"vi điều khiển, giám sát từ xa, hệ thống nhúng",5.4
+K19,Xây dựng ứng dụng điện thoại quản lý đơn thuốc và giờ dùng thuốc cho cơ sở khám chữa bệnh đa khoa Hưng Thịnh,DTC195290036,Phạm Trung An,GV015,"thông báo đẩy, Android, đa nền tảng",8.5
+K19,Phát triển ứng dụng quản lý văn bản đi đến cho UBND xã Sơn Cẩm,DTC195290037,Võ Duy Tú,GV001,"quy trình nghiệp vụ, ERP, báo cáo",9.3
+K19,Nghiên cứu và phát triển phần mềm trực tuyến giải quyết hồ sơ một cửa điện tử cho sở thông tin và truyền thông tỉnh Lạng Sơn trên nền tảng ReactJS,DTC195290038,Lý Thùy Giang,GV021,"ứng dụng web, quản lý, cơ sở dữ liệu",7.9
+K19,Xây dựng ứng dụng Android hỗ trợ giới thiệu điểm tham quan tại khách sạn Bắc Sơn sử dụng Flutter,DTC195290039,Đỗ Ngọc Anh,GV011,"Android, đa nền tảng, iOS",8.0
+K19,Ứng dụng Odoo trong tính lương và theo dõi hồ sơ nhân viên cho DNTN Tân Tiến,DTC195290040,Lương Bích Dung,GV006,"quản trị doanh nghiệp, quản lý, báo cáo",8.8
+K19,Ứng dụng Pandas trong cảnh báo sớm người học bỏ học cho trung tâm GDTX Sông Công,DTC195290041,Hồ Ngọc Yến,GV011,"kho dữ liệu, phân tích dữ liệu, khai phá dữ liệu",6.4
+K19,Nghiên cứu và phát triển hệ thống IoT hỗ trợ quan trắc chất lượng không khí tại ủy ban nhân dân xã Gia Sàng,DTC195290042,Võ Khánh Hạnh,GV003,"IoT, hệ thống nhúng",7.5
+K19,Thiết kế và xây dựng hệ thống báo cáo tích hợp dữ liệu kinh doanh cho chuỗi cửa hàng Nam Việt sử dụng Metabase,DTC195290043,Hà Thị Lan,GV016,"dự báo, phân tích dữ liệu",5.6
+K19,Nghiên cứu và phát triển website hỗ trợ kết nối nhà tuyển dụng và người tìm việc cho công ty TNHH Phúc An trên nền tảng Spring Boot,DTC195290044,Đinh Văn Đạt,GV002,"quản lý, ứng dụng web, cơ sở dữ liệu",7.0
+K19,Phát triển mô hình sao lưu và phục hồi dữ liệu cho doanh nghiệp tư nhân An Khang,DTC195290045,Nông Khánh Lan,GV018,"xác thực, bảo mật",8.6
+K19,Xây dựng và triển khai thiết bị IoT điều khiển nhà thông minh cho người dân TP Hòa Bình,DTC195290046,Ngô Thị Hoa,GV004,"vi điều khiển, IoT, giám sát từ xa",7.9
+K19,Ứng dụng Laravel trong chấm công và quản lý ca làm việc tại cơ sở cơ khí An Khang,DTC195290047,Ma Tuấn Kiên,GV002,"ERP, quản trị doanh nghiệp, báo cáo",9.5
+K19,Xây dựng và triển khai website tổ chức lớp học qua mạng cho trung tâm giáo dục thường xuyên Đồng Hỷ,DTC195290048,Hà Quang Hoàng,GV001,"giáo dục, e-learning, học trực tuyến",6.4
+K19,Xây dựng website khai thác kho học liệu điện tử cho trung tâm ngoại ngữ Phúc An trên nền tảng NodeJS,DTC195290049,Hà Thị Anh,GV001,"đánh giá, giáo dục",7.3
+K19,Xây dựng và triển khai ứng dụng di động hỗ trợ tiếp nhận kiến nghị của người dân tại ủy ban nhân dân huyện Na Rì trên nền tảng Swift,DTC195290050,Hà Bích Anh,GV004,"Android, ứng dụng di động, thông báo đẩy",6.2
+K19,Xây dựng cổng thông tin quản lý sách và mượn trả tài liệu cho trường trung học cơ sở Nguyễn Trãi,DTC195290051,Triệu Văn Sơn,GV010,"RESTful API, cơ sở dữ liệu",5.4
+K19,Ứng dụng PyTorch trong đọc biển kiểm soát phương tiện cho bãi đỗ xe Thành Công,DTC195290052,Trần Phương Thảo,GV012,"học sâu, thị giác máy tính",5.6
+K19,Phát triển giải pháp IoT hỗ trợ giám sát nhiệt độ kho lạnh cho công ty TNHH An Khang sử dụng MQTT,DTC195290053,Võ Mạnh Nam,GV019,"vi điều khiển, giám sát từ xa, hệ thống nhúng, cảm biến",9.5
+K19,Xây dựng mô hình học sâu dự báo doanh thu bán hàng cho chuỗi cửa hàng Hưng Thịnh,DTC195290054,Lê Thu Giang,GV010,"học máy, dự báo, khai phá dữ liệu, trí tuệ nhân tạo",5.2
+K19,Xây dựng và triển khai ứng dụng theo dõi nhập xuất tồn kho cho công ty trách nhiệm hữu hạn Việt Tiến sử dụng Spring Boot,DTC195290055,Phạm Hữu Thắng,GV003,"ERP, quản lý, báo cáo",5.2
+K19,Thiết kế và xây dựng ứng dụng di động đặt và giao đồ ăn cho câu lạc bộ thể thao Hưng Thịnh,DTC195290056,Trần Văn Phong,GV012,"đa nền tảng, ứng dụng di động",9.1
+K19,Xây dựng và triển khai mô hình hỗ trợ thống kê ca bệnh truyền nhiễm tại trạm y tế xã Đồng Bẩm sử dụng Pandas,DTC195290057,Huỳnh Khánh Linh,GV020,"phân tích dữ liệu, kho dữ liệu, khai phá dữ liệu",5.9
+K19,Phát triển ứng dụng đa nền tảng theo dõi sức khỏe cá nhân tại trung tâm y tế huyện Võ Nhai,DTC195290058,Trần Minh Vinh,GV019,"đa nền tảng, Android, ứng dụng di động",9.0
+K19,Nghiên cứu và phát triển bộ điều khiển giám sát nhiệt độ nhà kính tại HTX nông nghiệp Tân Cương,DTC195290059,Đỗ Bích Diệp,GV006,"giám sát từ xa, IoT, cảm biến, hệ thống nhúng",7.3
+K19,Nghiên cứu và phát triển ứng dụng biên soạn đề thi từ kho câu hỏi tại trường CĐ nghề Cao Bằng sử dụng ReactJS,DTC195290060,Triệu Hồng Lan,GV008,"giáo dục, học trực tuyến",8.9
+K20,Phát triển ứng dụng hỗ trợ thi trắc nghiệm trực tuyến cho trường THPT Chu Văn An,DTC205290001,Vũ Mạnh Cường,GV016,"giáo dục, LMS, học trực tuyến, đánh giá",6.1
+K20,Ứng dụng SQL Server trong bán thuốc và theo dõi hạn dùng cho phòng khám đa khoa Việt Tiến,DTC205290002,Lý Ngọc Loan,GV007,"ERP, quản trị doanh nghiệp, báo cáo, quy trình nghiệp vụ",6.4
+K20,Ứng dụng Spring Boot trong điều phối xe giao hàng cho công ty TNHH Hưng Thịnh,DTC205290003,Vũ Thị Hạnh,GV008,"quản lý, quy trình nghiệp vụ",6.8
+K20,Xây dựng ứng dụng điện thoại ghi nhận chỉ số sức khỏe hằng ngày tại trung tâm y tế huyện Định Hóa,DTC205290004,Đặng Tuấn Nam,GV011,"thông báo đẩy, iOS, Android, đa nền tảng",9.4
+K20,Ứng dụng Node-RED trong hướng dẫn chỗ đỗ xe còn trống cho bến xe liên tỉnh Tuyên Quang,DTC205290005,Huỳnh Thu Diệp,GV003,"IoT, vi điều khiển",8.9
+K20,Xây dựng và triển khai giải pháp thiết lập bộ lọc lưu lượng mạng tại trung tâm GDTX Phú Lương,DTC205290006,Hồ Thu Quỳnh,GV006,"mã hóa, phát hiện tấn công",7.5
+K20,Xây dựng hệ thống phân tích kết quả học tập tại trường trung học phổ thông Nguyễn Trãi,DTC205290007,Nông Ngọc Giang,GV020,"khai phá dữ liệu, dự báo, kho dữ liệu, phân tích dữ liệu",9.3
+K20,Nghiên cứu và phát triển hệ thống lập lịch giảng dạy tự động cho trường THCS Lê Hồng Phong,DTC205290008,Đinh Xuân Lâm,GV020,"đánh giá, học trực tuyến, giáo dục, LMS",8.1
+K20,Phát triển hệ thống phân loại rác thải qua hình ảnh cho UBND xã Phúc Xuân sử dụng OpenCV,DTC205290009,Hoàng Mai Quỳnh,GV006,"thị giác máy tính, học sâu",8.1
+K20,Xây dựng ứng dụng trí tuệ nhân tạo điểm danh bằng nhận diện khuôn mặt tại trường THPT Trần Phú trên nền tảng OpenCV,DTC205290010,Nông Hữu Kiên,GV020,"trí tuệ nhân tạo, học máy, thị giác máy tính",5.7
+K20,Thiết kế và xây dựng hệ thống tư vấn tuyển sinh bằng chatbot cho trung tâm đào tạo ngoại ngữ Minh Phát trên nền tảng PhoBERT,DTC205290011,Bùi Thu Oanh,GV005,"học sâu, học máy, trí tuệ nhân tạo, xử lý ngôn ngữ tự nhiên",8.3
+K20,Ứng dụng Firebase trong nhắc lịch uống thuốc tại bệnh viện tuyến tỉnh Lào Cai,DTC205290012,Triệu Xuân Toàn,GV010,"đa nền tảng, ứng dụng di động",6.5
+K20,Nghiên cứu và phát triển ứng dụng Android theo dõi thu chi cá nhân cho người thuê trọ tại Na Rì,DTC205290013,Nguyễn Thùy Lan,GV020,"ứng dụng di động, thông báo đẩy, Android, iOS",5.3
+K20,Thiết kế và cài đặt hệ thống hỗ trợ quản lý kho hàng tại công ty cổ phần Nam Việt trên nền tảng ERPNext,DTC205290014,Triệu Quang Lâm,GV008,"báo cáo, quy trình nghiệp vụ",8.0
+K20,Thiết kế và cài đặt nền tảng ôn tập bằng thẻ ghi nhớ tại trường THCS Lý Tự Trọng sử dụng Moodle,DTC205290015,Lê Duy Phong,GV008,"học trực tuyến, giáo dục",7.8
+K20,Ứng dụng PyTorch trong chuyển ảnh chữ viết tay thành văn bản cho trung tâm GDTX Võ Nhai,DTC205290016,Lý Xuân Hoàng,GV013,"học máy, xử lý ảnh",6.2
+K20,Ứng dụng Apache Airflow trong phân tích dữ liệu tiêu thụ điện tại DNTN An Khang,DTC205290017,Vũ Phương Diệp,GV005,"khai phá dữ liệu, phân tích dữ liệu, kho dữ liệu, trực quan hóa",7.1
+K20,Thiết kế và cài đặt ứng dụng hạch toán thu chi doanh nghiệp cho doanh nghiệp tư nhân Đại Phát,DTC205290018,Dương Thu Phương,GV017,"báo cáo, ERP, quản lý, quản trị doanh nghiệp",6.0
+K20,Xây dựng và triển khai website chia sẻ bài giảng video tại trường THCS Quang Trung,DTC205290019,Lê Bích Loan,GV016,"giáo dục, học trực tuyến",7.4
+K20,Nghiên cứu và phát triển ứng dụng chăm sóc và theo dõi khách hàng cho doanh nghiệp tư nhân Nam Việt trên nền tảng Odoo,DTC205290020,Hồ Đức Hải,GV003,"quy trình nghiệp vụ, quản trị doanh nghiệp, quản lý",6.0
+K20,Xây dựng ứng dụng web đặt sân thể thao cho khu du lịch Phú Bình sử dụng Spring Boot,DTC205290021,Lương Thanh Hoa,GV007,"quản lý, ứng dụng web",7.1
+K20,Thiết kế và cài đặt phần mềm quản lý nhân sự và tiền lương cho DNTN Việt Tiến trên nền tảng Spring Boot,DTC205290022,Ma Khánh Trang,GV021,"ERP, báo cáo, quản lý",7.5
+K20,Xây dựng và triển khai hệ thống IoT đo mực nước sông suối từ xa cho UBND xã Tân Cương,DTC205290023,Phạm Thị Loan,GV004,"giám sát từ xa, hệ thống nhúng, vi điều khiển, IoT",5.4
+K20,Thiết kế và xây dựng nền tảng học lập trình có chấm bài tự động cho trung tâm GDTX Sông Công trên nền tảng NodeJS,DTC205290024,Nguyễn Đức Phong,GV021,"giáo dục, đánh giá, học trực tuyến",5.0
+K20,Xây dựng hệ thống lập kế hoạch và theo dõi đơn hàng sản xuất tại KCN Ba Bể sử dụng SQL Server,DTC205290025,Hồ Minh Toàn,GV001,"quản trị doanh nghiệp, quản lý, quy trình nghiệp vụ",7.1
+K20,Ứng dụng Swift trong mua bán nông sản trực tiếp tại nông trại Bắc Sơn,DTC205290026,Nông Duy Sơn,GV017,"ứng dụng di động, iOS",7.6
+K20,Thiết kế và cài đặt bộ điều khiển tự động hóa thiết bị gia đình cho cư dân thành phố Bắc Giang trên nền tảng Raspberry Pi,DTC205290027,Triệu Ngọc Yến,GV016,"vi điều khiển, cảm biến, hệ thống nhúng",8.3
+K20,Thiết kế và cài đặt bộ điều khiển theo dõi hành trình xe bằng GPS cho công ty CP Hưng Thịnh,DTC205290028,Ma Phương Hạnh,GV002,"vi điều khiển, cảm biến, IoT",7.9
+K20,Ứng dụng Spring Boot trong quản lý tin tức cho UBND huyện Võ Nhai,DTC205290029,Hồ Thanh Châu,GV016,"ứng dụng web, giao diện người dùng",8.6
+K20,Xây dựng ứng dụng điện thoại hẹn giờ khám chữa bệnh tại bệnh viện tuyến tỉnh Thái Nguyên,DTC205290030,Hà Thanh Giang,GV001,"Android, thông báo đẩy",5.3
+K20,Ứng dụng Django trong đặt vé xe khách tại bến xe khách Lào Cai,DTC205290031,Phạm Thùy Hạnh,GV021,"giao diện người dùng, ứng dụng web, cơ sở dữ liệu",6.8
+K20,Nghiên cứu và phát triển hệ thống quản lý mua hàng cho công ty cổ phần Bắc Sơn,DTC205290032,Đặng Mạnh Quân,GV018,"ERP, quản lý",5.5
+K20,Phát triển ứng dụng điện thoại gọi món giao tận nơi tại điểm du lịch Ba Bể sử dụng React Native,DTC205290033,Lê Quang Hùng,GV021,"đa nền tảng, Android",6.3
+K20,Nghiên cứu và phát triển thiết bị IoT giám sát điện năng tiêu thụ cho doanh nghiệp tư nhân Thành Công,DTC205290034,Đinh Văn Tú,GV021,"giám sát từ xa, vi điều khiển",6.5
+K20,Thiết kế và xây dựng hệ thống hỗ trợ quản lý ngân hàng câu hỏi cho trung tâm giáo dục thường xuyên Na Rì sử dụng Moodle,DTC205290035,Đinh Thùy Ngân,GV020,"đánh giá, e-learning, giáo dục",8.3
+K20,Xây dựng và triển khai ứng dụng Android ghi nhớ từ mới tiếng Anh tại trường THCS Lê Hồng Phong sử dụng Firebase,DTC205290036,Đặng Thu Nhung,GV004,"đa nền tảng, thông báo đẩy",8.1
+K20,Thiết kế và cài đặt ứng dụng phân tích dữ liệu nhận diện khách hàng có nguy cơ ngừng dùng dịch vụ cho doanh nghiệp tư nhân An Khang,DTC205290037,Hoàng Thị Yến,GV018,"trực quan hóa, dự báo",8.8
+K20,Thiết kế và cài đặt nền tảng luyện thi tốt nghiệp THPT cho trường THCS Quang Trung,DTC205290038,Ngô Khánh Hà,GV007,"e-learning, giáo dục",8.9
+K20,Xây dựng hệ thống báo cáo tổng hợp dữ liệu bán hàng cho siêu thị mini Minh Phát trên nền tảng Apache Airflow,DTC205290039,Bùi Văn Lâm,GV006,"trực quan hóa, phân tích dữ liệu, khai phá dữ liệu",6.8
+K20,Xây dựng ứng dụng web tìm kiếm việc làm tại công ty CP An Khang,DTC205290040,Hoàng Hữu Thắng,GV010,"quản lý, ứng dụng web, RESTful API, giao diện người dùng",8.6
+K20,Phát triển công cụ hỗ trợ phát hiện thư điện tử lừa đảo tại DNTN Thành Công trên nền tảng Wazuh,DTC205290041,Trần Xuân Huy,GV002,"mã hóa, phát hiện tấn công, bảo mật",7.9
+K20,Xây dựng và triển khai hệ thống thông tin kinh doanh bán lẻ qua mạng tại cửa hàng tiện lợi Phúc An,DTC205290042,Nguyễn Công Hải,GV012,"giao diện người dùng, ứng dụng web, cơ sở dữ liệu",8.9
+K20,Xây dựng ứng dụng di động hỗ trợ hướng dẫn du lịch cho khu du lịch Đại Từ,DTC205290043,Ngô Hồng Thảo,GV019,"đa nền tảng, Android",7.8
+K20,Xây dựng mô hình học sâu đề xuất mặt hàng theo sở thích tại siêu thị mini Hoàng Long,DTC205290044,Ma Thành Kiên,GV003,"dự báo, trí tuệ nhân tạo",8.2
+K20,Ứng dụng Django trong đặt bàn nhà hàng tại trung tâm thể thao Trường Thịnh,DTC205290045,Đinh Văn Hùng,GV013,"RESTful API, cơ sở dữ liệu, ứng dụng web, giao diện người dùng",9.1
+K20,Phát triển công cụ phát hiện té ngã ở người cao tuổi tại trạm y tế xã Phúc Hà,DTC205290046,Hà Mạnh Hải,GV009,"trí tuệ nhân tạo, xử lý ảnh, học máy",9.5
+K20,Xây dựng và triển khai giải pháp quản lý định danh và phân quyền truy cập tại công ty cổ phần Tân Tiến trên nền tảng Keycloak,DTC205290047,Huỳnh Phương Lan,GV013,"bảo mật, mã hóa, an toàn thông tin",9.2
+K20,Thiết kế và cài đặt hệ thống luyện nói tiếng Anh trực tuyến tại trường THCS Chu Văn An,DTC205290048,Hồ Phương Giang,GV020,"LMS, giáo dục, đánh giá, e-learning",8.2
+K20,Nghiên cứu và phát triển ứng dụng đa nền tảng hỗ trợ gọi xe công nghệ cho cư dân thành phố Hà Giang,DTC205290049,Hà Mạnh Hoàng,GV020,"Android, đa nền tảng, thông báo đẩy, iOS",9.2
+K20,Nghiên cứu và phát triển hệ thống thống kê vụ va chạm giao thông tại UBND huyện Yên Sơn,DTC205290050,Đỗ Thị Hoa,GV007,"kho dữ liệu, dự báo",6.7
+K20,Phát triển bảng điều khiển hỗ trợ phân tích hành vi mua sắm cho chuỗi cửa hàng Thành Công,DTC205290051,Đặng Bích Châu,GV015,"dự báo, phân tích dữ liệu, kho dữ liệu",7.1
+K20,Xây dựng và triển khai nền tảng quản lý khóa học trực tuyến tại trường trung học cơ sở Trần Phú,DTC205290052,Hoàng Công Dũng,GV005,"LMS, e-learning, đánh giá, học trực tuyến",6.9
+K20,Thiết kế và xây dựng công cụ thiết lập kênh truyền bảo mật giữa các văn phòng cho công ty TNHH Thành Công trên nền tảng OpenSSL,DTC205290053,Phạm Quang Tú,GV013,"xác thực, an toàn thông tin",7.2
+K20,Phát triển công cụ tập trung hóa log máy chủ cho doanh nghiệp tư nhân Trường Thịnh,DTC205290054,Hà Ngọc Dung,GV019,"xác thực, mã hóa, an toàn thông tin",7.5
+K20,Thiết kế và cài đặt công cụ phân loại ý kiến khách hàng theo sắc thái tại hệ thống cửa hàng Tân Tiến,DTC205290055,Hoàng Khánh Loan,GV012,"xử lý ngôn ngữ tự nhiên, học máy, học sâu, trí tuệ nhân tạo",7.5
+K20,Phát triển hệ thống hỗ trợ dự phòng dữ liệu tự động cho công ty TNHH Phúc An,DTC205290056,Lương Minh Bình,GV007,"an toàn thông tin, phát hiện tấn công, bảo mật, xác thực",9.2
+K20,Ứng dụng Apache Spark trong dự đoán nguy cơ thôi học cho trường THCS Quang Trung,DTC205290057,Ma Phương Yến,GV022,"trực quan hóa, khai phá dữ liệu, kho dữ liệu, phân tích dữ liệu",7.3
+K20,Xây dựng cổng thông tin đặt chỗ lưu trú trực tuyến tại điểm du lịch Định Hóa,DTC205290058,Trần Văn Lâm,GV022,"RESTful API, cơ sở dữ liệu, ứng dụng web",8.6
+K20,Ứng dụng VueJS trong mua bán nhà đất qua tin đăng cho công ty TNHH Trường Thịnh,DTC205290059,Hồ Ngọc Uyên,GV011,"quản lý, RESTful API, ứng dụng web, giao diện người dùng",9.0
+K20,Ứng dụng ESP32 trong điều khiển tưới tiêu thông minh tại vùng trồng chè Cam Giá,DTC205290060,Hồ Thanh Anh,GV022,"cảm biến, IoT, hệ thống nhúng, vi điều khiển",8.5
 K21,Xây dựng và triển khai ứng dụng phân tích dữ liệu thống kê sản lượng điện sử dụng cho công ty CP Trường Thịnh,DTC215290001,Lương Ngọc Oanh,GV006,"kho dữ liệu, phân tích dữ liệu, khai phá dữ liệu",8.1
 K21,Ứng dụng TensorFlow trong nhận dạng chữ viết tay tại trường trung học cơ sở Nguyễn Huệ,DTC215290002,Hồ Mạnh Thắng,GV002,"trí tuệ nhân tạo, thị giác máy tính, học máy",6.9
 K21,Thiết kế và cài đặt hệ thống kiểm thử bảo mật website tại công ty CP Đại Phát trên nền tảng OpenVAS,DTC215290003,Bùi Duy Bình,GV017,"xác thực, phát hiện tấn công, bảo mật, mã hóa",5.1
-K21,Thiết kế và cài đặt hệ thống hỗ trợ luyện tập lập trình với trình chấm tự động cho trường THCS Lý Tự Trọng trên nền tảng WebRTC,DTC215290004,Huỳnh Thanh Hạnh,GV001,"giáo dục, đánh giá",6.0
-K21,Phát triển mô hình học máy hỗ trợ phân tích cảm xúc bình luận tại chuỗi cửa hàng Trường Thịnh,DTC215290005,Hồ Hữu Dũng,GV008,"xử lý ngôn ngữ tự nhiên, học máy, học sâu, trí tuệ nhân tạo",5.2
-K21,Xây dựng ứng dụng chăm sóc và theo dõi khách hàng cho công ty trách nhiệm hữu hạn Tân Tiến trên nền tảng Laravel,DTC215290006,Bùi Thị Hạnh,GV008,"quản trị doanh nghiệp, ERP, báo cáo, quản lý",9.2
+K21,Thiết kế và cài đặt nền tảng luyện tập lập trình với trình chấm tự động tại trường THCS Trần Phú trên nền tảng Django,DTC215290004,Huỳnh Thanh Hạnh,GV001,"giáo dục, đánh giá",6.0
+K21,Thiết kế và cài đặt công cụ phân tích cảm xúc bình luận cho chuỗi cửa hàng Trường Thịnh trên nền tảng TensorFlow,DTC215290005,Hồ Hữu Dũng,GV008,"xử lý ngôn ngữ tự nhiên, học máy, học sâu, trí tuệ nhân tạo",5.2
+K21,Thiết kế và xây dựng ứng dụng hỗ trợ quản lý quan hệ khách hàng cho công ty TNHH Trường Thịnh,DTC215290006,Bùi Thị Hạnh,GV008,"quản trị doanh nghiệp, ERP, báo cáo, quản lý",9.2
 K21,Ứng dụng Pandas trong theo dõi giá cả mặt hàng nông nghiệp cho vùng chè Tân Cương,DTC215290007,Ngô Mai Oanh,GV018,"kho dữ liệu, phân tích dữ liệu, dự báo",6.9
 K21,Nghiên cứu và phát triển hệ thống IoT cảnh báo mực nước lũ cho UBND xã Hóa Thượng,DTC215290008,Trần Thị Giang,GV006,"IoT, hệ thống nhúng",6.6
 K21,Thiết kế và cài đặt mô hình học sâu cảnh báo ngã cho người già cho trạm y tế xã Tích Lương,DTC215290009,Lê Thị Châu,GV015,"trí tuệ nhân tạo, thị giác máy tính",6.1
 K21,Thiết kế và xây dựng mô hình hỗ trợ ký số văn bản điện tử tại sở TT&TT tỉnh Cao Bằng trên nền tảng OpenSSL,DTC215290010,Huỳnh Hồng Hằng,GV014,"mã hóa, bảo mật",8.7
-K21,Xây dựng ứng dụng web bán vé xe liên tỉnh qua mạng tại nhà hàng Nam Việt trên nền tảng Spring Boot,DTC215290011,Võ Văn Kiên,GV020,"quản lý, RESTful API, ứng dụng web, cơ sở dữ liệu",8.9
+K21,Xây dựng ứng dụng web bán vé xe liên tỉnh qua mạng tại bến xe khách Hòa Bình trên nền tảng Spring Boot,DTC215290011,Võ Văn Kiên,GV020,"quản lý, RESTful API, ứng dụng web, cơ sở dữ liệu",8.9
 K21,Xây dựng hệ thống định vị và giám sát phương tiện cho doanh nghiệp tư nhân Tân Tiến sử dụng Node-RED,DTC215290012,Dương Tuấn Dũng,GV016,"cảm biến, hệ thống nhúng, vi điều khiển",7.0
 K21,Thiết kế và xây dựng bảng điều khiển phân tích lượt khách du lịch cho khách sạn Đại Phát sử dụng Pandas,DTC215290013,Nguyễn Thị Lan,GV007,"khai phá dữ liệu, dự báo",8.2
-K21,Phát triển hệ thống hạch toán thu chi doanh nghiệp cho công ty TNHH Tân Tiến,DTC215290014,Nông Thanh Hạnh,GV002,"quy trình nghiệp vụ, quản lý, quản trị doanh nghiệp",7.2
+K21,Ứng dụng SQL Server trong quản lý kế toán tại công ty CP Hoàng Long,DTC215290014,Nông Thanh Hạnh,GV002,"quy trình nghiệp vụ, quản lý, quản trị doanh nghiệp",7.2
 K21,Ứng dụng Raspberry Pi trong đo bụi mịn và khí thải môi trường cho sở thông tin và truyền thông tỉnh Lào Cai,DTC215290015,Hồ Xuân Cường,GV011,"vi điều khiển, giám sát từ xa",8.2
-K21,Thiết kế và xây dựng ứng dụng web đặt chỗ và gọi món tại nhà hàng cho khu du lịch Đồng Hỷ,DTC215290016,Nguyễn Thanh Hằng,GV012,"giao diện người dùng, quản lý, cơ sở dữ liệu, ứng dụng web",6.1
+K21,Thiết kế và xây dựng ứng dụng web đặt chỗ và gọi món tại nhà hàng cho trung tâm thể thao Tân Tiến,DTC215290016,Nguyễn Thanh Hằng,GV012,"giao diện người dùng, quản lý, cơ sở dữ liệu, ứng dụng web",6.1
 K21,Xây dựng và triển khai ứng dụng Android quản lý chi tiêu cá nhân cho người thuê trọ tại Phú Bình,DTC215290017,Vũ Trung Dũng,GV001,"ứng dụng di động, thông báo đẩy",8.0
 K21,Ứng dụng Flutter trong quản lý đơn thuốc và giờ dùng thuốc cho trung tâm y tế huyện Phú Bình,DTC215290018,Ngô Thanh Linh,GV021,"iOS, thông báo đẩy, Android",7.8
-K21,Xây dựng và triển khai ứng dụng quản lý tài sản cố định cho UBND xã Tân Cương,DTC215290019,Phan Hồng Dung,GV013,"quy trình nghiệp vụ, báo cáo",5.7
+K21,Phát triển phần mềm theo dõi thiết bị và khấu hao tài sản cho UBND xã Hóa Thượng trên nền tảng Laravel,DTC215290019,Phan Hồng Dung,GV013,"quy trình nghiệp vụ, báo cáo",5.7
 K21,Nghiên cứu và phát triển ứng dụng trí tuệ nhân tạo phân tích phim chụp X-quang ngực tại trung tâm y tế huyện Yên Sơn,DTC215290020,Đặng Ngọc Hà,GV015,"xử lý ảnh, trí tuệ nhân tạo",9.5
 K21,Thiết kế và cài đặt mô hình học máy hỗ trợ rút gọn nội dung tài liệu tiếng Việt cho ủy ban nhân dân huyện Phổ Yên,DTC215290021,Đặng Xuân Quân,GV001,"học máy, xử lý ngôn ngữ tự nhiên, trí tuệ nhân tạo",6.2
 K21,Nghiên cứu và phát triển ứng dụng di động đặt xe đưa đón theo yêu cầu cho người dân TP Bắc Giang,DTC215290022,Đỗ Đức Hiếu,GV008,"thông báo đẩy, Android, iOS, đa nền tảng",8.4
 K21,Phát triển mô hình thống kê điểm số của người học tại trường THCS Chu Văn An sử dụng Metabase,DTC215290023,Võ Thị Phương,GV004,"dự báo, khai phá dữ liệu",6.4
-K21,Xây dựng nền tảng ôn tập thi trung học phổ thông tại trường mẫu giáo Cam Giá,DTC215290024,Phạm Khánh Dung,GV010,"LMS, đánh giá, e-learning, giáo dục",5.3
-K21,Xây dựng ứng dụng ghi nhớ kiến thức theo phương pháp lặp lại ngắt quãng tại trường mẫu giáo Hóa Thượng sử dụng NodeJS,DTC215290025,Phan Thị Hằng,GV004,"LMS, học trực tuyến, đánh giá",6.0
-K21,Nghiên cứu và phát triển thiết bị IoT quản lý bãi đỗ xe thông minh cho quán ăn An Khang,DTC215290026,Lê Khánh Loan,GV014,"giám sát từ xa, vi điều khiển, cảm biến",5.2
+K21,Xây dựng và triển khai website ôn tập thi trung học phổ thông cho trung tâm GDTX Đồng Hỷ,DTC215290024,Phạm Khánh Dung,GV010,"LMS, đánh giá, e-learning, giáo dục",5.3
+K21,Thiết kế và xây dựng website ghi nhớ kiến thức theo phương pháp lặp lại ngắt quãng cho trường THCS Lê Quý Đôn,DTC215290025,Phan Thị Hằng,GV004,"LMS, học trực tuyến, đánh giá",6.0
+K21,Xây dựng hệ thống IoT quản lý bãi đỗ xe thông minh cho bến xe khách Lào Cai sử dụng MQTT,DTC215290026,Lê Khánh Loan,GV014,"giám sát từ xa, vi điều khiển, cảm biến",5.2
 K21,Xây dựng website hỗ trợ đặt phòng khách sạn tại nhà hàng Đại Phát,DTC215290027,Phan Văn Toàn,GV009,"cơ sở dữ liệu, giao diện người dùng, quản lý",5.2
 K21,Xây dựng hệ thống hỗ trợ theo dõi nhập xuất tồn kho cho công ty TNHH Minh Phát,DTC215290028,Đặng Thanh Uyên,GV013,"quản lý, ERP",8.9
-K21,Nghiên cứu và phát triển website kết nối nhà trường với phụ huynh tại trường mầm non Quyết Thắng,DTC215290029,Đỗ Bích Giang,GV014,"giáo dục, e-learning, LMS, đánh giá",6.7
-K21,Thiết kế và xây dựng ứng dụng web hỗ trợ quản lý hồ sơ học sinh tại trường mẫu giáo Quyết Thắng trên nền tảng NodeJS,DTC215290030,Dương Phương Nhung,GV012,"giao diện người dùng, RESTful API",7.4
+K21,Xây dựng nền tảng hỗ trợ kết nối nhà trường với phụ huynh cho trường THCS Chu Văn An trên nền tảng WebRTC,DTC215290029,Đỗ Bích Giang,GV014,"giáo dục, e-learning, LMS, đánh giá",6.7
+K21,Thiết kế và xây dựng ứng dụng web hỗ trợ quản lý hồ sơ học sinh tại trường cao đẳng nghề Thái Nguyên trên nền tảng NodeJS,DTC215290030,Dương Phương Nhung,GV012,"giao diện người dùng, RESTful API",7.4
 K21,Xây dựng và triển khai ứng dụng trí tuệ nhân tạo hỗ trợ gợi ý sản phẩm cho siêu thị mini Hưng Thịnh trên nền tảng TensorFlow,DTC215290031,Đặng Quang Huy,GV004,"học máy, trí tuệ nhân tạo, dự báo, khai phá dữ liệu",7.7
-K21,Phát triển phần mềm quản lý bán hàng tại quầy cho siêu thị mini Tân Tiến,DTC215290032,Phạm Mạnh Phong,GV017,"báo cáo, quản lý",7.3
-K21,Xây dựng ứng dụng bán thuốc và theo dõi hạn dùng cho trạm y tế xã Tích Lương,DTC215290033,Ngô Công Kiên,GV001,"báo cáo, quản trị doanh nghiệp, ERP",6.0
+K21,Xây dựng hệ thống hỗ trợ quản lý bán hàng tại quầy cho siêu thị mini Hoàng Long sử dụng SQL Server,DTC215290032,Phạm Mạnh Phong,GV017,"báo cáo, quản lý",7.3
+K21,Xây dựng phân hệ ERP quản lý nhà thuốc tại TTYT huyện Phú Bình sử dụng Spring Boot,DTC215290033,Ngô Công Kiên,GV001,"báo cáo, quản trị doanh nghiệp, ERP",6.0
 K21,Thiết kế và cài đặt ứng dụng phân tích dữ liệu khai phá tin tuyển dụng việc làm tại UBND xã Phúc Xuân,DTC215290034,Hồ Mai Nhung,GV010,"khai phá dữ liệu, trực quan hóa",6.5
 K21,Phát triển ứng dụng điện thoại học từ vựng tiếng Anh cho trung tâm ngoại ngữ Nam Việt sử dụng React Native,DTC215290035,Ngô Tuấn Lâm,GV019,"iOS, đa nền tảng",6.0
-K21,Ứng dụng WebRTC trong quản lý ngân hàng câu hỏi cho trường mẫu giáo Phúc Xuân,DTC215290036,Lương Văn Hoàng,GV004,"e-learning, học trực tuyến, giáo dục",5.5
+K21,Ứng dụng Django trong biên soạn đề thi từ kho câu hỏi tại trường cao đẳng nghề Phú Thọ,DTC215290036,Lương Văn Hoàng,GV004,"e-learning, học trực tuyến, giáo dục",5.5
 K21,Thiết kế và cài đặt hệ thống IoT cảnh báo nhiệt độ kho bảo quản tại DNTN Phúc An trên nền tảng Arduino,DTC215290037,Phạm Mạnh Quân,GV002,"vi điều khiển, hệ thống nhúng, IoT",9.2
 K21,Nghiên cứu và phát triển ứng dụng đa nền tảng hỗ trợ phản ánh hiện trường đô thị tại sở TT&TT tỉnh Tuyên Quang,DTC215290038,Vũ Mạnh Toàn,GV007,"iOS, Android, đa nền tảng",6.1
 K21,Ứng dụng Keycloak trong xác thực hai lớp tại doanh nghiệp tư nhân Đại Phát,DTC215290039,Phạm Thanh Thảo,GV002,"bảo mật, an toàn thông tin, xác thực",6.6
 K21,Ứng dụng Firebase trong kết nối tiêu thụ nông sản cho trang trại Tân Tiến,DTC215290040,Võ Hữu Bình,GV021,"đa nền tảng, thông báo đẩy, Android",7.9
-K21,Phát triển phần mềm trực tuyến tiếp nhận thủ tục hành chính trực tuyến cho ủy ban nhân dân huyện Phú Lương trên nền tảng Laravel,DTC215290041,Nguyễn Văn Phong,GV004,"ứng dụng web, quản lý, cơ sở dữ liệu, giao diện người dùng",9.4
-K21,Thiết kế và cài đặt nền tảng chia sẻ học liệu số cho trung tâm giáo dục thường xuyên Na Rì,DTC215290042,Hà Mai Giang,GV022,"e-learning, giáo dục",6.0
-K21,Xây dựng website hỗ trợ xếp thời khóa biểu tại trường mầm non Đồng Bẩm trên nền tảng Moodle,DTC215290043,Võ Quang Vinh,GV012,"giáo dục, đánh giá, LMS",9.5
-K21,Phát triển hệ thống báo cáo hỗ trợ trực quan hóa báo cáo điều hành tại doanh nghiệp tư nhân Minh Phát sử dụng Metabase,DTC215290044,Triệu Hồng Thảo,GV018,"kho dữ liệu, trực quan hóa, phân tích dữ liệu, khai phá dữ liệu",8.9
-K21,Phát triển nền tảng giảng dạy trực tuyến có tương tác cho trường mầm non Sơn Cẩm,DTC215290045,Trần Thành Dũng,GV008,"đánh giá, e-learning, học trực tuyến",5.0
+K21,Phát triển hệ thống thông tin tiếp nhận thủ tục hành chính trực tuyến tại UBND huyện Phú Lương trên nền tảng Laravel,DTC215290041,Nguyễn Văn Phong,GV004,"ứng dụng web, quản lý, cơ sở dữ liệu, giao diện người dùng",9.4
+K21,Nghiên cứu và phát triển hệ thống chia sẻ học liệu số cho trung tâm ngoại ngữ Hoàng Long,DTC215290042,Hà Mai Giang,GV022,"e-learning, giáo dục",6.0
+K21,Xây dựng và triển khai ứng dụng xếp thời khóa biểu cho trường THCS Lý Tự Trọng sử dụng Moodle,DTC215290043,Võ Quang Vinh,GV012,"giáo dục, đánh giá, LMS",9.5
+K21,Ứng dụng Metabase trong trực quan hóa báo cáo điều hành cho công ty CP Hưng Thịnh,DTC215290044,Triệu Hồng Thảo,GV018,"kho dữ liệu, trực quan hóa, phân tích dữ liệu, khai phá dữ liệu",8.9
+K21,Ứng dụng NodeJS trong giảng dạy trực tuyến có tương tác cho trường THCS Nguyễn Trãi,DTC215290045,Trần Thành Dũng,GV008,"đánh giá, e-learning, học trực tuyến",5.0
 K21,Xây dựng và triển khai mô hình cấu hình tường lửa cho trung tâm ngoại ngữ Nam Việt sử dụng Suricata,DTC215290046,Triệu Duy Cường,GV008,"phát hiện tấn công, bảo mật, xác thực, an toàn thông tin",5.1
 K21,Xây dựng và triển khai ứng dụng di động thuê nhà trọ cho sinh viên cho người thuê trọ tại Chợ Mới,DTC215290047,Ngô Văn Lâm,GV016,"ứng dụng di động, đa nền tảng, iOS, thông báo đẩy",8.7
-K21,Thiết kế và xây dựng công cụ hỗ trợ thu thập và phân tích nhật ký hệ thống cho công ty TNHH Việt Tiến sử dụng Wazuh,DTC215290048,Huỳnh Quang Khánh,GV005,"xác thực, an toàn thông tin, bảo mật",6.3
+K21,Thiết kế và xây dựng mô hình hỗ trợ thu thập và phân tích nhật ký hệ thống tại công ty trách nhiệm hữu hạn Việt Tiến sử dụng Wazuh,DTC215290048,Huỳnh Quang Khánh,GV005,"xác thực, an toàn thông tin, bảo mật",6.3
 K21,Thiết kế và cài đặt hệ thống hỗ trợ kết nối chi nhánh qua mạng riêng ảo tại công ty TNHH Việt Tiến sử dụng pfSense,DTC215290049,Trần Thu Hoa,GV018,"mã hóa, bảo mật, phát hiện tấn công",6.2
 K21,Phát triển hệ thống nhận biết loại rác bằng camera cho UBND huyện Chợ Mới trên nền tảng PyTorch,DTC215290050,Đỗ Ngọc Anh,GV020,"trí tuệ nhân tạo, thị giác máy tính, học máy",8.9
-K21,Ứng dụng Laravel trong cho thuê sân bóng theo khung giờ tại bến xe khách Yên Bái,DTC215290051,Nông Thùy Uyên,GV003,"giao diện người dùng, cơ sở dữ liệu, ứng dụng web, RESTful API",6.9
-K21,Phát triển ứng dụng hỗ trợ phát lại bài giảng đã ghi hình cho trường THPT Trần Phú,DTC215290052,Nông Đức Phong,GV019,"học trực tuyến, đánh giá, LMS, e-learning",6.8
+K21,Ứng dụng Laravel trong cho thuê sân bóng theo khung giờ tại khu du lịch Sông Công,DTC215290051,Nông Thùy Uyên,GV003,"giao diện người dùng, cơ sở dữ liệu, ứng dụng web, RESTful API",6.9
+K21,Phát triển hệ thống phát lại bài giảng đã ghi hình tại trung tâm giáo dục thường xuyên Yên Sơn,DTC215290052,Nông Đức Phong,GV019,"học trực tuyến, đánh giá, LMS, e-learning",6.8
 K21,Thiết kế và xây dựng mô hình hỗ trợ kiểm soát quyền người dùng tập trung tại công ty cổ phần Nam Việt trên nền tảng Keycloak,DTC215290053,Nguyễn Hữu Kiên,GV007,"an toàn thông tin, mã hóa",8.9
-K21,Xây dựng và triển khai mô hình học máy điểm danh bằng nhận diện khuôn mặt cho trung tâm GDTX Ba Bể,DTC215290054,Phan Ngọc Hà,GV022,"thị giác máy tính, học sâu",9.5
+K21,Phát triển mô hình học máy chấm công qua khuôn mặt tại trung tâm GDTX Phổ Yên sử dụng YOLOv8,DTC215290054,Phan Ngọc Hà,GV022,"thị giác máy tính, học sâu",9.5
 K21,Phát triển hệ thống hỗ trợ phân tích dữ liệu tai nạn giao thông cho ủy ban nhân dân xã Hóa Thượng trên nền tảng Apache Airflow,DTC215290055,Dương Thùy Ngân,GV008,"phân tích dữ liệu, khai phá dữ liệu, kho dữ liệu",6.0
-K21,Thiết kế và cài đặt công cụ mã hóa dữ liệu lưu trữ cho công ty cổ phần Thành Công,DTC215290056,Hà Thành Hải,GV021,"an toàn thông tin, mã hóa",6.5
-K21,Nghiên cứu và phát triển phân hệ ERP lập kế hoạch và theo dõi đơn hàng sản xuất tại khu công nghiệp Na Rì,DTC215290057,Hà Trung Đạt,GV007,"báo cáo, quản trị doanh nghiệp",5.7
+K21,Thiết kế và cài đặt công cụ bảo vệ tệp tin bằng mật mã cho công ty cổ phần Thành Công,DTC215290056,Hà Thành Hải,GV021,"an toàn thông tin, mã hóa",6.5
+K21,Xây dựng ứng dụng quản lý sản xuất cho xưởng may An Khang trên nền tảng ERPNext,DTC215290057,Hà Trung Đạt,GV007,"báo cáo, quản trị doanh nghiệp",5.7
 K21,Phát triển ứng dụng phân tích dữ liệu dự đoán khách hàng rời bỏ tại DNTN Tân Tiến,DTC215290058,Hồ Mai Oanh,GV019,"trực quan hóa, phân tích dữ liệu, kho dữ liệu",7.7
 K21,Xây dựng giải pháp phát hiện xâm nhập mạng cho doanh nghiệp tư nhân Hưng Thịnh sử dụng Wazuh,DTC215290059,Dương Bích Yến,GV021,"bảo mật, an toàn thông tin, phát hiện tấn công, xác thực",6.3
 K21,Thiết kế và cài đặt bảng điều khiển hỗ trợ khai phá thói quen mua hàng cho siêu thị mini Minh Phát,DTC215290060,Bùi Thu Hà,GV016,"dự báo, khai phá dữ liệu, trực quan hóa",8.7
 K22,Xây dựng và triển khai hệ thống IoT đo đếm công suất điện từ xa tại công ty TNHH Hưng Thịnh,DTC225290001,Lê Hồng Nhung,GV001,"hệ thống nhúng, cảm biến, giám sát từ xa, vi điều khiển",6.3
-K22,Ứng dụng Moodle trong ôn tập bằng thẻ ghi nhớ cho trung tâm giáo dục thường xuyên Sông Công,DTC225290002,Đặng Quang Tú,GV012,"đánh giá, e-learning, LMS, học trực tuyến",7.7
+K22,Xây dựng ứng dụng hỗ trợ ôn tập bằng thẻ ghi nhớ cho trung tâm ngoại ngữ Hoàng Long trên nền tảng NodeJS,DTC225290002,Đặng Quang Tú,GV012,"đánh giá, e-learning, LMS, học trực tuyến",7.7
 K22,Phát triển hệ thống thông tin tiếp nhận hồ sơ xét tuyển qua mạng tại trung tâm giáo dục thường xuyên Đại Từ,DTC225290003,Huỳnh Thu Oanh,GV022,"ứng dụng web, cơ sở dữ liệu, quản lý",8.2
 K22,Ứng dụng ReactJS trong quản lý thư viện tại trung tâm GDTX Phú Lương,DTC225290004,Nông Mạnh Dũng,GV013,"cơ sở dữ liệu, ứng dụng web, RESTful API",7.9
 K22,Thiết kế và xây dựng hệ thống phân tích biến động giá nông sản cho vùng chè Gia Sàng trên nền tảng Power BI,DTC225290005,Ngô Thùy Loan,GV017,"khai phá dữ liệu, kho dữ liệu, trực quan hóa, phân tích dữ liệu",6.9
 K22,Xây dựng và triển khai bộ điều khiển theo dõi hành trình xe bằng GPS cho DNTN Đại Phát trên nền tảng ESP32,DTC225290006,Lương Tuấn Dũng,GV006,"hệ thống nhúng, cảm biến",9.0
 K22,Thiết kế và xây dựng hệ thống hỗ trợ cảnh báo sớm người học bỏ học tại trường THCS Lê Hồng Phong,DTC225290007,Nguyễn Công Quân,GV010,"khai phá dữ liệu, kho dữ liệu",6.4
-K22,Thiết kế và cài đặt ứng dụng web giải quyết hồ sơ một cửa điện tử cho ủy ban nhân dân huyện Võ Nhai trên nền tảng Django,DTC225290008,Hoàng Công Sơn,GV020,"ứng dụng web, giao diện người dùng",7.4
+K22,Phát triển ứng dụng web giải quyết hồ sơ một cửa điện tử cho ủy ban nhân dân xã Cam Giá,DTC225290008,Hoàng Công Sơn,GV020,"ứng dụng web, giao diện người dùng",7.4
 K22,Nghiên cứu và phát triển công cụ hỗ trợ đề xuất mặt hàng theo sở thích cho siêu thị mini Minh Phát trên nền tảng scikit-learn,DTC225290009,Nguyễn Văn Hoàng,GV019,"khai phá dữ liệu, trí tuệ nhân tạo",8.4
-K22,Xây dựng và triển khai phân hệ ERP chấm công và quản lý ca làm việc cho xưởng may Việt Tiến trên nền tảng ERPNext,DTC225290010,Phan Tuấn Hải,GV012,"báo cáo, quy trình nghiệp vụ, ERP, quản trị doanh nghiệp",6.2
+K22,Ứng dụng Spring Boot trong theo dõi giờ công nhân viên cho xưởng cơ khí Bắc Sơn,DTC225290010,Phan Tuấn Hải,GV012,"báo cáo, quy trình nghiệp vụ, ERP, quản trị doanh nghiệp",6.2
 K22,Ứng dụng TensorFlow trong chẩn đoán bệnh cây qua ảnh lá cho vùng trồng chè Gia Sàng,DTC225290011,Phạm Thành Vinh,GV017,"trí tuệ nhân tạo, học máy, thị giác máy tính",5.1
 K22,Xây dựng ứng dụng Android hỗ trợ đặt và giao đồ ăn cho cơ sở lưu trú An Khang,DTC225290012,Vũ Mai Huyền,GV022,"Android, thông báo đẩy, iOS, đa nền tảng",9.2
 K22,Thiết kế và xây dựng ứng dụng Android mua bán nông sản trực tiếp cho trang trại Phúc An,DTC225290013,Đặng Xuân Lâm,GV014,"đa nền tảng, thông báo đẩy, iOS, ứng dụng di động",6.1
 K22,Nghiên cứu và phát triển mô hình nhận diện phần mềm độc hại tại công ty TNHH Bắc Sơn trên nền tảng Suricata,DTC225290014,Vũ Văn Bình,GV015,"mã hóa, phát hiện tấn công, an toàn thông tin",8.1
-K22,Ứng dụng PyTorch trong tư vấn tuyển sinh bằng chatbot tại trung tâm đào tạo ngoại ngữ An Khang,DTC225290015,Đặng Tuấn Kiên,GV017,"trí tuệ nhân tạo, học sâu, xử lý ngôn ngữ tự nhiên",9.4
+K22,Ứng dụng PyTorch trong giải đáp thắc mắc tuyển sinh qua trợ lý ảo tại trung tâm đào tạo ngoại ngữ An Khang,DTC225290015,Đặng Tuấn Kiên,GV017,"trí tuệ nhân tạo, học sâu, xử lý ngôn ngữ tự nhiên",9.4
 K22,Ứng dụng Flutter trong điểm danh sinh viên cho trung tâm GDTX Đồng Hỷ,DTC225290016,Phạm Khánh Yến,GV004,"ứng dụng di động, Android",7.0
 K22,Nghiên cứu và phát triển giải pháp IoT giám sát nhiệt độ kho lạnh cho DNTN Trường Thịnh,DTC225290017,Phạm Thu Hằng,GV013,"cảm biến, giám sát từ xa, hệ thống nhúng, vi điều khiển",8.7
-K22,Thiết kế và xây dựng giải pháp IoT điều khiển nhà thông minh cho các gia đình ở Yên Sơn trên nền tảng Node-RED,DTC225290018,Dương Đức Nam,GV001,"vi điều khiển, hệ thống nhúng, giám sát từ xa, cảm biến",7.2
+K22,Thiết kế và xây dựng thiết bị IoT điều khiển nhà thông minh cho các gia đình ở Yên Sơn trên nền tảng Node-RED,DTC225290018,Dương Đức Nam,GV001,"vi điều khiển, hệ thống nhúng, giám sát từ xa, cảm biến",7.2
 K22,Thiết kế và cài đặt công cụ hỗ trợ chẩn đoán ảnh X-quang phổi tại bệnh viện tuyến tỉnh Tuyên Quang sử dụng OpenCV,DTC225290019,Lý Minh Nam,GV017,"trí tuệ nhân tạo, xử lý ảnh",5.1
 K22,Ứng dụng Keycloak trong đăng nhập bằng mật khẩu và mã OTP cho công ty TNHH Minh Phát,DTC225290020,Ngô Ngọc Hoa,GV010,"bảo mật, mã hóa, phát hiện tấn công",5.2
-K22,Thiết kế và xây dựng công cụ hỗ trợ nhận dạng biển số xe cho nhà hàng Việt Tiến trên nền tảng OpenCV,DTC225290021,Hoàng Thị Linh,GV011,"trí tuệ nhân tạo, học máy, học sâu",8.6
+K22,Ứng dụng OpenCV trong nhận dạng biển số xe tại công ty vận tải Hoàng Long,DTC225290021,Hoàng Thị Linh,GV011,"trí tuệ nhân tạo, học máy, học sâu",8.6
 K22,Xây dựng hệ thống IoT theo dõi vi khí hậu trong nhà màng tại HTX nông nghiệp Tích Lương,DTC225290022,Dương Văn Sơn,GV021,"hệ thống nhúng, giám sát từ xa",9.5
 K22,Phát triển giải pháp sao lưu và phục hồi dữ liệu cho doanh nghiệp tư nhân Đại Phát,DTC225290023,Phan Khánh Hạnh,GV020,"xác thực, an toàn thông tin, phát hiện tấn công",5.1
-K22,Phát triển giải pháp IoT giám sát ao nuôi thủy sản cho vùng chè Gia Sàng,DTC225290024,Đinh Mạnh Huy,GV004,"hệ thống nhúng, IoT, vi điều khiển, cảm biến",9.5
-K22,Xây dựng và triển khai ứng dụng hỗ trợ biên soạn đề thi từ kho câu hỏi cho trường trung học cơ sở Ngô Quyền trên nền tảng NodeJS,DTC225290025,Vũ Thành Thắng,GV015,"học trực tuyến, e-learning, LMS",7.7
+K22,Phát triển giải pháp IoT đo chất lượng nước ao nuôi cá cho vùng chè Gia Sàng,DTC225290024,Đinh Mạnh Huy,GV004,"hệ thống nhúng, IoT, vi điều khiển, cảm biến",9.5
+K22,Nghiên cứu và phát triển ứng dụng quản lý ngân hàng câu hỏi tại trường CĐ nghề Lạng Sơn,DTC225290025,Vũ Thành Thắng,GV015,"học trực tuyến, e-learning, LMS",7.7
 K22,Thiết kế và xây dựng hệ thống hỗ trợ quản lý định danh và phân quyền truy cập tại công ty TNHH Hoàng Long,DTC225290026,Nguyễn Ngọc Nhung,GV017,"phát hiện tấn công, xác thực",9.2
 K22,Nghiên cứu và phát triển giải pháp IoT hỗ trợ theo dõi môi trường chuồng nuôi tại vùng trồng chè Phúc Hà sử dụng Node-RED,DTC225290027,Huỳnh Khánh Hà,GV007,"giám sát từ xa, cảm biến, vi điều khiển",6.6
-K22,Phát triển hệ thống bảo vệ tệp tin bằng mật mã tại DNTN Đại Phát,DTC225290028,Ngô Tuấn Huy,GV020,"mã hóa, phát hiện tấn công, xác thực",8.0
+K22,Phát triển hệ thống mã hóa dữ liệu lưu trữ tại DNTN Đại Phát,DTC225290028,Ngô Tuấn Huy,GV020,"mã hóa, phát hiện tấn công, xác thực",8.0
 K22,Xây dựng ứng dụng Android theo dõi sức khỏe cá nhân cho TTYT huyện Đồng Hỷ,DTC225290029,Đinh Mai Hạnh,GV013,"đa nền tảng, Android, thông báo đẩy, iOS",6.1
-K22,Xây dựng và triển khai website hỗ trợ trao đổi thông tin qua sổ liên lạc điện tử cho trung tâm GDTX Yên Sơn,DTC225290030,Phạm Thanh Yến,GV001,"e-learning, giáo dục",8.8
+K22,Xây dựng ứng dụng hỗ trợ trao đổi thông tin qua sổ liên lạc điện tử cho trường cao đẳng nghề Hòa Bình trên nền tảng Django,DTC225290030,Phạm Thanh Yến,GV001,"e-learning, giáo dục",8.8
 K22,Nghiên cứu và phát triển hệ thống thiết lập bộ lọc lưu lượng mạng tại trường THCS Lê Quý Đôn trên nền tảng pfSense,DTC225290031,Hà Hồng Linh,GV010,"phát hiện tấn công, xác thực, bảo mật",7.7
 K22,Thiết kế và cài đặt hệ thống IoT tưới cây tự động cho hợp tác xã nông nghiệp Cam Giá trên nền tảng MQTT,DTC225290032,Ngô Thanh Loan,GV006,"cảm biến, IoT, hệ thống nhúng",8.1
 K22,Ứng dụng PhoBERT trong tóm tắt văn bản tiếng Việt tại UBND xã Phúc Xuân,DTC225290033,Vũ Khánh Giang,GV022,"trí tuệ nhân tạo, học sâu, học máy",7.8
-K22,Xây dựng ứng dụng quản lý văn bản đi đến cho UBND huyện Sông Công,DTC225290034,Ngô Hồng Hà,GV018,"quản lý, quản trị doanh nghiệp, báo cáo, quy trình nghiệp vụ",6.7
+K22,Xây dựng phân hệ ERP luân chuyển công văn nội bộ cho UBND xã Hóa Thượng,DTC225290034,Ngô Hồng Hà,GV018,"quản lý, quản trị doanh nghiệp, báo cáo, quy trình nghiệp vụ",6.7
 K22,Phát triển giải pháp thiết lập kênh truyền bảo mật giữa các văn phòng tại DNTN Trường Thịnh trên nền tảng OpenSSL,DTC225290035,Đặng Thành Huy,GV017,"bảo mật, phát hiện tấn công",6.0
 K22,Xây dựng ứng dụng web hỗ trợ đặt sân thể thao tại nhà hàng Đại Phát,DTC225290036,Hà Thùy Anh,GV017,"ứng dụng web, quản lý, RESTful API",6.4
-K22,Xây dựng và triển khai website tổ chức kiểm tra trắc nghiệm qua mạng cho trung tâm giáo dục thường xuyên Đồng Hỷ,DTC225290037,Triệu Ngọc Anh,GV003,"đánh giá, giáo dục",8.4
+K22,Nghiên cứu và phát triển website tổ chức kiểm tra trắc nghiệm qua mạng cho trung tâm giáo dục thường xuyên Yên Sơn,DTC225290037,Triệu Ngọc Anh,GV003,"đánh giá, giáo dục",8.4
 K22,Thiết kế và xây dựng hệ thống IoT phát hiện khói và nhiệt bất thường cho công ty cổ phần Nam Việt,DTC225290038,Huỳnh Mai Dung,GV019,"vi điều khiển, IoT, giám sát từ xa",6.3
 K22,Xây dựng và triển khai mô hình chứng thực tài liệu bằng chữ ký số tại ủy ban nhân dân huyện Phú Lương,DTC225290039,Đỗ Ngọc Nhung,GV020,"an toàn thông tin, phát hiện tấn công, xác thực, mã hóa",7.4
 K22,Nghiên cứu và phát triển mô hình phân tích kết quả học tập cho trường THPT Lê Hồng Phong,DTC225290040,Ma Xuân Huy,GV003,"kho dữ liệu, phân tích dữ liệu, khai phá dữ liệu, trực quan hóa",5.2
 K22,Xây dựng ứng dụng trí tuệ nhân tạo hỗ trợ ước lượng doanh số theo thời gian tại siêu thị quy mô nhỏ Hoàng Long,DTC225290041,Hồ Quang Cường,GV004,"học máy, khai phá dữ liệu, dự báo, trí tuệ nhân tạo",8.3
-K22,Thiết kế và cài đặt mô hình học máy chuyển ảnh chữ viết tay thành văn bản tại trường mầm non Tân Cương,DTC225290042,Phan Đức Toàn,GV022,"học sâu, thị giác máy tính, học máy",7.8
+K22,Thiết kế và cài đặt mô hình học máy chuyển ảnh chữ viết tay thành văn bản tại trường CĐ nghề Tuyên Quang,DTC225290042,Phan Đức Toàn,GV022,"học sâu, thị giác máy tính, học máy",7.8
 K22,Xây dựng ứng dụng phân tích dữ liệu phân tích hành vi mua sắm cho cửa hàng tiện lợi Hoàng Long sử dụng Metabase,DTC225290043,Triệu Mạnh Hải,GV017,"trực quan hóa, phân tích dữ liệu, kho dữ liệu, khai phá dữ liệu",6.9
 K22,Thiết kế và xây dựng cổng thông tin hỗ trợ đặt bàn nhà hàng tại nhà hàng Minh Phát,DTC225290044,Nguyễn Hồng Ngân,GV016,"ứng dụng web, cơ sở dữ liệu, quản lý",7.9
-K22,Phát triển ứng dụng chia sẻ bài giảng video cho trường THCS Ngô Quyền,DTC225290045,Triệu Thùy Hằng,GV007,"đánh giá, e-learning",6.3
+K22,Xây dựng và triển khai website chia sẻ bài giảng video cho trung tâm giáo dục thường xuyên Chợ Mới,DTC225290045,Triệu Thùy Hằng,GV007,"đánh giá, e-learning",6.3
 K22,Ứng dụng Pandas trong phân tích nhu cầu tuyển dụng cho UBND xã Quyết Thắng,DTC225290046,Nguyễn Đức Kiên,GV015,"kho dữ liệu, trực quan hóa",5.8
-K22,Phát triển hệ thống báo cáo hiển thị số liệu quản trị trên bảng điều khiển cho doanh nghiệp tư nhân Trường Thịnh sử dụng Apache Airflow,DTC225290047,Dương Hữu Kiên,GV007,"khai phá dữ liệu, trực quan hóa",9.2
+K22,Ứng dụng Power BI trong hiển thị số liệu quản trị trên bảng điều khiển cho công ty TNHH Thành Công,DTC225290047,Dương Hữu Kiên,GV007,"khai phá dữ liệu, trực quan hóa",9.2
 K22,Thiết kế và cài đặt ứng dụng đa nền tảng hỗ trợ tiếp nhận kiến nghị của người dân tại sở TT&TT tỉnh Bắc Kạn sử dụng Kotlin,DTC225290048,Ma Đức Long,GV002,"đa nền tảng, ứng dụng di động, Android, iOS",6.8
 K22,Xây dựng hệ thống hỗ trợ phân loại rác thải qua hình ảnh tại sở TT&TT tỉnh Thái Nguyên,DTC225290049,Phạm Khánh Hạnh,GV007,"xử lý ảnh, học sâu, thị giác máy tính",9.0
 K22,Xây dựng và triển khai công cụ lọc email giả mạo cho công ty cổ phần An Khang,DTC225290050,Lý Xuân Cường,GV012,"phát hiện tấn công, bảo mật, an toàn thông tin",5.5
 K22,Ứng dụng Kotlin trong tìm phòng trọ cho người ở trọ tại Phú Lương,DTC225290051,Phan Mạnh Phong,GV005,"thông báo đẩy, Android, iOS, đa nền tảng",9.3
 K22,Nghiên cứu và phát triển mô hình phân tích số liệu dịch bệnh tại bệnh viện đa khoa tỉnh Tuyên Quang,DTC225290052,Hồ Công Đạt,GV020,"trực quan hóa, kho dữ liệu, dự báo",8.9
-K22,Nghiên cứu và phát triển phần mềm hỗ trợ quản lý nhà thuốc cho trạm y tế xã Phúc Xuân trên nền tảng Laravel,DTC225290053,Đỗ Mai Yến,GV020,"quản lý, quản trị doanh nghiệp, quy trình nghiệp vụ",5.2
+K22,Nghiên cứu và phát triển hệ thống hỗ trợ bán thuốc và theo dõi hạn dùng tại trung tâm y tế huyện Sông Công,DTC225290053,Đỗ Mai Yến,GV020,"quản lý, quản trị doanh nghiệp, quy trình nghiệp vụ",5.2
 K22,Ứng dụng Metabase trong thống kê vụ va chạm giao thông cho ủy ban nhân dân huyện Phú Lương,DTC225290054,Bùi Quang Nam,GV015,"trực quan hóa, khai phá dữ liệu, kho dữ liệu",7.2
 K22,Thiết kế và xây dựng website lưu trữ và tra cứu hồ sơ học sinh cho trung tâm GDTX Đồng Hỷ,DTC225290055,Hoàng Xuân Quân,GV004,"RESTful API, quản lý, giao diện người dùng, ứng dụng web",6.7
 K22,Thiết kế và cài đặt phần mềm trực tuyến đăng tin rao vặt bất động sản cho công ty CP Hoàng Long sử dụng NodeJS,DTC225290056,Vũ Ngọc Quỳnh,GV010,"cơ sở dữ liệu, giao diện người dùng",8.1
-K22,Xây dựng hệ thống thông tin đặt vé xe khách cho quán ăn Phúc An,DTC225290057,Hồ Thị Huyền,GV017,"giao diện người dùng, cơ sở dữ liệu, ứng dụng web",7.7
-K22,Xây dựng nền tảng học tiếng Anh giao tiếp tại trường THCS Nguyễn Trãi sử dụng NodeJS,DTC225290058,Đặng Tuấn Hoàng,GV008,"LMS, đánh giá, e-learning, học trực tuyến",5.4
+K22,Xây dựng hệ thống thông tin đặt vé xe khách cho bến xe liên tỉnh Bắc Giang,DTC225290057,Hồ Thị Huyền,GV017,"giao diện người dùng, cơ sở dữ liệu, ứng dụng web",7.7
+K22,Xây dựng nền tảng hỗ trợ học tiếng Anh giao tiếp cho trường THPT Nguyễn Trãi sử dụng NodeJS,DTC225290058,Đặng Tuấn Hoàng,GV008,"LMS, đánh giá, e-learning, học trực tuyến",5.4
 K22,Xây dựng và triển khai hệ thống giám sát và cảnh báo tấn công mạng tại công ty CP Bắc Sơn,DTC225290059,Võ Hồng Uyên,GV008,"bảo mật, an toàn thông tin, mã hóa",6.8
 K22,Nghiên cứu và phát triển ứng dụng Android hỗ trợ theo dõi thu chi cá nhân cho người thuê trọ tại Ba Bể,DTC225290060,Nông Thị Loan,GV001,"iOS, ứng dụng di động, Android, thông báo đẩy",8.0

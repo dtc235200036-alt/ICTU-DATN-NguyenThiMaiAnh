@@ -134,6 +134,12 @@ class TieuDe:
         return nfc(s[0].upper() + s[1:])
 
 
+def hop_san_pham(sp: str, dt: str) -> bool:
+    """Tránh lặp từ kiểu "phần mềm trực tuyến đặt chỗ … trực tuyến", "ứng dụng quản lý quản lý …"."""
+    duoi = " ".join(sp.split()[-2:])
+    return len(sp.split()) < 2 or duoi not in dt
+
+
 def chon_tu_noi(rng: random.Random, nhom: str) -> str:
     return "cho" if nhom in vocab.NHOM_CHI_DUNG_CHO else rng.choice(vocab.TU_NOI)
 
@@ -154,10 +160,11 @@ def sinh_tieu_de(rng: random.Random, dt: DoiTuong, *, dien_dat: int, don_vi: Don
     return TieuDe(
         kieu=kieu,
         dong_tu=rng.choice(dong_tu_ung),
-        san_pham=rng.choice(info["san_pham"]),
+        san_pham=rng.choice([s for s in info["san_pham"] if hop_san_pham(s[0], dt.dien_dat[dien_dat])]
+                            or info["san_pham"]),
         doi_tuong=dt,
         dien_dat=dien_dat,
-        tu_noi=chon_tu_noi(rng, dt.nhom),
+        tu_noi="cho" if "tại" in dt.dien_dat[dien_dat].split() else chon_tu_noi(rng, dt.nhom),
         don_vi=don_vi,
         day_du=rng.random() < 0.35,
         cong_nghe=cong_nghe,
@@ -176,8 +183,12 @@ def dien_dat_lai(rng: random.Random, td: TieuDe) -> TieuDe:
     tu_noi = td.tu_noi
     if td.doi_tuong.nhom not in vocab.NHOM_CHI_DUNG_CHO:
         tu_noi = "cho" if td.tu_noi == "tại" else "tại"
+    if "tại" in td.doi_tuong.dien_dat[1 - td.dien_dat].split():
+        tu_noi = "cho"
     # sản phẩm: dùng dạng đồng nghĩa (đảo cặp)
     san_pham = (td.san_pham[1], td.san_pham[0])
+    if not hop_san_pham(san_pham[0], td.doi_tuong.dien_dat[1 - td.dien_dat]):
+        san_pham = td.san_pham
     cong_nghe = td.cong_nghe
     if kieu not in ("ung_dung", "su_dung") and cong_nghe and rng.random() < 0.4:
         cong_nghe = None

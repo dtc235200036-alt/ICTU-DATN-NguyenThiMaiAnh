@@ -1,81 +1,81 @@
 ﻿ma_truy_van,loai,cum,ma_doi_tuong,ten_truy_van,tieu_de_goc,ky_vong_canh_bao,tap
-TV001,DIEN_DAT_LAI,ERP,ERP.cham_cong,Thiết kế và xây dựng mô-đun hoạch định nguồn lực doanh nghiệp hỗ trợ theo dõi giờ công nhân viên tại nhà máy may Việt Tiến,Xây dựng và triển khai phân hệ ERP chấm công và quản lý ca làm việc cho xưởng may Việt Tiến trên nền tảng ERPNext,1,HIEU_CHINH
-TV002,DIEN_DAT_LAI,ERP,ERP.van_tai,Phát triển mô-đun hoạch định nguồn lực doanh nghiệp hỗ trợ quản lý vận tải hàng hóa tại doanh nghiệp tư nhân Phúc An,Xây dựng phân hệ ERP điều phối xe giao hàng cho DNTN Phúc An,1,KIEM_CHUNG
-TV003,DIEN_DAT_LAI,HOC_TAP,HOC_TAP.khoa_hoc,Thiết kế và cài đặt nền tảng số hỗ trợ quản lý khóa học trực tuyến cho trung tâm giáo dục thường xuyên Chợ Mới,Xây dựng nền tảng tổ chức lớp học qua mạng tại trung tâm GDTX Chợ Mới,1,KIEM_CHUNG
-TV004,CUNG_LINH_VUC,AN_TOAN,AN_TOAN.ddos,Thiết kế và cài đặt mô hình phòng chống tấn công từ chối dịch vụ cho công ty TNHH Phúc An trên nền tảng Suricata,,0,HIEU_CHINH
+TV001,DIEN_DAT_LAI,ERP,ERP.ke_toan,Sử dụng SQL Server để hạch toán thu chi doanh nghiệp cho công ty cổ phần Hoàng Long,Ứng dụng SQL Server trong quản lý kế toán tại công ty CP Hoàng Long,1,HIEU_CHINH
+TV002,DIEN_DAT_LAI,ERP,ERP.nha_thuoc,Phát triển mô-đun hoạch định nguồn lực doanh nghiệp hỗ trợ bán thuốc và theo dõi hạn dùng cho trung tâm y tế huyện Phú Bình trên nền tảng Spring Boot,Xây dựng phân hệ ERP quản lý nhà thuốc tại TTYT huyện Phú Bình sử dụng Spring Boot,1,KIEM_CHUNG
+TV003,DIEN_DAT_LAI,HOC_TAP,HOC_TAP.khoa_hoc,Thiết kế và xây dựng nền tảng số hỗ trợ tổ chức lớp học qua mạng cho trường THCS Trần Phú,Xây dựng và triển khai nền tảng quản lý khóa học trực tuyến tại trường trung học cơ sở Trần Phú,1,KIEM_CHUNG
+TV004,CUNG_LINH_VUC,AN_TOAN,AN_TOAN.ddos,Xây dựng và triển khai giải pháp hỗ trợ phòng chống tấn công từ chối dịch vụ cho công ty cổ phần Thành Công sử dụng Suricata,,0,HIEU_CHINH
 TV005,CUNG_LINH_VUC,WEB,WEB.tour,Nghiên cứu và phát triển cổng thông tin bán chương trình du lịch trọn gói tại khách sạn Nam Việt sử dụng ReactJS,,0,HIEU_CHINH
-TV006,CUNG_LINH_VUC,ERP,ERP.phong_kham,Nghiên cứu và phát triển ứng dụng quản lý phòng khám tư nhân tại TTYT huyện Phổ Yên sử dụng Spring Boot,,0,KIEM_CHUNG
+TV006,CUNG_LINH_VUC,ERP,ERP.phong_kham,Thiết kế và cài đặt phần mềm quản lý phòng khám tư nhân cho phòng khám đa khoa Đại Phát,,0,KIEM_CHUNG
 TV007,DIEN_DAT_LAI,DU_LIEU,DU_LIEU.tuyen_dung,Sử dụng Pandas để khai phá tin tuyển dụng việc làm tại ủy ban nhân dân xã Quyết Thắng,Ứng dụng Pandas trong phân tích nhu cầu tuyển dụng cho UBND xã Quyết Thắng,1,HIEU_CHINH
-TV008,CUNG_LINH_VUC,AN_TOAN,AN_TOAN.bay_tan_cong,Nghiên cứu và phát triển mô hình giăng bẫy thu hút kẻ tấn công cho công ty TNHH An Khang,,0,HIEU_CHINH
-TV009,DIEN_DAT_LAI,HOC_TAP,HOC_TAP.ngoai_ngu,Phát triển nền tảng số hỗ trợ luyện nói tiếng Anh trực tuyến cho trường trung học cơ sở Nguyễn Trãi trên nền tảng NodeJS,Xây dựng nền tảng học tiếng Anh giao tiếp tại trường THCS Nguyễn Trãi sử dụng NodeJS,1,KIEM_CHUNG
+TV008,CUNG_LINH_VUC,AN_TOAN,AN_TOAN.bay_tan_cong,Thiết kế và cài đặt mô hình giăng bẫy thu hút kẻ tấn công cho công ty TNHH Phúc An trên nền tảng Suricata,,0,HIEU_CHINH
+TV009,DIEN_DAT_LAI,HOC_TAP,HOC_TAP.ngoai_ngu,Phát triển nền tảng số luyện nói tiếng Anh trực tuyến tại trường trung học phổ thông Nguyễn Trãi trên nền tảng NodeJS,Xây dựng nền tảng hỗ trợ học tiếng Anh giao tiếp cho trường THPT Nguyễn Trãi sử dụng NodeJS,1,KIEM_CHUNG
 TV010,DIEN_DAT_LAI,AI_ML,AI_ML.doanh_thu,Phát triển ứng dụng AI dự báo doanh thu bán hàng cho siêu thị mini Hoàng Long,Xây dựng ứng dụng trí tuệ nhân tạo hỗ trợ ước lượng doanh số theo thời gian tại siêu thị quy mô nhỏ Hoàng Long,1,HIEU_CHINH
 TV011,CUNG_LINH_VUC,AI_ML,AI_ML.giong_noi,Nghiên cứu và phát triển mô hình học sâu hỗ trợ chuyển giọng nói tiếng Việt thành văn bản cho ủy ban nhân dân huyện Chợ Mới sử dụng TensorFlow,,0,KIEM_CHUNG
-TV012,DIEN_DAT_LAI,AN_TOAN,AN_TOAN.ma_doc,Sử dụng Suricata để nhận diện phần mềm độc hại tại công ty TNHH Trường Thịnh,Ứng dụng Suricata trong phát hiện mã độc cho công ty trách nhiệm hữu hạn Trường Thịnh,1,HIEU_CHINH
-TV013,CUNG_LINH_VUC,ERP,ERP.van_hanh_ks,Phát triển ứng dụng quản lý vận hành khách sạn tại điểm du lịch Định Hóa trên nền tảng Odoo,,0,HIEU_CHINH
+TV012,DIEN_DAT_LAI,AN_TOAN,AN_TOAN.ma_doc,Thiết kế và cài đặt mô hình bảo mật hỗ trợ phát hiện mã độc cho công ty trách nhiệm hữu hạn Bắc Sơn,Nghiên cứu và phát triển mô hình nhận diện phần mềm độc hại tại công ty TNHH Bắc Sơn trên nền tảng Suricata,1,HIEU_CHINH
+TV013,CUNG_LINH_VUC,ERP,ERP.van_hanh_ks,Xây dựng ứng dụng quản lý vận hành khách sạn tại khách sạn Nam Việt,,0,HIEU_CHINH
 TV014,CUNG_LINH_VUC,MOBILE,MOBILE.the_duc,Phát triển ứng dụng di động hướng dẫn luyện tập thể dục tại nhà cho người ở trọ tại Phổ Yên,,0,HIEU_CHINH
 TV015,CUNG_LINH_VUC,HOC_TAP,HOC_TAP.dien_dan,Phát triển ứng dụng xây dựng cộng đồng trao đổi bài tập tại trường THCS Quang Trung trên nền tảng Django,,0,KIEM_CHUNG
 TV016,CUNG_LINH_VUC,MOBILE,MOBILE.the_duc,Xây dựng và triển khai ứng dụng điện thoại hỗ trợ lập kế hoạch tập luyện thể thao cho người dân TP Lạng Sơn,,0,KIEM_CHUNG
-TV017,CUNG_LINH_VUC,AN_TOAN,AN_TOAN.ddos,Xây dựng mô hình giảm thiểu tấn công làm nghẽn máy chủ cho công ty CP Việt Tiến trên nền tảng pfSense,,0,HIEU_CHINH
-TV018,DIEN_DAT_LAI,AN_TOAN,AN_TOAN.sao_luu,Xây dựng hệ thống bảo mật sao lưu và phục hồi dữ liệu tại công ty trách nhiệm hữu hạn Phúc An,Phát triển hệ thống hỗ trợ dự phòng dữ liệu tự động cho công ty TNHH Phúc An,1,HIEU_CHINH
+TV017,CUNG_LINH_VUC,AN_TOAN,AN_TOAN.ddos,Xây dựng mô hình giảm thiểu tấn công làm nghẽn máy chủ tại DNTN Thành Công,,0,HIEU_CHINH
+TV018,DIEN_DAT_LAI,AN_TOAN,AN_TOAN.sao_luu,Thiết kế và xây dựng mô hình bảo mật hỗ trợ dự phòng dữ liệu tự động tại DNTN An Khang,Phát triển mô hình sao lưu và phục hồi dữ liệu cho doanh nghiệp tư nhân An Khang,1,HIEU_CHINH
 TV019,DIEN_DAT_LAI,MOBILE,MOBILE.du_lich,Phát triển ứng dụng cho hệ điều hành Android hướng dẫn du lịch cho cơ sở lưu trú Bắc Sơn,Xây dựng ứng dụng Android hỗ trợ giới thiệu điểm tham quan tại khách sạn Bắc Sơn sử dụng Flutter,1,KIEM_CHUNG
 TV020,DIEN_DAT_LAI,MOBILE,MOBILE.phan_anh,Xây dựng ứng dụng chạy trên cả Android và iOS tiếp nhận kiến nghị của người dân cho sở thông tin và truyền thông tỉnh Tuyên Quang,Nghiên cứu và phát triển ứng dụng đa nền tảng hỗ trợ phản ánh hiện trường đô thị tại sở TT&TT tỉnh Tuyên Quang,1,HIEU_CHINH
-TV021,CUNG_LINH_VUC,IOT,IOT.den_duong,Xây dựng và triển khai giải pháp IoT điều khiển chiếu sáng công cộng cho UBND xã Tân Cương trên nền tảng Node-RED,,0,HIEU_CHINH
-TV022,CUNG_LINH_VUC,AN_TOAN,AN_TOAN.wifi,Xây dựng và triển khai giải pháp hỗ trợ kiểm soát truy cập mạng không dây cho trung tâm đào tạo ngoại ngữ Thành Công sử dụng Keycloak,,0,HIEU_CHINH
+TV021,CUNG_LINH_VUC,IOT,IOT.den_duong,Xây dựng và triển khai thiết bị IoT điều khiển chiếu sáng công cộng tại ủy ban nhân dân xã Tân Cương trên nền tảng Node-RED,,0,HIEU_CHINH
+TV022,CUNG_LINH_VUC,AN_TOAN,AN_TOAN.wifi,Xây dựng và triển khai mô hình kiểm soát truy cập mạng không dây cho trung tâm GDTX Đại Từ trên nền tảng pfSense,,0,HIEU_CHINH
 TV023,DIEN_DAT_LAI,AN_TOAN,AN_TOAN.tuong_lua,Sử dụng pfSense để thiết lập bộ lọc lưu lượng mạng tại trường THCS Ngô Quyền,Ứng dụng pfSense trong cấu hình tường lửa cho trường trung học cơ sở Ngô Quyền,1,KIEM_CHUNG
 TV024,DIEN_DAT_LAI,WEB,WEB.viec_lam,Thiết kế và cài đặt cổng điện tử hỗ trợ kết nối nhà tuyển dụng và người tìm việc cho công ty trách nhiệm hữu hạn Tân Tiến trên nền tảng Laravel,Xây dựng cổng thông tin tìm kiếm việc làm tại công ty TNHH Tân Tiến sử dụng Laravel,1,KIEM_CHUNG
 TV025,DIEN_DAT_LAI,DU_LIEU,DU_LIEU.gia_nong_san,Phát triển hệ thống phân tích hỗ trợ theo dõi giá cả mặt hàng nông nghiệp tại vùng trồng chè Gia Sàng sử dụng Power BI,Thiết kế và xây dựng hệ thống phân tích biến động giá nông sản cho vùng chè Gia Sàng trên nền tảng Power BI,1,HIEU_CHINH
-TV026,CUNG_LINH_VUC,IOT,IOT.sinh_hieu,Nghiên cứu và phát triển bộ điều khiển hỗ trợ theo dõi sinh hiệu người bệnh qua cảm biến tại TTYT huyện Na Rì,,0,HIEU_CHINH
-TV027,CUNG_LINH_VUC,HOC_TAP,HOC_TAP.dien_dan,Xây dựng hệ thống hỗ trợ tổ chức diễn đàn hỏi đáp học tập tại trường THPT Chu Văn An trên nền tảng ReactJS,,0,HIEU_CHINH
+TV026,CUNG_LINH_VUC,IOT,IOT.sinh_hieu,Xây dựng thiết bị IoT hỗ trợ theo dõi sinh hiệu người bệnh qua cảm biến tại trung tâm y tế huyện Phổ Yên,,0,HIEU_CHINH
+TV027,CUNG_LINH_VUC,HOC_TAP,HOC_TAP.dien_dan,Xây dựng và triển khai nền tảng tổ chức diễn đàn hỏi đáp học tập cho trường THPT Nguyễn Trãi trên nền tảng WebRTC,,0,HIEU_CHINH
 TV028,CUNG_LINH_VUC,WEB,WEB.su_kien,Thiết kế và cài đặt ứng dụng web quản lý sự kiện và bán vé hội thảo cho công ty CP Việt Tiến trên nền tảng Spring Boot,,0,HIEU_CHINH
 TV029,CUNG_LINH_VUC,WEB,WEB.quyen_gop,Ứng dụng ReactJS trong tiếp nhận và công khai ủng hộ từ thiện cho UBND huyện Định Hóa,,0,HIEU_CHINH
 TV030,CUNG_LINH_VUC,AI_ML,AI_ML.giong_noi,Xây dựng và triển khai mô hình học máy hỗ trợ nhận dạng tiếng nói tiếng Việt tại UBND xã Đồng Bẩm,,0,HIEU_CHINH
-TV031,CUNG_LINH_VUC,MOBILE,MOBILE.thu_cung,Thiết kế và cài đặt ứng dụng đa nền tảng chăm sóc thú cưng tại nhà hàng Bắc Sơn,,0,KIEM_CHUNG
-TV032,CUNG_LINH_VUC,DU_LIEU,DU_LIEU.khi_tuong,Xây dựng hệ thống báo cáo hỗ trợ thống kê lượng mưa và nhiệt độ cho vùng chè Phúc Xuân sử dụng Apache Airflow,,0,HIEU_CHINH
-TV033,DIEN_DAT_LAI,HOC_TAP,HOC_TAP.luyen_thi,Thiết kế và cài đặt nền tảng số hỗ trợ luyện thi tốt nghiệp THPT cho trường mầm non Cam Giá,Xây dựng nền tảng ôn tập thi trung học phổ thông tại trường mẫu giáo Cam Giá,1,HIEU_CHINH
-TV034,CUNG_LINH_VUC,DU_LIEU,DU_LIEU.dan_so,Thiết kế và xây dựng hệ thống hỗ trợ phân tích dữ liệu dân cư tại ủy ban nhân dân huyện Na Rì sử dụng Pandas,,0,KIEM_CHUNG
+TV031,CUNG_LINH_VUC,MOBILE,MOBILE.thu_cung,Phát triển ứng dụng đa nền tảng chăm sóc thú cưng tại chuỗi cửa hàng Tân Tiến,,0,KIEM_CHUNG
+TV032,CUNG_LINH_VUC,DU_LIEU,DU_LIEU.khi_tuong,Nghiên cứu và phát triển bảng điều khiển thống kê lượng mưa và nhiệt độ cho HTX nông nghiệp Phúc Hà,,0,HIEU_CHINH
+TV033,DIEN_DAT_LAI,HOC_TAP,HOC_TAP.luyen_thi,Phát triển nền tảng số hỗ trợ ôn tập thi trung học phổ thông tại trường trung học cơ sở Quang Trung,Thiết kế và cài đặt nền tảng luyện thi tốt nghiệp THPT cho trường THCS Quang Trung,1,HIEU_CHINH
+TV034,CUNG_LINH_VUC,DU_LIEU,DU_LIEU.dan_so,Nghiên cứu và phát triển mô hình hỗ trợ phân tích dữ liệu dân cư cho ủy ban nhân dân xã Sơn Cẩm sử dụng Apache Spark,,0,KIEM_CHUNG
 TV035,DIEN_DAT_LAI,AI_ML,AI_ML.x_quang,Xây dựng ứng dụng AI hỗ trợ hỗ trợ chẩn đoán ảnh X-quang phổi cho TTYT huyện Yên Sơn,Nghiên cứu và phát triển ứng dụng trí tuệ nhân tạo phân tích phim chụp X-quang ngực tại trung tâm y tế huyện Yên Sơn,1,KIEM_CHUNG
-TV036,DIEN_DAT_LAI,AN_TOAN,AN_TOAN.ma_hoa,Xây dựng phương án kỹ thuật hỗ trợ mã hóa dữ liệu lưu trữ cho doanh nghiệp tư nhân An Khang,Phát triển giải pháp bảo vệ tệp tin bằng mật mã tại DNTN An Khang,1,HIEU_CHINH
+TV036,DIEN_DAT_LAI,AN_TOAN,AN_TOAN.ma_hoa,Phát triển phương án kỹ thuật hỗ trợ bảo vệ tệp tin bằng mật mã cho doanh nghiệp tư nhân Phúc An sử dụng OpenSSL,Thiết kế và cài đặt giải pháp mã hóa dữ liệu lưu trữ tại DNTN Phúc An trên nền tảng OpenSSL,1,HIEU_CHINH
 TV037,DIEN_DAT_LAI,IOT,IOT.tuoi_cay,Xây dựng hệ thống Internet vạn vật hỗ trợ điều khiển tưới tiêu thông minh tại HTX nông nghiệp Cam Giá sử dụng MQTT,Thiết kế và cài đặt hệ thống IoT tưới cây tự động cho hợp tác xã nông nghiệp Cam Giá trên nền tảng MQTT,1,HIEU_CHINH
 TV038,DIEN_DAT_LAI,IOT,IOT.nha_thong_minh,Phát triển thiết bị kết nối Internet hỗ trợ tự động hóa thiết bị gia đình cho cư dân thành phố Hòa Bình,Xây dựng và triển khai thiết bị IoT điều khiển nhà thông minh cho người dân TP Hòa Bình,1,KIEM_CHUNG
-TV039,DIEN_DAT_LAI,AI_ML,AI_ML.chatbot,Nghiên cứu và phát triển hệ thống thông minh hỗ trợ tư vấn tuyển sinh bằng chatbot tại trung tâm ngoại ngữ Minh Phát sử dụng PhoBERT,Thiết kế và xây dựng hệ thống giải đáp thắc mắc tuyển sinh qua trợ lý ảo cho trung tâm đào tạo ngoại ngữ Minh Phát trên nền tảng PhoBERT,1,KIEM_CHUNG
-TV040,DIEN_DAT_LAI,HOC_TAP,HOC_TAP.hoc_lieu,Thiết kế và xây dựng trang web hỗ trợ chia sẻ học liệu số cho trường THPT Nguyễn Huệ,Xây dựng và triển khai website khai thác kho học liệu điện tử tại trường trung học phổ thông Nguyễn Huệ,1,HIEU_CHINH
-TV041,CUNG_LINH_VUC,DU_LIEU,DU_LIEU.dan_so,Xây dựng và triển khai hệ thống báo cáo thống kê biến động dân số cho UBND xã Hóa Thượng sử dụng Metabase,,0,HIEU_CHINH
-TV042,CUNG_LINH_VUC,DU_LIEU,DU_LIEU.mang_xa_hoi,Nghiên cứu và phát triển ứng dụng phân tích dữ liệu hỗ trợ phân tích dữ liệu mạng xã hội cho công ty TNHH Thành Công,,0,HIEU_CHINH
+TV039,DIEN_DAT_LAI,AI_ML,AI_ML.chatbot,Nghiên cứu và phát triển hệ thống thông minh hỗ trợ giải đáp thắc mắc tuyển sinh qua trợ lý ảo tại trung tâm ngoại ngữ Minh Phát sử dụng PhoBERT,Thiết kế và xây dựng hệ thống tư vấn tuyển sinh bằng chatbot cho trung tâm đào tạo ngoại ngữ Minh Phát trên nền tảng PhoBERT,1,KIEM_CHUNG
+TV040,DIEN_DAT_LAI,HOC_TAP,HOC_TAP.hoc_lieu,Phát triển trang web hỗ trợ chia sẻ học liệu số tại trung tâm đào tạo ngoại ngữ Phúc An sử dụng NodeJS,Xây dựng website khai thác kho học liệu điện tử cho trung tâm ngoại ngữ Phúc An trên nền tảng NodeJS,1,HIEU_CHINH
+TV041,CUNG_LINH_VUC,DU_LIEU,DU_LIEU.dan_so,Xây dựng hệ thống báo cáo hỗ trợ thống kê biến động dân số cho sở TT&TT tỉnh Yên Bái sử dụng Apache Airflow,,0,HIEU_CHINH
+TV042,CUNG_LINH_VUC,DU_LIEU,DU_LIEU.mang_xa_hoi,Xây dựng và triển khai hệ thống phân tích dữ liệu mạng xã hội tại công ty trách nhiệm hữu hạn Hoàng Long sử dụng Metabase,,0,HIEU_CHINH
 TV043,CUNG_LINH_VUC,AI_ML,AI_ML.dem_xe,Nghiên cứu và phát triển mô hình học máy thống kê số xe qua camera cho UBND xã Sơn Cẩm,,0,HIEU_CHINH
-TV044,DIEN_DAT_LAI,IOT,IOT.bai_do_xe,Xây dựng mạch điều khiển hỗ trợ quản lý bãi đỗ xe thông minh cho bến xe liên tỉnh Hà Giang,Nghiên cứu và phát triển bộ điều khiển hướng dẫn chỗ đỗ xe còn trống tại bến xe khách Hà Giang,1,HIEU_CHINH
-TV045,CUNG_LINH_VUC,IOT,IOT.khoa_cua,Ứng dụng ESP32 trong điều khiển khóa cửa thông minh cho người ở trọ tại Phổ Yên,,0,KIEM_CHUNG
+TV044,DIEN_DAT_LAI,IOT,IOT.bai_do_xe,Sử dụng Node-RED để quản lý bãi đỗ xe thông minh tại bến xe khách Tuyên Quang,Ứng dụng Node-RED trong hướng dẫn chỗ đỗ xe còn trống cho bến xe liên tỉnh Tuyên Quang,1,HIEU_CHINH
+TV045,CUNG_LINH_VUC,IOT,IOT.khoa_cua,Ứng dụng ESP32 trong điều khiển khóa cửa thông minh cho hộ gia đình tại Đại Từ,,0,KIEM_CHUNG
 TV046,DIEN_DAT_LAI,AI_ML,AI_ML.benh_la,Thiết kế và cài đặt ứng dụng AI hỗ trợ chẩn đoán bệnh cây qua ảnh lá cho vùng trồng chè Phúc Hà trên nền tảng OpenCV,Xây dựng ứng dụng trí tuệ nhân tạo phát hiện bệnh trên lá cây trồng tại vùng chè Phúc Hà sử dụng OpenCV,1,KIEM_CHUNG
-TV047,DIEN_DAT_LAI,AN_TOAN,AN_TOAN.lo_hong_web,Thiết kế và cài đặt hệ thống bảo mật hỗ trợ kiểm thử bảo mật website tại DNTN An Khang,Nghiên cứu và phát triển hệ thống rà quét lỗ hổng ứng dụng web cho doanh nghiệp tư nhân An Khang,1,HIEU_CHINH
-TV048,CUNG_LINH_VUC,AN_TOAN,AN_TOAN.bay_tan_cong,Xây dựng và triển khai mô hình triển khai mồi nhử kẻ tấn công cho công ty CP Minh Phát trên nền tảng Snort,,0,KIEM_CHUNG
+TV047,DIEN_DAT_LAI,AN_TOAN,AN_TOAN.lo_hong_web,Xây dựng hệ thống bảo mật hỗ trợ rà quét lỗ hổng ứng dụng web cho công ty cổ phần Đại Phát sử dụng OpenVAS,Thiết kế và cài đặt hệ thống kiểm thử bảo mật website tại công ty CP Đại Phát trên nền tảng OpenVAS,1,HIEU_CHINH
+TV048,CUNG_LINH_VUC,AN_TOAN,AN_TOAN.bay_tan_cong,Xây dựng mô hình triển khai mồi nhử kẻ tấn công cho công ty CP Việt Tiến trên nền tảng Snort,,0,KIEM_CHUNG
 TV049,DIEN_DAT_LAI,DU_LIEU,DU_LIEU.tieu_thu_dien,Xây dựng mô hình dự báo hỗ trợ phân tích dữ liệu tiêu thụ điện cho công ty TNHH Tân Tiến trên nền tảng Apache Spark,Phát triển mô hình thống kê sản lượng điện sử dụng tại công ty trách nhiệm hữu hạn Tân Tiến sử dụng Apache Spark,1,HIEU_CHINH
 TV050,DIEN_DAT_LAI,WEB,WEB.tuyen_sinh,Phát triển trang web hỗ trợ tiếp nhận hồ sơ xét tuyển qua mạng tại trường trung học cơ sở Chu Văn An,Thiết kế và xây dựng website tuyển sinh trực tuyến cho trường THCS Chu Văn An,1,HIEU_CHINH
-TV051,DIEN_DAT_LAI,HOC_TAP,HOC_TAP.so_lien_lac,Thiết kế và cài đặt nền tảng số kết nối nhà trường với phụ huynh tại trường trung học cơ sở Chu Văn An,Xây dựng nền tảng hỗ trợ trao đổi thông tin qua sổ liên lạc điện tử cho trường THCS Chu Văn An trên nền tảng Django,1,HIEU_CHINH
-TV052,CUNG_LINH_VUC,MOBILE,MOBILE.thu_cung,Nghiên cứu và phát triển ứng dụng điện thoại đặt lịch dịch vụ cho vật nuôi tại bến xe khách Yên Bái trên nền tảng Flutter,,0,HIEU_CHINH
+TV051,DIEN_DAT_LAI,HOC_TAP,HOC_TAP.so_lien_lac,Phát triển ứng dụng học tập hỗ trợ kết nối nhà trường với phụ huynh cho trung tâm giáo dục thường xuyên Võ Nhai,Thiết kế và cài đặt ứng dụng trao đổi thông tin qua sổ liên lạc điện tử tại trung tâm GDTX Võ Nhai sử dụng ReactJS,1,HIEU_CHINH
+TV052,CUNG_LINH_VUC,MOBILE,MOBILE.thu_cung,Thiết kế và cài đặt ứng dụng di động đặt lịch dịch vụ cho vật nuôi tại chuỗi cửa hàng Phúc An,,0,HIEU_CHINH
 TV053,CUNG_LINH_VUC,HOC_TAP,HOC_TAP.nang_luc,Xây dựng và triển khai website hỗ trợ lưu trữ hồ sơ năng lực của sinh viên cho trường trung học cơ sở Lê Quý Đôn sử dụng WebRTC,,0,HIEU_CHINH
-TV054,CUNG_LINH_VUC,ERP,ERP.phong_kham,Phát triển phân hệ ERP hỗ trợ tiếp đón và thu phí khám bệnh tại trạm y tế cấp xã Gia Sàng,,0,HIEU_CHINH
-TV055,DIEN_DAT_LAI,WEB,WEB.dat_ve_xe,Sử dụng Django để bán vé xe liên tỉnh qua mạng cho quán ăn Hoàng Long,Ứng dụng Django trong đặt vé xe khách tại nhà hàng Hoàng Long,1,HIEU_CHINH
+TV054,CUNG_LINH_VUC,ERP,ERP.phong_kham,Thiết kế và xây dựng phân hệ ERP tiếp đón và thu phí khám bệnh tại cơ sở khám chữa bệnh đa khoa Thành Công,,0,HIEU_CHINH
+TV055,DIEN_DAT_LAI,WEB,WEB.dat_ve_xe,Sử dụng Django để bán vé xe liên tỉnh qua mạng cho bến xe liên tỉnh Lào Cai,Ứng dụng Django trong đặt vé xe khách tại bến xe khách Lào Cai,1,HIEU_CHINH
 TV056,CUNG_LINH_VUC,MOBILE,MOBILE.xe_buyt,Ứng dụng Swift trong tra cứu lộ trình xe buýt cho UBND xã Đồng Bẩm,,0,KIEM_CHUNG
-TV057,CUNG_LINH_VUC,WEB,WEB.tour,Xây dựng và triển khai hệ thống thông tin đặt tour du lịch tại điểm du lịch Võ Nhai sử dụng VueJS,,0,HIEU_CHINH
+TV057,CUNG_LINH_VUC,WEB,WEB.tour,Xây dựng và triển khai hệ thống thông tin đặt tour du lịch tại câu lạc bộ thể thao Hưng Thịnh sử dụng VueJS,,0,HIEU_CHINH
 TV058,CUNG_LINH_VUC,AI_ML,AI_ML.tin_gia,Ứng dụng TensorFlow trong phát hiện tin giả trên mạng xã hội tại sở TT&TT tỉnh Vĩnh Phúc,,0,KIEM_CHUNG
 TV059,DIEN_DAT_LAI,IOT,IOT.dien_nang,Xây dựng giải pháp kết nối vạn vật hỗ trợ giám sát điện năng tiêu thụ tại công ty cổ phần Hoàng Long,Phát triển giải pháp IoT đo đếm công suất điện từ xa cho công ty CP Hoàng Long,1,HIEU_CHINH
-TV060,DIEN_DAT_LAI,ERP,ERP.san_xuat,Sử dụng Odoo để quản lý sản xuất tại cơ sở cơ khí Phúc An,Ứng dụng Odoo trong lập kế hoạch và theo dõi đơn hàng sản xuất cho xưởng cơ khí Phúc An,1,HIEU_CHINH
+TV060,DIEN_DAT_LAI,ERP,ERP.cham_cong,Sử dụng SQL Server để chấm công và quản lý ca làm việc tại khu công nghiệp Võ Nhai,Ứng dụng SQL Server trong theo dõi giờ công nhân viên cho KCN Võ Nhai,1,HIEU_CHINH
 TV061,DIEN_DAT_LAI,MOBILE,MOBILE.diem_danh,Sử dụng Flutter để ghi nhận chuyên cần của người học tại trung tâm giáo dục thường xuyên Đồng Hỷ,Ứng dụng Flutter trong điểm danh sinh viên cho trung tâm GDTX Đồng Hỷ,1,HIEU_CHINH
 TV062,DIEN_DAT_LAI,DU_LIEU,DU_LIEU.roi_bo,Phát triển công cụ phân tích số liệu hỗ trợ dự đoán khách hàng rời bỏ tại DNTN An Khang,Thiết kế và cài đặt ứng dụng phân tích dữ liệu nhận diện khách hàng có nguy cơ ngừng dùng dịch vụ cho doanh nghiệp tư nhân An Khang,1,HIEU_CHINH
 TV063,DIEN_DAT_LAI,IOT,IOT.muc_nuoc,Phát triển thiết bị kết nối Internet đo mực nước sông suối từ xa tại ủy ban nhân dân xã Đồng Bẩm,Thiết kế và cài đặt thiết bị IoT hỗ trợ cảnh báo mực nước lũ cho UBND xã Đồng Bẩm,1,HIEU_CHINH
-TV064,CUNG_LINH_VUC,ERP,ERP.van_hanh_ks,Xây dựng phần mềm điều phối buồng phòng và dịch vụ lưu trú cho bến xe khách Cao Bằng sử dụng Laravel,,0,HIEU_CHINH
-TV065,CUNG_LINH_VUC,WEB,WEB.quyen_gop,Nghiên cứu và phát triển website quản lý quyên góp từ thiện cho sở thông tin và truyền thông tỉnh Bắc Giang trên nền tảng NodeJS,,0,HIEU_CHINH
-TV066,CUNG_LINH_VUC,AI_ML,AI_ML.dem_xe,Nghiên cứu và phát triển mô hình học máy đếm lưu lượng phương tiện giao thông cho UBND xã Phúc Xuân sử dụng TensorFlow,,0,KIEM_CHUNG
-TV067,DIEN_DAT_LAI,DU_LIEU,DU_LIEU.khach_du_lich,Phát triển mô hình dự báo hỗ trợ phân tích lượt khách du lịch cho điểm du lịch Phú Bình,Thiết kế và cài đặt mô hình thống kê lượng du khách theo mùa tại khu du lịch Phú Bình trên nền tảng Apache Spark,1,HIEU_CHINH
-TV068,CUNG_LINH_VUC,ERP,ERP.ky_tuc_xa,Phát triển phần mềm quản lý ký túc xá tại trường trung học phổ thông Hoàng Văn Thụ,,0,KIEM_CHUNG
-TV069,CUNG_LINH_VUC,IOT,IOT.sinh_hieu,Nghiên cứu và phát triển hệ thống giám sát nhịp tim bệnh nhân từ xa cho phòng khám đa khoa Trường Thịnh trên nền tảng Arduino,,0,HIEU_CHINH
+TV064,CUNG_LINH_VUC,ERP,ERP.van_hanh_ks,Thiết kế và cài đặt phần mềm điều phối buồng phòng và dịch vụ lưu trú tại cơ sở lưu trú Hưng Thịnh,,0,HIEU_CHINH
+TV065,CUNG_LINH_VUC,WEB,WEB.quyen_gop,Xây dựng phần mềm trực tuyến quản lý quyên góp từ thiện cho ủy ban nhân dân xã Tân Cương,,0,HIEU_CHINH
+TV066,CUNG_LINH_VUC,AI_ML,AI_ML.dem_xe,Thiết kế và xây dựng công cụ đếm lưu lượng phương tiện giao thông cho UBND huyện Đồng Hỷ sử dụng OpenCV,,0,KIEM_CHUNG
+TV067,DIEN_DAT_LAI,DU_LIEU,DU_LIEU.khach_du_lich,Phát triển mô hình dự báo hỗ trợ phân tích lượt khách du lịch cho câu lạc bộ thể thao Thành Công,Thiết kế và cài đặt mô hình thống kê lượng du khách theo mùa tại trung tâm thể thao Thành Công trên nền tảng Apache Spark,1,HIEU_CHINH
+TV068,CUNG_LINH_VUC,ERP,ERP.ky_tuc_xa,Thiết kế và xây dựng ứng dụng quản lý ký túc xá cho trường THPT Quang Trung,,0,KIEM_CHUNG
+TV069,CUNG_LINH_VUC,IOT,IOT.sinh_hieu,Xây dựng hệ thống giám sát nhịp tim bệnh nhân từ xa cho TTYT huyện Đồng Hỷ trên nền tảng MQTT,,0,HIEU_CHINH
 TV070,DIEN_DAT_LAI,AI_ML,AI_ML.tom_tat,Sử dụng PhoBERT để rút gọn nội dung tài liệu tiếng Việt cho ủy ban nhân dân xã Phúc Xuân,Ứng dụng PhoBERT trong tóm tắt văn bản tiếng Việt tại UBND xã Phúc Xuân,1,HIEU_CHINH
 TV071,DIEN_DAT_LAI,WEB,WEB.thu_vien,Sử dụng ReactJS để quản lý sách và mượn trả tài liệu cho trung tâm giáo dục thường xuyên Phú Lương,Ứng dụng ReactJS trong quản lý thư viện tại trung tâm GDTX Phú Lương,1,KIEM_CHUNG
-TV072,CUNG_LINH_VUC,IOT,IOT.den_duong,Ứng dụng Node-RED trong bật tắt đèn đường theo lịch tại ủy ban nhân dân xã Sơn Cẩm,,0,HIEU_CHINH
+TV072,CUNG_LINH_VUC,IOT,IOT.den_duong,Thiết kế và xây dựng hệ thống IoT bật tắt đèn đường theo lịch tại sở TT&TT tỉnh Lạng Sơn trên nền tảng MQTT,,0,HIEU_CHINH
 TV073,DIEN_DAT_LAI,WEB,WEB.tin_tuc,Sử dụng Spring Boot để đăng tải tin bài trên cổng điện tử tại ủy ban nhân dân huyện Võ Nhai,Ứng dụng Spring Boot trong quản lý tin tức cho UBND huyện Võ Nhai,1,KIEM_CHUNG
-TV074,CUNG_LINH_VUC,HOC_TAP,HOC_TAP.khao_sat,Thiết kế và xây dựng website khảo sát ý kiến người học về giảng dạy tại trường THPT Hoàng Văn Thụ sử dụng WebRTC,,0,HIEU_CHINH
-TV075,CUNG_LINH_VUC,DU_LIEU,DU_LIEU.khi_tuong,Phát triển ứng dụng phân tích dữ liệu hỗ trợ phân tích dữ liệu khí tượng cho trang trại Nam Việt sử dụng Metabase,,0,HIEU_CHINH
-TV076,DIEN_DAT_LAI,ERP,ERP.nha_thuoc,Thiết kế và cài đặt ứng dụng quản lý hỗ trợ quản lý nhà thuốc tại trạm y tế cấp xã Tích Lương,Xây dựng ứng dụng bán thuốc và theo dõi hạn dùng cho trạm y tế xã Tích Lương,1,HIEU_CHINH
+TV074,CUNG_LINH_VUC,HOC_TAP,HOC_TAP.khao_sat,Ứng dụng Moodle trong khảo sát ý kiến người học về giảng dạy cho trường cao đẳng nghề Tuyên Quang,,0,HIEU_CHINH
+TV075,CUNG_LINH_VUC,DU_LIEU,DU_LIEU.khi_tuong,Nghiên cứu và phát triển mô hình hỗ trợ phân tích dữ liệu khí tượng cho HTX nông nghiệp Cam Giá,,0,HIEU_CHINH
+TV076,DIEN_DAT_LAI,ERP,ERP.crm,Xây dựng ứng dụng hỗ trợ quản lý quan hệ khách hàng tại DNTN Nam Việt sử dụng Odoo,Nghiên cứu và phát triển ứng dụng chăm sóc và theo dõi khách hàng cho doanh nghiệp tư nhân Nam Việt trên nền tảng Odoo,1,HIEU_CHINH
 TV077,DIEN_DAT_LAI,MOBILE,MOBILE.suc_khoe,Thiết kế và cài đặt app di động hỗ trợ theo dõi sức khỏe cá nhân cho TTYT huyện Định Hóa,Xây dựng ứng dụng điện thoại ghi nhận chỉ số sức khỏe hằng ngày tại trung tâm y tế huyện Định Hóa,1,HIEU_CHINH
 TV078,DIEN_DAT_LAI,MOBILE,MOBILE.giao_do_an,Thiết kế và cài đặt ứng dụng cho hệ điều hành Android gọi món giao tận nơi tại khách sạn An Khang,Xây dựng ứng dụng Android hỗ trợ đặt và giao đồ ăn cho cơ sở lưu trú An Khang,1,HIEU_CHINH
-TV079,DIEN_DAT_LAI,ERP,ERP.ban_hang_quay,Xây dựng ứng dụng quản lý hỗ trợ thu ngân và lập hóa đơn bán lẻ cho cửa hiệu tiện lợi Phúc An,Phát triển ứng dụng quản lý bán hàng tại quầy tại cửa hàng tiện lợi Phúc An sử dụng ERPNext,1,HIEU_CHINH
+TV079,DIEN_DAT_LAI,ERP,ERP.san_xuat,Phát triển ứng dụng quản lý hỗ trợ lập kế hoạch và theo dõi đơn hàng sản xuất tại KCN Phú Bình,Xây dựng và triển khai ứng dụng quản lý sản xuất cho khu công nghiệp Phú Bình,1,HIEU_CHINH
 TV080,CUNG_LINH_VUC,HOC_TAP,HOC_TAP.khao_sat,Ứng dụng ReactJS trong lấy phản hồi của sinh viên về học phần tại trung tâm ngoại ngữ Việt Tiến,,0,HIEU_CHINH
