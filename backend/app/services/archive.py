@@ -20,6 +20,7 @@ from pathlib import Path
 
 from fastapi import HTTPException, UploadFile
 from sqlalchemy import func, or_, select, update
+from sqlalchemy.exc import DataError, IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.db import SessionLocal
@@ -395,20 +396,29 @@ def import_csv(db: Session, upload: UploadFile) -> tuple[ImportResult, list[int]
     reader.fieldnames = header
 
     parsed: list[tuple[int, dict[str, str]]] = []
-    for raw in reader:
-        cells = {
-            col: nfc(raw.get(col) or "").strip() if isinstance(raw.get(col), str) else ""
-            for col in _CSV_COLUMNS
-        }
-        if not any(cells.values()) and not any(
-            isinstance(v, str) and v.strip() for v in raw.values()
-        ):
-            continue  # dòng trống hoàn toàn (thường ở cuối file xuất từ bảng tính)
-        parsed.append((reader.line_num, cells))
-        if len(parsed) > CSV_MAX_ROWS:
-            raise HTTPException(
-                status_code=422, detail=f"File CSV tối đa {CSV_MAX_ROWS} dòng dữ liệu"
-            )
+    try:
+        for raw in reader:
+            cells = {
+                col: nfc(raw.get(col) or "").strip() if isinstance(raw.get(col), str) else ""
+                for col in _CSV_COLUMNS
+            }
+            if not any(cells.values()) and not any(
+                isinstance(v, str) and v.strip() for v in raw.values()
+            ):
+                continue  # dòng trống hoàn toàn (thường ở cuối file xuất từ bảng tính)
+            parsed.append((reader.line_num, cells))
+            if len(parsed) > CSV_MAX_ROWS:
+                raise HTTPException(
+                    status_code=422, detail=f"File CSV tối đa {CSV_MAX_ROWS} dòng dữ liệu"
+                )
+    except csv.Error as exc:
+        # WR-08: ô vượt field_size_limit, dấu ngoặc kép hỏng... -> 422 có số dòng
+        # thay vì 500 (không đưa nội dung ô vào thông điệp).
+        raise HTTPException(
+            status_code=422,
+            detail=f"File CSV không hợp lệ gần dòng {reader.line_num + 1}: {type(exc).__name__}"
+            f" ({str(exc)[:120]})",
+        ) from None
 
     # Tra cứu gộp (không N+1): GV theo mã, SV theo mã, bản ghi kho sẵn có theo khóa.
     ma_gv = {c["ma_giang_vien"] for _, c in parsed if c["ma_giang_vien"]}
@@ -482,7 +492,16 @@ def import_csv(db: Session, upload: UploadFile) -> tuple[ImportResult, list[int]
         )
 
     if new_rows:
-        db.add_all(new_rows)
-        db.commit()
+        try:
+            db.add_all(new_rows)
+            db.commit()
+        except (IntegrityError, DataError):
+            # WR-08: ràng buộc mà bước kiểm tra trước bỏ sót (vd. import đồng
+            # thời trùng khóa + tên) -> 409, không phải 500.
+            db.rollback()
+            raise HTTPException(
+                status_code=409,
+                detail="Không lưu được dữ liệu import — vui lòng kiểm tra lại file",
+            ) from None
     result = ImportResult(tong_dong=len(parsed), thanh_cong=len(new_rows), loi=errors)
     return result, [r.id for r in new_rows]
