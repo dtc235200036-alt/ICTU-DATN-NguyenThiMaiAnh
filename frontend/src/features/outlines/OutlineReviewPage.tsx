@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { App as AntApp, Alert, Button, Card, Col, Form, Input, Popconfirm, Row, Select, Table, Tag } from 'antd'
+import { App as AntApp, Alert, Button, Card, Col, Form, Input, Popconfirm, Row, Select, Table, Tag, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { AxiosError } from 'axios'
 import { useSearchParams } from 'react-router'
@@ -216,10 +216,11 @@ export default function OutlineReviewPage() {
             <>
               <Row gutter={20}>
                 <Col xs={24} lg={14}>
-                  <Card
-                    title={`Duyệt đề cương - ${detail.sinh_vien?.ho_ten ?? '—'}`}
-                    extra={detail.ten_de_tai}
-                  >
+                  <Card title={`Duyệt đề cương - ${detail.sinh_vien?.ho_ten ?? '—'}`}>
+                    {/* Tên đề tài dài để ở `extra` làm tiêu đề (tên SV) bị cắt thành "Duyệt ..." */}
+                    <Typography.Paragraph type="secondary" style={{ marginTop: -8 }}>
+                      Đề tài: {detail.ten_de_tai}
+                    </Typography.Paragraph>
                     <Form layout="vertical">
                       <Form.Item label="Phiên bản">
                         <Select
