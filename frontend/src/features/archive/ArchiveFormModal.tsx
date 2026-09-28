@@ -36,6 +36,8 @@ export default function ArchiveFormModal({ open, record, onClose, onSaved }: Arc
   const createMutation = useCreateArchive()
   const updateMutation = useUpdateArchive()
   const isEdit = record !== undefined
+  // WR-09: bản ghi tự lưu khi chốt bảo vệ — điểm và danh tính SV chỉ đọc.
+  const lockedDefense = record?.nguon === 'HE_THONG'
 
   useEffect(() => {
     if (!open) return
@@ -116,7 +118,7 @@ export default function ArchiveFormModal({ open, record, onClose, onSaved }: Arc
             style={{ flex: 1 }}
             rules={[{ max: 20, message: 'Mã SV tối đa 20 ký tự' }]}
           >
-            <Input />
+            <Input disabled={lockedDefense} />
           </Form.Item>
           <Form.Item
             name="ho_ten_sinh_vien"
@@ -124,7 +126,7 @@ export default function ArchiveFormModal({ open, record, onClose, onSaved }: Arc
             style={{ flex: 2 }}
             rules={[{ max: 150, message: 'Họ tên tối đa 150 ký tự' }]}
           >
-            <Input />
+            <Input disabled={lockedDefense} />
           </Form.Item>
         </div>
         <Form.Item name="giang_vien_id" label="GVHD">
@@ -149,8 +151,19 @@ export default function ArchiveFormModal({ open, record, onClose, onSaved }: Arc
         >
           <Input />
         </Form.Item>
-        <Form.Item name="diem" label="Điểm">
-          <InputNumber min={0} max={10} step={0.1} precision={2} style={{ width: 160 }} />
+        <Form.Item
+          name="diem"
+          label="Điểm"
+          extra={lockedDefense ? 'Điểm chính thức từ kết quả chốt bảo vệ — không sửa được' : undefined}
+        >
+          <InputNumber
+            min={0}
+            max={10}
+            step={0.1}
+            precision={2}
+            style={{ width: 160 }}
+            disabled={lockedDefense}
+          />
         </Form.Item>
       </Form>
     </Modal>

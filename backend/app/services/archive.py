@@ -290,12 +290,16 @@ def _validate_payload(db: Session, payload: ArchiveIn, exclude_id: int | None) -
 def _apply(kho: DoAnKho, payload: ArchiveIn, sv: SinhVien | None) -> None:
     kho.khoa = payload.khoa
     kho.ten_de_tai = payload.ten_de_tai
-    kho.ma_so_sinh_vien = payload.ma_so_sinh_vien
-    kho.ho_ten_sinh_vien = payload.ho_ten_sinh_vien or (sv.ho_ten if sv is not None else None)
-    kho.sinh_vien_id = sv.id if sv is not None else None
+    if kho.nguon != HE_THONG:
+        # WR-09: bản ghi HE_THONG (chốt bảo vệ) giữ nguyên điểm chính thức
+        # (= lich_bao_ve.diem_trung_binh, một chiều) và liên kết/danh tính SV;
+        # server bỏ qua các giá trị này trong payload.
+        kho.ma_so_sinh_vien = payload.ma_so_sinh_vien
+        kho.ho_ten_sinh_vien = payload.ho_ten_sinh_vien or (sv.ho_ten if sv is not None else None)
+        kho.sinh_vien_id = sv.id if sv is not None else None
+        kho.diem = payload.diem
     kho.giang_vien_id = payload.giang_vien_id
     kho.tu_khoa = payload.tu_khoa
-    kho.diem = payload.diem
     # Nội dung đổi -> phải index lại (run_ingest nền sẽ lật sang DA_INDEX).
     kho.trang_thai_index = CHUA_INDEX
 
@@ -311,7 +315,8 @@ def create(db: Session, payload: ArchiveIn) -> int:
 
 
 def update_record(db: Session, kho_id: int, payload: ArchiveIn) -> None:
-    """UC5.3: sửa metadata — nguon và de_tai_id không bao giờ đổi."""
+    """UC5.3: sửa metadata — nguon và de_tai_id không bao giờ đổi; với bản
+    ghi HE_THONG, điểm và danh tính SV cũng chỉ đọc (WR-09)."""
     kho = _get_or_404(db, kho_id)
     sv = _validate_payload(db, payload, kho_id)
     _apply(kho, payload, sv)
