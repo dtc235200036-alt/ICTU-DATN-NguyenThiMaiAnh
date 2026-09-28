@@ -362,22 +362,25 @@ def embed_symmetric(model, text: str):
 
 **If this table is empty:** N/A — see rows above; everything else in this document is either `[VERIFIED]` this session or `[CITED]` from an official/model-card source.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Will the D-01 bake-off actually have enough labeled pairs to make a statistically meaningful AUC comparison?**
    - What we know: D-01 calls for "a small labeled set" and the bake-off set size is explicitly Claude's discretion; no real corpus exists to draw pairs from (Pitfall B).
    - What's unclear: How many synthetic pairs is "enough" to trust a model-selection decision that will govern the rest of the phase.
    - Recommendation: Treat the bake-off as directional, not statistically rigorous — pick the model with the clearer separation AND acceptable latency, document the small-sample caveat explicitly in the chương 4 report, and rely on D-06's larger 50-document/held-out-validation set as the real calibration evidence.
+   - RESOLVED: 04-03 treats the bake-off as directional with a pre-registered decision rule and small-sample caveat; 04-04 calibrates on the 50-doc set with a held-out split.
 
 2. **What is the actual batched CPU embedding throughput for the chosen model, on the actual deployment container, for a 100-chunk document?**
    - What we know: One blog-sourced single-core data point (2 sentences/sec), 16 cores available on this dev host, official ONNX-backend fallback exists if needed.
    - What's unclear: Real throughput for this specific PhoBERT-base-v2-sized model, batched, on whatever CPU the actual target server has (still unknown per D-02's own note).
    - Recommendation: Measure directly as an early implementation task (see Common Pitfalls D), not deferred to Phase 5 verification.
+   - RESOLVED: 04-01 includes a real-model CPU throughput smoke; 04-04 measures in-process P95; 04-06 `ai-nfr.sh` measures NFR-07..11 on the deployed container.
 
 3. **Where exactly should `AiClientHttp` live and what should its retry/timeout behavior be when the AI service is slow or down?**
    - What we know: `AiClientError`-equivalent already exists as `AiServiceError` in the current stub (`ai_client.py:26-28`) and is documented as "never block business logic" — the Web API's title-check and document-check flows already have `alt` branches for AI-service failure in the sequence diagrams (§3.3.7).
    - What's unclear: Concrete `httpx` timeout values appropriate for a ≤5 s / ≤30 s NFR budget (the HTTP client's own timeout must be comfortably inside those numbers, not equal to them, to leave room for the Web API's own overhead).
    - Recommendation: Set `httpx` timeouts at roughly 80% of the relevant NFR (e.g., ~4 s for title check, ~24 s for document check) so the Web API can raise `AiServiceError` and fail gracefully before the NFR clock itself expires.
+   - RESOLVED: 04-05 implements `AiClientHttp` in `backend/app/services/ai_client.py` with 4 s / 24 s / 60 s timeouts and stub fallback (`AI_STUB_MODE`).
 
 ## Environment Availability
 
