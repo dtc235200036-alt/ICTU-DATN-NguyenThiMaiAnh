@@ -2,17 +2,17 @@
 gsd_state_version: "1.0"
 current_phase: 3
 current_phase_name: Outline, Progress, Defense & Archive
-status: executing
-stopped_at: "Completed 03-06-PLAN.md (UC3 progress: milestones, reports, GVHD review, faculty dashboard)"
-last_updated: "2026-09-28T06:21:53.207Z"
+status: verifying
+stopped_at: Completed 03-07-PLAN.md
+last_updated: "2026-09-28T06:49:08.752Z"
 last_activity: 2026-09-28
-last_activity_desc: Phase 3 plan 03-04 complete (UC4.3-4.5 scoring/finalize + UC5.2 auto-archive, 2/2 tasks)
-state_head: 1d96bae6a41b1f11b518e59b548d2c6264debed1
+last_activity_desc: Phase 3 plan 03-07 complete (notification bell + topic-decision notifications, Phase-3 dashboards, phase gate green)
+state_head: 1e6caad071b48bd841cec9448642ef397c79481d
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 35
-  completed_plans: 22
+  completed_plans: 23
   percent: 0
 ---
 
@@ -29,8 +29,8 @@ See: .planning/PROJECT.md (updated 2026-09-27)
 
 Phase: 3 (Outline, Progress, Defense & Archive) — EXECUTING
 Plan: 7 of 7
-Status: Ready to execute
-Last activity: 2026-09-28 — Plan 03-04 complete (committee scoring, chốt, auto-archive + ingest)
+Status: Phase complete — ready for verification
+Last activity: 2026-09-28 — Plan 03-07 complete (bell + dashboards + smoke/e2e/README; Phase 3 gate green)
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -74,6 +74,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03 P04 | 22min | 2 tasks | 17 files |
 | Phase 03 P05 | 20min | 2 tasks | 11 files |
 | Phase 03 P06 | 16min | 2 tasks | 21 files |
+| Phase 03 P07 | 26min | 2 tasks | 20 files |
 
 ## Accumulated Context
 
@@ -136,6 +137,9 @@ Recent decisions affecting current work:
 - [Phase 03]: 03-06: D-05 late status computed on read by trang_thai_moc (VN date); SV trễ mốc = any NOP_TRE/TRE_MOC
 - [Phase 03]: 03-06: final report (UC4.1) not gated on milestone completion — lateness tracked by UC3.4 only
 - [Phase 03]: 03-06: bao_cao_tien_do.tai_lieu_do_an_id additive column; resubmit without file keeps previous attachment, new file = new BAO_CAO_TIEN_DO version
+- [Phase 03]: 03-07: refused topic decisions roll back before any notification; approve/reject notify SV+GVHD / proposing GV / proposer in the same commit
+- [Phase 03]: 03-07: bell polls only /notifications/unread-count every 30 s (paused in hidden tabs); list loads when the dropdown opens; client navigates only to single-slash app paths
+- [Phase 03]: 03-07: dashboard<->progress use module imports to avoid an import cycle; progress.row_out shared by /tien-do-toan-khoa and the Bộ môn dashboard
 
 ### Pending Todos
 
@@ -159,6 +163,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-28T06:21:53.157Z
-Stopped at: Completed 03-06-PLAN.md (UC3 progress: milestones, reports, GVHD review, faculty dashboard)
+Last session: 2026-09-28T06:49:08.702Z
+Stopped at: Completed 03-07-PLAN.md
 Resume file: None
