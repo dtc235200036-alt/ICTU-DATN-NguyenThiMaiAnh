@@ -349,6 +349,8 @@ MAX_PASSAGE_SENTENCES = 6
 # lên 32–35 %; câu diễn đạt lại thì đi thành đoạn liền nhau cùng nguồn.
 # Cờ NGUYEN_VAN (MinHash) là bằng chứng mạnh nên đứng một mình vẫn giữ.
 MIN_RUN_NGU_NGHIA = 2
+# WR-02: số hàng ma trận MinHash so mỗi lượt (bộ nhớ tạm ≈ khối × num_perm byte).
+_MH_BLOCK = 32_768
 
 
 @dataclass(frozen=True)
@@ -410,20 +412,18 @@ def score_document(
     excluded = frozenset(int(r) for r in exclude_refs)
     excluded_arr = np.fromiter(excluded, dtype=np.int64, count=len(excluded))
 
-    out: list[ChunkScore] = []
+    # WR-02 (04-REVIEW): dưới index.lock chỉ tìm FAISS và chụp THAM CHIẾU tới
+    # ma trận MinHash (add/remove_source luôn thay mảng mới, không sửa tại
+    # chỗ) — không sao chép N×num_perm, và phần chấm MinHash chạy ngoài khóa
+    # để /check-title không phải chờ.
+    sem_rows: list[ChunkRow | None] = []
+    sem_scores: list[float] = []
     with index.lock:
         part = index.partition(TAI_LIEU)
         n_excluded = sum(len(part.by_source.get((LOAI_DOCUMENT, r), [])) for r in excluded)
         k = min(index.size(TAI_LIEU), n_excluded + 10)
         scores, ids = index.search(TAI_LIEU, vectors, k)
-
-        matrix, mh_ids = None, None
-        if part.mh_matrix is not None and len(part.mh_ids) > 0:
-            allowed = ~np.isin(part.mh_refs, excluded_arr)
-            if allowed.any():
-                matrix, mh_ids = part.mh_matrix[allowed], part.mh_ids[allowed]
-
-        for pos, sent in enumerate(sents):
+        for pos in range(len(sents)):
             sem_row, sem_score = None, 0.0
             for score, cid in zip(scores[pos], ids[pos]):
                 if cid < 0:
@@ -432,26 +432,49 @@ def score_document(
                 if row is not None and row.ma_nguon not in excluded:
                     sem_row, sem_score = row, float(score)
                     break
-            verb_row, verb_score = None, 0.0
-            if matrix is not None:
-                jac = minhash.jaccard_many(signatures[pos], matrix)
-                best = int(np.argmax(jac))
-                verb_row, verb_score = part.rows.get(int(mh_ids[best])), float(jac[best])
-            out.append(
-                ChunkScore(
-                    vi_tri=pos + 1,
-                    text=sent,
-                    n_chars=len(sent),
-                    sem_ref=sem_row.ma_nguon if sem_row else None,
-                    sem_text=sem_row.noi_dung if sem_row else None,
-                    sem_thu_tu=sem_row.thu_tu if sem_row else None,
-                    sem_score=sem_score,
-                    verb_ref=verb_row.ma_nguon if verb_row else None,
-                    verb_text=verb_row.noi_dung if verb_row else None,
-                    verb_thu_tu=verb_row.thu_tu if verb_row else None,
-                    verb_score=verb_score,
-                )
+            sem_rows.append(sem_row)
+            sem_scores.append(sem_score)
+        mh_matrix, mh_ids, mh_refs = part.mh_matrix, part.mh_ids, part.mh_refs
+
+    best_ids: list[int | None] = [None] * len(sents)
+    best_scores = [0.0] * len(sents)
+    if mh_matrix is not None and len(mh_ids) > 0:
+        allowed = ~np.isin(mh_refs, excluded_arr)
+        if allowed.any():
+            for pos, sig in enumerate(signatures):
+                best, best_score = -1, -1.0
+                for start in range(0, len(mh_ids), _MH_BLOCK):
+                    jac = minhash.jaccard_many(sig, mh_matrix[start : start + _MH_BLOCK])
+                    jac[~allowed[start : start + _MH_BLOCK]] = -1.0
+                    j = int(np.argmax(jac))
+                    if jac[j] > best_score:
+                        best, best_score = start + j, float(jac[j])
+                if best >= 0 and best_score >= 0:
+                    best_ids[pos], best_scores[pos] = int(mh_ids[best]), best_score
+
+    with index.lock:
+        verb_rows = [part.rows.get(cid) if cid is not None else None for cid in best_ids]
+
+    out: list[ChunkScore] = []
+    for pos, sent in enumerate(sents):
+        sem_row, sem_score = sem_rows[pos], sem_scores[pos]
+        verb_row = verb_rows[pos]
+        verb_score = best_scores[pos] if verb_row is not None else 0.0
+        out.append(
+            ChunkScore(
+                vi_tri=pos + 1,
+                text=sent,
+                n_chars=len(sent),
+                sem_ref=sem_row.ma_nguon if sem_row else None,
+                sem_text=sem_row.noi_dung if sem_row else None,
+                sem_thu_tu=sem_row.thu_tu if sem_row else None,
+                sem_score=sem_score,
+                verb_ref=verb_row.ma_nguon if verb_row else None,
+                verb_text=verb_row.noi_dung if verb_row else None,
+                verb_thu_tu=verb_row.thu_tu if verb_row else None,
+                verb_score=verb_score,
             )
+        )
     return DocumentScores(out, removed, ty_le_loai_tru)
 
 
