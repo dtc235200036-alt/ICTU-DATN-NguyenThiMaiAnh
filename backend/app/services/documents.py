@@ -309,4 +309,20 @@ def to_document_out(doc: TaiLieuDoAn) -> DocumentOut:
         thoi_diem_nop=doc.thoi_diem_nop,
         trich_xuat_loi=doc.trich_xuat_loi,
         tom_tat=tom_tat,
+        qua_dai_kiem_tra=too_long_for_check(doc.noi_dung_trich_xuat),
+    )
+
+
+def too_long_for_check(text: str | None) -> bool:
+    """WR-05: văn bản dài hơn trần gửi sang dịch vụ AI (AI_DOCUMENT_MAX_CHARS)."""
+    return text is not None and len(text) > get_settings().AI_DOCUMENT_MAX_CHARS
+
+
+def too_long_detail(text: str) -> str:
+    limit = get_settings().AI_DOCUMENT_MAX_CHARS
+    so = f"{len(text):,}".replace(",", ".")
+    toi_da = f"{limit:,}".replace(",", ".")
+    return (
+        f"Tài liệu quá dài để kiểm tra trùng lặp tự động ({so} ký tự, tối đa {toi_da})"
+        " — hãy nộp bản đã bỏ phụ lục/mã nguồn dài"
     )

@@ -20,6 +20,8 @@ export interface DocumentOut {
   thoi_diem_nop: string
   trich_xuat_loi: boolean
   tom_tat: string | null
+  /** WR-05: văn bản quá dài để gửi dịch vụ AI — LOI không thử lại được */
+  qua_dai_kiem_tra: boolean
 }
 
 export type CheckStatus = 'DANG_KIEM_TRA' | 'HOAN_TAT' | 'LOI'

@@ -103,10 +103,12 @@ export default function CheckPanel({ taiLieuId, canRecheck, pendingText }: Check
         description={
           data.tai_lieu.trich_xuat_loi
             ? 'Không trích xuất được nội dung file — cần nộp lại file khác để kiểm tra.'
-            : undefined
+            : data.tai_lieu.qua_dai_kiem_tra
+              ? 'Tài liệu quá dài để kiểm tra trùng lặp tự động — kiểm tra lại cũng không được; hãy nộp bản đã bỏ phụ lục/mã nguồn dài.'
+              : undefined
         }
         action={
-          canRecheck && !data.tai_lieu.trich_xuat_loi ? (
+          canRecheck && !data.tai_lieu.trich_xuat_loi && !data.tai_lieu.qua_dai_kiem_tra ? (
             <Button size="small" loading={recheckMutation.isPending} onClick={handleRecheck}>
               Kiểm tra lại
             </Button>

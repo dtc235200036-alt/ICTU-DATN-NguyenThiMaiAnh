@@ -45,6 +45,11 @@ class Settings(BaseSettings):
     # chạy quá hạn đó bị expire_if_stale chuyển LOI).
     AI_DOCUMENT_TIMEOUT_PER_1K_CHARS: float = 0.25
     AI_DOCUMENT_TIMEOUT_MAX_SECONDS: float = 240.0
+    # WR-05 (04-REVIEW): văn bản trích xuất dài hơn mức này không được gửi sang
+    # dịch vụ AI (trần của AI: 2 000 000 ký tự / 8 MiB thân request) — kết quả
+    # LOI không thử lại được, kèm thông báo rõ. 800 000 ký tự ≈ 230 trang, mã
+    # hóa ~100 s — vẫn dưới timeout theo độ dài (24 + 0,25 × 800 = 224 s).
+    AI_DOCUMENT_MAX_CHARS: int = 800_000
     TITLE_CHECK_TOP_K: int = 5
 
     # D-02/D-03/D-04 (Phase 3): tài liệu đề cương/báo cáo lưu ngoài DocumentRoot

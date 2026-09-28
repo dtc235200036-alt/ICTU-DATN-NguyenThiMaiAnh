@@ -39,6 +39,7 @@ from app.models.kho import CHUA_INDEX, DA_INDEX, DoAnKho
 from app.schemas.common import nfc
 from app.services.ai_client import get_ai_client
 from app.services.archive import ingest_payload
+from app.services.documents import too_long_for_check
 
 _logger = logging.getLogger(__name__)
 
@@ -82,6 +83,7 @@ def ingest_document(tai_lieu_do_an_id: int) -> None:
             or doc.loai not in _DOCUMENT_LOAI
             or doc.trich_xuat_loi
             or not doc.noi_dung_trich_xuat
+            or too_long_for_check(doc.noi_dung_trich_xuat)
         ):
             return
         doc_id, text = doc.id, doc.noi_dung_trich_xuat
@@ -189,7 +191,7 @@ def _backfill_documents(db) -> tuple[int, int]:
         text = db.execute(
             select(TaiLieuDoAn.noi_dung_trich_xuat).where(TaiLieuDoAn.id == doc_id)
         ).scalar_one_or_none()
-        if not text:
+        if not text or too_long_for_check(text):
             continue
         try:
             client.ingest(doc_id, LOAI_DOCUMENT, text)

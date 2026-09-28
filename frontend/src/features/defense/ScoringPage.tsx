@@ -62,7 +62,8 @@ function CheckSummaryBlock({ detail }: { detail: ScoringDetail }) {
     kiemTra &&
     kiemTra.trang_thai === 'LOI' &&
     detail.bao_cao_cuoi &&
-    !detail.bao_cao_cuoi.trich_xuat_loi
+    !detail.bao_cao_cuoi.trich_xuat_loi &&
+    !detail.bao_cao_cuoi.qua_dai_kiem_tra
   ) {
     return (
       <Space size={6} wrap>

@@ -180,3 +180,18 @@ def test_document_check_uses_ai_contract(
     v4_id = submit(topic.id, sv, "v4.docx", ["Đề cương phiên bản bốn khi dịch vụ AI lỗi"])
     assert [c[0] for c in fake.calls] == ["check"]
     assert check_of(v4_id, gv)["trang_thai"] == "LOI"
+
+    # WR-05: văn bản vượt trần gửi AI -> không gọi AI, LOI không thử lại được,
+    # lý do hiện qua tai_lieu.qua_dai_kiem_tra; "Kiểm tra lại" trả 409 rõ ràng.
+    from app.core.config import get_settings
+
+    request_changes(topic.id, gv, v4_id)
+    fake.fail_check = False
+    fake.calls.clear()
+    monkeypatch.setattr(get_settings(), "AI_DOCUMENT_MAX_CHARS", 20)
+    v5_id = submit(topic.id, sv, "v5.docx", ["Đề cương phiên bản năm dài hơn trần kiểm tra"])
+    assert fake.calls == []
+    too_long = check_of(v5_id, gv)
+    assert too_long["trang_thai"] == "LOI" and too_long["tai_lieu"]["qua_dai_kiem_tra"] is True
+    resp = client.post(f"/api/documents/{v5_id}/recheck", headers=auth_headers(gv))
+    assert resp.status_code == 409 and "quá dài" in resp.json()["detail"], resp.text

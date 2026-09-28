@@ -34,7 +34,7 @@ from app.schemas.documents import CheckDetail, CheckMatch, CheckSegment, CheckSu
 from app.schemas.topics import PersonRef
 from app.services import ai_index
 from app.services.ai_client import get_ai_client
-from app.services.documents import to_document_out
+from app.services.documents import to_document_out, too_long_detail, too_long_for_check
 
 _logger = logging.getLogger(__name__)
 
@@ -221,6 +221,16 @@ def run(ket_qua_id: int) -> None:
         stamp = ket_qua.thoi_diem
         doc = task_db.get(TaiLieuDoAn, ket_qua.tai_lieu_do_an_id)
         if doc is None or doc.trich_xuat_loi or not doc.noi_dung_trich_xuat:
+            _mark_loi(task_db, ket_qua_id, stamp)
+            return
+        if too_long_for_check(doc.noi_dung_trich_xuat):
+            # WR-05: vượt trần của dịch vụ AI — không gọi (chắc chắn lỗi), LOI
+            # không thử lại được; MH-09 hiện lý do từ DocumentOut.qua_dai_kiem_tra.
+            _logger.warning(
+                "document_check.run: tài liệu %s quá dài (%s ký tự) — không gửi AI",
+                doc.id,
+                len(doc.noi_dung_trich_xuat),
+            )
             _mark_loi(task_db, ket_qua_id, stamp)
             return
         doc_id, text = doc.id, doc.noi_dung_trich_xuat
@@ -504,6 +514,9 @@ def request_recheck(
     lại LOI; cần nộp file khác)."""
     if doc is not None and (doc.trich_xuat_loi or not doc.noi_dung_trich_xuat):
         raise HTTPException(status_code=409, detail=_RECHECK_NO_TEXT_DETAIL)
+    if doc is not None and too_long_for_check(doc.noi_dung_trich_xuat):
+        # WR-05: chạy lại chắc chắn lại LOI — cần nộp bản ngắn hơn.
+        raise HTTPException(status_code=409, detail=too_long_detail(doc.noi_dung_trich_xuat))
     stmt = (
         update(KetQuaKiemTraTrungLap)
         .where(KetQuaKiemTraTrungLap.id == ket_qua.id)

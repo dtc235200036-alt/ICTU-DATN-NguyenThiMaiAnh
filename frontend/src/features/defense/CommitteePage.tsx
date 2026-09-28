@@ -273,7 +273,8 @@ export default function CommitteePage() {
           <CheckStatusTag kiemTra={record.kiem_tra} />
           {record.kiem_tra?.trang_thai === 'LOI' &&
             record.bao_cao_cuoi &&
-            !record.bao_cao_cuoi.trich_xuat_loi && (
+            !record.bao_cao_cuoi.trich_xuat_loi &&
+            !record.bao_cao_cuoi.qua_dai_kiem_tra && (
             <RecheckButton taiLieuId={record.bao_cao_cuoi.id} />
           )}
         </Space>
