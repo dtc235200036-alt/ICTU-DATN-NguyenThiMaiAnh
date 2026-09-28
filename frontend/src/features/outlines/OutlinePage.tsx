@@ -1,13 +1,9 @@
-import { useState } from 'react'
-import { App as AntApp, Button, Card, Empty, Skeleton, Table, Tag, Upload } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
+import { App as AntApp, Card, Empty, Skeleton, Tabs, Tag } from 'antd'
+import { Link, useSearchParams } from 'react-router'
 
-import { getErrorMessage } from '../../api/client'
-import { formatBytes, formatDate } from '../../utils/format'
+import DocumentUpload from '../documents/DocumentUpload'
 import { useOutline, useOutlines, useSubmitOutline } from './api'
-import type { OutlineVersion } from './api'
-
-const { Dragger } = Upload
+import VersionHistory from './VersionHistory'
 
 const TRANG_THAI_LABEL: Record<string, { label: string; color: string }> = {
   CHUA_NOP: { label: 'Chưa nộp', color: 'default' },
@@ -16,27 +12,23 @@ const TRANG_THAI_LABEL: Record<string, { label: string; color: string }> = {
   DA_DUYET: { label: 'Đã duyệt', color: 'success' },
 }
 
-function renderKiemTra(version: OutlineVersion) {
-  if (!version.kiem_tra || version.kiem_tra.trang_thai === 'DANG_KIEM_TRA') {
-    return (
-      <span style={{ color: 'rgba(0,0,0,0.45)' }}>
-        {version.kiem_tra ? 'Đang kiểm tra' : 'Chưa có kết quả'}
-      </span>
-    )
-  }
-  if (version.kiem_tra.trang_thai === 'HOAN_TAT') {
-    return <Tag color="success">{`Hoàn tất - ${version.kiem_tra.ty_le_tong ?? 0}%`}</Tag>
-  }
-  return <Tag color="error">Lỗi kiểm tra</Tag>
+// UC2.1 - E1: chỉ nộp được khi CHUA_NOP hoặc YEU_CAU_SUA; hai lý do còn lại
+// (đang chờ duyệt / đã duyệt) hiển thị nguyên văn ở Alert của DocumentUpload.
+const DISABLED_REASON: Record<string, string> = {
+  CHO_DUYET: 'Đề cương đang chờ GVHD duyệt — bạn nộp được phiên bản mới khi GVHD yêu cầu sửa.',
+  DA_DUYET: 'Đề cương đã được duyệt.',
 }
 
+const DEFAULT_TAB = 'de-cuong'
+
 /**
- * MH-08 (tracer, thin — fidelity đầy đủ ở plan 03-02): SV nộp phiên bản mới
- * bằng Upload.Dragger và xem lịch sử phiên bản đề cương của đề tài mình.
+ * MH-08 (SV): Tabs "Đề cương" / "Báo cáo cuối" (khóa key trên URL `?tab=` —
+ * tab 'bao-cao-cuoi' được plan 03-03 thêm vào items, không sửa page này).
  */
 export default function OutlinePage() {
   const { message } = AntApp.useApp()
-  const [file, setFile] = useState<File | null>(null)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeTab = searchParams.get('tab') ?? DEFAULT_TAB
 
   const { data: outlinesPage, isLoading: isListLoading } = useOutlines({})
   const ownItem = outlinesPage?.items[0]
@@ -56,7 +48,9 @@ export default function OutlinePage() {
   if (!ownItem || deTaiId === undefined) {
     return (
       <Card>
-        <Empty description="Bạn chưa có đề tài được phân công GVHD" />
+        <Empty description="Bạn chưa có đề tài được phân công GVHD">
+          <Link to="/de-tai">Xem đề tài của tôi</Link>
+        </Empty>
       </Card>
     )
   }
@@ -74,88 +68,48 @@ export default function OutlinePage() {
     color: 'default',
   }
 
-  const handleSubmit = async () => {
-    if (!file) return
-    try {
-      await submitMutation.mutateAsync({ deTaiId, file })
-      message.success('Đã nộp đề cương')
-      setFile(null)
-    } catch (err) {
-      message.error(getErrorMessage(err))
-    }
+  const handleSubmit = async (file: File) => {
+    await submitMutation.mutateAsync({ deTaiId, file })
+    message.success('Đã nộp phiên bản mới — hệ thống đang kiểm tra trùng lặp')
   }
 
-  const columns: ColumnsType<OutlineVersion> = [
-    {
-      title: 'Phiên bản',
-      key: 'phien_ban',
-      render: (_value, record) => `v${record.tai_lieu.so_phien_ban}`,
-    },
-    {
-      title: 'Ngày nộp',
-      key: 'ngay_nop',
-      render: (_value, record) => formatDate(record.tai_lieu.thoi_diem_nop),
-    },
-    {
-      title: 'Trạng thái duyệt',
-      key: 'trang_thai_duyet',
-      render: (_value, record) =>
-        record.luot_duyet ? (
-          <Tag color={record.luot_duyet.ket_qua === 'DA_DUYET' ? 'success' : 'error'}>
-            {record.luot_duyet.ket_qua === 'DA_DUYET' ? 'Đã duyệt' : 'Yêu cầu sửa'}
-          </Tag>
-        ) : (
-          <Tag color="processing">Chờ duyệt</Tag>
-        ),
-    },
-    {
-      title: 'Kết quả kiểm tra',
-      key: 'kiem_tra',
-      render: (_value, record) => renderKiemTra(record),
-    },
-  ]
-
   return (
-    <Card title={detail.ten_de_tai} extra={<Tag color={trangThai.color}>{trangThai.label}</Tag>}>
-      <Card size="small" title="Nộp phiên bản mới" style={{ marginBottom: 20 }}>
-        <Dragger
-          accept=".docx,.pdf"
-          maxCount={1}
-          multiple={false}
-          disabled={!detail.quyen.nop}
-          beforeUpload={(f) => {
-            setFile(f)
-            return false
-          }}
-          onRemove={() => setFile(null)}
-        >
-          <p className="ant-upload-text">Kéo thả file vào đây hoặc bấm để chọn file</p>
-          <p className="ant-upload-hint">Chỉ nhận DOCX hoặc PDF, tối đa 20 MB (NFR-06)</p>
-        </Dragger>
-        {file && (
-          <p style={{ marginTop: 8, fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>
-            Đã chọn: {file.name} ({formatBytes(file.size)})
-          </p>
-        )}
-        <Button
-          type="primary"
-          block
-          style={{ marginTop: 16 }}
-          disabled={!detail.quyen.nop || !file}
-          loading={submitMutation.isPending}
-          onClick={handleSubmit}
-        >
-          Nộp phiên bản mới
-        </Button>
-      </Card>
-
-      <Table<OutlineVersion>
-        size="small"
-        rowKey={(record) => record.tai_lieu.id}
-        columns={columns}
-        dataSource={detail.phien_ban}
-        pagination={false}
-        locale={{ emptyText: 'Chưa có phiên bản nào' }}
+    <Card title="Đề cương / Báo cáo cuối">
+      <Tabs
+        activeKey={activeTab}
+        onChange={(key) => {
+          const next = new URLSearchParams(searchParams)
+          next.set('tab', key)
+          setSearchParams(next, { replace: true })
+        }}
+        items={[
+          {
+            key: 'de-cuong',
+            label: 'Đề cương',
+            children: (
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                  <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>{detail.ten_de_tai}</h2>
+                  <Tag color={trangThai.color}>{trangThai.label}</Tag>
+                </div>
+                <Card size="small" title="Nộp phiên bản mới" style={{ marginBottom: 20 }}>
+                  <DocumentUpload
+                    disabled={!detail.quyen.nop}
+                    disabledReason={DISABLED_REASON[detail.trang_thai]}
+                    submitLabel="Nộp phiên bản mới"
+                    loading={submitMutation.isPending}
+                    onSubmit={handleSubmit}
+                  />
+                </Card>
+                <VersionHistory
+                  versions={detail.phien_ban}
+                  trangThai={detail.trang_thai}
+                  docLabel="đề cương"
+                />
+              </div>
+            ),
+          },
+        ]}
       />
     </Card>
   )

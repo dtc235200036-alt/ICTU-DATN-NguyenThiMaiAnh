@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Avatar, Breadcrumb, Button, Layout, Menu, Tag } from 'antd'
-import { Outlet, useLocation, useNavigate } from 'react-router'
+import { Outlet, matchPath, useLocation, useNavigate } from 'react-router'
 import { useQueryClient } from '@tanstack/react-query'
 
 import { collectRoutes } from '../app/registry'
@@ -46,8 +46,13 @@ export default function AppLayout() {
       }))
   }, [routes, user])
 
+  // T-03 (bug pre-existing từ Phase 2): so khớp CHÍNH XÁC theo chuỗi bỏ sót
+  // mọi route có tham số động (`/de-tai/:id`, `/kiem-tra-trung-lap/:taiLieuId`,
+  // 03-02) — không route nào trong số đó từng hiện Breadcrumb. Dùng matchPath
+  // (end: true) để khớp đúng pattern, giữ nguyên hành vi cho route tĩnh.
   const matchedRoute = useMemo(
-    () => routes.find((route) => route.path === location.pathname),
+    () =>
+      routes.find((route) => matchPath({ path: route.path, end: true }, location.pathname) !== null),
     [routes, location.pathname],
   )
 

@@ -31,3 +31,33 @@ export function formatBytes(bytes: number): string {
   }
   return `${value.toFixed(1)} ${units[unitIndex]}`
 }
+
+/** MH-09/MH-14: "12%" tối đa một chữ số thập phân, "—" khi null/undefined. */
+export function formatPercent(value: number | null | undefined): string {
+  if (value === null || value === undefined) return '—'
+  const rounded = Math.round(value * 10) / 10
+  const display = Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1)
+  return `${display}%`
+}
+
+const RELATIVE_UNITS: { unit: Intl.RelativeTimeFormatUnit; ms: number }[] = [
+  { unit: 'year', ms: 365 * 24 * 60 * 60 * 1000 },
+  { unit: 'month', ms: 30 * 24 * 60 * 60 * 1000 },
+  { unit: 'day', ms: 24 * 60 * 60 * 1000 },
+  { unit: 'hour', ms: 60 * 60 * 1000 },
+  { unit: 'minute', ms: 60 * 1000 },
+]
+
+const relativeFormatter = new Intl.RelativeTimeFormat('vi', { numeric: 'auto' })
+
+/** Dùng sau này bởi chuông thông báo (D-08) — "5 phút trước", "hôm qua". */
+export function formatRelative(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  const diffMs = new Date(iso).getTime() - Date.now()
+  for (const { unit, ms } of RELATIVE_UNITS) {
+    if (Math.abs(diffMs) >= ms) {
+      return relativeFormatter.format(Math.round(diffMs / ms), unit)
+    }
+  }
+  return relativeFormatter.format(Math.round(diffMs / 60000), 'minute')
+}

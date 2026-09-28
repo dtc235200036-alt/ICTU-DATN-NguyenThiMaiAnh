@@ -2,53 +2,21 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { AxiosError } from 'axios'
 
 import { api } from '../../api/client'
-import type { PersonRef } from '../topics/api'
+import type {
+  CheckDetail,
+  CheckMatch,
+  CheckSegment,
+  CheckStatus,
+  CheckSummary,
+  DocumentOut,
+  PersonRef,
+} from '../documents/api'
 
-export type { PersonRef }
-
-export interface DocumentOut {
-  id: number
-  loai: string
-  so_phien_ban: number
-  ten_goc: string
-  kich_thuoc: number
-  dinh_dang: 'DOCX' | 'PDF'
-  thoi_diem_nop: string
-  trich_xuat_loi: boolean
-  tom_tat: string | null
-}
-
-export type CheckStatus = 'DANG_KIEM_TRA' | 'HOAN_TAT' | 'LOI'
-
-export interface CheckSummary {
-  id: number
-  trang_thai: CheckStatus
-  ty_le_tong: number | null
-  nguong_ap_dung: number
-  thoi_diem: string
-}
-
-export interface CheckMatch {
-  doi_tuong_trung: string
-  ty_le: number
-}
-
-export interface CheckSegment {
-  doi_tuong_trung: string
-  doan_nguon: string | null
-  doan_trung: string | null
-  vi_tri: string | null
-  ty_le: number
-}
-
-export interface CheckDetail extends CheckSummary {
-  tai_lieu: DocumentOut
-  de_tai_id: number
-  ten_de_tai: string
-  sinh_vien: PersonRef | null
-  do_an_trung: CheckMatch[]
-  chi_tiet: CheckSegment[]
-}
+// Các kiểu tài liệu/kiểm tra trùng lặp giờ khai báo MỘT nơi duy nhất ở
+// features/documents/api.ts (dùng chung với báo cáo tiến độ/cuối/chấm điểm ở
+// các plan sau) — re-export lại đây để mọi import cũ từ 'features/outlines/api'
+// không phải sửa.
+export type { CheckDetail, CheckMatch, CheckSegment, CheckStatus, CheckSummary, DocumentOut, PersonRef }
 
 export type ReviewKetQua = 'DA_DUYET' | 'YEU_CAU_SUA'
 
