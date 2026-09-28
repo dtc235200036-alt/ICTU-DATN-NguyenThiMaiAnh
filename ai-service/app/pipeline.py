@@ -122,6 +122,7 @@ def _is_unchanged(session: Session, encoder: Encoder, loai: str, ma_nguon: int, 
         select(func.count(Embedding.id)).where(
             Embedding.chunk_id.in_([cid for cid, _ in stored]),
             Embedding.ten_model == encoder.name,
+            Embedding.so_chieu == encoder.dim,  # IN-05: cùng tiêu chí với rebuild
         )
     )
     return with_embedding == len(stored)
@@ -583,9 +584,17 @@ def check_document(
     }
 
 
+def _usable_embeddings(encoder: Encoder):
+    """IN-05 (04-REVIEW): embedding dùng được = đúng mô hình VÀ đúng số chiều
+    (cùng tiêu chí rebuild dùng để nạp) — dòng sai số chiều tính là thiếu."""
+    return select(Embedding.chunk_id).where(
+        Embedding.ten_model == encoder.name, Embedding.so_chieu == encoder.dim
+    )
+
+
 def count_missing(session: Session, encoder: Encoder) -> int:
-    """Số chunk chưa có embedding cho mô hình hiện tại."""
-    has = select(Embedding.chunk_id).where(Embedding.ten_model == encoder.name)
+    """Số chunk chưa có embedding dùng được cho mô hình hiện tại."""
+    has = _usable_embeddings(encoder)
     return int(session.scalar(select(func.count(Chunk.id)).where(Chunk.id.not_in(has))) or 0)
 
 
@@ -593,13 +602,22 @@ def reembed_missing(session: Session, index: CorpusIndex, encoder: Encoder) -> R
     """/reindex không kèm items: encode (MỘT lần) các chunk thiếu embedding
     cho mô hình hiện tại, rồi dựng lại bộ nhớ từ thesis_ai."""
     with _WRITE_LOCK:
-        has = select(Embedding.chunk_id).where(Embedding.ten_model == encoder.name)
+        has = _usable_embeddings(encoder)
         missing = session.execute(
             select(Chunk.id, Chunk.noi_dung).where(Chunk.id.not_in(has)).order_by(Chunk.id)
         ).all()
         if missing:
             vectors = encoder.encode([t for _, t in missing])
             try:
+                # IN-05: dòng cùng mô hình nhưng sai số chiều bị thay (UNIQUE
+                # chunk_id + ten_model không cho chèn dòng thứ hai).
+                session.execute(
+                    delete(Embedding).where(
+                        Embedding.ten_model == encoder.name,
+                        Embedding.so_chieu != encoder.dim,
+                        Embedding.chunk_id.in_([cid for cid, _ in missing]),
+                    )
+                )
                 session.add_all(
                     Embedding(
                         chunk_id=cid,
