@@ -2,17 +2,17 @@
 gsd_state_version: "1.0"
 current_phase: 2
 current_phase_name: Platform, RBAC & Topic Management
-status: executing
-stopped_at: Completed 02-05-PLAN.md
-last_updated: "2026-09-27T23:53:26.193Z"
+status: verifying
+stopped_at: Completed 02-06-PLAN.md
+last_updated: "2026-09-28T00:24:37.683Z"
 last_activity: 2026-09-28
 last_activity_desc: Phase 2 execution started
-state_head: d40d83cd9ac02cc2323a1c4fc531f07d1baf52bf
+state_head: 0a990c43dcd754042044df7e4102240454b546af
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 13
-  completed_plans: 11
+  completed_plans: 12
   percent: 0
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-09-27)
 
 Phase: 2 (Platform, RBAC & Topic Management) — EXECUTING
 Plan: 6 of 6
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-28 — Phase 2 execution started
 
 Progress: [░░░░░░░░░░] 0%
@@ -67,6 +67,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02 P03 | 45min | 2 tasks | 11 files |
 | Phase 02 P04 | 40min | 2 tasks | 27 files |
 | Phase 02 P05 | 30min | 2 tasks | 9 files |
+| Phase 02 P06 | 65min | 2 tasks | 18 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,9 @@ Recent decisions affecting current work:
 - [Phase 02]: [Phase 02]: react-query default retry(3) turns a definitive 403 into an infinite Skeleton for any consumer treating isLoading||!data as still-loading — useTopic now skips retry on 4xx; found via this plan's own human-check
 - [Phase 02]: [Phase 02] TopicListParams stays a plain dataclass (not Pydantic) — FastAPI Query() already validates/coerces trang_thai/pham_vi/sap_xep enums before the router builds it
 - [Phase 02]: [Phase 02] register_topic's rowcount=0 re-read only picks the user-facing error message — the accept/reject decision was already made atomically by the conditional UPDATE's WHERE clause, never a check-then-act gap
+- [Phase 02]: [Phase 02]: topic_approval.py reuses topics_service._person_refs/get_topic directly rather than forking a parallel implementation
+- [Phase 02]: [Phase 02]: GVHD never pre-selected even for the sole proposing GV (UC1.3 E1) — enforced independently on frontend (disabled button) and backend (422 if omitted)
+- [Phase 02]: [Phase 02]: dashboard services use only COUNT()/exists() aggregates per role, never a Python loop over all rows
 
 ### Pending Todos
 
@@ -128,6 +132,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-27T23:53:26.161Z
-Stopped at: Completed 02-05-PLAN.md
+Last session: 2026-09-28T00:24:37.650Z
+Stopped at: Completed 02-06-PLAN.md
 Resume file: None
