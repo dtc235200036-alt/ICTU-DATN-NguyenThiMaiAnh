@@ -27,7 +27,7 @@ Khoa CNTT (AISV-01..05).
 | `AI_API_KEY` | — (bắt buộc, ≥ 32 ký tự) | **có** | Khóa nội bộ mà Web API gửi trong `X-API-Key` |
 | `AI_MODEL_PROFILE` | `bkai` | | `bkai` \| `e5` \| `fake` (chỉ khi `APP_ENV=test`); hiệu chỉnh — `calibration/nguong-de-xuat.json` (2026-09-28) |
 | `TORCH_THREADS` | `4` | | Số luồng CPU của torch |
-| `MAX_TEXT_CHARS` | `2000000` | | Trần độ dài trường `text` (422 khi vượt) |
+| `MAX_TEXT_CHARS` | `2000000` | | Trần độ dài trường `text` (422 khi vượt); `text` của TOPIC/ARCHIVE (một tiêu đề) tối đa 1000 ký tự, mọi id/`ref_id`/`loai_tru[]` ≤ 2⁶³−1 (IN-03) |
 | `MAX_BODY_BYTES` | `8388608` | | Trần thân request (413 khi vượt, đếm byte thật) |
 | `NGUONG_DOAN_MAC_DINH` | `67.7` | | Ngưỡng ngữ nghĩa (cosine×100) khi request không gửi; hiệu chỉnh — `calibration/nguong-de-xuat.json` (2026-09-28) |
 | `NGUONG_NGUYEN_VAN_MAC_DINH` | `88.7` | | Ngưỡng nguyên văn (Jaccard×100) khi request không gửi; hiệu chỉnh — `calibration/nguong-de-xuat.json` (2026-09-28) |

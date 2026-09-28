@@ -66,6 +66,15 @@ class Settings(BaseSettings):
             raise ValueError("JWT_SECRET phải có ít nhất 32 ký tự")
         return v
 
+    @field_validator("TITLE_CHECK_TOP_K")
+    @classmethod
+    def _title_top_k_range(cls, v: int) -> int:
+        # IN-03 (04-REVIEW): Web API xin AI TITLE_CHECK_TOP_K × 2 kết quả, AI
+        # nhận top_k tối đa 20 — ngoài 1..10 thì mọi lần kiểm tra tên sẽ LOI.
+        if not 1 <= v <= 10:
+            raise ValueError("TITLE_CHECK_TOP_K phải trong khoảng 1..10")
+        return v
+
     @field_validator("BCRYPT_ROUNDS")
     @classmethod
     def _bcrypt_rounds_floor(cls, v: int, info) -> int:
