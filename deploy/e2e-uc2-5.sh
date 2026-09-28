@@ -113,7 +113,7 @@ cleanup() {
     if [ -n "${TEN_LUU_TRU_LIST}" ]; then
       while IFS= read -r ten; do
         [ -z "$ten" ] && continue
-        docker compose -f "${SCRIPT_DIR}/docker-compose.yml" exec -T api rm -f "/data/uploads/${ten}" >/dev/null 2>&1 || true
+        docker compose -f "${SCRIPT_DIR}/docker-compose.yml" exec -T api rm -f "/data/uploads/${ten}" </dev/null >/dev/null 2>&1 || true
       done <<<"${TEN_LUU_TRU_LIST}"
     fi
     DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \

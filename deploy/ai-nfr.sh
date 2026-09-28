@@ -88,7 +88,7 @@ cleanup() {
     files="$(sql "SELECT t.ten_luu_tru FROM tai_lieu_do_an t JOIN de_tai dt ON dt.id = t.de_tai_id WHERE dt.dot_do_an_id = ${DOT_DO_AN_ID}" 2>/dev/null || true)"
     while IFS= read -r ten; do
       [ -z "$ten" ] && continue
-      "${COMPOSE[@]}" exec -T api rm -f "/data/uploads/${ten}" >/dev/null 2>&1 || true
+      "${COMPOSE[@]}" exec -T api rm -f "/data/uploads/${ten}" </dev/null >/dev/null 2>&1 || true
     done <<<"${files}"
   fi
   if [ -n "${KHO_ID}" ]; then
