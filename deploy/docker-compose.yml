@@ -1,5 +1,14 @@
 name: ntma
 
+# WR-03: subnet cố định + IP tĩnh cho apache, để api chỉ tin cậy đúng một địa
+# chỉ (Apache) qua --forwarded-allow-ips thay vì '*' (tin mọi container có
+# thể mở kết nối TCP tới api:8001 trên cùng mạng compose).
+networks:
+  ntma-internal:
+    ipam:
+      config:
+        - subnet: 172.28.238.0/24
+
 services:
   mysql:
     image: mysql:8.4
@@ -17,6 +26,8 @@ services:
       - ./mysql/initdb:/docker-entrypoint-initdb.d:ro
     ports:
       - "127.0.0.1:${MYSQL_HOST_PORT:-3307}:3306"
+    networks:
+      - ntma-internal
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
       interval: 5s
@@ -38,9 +49,14 @@ services:
       AI_STUB_MODE: ${AI_STUB_MODE:-normal}
       APP_ENV: production
       COOKIE_SECURE: "true"
+      # WR-03: chỉ tin X-Forwarded-For/-Proto đến từ IP tĩnh của apache bên
+      # dưới — phải khớp networks.ntma-internal.apache.ipv4_address.
+      FORWARDED_ALLOW_IPS: 172.28.238.10
     depends_on:
       mysql:
         condition: service_healthy
+    networks:
+      - ntma-internal
     expose:
       - "8001"
     healthcheck:
@@ -61,6 +77,10 @@ services:
       - "${HTTPS_PORT:-443}:443"
     volumes:
       - ./certs:/usr/local/apache2/conf/certs:ro
+    networks:
+      ntma-internal:
+        # WR-03: IP tĩnh — phải khớp FORWARDED_ALLOW_IPS của service api.
+        ipv4_address: 172.28.238.10
     depends_on:
       api:
         condition: service_healthy
