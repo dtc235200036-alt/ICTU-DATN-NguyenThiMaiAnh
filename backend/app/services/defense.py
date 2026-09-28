@@ -880,16 +880,49 @@ def remove_schedule(db: Session, lich_bao_ve_id: int) -> None:
 _VAI_TRO_ORDER = {CHU_TICH: 0, THU_KY: 1}
 
 
-def _is_member(db: Session, hoi_dong_id: int, giang_vien_id: int | None) -> bool:
+def _is_member(
+    db: Session, hoi_dong_id: int, giang_vien_id: int | None, *, lock: bool = False
+) -> bool:
+    """`lock=True`: đọc có khóa chia sẻ — thấy bản commit mới nhất thay vì
+    snapshot REPEATABLE READ mở từ đầu request (WR-02)."""
     if giang_vien_id is None:
         return False
-    count = db.execute(
+    stmt = (
         select(func.count())
         .select_from(ThanhVienHoiDong)
         .where(ThanhVienHoiDong.hoi_dong_id == hoi_dong_id)
         .where(ThanhVienHoiDong.giang_vien_id == giang_vien_id)
-    ).scalar_one()
+    )
+    if lock:
+        stmt = stmt.with_for_update(read=True)
+    count = db.execute(stmt).scalar_one()
     return count > 0
+
+
+def _lock_committee_then_schedule(
+    db: Session, lich_id: int, *, shared_committee: bool
+) -> tuple[HoiDong, LichBaoVe]:
+    """WR-02/IN-08: thứ tự khóa thống nhất hoi_dong -> lich_bao_ve cho score,
+    finalize và remove_schedule (update_committee/add_schedule chỉ khóa
+    hoi_dong), nên các thao tác này serialize với việc sửa thành viên hội
+    đồng mà không tạo chu trình khóa. hoi_dong_id của một lịch không đổi."""
+    hoi_dong_id = db.execute(
+        select(LichBaoVe.hoi_dong_id).where(LichBaoVe.id == lich_id)
+    ).scalar_one_or_none()
+    if hoi_dong_id is None:
+        raise HTTPException(status_code=404, detail=_SCHEDULE_NOT_FOUND_DETAIL)
+    hd = db.execute(
+        select(HoiDong)
+        .where(HoiDong.id == hoi_dong_id)
+        .with_for_update(read=shared_committee)
+    ).scalar_one()
+    lich = db.execute(
+        select(LichBaoVe).where(LichBaoVe.id == lich_id).with_for_update()
+    ).scalar_one_or_none()
+    if lich is None:
+        db.rollback()
+        raise HTTPException(status_code=404, detail=_SCHEDULE_NOT_FOUND_DETAIL)
+    return hd, lich
 
 
 def my_committees(db: Session, user: CurrentUser) -> list[MyCommittee]:
@@ -1020,21 +1053,17 @@ def get_schedule_for_scoring(db: Session, user: CurrentUser, lich_id: int) -> Sc
 
 
 def score(db: Session, user: CurrentUser, lich_id: int, payload: ScoreRequest) -> ScoringDetail:
-    """UC4.3/T-03-21: khóa dòng lich_bao_ve (serialize với finalize) — thành
+    """UC4.3/T-03-21: khóa CHIA SẺ hoi_dong (serialize với update_committee —
+    WR-02) rồi khóa dòng lich_bao_ve (serialize với finalize) — thành
     viên (403), chưa chốt (409), đã đến ngày bảo vệ (409); upsert điểm của
     chính người gọi (UNIQUE(lich_bao_ve_id, giang_vien_id))."""
-    lich = db.execute(
-        select(LichBaoVe).where(LichBaoVe.id == lich_id).with_for_update()
-    ).scalar_one_or_none()
-    if lich is None:
-        raise HTTPException(status_code=404, detail=_SCHEDULE_NOT_FOUND_DETAIL)
-    if not _is_member(db, lich.hoi_dong_id, user.giang_vien_id):
+    hd, lich = _lock_committee_then_schedule(db, lich_id, shared_committee=True)
+    if not _is_member(db, lich.hoi_dong_id, user.giang_vien_id, lock=True):
         db.rollback()
         raise HTTPException(status_code=403, detail=_NOT_MEMBER_DETAIL)
     if lich.da_chot:
         db.rollback()
         raise HTTPException(status_code=409, detail=_SCORE_FINALIZED_DETAIL)
-    hd = db.get(HoiDong, lich.hoi_dong_id)
     if hd.ngay_bao_ve > today_vn():
         db.rollback()
         raise HTTPException(status_code=409, detail=_not_yet_detail(hd.ngay_bao_ve))
@@ -1071,11 +1100,7 @@ def finalize(db: Session, lich_id: int) -> tuple[FinalizeOut, int]:
     (ROUND_HALF_UP); da_chot lật bằng MỘT conditional UPDATE; cùng
     transaction chèn do_an_kho + thông báo KET_QUA_BAO_VE. Router đẩy
     archive.run_ingest vào BackgroundTasks SAU commit."""
-    lich = db.execute(
-        select(LichBaoVe).where(LichBaoVe.id == lich_id).with_for_update()
-    ).scalar_one_or_none()
-    if lich is None:
-        raise HTTPException(status_code=404, detail=_SCHEDULE_NOT_FOUND_DETAIL)
+    _hd, lich = _lock_committee_then_schedule(db, lich_id, shared_committee=True)
     if lich.da_chot:
         db.rollback()
         raise HTTPException(status_code=409, detail=_FINALIZED_DETAIL)
@@ -1084,9 +1109,21 @@ def finalize(db: Session, lich_id: int) -> tuple[FinalizeOut, int]:
         select(func.count())
         .select_from(ThanhVienHoiDong)
         .where(ThanhVienHoiDong.hoi_dong_id == lich.hoi_dong_id)
+        .with_for_update(read=True)
     ).scalar_one()
+    # WR-02: chỉ tính điểm của thành viên HIỆN TẠI — không bao giờ lấy điểm
+    # của một GV đã rời hội đồng vào điểm trung bình chính thức.
     scores = (
-        db.execute(select(DiemBaoVe.diem).where(DiemBaoVe.lich_bao_ve_id == lich_id))
+        db.execute(
+            select(DiemBaoVe.diem)
+            .join(
+                ThanhVienHoiDong,
+                (ThanhVienHoiDong.giang_vien_id == DiemBaoVe.giang_vien_id)
+                & (ThanhVienHoiDong.hoi_dong_id == lich.hoi_dong_id),
+            )
+            .where(DiemBaoVe.lich_bao_ve_id == lich_id)
+            .with_for_update(read=True)
+        )
         .scalars()
         .all()
     )
