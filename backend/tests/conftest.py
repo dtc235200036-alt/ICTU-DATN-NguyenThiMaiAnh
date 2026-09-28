@@ -1,6 +1,9 @@
 import os
 import secrets
+import tempfile
 from dataclasses import dataclass
+from datetime import date
+from io import BytesIO
 from pathlib import Path
 
 import pytest
@@ -29,6 +32,9 @@ def _configure_test_environment() -> None:
     os.environ["BCRYPT_ROUNDS"] = "4"
     os.environ.setdefault("JWT_SECRET", secrets.token_hex(32))
     os.environ.setdefault("COOKIE_SECURE", "true")
+    # Phase 3: host pytest không ghi được /data/uploads (container-only) — mỗi
+    # phiên test dùng một thư mục tạm riêng, tự dọn khi tiến trình pytest thoát.
+    os.environ["UPLOAD_DIR"] = tempfile.mkdtemp(prefix="ntma-uploads-")
 
     if os.environ.get("TEST_DATABASE_URL"):
         os.environ["DATABASE_URL"] = os.environ["TEST_DATABASE_URL"]
@@ -225,3 +231,73 @@ def auth_headers():
         return {"Authorization": f"Bearer {token}"}
 
     return _headers
+
+
+@pytest.fixture
+def make_assigned_topic(db):
+    """Phase 3/UC2: một DeTai ở DA_PHAN_CONG (SV + GVHD đã gán) qua một
+    DotDoAn đang mở tự tạo — điểm vào bắt buộc cho mọi nộp đề cương."""
+
+    def _make(sv: SeededAccount, gv: SeededAccount):
+        from app.models.de_tai import DA_PHAN_CONG, GIANG_VIEN, DeTai
+        from app.models.dot_do_an import DANG_MO, DotDoAn
+
+        suffix = _next_suffix()
+        cohort = DotDoAn(
+            ten_dot=f"Đợt kiểm thử đề cương {suffix}",
+            khoa="KTEST",
+            nam_hoc="2026-2027",
+            ngay_bat_dau=date(2026, 1, 1),
+            trang_thai=DANG_MO,
+        )
+        db.add(cohort)
+        db.flush()
+
+        topic = DeTai(
+            dot_do_an_id=cohort.id,
+            giang_vien_id=gv.giang_vien_id,
+            sinh_vien_id=sv.sinh_vien_id,
+            ten_de_tai=f"Đề tài kiểm thử đề cương {suffix}",
+            trang_thai=DA_PHAN_CONG,
+            loai_nguoi_de_xuat=GIANG_VIEN,
+        )
+        db.add(topic)
+        db.commit()
+        db.refresh(topic)
+        return topic
+
+    return _make
+
+
+@pytest.fixture
+def docx_bytes():
+    def _make(paragraphs: list[str]) -> bytes:
+        from docx import Document
+
+        doc = Document()
+        for p in paragraphs:
+            doc.add_paragraph(p)
+        buf = BytesIO()
+        doc.save(buf)
+        return buf.getvalue()
+
+    return _make
+
+
+@pytest.fixture
+def pdf_bytes():
+    def _make(lines: list[str]) -> bytes:
+        # ASCII only — font PDF mặc định của PyMuPDF không có glyph tiếng Việt.
+        import pymupdf
+
+        pdf = pymupdf.open()
+        page = pdf.new_page()
+        y = 72
+        for line in lines:
+            page.insert_text((72, y), line)
+            y += 20
+        data = pdf.tobytes()
+        pdf.close()
+        return data
+
+    return _make

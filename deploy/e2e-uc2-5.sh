@@ -207,13 +207,64 @@ PYEOF
   [ "$kiem_tra_trang" = "HOAN_TAT" ] || fail "GV029 không thấy kiểm tra Hoàn tất (nhận ${kiem_tra_trang})"
   ok "GV029 thấy tóm tắt trích xuất (D-03) + kiểm tra Hoàn tất trên màn duyệt"
 
+  # GV029 yêu cầu sửa v1 kèm nhận xét (UC2.2 A1)
   status="$(call POST "/api/outlines/${DE_TAI_ID}/review" "${TOKEN_GV029}" \
     -H 'Content-Type: application/json' \
-    -d "{\"tai_lieu_do_an_id\":${doc_id},\"ket_qua\":\"DA_DUYET\"}")"
-  [ "$status" = "200" ] || fail "GV029 duyệt đề cương không trả 200 (mã ${status}, $(cat "$TMP/body"))"
+    -d "{\"tai_lieu_do_an_id\":${doc_id},\"ket_qua\":\"YEU_CAU_SUA\",\"nhan_xet\":\"Vui lòng bổ sung mục tiêu cụ thể hơn\"}")"
+  [ "$status" = "200" ] || fail "GV029 yêu cầu sửa không trả 200 (mã ${status}, $(cat "$TMP/body"))"
+  trang="$(jget "d.get('trang_thai','')")"
+  [ "$trang" = "YEU_CAU_SUA" ] || fail "Đề cương không chuyển Yêu cầu sửa (nhận ${trang})"
+  ok "GV029 yêu cầu sửa đề cương kèm nhận xét -> Yêu cầu sửa"
+
+  status="$(call GET /api/notifications "${TOKEN_SV098}")"
+  [ "$status" = "200" ] || fail "DTC225200098 không lấy được thông báo (mã ${status})"
+  local has_yeu_cau_sua_notif
+  has_yeu_cau_sua_notif="$(jget "1 if any(i['loai'] == 'DE_CUONG_YEU_CAU_SUA' for i in d['items']) else 0")"
+  [ "$has_yeu_cau_sua_notif" = "1" ] || fail "DTC225200098 không có thông báo Yêu cầu sửa đề cương"
+  ok "DTC225200098 có thông báo Yêu cầu sửa đề cương (NOTF-01)"
+
+  # DTC225200098 nộp lại phiên bản 2 dạng PDF
+  local pdf_path="$TMP/de-cuong-v2.pdf"
+  uv --directory "${SCRIPT_DIR}/../backend" run python - "$pdf_path" <<'PYEOF'
+import sys
+import pymupdf
+
+path = sys.argv[1]
+doc = pymupdf.open()
+page = doc.new_page()
+page.insert_text((72, 72), "Outline version 2 - revised after GVHD feedback")
+page.insert_text((72, 96), "This paragraph adds more detail about the research scope and methodology")
+doc.save(path)
+doc.close()
+PYEOF
+  [ -s "$pdf_path" ] || fail "Không sinh được file PDF kiểm thử"
+
+  local doc_id_v2
+  status="$(call POST "/api/outlines/${DE_TAI_ID}/submit" "${TOKEN_SV098}" \
+    -F "file=@${pdf_path};type=application/pdf")"
+  [ "$status" = "202" ] || fail "Nộp đề cương v2 (PDF) không trả 202 (mã ${status}, $(cat "$TMP/body"))"
+  doc_id_v2="$(jget "d['phien_ban'][0]['tai_lieu']['id']")"
+  [ -n "$doc_id_v2" ] || fail "Không đọc được id tài liệu v2 vừa nộp"
+  ok "DTC225200098 nộp đề cương v2 (PDF) -> 202 (tai_lieu_do_an_id=${doc_id_v2})"
+
+  trang=""
+  for attempt in $(seq 1 20); do
+    status="$(call GET "/api/documents/${doc_id_v2}/check" "${TOKEN_SV098}")"
+    [ "$status" = "200" ] || fail "GET check tài liệu v2 lỗi (mã ${status})"
+    trang="$(jget "d.get('trang_thai','')")"
+    [ "$trang" != "DANG_KIEM_TRA" ] && break
+    sleep 0.5
+  done
+  [ "$trang" = "HOAN_TAT" ] || fail "Kiểm tra trùng lặp v2 không đạt Hoàn tất (trạng thái cuối: ${trang})"
+  ok "Kiểm tra trùng lặp tài liệu v2 hoàn tất (HOAN_TAT)"
+
+  status="$(call POST "/api/outlines/${DE_TAI_ID}/review" "${TOKEN_GV029}" \
+    -H 'Content-Type: application/json' \
+    -d "{\"tai_lieu_do_an_id\":${doc_id_v2},\"ket_qua\":\"DA_DUYET\"}")"
+  [ "$status" = "200" ] || fail "GV029 duyệt đề cương v2 không trả 200 (mã ${status}, $(cat "$TMP/body"))"
   trang="$(jget "d.get('trang_thai','')")"
   [ "$trang" = "DA_DUYET" ] || fail "Đề cương không chuyển Đã duyệt (nhận ${trang})"
-  ok "GV029 duyệt đề cương -> Đã duyệt"
+  ok "GV029 duyệt đề cương v2 -> Đã duyệt"
 
   status="$(call GET /api/notifications "${TOKEN_SV098}")"
   [ "$status" = "200" ] || fail "DTC225200098 không lấy được thông báo (mã ${status})"
@@ -221,6 +272,42 @@ PYEOF
   has_notification="$(jget "1 if any(i['loai'] == 'DE_CUONG_DUYET' for i in d['items']) else 0")"
   [ "$has_notification" = "1" ] || fail "DTC225200098 không có thông báo Đề cương được duyệt"
   ok "DTC225200098 có thông báo Đề cương được duyệt (NOTF-01)"
+
+  # ZIP đổi tên .docx -> 422 (kiểm tra theo nội dung nhị phân, không theo đuôi file)
+  local fake_docx="$TMP/fake.docx"
+  python3 -c "
+import zipfile
+with zipfile.ZipFile('$fake_docx', 'w') as zf:
+    zf.writestr('not-a-document.txt', 'hello')
+"
+  status="$(call POST "/api/outlines/${DE_TAI_ID}/submit" "${TOKEN_SV098}" \
+    -F "file=@${fake_docx};type=application/vnd.openxmlformats-officedocument.wordprocessingml.document")"
+  [ "$status" = "422" ] || fail "ZIP đổi tên .docx không bị từ chối 422 (mã ${status})"
+  ok "ZIP đổi tên .docx bị từ chối 422 (kiểm tra theo nội dung nhị phân)"
+
+  # DTC225200097 (SV khác) -> 403
+  status="$(call GET "/api/outlines/${DE_TAI_ID}" "${TOKEN_SV097}")"
+  [ "$status" = "403" ] || fail "DTC225200097 xem chi tiết đề cương không bị từ chối 403 (mã ${status})"
+  status="$(call GET "/api/documents/${doc_id}/download" "${TOKEN_SV097}")"
+  [ "$status" = "403" ] || fail "DTC225200097 tải tài liệu không bị từ chối 403 (mã ${status})"
+  ok "DTC225200097 (SV khác) bị từ chối 403 trên xem chi tiết + tải tài liệu"
+
+  # GV025 (GV không liên quan) -> 403 khi duyệt
+  status="$(call POST "/api/outlines/${DE_TAI_ID}/review" "${TOKEN_GV025}" \
+    -H 'Content-Type: application/json' \
+    -d "{\"tai_lieu_do_an_id\":${doc_id_v2},\"ket_qua\":\"DA_DUYET\"}")"
+  [ "$status" = "403" ] || fail "GV025 duyệt đề cương không bị từ chối 403 (mã ${status})"
+  ok "GV025 (GV không liên quan) bị từ chối 403 khi duyệt"
+
+  # DTC225200098 tải lại v1 -> byte giống hệt file đã nộp
+  local downloaded_path="$TMP/downloaded-v1"
+  curl -sk -o "$downloaded_path" -X GET "$BASE/api/documents/${doc_id}/download" \
+    -H "Authorization: Bearer ${TOKEN_SV098}"
+  local original_sha downloaded_sha
+  original_sha="$(sha256sum "$docx_path" | awk '{print $1}')"
+  downloaded_sha="$(sha256sum "$downloaded_path" | awk '{print $1}')"
+  [ "$original_sha" = "$downloaded_sha" ] || fail "Bytes tải về của v1 không khớp file đã nộp"
+  ok "DTC225200098 tải lại v1 -> bytes khớp sha256 với file gốc"
 
   if docker compose -f "${SCRIPT_DIR}/docker-compose.yml" exec -T apache test -e /data/uploads 2>/dev/null; then
     fail "/data/uploads có thể truy cập được từ container apache (vi phạm D-02)"
