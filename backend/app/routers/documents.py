@@ -61,7 +61,10 @@ def recheck_document(
 ) -> CheckSummary:
     """UC0.7/trang-thai-kiem-tra-trung-lap.puml: chỉ kiểm tra lại được khi
     đang LOI (conditional UPDATE trong document_check.request_recheck).
-    get_viewable_or_error đã tự giới hạn GV chỉ là GVHD của đề tài (T-03-06)."""
+    Phạm vi GV do get_viewable_or_error quyết định (T-03-06): GVHD của đề
+    tài, và với BAO_CAO_CUOI thêm thành viên hội đồng bảo vệ của đề tài
+    (documents.can_view) — hội đồng cũng cần kết quả kiểm tra báo cáo cuối
+    (WR-13), nên việc này là cố ý."""
     doc = documents.get_viewable_or_error(db, user, tai_lieu_do_an_id)
     ket_qua = document_check.get_check_for_doc(db, doc)
     if ket_qua is None:
