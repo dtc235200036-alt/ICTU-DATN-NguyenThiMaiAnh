@@ -18,11 +18,13 @@ export const routes: AppRoute[] = [
   },
   {
     path: '/duyet-de-cuong',
-    roles: ['GIANG_VIEN'],
+    roles: ['GIANG_VIEN', 'BO_MON'],
     breadcrumb: ['Quản lý đề cương', 'Duyệt đề cương'],
     element: <OutlineReviewPage />,
     menu: {
-      roles: ['GIANG_VIEN'],
+      // Cùng nhãn/order cho cả hai vai trò (MH-04/11/13) — một MenuEntry đủ,
+      // không cần route "shim" như /de-tai (nhãn khác nhau theo vai trò).
+      roles: ['GIANG_VIEN', 'BO_MON'],
       label: 'Duyệt đề cương',
       order: 40,
     },
