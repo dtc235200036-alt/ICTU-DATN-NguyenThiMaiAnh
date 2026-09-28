@@ -5,6 +5,8 @@ Cach dung (tu thu muc tools/bakeoff):
     uv run python bakeoff.py --profile bkai         # cham 1 mo hinh trong CHINH tien trinh nay
     uv run python bakeoff.py --profile e5
     uv run python bakeoff.py --all                  # chay lan luot tung profile bang subprocess
+    uv run python bakeoff.py --decide               # ap dung quy tac dang ky truoc -> ket-qua.json
+    uv run python bakeoff.py --bang                 # in bang Markdown cho chuong 4 (tu cac file ket qua)
 
 Nguyen tac bo nho (may dung chung 16 GB, tung bi OOM): moi tien trinh chi nap DUNG MOT mo hinh;
 tien trinh cha (--all) khong bao gio nap mo hinh; truoc khi nap, doi den khi MemAvailable >= 3 GiB.
@@ -310,6 +312,147 @@ def run_profile(name: str, out: Path) -> dict:
     return result
 
 
+# ---------------------------------------------------------------- quyet dinh (dang ky truoc)
+NGUONG_AUC = 0.05          # e5 phai hon bkai it nhat 0.05 AUC ...
+KIEU_QUYET_DINH = ("CAU", "DOAN")  # ... tren CA HAI tap nay
+TRAN_ENCODE_300_S = 20.0   # cong do tre: encode 300 cau <= 20 s
+TRAN_RSS_MB = 2560         # cong bo nho: peak RSS <= 2.5 GiB
+
+QUY_TAC = (
+    "Chon e5 chi khi e5 nap duoc va AUC cua e5 vuot bkai >= 0.05 tren CA tap CAU va tap DOAN, "
+    "dong thoi e5 encode 300 cau <= 20 s va peak RSS <= 2560 MB (2.5 GiB). "
+    "Neu bkai khong nap duoc hoac truot cong 20 s trong khi e5 qua ca cong do tre va cong bo nho -> chon e5. "
+    "Neu ca hai truot cong do tre -> chon bkai va ghi ro rui ro (du phong: backend ONNX, 04-RESEARCH Pattern 2). "
+    "Moi truong hop con lai -> chon bkai (nho hon, 515 MiB; uu tien vi may dung chung bo nho)."
+)
+
+
+def _load_result(name: str) -> dict:
+    path = HERE / f"ket-qua-{name}.json"
+    if not path.exists():
+        raise SystemExit(f"thieu {path.name} — chay --profile {name} truoc")
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _nap_duoc(r: dict) -> bool:
+    return not r.get("loi") and "theo_kieu" in r
+
+
+def _qua_do_tre(r: dict) -> bool:
+    return _nap_duoc(r) and r["chi_phi"]["encode_300_s"] <= TRAN_ENCODE_300_S
+
+
+def _qua_bo_nho(r: dict) -> bool:
+    return _nap_duoc(r) and r["chi_phi"]["peak_rss_mb"] <= TRAN_RSS_MB
+
+
+def apply_rule(bkai: dict, e5: dict) -> tuple[str, str, str]:
+    """Tra ve (chon, nhanh, ly_do) theo dung quy tac QUY_TAC."""
+    if not _nap_duoc(bkai) and not _nap_duoc(e5):
+        raise SystemExit("ca hai mo hinh deu khong nap duoc — khong co lua chon hop le")
+    chenh = {}
+    if _nap_duoc(bkai) and _nap_duoc(e5):
+        chenh = {k: round(e5["theo_kieu"][k]["auc"] - bkai["theo_kieu"][k]["auc"], 4) for k in KIEU_QUYET_DINH}
+    chenh_txt = ", ".join(f"{k} {v:+.4f}" for k, v in chenh.items())
+
+    # Nhanh 1: e5 vuot troi ro rang va qua ca hai cong.
+    if chenh and all(v >= NGUONG_AUC for v in chenh.values()) and _qua_do_tre(e5) and _qua_bo_nho(e5):
+        return "e5", "E5_VUOT_NGUONG", (
+            f"e5 hon bkai >= {NGUONG_AUC} AUC tren ca CAU va DOAN ({chenh_txt}), "
+            f"encode 300 cau {e5['chi_phi']['encode_300_s']} s <= {TRAN_ENCODE_300_S:g} s, "
+            f"peak RSS {e5['chi_phi']['peak_rss_mb']} MB <= {TRAN_RSS_MB} MB.")
+    # Nhanh 2: bkai hong (khong nap / qua cham) trong khi e5 qua ca hai cong.
+    if (not _nap_duoc(bkai) or not _qua_do_tre(bkai)) and _qua_do_tre(e5) and _qua_bo_nho(e5):
+        why = f"khong nap duoc ({bkai.get('loi')})" if not _nap_duoc(bkai) else \
+            f"truot cong do tre ({bkai['chi_phi']['encode_300_s']} s > {TRAN_ENCODE_300_S:g} s)"
+        return "e5", "BKAI_HONG", f"bkai {why}, trong khi e5 qua cong do tre va cong bo nho."
+    # Nhanh 3: ca hai truot cong do tre.
+    if _nap_duoc(bkai) and _nap_duoc(e5) and not _qua_do_tre(bkai) and not _qua_do_tre(e5):
+        return "bkai", "CA_HAI_CHAM", (
+            f"ca hai truot cong {TRAN_ENCODE_300_S:g} s (bkai {bkai['chi_phi']['encode_300_s']} s, "
+            f"e5 {e5['chi_phi']['encode_300_s']} s) -> chon bkai (nho hon); RUI RO do tre NFR, "
+            "du phong: backend ONNX cua sentence-transformers (04-RESEARCH Pattern 2).")
+    # Nhanh 4: mac dinh bkai.
+    if not _nap_duoc(e5):
+        return "bkai", "E5_KHONG_NAP", f"e5 khong nap duoc ({e5.get('loi')}) -> chon bkai."
+    ly_do = [f"chenh AUC e5 - bkai: {chenh_txt} (can >= {NGUONG_AUC} tren CA HAI)"]
+    if not all(v >= NGUONG_AUC for v in chenh.values()):
+        thieu = [k for k, v in chenh.items() if v < NGUONG_AUC]
+        ly_do.append(f"e5 KHONG dat nguong tren {', '.join(thieu)}")
+    if not _qua_do_tre(e5):
+        ly_do.append(f"e5 truot cong do tre ({e5['chi_phi']['encode_300_s']} s)")
+    if not _qua_bo_nho(e5):
+        ly_do.append(f"e5 truot cong bo nho ({e5['chi_phi']['peak_rss_mb']} MB)")
+    return "bkai", "MAC_DINH_BKAI", "; ".join(ly_do) + " -> giu mac dinh bkai (nho hon, 515 MiB)."
+
+
+def decide() -> dict:
+    res = {name: _load_result(name) for name in PROFILES}
+    chon, nhanh, ly_do = apply_rule(res["bkai"], res["e5"])
+    prof = PROFILES[chon]
+    out = {
+        "chon": chon,
+        "ten_model": prof["model_id"],
+        "phan_doan": prof["phan_doan"],
+        "tien_to": prof["tien_to"],
+        "ly_do": ly_do,
+        "nhanh_quy_tac": nhanh,
+        "quy_tac": QUY_TAC,
+        "so_sanh": {
+            name: ({k: {x: r["theo_kieu"][k][x] for x in ("auc", "gap", "margin", "acc")} for k in KIEU}
+                   if _nap_duoc(r) else {"loi": r.get("loi")})
+            for name, r in res.items()
+        },
+        "chi_phi": {
+            name: {x: r.get("chi_phi", {}).get(x) for x in ("load_s", "title_ms", "encode_300_s", "peak_rss_mb")}
+            for name, r in res.items()
+        },
+        "ngay": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
+    (HERE / "ket-qua.json").write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"chon = {chon} ({prof['model_id']}), nhanh = {nhanh}\nly_do: {ly_do}")
+    return out
+
+
+def bang_markdown() -> str:
+    """In bang Markdown lay truc tiep tu cac file ket qua (dung cho chuong 4, khong go tay so lieu)."""
+    res = {name: _load_result(name) for name in PROFILES}
+    ten = {"TIEU_DE": "Tên đề tài", "CAU": "Câu", "DOAN": "Đoạn"}
+    chi_so = [("auc", "AUC"), ("auc_kho", "AUC (chỉ diễn đạt lại vs cùng lĩnh vực)"), ("tb_duong", "TB cosine cặp trùng"),
+              ("tb_am", "TB cosine cặp không trùng"), ("gap", "Gap (TB trùng − TB không trùng)"),
+              ("margin", "Margin (min trùng − max không trùng)"), ("acc", "Độ chính xác tại ngưỡng tốt nhất"),
+              ("nguong_acc", "Ngưỡng tốt nhất (cosine)")]
+    lines = ["| Loại cặp | Chỉ số | bkai | e5 |", "|---|---|---:|---:|"]
+    for k in KIEU:
+        for key, label in chi_so:
+            vals = [f"{r['theo_kieu'][k][key]:.4f}" if _nap_duoc(r) and r["theo_kieu"][k][key] is not None else "—"
+                    for r in (res["bkai"], res["e5"])]
+            lines.append(f"| {ten[k]} | {label} | {vals[0]} | {vals[1]} |")
+    lines += ["", "| Nhóm cặp (TB cosine) | Loại | bkai | e5 |", "|---|---|---:|---:|"]
+    for k in KIEU:
+        for nhom in NHOM_NHAN:
+            vals = [f"{r['theo_kieu'][k]['tb_theo_nhom'][nhom]:.4f}" if _nap_duoc(r) else "—"
+                    for r in (res["bkai"], res["e5"])]
+            lines.append(f"| {nhom} | {ten[k]} | {vals[0]} | {vals[1]} |")
+    cp = [("load_s", "Nạp mô hình (s, từ cache)", "{:.2f}"), ("title_ms", "Encode 1 tên đề tài (ms, trung vị 20 lần)", "{:.1f}"),
+          ("encode_300_s", "Encode 300 câu (s)", "{:.2f}"), ("peak_rss_mb", "RSS đỉnh của tiến trình (MB)", "{:.1f}")]
+    lines += ["", "| Chi phí trên máy phát triển | bkai | e5 | Cổng |", "|---|---:|---:|---|"]
+    gate = {"encode_300_s": f"≤ {TRAN_ENCODE_300_S:g} s", "peak_rss_mb": f"≤ {TRAN_RSS_MB} MB"}
+    for key, label, fmt in cp:
+        vals = [fmt.format(r["chi_phi"][key]) if r.get("chi_phi", {}).get(key) is not None else "—"
+                for r in (res["bkai"], res["e5"])]
+        lines.append(f"| {label} | {vals[0]} | {vals[1]} | {gate.get(key, '—')} |")
+    b, e = res["bkai"], res["e5"]
+    lines += ["", f"Máy đo: {b['may']['cpu_count']} CPU logic, torch {b['phien_ban']['torch']} "
+                  f"({b['may']['torch_threads']} luồng), sentence-transformers {b['phien_ban']['sentence-transformers']}, "
+                  f"transformers {b['phien_ban']['transformers']}, underthesea {b['phien_ban']['underthesea']}, "
+                  f"Python {b['phien_ban']['python']}. Đo ngày {b['ngay'][:10]} (bkai) và {e['ngay'][:10]} (e5)."]
+    if (HERE / "ket-qua.json").exists():
+        d = json.loads((HERE / "ket-qua.json").read_text(encoding="utf-8"))
+        lines += ["", f"Quyết định: **{d['ten_model']}** (`{d['chon']}`), nhánh quy tắc `{d['nhanh_quy_tac']}` — {d['ly_do']}"]
+    return "\n".join(lines)
+
+
 def run_all() -> int:
     """Tien trinh cha: KHONG nap mo hinh, chay tung profile trong subprocess rieng, lan luot."""
     for name in PROFILES:
@@ -328,6 +471,8 @@ def main(argv: list[str] | None = None) -> int:
     g.add_argument("--validate-pairs", action="store_true", help="kiem tra cap-mau.jsonl")
     g.add_argument("--profile", choices=sorted(PROFILES), help="cham mot mo hinh trong tien trinh hien tai")
     g.add_argument("--all", action="store_true", help="chay moi profile bang subprocess, lan luot")
+    g.add_argument("--decide", action="store_true", help="doc ket-qua-{bkai,e5}.json, ap dung quy tac, ghi ket-qua.json")
+    g.add_argument("--bang", action="store_true", help="in bang Markdown tu cac file ket qua (cho chuong 4)")
     ap.add_argument("--out", type=Path, help="duong dan ket qua (mac dinh ket-qua-{profile}.json)")
     args = ap.parse_args(argv)
 
@@ -346,6 +491,12 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.all:
         return run_all()
+    if args.decide:
+        decide()
+        return 0
+    if args.bang:
+        print(bang_markdown())
+        return 0
     return 2
 
 

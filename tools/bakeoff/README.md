@@ -18,6 +18,7 @@ uv run python bakeoff.py --validate-pairs         # kiểm tra cap-mau.jsonl
 uv run python bakeoff.py --profile bkai           # → ket-qua-bkai.json
 uv run python bakeoff.py --profile e5             # → ket-qua-e5.json (chạy SAU khi tiến trình bkai đã thoát)
 uv run python bakeoff.py --decide                 # → ket-qua.json (áp dụng quy tắc chọn bên dưới)
+uv run python bakeoff.py --bang                   # in bảng Markdown cho chương 4, lấy thẳng từ các file kết quả
 # hoặc: uv run python bakeoff.py --all            # tiến trình cha không nạp mô hình, gọi từng profile bằng subprocess, lần lượt
 ```
 
@@ -38,6 +39,10 @@ Ràng buộc bộ nhớ (máy dùng chung 16 GB, từng bị OOM): mỗi tiến 
 ## Quy tắc chọn (đăng ký trước khi chạy)
 
 Chọn **e5** chỉ khi e5 nạp được **và** AUC của e5 vượt bkai **≥ 0,05 trên CẢ tập CAU và tập DOAN**, **và** e5 encode 300 câu **≤ 20 s**, **và** RSS đỉnh của e5 **≤ 2,5 GiB (2560 MB)**. Nếu bkai không nạp được hoặc trượt cổng 20 s trong khi e5 qua cả hai cổng (độ trễ, bộ nhớ) → chọn e5. Nếu cả hai trượt cổng độ trễ → chọn bkai và ghi rõ rủi ro (phương án dự phòng là backend ONNX, 04-RESEARCH Pattern 2). Mọi trường hợp còn lại → chọn **bkai** (nhỏ hơn, 515 MiB — ưu tiên vì máy dùng chung bộ nhớ).
+
+## Kết quả đã chốt (2026-09-28)
+
+`chon = "bkai"` — `bkai-foundation-models/vietnamese-bi-encoder`, `phan_doan = true`, `tien_to = ""`, nhánh quy tắc `MAC_DINH_BKAI`: e5 hơn bkai 0,0521 AUC trên DOAN nhưng 0 trên CAU (cả hai đạt 1,0), không thỏa điều kiện "≥ 0,05 trên cả hai". Bảng đầy đủ: `docs/chuong-4-trien-khai/thu-nghiem-ai/02-so-sanh-mo-hinh-embedding.md`.
 
 ## Lưu ý
 

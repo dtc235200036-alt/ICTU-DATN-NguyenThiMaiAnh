@@ -1,0 +1,66 @@
+{
+  "chon": "bkai",
+  "ten_model": "bkai-foundation-models/vietnamese-bi-encoder",
+  "phan_doan": true,
+  "tien_to": "",
+  "ly_do": "chenh AUC e5 - bkai: CAU +0.0000, DOAN +0.0521 (can >= 0.05 tren CA HAI); e5 KHONG dat nguong tren CAU -> giu mac dinh bkai (nho hon, 515 MiB).",
+  "nhanh_quy_tac": "MAC_DINH_BKAI",
+  "quy_tac": "Chon e5 chi khi e5 nap duoc va AUC cua e5 vuot bkai >= 0.05 tren CA tap CAU va tap DOAN, dong thoi e5 encode 300 cau <= 20 s va peak RSS <= 2560 MB (2.5 GiB). Neu bkai khong nap duoc hoac truot cong 20 s trong khi e5 qua ca cong do tre va cong bo nho -> chon e5. Neu ca hai truot cong do tre -> chon bkai va ghi ro rui ro (du phong: backend ONNX, 04-RESEARCH Pattern 2). Moi truong hop con lai -> chon bkai (nho hon, 515 MiB; uu tien vi may dung chung bo nho).",
+  "so_sanh": {
+    "bkai": {
+      "TIEU_DE": {
+        "auc": 0.8472,
+        "gap": 0.2407,
+        "margin": -0.329,
+        "acc": 0.8
+      },
+      "CAU": {
+        "auc": 1.0,
+        "gap": 0.4728,
+        "margin": 0.0209,
+        "acc": 1.0
+      },
+      "DOAN": {
+        "auc": 0.9479,
+        "gap": 0.3604,
+        "margin": -0.0727,
+        "acc": 0.9
+      }
+    },
+    "e5": {
+      "TIEU_DE": {
+        "auc": 0.875,
+        "gap": 0.0617,
+        "margin": -0.048,
+        "acc": 0.8667
+      },
+      "CAU": {
+        "auc": 1.0,
+        "gap": 0.0935,
+        "margin": 0.0087,
+        "acc": 1.0
+      },
+      "DOAN": {
+        "auc": 1.0,
+        "gap": 0.0854,
+        "margin": 0.0091,
+        "acc": 1.0
+      }
+    }
+  },
+  "chi_phi": {
+    "bkai": {
+      "load_s": 8.86,
+      "title_ms": 18.2,
+      "encode_300_s": 4.84,
+      "peak_rss_mb": 1047.7
+    },
+    "e5": {
+      "load_s": 10.55,
+      "title_ms": 20.9,
+      "encode_300_s": 6.3,
+      "peak_rss_mb": 1572.9
+    }
+  },
+  "ngay": "2026-09-28T03:29:52+00:00"
+}
