@@ -97,6 +97,26 @@ def _get_open_cohort_or_error(db: Session, dot_do_an_id: int) -> DotDoAn:
     return cohort
 
 
+def _lock_open_cohort_or_error(db: Session, dot_do_an_id: int) -> DotDoAn:
+    """WR-01: giống _get_open_cohort_or_error nhưng khóa hàng đợt (SELECT ...
+    FOR UPDATE) ngay trước khi ghi đề tài. create_topic/update_topic gọi
+    _get_open_cohort_or_error TRƯỚC (early 404/409, không giữ khóa qua bước
+    kiểm tra trùng tên có thể chậm — UC1.1/D-10), rồi gọi hàm này NGAY TRƯỚC
+    db.add()/commit() để đóng cửa sổ TOCTOU: nếu một request khác đang đóng
+    đợt (cohorts.close_cohort cũng ghi vào cùng hàng dot_do_an), một trong
+    hai giao dịch phải chờ giao dịch kia commit trước khi đọc/ghi tiếp —
+    không còn khoảng hở giữa đọc trạng thái và ghi đề tài, giống cách
+    submit_topic/register_topic tự bảo vệ bằng UPDATE có điều kiện."""
+    cohort = db.execute(
+        select(DotDoAn).where(DotDoAn.id == dot_do_an_id).with_for_update()
+    ).scalar_one_or_none()
+    if cohort is None:
+        raise HTTPException(status_code=404, detail=_COHORT_NOT_FOUND_DETAIL)
+    if cohort.trang_thai != DANG_MO:
+        raise HTTPException(status_code=409, detail=_COHORT_CLOSED_DETAIL)
+    return cohort
+
+
 def _person_ref(entity, ma_attr: str) -> PersonRef:
     return PersonRef(id=entity.id, ho_ten=entity.ho_ten or "", ma=getattr(entity, ma_attr))
 
@@ -226,8 +246,12 @@ def create_topic(db: Session, user: CurrentUser, payload: TopicCreate) -> TopicO
         trang_thai=CHO_DUYET if payload.gui else NHAP,
         loai_nguoi_de_xuat=loai,
     )
-    db.add(topic)
     try:
+        # WR-01: khóa lại đợt ngay trước khi ghi để đóng cửa sổ TOCTOU giữa
+        # lần kiểm tra ở trên và INSERT thật sự (khoảng cách này có thể vài
+        # giây khi payload.gui=True gọi AI).
+        _lock_open_cohort_or_error(db, payload.dot_do_an_id)
+        db.add(topic)
         db.flush()
         if check_result is not None:
             title_check.luu_ket_qua(db, topic.id, payload.ten_de_tai, check_result)
@@ -235,6 +259,9 @@ def create_topic(db: Session, user: CurrentUser, payload: TopicCreate) -> TopicO
     except IntegrityError:
         db.rollback()
         raise HTTPException(status_code=409, detail=_DUPLICATE_ACTIVE_TOPIC_DETAIL) from None
+    except HTTPException:
+        db.rollback()
+        raise
 
     return _to_out(db, user, _get_or_404(db, topic.id))
 
@@ -252,10 +279,16 @@ def update_topic(db: Session, user: CurrentUser, topic_id: int, payload: TopicUp
     topic.mo_ta = payload.mo_ta
     topic.linh_vuc = payload.linh_vuc
     try:
+        # WR-01: khóa lại đợt ngay trước khi ghi để đóng cửa sổ TOCTOU giữa
+        # _get_open_cohort_or_error ở trên và UPDATE thật sự.
+        _lock_open_cohort_or_error(db, payload.dot_do_an_id)
         db.commit()
     except IntegrityError:
         db.rollback()
         raise HTTPException(status_code=409, detail=_DUPLICATE_ACTIVE_TOPIC_DETAIL) from None
+    except HTTPException:
+        db.rollback()
+        raise
 
     return _to_out(db, user, _get_or_404(db, topic_id))
 
