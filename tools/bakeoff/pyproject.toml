@@ -1,0 +1,26 @@
+[project]
+name = "ntma-bakeoff"
+version = "0.1.0"
+description = "NTMA Phase 4 (D-01): so sanh mo hinh embedding bkai vs multilingual-e5 tren tap cap co nhan"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "sentence-transformers",
+    "torch",
+    "underthesea>=9.5",
+    "scikit-learn",
+    "numpy",
+]
+
+[tool.uv]
+# bakeoff.py la script, khong dong goi thanh package.
+package = false
+environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'"]
+
+# torch PHAI lay tu index CPU (04-RESEARCH Pitfall A: torch mac dinh tren PyPI keo theo CUDA).
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true

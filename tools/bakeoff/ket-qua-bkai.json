@@ -1,0 +1,655 @@
+{
+  "profile": "bkai",
+  "model_id": "bkai-foundation-models/vietnamese-bi-encoder",
+  "phan_doan": true,
+  "tien_to": "",
+  "ngay": "2026-09-28T03:25:01+00:00",
+  "may": {
+    "cpu_count": 16,
+    "torch_threads": 4,
+    "mem_available_gib_truoc_khi_nap": 7.52,
+    "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.39"
+  },
+  "phien_ban": {
+    "python": "3.12.3",
+    "sentence-transformers": "6.1.0",
+    "transformers": "5.17.0",
+    "tokenizers": "0.23.2",
+    "torch": "2.14.0+cpu",
+    "underthesea": "9.5.0",
+    "underthesea-core": "3.3.2",
+    "scikit-learn": "1.9.1",
+    "numpy": "2.5.3"
+  },
+  "loi": null,
+  "max_seq_length": 256,
+  "theo_kieu": {
+    "TIEU_DE": {
+      "n": 30,
+      "n_duong": 12,
+      "n_am": 18,
+      "auc": 0.8472,
+      "tb_duong": 0.581,
+      "tb_am": 0.3403,
+      "gap": 0.2407,
+      "margin": -0.329,
+      "acc": 0.8,
+      "nguong_acc": 0.5713,
+      "nguong_youden": 0.5713,
+      "auc_kho": 0.7708,
+      "tb_theo_nhom": {
+        "DIEN_DAT_LAI": 0.581,
+        "CUNG_LINH_VUC": 0.4369,
+        "KHONG_LIEN_QUAN": 0.1471
+      }
+    },
+    "CAU": {
+      "n": 30,
+      "n_duong": 12,
+      "n_am": 18,
+      "auc": 1.0,
+      "tb_duong": 0.6298,
+      "tb_am": 0.157,
+      "gap": 0.4728,
+      "margin": 0.0209,
+      "acc": 1.0,
+      "nguong_acc": 0.4414,
+      "nguong_youden": 0.4414,
+      "auc_kho": 1.0,
+      "tb_theo_nhom": {
+        "DIEN_DAT_LAI": 0.6298,
+        "CUNG_LINH_VUC": 0.2246,
+        "KHONG_LIEN_QUAN": 0.0218
+      }
+    },
+    "DOAN": {
+      "n": 20,
+      "n_duong": 8,
+      "n_am": 12,
+      "auc": 0.9479,
+      "tb_duong": 0.6483,
+      "tb_am": 0.2879,
+      "gap": 0.3604,
+      "margin": -0.0727,
+      "acc": 0.9,
+      "nguong_acc": 0.5909,
+      "nguong_youden": 0.5909,
+      "auc_kho": 0.9219,
+      "tb_theo_nhom": {
+        "DIEN_DAT_LAI": 0.6483,
+        "CUNG_LINH_VUC": 0.4066,
+        "KHONG_LIEN_QUAN": 0.0505
+      }
+    }
+  },
+  "chi_phi": {
+    "load_s": 8.86,
+    "title_ms": 18.2,
+    "title_ms_so_lan": 20,
+    "encode_300_s": 4.84,
+    "encode_300_so_cau": 300,
+    "peak_rss_mb": 1047.7
+  },
+  "cap": [
+    {
+      "id": "T01",
+      "kieu": "TIEU_DE",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.5713
+    },
+    {
+      "id": "T02",
+      "kieu": "TIEU_DE",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.6065
+    },
+    {
+      "id": "T03",
+      "kieu": "TIEU_DE",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.7294
+    },
+    {
+      "id": "T04",
+      "kieu": "TIEU_DE",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.7451
+    },
+    {
+      "id": "T05",
+      "kieu": "TIEU_DE",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.6427
+    },
+    {
+      "id": "T06",
+      "kieu": "TIEU_DE",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.5787
+    },
+    {
+      "id": "T07",
+      "kieu": "TIEU_DE",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.4541
+    },
+    {
+      "id": "T08",
+      "kieu": "TIEU_DE",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.6612
+    },
+    {
+      "id": "T09",
+      "kieu": "TIEU_DE",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.7219
+    },
+    {
+      "id": "T10",
+      "kieu": "TIEU_DE",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.4426
+    },
+    {
+      "id": "T11",
+      "kieu": "TIEU_DE",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.3913
+    },
+    {
+      "id": "T12",
+      "kieu": "TIEU_DE",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.4272
+    },
+    {
+      "id": "T13",
+      "kieu": "TIEU_DE",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.7203
+    },
+    {
+      "id": "T14",
+      "kieu": "TIEU_DE",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.3521
+    },
+    {
+      "id": "T15",
+      "kieu": "TIEU_DE",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.6093
+    },
+    {
+      "id": "T16",
+      "kieu": "TIEU_DE",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.5701
+    },
+    {
+      "id": "T17",
+      "kieu": "TIEU_DE",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.208
+    },
+    {
+      "id": "T18",
+      "kieu": "TIEU_DE",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.4376
+    },
+    {
+      "id": "T19",
+      "kieu": "TIEU_DE",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.5019
+    },
+    {
+      "id": "T20",
+      "kieu": "TIEU_DE",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.2434
+    },
+    {
+      "id": "T21",
+      "kieu": "TIEU_DE",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.4413
+    },
+    {
+      "id": "T22",
+      "kieu": "TIEU_DE",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.4317
+    },
+    {
+      "id": "T23",
+      "kieu": "TIEU_DE",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.2802
+    },
+    {
+      "id": "T24",
+      "kieu": "TIEU_DE",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.4468
+    },
+    {
+      "id": "T25",
+      "kieu": "TIEU_DE",
+      "nhom": "KHONG_LIEN_QUAN",
+      "nhan": 0,
+      "cosine": 0.1371
+    },
+    {
+      "id": "T26",
+      "kieu": "TIEU_DE",
+      "nhom": "KHONG_LIEN_QUAN",
+      "nhan": 0,
+      "cosine": 0.1986
+    },
+    {
+      "id": "T27",
+      "kieu": "TIEU_DE",
+      "nhom": "KHONG_LIEN_QUAN",
+      "nhan": 0,
+      "cosine": 0.1541
+    },
+    {
+      "id": "T28",
+      "kieu": "TIEU_DE",
+      "nhom": "KHONG_LIEN_QUAN",
+      "nhan": 0,
+      "cosine": 0.1594
+    },
+    {
+      "id": "T29",
+      "kieu": "TIEU_DE",
+      "nhom": "KHONG_LIEN_QUAN",
+      "nhan": 0,
+      "cosine": 0.13
+    },
+    {
+      "id": "T30",
+      "kieu": "TIEU_DE",
+      "nhom": "KHONG_LIEN_QUAN",
+      "nhan": 0,
+      "cosine": 0.1032
+    },
+    {
+      "id": "C01",
+      "kieu": "CAU",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.6213
+    },
+    {
+      "id": "C02",
+      "kieu": "CAU",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.5105
+    },
+    {
+      "id": "C03",
+      "kieu": "CAU",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.6619
+    },
+    {
+      "id": "C04",
+      "kieu": "CAU",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.6862
+    },
+    {
+      "id": "C05",
+      "kieu": "CAU",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.4414
+    },
+    {
+      "id": "C06",
+      "kieu": "CAU",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.5623
+    },
+    {
+      "id": "C07",
+      "kieu": "CAU",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.7159
+    },
+    {
+      "id": "C08",
+      "kieu": "CAU",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.5482
+    },
+    {
+      "id": "C09",
+      "kieu": "CAU",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.6433
+    },
+    {
+      "id": "C10",
+      "kieu": "CAU",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.5777
+    },
+    {
+      "id": "C11",
+      "kieu": "CAU",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.9085
+    },
+    {
+      "id": "C12",
+      "kieu": "CAU",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.6804
+    },
+    {
+      "id": "C13",
+      "kieu": "CAU",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.3631
+    },
+    {
+      "id": "C14",
+      "kieu": "CAU",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.2644
+    },
+    {
+      "id": "C15",
+      "kieu": "CAU",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.1576
+    },
+    {
+      "id": "C16",
+      "kieu": "CAU",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.2593
+    },
+    {
+      "id": "C17",
+      "kieu": "CAU",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.3211
+    },
+    {
+      "id": "C18",
+      "kieu": "CAU",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.1549
+    },
+    {
+      "id": "C19",
+      "kieu": "CAU",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.154
+    },
+    {
+      "id": "C20",
+      "kieu": "CAU",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.012
+    },
+    {
+      "id": "C21",
+      "kieu": "CAU",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.1598
+    },
+    {
+      "id": "C22",
+      "kieu": "CAU",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.4205
+    },
+    {
+      "id": "C23",
+      "kieu": "CAU",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.226
+    },
+    {
+      "id": "C24",
+      "kieu": "CAU",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.2029
+    },
+    {
+      "id": "C25",
+      "kieu": "CAU",
+      "nhom": "KHONG_LIEN_QUAN",
+      "nhan": 0,
+      "cosine": -0.0408
+    },
+    {
+      "id": "C26",
+      "kieu": "CAU",
+      "nhom": "KHONG_LIEN_QUAN",
+      "nhan": 0,
+      "cosine": -0.0687
+    },
+    {
+      "id": "C27",
+      "kieu": "CAU",
+      "nhom": "KHONG_LIEN_QUAN",
+      "nhan": 0,
+      "cosine": 0.0488
+    },
+    {
+      "id": "C28",
+      "kieu": "CAU",
+      "nhom": "KHONG_LIEN_QUAN",
+      "nhan": 0,
+      "cosine": 0.1166
+    },
+    {
+      "id": "C29",
+      "kieu": "CAU",
+      "nhom": "KHONG_LIEN_QUAN",
+      "nhan": 0,
+      "cosine": 0.0243
+    },
+    {
+      "id": "C30",
+      "kieu": "CAU",
+      "nhom": "KHONG_LIEN_QUAN",
+      "nhan": 0,
+      "cosine": 0.0506
+    },
+    {
+      "id": "D01",
+      "kieu": "DOAN",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.7383
+    },
+    {
+      "id": "D02",
+      "kieu": "DOAN",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.6863
+    },
+    {
+      "id": "D03",
+      "kieu": "DOAN",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.5447
+    },
+    {
+      "id": "D04",
+      "kieu": "DOAN",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.5942
+    },
+    {
+      "id": "D05",
+      "kieu": "DOAN",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.6929
+    },
+    {
+      "id": "D06",
+      "kieu": "DOAN",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.7021
+    },
+    {
+      "id": "D07",
+      "kieu": "DOAN",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.6368
+    },
+    {
+      "id": "D08",
+      "kieu": "DOAN",
+      "nhom": "DIEN_DAT_LAI",
+      "nhan": 1,
+      "cosine": 0.5909
+    },
+    {
+      "id": "D09",
+      "kieu": "DOAN",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.5808
+    },
+    {
+      "id": "D10",
+      "kieu": "DOAN",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.2607
+    },
+    {
+      "id": "D11",
+      "kieu": "DOAN",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.5631
+    },
+    {
+      "id": "D12",
+      "kieu": "DOAN",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.411
+    },
+    {
+      "id": "D13",
+      "kieu": "DOAN",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.2293
+    },
+    {
+      "id": "D14",
+      "kieu": "DOAN",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.4712
+    },
+    {
+      "id": "D15",
+      "kieu": "DOAN",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.6174
+    },
+    {
+      "id": "D16",
+      "kieu": "DOAN",
+      "nhom": "CUNG_LINH_VUC",
+      "nhan": 0,
+      "cosine": 0.119
+    },
+    {
+      "id": "D17",
+      "kieu": "DOAN",
+      "nhom": "KHONG_LIEN_QUAN",
+      "nhan": 0,
+      "cosine": 0.0208
+    },
+    {
+      "id": "D18",
+      "kieu": "DOAN",
+      "nhom": "KHONG_LIEN_QUAN",
+      "nhan": 0,
+      "cosine": 0.0575
+    },
+    {
+      "id": "D19",
+      "kieu": "DOAN",
+      "nhom": "KHONG_LIEN_QUAN",
+      "nhan": 0,
+      "cosine": 0.0442
+    },
+    {
+      "id": "D20",
+      "kieu": "DOAN",
+      "nhom": "KHONG_LIEN_QUAN",
+      "nhan": 0,
+      "cosine": 0.0796
+    }
+  ]
+}
