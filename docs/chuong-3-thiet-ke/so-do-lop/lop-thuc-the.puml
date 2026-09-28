@@ -85,6 +85,12 @@ enum LoaiCauHinhNguong {
   NGUONG_DOAN_TRUNG
 }
 
+enum KhongGianNguon {
+  TOPIC
+  ARCHIVE
+  DOCUMENT
+}
+
 ' =====================================================================
 ' Tài khoản & phân quyền
 ' =====================================================================
@@ -150,6 +156,8 @@ class ChiTietTrungLap <<Entity>> {
   +doanNguon : String
   +doanTrung : String
   +viTri : String
+  +loaiNguon : KhongGianNguon
+  +nguonId : Long
 }
 
 ' =====================================================================
@@ -310,6 +318,7 @@ LuotDuyetDeCuong ..> KetQuaDuyet
 ThanhVienHoiDong ..> VaiTroHoiDong
 KetQuaKiemTraTrungLap ..> LoaiKiemTra
 KetQuaKiemTraTrungLap ..> TrangThaiKiemTra
+ChiTietTrungLap ..> KhongGianNguon
 DoAnKho ..> LoaiNguon
 ThongBao ..> LoaiThongBao
 CauHinhNguong ..> LoaiCauHinhNguong

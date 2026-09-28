@@ -228,6 +228,8 @@ Lược đồ `thesis_core` gồm 19 bảng, khớp 1-1 với 19 lớp thực th
 | doan_nguon | TEXT | Có | — | Đoạn văn bản của tài liệu đang kiểm tra |
 | doan_trung | TEXT | Có | — | Đoạn văn bản trùng trong đồ án/đề tài đối chiếu |
 | vi_tri | VARCHAR(50) | Có | — | Vị trí đoạn trong tài liệu (trang/đoạn) |
+| loai_nguon | VARCHAR(20) | Có | CHECK | Không gian id của nguồn trùng theo Dịch vụ AI: `TOPIC` (de_tai), `ARCHIVE` (do_an_kho), `DOCUMENT` (tai_lieu_do_an); NULL với dòng cũ |
+| nguon_id | BIGINT | Có | — | Id của nguồn trong không gian `loai_nguon` (tham chiếu đa hình, không FK). Dùng để tra nhãn đúng bảng và để quyết định SV có được xem `doan_trung` hay không (chỉ khi nguồn là đồ án đã vào kho) |
 
 #### `thong_bao`
 

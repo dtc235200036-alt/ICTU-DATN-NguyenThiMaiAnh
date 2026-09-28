@@ -10,6 +10,11 @@ from app.models.base import Base
 TEN_DE_TAI = "TEN_DE_TAI"
 TAI_LIEU = "TAI_LIEU"
 
+# WR-06: không gian id của nguồn trùng (khớp dịch vụ AI, §3.3.5).
+NGUON_TOPIC = "TOPIC"  # de_tai.id
+NGUON_ARCHIVE = "ARCHIVE"  # do_an_kho.id
+NGUON_DOCUMENT = "DOCUMENT"  # tai_lieu_do_an.id
+
 DANG_KIEM_TRA = "DANG_KIEM_TRA"
 HOAN_TAT = "HOAN_TAT"
 LOI = "LOI"
@@ -57,5 +62,9 @@ class ChiTietTrungLap(Base):
     doan_nguon: Mapped[str | None] = mapped_column(Text)
     doan_trung: Mapped[str | None] = mapped_column(Text)
     vi_tri: Mapped[str | None] = mapped_column(String(50))
+    # WR-06 (0011): nguồn của đoạn trùng — không gian id AI + id trong không
+    # gian đó; không FK (tham chiếu đa hình, nguồn có thể bị xóa sau này).
+    loai_nguon: Mapped[str | None] = mapped_column(String(20))
+    nguon_id: Mapped[int | None] = mapped_column(BigInteger)
 
     ket_qua: Mapped[KetQuaKiemTraTrungLap] = relationship(back_populates="chi_tiet")

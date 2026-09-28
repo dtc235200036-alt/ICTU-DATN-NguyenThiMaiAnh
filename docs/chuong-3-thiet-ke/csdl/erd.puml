@@ -91,6 +91,8 @@ entity "chi_tiet_trung_lap" as chi_tiet_trung_lap {
   doan_nguon : TEXT
   doan_trung : TEXT
   vi_tri : VARCHAR(50)
+  loai_nguon : VARCHAR(20)
+  nguon_id : BIGINT
 }
 
 ' =====================================================================

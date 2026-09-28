@@ -16,10 +16,13 @@ from app.core.timeutil import now_utc
 from app.models.cau_hinh_nguong import NGUONG_TAI_LIEU, CauHinhNguong
 from app.models.de_cuong import TaiLieuDoAn
 from app.models.de_tai import DeTai
+from app.models.kho import DoAnKho
 from app.models.trung_lap import (
     DANG_KIEM_TRA,
     HOAN_TAT,
     LOI,
+    NGUON_ARCHIVE,
+    NGUON_DOCUMENT,
     TAI_LIEU,
     ChiTietTrungLap,
     KetQuaKiemTraTrungLap,
@@ -66,7 +69,15 @@ def create_pending(db: Session, doc: TaiLieuDoAn) -> KetQuaKiemTraTrungLap:
     return ket_qua
 
 
-def _label_for(db: Session, ref_id: int) -> str:
+def _label_for(db: Session, loai: str, ref_id: int) -> str:
+    """WR-06: tra nhãn THEO KHÔNG GIAN id — ARCHIVE là do_an_kho.id, DOCUMENT
+    là tai_lieu_do_an.id; không bao giờ đọc một id kho như id tài liệu."""
+    if loai == NGUON_ARCHIVE:
+        kho = db.get(DoAnKho, ref_id)
+        if kho is None:
+            return f"Đồ án kho #{ref_id}"
+        label = f"{kho.ten_de_tai} ({kho.khoa})" if kho.khoa else kho.ten_de_tai
+        return label[:255]
     doc = db.get(TaiLieuDoAn, ref_id)
     if doc is None:
         return f"Tài liệu #{ref_id}"
@@ -131,15 +142,22 @@ def run(ket_qua_id: int) -> None:
             )
         )
         for item in raw.get("chi_tiet", []):
-            label = _label_for(task_db, item["ref_id"])
+            # /check-document so khớp trong không gian DOCUMENT (§3.3.5); một
+            # item mang "loai" tường minh (ARCHIVE) được tôn trọng (WR-06).
+            loai = item.get("loai") or NGUON_DOCUMENT
+            if loai not in (NGUON_DOCUMENT, NGUON_ARCHIVE):
+                loai = NGUON_DOCUMENT
+            ref_id = int(item["ref_id"])
             task_db.add(
                 ChiTietTrungLap(
                     ket_qua_id=ket_qua_id,
-                    doi_tuong_trung=label,
+                    doi_tuong_trung=_label_for(task_db, loai, ref_id),
                     ty_le=item["ty_le"],
                     doan_nguon=item.get("doan_nguon"),
                     doan_trung=item.get("doan_trung"),
                     vi_tri=item.get("vi_tri"),
+                    loai_nguon=loai,
+                    nguon_id=ref_id,
                 )
             )
 
