@@ -12,15 +12,19 @@ Quy tắc (so khớp trên dòng NFC, casefold, khoảng trắng đã gộp), th
     CHƯƠNG n, KẾT LUẬN hoặc một tiêu đề trong danh sách trên);
 (b) dòng bìa: TRƯỜNG ĐẠI HỌC…, ĐẠI HỌC THÁI NGUYÊN, KHOA CÔNG NGHỆ THÔNG TIN,
     ĐỒ ÁN TỐT NGHIỆP, ĐỀ CƯƠNG ĐỒ ÁN…, BÁO CÁO ĐỒ ÁN…, nhãn "Sinh viên thực
-    hiện", "Giảng viên hướng dẫn", "Mã sinh viên", "Lớp" và "Thái Nguyên, …
-    năm yyyy";
+    hiện", "Giảng viên hướng dẫn", "Mã sinh viên", "Lớp", "Ngành", "Đề tài:"
+    và "Thái Nguyên, … năm yyyy"; tên đề tài sau nhãn "Đề tài:" bị PDF bẻ sang
+    tối đa 2 dòng tiếp theo (≤ 20 âm tiết, không kết thúc bằng dấu câu) cũng
+    bị bỏ (plan 04-04: nếu sót, dòng bìa dính vào câu nội dung đầu tiên);
 (c) dòng mục lục: kết thúc bằng dải dấu chấm/… hoặc tab rồi số trang;
 (d) dòng tiêu đề: "CHƯƠNG …", tiêu đề đánh số (^\\d+(\\.\\d+)*\\.?\\s) tối đa 15
     âm tiết không kết thúc bằng dấu câu, dòng VIẾT HOA TOÀN BỘ tối đa 20 âm
     tiết (tên đề tài trên bìa, MỞ ĐẦU, KẾT LUẬN…), chú thích "Hình/Bảng/Biểu
     đồ/Sơ đồ" + số;
-(e) dòng lặp: dòng tối đa 20 âm tiết mà dạng che-chữ-số xuất hiện ≥ 3 lần
-    trong cùng văn bản (header/footer PDF), số trang trơn và "Trang n" —
+(e) dòng lặp: dòng tối đa 20 âm tiết, không kết thúc bằng dấu câu, mà dạng
+    che-chữ-số xuất hiện ≥ 3 lần trong cùng văn bản (header/footer PDF) — dòng
+    kết thúc bằng dấu câu là mảnh cuối đoạn do PDF bẻ dòng (vd. "Quang."),
+    không phải header (plan 04-04); số trang trơn và "Trang n" —
     trích xuất PDF naive phía Web API (page.get_text()) không tránh được.
 `removed` đếm số dòng đã bỏ.
 """
@@ -49,6 +53,10 @@ _COVER_RE = re.compile(
     r"|thái nguyên,.*năm \d{4}\.?)$"
 )
 _LABEL_RE = re.compile(r"^(?:sinh viên thực hiện|giảng viên hướng dẫn|mã sinh viên|lớp)\b\s*(:)?")
+# Nhãn chỉ nhận dạng khi có dấu ':' (dòng PDF bắt đầu bằng "ngành …" có thể là nội dung).
+_LABEL_COLON_RE = re.compile(r"^(?:chuyên )?ngành\s*:")
+_COVER_TITLE_RE = re.compile(r"^(?:tên )?đề tài\s*:")
+_COVER_TITLE_MAX_CONT = 2
 
 _TOC_RE = re.compile(r"(?:\.{3,}|…+|\t)\s*(?:\d+|[ivxlc]+)$")
 _CHUONG_RE = re.compile(r"^chương\s+(?:\d+|[ivxlc]+)\b")
@@ -87,6 +95,8 @@ def _is_toc(key: str) -> bool:
 def _is_cover(line: str, key: str, n_syl: int) -> bool:
     if n_syl <= 20 and _COVER_RE.match(key):
         return True
+    if _LABEL_COLON_RE.match(key):
+        return True
     label = _LABEL_RE.match(key)
     # Nhãn trên bìa: "Lớp: CNTT K22A" — tránh bỏ nhầm câu nội dung bắt đầu
     # bằng "Giảng viên hướng dẫn …" (bắt buộc dấu ':' hoặc dòng rất ngắn).
@@ -119,7 +129,23 @@ def strip_boilerplate(text: str) -> StripResult:
     kept: list[str] = []
     removed = 0
     in_section = False
+    title_cont = 0  # số dòng tiếp nối tên đề tài trên bìa còn được bỏ
     for line, key, n_syl in zip(lines, keys, n_syls):
+        if title_cont:
+            title_cont -= 1
+            if (
+                n_syl <= 20
+                and not key.endswith(_SENTENCE_END)
+                and not _LABEL_RE.match(key)
+                and not _LABEL_COLON_RE.match(key)
+            ):
+                removed += 1
+                continue
+            title_cont = 0
+        if _COVER_TITLE_RE.match(key):
+            title_cont = _COVER_TITLE_MAX_CONT
+            removed += 1
+            continue
         if in_section:
             if not _is_toc(key) and not _is_section_heading(key, n_syl) and _is_major_heading(key, n_syl):
                 in_section = False  # tiêu đề lớn kết thúc mục; bản thân nó bị bỏ
@@ -132,7 +158,11 @@ def strip_boilerplate(text: str) -> StripResult:
         if (
             _is_toc(key)
             or _PAGE_RE.match(key)
-            or (n_syl <= 20 and masked[_DIGITS_RE.sub("#", key)] >= 3)
+            or (
+                n_syl <= 20
+                and not key.endswith(_SENTENCE_END)
+                and masked[_DIGITS_RE.sub("#", key)] >= 3
+            )
             or _is_cover(line, key, n_syl)
             or _is_heading(line, key, n_syl)
         ):

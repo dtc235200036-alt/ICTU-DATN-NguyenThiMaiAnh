@@ -285,6 +285,13 @@ def rebuild(session: Session, index: CorpusIndex, encoder: Encoder) -> RebuildSt
 NGUYEN_VAN = "NGUYEN_VAN"
 NGU_NGHIA = "NGU_NGHIA"
 MAX_PASSAGE_SENTENCES = 6
+# Cờ NGU_NGHIA cần chỗ dựa đoạn văn: câu phải nằm trong chuỗi ≥ 2 câu liên
+# tiếp gắn cờ cùng một nguồn (plan 04-04). Trên tập hiệu chỉnh, câu tự viết
+# theo khuôn câu chung của lĩnh vực đạt cosine cao với MỘT câu lẻ của đồ án
+# khác (bách phân vị 90 = 80,1 %) và làm tỷ lệ tổng của cặp không liên quan
+# lên 32–35 %; câu diễn đạt lại thì đi thành đoạn liền nhau cùng nguồn.
+# Cờ NGUYEN_VAN (MinHash) là bằng chứng mạnh nên đứng một mình vẫn giữ.
+MIN_RUN_NGU_NGHIA = 2
 
 
 @dataclass(frozen=True)
@@ -395,13 +402,15 @@ def check_document(
     nguong_nguyen_van: float,
     top_k: int,
     chi_tiet_toi_da: int,
+    min_run_ngu_nghia: int = MIN_RUN_NGU_NGHIA,
 ) -> dict:
     """Áp ngưỡng lên điểm từng câu → phản hồi /check-document.
 
     Câu bị gắn cờ NGUYEN_VAN khi Jaccard×100 ≥ nguong_nguyen_van (bằng chứng
     mạnh hơn nên thắng), ngược lại NGU_NGHIA khi cosine×100 ≥ nguong_doan.
-    ty_le_tong = tỷ lệ ký tự bị gắn cờ; đoạn trùng = chuỗi câu liên tiếp gắn
-    cờ cùng một nguồn (tối đa 6 câu).
+    Cờ NGU_NGHIA chỉ được giữ khi câu thuộc chuỗi ≥ min_run_ngu_nghia câu liên
+    tiếp gắn cờ cùng một nguồn (bất kể tín hiệu). ty_le_tong = tỷ lệ ký tự bị
+    gắn cờ; đoạn trùng = chuỗi câu liên tiếp gắn cờ cùng một nguồn (tối đa 6 câu).
     """
     chunks = scores.chunks
     total_chars = sum(c.n_chars for c in chunks)
@@ -414,6 +423,21 @@ def check_document(
             flags.append((c, NGU_NGHIA, c.sem_ref, (c.sem_thu_tu, c.sem_text), c.sem_score))
         else:
             flags.append(None)
+
+    # Bỏ cờ NGU_NGHIA đứng lẻ (chuỗi cùng nguồn ngắn hơn min_run_ngu_nghia).
+    i = 0
+    while i < len(flags):
+        if flags[i] is None:
+            i += 1
+            continue
+        j = i
+        while j + 1 < len(flags) and flags[j + 1] is not None and flags[j + 1][2] == flags[i][2]:
+            j += 1
+        if j - i + 1 < min_run_ngu_nghia:
+            for k in range(i, j + 1):
+                if flags[k][1] == NGU_NGHIA:
+                    flags[k] = None
+        i = j + 1
 
     flagged_chars = sum(f[0].n_chars for f in flags if f)
     per_ref: dict[int, int] = {}
