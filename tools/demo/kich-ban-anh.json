@@ -1,31 +1,707 @@
 {
   "ten": "Ảnh chụp chương 4 — 5 UC × 3 vai trò (1440 px)",
+  "ghi_chu": "Chạy trên trạng thái demo vừa dựng (bash deploy/demo-state.sh); kịch bản có ghi dữ liệu (011 gửi đề xuất, GV014 lưu điểm cho 014) nên chạy lại demo-state.sh sau đó. Mỗi bước khẳng định một chữ chứng minh đúng dữ liệu đang hiển thị. --chi-doc bỏ qua 4 bước ghi_du_lieu (verify-all dùng để đo NFR-16 mà không đổi trạng thái demo).",
   "buoc": [
     {
-      "id": "uc0-tong-quan-bo-mon",
-      "mo_ta": "Bộ môn — trang tổng quan (MH-04)",
-      "vai_tro": "bomon",
+      "id": "uc0-dang-nhap",
+      "mo_ta": "Màn hình đăng nhập (MH-01), chưa đăng nhập",
+      "vai_tro": null,
+      "man_hinh": "MH-01",
       "hanh_dong": [
-        {"mo": "/tong-quan"},
-        {"cho_chu": "Tổng quan"},
-        {"chup": true}
+        {
+          "mo": "/dang-nhap"
+        },
+        {
+          "cho_chu": "Mã SV/GV hoặc email"
+        },
+        {
+          "chup": true
+        }
       ],
-      "man_hinh_mong_doi": "Thống kê toàn khoa của Bộ môn"
+      "man_hinh_mong_doi": "Form đăng nhập: Mã SV/GV hoặc email, Mật khẩu, nút Đăng nhập",
+      "cho_phep_http": [
+        401
+      ]
+    },
+    {
+      "id": "uc0-tong-quan-sinh-vien",
+      "mo_ta": "SV DTC225200013 — tổng quan (MH-02): đề tài, đề cương đã duyệt, tiến độ, thông báo",
+      "vai_tro": "DTC225200013",
+      "man_hinh": "MH-02",
+      "hanh_dong": [
+        {
+          "mo": "/tong-quan"
+        },
+        {
+          "cho_chu": "Phát triển ứng dụng hỗ trợ sinh viên tìm nhà trọ quanh Đại học Thái Nguyên"
+        },
+        {
+          "cho_chu": "Mốc 1 – Phân tích và thiết kế hệ thống"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Thẻ Đề tài của tôi, Thông báo, Đề cương (Đã duyệt), Tiến độ (2 mốc Đúng hạn)"
+    },
+    {
+      "id": "uc0-thong-bao",
+      "mo_ta": "SV DTC225200013 — mở chuông thông báo (NOTF-01)",
+      "vai_tro": "DTC225200013",
+      "man_hinh": "MH-02",
+      "hanh_dong": [
+        {
+          "mo": "/tong-quan"
+        },
+        {
+          "bam": "[data-testid=notification-bell]"
+        },
+        {
+          "cho_chu": "Đánh dấu tất cả đã đọc"
+        },
+        {
+          "cho_chu": "GVHD đã nhận xét báo cáo Mốc 1"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Popover thông báo chưa đọc: nhận xét tiến độ, duyệt đề cương, duyệt đề tài"
+    },
+    {
+      "id": "uc0-trang-403",
+      "mo_ta": "SV DTC225200013 mở /tai-khoan (chức năng Bộ môn) — trang 403 (NFR-04)",
+      "vai_tro": "DTC225200013",
+      "man_hinh": "—",
+      "hanh_dong": [
+        {
+          "mo": "/tai-khoan"
+        },
+        {
+          "cho_chu": "Bạn không có quyền truy cập trang này"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "403 — Bạn không có quyền truy cập trang này",
+      "cho_phep_http": [
+        403
+      ]
+    },
+    {
+      "id": "uc0-tong-quan-giang-vien",
+      "mo_ta": "GV011 — tổng quan giảng viên (MH-03): việc cần xử lý",
+      "vai_tro": "GV011",
+      "man_hinh": "MH-03",
+      "hanh_dong": [
+        {
+          "mo": "/tong-quan"
+        },
+        {
+          "cho_chu": "Việc cần xử lý"
+        },
+        {
+          "cho_chu": "Kiểm tra trùng lặp: Hoàn tất"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Đề cương chờ duyệt 1 (012, Hoàn tất 48 %), báo cáo tiến độ chờ nhận xét 1 (013)"
+    },
+    {
+      "id": "uc0-tong-quan-bo-mon",
+      "mo_ta": "Bộ môn — tổng quan toàn khoa (MH-04)",
+      "vai_tro": "bomon",
+      "man_hinh": "MH-04",
+      "hanh_dong": [
+        {
+          "mo": "/tong-quan"
+        },
+        {
+          "cho_chu": "Tổng quan toàn khoa"
+        },
+        {
+          "cho_chu": "Mốc 1 – Phân tích và thiết kế hệ thống"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Thống kê toàn khoa, tiến độ sinh viên, mốc tiến độ của đợt K22"
+    },
+    {
+      "id": "uc0-quan-ly-tai-khoan",
+      "mo_ta": "Bộ môn — quản lý tài khoản (UC0.2)",
+      "vai_tro": "bomon",
+      "man_hinh": "—",
+      "hanh_dong": [
+        {
+          "mo": "/tai-khoan"
+        },
+        {
+          "cho_chu": "Quản lý tài khoản"
+        },
+        {
+          "cho_chu": "@ictu.edu.vn"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Bảng tài khoản sinh viên (mã, họ tên, lớp, email, trạng thái, Sửa/Khóa)"
+    },
+    {
+      "id": "uc0-dot-do-an",
+      "mo_ta": "Bộ môn — quản lý đợt đồ án (UC0.3)",
+      "vai_tro": "bomon",
+      "man_hinh": "—",
+      "hanh_dong": [
+        {
+          "mo": "/dot-do-an"
+        },
+        {
+          "cho_chu": "Đợt đồ án tốt nghiệp K22 - HK1 (2026-2027)"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Đợt K22 Đang mở + 5 đợt dữ liệu lịch sử Đã đóng"
+    },
+    {
+      "id": "uc0-cau-hinh-nguong",
+      "mo_ta": "Bộ môn — cấu hình ngưỡng trùng lặp (UC0.4, chỉ xem, không lưu)",
+      "vai_tro": "bomon",
+      "man_hinh": "—",
+      "hanh_dong": [
+        {
+          "mo": "/cau-hinh-nguong"
+        },
+        {
+          "cho_chu": "Ngưỡng tên đề tài"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Ba ngưỡng kèm giải thích, giá trị đề xuất và người cập nhật"
     },
     {
       "id": "uc1-sv-canh-bao-trung-ten",
       "mo_ta": "SV DTC225200011 nhập tên diễn đạt lại một đề tài kho — cảnh báo trùng tên (MH-06)",
       "vai_tro": "DTC225200011",
+      "man_hinh": "MH-06",
       "hanh_dong": [
-        {"mo": "/de-tai/de-xuat"},
-        {"cho_chu": "Thông tin đề tài"},
-        {"go": {"o": "Tên đề tài", "chu": "Sử dụng SQL Server để hạch toán thu chi doanh nghiệp cho công ty cổ phần Hoàng Long"}},
-        {"cho_chu": "Phát hiện 1 đề tài tương tự trong kho", "toi_da_giay": 10},
-        {"cho_chu": "Ứng dụng SQL Server trong quản lý kế toán tại công ty CP Hoàng Long"},
-        {"cho_chu": "Kho đồ án"},
-        {"chup": true}
+        {
+          "mo": "/de-tai/de-xuat"
+        },
+        {
+          "cho_chu": "Thông tin đề tài"
+        },
+        {
+          "go": {
+            "o": "Đợt đồ án",
+            "chu": "Đợt đồ án tốt nghiệp K22 - HK1 (2026-2027) (K22)"
+          }
+        },
+        {
+          "go": {
+            "o": "Tên đề tài",
+            "chu": "Sử dụng SQL Server để hạch toán thu chi doanh nghiệp cho công ty cổ phần Hoàng Long"
+          }
+        },
+        {
+          "cho_chu": "Phát hiện 1 đề tài tương tự trong kho",
+          "toi_da_giay": 10
+        },
+        {
+          "cho_chu": "Ứng dụng SQL Server trong quản lý kế toán tại công ty CP Hoàng Long"
+        },
+        {
+          "cho_chu": "Kho đồ án"
+        },
+        {
+          "chup": true
+        }
       ],
-      "man_hinh_mong_doi": "Cảnh báo vàng: nguồn Kho đồ án, K21, tỷ lệ tương đồng ≈ 82 %"
+      "man_hinh_mong_doi": "Cảnh báo vàng: nguồn Kho đồ án, K21, GVHD, tỷ lệ tương đồng ≈ 82 %; nút Sửa tên / Vẫn gửi đề xuất"
+    },
+    {
+      "id": "uc1-sv-gui-de-xuat",
+      "mo_ta": "SV DTC225200011 chọn Vẫn gửi đề xuất -> đề tài Chờ duyệt (UC1.1)",
+      "vai_tro": "DTC225200011",
+      "ghi_du_lieu": true,
+      "man_hinh": "MH-06",
+      "hanh_dong": [
+        {
+          "bam": "Vẫn gửi đề xuất"
+        },
+        {
+          "go": {
+            "o": "Lĩnh vực",
+            "chu": "Hệ thống thông tin"
+          }
+        },
+        {
+          "bam": "Gửi đề xuất"
+        },
+        {
+          "cho_chu": "Chờ duyệt",
+          "toi_da_giay": 15
+        },
+        {
+          "cho_chu": "Sử dụng SQL Server để hạch toán thu chi doanh nghiệp"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Chi tiết đề tài vừa gửi, trạng thái Chờ duyệt, kết quả kiểm tra tên đã lưu"
+    },
+    {
+      "id": "uc1-danh-sach-de-tai",
+      "mo_ta": "Bộ môn — danh sách đề tài lọc theo đợt K22 (MH-05)",
+      "vai_tro": "bomon",
+      "man_hinh": "MH-05",
+      "hanh_dong": [
+        {
+          "mo": "/de-tai"
+        },
+        {
+          "cho_chu": "Danh sách đề tài"
+        },
+        {
+          "go": {
+            "o": "Đợt đồ án",
+            "chu": "Đợt đồ án tốt nghiệp K22 - HK1 (2026-2027)"
+          }
+        },
+        {
+          "cho_on_dinh": true
+        },
+        {
+          "cho_chu": "Phát triển ứng dụng hỗ trợ sinh viên tìm nhà trọ quanh Đại học Thái Nguyên"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Đề tài của đợt K22: 4 Đã phân công (012–015) và — sau bước uc1-sv-gui-de-xuat — 1 Chờ duyệt (011)"
+    },
+    {
+      "id": "uc1-duyet-phan-cong",
+      "mo_ta": "Bộ môn — duyệt và phân công GVHD cho đề tài chờ duyệt của 011 (MH-07, chưa bấm duyệt)",
+      "vai_tro": "bomon",
+      "ghi_du_lieu": true,
+      "man_hinh": "MH-07",
+      "hanh_dong": [
+        {
+          "mo": "/duyet-de-tai"
+        },
+        {
+          "cho_chu": "Sử dụng SQL Server để hạch toán thu chi doanh nghiệp"
+        },
+        {
+          "bam": {
+            "chu": "Xem chi tiết",
+            "hang": "Sử dụng SQL Server để hạch toán thu chi doanh nghiệp"
+          }
+        },
+        {
+          "cho_chu": "Chi tiết đề tài chờ duyệt"
+        },
+        {
+          "cho_chu": "Kết quả kiểm tra tên đã lưu lúc đề xuất"
+        },
+        {
+          "go": {
+            "o": "Chọn giảng viên hướng dẫn",
+            "chu": "Đặng Hữu Minh"
+          }
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Ngăn chi tiết: sinh viên, kết quả kiểm tra tên (Kho đồ án ≈ 82 %), GVHD được chọn, nút Duyệt và phân công"
+    },
+    {
+      "id": "uc2-sv-nop-de-cuong",
+      "mo_ta": "SV DTC225200012 — trang đề cương sau khi nộp: Hoàn tất – 48 % (MH-08)",
+      "vai_tro": "DTC225200012",
+      "man_hinh": "MH-08",
+      "hanh_dong": [
+        {
+          "mo": "/de-cuong"
+        },
+        {
+          "cho_chu": "Lịch sử phiên bản"
+        },
+        {
+          "cho_chu": "Hoàn tất - 48%"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Đề cương Chờ duyệt, ô nộp DOCX/PDF, phiên bản v1 Hoàn tất – 48 %"
+    },
+    {
+      "id": "uc2-gv-duyet-de-cuong",
+      "mo_ta": "GV011 — duyệt đề cương của 012 cạnh khung kết quả kiểm tra trùng lặp (MH-09)",
+      "vai_tro": "GV011",
+      "man_hinh": "MH-09",
+      "hanh_dong": [
+        {
+          "mo": "/duyet-de-cuong"
+        },
+        {
+          "cho_chu": "Lê Bảo Ánh (DTC225200012)"
+        },
+        {
+          "bam": {
+            "chu": "Duyệt",
+            "hang": "DTC225200012"
+          }
+        },
+        {
+          "cho_chu": "Duyệt đề cương - Lê Bảo Ánh"
+        },
+        {
+          "cho_chu": "Vượt ngưỡng cảnh báo"
+        },
+        {
+          "cho_chu": "Ứng dụng PyTorch trong giải đáp thắc mắc tuyển sinh"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Tóm tắt đã trích xuất, ô nhận xét, Yêu cầu sửa / Duyệt đề cương; khung 48 %, Vượt ngưỡng, đồ án trùng K22"
+    },
+    {
+      "id": "uc2-chi-tiet-trung-lap",
+      "mo_ta": "GV011 — chi tiết kết quả kiểm tra: đoạn nộp cạnh đoạn nguồn, cụm trùng tô sáng (MH-14)",
+      "vai_tro": "GV011",
+      "man_hinh": "MH-14",
+      "hanh_dong": [
+        {
+          "bam": "Xem chi tiết"
+        },
+        {
+          "cho_chu": "Chi tiết kết quả kiểm tra trùng lặp"
+        },
+        {
+          "cho_chu": "Trùng nguyên văn"
+        },
+        {
+          "cho_chu": "Đoạn nguồn (Ứng dụng PyTorch"
+        },
+        {
+          "cuon": 0
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Tỷ lệ tổng 48 %, ngưỡng, đồ án trùng; từng đoạn: Mức trùng Cao, Trùng nguyên văn, đoạn nộp | đoạn nguồn tô sáng"
+    },
+    {
+      "id": "uc3-sv-bao-cao-tien-do",
+      "mo_ta": "SV DTC225200013 — báo cáo tiến độ theo mốc (MH-10)",
+      "vai_tro": "DTC225200013",
+      "man_hinh": "MH-10",
+      "hanh_dong": [
+        {
+          "mo": "/tien-do"
+        },
+        {
+          "cho_chu": "Nhận xét của GVHD"
+        },
+        {
+          "cho_chu": "Mốc 3 – Kiểm thử và hoàn thiện báo cáo"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Mốc 1 Đúng hạn + nhận xét Đạt, Mốc 2 Đúng hạn chờ nhận xét, Mốc 3 Chưa đến hạn + form nộp"
+    },
+    {
+      "id": "uc3-gv-nhan-xet-tien-do",
+      "mo_ta": "GV011 — nhận xét báo cáo tiến độ của 013 (UC3.3, chưa gửi)",
+      "vai_tro": "GV011",
+      "man_hinh": "MH-10",
+      "hanh_dong": [
+        {
+          "mo": "/nhan-xet-tien-do"
+        },
+        {
+          "bam": "Dương Quang Anh (DTC225200013)"
+        },
+        {
+          "cho_chu": "Mốc 2 – Cài đặt các chức năng chính"
+        },
+        {
+          "go": {
+            "o": "Nhận xét",
+            "chu": "Đã có chức năng tìm phòng theo bản đồ; cần bổ sung kiểm thử cho chức năng đăng tin."
+          }
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Báo cáo mốc 1 (đã nhận xét), mốc 2 chờ nhận xét với ô Nhận xét + Đánh giá"
+    },
+    {
+      "id": "uc3-bo-mon-theo-doi-tien-do",
+      "mo_ta": "Bộ môn — tiến độ toàn khoa đợt K22 (UC3.4)",
+      "vai_tro": "bomon",
+      "man_hinh": "MH-10",
+      "hanh_dong": [
+        {
+          "mo": "/tien-do-toan-khoa"
+        },
+        {
+          "cho_chu": "SV trễ mốc"
+        },
+        {
+          "cho_chu": "Dương Quang Anh (DTC225200013)"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Bảng SV × mốc với trạng thái Đúng hạn / Chưa đến hạn, bộ lọc Chỉ SV trễ mốc"
+    },
+    {
+      "id": "uc4-hoi-dong-lich",
+      "mo_ta": "Bộ môn — hội đồng và lịch bảo vệ (MH-11)",
+      "vai_tro": "bomon",
+      "man_hinh": "MH-11",
+      "hanh_dong": [
+        {
+          "mo": "/hoi-dong"
+        },
+        {
+          "bam": "Hội đồng demo K22"
+        },
+        {
+          "cho_chu": "Thành viên hội đồng"
+        },
+        {
+          "cho_chu": "2/3 đã chấm"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Hội đồng demo K22: 3 thành viên, 2 SV (015 Đã chốt 8.50, 014 2/3 đã chấm)"
+    },
+    {
+      "id": "uc4-sv-bao-cao-cuoi",
+      "mo_ta": "SV DTC225200014 — tab Báo cáo cuối: đã kiểm tra, đã xếp lịch",
+      "vai_tro": "DTC225200014",
+      "man_hinh": "MH-08",
+      "hanh_dong": [
+        {
+          "mo": "/de-cuong"
+        },
+        {
+          "bam": "Báo cáo cuối"
+        },
+        {
+          "cho_chu": "Bạn đã được xếp lịch bảo vệ"
+        },
+        {
+          "cho_chu": "Hoàn tất - 0%"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Báo cáo cuối v1 Hoàn tất, Dưới ngưỡng cảnh báo, không nộp lại được sau khi xếp lịch"
+    },
+    {
+      "id": "uc4-gv-cham-diem",
+      "mo_ta": "GV014 (ủy viên) — chấm điểm SV DTC225200014 (MH-12)",
+      "vai_tro": "GV014",
+      "ghi_du_lieu": true,
+      "man_hinh": "MH-12",
+      "hanh_dong": [
+        {
+          "mo": "/cham-diem"
+        },
+        {
+          "bam": "Dương Phú Hương"
+        },
+        {
+          "cho_chu": "Chấm điểm - Dương Phú Hương"
+        },
+        {
+          "go": {
+            "o": "Điểm (0-10)",
+            "chu": "8.5"
+          }
+        },
+        {
+          "go": {
+            "o": "Nhận xét",
+            "chu": "Hệ thống chạy ổn định, cần bổ sung phân quyền chi tiết cho ban chủ nhiệm câu lạc bộ."
+          }
+        },
+        {
+          "bam": "Lưu điểm"
+        },
+        {
+          "cho_chu": "8.5",
+          "toi_da_giay": 10
+        },
+        {
+          "cho_on_dinh": true
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Danh sách SV của hội đồng, form Điểm (0-10) + Nhận xét, tóm tắt kiểm tra trùng lặp"
+    },
+    {
+      "id": "uc4-bo-mon-chot-diem",
+      "mo_ta": "Bộ môn — đủ 3/3 điểm, xác nhận chốt kết quả của 014 (UC4.5, chưa bấm xác nhận)",
+      "vai_tro": "bomon",
+      "ghi_du_lieu": true,
+      "man_hinh": "MH-11",
+      "hanh_dong": [
+        {
+          "mo": "/hoi-dong"
+        },
+        {
+          "bam": "Hội đồng demo K22"
+        },
+        {
+          "cho_chu": "3/3 đã chấm"
+        },
+        {
+          "bam": {
+            "chu": "Chốt kết quả",
+            "hang": "DTC225200014"
+          }
+        },
+        {
+          "cho_chu": "Chốt kết quả bảo vệ?"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Dòng 014: 3/3 đã chấm, Popconfirm 'Chốt kết quả bảo vệ?' với điểm tạm tính"
+    },
+    {
+      "id": "uc4-sv-ket-qua-bao-ve",
+      "mo_ta": "SV DTC225200015 — lịch và kết quả bảo vệ đã chốt",
+      "vai_tro": "DTC225200015",
+      "man_hinh": "MH-12",
+      "hanh_dong": [
+        {
+          "mo": "/bao-ve"
+        },
+        {
+          "cho_chu": "Hội đồng demo K22"
+        },
+        {
+          "cho_chu": "8.5"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Hội đồng, phòng, giờ, thành viên; điểm bảo vệ 8.5"
+    },
+    {
+      "id": "uc5-kho-tim-kiem",
+      "mo_ta": "SV DTC225200012 — tra cứu kho theo từ khóa + khóa K22 (MH-13)",
+      "vai_tro": "DTC225200012",
+      "man_hinh": "MH-13",
+      "hanh_dong": [
+        {
+          "mo": "/kho-do-an"
+        },
+        {
+          "cho_chu": "Kho đồ án"
+        },
+        {
+          "go": {
+            "o": "Khóa",
+            "chu": "K22"
+          }
+        },
+        {
+          "go": {
+            "o": "Tên đề tài hoặc từ khóa",
+            "chu": "tiêm chủng",
+            "enter": true
+          }
+        },
+        {
+          "cho_on_dinh": true
+        },
+        {
+          "cho_chu": "Phát triển ứng dụng di động theo dõi lịch tiêm chủng cho trẻ em tại trạm y tế phường Tân Thịnh"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Kết quả lọc K22 + 'tiêm chủng': đồ án của 015 vừa lưu kho"
+    },
+    {
+      "id": "uc5-kho-chi-tiet",
+      "mo_ta": "Bộ môn — chi tiết bản ghi kho của 015 (nguồn Hệ thống, Đã index)",
+      "vai_tro": "bomon",
+      "man_hinh": "MH-13",
+      "hanh_dong": [
+        {
+          "mo": "/kho-do-an"
+        },
+        {
+          "bam": "Phát triển ứng dụng di động theo dõi lịch tiêm chủng cho trẻ em tại trạm y tế phường Tân Thịnh"
+        },
+        {
+          "cho_chu": "Chi tiết bản ghi kho"
+        },
+        {
+          "cho_chu": "Hệ thống (chốt bảo vệ)"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Ngăn chi tiết: SV, khóa K22, GVHD, điểm 8.5, nguồn Hệ thống, Đã index, tải báo cáo cuối"
+    },
+    {
+      "id": "uc5-kho-import",
+      "mo_ta": "Bộ môn — hộp thoại import khóa cũ từ CSV (UC5.4, không gửi)",
+      "vai_tro": "bomon",
+      "man_hinh": "MH-13",
+      "hanh_dong": [
+        {
+          "mo": "/kho-do-an"
+        },
+        {
+          "bam": "Import khóa cũ"
+        },
+        {
+          "cho_chu": "ma_so_sinh_vien"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Hộp thoại import: định dạng cột CSV, chọn tệp, kết quả từng dòng"
     }
   ]
 }

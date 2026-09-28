@@ -4,6 +4,8 @@
 #
 #   bash deploy/demo-state.sh             # xóa trạng thái demo cũ + dựng lại
 #   bash deploy/demo-state.sh --chi-xoa   # chỉ xóa (đợt K22 trống cho 5 SV demo)
+#   bash deploy/demo-state.sh --dem       # chỉ ĐỌC: in chữ ký (số hàng + md5 cột trạng
+#                                         # thái) của mọi hàng demo — verify-all so trước/sau
 #
 # Tài khoản demo DÀNH RIÊNG (không bộ kiểm thử tự động nào dùng; tự động dùng
 # K95–K99, DTC225200094–100, GV023, GV025–GV030; smoke-test chỉ ĐỌC với
@@ -49,11 +51,13 @@ DEMO_IN="'$(IFS=,; echo "${DEMO_SV[*]}" | sed "s/,/','/g")'"
 DEMO_ALL_IN="'$(IFS=,; echo "${DEMO_SV[*]},${DEMO_GV[*]}" | sed "s/,/','/g")'"
 
 CHI_XOA=0
+DEM=0
 case "${1:-}" in
   --chi-xoa) CHI_XOA=1 ;;
+  --dem) DEM=1 ;;
   "") ;;
-  -h|--help) sed -n '2,8p' "$0"; exit 0 ;;
-  *) echo "Dùng: bash deploy/demo-state.sh [--chi-xoa]" >&2; exit 2 ;;
+  -h|--help) sed -n '2,10p' "$0"; exit 0 ;;
+  *) echo "Dùng: bash deploy/demo-state.sh [--chi-xoa | --dem]" >&2; exit 2 ;;
 esac
 
 ok() { echo "OK: $1"; }
@@ -102,6 +106,23 @@ TK_DEMO_IDS="$(sql "SELECT id FROM tai_khoan WHERE ma_dang_nhap IN (${DEMO_ALL_I
 GV_DEMO_IDS="$(sql "SELECT gv.id FROM giang_vien gv JOIN tai_khoan tk ON tk.id = gv.tai_khoan_id WHERE tk.ma_dang_nhap IN (${DEMO_ALL_IN})" | csv)"
 DOT_ID="$(sql "SELECT id FROM dot_do_an WHERE ten_dot = '${DOT_TEN}' AND khoa = 'K22' AND trang_thai = 'DANG_MO'")"
 [ "$(printf '%s\n' "$DOT_ID" | grep -c .)" = "1" ] || fail "Không tìm thấy đúng một đợt đang mở '${DOT_TEN}' (nhận '${DOT_ID}')"
+
+if [ "$DEM" = "1" ]; then
+  # Chữ ký hàng demo: số hàng + md5 các cột trạng thái/điểm (phát hiện cả hàng bị SỬA).
+  T_SEL="SELECT id FROM de_tai WHERE dot_do_an_id = ${DOT_ID} AND sinh_vien_id IN (${SV_IDS})"
+  L_SEL="SELECT l.id FROM lich_bao_ve l JOIN hoi_dong h ON h.id = l.hoi_dong_id WHERE h.ten_hoi_dong = '${HOI_DONG_TEN}' OR l.de_tai_id IN (${T_SEL})"
+  sql "SELECT 'de_tai', COUNT(*), IFNULL(MD5(GROUP_CONCAT(CONCAT_WS(':', id, trang_thai, IFNULL(giang_vien_id, '-'), ten_de_tai) ORDER BY id)), '-') FROM de_tai WHERE id IN (${T_SEL})
+UNION ALL SELECT 'tai_lieu_do_an', COUNT(*), IFNULL(MD5(GROUP_CONCAT(CONCAT_WS(':', id, loai, so_phien_ban, ten_luu_tru) ORDER BY id)), '-') FROM tai_lieu_do_an WHERE de_tai_id IN (${T_SEL})
+UNION ALL SELECT 'de_cuong', COUNT(*), IFNULL(MD5(GROUP_CONCAT(CONCAT_WS(':', id, trang_thai) ORDER BY id)), '-') FROM de_cuong WHERE de_tai_id IN (${T_SEL})
+UNION ALL SELECT 'ket_qua_kiem_tra', COUNT(*), IFNULL(MD5(GROUP_CONCAT(CONCAT_WS(':', id, trang_thai, IFNULL(ty_le_tong, '-')) ORDER BY id)), '-') FROM ket_qua_kiem_tra_trung_lap WHERE de_tai_id IN (${T_SEL})
+UNION ALL SELECT 'bao_cao_tien_do', COUNT(*), IFNULL(MD5(GROUP_CONCAT(CONCAT_WS(':', id, IFNULL(danh_gia, '-'), IFNULL(nhan_xet, '-')) ORDER BY id)), '-') FROM bao_cao_tien_do WHERE de_tai_id IN (${T_SEL})
+UNION ALL SELECT 'hoi_dong', COUNT(*), IFNULL(MD5(GROUP_CONCAT(CONCAT_WS(':', id, ngay_bao_ve, gio_bao_ve, phong) ORDER BY id)), '-') FROM hoi_dong WHERE ten_hoi_dong = '${HOI_DONG_TEN}'
+UNION ALL SELECT 'lich_bao_ve', COUNT(*), IFNULL(MD5(GROUP_CONCAT(CONCAT_WS(':', id, da_chot, IFNULL(diem_trung_binh, '-')) ORDER BY id)), '-') FROM lich_bao_ve WHERE id IN (SELECT id FROM (${L_SEL}) x)
+UNION ALL SELECT 'diem_bao_ve', COUNT(*), IFNULL(MD5(GROUP_CONCAT(CONCAT_WS(':', id, diem) ORDER BY id)), '-') FROM diem_bao_ve WHERE lich_bao_ve_id IN (SELECT id FROM (${L_SEL}) x)
+UNION ALL SELECT 'do_an_kho', COUNT(*), IFNULL(MD5(GROUP_CONCAT(CONCAT_WS(':', id, trang_thai_index, IFNULL(diem, '-'), IFNULL(tu_khoa, '-')) ORDER BY id)), '-') FROM do_an_kho WHERE de_tai_id IN (${T_SEL})
+UNION ALL SELECT 'thong_bao', COUNT(*), IFNULL(MD5(GROUP_CONCAT(CONCAT_WS(':', id, da_doc) ORDER BY id)), '-') FROM thong_bao WHERE tai_khoan_id IN (${TK_DEMO_IDS})"
+  exit 0
+fi
 ok "5 SV demo (sinh_vien.id ${SV_IDS}), 4 GV demo, đợt K22 id=${DOT_ID}"
 
 # ------------------------------------------------------------------ xóa
@@ -297,7 +318,7 @@ ok "Đề cương 013/014/015 ($(nhan DC013)/$(nhan DC014)/$(nhan DC015)-B, ${TL
 for spec in "1|Đã hoàn thành khảo sát nhu cầu thuê trọ của 120 sinh viên, đặc tả 14 use case và thiết kế CSDL (9 bảng)." \
             "2|Đã cài đặt tìm kiếm phòng trọ theo bản đồ, lọc theo giá/khoảng cách và đăng tin cho chủ trọ; đang tích hợp đánh giá phòng."; do
   IFS='|' read -r so nd <<<"$spec"
-  code="$(call POST "/api/progress/reports/${MOC[$so]}" "${TOKEN[DTC225200013]}" -F "noi_dung=${nd}")"
+  code="$(call POST "/api/progress/reports/${MOC[$so]}" "${TOKEN[DTC225200013]}" --form-string "noi_dung=${nd}")"
   [ "$code" = "200" ] || fail "013 nộp báo cáo mốc ${so} trả ${code}: $(head -c 300 "$TMP/body")"
 done
 call GET "/api/progress/topics/${DE_TAI[DTC225200013]}" "${TOKEN[GV011]}" >/dev/null

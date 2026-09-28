@@ -14,11 +14,14 @@ Hành động (mỗi phần tử một khóa):
     {"mo": "/duong-dan"}                 điều hướng + chờ load/mạng rảnh
     {"cho_chu": "...", "toi_da_giay": N} chờ chữ xuất hiện
     {"cho_het_chu": "...", "toi_da_giay": N}
-    {"go": {"o": nhãn|selector|placeholder, "chu": "..."}}
+    {"go": {"o": nhãn|selector|placeholder, "chu": "...", "enter": false}}
     {"bam": "chữ"} | {"bam": {"chu", "pham_vi", "hang"}}
     {"tai_len": {"o": selector input[type=file], "tep": đường dẫn (tương đối gốc repo)}}
     {"cuon": "chữ" | số}  {"phim": "Escape"}  {"cho": giây}  {"cho_on_dinh": true}
     {"chup": true | "ten-tep.png" | {"tep", "toan_trang": true}}
+
+Bước có "ghi_du_lieu": true (thay đổi dữ liệu, hoặc cần bước ghi trước nó) bị
+bỏ qua khi chạy với --chi-doc (verify-all đo NFR-16 mà không đụng trạng thái demo).
 
 Một bước FAIL khi: hết giờ chờ/không thấy phần tử, có exception JS hoặc lỗi
 console, có HTTP >= 400 không nằm trong cho_phep_http, hoặc trang tràn ngang
@@ -74,7 +77,7 @@ async def chay_hanh_dong(td: TrinhDuyet, hd: dict, buoc: dict, out_dir: Path, an
     elif "cho_het_chu" in hd:
         await td.cho_het_chu(hd["cho_het_chu"], float(hd.get("toi_da_giay", 15)))
     elif "go" in hd:
-        await td.go(hd["go"]["o"], hd["go"]["chu"])
+        await td.go(hd["go"]["o"], hd["go"]["chu"], enter=bool(hd["go"].get("enter")))
     elif "bam" in hd:
         b = hd["bam"]
         if isinstance(b, str):
@@ -119,10 +122,12 @@ async def chay(args: argparse.Namespace) -> int:
     thoi_diem = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     ket_qua: list[dict] = []
     that_bai = False
+    cac_buoc = [b for b in kich_ban["buoc"] if not (args.chi_doc and b.get("ghi_du_lieu"))]
+    bo_qua = [b["id"] for b in kich_ban["buoc"] if b not in cac_buoc]
 
     async with TrinhDuyet(args.base_url) as td:
         vai_tro_hien_tai: object = object()
-        for buoc in kich_ban["buoc"]:
+        for buoc in cac_buoc:
             t0 = time.monotonic()
             anh: list[str] = []
             loi: list[str] = []
@@ -162,6 +167,7 @@ async def chay(args: argparse.Namespace) -> int:
                     pass
             ket_qua.append({
                 "id": buoc["id"], "mo_ta": buoc.get("mo_ta", ""), "vai_tro": buoc.get("vai_tro"),
+                "man_hinh": buoc.get("man_hinh"), "man_hinh_mong_doi": buoc.get("man_hinh_mong_doi"),
                 "giay": giay, "ket_qua": kq, "loi": loi,
                 "http_loi": td.http_loi[:], "do_rong": do_rong,
                 "anh": anh[0] if anh else None, "anh_them": anh[1:],
@@ -180,10 +186,11 @@ async def chay(args: argparse.Namespace) -> int:
         "base_url": args.base_url,
         "khung_nhin": f"{1440}x{900}",
         "buoc": ket_qua,
-        "so_buoc": len(kich_ban["buoc"]),
+        "bo_qua_ghi_du_lieu": bo_qua,
+        "so_buoc": len(cac_buoc),
         "so_buoc_ok": sum(1 for b in ket_qua if b["ket_qua"] == "OK"),
         "tong_giay": tong,
-        "ket_qua": "OK" if not that_bai and len(ket_qua) == len(kich_ban["buoc"]) else "FAIL",
+        "ket_qua": "OK" if not that_bai and len(ket_qua) == len(cac_buoc) else "FAIL",
     }
     if args.json:
         Path(args.json).parent.mkdir(parents=True, exist_ok=True)
@@ -224,6 +231,7 @@ def main() -> int:
     ap.add_argument("--json")
     ap.add_argument("--log")
     ap.add_argument("--tiep-tuc-khi-loi", action="store_true")
+    ap.add_argument("--chi-doc", action="store_true", help="bỏ qua các bước ghi_du_lieu")
     return asyncio.run(chay(ap.parse_args()))
 
 

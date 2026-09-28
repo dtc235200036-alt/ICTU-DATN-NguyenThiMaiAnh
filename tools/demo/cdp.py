@@ -107,6 +107,20 @@ _JS_TIM = r"""
       }
       const ph = [...g.querySelectorAll('input, textarea')].find((el) => el.getAttribute('placeholder') === o && hienThiO(el));
       if (ph) return ph;
+      // Nhãn tự do (span/div không gắn for=) hoặc placeholder của antd Select:
+      // lấy ô nhập / Select đầu tiên đứng SAU chữ đó trong vài tầng cha gần nhất.
+      const chu = [...g.querySelectorAll('span, div, label, p, th, strong')].filter((e) => hienThi(e)
+        && chuan(e.innerText) === o && ![...e.children].some((c) => chuan(c.innerText) === o));
+      for (const e of chu) {
+        const sel = e.closest('.ant-select');
+        if (sel) return sel.querySelector('input') || sel;
+        let a = e.parentElement;
+        for (let i = 0; i < 4 && a; i++, a = a.parentElement) {
+          const c = [...a.querySelectorAll('.ant-select, input:not([type=hidden]):not([type=file]), textarea')]
+            .find((x) => hienThi(x) && !e.contains(x) && (e.compareDocumentPosition(x) & Node.DOCUMENT_POSITION_FOLLOWING));
+          if (c) return c.classList.contains('ant-select') ? (c.querySelector('input') || c) : (c.closest('.ant-select') ? c : c);
+        }
+      }
     }
     return null;
   };
@@ -157,8 +171,10 @@ class TrinhDuyet:
             "--disable-gpu", "--disable-extensions", "--disable-background-networking",
             "--disable-sync", "--mute-audio", "about:blank",
         ]
+        # Trên Linux Chrome lấy ngôn ngữ giao diện (cả định dạng ô date/time) từ biến môi trường.
+        env = {**os.environ, "LANGUAGE": "vi", "LANG": "vi_VN.UTF-8", "LC_ALL": "vi_VN.UTF-8"}
         self._proc = subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                                      start_new_session=True)
+                                      start_new_session=True, env=env)
         port_file = Path(self._profile) / "DevToolsActivePort"
         han = time.monotonic() + 20
         while not (port_file.exists() and port_file.read_text().strip()):
@@ -187,6 +203,9 @@ class TrinhDuyet:
         await self.gui("Page.addScriptToEvaluateOnNewDocument", {"source": _JS_TIM})
         # Headless không có cửa sổ được focus -> focus/blur (onBlur của React) không bắn nếu thiếu dòng này.
         await self.gui("Emulation.setFocusEmulationEnabled", {"enabled": True})
+        # Ô <input type="date|time"> hiển thị theo locale trình duyệt (headless mặc định en-US).
+        await self.gui("Emulation.setLocaleOverride", {"locale": "vi-VN"})
+        await self.gui("Emulation.setTimezoneOverride", {"timezoneId": "Asia/Ho_Chi_Minh"})
 
     async def dong(self) -> None:
         if self._doc_task:
@@ -372,7 +391,7 @@ class TrinhDuyet:
             await self.gui("Input.dispatchMouseEvent",
                            {"type": loai, "x": x, "y": y, "button": "left", "clickCount": 1})
 
-    async def go(self, o: str, chu: str, timeout: float = 10) -> None:
+    async def go(self, o: str, chu: str, timeout: float = 10, enter: bool = False) -> None:
         """Điền chữ vào ô (nhãn / selector / placeholder). Với antd Select: mở, gõ, chọn option."""
         han = time.monotonic() + timeout
         muc = json.dumps(o, ensure_ascii=False)
@@ -416,7 +435,11 @@ class TrinhDuyet:
             " const proto = el.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;"
             " Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, " + gia_tri + ");"
             " el.dispatchEvent(new Event('input', {bubbles: true}));"
-            " el.dispatchEvent(new Event('change', {bubbles: true})); el.blur(); })()")
+            " el.dispatchEvent(new Event('change', {bubbles: true})); })()")
+        if enter:  # vd. antd Input.Search (onSearch khi nhấn Enter)
+            await self.phim("Enter")
+            await asyncio.sleep(0.2)
+        await self.js("window.__ntmaDich && window.__ntmaDich.blur()")
 
     async def tai_len(self, selector: str, duong_dan: str) -> None:
         """Gắn tệp vào <input type=file> (DOM.setFileInputFiles, đường dẫn tuyệt đối)."""

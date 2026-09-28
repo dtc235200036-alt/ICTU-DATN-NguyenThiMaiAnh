@@ -10,6 +10,10 @@
 #               tools/check-erd-db.py và kiểm tra dữ liệu kiểm thử còn sót
 #   --report  : ghi tong-hop.json + nhat-ky-verify-all.log và trang số liệu
 #               AI thu-nghiem-ai/04-hieu-nang-va-bao-mat.md (ai-nfr.sh --report)
+#   (05-05) mọi chế độ: chữ ký hàng của tài khoản demo (deploy/demo-state.sh --dem)
+#               được ghi TRƯỚC các bộ kiểm thử và so lại ở bước cuối "trạng thái
+#               demo" — lệch là FAIL. Chế độ đầy đủ đo thêm NFR-16: chạy kịch bản
+#               ảnh tools/demo/kich-ban-anh.json --chi-doc qua Chrome headless 1440 px.
 #
 # Mọi nội dung ghi ra đĩa và in ra màn hình đi qua hàm che: mọi giá trị dài
 # >= 8 ký tự của deploy/.env và mọi chuỗi dạng JWT (eyJ….….…) bị thay (T-05-10).
@@ -166,6 +170,69 @@ PY
 }
 
 # =============================================================================
+# Bước nội bộ (05-05): trạng thái demo không bị các bộ kiểm thử làm thay đổi
+# =============================================================================
+buoc_trang_thai_demo() {
+  if [ ! -f "${SCRIPT_DIR}/demo-state.sh" ]; then
+    echo "OK: bỏ qua — không có deploy/demo-state.sh"
+    return 0
+  fi
+  [ -s "${TRUOC:-}" ] || { echo "FAIL: không có chữ ký trạng thái demo trước khi chạy (${TRUOC:-chưa đặt TRUOC})"; return 1; }
+  local sau
+  sau="$(bash "${SCRIPT_DIR}/demo-state.sh" --dem)" || { echo "FAIL: demo-state.sh --dem lỗi"; return 1; }
+  python3 - "$TRUOC" "$sau" <<'PY'
+import sys
+truoc = [l.split("\t") for l in open(sys.argv[1], encoding="utf-8").read().splitlines() if l.strip()]
+sau = [l.split("\t") for l in sys.argv[2].splitlines() if l.strip()]
+t, s = {r[0]: r[1:] for r in truoc}, {r[0]: r[1:] for r in sau}
+lech = [k for k in sorted(set(t) | set(s)) if t.get(k) != s.get(k)]
+print("OK: hàng demo trước = sau: " + ", ".join(f"{k} {t[k][0]}" for k in t if k not in lech))
+for k in lech:
+    print(f"FAIL: hàng demo '{k}' đã đổi: trước {t.get(k)} -> sau {s.get(k)}")
+sys.exit(1 if lech else 0)
+PY
+}
+
+# =============================================================================
+# Bước nội bộ (05-05): NFR-16 — màn hình chính ở 1440 px, không lỗi, không tràn
+# =============================================================================
+buoc_nfr16() {
+  local n out j
+  if [ ! -f "${SCRIPT_DIR}/demo-state.sh" ] || [ ! -f "${REPO_ROOT}/tools/demo/kich-ban-anh.json" ]; then
+    echo "OK: bỏ qua đo trực tiếp — thiếu deploy/demo-state.sh hoặc tools/demo/kich-ban-anh.json"
+    return 0
+  fi
+  n="$(bash "${SCRIPT_DIR}/demo-state.sh" --dem | awk -F'\t' '$1=="de_tai"{print $2}')"
+  if [ "${n:-0}" -lt 4 ]; then
+    echo "OK: bỏ qua đo trực tiếp — chưa có trạng thái demo (bash deploy/demo-state.sh); NFR-16 lấy từ ket-qua-kiem-thu/anh-chup.json đã commit"
+    return 0
+  fi
+  out="$(mktemp -d)"
+  j="${NFR16_JSON:-$out/nfr16.json}"
+  if ! python3 "${REPO_ROOT}/tools/demo/chay-kich-ban.py" "${REPO_ROOT}/tools/demo/kich-ban-anh.json" --chi-doc \
+      --out-dir "$out" --json "$j"; then
+    rm -rf "$out"
+    echo "FAIL: kịch bản ảnh (chỉ đọc) lỗi"
+    return 1
+  fi
+  python3 - "$j" <<'PY' || { rm -rf "$out"; return 1; }
+import json, struct, sys
+d = json.load(open(sys.argv[1], encoding="utf-8"))
+sizes = {struct.unpack(">II", open(b["anh"], "rb").read()[16:24]) for b in d["buoc"] if b["anh"]}
+rong = max(b["do_rong"] or 0 for b in d["buoc"])
+bad = [b["id"] for b in d["buoc"] if b["ket_qua"] != "OK"]
+ok = not bad and rong <= 1440 and sizes == {(1440, 900)}
+print(f"{'OK' if ok else 'FAIL'}: NFR-16 {len(d['buoc'])} màn hình, ảnh {sorted(sizes)}, scrollWidth max {rong} px, lỗi {bad or 'không'}")
+sys.exit(0 if ok else 1)
+PY
+  rm -rf "$out"
+  if pgrep -f '[c]hrome.*remote-debugging-port=0' >/dev/null; then
+    echo "FAIL: còn tiến trình Chrome debug sau khi chạy"
+    return 1
+  fi
+}
+
+# =============================================================================
 # Bước nội bộ: không còn dữ liệu của các bộ kiểm thử tự động
 # =============================================================================
 buoc_con_sot() {
@@ -186,6 +253,8 @@ case "${BUOC}" in
   stack) buoc_stack; exit $? ;;
   du-lieu) buoc_du_lieu; exit $? ;;
   con-sot) buoc_con_sot; exit $? ;;
+  trang-thai-demo) buoc_trang_thai_demo; exit $? ;;
+  nfr-16) buoc_nfr16; exit $? ;;
   *) echo "Bước không hợp lệ: ${BUOC}" >&2; exit 2 ;;
 esac
 
@@ -226,6 +295,11 @@ PY
 che() {
   python3 "$WORK/che.py" "$ENV_FILE"
 }
+
+# 05-05: chữ ký hàng demo TRƯỚC mọi bộ kiểm thử (so lại ở bước cuối).
+if [ -f "${SCRIPT_DIR}/demo-state.sh" ]; then
+  bash "${SCRIPT_DIR}/demo-state.sh" --dem > "$WORK/demo-truoc.tsv" 2>&1 || true
+fi
 
 FAILED=0
 run_step() {
@@ -276,7 +350,11 @@ if [ "$MODE" = "full" ]; then
   run_step erd-db "Đối chiếu ERD với schema thesis_core" 120 "python3 tools/check-erd-db.py"
   run_step con-sot "Không còn dữ liệu kiểm thử (K95–K99, tài khoản khóa)" 120 \
     "bash deploy/verify-all.sh --buoc con-sot"
+  run_step nfr-16 "NFR-16 — màn hình chính ở 1440 px qua Chrome headless (chỉ đọc)" 600 \
+    "NFR16_JSON='$WORK/nfr16.json' bash deploy/verify-all.sh --buoc nfr-16"
 fi
+run_step trang-thai-demo "Kiểm tra trạng thái demo không đổi (hàng của tài khoản demo trước/sau)" 120 \
+  "TRUOC='$WORK/demo-truoc.tsv' bash deploy/verify-all.sh --buoc trang-thai-demo"
 
 TOTAL=$(( $(date +%s) - RUN_T0 ))
 
@@ -438,9 +516,28 @@ if ai:
                      "cach_do": "encode_calls (/health) trước và sau khi Bộ môn thêm 1 bản ghi kho (chờ DA_INDEX)",
                      "ket_qua": f"+{n11['encode_calls_delta']} lần encode",
                      "dat": bool(n11["dat"]), "nguon": "deploy/ai-nfr.sh"}
-nfr["NFR-16"] = {"ma": "NFR-16", "chi_tieu": CHI_TIEU["NFR-16"],
-                 "cach_do": "Chụp toàn bộ màn hình chính bằng Chrome headless ở 1440 px (plan 05-05)",
-                 "ket_qua": "Chưa đo", "dat": None, "nguon": "plan 05-05"}
+# NFR-16 (05-05): số đo trực tiếp của bước nfr-16 nếu có, không thì ảnh chụp đã commit.
+n16 = load("nfr16.json")
+nguon16 = "verify-all bước nfr-16 (tools/demo/chay-kich-ban.py --chi-doc)"
+if n16 is None:
+    p16 = os.path.join(os.path.dirname(out), "anh-chup.json")
+    if os.path.exists(p16):
+        n16 = json.load(open(p16, encoding="utf-8"))
+        nguon16 = "docs/chuong-4-trien-khai/ket-qua-kiem-thu/anh-chup.json (tools/demo/chay-kich-ban.py)"
+if n16:
+    b16 = n16["buoc"]
+    rong16 = max((b["do_rong"] or 0) for b in b16) if b16 else 0
+    loi16 = [b["id"] for b in b16 if b["ket_qua"] != "OK"]
+    uc16 = sorted({b["id"].split("-")[0] for b in b16})
+    vt16 = sorted({("SV" if (b["vai_tro"] or "").startswith("DTC") else "GV" if (b["vai_tro"] or "").startswith("GV") else "Bộ môn" if b["vai_tro"] else "khách") for b in b16})
+    nfr["NFR-16"] = {"ma": "NFR-16", "chi_tieu": CHI_TIEU["NFR-16"],
+                     "cach_do": f"Chrome headless (CDP) khung 1440×900 qua Apache HTTPS, {len(b16)} màn hình ({', '.join(uc16)}; vai trò {', '.join(vt16)}); mỗi màn hình đo document.documentElement.scrollWidth, bắt exception JS, lỗi console, HTTP >= 400 ngoài dự kiến",
+                     "ket_qua": f"{len(b16) - len(loi16)}/{len(b16)} màn hình OK, scrollWidth max {rong16} px, lỗi: {', '.join(loi16) or 'không'} (đo lúc {n16.get('thoi_diem_utc')})",
+                     "dat": (not loi16) and rong16 <= 1440 and len(b16) >= 20, "nguon": nguon16}
+else:
+    nfr["NFR-16"] = {"ma": "NFR-16", "chi_tieu": CHI_TIEU["NFR-16"],
+                     "cach_do": "Chụp các màn hình chính bằng Chrome headless ở 1440 px (tools/demo/chay-kich-ban.py)",
+                     "ket_qua": "Chưa đo", "dat": None, "nguon": "plan 05-05"}
 for i in range(1, 20):
     ma = "NFR-%02d" % i
     nfr.setdefault(ma, {"ma": ma, "chi_tieu": CHI_TIEU[ma], "cach_do": "", "ket_qua": "Chưa đo (bước đo không chạy)", "dat": None, "nguon": ""})
