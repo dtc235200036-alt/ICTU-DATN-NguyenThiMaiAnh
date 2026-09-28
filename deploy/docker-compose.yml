@@ -74,6 +74,9 @@ services:
       - "8001"
     volumes:
       - uploads-data:/data/uploads
+      # DATA-03 (04-06): bộ tài liệu thử nghiệm, chỉ đọc — dùng bởi
+      # `python -m app.seed_ai_corpus --data /seed-data` (deploy/seed-ai.sh).
+      - ../seed-data:/seed-data:ro
     # CR-01 (03-REVIEW): trần bộ nhớ — một upload độc hại chỉ có thể làm
     # container api bị OOM-kill (restart: unless-stopped), không kéo sập host.
     mem_limit: ${API_MEM_LIMIT:-1g}

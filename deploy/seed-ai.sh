@@ -93,9 +93,25 @@ fi
 
 ok "${EXPECTED} đề tài kho đã index"
 
-# (4) Backfill: index các đề tài hiện hành (không phải nháp) đã có từ demo
-# Phase 2/3 và tự chữa vector kho còn thiếu (vd. volume thesis_ai bị xóa) —
-# văn bản không đổi là no-op phía dịch vụ AI.
-"${COMPOSE[@]}" exec -T api python -m app.services.ai_index backfill --loai TOPIC ARCHIVE \
+# (4) DATA-03 (04-06): 25 tài liệu nguồn (A) thành đồ án khóa cũ có báo cáo
+# cuối, liên kết với bản ghi kho vừa import, index DOCUMENT. Chạy lại không đổi gì.
+"${COMPOSE[@]}" exec -T api python -m app.seed_ai_corpus --data /seed-data \
+  || fail "seed_ai_corpus thất bại"
+
+# (5) Backfill: index các đề tài hiện hành (không phải nháp, chưa vào kho) đã
+# có từ demo Phase 2/3, tự chữa vector kho/tài liệu còn thiếu (vd. volume
+# thesis_ai bị xóa) — văn bản không đổi là no-op phía dịch vụ AI.
+"${COMPOSE[@]}" exec -T api python -m app.services.ai_index backfill --loai TOPIC ARCHIVE DOCUMENT \
   || fail "ai_index backfill thất bại"
-ok "Backfill TOPIC + ARCHIVE xong"
+ok "Backfill TOPIC + ARCHIVE + DOCUMENT xong"
+
+# (6) Kiểm tra cuối: đúng 25 bản ghi kho nguồn đã liên kết đề tài có báo cáo,
+# và chỉ mục tài liệu của dịch vụ AI không rỗng.
+linked="$(bash "${SCRIPT_DIR}/sql.sh" "SELECT COUNT(*) FROM do_an_kho k JOIN tai_lieu_do_an t ON t.de_tai_id = k.de_tai_id AND t.loai = 'BAO_CAO_CUOI' WHERE k.nguon='IMPORT' AND k.khoa IN (${KHOA_SEED})")"
+[ "$linked" = "25" ] || fail "Kỳ vọng 25 bản ghi kho nguồn có báo cáo cuối, nhận ${linked}"
+size_tai_lieu="$("${COMPOSE[@]}" exec -T api python -c "
+import json, urllib.request
+print(json.load(urllib.request.urlopen('http://ai:8002/health', timeout=4))['index_size_tai_lieu'])
+")"
+[ "${size_tai_lieu:-0}" -gt 0 ] || fail "Chỉ mục tài liệu của dịch vụ AI rỗng (index_size_tai_lieu=${size_tai_lieu})"
+ok "25 đồ án nguồn có báo cáo cuối; index_size_tai_lieu=${size_tai_lieu}"

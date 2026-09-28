@@ -10,12 +10,18 @@
 #   ai_index    — ROADMAP SC5/AISV-02/NFR-11: bản ghi kho mới và đề tài vừa gửi
 #                 duyệt được index ngay (push-on-write), đúng một lần encode,
 #                 và lần kiểm tra tên kế tiếp đã thấy chúng.
-# Dọn dẹp (trap, kể cả khi lỗi giữa chừng): purge vector TOPIC/ARCHIVE đã tạo
-# khỏi chỉ mục AI rồi xóa dữ liệu K97 theo thứ tự khóa ngoại.
+#   ai_document — ROADMAP SC2/AISV-04..06 (04-06): SV nộp tài liệu B của một
+#                 cặp chép nguyên văn -> HOAN_TAT, tỷ lệ >= NGUONG_TAI_LIEU,
+#                 đồ án trùng "{tên A} ({khóa})", đoạn nộp cạnh đoạn nguồn,
+#                 không đoạn khuôn mẫu; B của cặp không liên quan dưới ngưỡng;
+#                 GVHD thấy cùng kết quả; nộp lại không khớp chính đề tài mình.
+# Dọn dẹp (trap, kể cả khi lỗi giữa chừng): purge vector TOPIC/ARCHIVE/DOCUMENT
+# đã tạo khỏi chỉ mục AI, xóa file đã nộp rồi xóa dữ liệu K97 theo thứ tự khóa
+# ngoại.
 #
 # Tài khoản dành riêng (không script nào khác dùng): bomon, DTC225200095,
-# DTC225200096 (SV), GV023 (GVHD, dự phòng — chưa dùng); khóa kiểm thử K97
-# (e2e-uc1 dùng K99, e2e-uc2-5 dùng K98). Cần chạy `bash deploy/seed-ai.sh` trước.
+# DTC225200096 (SV), GV023 (GVHD); khóa kiểm thử K97 (e2e-uc1 dùng K99,
+# e2e-uc2-5 dùng K98, ai-nfr dùng K96). Cần chạy `bash deploy/seed-ai.sh` trước.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -55,6 +61,9 @@ print($1)
 
 DOT_DO_AN_ID=""
 KHO_IDS=""
+# Đề tài K97 do DTC225200095 tự đề xuất trong ai_index — ai_document dùng lại
+# (một SV chỉ được giữ một đề tài đang hoạt động).
+TOPIC_SV_A_ID=""
 
 sql() {
   DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" "$1"
@@ -78,8 +87,21 @@ cleanup() {
     fi
     sql "DELETE FROM thong_bao WHERE tai_khoan_id IN (SELECT id FROM tai_khoan WHERE ma_dang_nhap IN ('DTC225200095','DTC225200096','GV023')) AND thoi_diem >= '${START_UTC}';" >/dev/null 2>&1 || true
     if [ -n "${DOT_DO_AN_ID}" ]; then
+      local doc_ids files ten
+      doc_ids="$(sql "SELECT t.id FROM tai_lieu_do_an t JOIN de_tai dt ON dt.id = t.de_tai_id WHERE dt.dot_do_an_id = ${DOT_DO_AN_ID}" 2>/dev/null | paste -sd, - || true)"
+      if [ -n "${doc_ids}" ]; then
+        "${COMPOSE[@]}" exec -T api python -m app.services.ai_index purge --loai DOCUMENT --ids "${doc_ids}" >/dev/null 2>&1 || true
+      fi
+      files="$(sql "SELECT t.ten_luu_tru FROM tai_lieu_do_an t JOIN de_tai dt ON dt.id = t.de_tai_id WHERE dt.dot_do_an_id = ${DOT_DO_AN_ID}" 2>/dev/null || true)"
+      while IFS= read -r ten; do
+        [ -z "$ten" ] && continue
+        "${COMPOSE[@]}" exec -T api rm -f "/data/uploads/${ten}" >/dev/null 2>&1 || true
+      done <<<"${files}"
       sql "DELETE ct FROM chi_tiet_trung_lap ct JOIN ket_qua_kiem_tra_trung_lap kq ON kq.id = ct.ket_qua_id JOIN de_tai dt ON dt.id = kq.de_tai_id WHERE dt.dot_do_an_id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
       sql "DELETE kq FROM ket_qua_kiem_tra_trung_lap kq JOIN de_tai dt ON dt.id = kq.de_tai_id WHERE dt.dot_do_an_id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
+      sql "DELETE l FROM luot_duyet_de_cuong l JOIN de_cuong dc ON dc.id = l.de_cuong_id JOIN de_tai dt ON dt.id = dc.de_tai_id WHERE dt.dot_do_an_id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
+      sql "DELETE t FROM tai_lieu_do_an t JOIN de_tai dt ON dt.id = t.de_tai_id WHERE dt.dot_do_an_id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
+      sql "DELETE dc FROM de_cuong dc JOIN de_tai dt ON dt.id = dc.de_tai_id WHERE dt.dot_do_an_id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
       sql "DELETE FROM de_tai WHERE dot_do_an_id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
     fi
     if [ -n "${kho_ids}" ]; then
@@ -277,6 +299,7 @@ ai_index() {
   res="$(call POST /api/topics "$token_sv_a" -H 'Content-Type: application/json' --data-binary "@$TMP/topic.json")"
   [ "${res%% *}" = "201" ] || fail "DTC225200095 tự đề xuất đề tài trả ${res%% *}: $(cat "$TMP/body")"
   topic_id="$(jget 'd["id"]')"
+  TOPIC_SV_A_ID="${topic_id}"
   [ "$(jget 'd["trang_thai"]')" = "CHO_DUYET" ] || fail "Đề tài mới không ở CHO_DUYET"
   # +2 = 1 encode truy vấn (kiểm tra tên lưu lúc gửi) + 1 encode ingest TOPIC.
   deadline=$((SECONDS + 10))
@@ -296,9 +319,168 @@ ai_index() {
   ok "DTC225200096 kiểm tra tên diễn đạt lại -> thấy ngay đề tài hiện hành vừa gửi (${hit}%)"
 }
 
+# --- ai_document (SC2, AISV-04/05/06, D-03/D-04) ------------------------------
+DOCX_CT="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+# submit_outline TOKEN DE_TAI_ID FILE — nộp đề cương, in ra tai_lieu_do_an id.
+submit_outline() {
+  local ct="application/pdf" res
+  case "$3" in *.docx) ct="$DOCX_CT" ;; esac
+  res="$(call POST "/api/outlines/$2/submit" "$1" -F "file=@$3;type=${ct}")"
+  [ "${res%% *}" = "202" ] || fail "Nộp đề cương $(basename "$3") trả ${res%% *}: $(cat "$TMP/body")" >&2
+  echo "OK: nộp $(basename "$3") cho đề tài $2 -> 202 trong ${res#* }s" >&2
+  jget 'd["phien_ban"][0]["tai_lieu"]["id"]'
+}
+
+# wait_check TOKEN DOC_ID OUT — chờ tối đa 30 s tới HOAN_TAT, chép thân vào OUT.
+wait_check() {
+  local deadline=$((SECONDS + 30)) trang
+  while :; do
+    call GET "/api/documents/$2/check" "$1" >/dev/null
+    trang="$(jget 'd["trang_thai"]')"
+    [ "$trang" = "HOAN_TAT" ] && break
+    [ "$trang" = "LOI" ] && fail "Kiểm tra tài liệu $2 kết thúc LOI"
+    [ "$SECONDS" -lt "$deadline" ] || fail "Kiểm tra tài liệu $2 chưa HOAN_TAT sau 30 s (${trang})"
+    sleep 0.5
+  done
+  cp "$TMP/body" "$3"
+}
+
+# review_changes TOKEN_GV DE_TAI_ID DOC_ID — GVHD yêu cầu sửa (để nộp phiên bản mới).
+review_changes() {
+  local res
+  res="$(call POST "/api/outlines/$2/review" "$1" -H 'Content-Type: application/json' \
+    -d "{\"tai_lieu_do_an_id\":$3,\"ket_qua\":\"YEU_CAU_SUA\",\"nhan_xet\":\"Kiểm thử tự động: nộp lại\"}")"
+  [ "${res%% *}" = "200" ] || fail "GVHD yêu cầu sửa đề cương đề tài $2 trả ${res%% *}: $(cat "$TMP/body")"
+}
+
+ai_document() {
+  local token_bomon token_sv_a token_sv_b token_gv gv_id topic_b res nguong t
+  token_bomon="$(bash "${SCRIPT_DIR}/api-login.sh" bomon)"
+  token_sv_a="$(bash "${SCRIPT_DIR}/api-login.sh" DTC225200095)"
+  token_sv_b="$(bash "${SCRIPT_DIR}/api-login.sh" DTC225200096)"
+  token_gv="$(bash "${SCRIPT_DIR}/api-login.sh" GV023)"
+  [ -n "${TOPIC_SV_A_ID}" ] || fail "ai_document cần đề tài K97 của DTC225200095 từ ai_index"
+
+  call GET /api/lecturers "$token_bomon" >/dev/null
+  gv_id="$(jget 'next((g["id"] for g in d if g.get("ma_giang_vien") == "GV023"), "")')"
+  [ -n "$gv_id" ] || fail "Không tìm được id GV023"
+
+  python3 -c 'import json,sys; print(json.dumps({"dot_do_an_id": int(sys.argv[1]), "ten_de_tai": "Hệ thống đặt lịch sân bóng mini trực tuyến cho câu lạc bộ thể thao phường", "linh_vuc": "Công nghệ phần mềm", "gui": True}, ensure_ascii=False))' "$DOT_DO_AN_ID" > "$TMP/topic-b.json"
+  res="$(call POST /api/topics "$token_sv_b" -H 'Content-Type: application/json' --data-binary "@$TMP/topic-b.json")"
+  [ "${res%% *}" = "201" ] || fail "DTC225200096 tự đề xuất đề tài trả ${res%% *}: $(cat "$TMP/body")"
+  topic_b="$(jget 'd["id"]')"
+
+  for t in "${TOPIC_SV_A_ID}" "${topic_b}"; do
+    res="$(call POST "/api/topic-approvals/${t}/approve" "$token_bomon" -H 'Content-Type: application/json' -d "{\"giang_vien_id\":${gv_id}}")"
+    [ "${res%% *}" = "200" ] || fail "Bộ môn duyệt đề tài ${t} trả ${res%% *}: $(cat "$TMP/body")"
+    [ "$(jget 'd["trang_thai"]')" = "DA_PHAN_CONG" ] || fail "Đề tài ${t} không DA_PHAN_CONG"
+  done
+  ok "Bộ môn duyệt 2 đề tài K97 (${TOPIC_SV_A_ID}, ${topic_b}) với GVHD GV023 -> DA_PHAN_CONG"
+
+  # Cặp chép nguyên văn và cặp không liên quan đầu tiên mà hiệu chỉnh (04-04) đánh giá đạt.
+  python3 - "$REPO_ROOT" > "$TMP/pairs.tsv" <<'PY'
+import json, sys
+root = sys.argv[1]
+manifest = json.load(open(f"{root}/seed-data/manifest.json", encoding="utf-8"))
+dat = {c["ma_cap"] for c in json.load(open(f"{root}/ai-service/calibration/ket-qua-chi-tiet.json", encoding="utf-8"))["cap"] if c["dat"]}
+for loai in ("CHEP_NGUYEN_VAN", "KHONG_LIEN_QUAN"):
+    cap = next(c for c in manifest["cap"] if c["loai"] == loai and c["ma_cap"] in dat)
+    print("\t".join([loai, cap["ma_cap"], f"{root}/seed-data/{cap['B']['tep']}", f"{cap['A']['ten_de_tai']} ({cap['A']['khoa']})"]))
+PY
+  local chep_ma chep_file chep_label khac_ma khac_file
+  IFS=$'\t' read -r _ chep_ma chep_file chep_label < <(grep '^CHEP_NGUYEN_VAN' "$TMP/pairs.tsv")
+  IFS=$'\t' read -r _ khac_ma khac_file _ < <(grep '^KHONG_LIEN_QUAN' "$TMP/pairs.tsv")
+  [ -f "$chep_file" ] && [ -f "$khac_file" ] || fail "Không thấy tệp B của cặp ${chep_ma}/${khac_ma}"
+  nguong="$(sql "SELECT gia_tri FROM cau_hinh_nguong WHERE loai='NGUONG_TAI_LIEU'")"
+
+  # (1) Bài chép nguyên văn -> cảnh báo, đúng đồ án nguồn, đoạn nộp cạnh đoạn nguồn.
+  local doc_a t0 own_label summary_a
+  t0=$SECONDS
+  doc_a="$(submit_outline "$token_sv_a" "${TOPIC_SV_A_ID}" "$chep_file")"
+  wait_check "$token_sv_a" "$doc_a" "$TMP/check-a.json"
+  own_label="$(sql "SELECT CONCAT(ten_de_tai, ' (K97)') FROM de_tai WHERE id = ${TOPIC_SV_A_ID}")"
+  summary_a="$(python3 - "$TMP/check-a.json" "$nguong" "$chep_label" "$own_label" <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1], encoding="utf-8"))
+nguong, label, own = float(sys.argv[2]), sys.argv[3], sys.argv[4]
+boiler = ("LỜI CAM ĐOAN", "MỤC LỤC", "TÀI LIỆU THAM KHẢO", "Đồ án tốt nghiệp - Khoa Công nghệ thông tin")
+errs = []
+if d["ty_le_tong"] is None or d["ty_le_tong"] < nguong:
+    errs.append(f"ty_le_tong {d['ty_le_tong']} < {nguong}")
+if not d["do_an_trung"] or d["do_an_trung"][0]["doi_tuong_trung"] != label:
+    errs.append(f"đồ án trùng {[m['doi_tuong_trung'] for m in d['do_an_trung']]} != {label!r}")
+segs = d["chi_tiet"]
+if not any(s["doi_tuong_trung"] == label for s in segs):
+    errs.append("không đoạn nào gắn nhãn đồ án nguồn")
+if not any("trùng nguyên văn" in (s["vi_tri"] or "") for s in segs):
+    errs.append("không đoạn nào 'trùng nguyên văn'")
+if not all(s["doan_nguon"] and s["doan_trung"] and not s["doan_trung_an"] for s in segs):
+    errs.append("có đoạn thiếu văn bản nộp/văn bản nguồn")
+for s in segs:
+    for b in boiler:
+        if b in (s["doan_nguon"] or "") or b in (s["doan_trung"] or ""):
+            errs.append(f"đoạn {s['vi_tri']} chứa khuôn mẫu {b!r}")
+if any(s["doi_tuong_trung"] == own for s in segs):
+    errs.append("khớp với chính đề tài của mình")
+if errs:
+    print("; ".join(errs)); sys.exit(1)
+nv = sum(1 for s in segs if "nguyên văn" in (s["vi_tri"] or ""))
+print(f"{d['ty_le_tong']}% >= {nguong}%, {len(segs)} đoạn ({nv} nguyên văn), đồ án trùng '{label}' {d['do_an_trung'][0]['ty_le']}%")
+PY
+)" || fail "${chep_ma}-B: kết quả kiểm tra không đạt SC2: ${summary_a}"
+  ok "${chep_ma}-B (chép nguyên văn) HOAN_TAT sau $((SECONDS - t0))s: ${summary_a}; đoạn nộp cạnh đoạn nguồn, không đoạn khuôn mẫu"
+
+  # (2) GVHD thấy cùng kết quả trên màn duyệt đề cương và trang chi tiết.
+  res="$(call GET "/api/outlines/${TOPIC_SV_A_ID}" "$token_gv")"
+  [ "${res%% *}" = "200" ] || fail "GV023 xem đề cương trả ${res%% *}"
+  python3 - "$TMP/body" "$TMP/check-a.json" "$doc_a" <<'PY' || fail "GV023 không thấy cùng kết quả kiểm tra trên màn duyệt"
+import json, sys
+o = json.load(open(sys.argv[1], encoding="utf-8")); a = json.load(open(sys.argv[2], encoding="utf-8"))
+v = next(p for p in o["phien_ban"] if p["tai_lieu"]["id"] == int(sys.argv[3]))
+k = v["kiem_tra"]
+sys.exit(0 if k["trang_thai"] == "HOAN_TAT" and k["ty_le_tong"] == a["ty_le_tong"] else 1)
+PY
+  res="$(call GET "/api/documents/${doc_a}/check" "$token_gv")"
+  [ "${res%% *}" = "200" ] || fail "GV023 xem chi tiết kiểm tra trả ${res%% *}"
+  python3 - "$TMP/body" "$TMP/check-a.json" <<'PY' || fail "GV023 thấy chi tiết khác SV"
+import json, sys
+g = json.load(open(sys.argv[1], encoding="utf-8")); a = json.load(open(sys.argv[2], encoding="utf-8"))
+key = lambda d: (d["ty_le_tong"], [(m["doi_tuong_trung"], m["ty_le"]) for m in d["do_an_trung"]], [(s["vi_tri"], s["doan_nguon"], s["doan_trung"]) for s in d["chi_tiet"]])
+sys.exit(0 if key(g) == key(a) else 1)
+PY
+  ok "GV023 thấy cùng tỷ lệ, đồ án trùng và đoạn trùng trên màn duyệt đề cương + chi tiết"
+
+  # (3) Bài không liên quan -> dưới ngưỡng.
+  local doc_b ty_b
+  doc_b="$(submit_outline "$token_sv_b" "${topic_b}" "$khac_file")"
+  wait_check "$token_sv_b" "$doc_b" "$TMP/check-b.json"
+  ty_b="$(python3 -c "import json;print(json.load(open('$TMP/check-b.json'))['ty_le_tong'])")"
+  python3 -c "import sys; sys.exit(0 if float('$ty_b') < float('$nguong') else 1)" \
+    || fail "${khac_ma}-B (không liên quan) bị cảnh báo: ${ty_b}% >= ${nguong}%"
+  ok "${khac_ma}-B (không liên quan) HOAN_TAT: ${ty_b}% < ${nguong}%"
+
+  # (4) Nộp lại cùng file sau Yêu cầu sửa -> không khớp phiên bản trước của mình (loai_tru).
+  local doc_a2 ty_a2
+  review_changes "$token_gv" "${TOPIC_SV_A_ID}" "$doc_a"
+  doc_a2="$(submit_outline "$token_sv_a" "${TOPIC_SV_A_ID}" "$chep_file")"
+  wait_check "$token_gv" "$doc_a2" "$TMP/check-a2.json"
+  ty_a2="$(python3 - "$TMP/check-a2.json" "$own_label" "$chep_label" <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1], encoding="utf-8"))
+labels = {s["doi_tuong_trung"] for s in d["chi_tiet"]} | {m["doi_tuong_trung"] for m in d["do_an_trung"]}
+if sys.argv[2] in labels or not d["do_an_trung"] or d["do_an_trung"][0]["doi_tuong_trung"] != sys.argv[3]:
+    print(sorted(labels)); sys.exit(1)
+print(d["ty_le_tong"])
+PY
+)" || fail "Nộp lại khớp với phiên bản trước của chính đề tài: ${ty_a2}"
+  ok "Nộp lại cùng file (v2) HOAN_TAT: ${ty_a2}%, không nhãn của chính đề tài, nguồn vẫn '${chep_label}'"
+}
+
 require_seeds
 ai_security
 ai_title
 ai_index
+ai_document
 
 echo "OK: e2e dịch vụ AI hoàn tất (bắt đầu ${START_UTC} UTC)"

@@ -86,12 +86,20 @@ def read_and_validate(upload: UploadFile) -> ValidatedFile:
     tự khai, có thể giả mạo)."""
     settings = get_settings()
     content = upload.file.read(settings.MAX_UPLOAD_BYTES + 1)
+    return validate_bytes(content, upload.filename or "")
+
+
+def validate_bytes(content: bytes, filename: str) -> ValidatedFile:
+    """Phần kiểm tra theo bytes của read_and_validate (dung lượng, đuôi + magic
+    bytes, trích xuất văn bản) — dùng chung cho công cụ seed không có
+    UploadFile (04-06 `app.seed_ai_corpus`); hành vi y hệt đường upload."""
+    settings = get_settings()
     if len(content) > settings.MAX_UPLOAD_BYTES:
         raise HTTPException(status_code=422, detail=_FILE_TOO_LARGE_DETAIL)
     if len(content) == 0:
         raise HTTPException(status_code=422, detail=_FILE_EMPTY_DETAIL)
 
-    ten_goc = _safe_basename(upload.filename or "")
+    ten_goc = _safe_basename(filename)
     ext = Path(ten_goc).suffix.lower()
 
     if ext == ".pdf":

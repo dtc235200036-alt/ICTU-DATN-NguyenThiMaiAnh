@@ -16,8 +16,8 @@ from app.core.db import SessionLocal
 from app.core.deps import CurrentUser
 from app.core.roles import VaiTro
 from app.core.timeutil import now_utc
-from app.models.cau_hinh_nguong import NGUONG_TAI_LIEU, CauHinhNguong
-from app.models.de_cuong import TaiLieuDoAn
+from app.models.cau_hinh_nguong import NGUONG_DOAN_TRUNG, NGUONG_TAI_LIEU, CauHinhNguong
+from app.models.de_cuong import LOAI_BAO_CAO_CUOI, LOAI_DE_CUONG, TaiLieuDoAn
 from app.models.de_tai import DeTai
 from app.models.kho import DoAnKho
 from app.models.trung_lap import (
@@ -32,6 +32,7 @@ from app.models.trung_lap import (
 )
 from app.schemas.documents import CheckDetail, CheckMatch, CheckSegment, CheckSummary
 from app.schemas.topics import PersonRef
+from app.services import ai_index
 from app.services.ai_client import get_ai_client
 from app.services.documents import to_document_out
 
@@ -43,6 +44,13 @@ _FALLBACK_NGUONG_TAI_LIEU = 30.00
 _RECHECK_NOT_LOI_DETAIL = "Chỉ kiểm tra lại được khi kết quả đang ở trạng thái Lỗi"
 _RECHECK_NO_TEXT_DETAIL = "Không trích xuất được nội dung file — hãy nộp lại file khác"
 
+# D-03 (04-06): tín hiệu của từng đoạn trùng (dịch vụ AI trả `tin_hieu`) được
+# ghi kèm vào vi_tri (VARCHAR(50)) — không cần cột mới.
+_TIN_HIEU_NHAN = {"NGUYEN_VAN": "trùng nguyên văn", "NGU_NGHIA": "trùng ngữ nghĩa"}
+_VI_TRI_MAX = 50
+# Số đồ án trùng nhiều nhất trong do_an_trung (MH-14 liệt kê top-k).
+_TOP_K = 5
+
 
 def _get_threshold(db: Session) -> float:
     try:
@@ -52,6 +60,41 @@ def _get_threshold(db: Session) -> float:
         return float(gia_tri)
     except NoResultFound:
         return _FALLBACK_NGUONG_TAI_LIEU
+
+
+def _get_passage_threshold(db: Session) -> float | None:
+    """D-04: ngưỡng đoạn (NGUONG_DOAN_TRUNG) hiện hành gửi theo từng request;
+    thiếu dòng -> None (dịch vụ AI dùng giá trị hiệu chỉnh mặc định)."""
+    gia_tri = db.execute(
+        select(CauHinhNguong.gia_tri).where(CauHinhNguong.loai == NGUONG_DOAN_TRUNG)
+    ).scalar_one_or_none()
+    return float(gia_tri) if gia_tri is not None else None
+
+
+def _same_topic_versions(db: Session, de_tai_id: int) -> list[int]:
+    """T-04-24: mọi phiên bản đề cương/báo cáo cuối của CÙNG đề tài (kể cả
+    phiên bản đang kiểm tra) — không bao giờ tính là "trùng" với chính mình.
+    Dịch vụ AI không biết đề tài, nên Web API gửi tường minh (loai_tru)."""
+    return list(
+        db.execute(
+            select(TaiLieuDoAn.id)
+            .where(TaiLieuDoAn.de_tai_id == de_tai_id)
+            .where(TaiLieuDoAn.loai.in_([LOAI_DE_CUONG, LOAI_BAO_CAO_CUOI]))
+        ).scalars()
+    )
+
+
+def _vi_tri_with_signal(vi_tri: str | None, tin_hieu: str | None) -> str | None:
+    """"Câu a–b" + " · trùng nguyên văn|ngữ nghĩa"; không có tín hiệu (bộ giả
+    lập) -> giữ nguyên."""
+    nhan = _TIN_HIEU_NHAN.get(tin_hieu or "")
+    if nhan is None:
+        return vi_tri[:_VI_TRI_MAX] if vi_tri else vi_tri
+    base = vi_tri or ""
+    suffix = f" · {nhan}"
+    if len(base) + len(suffix) > _VI_TRI_MAX:
+        base = base[: max(0, _VI_TRI_MAX - len(suffix))]
+    return f"{base}{suffix}".strip()
 
 
 def create_pending(db: Session, doc: TaiLieuDoAn) -> KetQuaKiemTraTrungLap:
@@ -121,6 +164,7 @@ def run(ket_qua_id: int) -> None:
     lần chạy. Lời gọi AI nằm ngoài transaction ghi."""
     task_db = SessionLocal()
     stamp: datetime | None = None
+    completed_doc_id: int | None = None
     try:
         ket_qua = task_db.get(KetQuaKiemTraTrungLap, ket_qua_id)
         if ket_qua is None or ket_qua.tai_lieu_do_an_id is None:
@@ -133,10 +177,21 @@ def run(ket_qua_id: int) -> None:
             _mark_loi(task_db, ket_qua_id, stamp)
             return
         doc_id, text = doc.id, doc.noi_dung_trich_xuat
+        nguong_doan = _get_passage_threshold(task_db)
+        loai_tru = _same_topic_versions(task_db, doc.de_tai_id)
         # Kết thúc transaction đọc trước lời gọi AI (có thể tới hàng chục giây).
         task_db.commit()
 
-        raw = get_ai_client(task_db).check_document(doc_id, text)
+        # D-03/D-04: ngưỡng đoạn hiện hành + mọi phiên bản cùng đề tài. Tài
+        # liệu CHƯA nằm trong chỉ mục (ingest chỉ sau HOAN_TAT) nên không bao
+        # giờ khớp với chính nó.
+        raw = get_ai_client(task_db).check_document(
+            doc_id,
+            text,
+            _TOP_K,
+            nguong_doan=nguong_doan,
+            loai_tru=loai_tru,
+        )
 
         # Xóa chi tiết cũ rồi chèn lại trong CÙNG transaction với UPDATE có
         # điều kiện bên dưới (WR-05).
@@ -159,7 +214,7 @@ def run(ket_qua_id: int) -> None:
                     ty_le=item["ty_le"],
                     doan_nguon=item.get("doan_nguon"),
                     doan_trung=item.get("doan_trung"),
-                    vi_tri=item.get("vi_tri"),
+                    vi_tri=_vi_tri_with_signal(item.get("vi_tri"), item.get("tin_hieu")),
                     loai_nguon=loai,
                     nguon_id=ref_id,
                 )
@@ -181,6 +236,7 @@ def run(ket_qua_id: int) -> None:
             )
             return
         task_db.commit()
+        completed_doc_id = doc_id
     except Exception:
         task_db.rollback()
         try:
@@ -190,6 +246,12 @@ def run(ket_qua_id: int) -> None:
         _logger.exception("document_check.run thất bại cho ket_qua_id=%s", ket_qua_id)
     finally:
         task_db.close()
+
+    # AISV-06 (push-on-write): chỉ SAU khi kết quả đã commit HOAN_TAT mới đưa
+    # tài liệu vào chỉ mục AI để các lần nộp sau so khớp được với nó. Lỗi ở
+    # đây chỉ ghi log — không bao giờ đổi kết quả kiểm tra (T-04-23).
+    if completed_doc_id is not None:
+        ai_index.ingest_document(completed_doc_id)
 
 
 def expire_if_stale(db: Session, ket_qua: KetQuaKiemTraTrungLap) -> None:

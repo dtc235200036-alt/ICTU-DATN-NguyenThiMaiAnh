@@ -74,6 +74,14 @@ cleanup() {
       docker compose -f "${SCRIPT_DIR}/docker-compose.yml" exec -T api \
         python -m app.services.ai_index purge --loai ARCHIVE --ids "${purge_kho_ids}" >/dev/null 2>&1 || true
     fi
+    # 04-06: đề cương/báo cáo cuối đã kiểm tra xong được ingest DOCUMENT — gỡ luôn.
+    local purge_doc_ids
+    purge_doc_ids="$(DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
+      "SELECT id FROM tai_lieu_do_an WHERE de_tai_id IN (SELECT id FROM de_tai WHERE dot_do_an_id = ${DOT_DO_AN_ID});" 2>/dev/null | paste -sd, - || true)"
+    if [ -n "${purge_doc_ids}" ]; then
+      docker compose -f "${SCRIPT_DIR}/docker-compose.yml" exec -T api \
+        python -m app.services.ai_index purge --loai DOCUMENT --ids "${purge_doc_ids}" >/dev/null 2>&1 || true
+    fi
     DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
       "DELETE FROM thong_bao WHERE tai_khoan_id IN (SELECT id FROM tai_khoan WHERE ma_dang_nhap IN ('GV025','GV026','GV027','GV028','GV029','DTC225200097','DTC225200098')) AND thoi_diem >= '${START_UTC}';" >/dev/null 2>&1 || true
     DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
