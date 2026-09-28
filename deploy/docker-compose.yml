@@ -184,6 +184,7 @@ services:
       dockerfile: deploy/apache/Dockerfile
     environment:
       SERVER_NAME: ${SERVER_NAME:-localhost}
+      PUBLIC_HTTPS_PORT: ${HTTPS_PORT:-443}
     ports:
       - "${HTTP_PORT:-80}:80"
       - "${HTTPS_PORT:-443}:443"
