@@ -1,0 +1,262 @@
+"""Kiểm tra trùng lặp tài liệu bất đồng bộ (D-04, UC0.7, §3.3.7) — Pattern 4
+(03-RESEARCH.md): hàm `run` chạy trong FastAPI BackgroundTasks, PHẢI mở
+SessionLocal RIÊNG (không bao giờ dùng session của request) và PHẢI luôn kết
+thúc ở HOAN_TAT hoặc LOI — không bao giờ để lại DANG_KIEM_TRA
+(trang-thai-kiem-tra-trung-lap.puml)."""
+import logging
+from datetime import timedelta
+
+from sqlalchemy import select, update
+from sqlalchemy.exc import NoResultFound
+from sqlalchemy.orm import Session, selectinload
+
+from app.core.config import get_settings
+from app.core.db import SessionLocal
+from app.core.timeutil import now_utc
+from app.models.cau_hinh_nguong import NGUONG_TAI_LIEU, CauHinhNguong
+from app.models.de_cuong import TaiLieuDoAn
+from app.models.de_tai import DeTai
+from app.models.trung_lap import (
+    DANG_KIEM_TRA,
+    HOAN_TAT,
+    LOI,
+    TAI_LIEU,
+    ChiTietTrungLap,
+    KetQuaKiemTraTrungLap,
+)
+from app.schemas.documents import CheckDetail, CheckMatch, CheckSegment, CheckSummary
+from app.schemas.topics import PersonRef
+from app.services.ai_client import get_ai_client
+from app.services.documents import to_document_out
+
+_logger = logging.getLogger(__name__)
+
+# WR-02-tương tự: chỉ dùng để LƯU VẾT khi cau_hinh_nguong thiếu dòng
+# NGUONG_TAI_LIEU — khớp giá trị seed ở migration 0004.
+_FALLBACK_NGUONG_TAI_LIEU = 30.00
+_RECHECK_NOT_LOI_DETAIL = "Chỉ kiểm tra lại được khi kết quả đang ở trạng thái Lỗi"
+
+
+def _get_threshold(db: Session) -> float:
+    try:
+        gia_tri = db.execute(
+            select(CauHinhNguong.gia_tri).where(CauHinhNguong.loai == NGUONG_TAI_LIEU)
+        ).scalar_one()
+        return float(gia_tri)
+    except NoResultFound:
+        return _FALLBACK_NGUONG_TAI_LIEU
+
+
+def create_pending(db: Session, doc: TaiLieuDoAn) -> KetQuaKiemTraTrungLap:
+    """D-04: một dòng ket_qua_kiem_tra_trung_lap (DANG_KIEM_TRA) trong CÙNG
+    transaction với submit — caller commit, KHÔNG commit ở đây."""
+    nguong = _get_threshold(db)
+    doi_tuong = f"{doc.loai} v{doc.so_phien_ban} - {doc.ten_goc}"[:255]
+    ket_qua = KetQuaKiemTraTrungLap(
+        de_tai_id=doc.de_tai_id,
+        tai_lieu_do_an_id=doc.id,
+        loai_kiem_tra=TAI_LIEU,
+        trang_thai=DANG_KIEM_TRA,
+        nguong_ap_dung=nguong,
+        doi_tuong_duoc_kiem_tra=doi_tuong,
+        thoi_diem=now_utc(),
+    )
+    db.add(ket_qua)
+    db.flush()
+    return ket_qua
+
+
+def _label_for(db: Session, ref_id: int) -> str:
+    doc = db.get(TaiLieuDoAn, ref_id)
+    if doc is None:
+        return f"Tài liệu #{ref_id}"
+    topic = db.get(DeTai, doc.de_tai_id)
+    if topic is None:
+        return f"Tài liệu #{ref_id}"
+    khoa = topic.dot_do_an.khoa if topic.dot_do_an is not None else ""
+    label = f"{topic.ten_de_tai} ({khoa})" if khoa else topic.ten_de_tai
+    return label[:255]
+
+
+def _mark_loi(task_db: Session, ket_qua_id: int) -> None:
+    stmt = (
+        update(KetQuaKiemTraTrungLap)
+        .where(KetQuaKiemTraTrungLap.id == ket_qua_id)
+        .where(KetQuaKiemTraTrungLap.trang_thai == DANG_KIEM_TRA)
+        .values(trang_thai=LOI)
+    )
+    task_db.execute(stmt)
+    task_db.commit()
+
+
+def run(ket_qua_id: int) -> None:
+    """Chạy nền sau response 202 — mở SessionLocal riêng, broad except cố ý:
+    BẤT KỲ lỗi gì cũng phải chuyển bản ghi sang LOI, không bao giờ để lại
+    DANG_KIEM_TRA (Pitfall 1, 03-RESEARCH.md)."""
+    task_db = SessionLocal()
+    try:
+        ket_qua = task_db.get(KetQuaKiemTraTrungLap, ket_qua_id)
+        if ket_qua is None or ket_qua.tai_lieu_do_an_id is None:
+            return
+        doc = task_db.get(TaiLieuDoAn, ket_qua.tai_lieu_do_an_id)
+        if doc is None or doc.trich_xuat_loi or not doc.noi_dung_trich_xuat:
+            _mark_loi(task_db, ket_qua_id)
+            return
+
+        # Xóa chi tiết cũ (trường hợp kiểm tra lại — task 2 recheck) trước
+        # khi chèn lại, tránh trùng lặp dòng chi_tiet_trung_lap.
+        task_db.execute(
+            ChiTietTrungLap.__table__.delete().where(
+                ChiTietTrungLap.ket_qua_id == ket_qua_id
+            )
+        )
+
+        raw = get_ai_client(task_db).check_document(doc.id, doc.noi_dung_trich_xuat)
+
+        for item in raw.get("chi_tiet", []):
+            label = _label_for(task_db, item["ref_id"])
+            task_db.add(
+                ChiTietTrungLap(
+                    ket_qua_id=ket_qua_id,
+                    doi_tuong_trung=label,
+                    ty_le=item["ty_le"],
+                    doan_nguon=item.get("doan_nguon"),
+                    doan_trung=item.get("doan_trung"),
+                    vi_tri=item.get("vi_tri"),
+                )
+            )
+
+        stmt = (
+            update(KetQuaKiemTraTrungLap)
+            .where(KetQuaKiemTraTrungLap.id == ket_qua_id)
+            .where(KetQuaKiemTraTrungLap.trang_thai == DANG_KIEM_TRA)
+            .values(trang_thai=HOAN_TAT, ty_le_tong=raw.get("ty_le_tong", 0.0))
+        )
+        task_db.execute(stmt)
+        task_db.commit()
+    except Exception:
+        task_db.rollback()
+        try:
+            _mark_loi(task_db, ket_qua_id)
+        except Exception:
+            task_db.rollback()
+        _logger.exception("document_check.run thất bại cho ket_qua_id=%s", ket_qua_id)
+    finally:
+        task_db.close()
+
+
+def expire_if_stale(db: Session, ket_qua: KetQuaKiemTraTrungLap) -> None:
+    """Bất biến bắt buộc (trang-thai-kiem-tra-trung-lap.puml): một bản ghi
+    không bao giờ ở mãi DANG_KIEM_TRA — kể cả khi tiến trình api bị khởi động
+    lại giữa lúc chạy nền. Gọi trước mọi lần đọc kết quả kiểm tra."""
+    if ket_qua.trang_thai != DANG_KIEM_TRA:
+        return
+    settings = get_settings()
+    if now_utc() - ket_qua.thoi_diem < timedelta(
+        seconds=settings.DOCUMENT_CHECK_TIMEOUT_SECONDS
+    ):
+        return
+    stmt = (
+        update(KetQuaKiemTraTrungLap)
+        .where(KetQuaKiemTraTrungLap.id == ket_qua.id)
+        .where(KetQuaKiemTraTrungLap.trang_thai == DANG_KIEM_TRA)
+        .values(trang_thai=LOI)
+    )
+    db.execute(stmt)
+    db.commit()
+    db.refresh(ket_qua)
+
+
+def get_check_for_doc(db: Session, doc: TaiLieuDoAn) -> KetQuaKiemTraTrungLap | None:
+    return db.execute(
+        select(KetQuaKiemTraTrungLap)
+        .where(KetQuaKiemTraTrungLap.tai_lieu_do_an_id == doc.id)
+        .options(selectinload(KetQuaKiemTraTrungLap.chi_tiet))
+    ).scalar_one_or_none()
+
+
+def summary(ket_qua: KetQuaKiemTraTrungLap) -> CheckSummary:
+    return CheckSummary(
+        id=ket_qua.id,
+        trang_thai=ket_qua.trang_thai,
+        ty_le_tong=float(ket_qua.ty_le_tong) if ket_qua.ty_le_tong is not None else None,
+        nguong_ap_dung=float(ket_qua.nguong_ap_dung),
+        thoi_diem=ket_qua.thoi_diem,
+    )
+
+
+def detail(db: Session, doc: TaiLieuDoAn) -> CheckDetail:
+    """Router đã gọi expire_if_stale + kiểm tra tồn tại (404) trước khi gọi
+    hàm này — vẫn phòng thủ khi ket_qua vắng mặt để hàm luôn trả được kết quả."""
+    ket_qua = get_check_for_doc(db, doc)
+    topic = db.get(DeTai, doc.de_tai_id)
+    ten_de_tai = topic.ten_de_tai if topic is not None else ""
+    sinh_vien = None
+    if topic is not None and topic.sinh_vien is not None:
+        sinh_vien = PersonRef(
+            id=topic.sinh_vien.id,
+            ho_ten=topic.sinh_vien.ho_ten or "",
+            ma=topic.sinh_vien.ma_so_sinh_vien,
+        )
+
+    chi_tiet_rows = list(ket_qua.chi_tiet) if ket_qua is not None else []
+    chi_tiet = [
+        CheckSegment(
+            doi_tuong_trung=row.doi_tuong_trung,
+            doan_nguon=row.doan_nguon,
+            doan_trung=row.doan_trung,
+            vi_tri=row.vi_tri,
+            ty_le=float(row.ty_le),
+        )
+        for row in chi_tiet_rows
+    ]
+
+    grouped: dict[str, float] = {}
+    for row in chi_tiet_rows:
+        ty_le = float(row.ty_le)
+        if row.doi_tuong_trung not in grouped or ty_le > grouped[row.doi_tuong_trung]:
+            grouped[row.doi_tuong_trung] = ty_le
+    do_an_trung = sorted(
+        (CheckMatch(doi_tuong_trung=k, ty_le=v) for k, v in grouped.items()),
+        key=lambda m: -m.ty_le,
+    )
+
+    return CheckDetail(
+        id=ket_qua.id if ket_qua is not None else 0,
+        trang_thai=ket_qua.trang_thai if ket_qua is not None else DANG_KIEM_TRA,
+        ty_le_tong=(
+            float(ket_qua.ty_le_tong)
+            if ket_qua is not None and ket_qua.ty_le_tong is not None
+            else None
+        ),
+        nguong_ap_dung=float(ket_qua.nguong_ap_dung) if ket_qua is not None else 0.0,
+        thoi_diem=ket_qua.thoi_diem if ket_qua is not None else now_utc(),
+        tai_lieu=to_document_out(doc),
+        de_tai_id=doc.de_tai_id,
+        ten_de_tai=ten_de_tai,
+        sinh_vien=sinh_vien,
+        do_an_trung=do_an_trung,
+        chi_tiet=chi_tiet,
+    )
+
+
+def request_recheck(db: Session, ket_qua: KetQuaKiemTraTrungLap) -> None:
+    """Task 2 (POST /recheck): chỉ cho phép khi đang LOI — conditional UPDATE
+    (rowcount 0 -> 409); xóa chi tiết cũ, commit, router mới schedule `run`."""
+    stmt = (
+        update(KetQuaKiemTraTrungLap)
+        .where(KetQuaKiemTraTrungLap.id == ket_qua.id)
+        .where(KetQuaKiemTraTrungLap.trang_thai == LOI)
+        .values(trang_thai=DANG_KIEM_TRA, thoi_diem=now_utc())
+    )
+    from fastapi import HTTPException
+
+    result = db.execute(stmt)
+    if result.rowcount == 0:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=_RECHECK_NOT_LOI_DETAIL)
+    db.execute(
+        ChiTietTrungLap.__table__.delete().where(ChiTietTrungLap.ket_qua_id == ket_qua.id)
+    )
+    db.commit()
+    db.refresh(ket_qua)

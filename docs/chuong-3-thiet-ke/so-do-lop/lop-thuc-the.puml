@@ -173,6 +173,8 @@ class TaiLieuDoAn <<Entity>> {
   +kichThuoc : Long
   +dinhDang : String
   +thoiDiemNop : DateTime
+  +noiDungTrichXuat : String
+  +trichXuatLoi : Boolean
 }
 
 class LuotDuyetDeCuong <<Entity>> {

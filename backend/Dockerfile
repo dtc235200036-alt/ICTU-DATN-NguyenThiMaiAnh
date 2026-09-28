@@ -13,7 +13,8 @@ RUN uv sync --frozen --no-dev
 ENV PATH="/app/.venv/bin:${PATH}"
 
 RUN useradd --uid 10001 --create-home --shell /usr/sbin/nologin appuser \
- && chown -R appuser:appuser /app
+ && mkdir -p /data/uploads \
+ && chown -R appuser:appuser /app /data
 USER appuser
 
 ENTRYPOINT ["sh", "/app/docker-entrypoint.sh"]

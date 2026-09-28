@@ -117,6 +117,8 @@ Lược đồ `thesis_core` gồm 19 bảng, khớp 1-1 với 19 lớp thực th
 | kich_thuoc | BIGINT | Không | — | Dung lượng (byte), kiểm tra ≤ 20 MB (NFR-06) |
 | dinh_dang | VARCHAR(10) | Không | — | `DOCX` / `PDF`, xác định theo magic bytes |
 | thoi_diem_nop | DATETIME | Không | — | Thời điểm nộp |
+| noi_dung_trich_xuat | LONGTEXT | Có | — | Văn bản trích xuất lúc nộp (NFC) để gửi Dịch vụ AI — cột bổ sung khi thi công Phase 3 (D-03) |
+| trich_xuat_loi | BOOLEAN | Không | — | TRUE khi không trích xuất được văn bản; không chặn việc nộp (D-03) |
 
 #### `luot_duyet_de_cuong`
 

@@ -52,6 +52,9 @@ services:
       # WR-03: chỉ tin X-Forwarded-For/-Proto đến từ IP tĩnh của apache bên
       # dưới — phải khớp networks.ntma-internal.apache.ipv4_address.
       FORWARDED_ALLOW_IPS: 172.28.238.10
+      # D-02 (Phase 3): thư mục lưu đề cương/báo cáo trên named volume riêng
+      # của container api — không nằm dưới DocumentRoot của Apache.
+      UPLOAD_DIR: /data/uploads
     depends_on:
       mysql:
         condition: service_healthy
@@ -59,6 +62,8 @@ services:
       - ntma-internal
     expose:
       - "8001"
+    volumes:
+      - uploads-data:/data/uploads
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/api/health')"]
       interval: 5s
@@ -88,3 +93,4 @@ services:
 
 volumes:
   mysql-data:
+  uploads-data:

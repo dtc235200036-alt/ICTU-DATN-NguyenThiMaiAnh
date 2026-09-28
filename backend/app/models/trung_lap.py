@@ -24,8 +24,10 @@ class KetQuaKiemTraTrungLap(Base):
     de_tai_id: Mapped[int | None] = mapped_column(
         BigInteger, ForeignKey("de_tai.id", name="fk_ket_qua_kttl_de_tai")
     )
-    # Phase 3 thêm FK khi bảng tai_lieu_do_an ra đời (D-04) — cột đã UNIQUE sẵn.
-    tai_lieu_do_an_id: Mapped[int | None] = mapped_column(BigInteger)
+    tai_lieu_do_an_id: Mapped[int | None] = mapped_column(
+        BigInteger,
+        ForeignKey("tai_lieu_do_an.id", name="fk_ket_qua_kttl_tai_lieu_do_an"),
+    )
     loai_kiem_tra: Mapped[str] = mapped_column(String(20), nullable=False)
     trang_thai: Mapped[str] = mapped_column(String(20), nullable=False)
     ty_le_tong: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))

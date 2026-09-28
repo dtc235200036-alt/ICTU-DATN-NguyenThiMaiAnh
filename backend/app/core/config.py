@@ -29,6 +29,12 @@ class Settings(BaseSettings):
     AI_STUB_MODE: str = "normal"
     TITLE_CHECK_TOP_K: int = 5
 
+    # D-02/D-03/D-04 (Phase 3): tài liệu đề cương/báo cáo lưu ngoài DocumentRoot
+    # của Apache, trên named volume riêng của container api.
+    UPLOAD_DIR: str = "/data/uploads"
+    MAX_UPLOAD_BYTES: int = 20 * 1024 * 1024
+    DOCUMENT_CHECK_TIMEOUT_SECONDS: int = 300
+
     @field_validator("JWT_SECRET")
     @classmethod
     def _jwt_secret_min_length(cls, v: str) -> str:

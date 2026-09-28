@@ -1,7 +1,8 @@
 import unicodedata
-from typing import Generic, TypeVar
+from datetime import datetime, timezone
+from typing import Annotated, Generic, TypeVar
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, PlainSerializer, field_validator
 
 T = TypeVar("T")
 
@@ -36,3 +37,15 @@ class Page(BaseModel, Generic[T]):
     total: int
     page: int
     page_size: int
+
+
+def _serialize_utc(value: datetime) -> str:
+    """D-06/NFR-14: datetime lưu DB là UTC naive — gắn lại tzinfo=UTC trước
+    khi xuất ISO-8601 để frontend quy đổi đúng sang Asia/Ho_Chi_Minh (cùng
+    hành vi field_serializer đã có ở schemas/topics.py:SavedTitleCheck)."""
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    return value.isoformat()
+
+
+UtcDateTime = Annotated[datetime, PlainSerializer(_serialize_utc, return_type=str)]
