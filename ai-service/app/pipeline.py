@@ -2,6 +2,9 @@
 
 - ingest / ingest_many : REPLACE theo (loai, ma_nguon), một lần encode cho cả lô
 - check_title          : tìm tiêu đề gần nghĩa trong phân vùng tieu_de
+- score_document       : điểm ngữ nghĩa + nguyên văn tốt nhất của từng câu
+- check_document       : áp ngưỡng (theo request, D-04) → tỷ lệ, đồ án, đoạn trùng
+- reembed_missing      : encode (một lần) các chunk thiếu embedding cho mô hình hiện tại
 - rebuild              : dựng lại chỉ mục bộ nhớ từ thesis_ai, KHÔNG encode
 """
 import hashlib
@@ -15,15 +18,19 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
 from app.embedding import Encoder
-from app.index import TIEU_DE, ChunkRow, CorpusIndex, partition_of
+from app import minhash
+from app.index import TAI_LIEU, TIEU_DE, ChunkRow, CorpusIndex, partition_of
 from app.models import (
     LOAI_ARCHIVE,
+    LOAI_DOCUMENT,
     LOAI_TOPIC,
     Chunk,
     Embedding,
     IndexMetadata,
 )
-from app.nlp.normalize import one_line
+from app.nlp.boilerplate import strip_boilerplate
+from app.nlp.chunking import sentences
+from app.nlp.normalize import nfc, one_line
 
 logger = logging.getLogger("ai_service.pipeline")
 
@@ -45,6 +52,8 @@ def chunk_texts(loai: str, text: str) -> list[str]:
     if loai in (LOAI_TOPIC, LOAI_ARCHIVE):
         title = one_line(text)
         return [title] if title else []
+    if loai == LOAI_DOCUMENT:
+        return sentences(strip_boilerplate(text).lines)
     raise ValueError(f"loai_nguon không hỗ trợ: {loai}")
 
 
@@ -267,3 +276,229 @@ def rebuild(session: Session, index: CorpusIndex, encoder: Encoder) -> RebuildSt
     if thieu:
         logger.warning("%s chunk chưa có embedding cho %s (dùng /reindex)", thieu, encoder.name)
     return RebuildStats(loaded=loaded, thieu_embedding=thieu)
+
+
+# ---------------------------------------------------------------------------
+# Kiểm tra tài liệu (AISV-04, AISV-05, D-03)
+# ---------------------------------------------------------------------------
+
+NGUYEN_VAN = "NGUYEN_VAN"
+NGU_NGHIA = "NGU_NGHIA"
+MAX_PASSAGE_SENTENCES = 6
+
+
+@dataclass(frozen=True)
+class ChunkScore:
+    vi_tri: int  # thứ tự câu trong tài liệu được kiểm tra (từ 1)
+    text: str
+    n_chars: int
+    sem_ref: int | None
+    sem_text: str | None
+    sem_thu_tu: int | None
+    sem_score: float
+    verb_ref: int | None
+    verb_text: str | None
+    verb_thu_tu: int | None
+    verb_score: float
+
+
+@dataclass(frozen=True)
+class DocumentScores:
+    chunks: list[ChunkScore]
+    removed: int
+
+
+def score_document(
+    index: CorpusIndex,
+    encoder: Encoder,
+    text: str,
+    exclude_refs: set[int] | frozenset[int],
+    strip: bool = True,
+    shingle: int = 4,
+    num_perm: int = 128,
+) -> DocumentScores:
+    """Điểm tốt nhất của từng câu so với kho DOCUMENT (không phụ thuộc ngưỡng).
+
+    strip=False chỉ dành cho ablation của plan 04-04. Một lần encode cho mọi
+    câu; nguồn thuộc exclude_refs không bao giờ được so khớp. shingle/num_perm
+    phải trùng với signer của CorpusIndex (main.py truyền cùng Settings).
+    """
+    if strip:
+        stripped = strip_boilerplate(text)
+        lines, removed = stripped.lines, stripped.removed
+    else:
+        lines, removed = [line for line in nfc(text).split("\n") if line], 0
+    sents = sentences(lines)
+    if not sents:
+        return DocumentScores([], removed)
+
+    vectors = encoder.encode(sents)
+    signatures = [minhash.signature(s, shingle, num_perm) for s in sents]
+    excluded = frozenset(int(r) for r in exclude_refs)
+    excluded_arr = np.fromiter(excluded, dtype=np.int64, count=len(excluded))
+
+    out: list[ChunkScore] = []
+    with index.lock:
+        part = index.partition(TAI_LIEU)
+        n_excluded = sum(len(part.by_source.get((LOAI_DOCUMENT, r), [])) for r in excluded)
+        k = min(index.size(TAI_LIEU), n_excluded + 10)
+        scores, ids = index.search(TAI_LIEU, vectors, k)
+
+        matrix, mh_ids = None, None
+        if part.mh_matrix is not None and len(part.mh_ids) > 0:
+            allowed = ~np.isin(part.mh_refs, excluded_arr)
+            if allowed.any():
+                matrix, mh_ids = part.mh_matrix[allowed], part.mh_ids[allowed]
+
+        for pos, sent in enumerate(sents):
+            sem_row, sem_score = None, 0.0
+            for score, cid in zip(scores[pos], ids[pos]):
+                if cid < 0:
+                    continue
+                row = part.rows.get(int(cid))
+                if row is not None and row.ma_nguon not in excluded:
+                    sem_row, sem_score = row, float(score)
+                    break
+            verb_row, verb_score = None, 0.0
+            if matrix is not None:
+                jac = minhash.jaccard_many(signatures[pos], matrix)
+                best = int(np.argmax(jac))
+                verb_row, verb_score = part.rows.get(int(mh_ids[best])), float(jac[best])
+            out.append(
+                ChunkScore(
+                    vi_tri=pos + 1,
+                    text=sent,
+                    n_chars=len(sent),
+                    sem_ref=sem_row.ma_nguon if sem_row else None,
+                    sem_text=sem_row.noi_dung if sem_row else None,
+                    sem_thu_tu=sem_row.thu_tu if sem_row else None,
+                    sem_score=sem_score,
+                    verb_ref=verb_row.ma_nguon if verb_row else None,
+                    verb_text=verb_row.noi_dung if verb_row else None,
+                    verb_thu_tu=verb_row.thu_tu if verb_row else None,
+                    verb_score=verb_score,
+                )
+            )
+    return DocumentScores(out, removed)
+
+
+def _weighted(values: list[tuple[float, int]]) -> float:
+    total = sum(w for _, w in values)
+    if total == 0:
+        return 0.0
+    return round(100 * sum(v * w for v, w in values) / total, 2)
+
+
+def check_document(
+    scores: DocumentScores,
+    nguong_doan: float,
+    nguong_nguyen_van: float,
+    top_k: int,
+    chi_tiet_toi_da: int,
+) -> dict:
+    """Áp ngưỡng lên điểm từng câu → phản hồi /check-document.
+
+    Câu bị gắn cờ NGUYEN_VAN khi Jaccard×100 ≥ nguong_nguyen_van (bằng chứng
+    mạnh hơn nên thắng), ngược lại NGU_NGHIA khi cosine×100 ≥ nguong_doan.
+    ty_le_tong = tỷ lệ ký tự bị gắn cờ; đoạn trùng = chuỗi câu liên tiếp gắn
+    cờ cùng một nguồn (tối đa 6 câu).
+    """
+    chunks = scores.chunks
+    total_chars = sum(c.n_chars for c in chunks)
+    # (chunk, tín hiệu, ref, (thu_tu, câu nguồn), điểm kích hoạt)
+    flags: list[tuple[ChunkScore, str, int, tuple[int, str], float] | None] = []
+    for c in chunks:
+        if c.verb_ref is not None and c.verb_score * 100 >= nguong_nguyen_van:
+            flags.append((c, NGUYEN_VAN, c.verb_ref, (c.verb_thu_tu, c.verb_text), c.verb_score))
+        elif c.sem_ref is not None and c.sem_score * 100 >= nguong_doan:
+            flags.append((c, NGU_NGHIA, c.sem_ref, (c.sem_thu_tu, c.sem_text), c.sem_score))
+        else:
+            flags.append(None)
+
+    flagged_chars = sum(f[0].n_chars for f in flags if f)
+    per_ref: dict[int, int] = {}
+    for f in flags:
+        if f:
+            per_ref[f[2]] = per_ref.get(f[2], 0) + f[0].n_chars
+    do_an_trung = sorted(
+        ({"ref_id": ref, "ty_le": round(100 * n / total_chars, 2)} for ref, n in per_ref.items()),
+        key=lambda d: (-d["ty_le"], d["ref_id"]),
+    )[:top_k]
+
+    runs: list[list[tuple]] = []
+    prev = None
+    for f in flags:
+        if f is None:
+            prev = None
+            continue
+        if prev is not None and prev[2] == f[2] and len(runs[-1]) < MAX_PASSAGE_SENTENCES:
+            runs[-1].append(f)
+        else:
+            runs.append([f])
+        prev = f
+
+    chi_tiet = []
+    for run in runs:
+        first, last = run[0][0].vi_tri, run[-1][0].vi_tri
+        sources = sorted({src for _, _, _, src, _ in run}, key=lambda s: s[0])
+        run_chars = sum(c.n_chars for c, *_ in run)
+        verbatim_chars = sum(c.n_chars for c, sig, *_ in run if sig == NGUYEN_VAN)
+        chi_tiet.append(
+            {
+                "ref_id": run[0][2],
+                "doan_nguon": " ".join(c.text for c, *_ in run),
+                "doan_trung": " ".join(text for _, text in sources),
+                "vi_tri": f"Câu {first}" if first == last else f"Câu {first}–{last}",
+                "ty_le": _weighted([(trig, c.n_chars) for c, _, _, _, trig in run]),
+                "tin_hieu": NGUYEN_VAN if 2 * verbatim_chars >= run_chars else NGU_NGHIA,
+                "diem_ngu_nghia": _weighted([(max(c.sem_score, 0.0), c.n_chars) for c, *_ in run]),
+                "diem_nguyen_van": _weighted([(c.verb_score, c.n_chars) for c, *_ in run]),
+                "_first": first,
+            }
+        )
+    chi_tiet.sort(key=lambda d: (-d["ty_le"], d["_first"]))
+    for d in chi_tiet:
+        del d["_first"]
+
+    return {
+        "ty_le_tong": round(100 * flagged_chars / total_chars, 2) if total_chars else 0.0,
+        "do_an_trung": do_an_trung,
+        "chi_tiet": chi_tiet[:chi_tiet_toi_da],
+        "so_doan": len(chunks),
+        "so_doan_loai_tru": scores.removed,
+    }
+
+
+def count_missing(session: Session, encoder: Encoder) -> int:
+    """Số chunk chưa có embedding cho mô hình hiện tại."""
+    has = select(Embedding.chunk_id).where(Embedding.ten_model == encoder.name)
+    return int(session.scalar(select(func.count(Chunk.id)).where(Chunk.id.not_in(has))) or 0)
+
+
+def reembed_missing(session: Session, index: CorpusIndex, encoder: Encoder) -> RebuildStats:
+    """/reindex không kèm items: encode (MỘT lần) các chunk thiếu embedding
+    cho mô hình hiện tại, rồi dựng lại bộ nhớ từ thesis_ai."""
+    with _WRITE_LOCK:
+        has = select(Embedding.chunk_id).where(Embedding.ten_model == encoder.name)
+        missing = session.execute(
+            select(Chunk.id, Chunk.noi_dung).where(Chunk.id.not_in(has)).order_by(Chunk.id)
+        ).all()
+        if missing:
+            vectors = encoder.encode([t for _, t in missing])
+            try:
+                session.add_all(
+                    Embedding(
+                        chunk_id=cid,
+                        ten_model=encoder.name,
+                        so_chieu=encoder.dim,
+                        vector=v.astype("<f4").tobytes(),
+                    )
+                    for (cid, _), v in zip(missing, vectors)
+                )
+                session.flush()
+                _upsert_index_metadata(session, encoder.name)
+                session.commit()
+            except Exception:
+                session.rollback()
+                raise
+        return rebuild(session, index, encoder)
