@@ -63,6 +63,22 @@ from app.models.tai_khoan import GiangVien, SinhVien, TaiKhoan  # noqa: E402
 
 _TRUNCATE_EXCLUDE = {"alembic_version", "cau_hinh_nguong"}
 
+# WR-05: chỉ là dữ liệu test — test_every_api_route_declares_roles dùng để bỏ
+# qua các endpoint cố ý công khai (AUTH-03) khi kiểm tra mọi route còn lại đều
+# khai báo Depends(require_role(...)). KHÔNG có allow-list/middleware nào
+# trong app đọc set này; giữ ở đây (thay vì app/core/deps.py) để không ai
+# tưởng nhầm nó có hiệu lực runtime.
+PUBLIC_ROUTES: set[tuple[str, str]] = {
+    ("POST", "/api/auth/login"),
+    ("POST", "/api/auth/refresh"),
+    ("POST", "/api/auth/logout"),
+    ("GET", "/api/health"),
+    ("GET", "/api/docs"),
+    ("HEAD", "/api/docs"),
+    ("GET", "/api/openapi.json"),
+    ("HEAD", "/api/openapi.json"),
+}
+
 
 def _check_db_reachable() -> None:
     try:

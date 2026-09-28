@@ -110,8 +110,8 @@ def test_expired_or_refresh_token_rejected_as_bearer(client, make_account, auth_
 
 
 def test_every_api_route_declares_roles():
-    from app.core.deps import PUBLIC_ROUTES
     from app.main import app
+    from conftest import PUBLIC_ROUTES
 
     def _dependant_has_allowed_roles(dependant) -> bool:
         if getattr(dependant.call, "allowed_roles", None) is not None:

@@ -14,19 +14,12 @@ _bearer_scheme = HTTPBearer(auto_error=False)
 
 _INVALID_SESSION_DETAIL = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
 
-# Allow-list of (method, path) đôi không cần xác thực (AUTH-03).
-# /api/docs và /api/openapi.json là tài liệu OpenAPI tự sinh bởi FastAPI (không
-# chứa dữ liệu nghiệp vụ) — công khai theo mặc định của framework.
-PUBLIC_ROUTES: set[tuple[str, str]] = {
-    ("POST", "/api/auth/login"),
-    ("POST", "/api/auth/refresh"),
-    ("POST", "/api/auth/logout"),
-    ("GET", "/api/health"),
-    ("GET", "/api/docs"),
-    ("HEAD", "/api/docs"),
-    ("GET", "/api/openapi.json"),
-    ("HEAD", "/api/openapi.json"),
-}
+# WR-05: KHÔNG có allow-list/middleware nào trong app đọc PUBLIC_ROUTES ở đây
+# nữa — mỗi route tự bảo vệ qua Depends(require_role(...))/Depends(get_current_user).
+# Danh sách endpoint công khai (dữ liệu test) đã chuyển sang
+# tests/conftest.py vì nó chỉ được test_every_api_route_declares_roles dùng
+# để bỏ qua các route cố ý công khai khi kiểm tra toàn bộ route còn lại đều
+# khai báo vai trò.
 
 
 @dataclass(frozen=True)
