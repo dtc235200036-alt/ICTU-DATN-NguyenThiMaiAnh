@@ -3,17 +3,17 @@ gsd_state_version: "1.0"
 current_phase: 3
 current_phase_name: Outline, Progress, Defense & Archive
 status: executing
-stopped_at: Completed 03-01-PLAN.md (UC2 outline tracer + revision loop); Phase 2 awaiting UAT; Phase 1 paused at 01-07 human checkpoint
-last_updated: "2026-09-28T02:33:00.000Z"
+stopped_at: Completed 03-02-PLAN.md (MH-08/MH-09/MH-14 full fidelity + shared document UI)
+last_updated: "2026-09-28T03:08:04.314Z"
 last_activity: 2026-09-28
 last_activity_desc: Phase 3 plan 03-01 complete (UC2 outline tracer + revision loop, 2/2 tasks, 4 tests)
-state_head: 4b05663b81aaac16de4c0f7200b45eca0e25f25e
+state_head: 5dcef8ea901f67bfc91b7d7fb993f289d257146e
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 20
-  completed_plans: 13
-  percent: 65
+  total_plans: 24
+  completed_plans: 14
+  percent: 0
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-09-27)
 ## Current Position
 
 Phase: 3 (Outline, Progress, Defense & Archive) — EXECUTING
-Plan: 2 of 7
-Status: Executing Phase 3
+Plan: 3 of 7
+Status: Ready to execute
 Last activity: 2026-09-28 — Plan 03-01 complete (UC2 outline tracer + revision loop)
 
-Progress: [██████████████░░░░░░] 65%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -69,6 +69,7 @@ Progress: [██████████████░░░░░░] 65%
 | Phase 02 P05 | 30min | 2 tasks | 9 files |
 | Phase 02 P06 | 65min | 2 tasks | 18 files |
 | Phase 03 P01 | 42min | 2 tasks | 39 files |
+| Phase 03 P02 | 55min | 2 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -114,6 +115,9 @@ Recent decisions affecting current work:
 - [Phase 03]: document_check.run() (BackgroundTasks) always opens its own SessionLocal and wraps the whole body in a broad except → LOI, never leaving a row stuck DANG_KIEM_TRA
 - [Phase 03]: outlines.review() implements both DA_DUYET and YEU_CAU_SUA branches together (Task 1) since they share one conditional-UPDATE/notification shape — avoided a throwaway Task-1-only placeholder
 - [Phase 03]: AiClientStub.check_document scores at paragraph granularity (>=8 tokens/line, NFC) and excludes the query document's own de_tai_id from the corpus, not just its own row id
+- [Phase 03]: documents/api.ts is the single source of DocumentOut/CheckSummary/CheckMatch/CheckSegment/CheckDetail; outlines/api.ts re-exports them
+- [Phase 03]: CheckPanel's canRecheck is caller-supplied (not role-derived internally); OutlineReviewPage passes true since the route is GV/Bo mon-only and the server re-checks ownership
+- [Phase 03]: AppLayout breadcrumb lookup switched to react-router matchPath (was exact pathname equality, silently broke every :param route's breadcrumb)
 
 ### Pending Todos
 
@@ -137,6 +141,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-28T02:33:00.000Z
-Stopped at: Completed 03-01-PLAN.md (UC2 outline tracer + revision loop); Phase 2 awaiting UAT; Phase 1 paused at 01-07 human checkpoint
+Last session: 2026-09-28T03:08:04.272Z
+Stopped at: Completed 03-02-PLAN.md (MH-08/MH-09/MH-14 full fidelity + shared document UI)
 Resume file: None
