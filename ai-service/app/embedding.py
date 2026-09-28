@@ -1,0 +1,106 @@
+"""Bộ mã hóa embedding (D-01, D-02, AISV-02).
+
+Hai profile thật của bake-off là hạng nhất, chọn bằng AI_MODEL_PROFILE:
+- bkai: bkai-foundation-models/vietnamese-bi-encoder, tách từ underthesea trước;
+- e5:   intfloat/multilingual-e5-base, tiền tố "query: " cho MỌI đầu vào (so
+        sánh tiêu đề/câu là đối xứng nên cả hai phía dùng "query: ").
+Profile fake (HashingEncoder) chỉ dùng cho test (Settings từ chối ngoài
+APP_ENV=test): tất định, không import torch.
+
+Mỗi lần gọi encode() = đúng MỘT lần gọi mô hình cho cả lô, encode_calls tăng 1
+bất kể số văn bản (NFR-11: ingest chỉ mã hóa mục mới, một lần).
+"""
+import hashlib
+import threading
+from dataclasses import dataclass
+
+import numpy as np
+
+from app.nlp.normalize import nfc, syllables
+from app.nlp.segment import segment
+
+
+@dataclass(frozen=True)
+class Profile:
+    model: str
+    segment: bool
+    prefix: str
+
+
+PROFILES: dict[str, Profile] = {
+    "bkai": Profile("bkai-foundation-models/vietnamese-bi-encoder", True, ""),
+    "e5": Profile("intfloat/multilingual-e5-base", False, "query: "),
+    "fake": Profile("fake-hashing-256", False, ""),
+}
+
+
+class HashingEncoder:
+    """Bộ mã hóa giả tất định cho test: đếm unigram + bigram âm tiết băm
+    blake2b vào 256 chiều, chuẩn hóa L2. Không đánh giá được diễn đạt lại —
+    chất lượng ngữ nghĩa do plan 04-04 đo trên mô hình thật."""
+
+    dim = 256
+
+    def encode(self, texts: list[str]) -> np.ndarray:
+        out = np.zeros((len(texts), self.dim), dtype=np.float32)
+        for row, text in enumerate(texts):
+            toks = syllables(text)
+            grams = toks + [f"{a} {b}" for a, b in zip(toks, toks[1:])]
+            for gram in grams:
+                h = hashlib.blake2b(gram.encode("utf-8"), digest_size=8).digest()
+                out[row, int.from_bytes(h, "little") % self.dim] += 1.0
+            norm = np.linalg.norm(out[row])
+            if norm > 0:
+                out[row] /= norm
+        return out
+
+
+class Encoder:
+    def __init__(self, profile: str, torch_threads: int = 4) -> None:
+        if profile not in PROFILES:
+            raise ValueError(f"Profile không hợp lệ: {profile}")
+        self.profile = profile
+        self._spec = PROFILES[profile]
+        self.name = self._spec.model
+        self.encode_calls = 0
+        self._lock = threading.Lock()
+        if profile == "fake":
+            self._model = HashingEncoder()
+            self.dim = HashingEncoder.dim
+        else:
+            import torch
+            from sentence_transformers import SentenceTransformer
+
+            torch.set_num_threads(torch_threads)
+            # Trọng số lấy từ cache HF_HOME (volume /models trong container).
+            self._model = SentenceTransformer(self._spec.model, device="cpu")
+            get_dim = getattr(self._model, "get_embedding_dimension", None) or getattr(
+                self._model, "get_sentence_embedding_dimension"
+            )
+            self.dim = int(get_dim())
+
+    def preprocess(self, text: str) -> str:
+        text = nfc(text)
+        if self._spec.segment:
+            text = segment(text)
+        return self._spec.prefix + text
+
+    def encode(self, texts: list[str]) -> np.ndarray:
+        """Mã hóa cả lô trong MỘT lần gọi; trả float32 (n, dim) đã chuẩn hóa L2."""
+        if not texts:
+            # Lô rỗng không chạm tới mô hình → không tính là một lần gọi.
+            return np.zeros((0, self.dim), dtype=np.float32)
+        with self._lock:
+            self.encode_calls += 1
+            prepared = [self.preprocess(t) for t in texts]
+            if self.profile == "fake":
+                vectors = self._model.encode(prepared)
+            else:
+                vectors = self._model.encode(
+                    prepared,
+                    batch_size=32,
+                    normalize_embeddings=True,
+                    convert_to_numpy=True,
+                    show_progress_bar=False,
+                )
+            return np.ascontiguousarray(vectors, dtype=np.float32)
