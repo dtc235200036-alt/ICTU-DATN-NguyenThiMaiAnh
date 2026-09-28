@@ -134,3 +134,6 @@ class BmDashboardOut(BaseModel):
     moc_tien_do: list[MilestoneOut] = []
     so_hoi_dong_sap_toi: int = 0
     hoi_dong_sap_toi: list[BmUpcomingCommittee] = []
+    # WR-06 (04-REVIEW): đề cương/báo cáo đã kiểm tra xong nhưng chưa vào chỉ
+    # mục AI (ingest lỗi) — toàn khoa, không theo đợt.
+    tai_lieu_chua_index: int = 0

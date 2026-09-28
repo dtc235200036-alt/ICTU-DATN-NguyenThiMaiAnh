@@ -195,3 +195,19 @@ def test_document_check_uses_ai_contract(
     assert too_long["trang_thai"] == "LOI" and too_long["tai_lieu"]["qua_dai_kiem_tra"] is True
     resp = client.post(f"/api/documents/{v5_id}/recheck", headers=auth_headers(gv))
     assert resp.status_code == 409 and "quá dài" in resp.json()["detail"], resp.text
+
+    # WR-06: v3 hoàn tất kiểm tra nhưng ingest lỗi -> còn "chưa vào chỉ mục";
+    # lần ingest thành công kế tiếp thử lại nó và đóng dấu da_index_luc.
+    from app.models.de_cuong import TaiLieuDoAn
+
+    monkeypatch.setattr(get_settings(), "AI_DOCUMENT_MAX_CHARS", 800_000)
+    db.rollback()
+    assert db.get(TaiLieuDoAn, v3_id).da_index_luc is None
+    assert db.get(TaiLieuDoAn, v2_id).da_index_luc is not None
+    assert ai_index.count_pending_documents(db) == 1
+    fake.calls.clear()
+    ai_index.ingest_document(v2_id)
+    assert [(c[0], c[1]) for c in fake.calls] == [("ingest", v2_id), ("ingest", v3_id)]
+    db.rollback()
+    assert db.get(TaiLieuDoAn, v3_id).da_index_luc is not None
+    assert ai_index.count_pending_documents(db) == 0

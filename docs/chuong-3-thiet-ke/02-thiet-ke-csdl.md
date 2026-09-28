@@ -119,6 +119,7 @@ Lược đồ `thesis_core` gồm 19 bảng, khớp 1-1 với 19 lớp thực th
 | thoi_diem_nop | DATETIME | Không | — | Thời điểm nộp |
 | noi_dung_trich_xuat | LONGTEXT | Có | — | Văn bản trích xuất lúc nộp (NFC) để gửi Dịch vụ AI — cột bổ sung khi thi công Phase 3 (D-03) |
 | trich_xuat_loi | BOOLEAN | Không | — | TRUE khi không trích xuất được văn bản; không chặn việc nộp (D-03) |
+| da_index_luc | DATETIME | Có | — | Lần đưa đề cương/báo cáo cuối vào chỉ mục Dịch vụ AI (DOCUMENT) thành công gần nhất; NULL = chưa vào chỉ mục — Web API tự thử lại sau lần ingest thành công kế tiếp, `ai_index backfill --loai DOCUMENT --chua-index`, dashboard Bộ môn đếm số tài liệu còn thiếu (sửa lỗi review WR-06, Alembic 0014) |
 
 #### `luot_duyet_de_cuong`
 

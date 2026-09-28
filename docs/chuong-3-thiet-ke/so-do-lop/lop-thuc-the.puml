@@ -189,6 +189,7 @@ class TaiLieuDoAn <<Entity>> {
   +thoiDiemNop : DateTime
   +noiDungTrichXuat : String
   +trichXuatLoi : Boolean
+  +daIndexLuc : DateTime
 }
 
 class LuotDuyetDeCuong <<Entity>> {

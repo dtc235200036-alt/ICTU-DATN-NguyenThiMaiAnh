@@ -134,6 +134,7 @@ entity "tai_lieu_do_an" as tai_lieu_do_an {
   thoi_diem_nop : DATETIME
   noi_dung_trich_xuat : LONGTEXT
   trich_xuat_loi : BOOLEAN <<NOT NULL>> = FALSE
+  da_index_luc : DATETIME
   ..UNIQUE(de_tai_id, loai, so_phien_ban)..
 }
 

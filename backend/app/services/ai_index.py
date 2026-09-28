@@ -22,20 +22,22 @@
   không còn chiếm chỗ trong top-k của /check-title.
 
 CLI (trong container api, chỉ khi AI_CLIENT=http):
-    python -m app.services.ai_index backfill [--loai TOPIC ARCHIVE DOCUMENT]
+    python -m app.services.ai_index backfill [--loai TOPIC ARCHIVE DOCUMENT] [--chua-index]
     python -m app.services.ai_index purge --loai TOPIC|ARCHIVE|DOCUMENT --ids 1,2,3
 """
 import argparse
 import logging
 import sys
 
-from sqlalchemy import select, update
+from sqlalchemy import func, or_, select, update
 
 from app.core.config import get_settings
 from app.core.db import SessionLocal
+from app.core.timeutil import now_utc
 from app.models.de_cuong import LOAI_BAO_CAO_CUOI, LOAI_DE_CUONG, TaiLieuDoAn
 from app.models.de_tai import NHAP, DeTai
 from app.models.kho import CHUA_INDEX, DA_INDEX, DoAnKho
+from app.models.trung_lap import HOAN_TAT, KetQuaKiemTraTrungLap
 from app.schemas.common import nfc
 from app.services.ai_client import get_ai_client
 from app.services.archive import ingest_payload
@@ -71,30 +73,95 @@ def run_ingest_topic(de_tai_id: int) -> None:
 _DOCUMENT_LOAI = (LOAI_DE_CUONG, LOAI_BAO_CAO_CUOI)
 
 
+# WR-06: số tài liệu chưa index được thử lại sau mỗi lần ingest thành công.
+_RETRY_PER_INGEST = 3
+
+
+def pending_documents_query():
+    """WR-06: tài liệu đáng lẽ đã nằm trong chỉ mục AI nhưng chưa — đề cương /
+    báo cáo cuối có văn bản (trong trần gửi AI), da_index_luc NULL, và kiểm tra
+    trùng lặp đã HOAN_TAT hoặc không có (tài liệu seed khóa cũ). Tài liệu đang
+    kiểm tra / LOI không tính (luồng "kiểm tra trước, index sau")."""
+    return (
+        select(TaiLieuDoAn.id)
+        .outerjoin(
+            KetQuaKiemTraTrungLap,
+            KetQuaKiemTraTrungLap.tai_lieu_do_an_id == TaiLieuDoAn.id,
+        )
+        .where(TaiLieuDoAn.loai.in_(_DOCUMENT_LOAI))
+        .where(TaiLieuDoAn.trich_xuat_loi.is_(False))
+        .where(TaiLieuDoAn.noi_dung_trich_xuat.is_not(None))
+        .where(func.char_length(TaiLieuDoAn.noi_dung_trich_xuat) <= get_settings().AI_DOCUMENT_MAX_CHARS)
+        .where(TaiLieuDoAn.da_index_luc.is_(None))
+        .where(
+            or_(
+                KetQuaKiemTraTrungLap.id.is_(None),
+                KetQuaKiemTraTrungLap.trang_thai == HOAN_TAT,
+            )
+        )
+    )
+
+
+def count_pending_documents(db) -> int:
+    return int(db.execute(select(func.count()).select_from(pending_documents_query().subquery())).scalar_one())
+
+
+def _ingest_one(task_db, client, doc_id: int) -> bool:
+    """Ingest một tài liệu và đóng dấu da_index_luc; False nếu bỏ qua."""
+    doc = task_db.get(TaiLieuDoAn, doc_id)
+    if (
+        doc is None
+        or doc.loai not in _DOCUMENT_LOAI
+        or doc.trich_xuat_loi
+        or not doc.noi_dung_trich_xuat
+        or too_long_for_check(doc.noi_dung_trich_xuat)
+    ):
+        return False
+    text = doc.noi_dung_trich_xuat
+    task_db.commit()  # không giữ transaction đọc trong lúc gọi AI
+    client.ingest(doc_id, LOAI_DOCUMENT, text)
+    task_db.execute(
+        update(TaiLieuDoAn).where(TaiLieuDoAn.id == doc_id).values(da_index_luc=now_utc())
+    )
+    task_db.commit()
+    return True
+
+
 def ingest_document(tai_lieu_do_an_id: int) -> None:
     """AISV-06: đưa một đề cương/báo cáo cuối đã kiểm tra xong vào chỉ mục AI
     (DOCUMENT, id = tai_lieu_do_an.id) — SessionLocal riêng, lỗi chỉ ghi cảnh
-    báo (không bao giờ đổi kết quả kiểm tra đã lưu)."""
+    báo (không bao giờ đổi kết quả kiểm tra đã lưu). WR-06: thành công thì
+    đóng dấu da_index_luc rồi thử lại vài tài liệu còn chưa index (lỗi ingest
+    trước đó, AI khởi động lại…), nên không tài liệu nào bị bỏ sót vĩnh viễn."""
     task_db = SessionLocal()
     try:
-        doc = task_db.get(TaiLieuDoAn, tai_lieu_do_an_id)
-        if (
-            doc is None
-            or doc.loai not in _DOCUMENT_LOAI
-            or doc.trich_xuat_loi
-            or not doc.noi_dung_trich_xuat
-            or too_long_for_check(doc.noi_dung_trich_xuat)
-        ):
-            return
-        doc_id, text = doc.id, doc.noi_dung_trich_xuat
-        task_db.commit()
-        get_ai_client(task_db).ingest(doc_id, LOAI_DOCUMENT, text)
+        client = get_ai_client(task_db)
+        _ingest_one(task_db, client, tai_lieu_do_an_id)
     except Exception as exc:  # noqa: BLE001 — không bao giờ chặn nghiệp vụ
+        task_db.rollback()
         _logger.warning(
             "ai_index.ingest_document thất bại cho tai_lieu_do_an_id=%s (%s)",
             tai_lieu_do_an_id,
             type(exc).__name__,
         )
+        task_db.close()
+        return
+    try:
+        pending = (
+            task_db.execute(
+                pending_documents_query()
+                .where(TaiLieuDoAn.id != tai_lieu_do_an_id)
+                .order_by(TaiLieuDoAn.id)
+                .limit(_RETRY_PER_INGEST)
+            )
+            .scalars()
+            .all()
+        )
+        for doc_id in pending:
+            _ingest_one(task_db, client, doc_id)
+    except Exception as exc:  # noqa: BLE001
+        task_db.rollback()
+        _logger.warning("ai_index thử lại tài liệu chưa index thất bại (%s)", type(exc).__name__)
     finally:
         task_db.close()
 
@@ -173,36 +240,34 @@ def _backfill_archive(db) -> tuple[int, int]:
     return ok, failed
 
 
-def _backfill_documents(db) -> tuple[int, int]:
+def _backfill_documents(db, chua_index: bool = False) -> tuple[int, int]:
+    """Mọi đề cương/báo cáo cuối có văn bản (hoặc, với chua_index, chỉ các tài
+    liệu pending — WR-06); đóng dấu da_index_luc khi thành công."""
     client = get_ai_client(db)
     ok = failed = 0
-    ids = (
-        db.execute(
+    if chua_index:
+        query = pending_documents_query()
+    else:
+        query = (
             select(TaiLieuDoAn.id)
             .where(TaiLieuDoAn.loai.in_(_DOCUMENT_LOAI))
             .where(TaiLieuDoAn.trich_xuat_loi.is_(False))
             .where(TaiLieuDoAn.noi_dung_trich_xuat.is_not(None))
-            .order_by(TaiLieuDoAn.id)
         )
-        .scalars()
-        .all()
-    )
+    ids = db.execute(query.order_by(TaiLieuDoAn.id)).scalars().all()
+    db.commit()
     for doc_id in ids:
-        text = db.execute(
-            select(TaiLieuDoAn.noi_dung_trich_xuat).where(TaiLieuDoAn.id == doc_id)
-        ).scalar_one_or_none()
-        if not text or too_long_for_check(text):
-            continue
         try:
-            client.ingest(doc_id, LOAI_DOCUMENT, text)
-            ok += 1
+            if _ingest_one(db, client, doc_id):
+                ok += 1
         except Exception as exc:  # noqa: BLE001
+            db.rollback()
             failed += 1
             _logger.warning("backfill DOCUMENT %s thất bại (%s)", doc_id, type(exc).__name__)
     return ok, failed
 
 
-def backfill(loai: list[str]) -> dict[str, tuple[int, int]]:
+def backfill(loai: list[str], chua_index: bool = False) -> dict[str, tuple[int, int]]:
     """Trả {loai: (thành công, thất bại)}."""
     db = SessionLocal()
     try:
@@ -212,7 +277,7 @@ def backfill(loai: list[str]) -> dict[str, tuple[int, int]]:
         if LOAI_ARCHIVE in loai:
             result[LOAI_ARCHIVE] = _backfill_archive(db)
         if LOAI_DOCUMENT in loai:
-            result[LOAI_DOCUMENT] = _backfill_documents(db)
+            result[LOAI_DOCUMENT] = _backfill_documents(db, chua_index)
         return result
     finally:
         db.close()
@@ -253,6 +318,11 @@ def main(argv: list[str] | None = None) -> int:
         choices=[LOAI_TOPIC, LOAI_ARCHIVE, LOAI_DOCUMENT],
         default=[LOAI_TOPIC, LOAI_ARCHIVE, LOAI_DOCUMENT],
     )
+    p_backfill.add_argument(
+        "--chua-index",
+        action="store_true",
+        help="DOCUMENT: chỉ thử lại tài liệu chưa vào chỉ mục (da_index_luc NULL, WR-06)",
+    )
     p_purge = sub.add_parser("purge", help="xóa nguồn khỏi chỉ mục AI (chỉ cho test)")
     p_purge.add_argument("--loai", required=True, choices=[LOAI_TOPIC, LOAI_ARCHIVE, LOAI_DOCUMENT])
     p_purge.add_argument("--ids", required=True, help="danh sách id, phân cách bằng dấu phẩy")
@@ -263,8 +333,13 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     if args.lenh == "backfill":
-        for loai, (ok, failed) in backfill(args.loai).items():
+        for loai, (ok, failed) in backfill(args.loai, args.chua_index).items():
             print(f"backfill {loai}: {ok} thành công, {failed} lỗi")
+        db = SessionLocal()
+        try:
+            print(f"tài liệu chưa vào chỉ mục AI: {count_pending_documents(db)}")
+        finally:
+            db.close()
         return 0
 
     ids = _parse_ids(args.ids)

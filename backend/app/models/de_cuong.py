@@ -72,6 +72,9 @@ class TaiLieuDoAn(Base):
     # ngược lại erd.puml/lop-thuc-the.puml/02-thiet-ke-csdl.md cùng migration 0006.
     noi_dung_trich_xuat: Mapped[str | None] = mapped_column(LONGTEXT)
     trich_xuat_loi: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="0")
+    # WR-06 (04-REVIEW, 0014): lần ingest DOCUMENT thành công gần nhất vào chỉ
+    # mục AI; NULL = chưa vào chỉ mục (được thử lại, đếm trên dashboard Bộ môn).
+    da_index_luc: Mapped[datetime | None] = mapped_column(DateTime)
 
     de_tai = relationship("DeTai")
     de_cuong = relationship("DeCuong", back_populates="phien_ban")

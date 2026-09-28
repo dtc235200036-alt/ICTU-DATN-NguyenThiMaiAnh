@@ -27,7 +27,7 @@ from app.schemas.dashboard import (
     SvTopicOut,
 )
 from app.schemas.topics import CohortRef
-from app.services import defense, document_check, progress
+from app.services import ai_index, defense, document_check, progress
 
 _VIEC_MAX = 10
 _TIEN_DO_TRICH = 5
@@ -474,6 +474,7 @@ def get_bo_mon_dashboard(db: Session, dot_do_an_id: int | None) -> BmDashboardOu
     ]
 
     return BmDashboardOut(
+        tai_lieu_chua_index=ai_index.count_pending_documents(db),
         sv_tre_moc=sv_tre_moc,
         tien_do_trich=tien_do_trich,
         moc_tien_do=moc_tien_do,

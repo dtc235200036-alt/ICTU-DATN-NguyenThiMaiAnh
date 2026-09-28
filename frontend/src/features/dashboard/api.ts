@@ -120,6 +120,8 @@ export interface BmDashboardOut {
   moc_tien_do: MilestoneOut[]
   so_hoi_dong_sap_toi: number
   hoi_dong_sap_toi: BmUpcomingCommittee[]
+  /** WR-06: tài liệu đã kiểm tra xong nhưng chưa vào chỉ mục AI */
+  tai_lieu_chua_index: number
 }
 
 export function useSvDashboard() {

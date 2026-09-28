@@ -104,6 +104,18 @@ export default function BmDashboard() {
             <Card style={{ minWidth: 220, cursor: 'pointer' }} onClick={() => navigate('/hoi-dong')}>
               <Statistic title="Hội đồng sắp tới" value={data.so_hoi_dong_sap_toi} />
             </Card>
+            {data.tai_lieu_chua_index > 0 ? (
+              <Card style={{ minWidth: 220 }}>
+                <Statistic
+                  title="Tài liệu chưa vào chỉ mục AI"
+                  value={data.tai_lieu_chua_index}
+                  valueStyle={{ color: '#cf1322' }}
+                />
+                <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', marginTop: 4 }}>
+                  Tự thử lại sau lần nộp kế tiếp
+                </div>
+              </Card>
+            ) : null}
           </div>
 
           <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
