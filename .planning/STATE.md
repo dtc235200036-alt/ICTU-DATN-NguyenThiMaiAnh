@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 3
 current_phase_name: Outline, Progress, Defense & Archive
 status: executing
-stopped_at: Completed 03-04-PLAN.md (UC4.3-4.5 scoring/finalize + UC5.2 auto-archive/ingest)
-last_updated: "2026-09-28T04:09:01.731Z"
+stopped_at: Completed 03-05-PLAN.md (UC5.1/5.3/5.4 archive search, maintenance, CSV import)
+last_updated: "2026-09-28T04:26:14.225Z"
 last_activity: 2026-09-28
 last_activity_desc: Phase 3 plan 03-04 complete (UC4.3-4.5 scoring/finalize + UC5.2 auto-archive, 2/2 tasks)
-state_head: cc4daa5c8cc3832ba060ef143f3fdebb3950bfc8
+state_head: 98c5285ae9bc1d0001dcd4279f7be95a2127a541
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 27
-  completed_plans: 19
+  completed_plans: 21
   percent: 0
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-09-27)
 ## Current Position
 
 Phase: 3 (Outline, Progress, Defense & Archive) — EXECUTING
-Plan: 5 of 7
+Plan: 6 of 7
 Status: Ready to execute
 Last activity: 2026-09-28 — Plan 03-04 complete (committee scoring, chốt, auto-archive + ingest)
 
@@ -72,6 +72,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03 P02 | 55min | 2 tasks | 14 files |
 | Phase 03 P03 | 38min | 2 tasks | 13 files |
 | Phase 03 P04 | 22min | 2 tasks | 17 files |
+| Phase 03 P05 | 20min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -127,6 +128,10 @@ Recent decisions affecting current work:
 - [Phase 03]: 03-04: AI ingest of a finalized thesis runs post-commit in BackgroundTasks (archive.run_ingest, own SessionLocal); payload DOCUMENT with latest BAO_CAO_CUOI text else TOPIC ten_de_tai+tu_khoa; failure leaves CHUA_INDEX
 - [Phase 03]: 03-04: committee members get read access to BAO_CAO_CUOI only (documents.is_committee_member_for_topic), never outline/progress docs
 - [Phase 03]: 03-04: do_an_kho gains additive ma_so_sinh_vien/ho_ten_sinh_vien snapshot columns (written back to ERD/class diagram/§3.2.3)
+- [Phase 03]: 03-05: Archive search q=NFC contains(autoescape) on title OR keywords; utf8mb4_vietnamese_ci is case-insensitive but accent-sensitive ('thu vien' does not find 'thư viện')
+- [Phase 03]: 03-05: Manual/imported archive records are nguon IMPORT without file; any update resets CHUA_INDEX and re-ingests in background
+- [Phase 03]: 03-05: CSV import partial success — per-row errors with physical line number, valid rows in one transaction; ';' fallback + blank rows skipped
+- [Phase 03]: 03-05: DELETE /api/archive removes the thesis_core row only — AI-side delete is a Phase 4 contract gap (§3.3.5 has no /delete)
 
 ### Pending Todos
 
@@ -150,6 +155,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-28T04:09:01.685Z
-Stopped at: Completed 03-04-PLAN.md (UC4.3-4.5 scoring/finalize + UC5.2 auto-archive/ingest)
+Last session: 2026-09-28T04:26:14.177Z
+Stopped at: Completed 03-05-PLAN.md (UC5.1/5.3/5.4 archive search, maintenance, CSV import)
 Resume file: None

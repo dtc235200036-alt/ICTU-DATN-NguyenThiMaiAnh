@@ -53,8 +53,8 @@
 ### Kho dữ liệu đồ án (UC5)
 
 - [x] **REPO-01**: Đồ án đã chốt kết quả được đưa vào kho với metadata (khóa, đề tài, SV, GVHD, từ khóa, điểm, file)
-- [ ] **REPO-02**: Người dùng tìm kiếm/lọc đồ án trong kho theo khóa, từ khóa, GVHD và xem chi tiết
-- [ ] **REPO-03**: Bộ môn thêm/sửa/xóa bản ghi kho, kể cả import đồ án các khóa cũ; mỗi bản ghi mới được đẩy sang dịch vụ AI để index
+- [x] **REPO-02**: Người dùng tìm kiếm/lọc đồ án trong kho theo khóa, từ khóa, GVHD và xem chi tiết
+- [x] **REPO-03**: Bộ môn thêm/sửa/xóa bản ghi kho, kể cả import đồ án các khóa cũ; mỗi bản ghi mới được đẩy sang dịch vụ AI để index
 
 ### AI kiểm tra trùng lặp
 
@@ -139,8 +139,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DEFN-03 | Phase 3 | Complete |
 | DEFN-04 | Phase 3 | Complete |
 | REPO-01 | Phase 3 | Complete |
-| REPO-02 | Phase 3 | Pending |
-| REPO-03 | Phase 3 | Pending |
+| REPO-02 | Phase 3 | Complete |
+| REPO-03 | Phase 3 | Complete |
 | AISV-01 | Phase 4 | Pending |
 | AISV-02 | Phase 4 | Pending |
 | AISV-03 | Phase 4 | Pending |
