@@ -500,6 +500,11 @@ if d["ty_le_tong"] is None or d["ty_le_tong"] < nguong:
     errs.append(f"ty_le_tong {d['ty_le_tong']} < {nguong}")
 if not d["do_an_trung"] or d["do_an_trung"][0]["doi_tuong_trung"] != label:
     errs.append(f"đồ án trùng {[m['doi_tuong_trung'] for m in d['do_an_trung']]} != {label!r}")
+# 04-07: tỷ lệ theo đồ án là phần của tỷ lệ tổng (không phải điểm đoạn cao nhất).
+if d["do_an_trung"] and not (0 < d["do_an_trung"][0]["ty_le"] <= d["ty_le_tong"] + 0.1):
+    errs.append(f"tỷ lệ đồ án trùng {d['do_an_trung'][0]['ty_le']} không nằm trong (0, {d['ty_le_tong']}]")
+if d["do_an_trung"] and abs(sum(m["ty_le"] for m in d["do_an_trung"]) - d["ty_le_tong"]) > 0.5:
+    errs.append(f"tổng tỷ lệ theo đồ án {sum(m['ty_le'] for m in d['do_an_trung'])} != tỷ lệ tổng {d['ty_le_tong']}")
 segs = d["chi_tiet"]
 if not any(s["doi_tuong_trung"] == label for s in segs):
     errs.append("không đoạn nào gắn nhãn đồ án nguồn")

@@ -8,6 +8,7 @@ import { getErrorMessage } from '../../api/client'
 import { formatPercent } from '../../utils/format'
 import { useDocumentCheck, useRecheck } from './api'
 import type { CheckMatch } from './api'
+import { parseViTri } from './highlight'
 
 export interface CheckPanelProps {
   taiLieuId: number | undefined
@@ -114,6 +115,8 @@ export default function CheckPanel({ taiLieuId, canRecheck, pendingText }: Check
     )
   } else {
     const overThreshold = (data.ty_le_tong ?? 0) > data.nguong_ap_dung
+    const soDoan = data.chi_tiet.length
+    const soNguyenVan = data.chi_tiet.filter((seg) => parseViTri(seg.vi_tri).tinHieu === 'NGUYEN_VAN').length
     body = (
       <div>
         <div style={{ textAlign: 'center', marginBottom: 8 }}>
@@ -125,7 +128,7 @@ export default function CheckPanel({ taiLieuId, canRecheck, pendingText }: Check
         <p
           style={{
             textAlign: 'center',
-            margin: '0 0 16px',
+            margin: '0 0 8px',
             fontSize: 12,
             color: 'rgba(0,0,0,0.45)',
           }}
@@ -135,6 +138,10 @@ export default function CheckPanel({ taiLieuId, canRecheck, pendingText }: Check
           <Tag color={overThreshold ? 'error' : 'success'}>
             {overThreshold ? 'Vượt ngưỡng cảnh báo' : 'Dưới ngưỡng cảnh báo'}
           </Tag>
+        </p>
+        <p style={{ textAlign: 'center', margin: '0 0 16px', fontSize: 13 }}>
+          {`Số đoạn trùng: ${soDoan}`}
+          {soNguyenVan > 0 ? ` (${soNguyenVan} trùng nguyên văn)` : null}
         </p>
         <p style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 500 }}>Đồ án trùng nhiều nhất</p>
         <Table<CheckMatch>

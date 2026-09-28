@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Card, Col, Descriptions, Empty, Row, Skeleton, Spin, Tag } from 'antd'
+import { Alert, Card, Col, Descriptions, Empty, Row, Skeleton, Space, Spin, Tag, theme } from 'antd'
 import { AxiosError } from 'axios'
 import { useParams } from 'react-router'
 
@@ -8,6 +8,7 @@ import ForbiddenPage from '../auth/ForbiddenPage'
 import { useDocumentCheck } from './api'
 import type { CheckMatch, CheckSegment } from './api'
 import CheckStatusTag from './CheckStatusTag'
+import { highlightOverlap, parseViTri } from './highlight'
 
 const LOAI_LABEL: Record<string, string> = {
   DE_CUONG: 'Đề cương',
@@ -26,6 +27,81 @@ function mucTrungTag(tyLe: number) {
     return <Tag color="orange">{`Mức trùng: Trung bình (${tyLe}%)`}</Tag>
   }
   return <Tag>{`Mức trùng: Thấp (${tyLe}%)`}</Tag>
+}
+
+// 04-06: tín hiệu kích hoạt lưu trong vi_tri — giải thích VÌ SAO đoạn bị gắn cờ
+// (nguyên văn: MinHash; ngữ nghĩa: embedding — có thể ít từ trùng).
+function tinHieuTag(tinHieu: 'NGUYEN_VAN' | 'NGU_NGHIA' | null) {
+  if (tinHieu === 'NGUYEN_VAN') return <Tag color="red">Trùng nguyên văn</Tag>
+  if (tinHieu === 'NGU_NGHIA') return <Tag color="orange">Trùng ngữ nghĩa</Tag>
+  return null
+}
+
+/**
+ * AISV-05/T-04-31: đoạn văn với các cụm từ dùng chung bọc trong <mark> — chỉ
+ * React text node, không bao giờ chèn HTML thô từ nội dung trích xuất.
+ */
+function HighlightedText({ text, other, markBg }: { text: string; other: string; markBg: string }) {
+  const segments = useMemo(() => highlightOverlap(text, other), [text, other])
+  return (
+    <p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+      {segments.map((segment, i) =>
+        segment.match ? (
+          <mark key={i} style={{ background: markBg, padding: '0 1px', borderRadius: 2, color: 'inherit' }}>
+            {segment.text}
+          </mark>
+        ) : (
+          <span key={i}>{segment.text}</span>
+        ),
+      )}
+    </p>
+  )
+}
+
+const COLUMN_LABEL_STYLE = {
+  margin: '0 0 6px',
+  fontSize: 12,
+  fontWeight: 500,
+  color: 'rgba(0,0,0,0.45)',
+} as const
+
+function SegmentCard({ seg, markBg }: { seg: CheckSegment; markBg: string }) {
+  const { viTri, tinHieu } = parseViTri(seg.vi_tri)
+  const nguon = seg.doan_nguon ?? ''
+  const trung = seg.doan_trung ?? ''
+  return (
+    <Card
+      size="small"
+      style={{ marginBottom: 16 }}
+      title={
+        <Space size={8} wrap>
+          <span style={{ fontWeight: 500 }}>{viTri || 'Đoạn trùng'}</span>
+          {mucTrungTag(seg.ty_le)}
+          {tinHieuTag(tinHieu)}
+        </Space>
+      }
+    >
+      <Row gutter={24}>
+        <Col xs={24} md={12}>
+          <p style={COLUMN_LABEL_STYLE}>Đoạn trong tài liệu nộp</p>
+          {nguon ? <HighlightedText text={nguon} other={trung} markBg={markBg} /> : <p style={{ margin: 0 }}>—</p>}
+        </Col>
+        <Col xs={24} md={12}>
+          <p style={COLUMN_LABEL_STYLE}>{`Đoạn nguồn (${seg.doi_tuong_trung})`}</p>
+          {seg.doan_trung_an ? (
+            <p style={{ margin: 0, fontSize: 13, fontStyle: 'italic', color: 'rgba(0, 0, 0, 0.45)' }}>
+              Nguồn là tài liệu chưa công bố của sinh viên khác — chỉ GVHD và Bộ môn xem được nội dung đoạn
+              này.
+            </p>
+          ) : trung ? (
+            <HighlightedText text={trung} other={nguon} markBg={markBg} />
+          ) : (
+            <p style={{ margin: 0 }}>—</p>
+          )}
+        </Col>
+      </Row>
+    </Card>
+  )
 }
 
 function SourceRow({
@@ -59,8 +135,9 @@ function SourceRow({
 }
 
 /**
- * MH-14/UC0.7: skeleton chi tiết kết quả kiểm tra trùng lặp — Phase 4 chỉ
- * thay client (`ai_client.py`), khung màn hình này giữ nguyên. Mở từ
+ * MH-14/UC0.7/AISV-05: chi tiết kết quả kiểm tra trùng lặp — mỗi đoạn trùng
+ * đặt cạnh đoạn nguồn, cụm từ dùng chung được tô (highlightOverlap), nhãn tín
+ * hiệu "Trùng nguyên văn"/"Trùng ngữ nghĩa" giải thích lý do (04-07). Mở từ
  * CheckPanel ("Xem chi tiết") và từ cột "Kết quả kiểm tra" trong bảng lịch
  * sử phiên bản (Tag "Hoàn tất - N%").
  */
@@ -68,6 +145,7 @@ export default function CheckDetailPage() {
   const params = useParams<{ taiLieuId: string }>()
   const taiLieuId = params.taiLieuId !== undefined ? Number(params.taiLieuId) : undefined
   const [selectedSource, setSelectedSource] = useState<string | null>(null)
+  const { token } = theme.useToken()
 
   const { data, isLoading, isError, error } = useDocumentCheck(taiLieuId)
 
@@ -184,33 +262,22 @@ export default function CheckDetailPage() {
             </Card>
           </Col>
           <Col xs={24} lg={16}>
+            {data.trang_thai === 'HOAN_TAT' ? (
+              <Alert
+                type="info"
+                showIcon
+                style={{ marginBottom: 16 }}
+                message="Đã loại trừ phần mẫu chung: tiêu đề mẫu, mục lục, tài liệu tham khảo trước khi so sánh (FR-AI-02)."
+                description="Phần tô màu là cụm từ (từ 3 từ liên tiếp) xuất hiện ở cả hai đoạn. Đoạn trùng ngữ nghĩa có thể ít từ chung — nhãn cho biết lý do đoạn bị đánh dấu."
+              />
+            ) : null}
             {filteredSegments.length === 0 ? (
               <Card>
                 <Empty description="Không phát hiện đoạn trùng vượt ngưỡng (UC0.7 - A1)" />
               </Card>
             ) : (
               filteredSegments.map((seg, idx) => (
-                <Row gutter={16} key={`${seg.doi_tuong_trung}-${idx}`} style={{ marginBottom: 16 }}>
-                  <Col xs={24} md={12}>
-                    <Card size="small" title="Đoạn trong tài liệu nộp">
-                      <div style={{ marginBottom: 8 }}>{mucTrungTag(seg.ty_le)}</div>
-                      <p style={{ margin: 0, fontSize: 13 }}>{seg.doan_nguon ?? '—'}</p>
-                    </Card>
-                  </Col>
-                  <Col xs={24} md={12}>
-                    <Card size="small" title={`Đoạn nguồn (${seg.doi_tuong_trung})`}>
-                      <div style={{ marginBottom: 8 }}>{mucTrungTag(seg.ty_le)}</div>
-                      {seg.doan_trung_an ? (
-                        <p style={{ margin: 0, fontSize: 13, fontStyle: 'italic', color: 'rgba(0, 0, 0, 0.45)' }}>
-                          Nguồn là tài liệu chưa công bố của sinh viên khác — chỉ GVHD và Bộ môn xem được nội
-                          dung đoạn này.
-                        </p>
-                      ) : (
-                        <p style={{ margin: 0, fontSize: 13 }}>{seg.doan_trung ?? '—'}</p>
-                      )}
-                    </Card>
-                  </Col>
-                </Row>
+                <SegmentCard key={`${seg.doi_tuong_trung}-${seg.vi_tri ?? ''}-${idx}`} seg={seg} markBg={token.colorWarningBgHover} />
               ))
             )}
           </Col>

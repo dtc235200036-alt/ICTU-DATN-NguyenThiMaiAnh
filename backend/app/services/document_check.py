@@ -318,6 +318,40 @@ def _published_sources(db: Session, rows: list[ChiTietTrungLap]) -> set[tuple[st
     return visible
 
 
+def _per_source_share(
+    ket_qua: KetQuaKiemTraTrungLap | None, rows: list[ChiTietTrungLap]
+) -> list[CheckMatch]:
+    """MH-14/MH-09 "Đồ án trùng": tỷ lệ theo từng đồ án nguồn = phần của tỷ lệ
+    tổng ứng với số ký tự đoạn nộp khớp nguồn đó (04-07).
+
+    Dịch vụ AI tính ty_le_tong = ký tự câu bị gắn cờ / tổng ký tự (sau loại khuôn
+    mẫu) và mỗi câu chỉ thuộc một nguồn, nên share(nguồn) = ty_le_tong × ký tự
+    đoạn của nguồn / ký tự mọi đoạn — không cần lưu thêm cột (tỷ lệ theo nguồn
+    của AI không được lưu). Sai khác nhỏ do đoạn được ghép bằng dấu cách, hoặc
+    khi AI cắt quá CHI_TIET_TOI_DA đoạn. Không có ty_le_tong / ký tự đoạn (dữ
+    liệu cũ) thì quay về điểm đoạn cao nhất như trước."""
+    chars: dict[str, int] = {}
+    best: dict[str, float] = {}
+    for row in rows:
+        label = row.doi_tuong_trung
+        chars[label] = chars.get(label, 0) + len(row.doan_nguon or "")
+        best[label] = max(best.get(label, 0.0), float(row.ty_le))
+    total_chars = sum(chars.values())
+    ty_le_tong = (
+        float(ket_qua.ty_le_tong)
+        if ket_qua is not None and ket_qua.ty_le_tong is not None
+        else None
+    )
+    if ty_le_tong is not None and total_chars > 0:
+        shares = {k: round(ty_le_tong * n / total_chars, 1) for k, n in chars.items()}
+    else:
+        shares = best
+    return sorted(
+        (CheckMatch(doi_tuong_trung=k, ty_le=v) for k, v in shares.items()),
+        key=lambda m: (-m.ty_le, m.doi_tuong_trung),
+    )
+
+
 def detail(db: Session, doc: TaiLieuDoAn, user: CurrentUser) -> CheckDetail:
     """Router đã gọi expire_if_stale + kiểm tra tồn tại (404) trước khi gọi
     hàm này — vẫn phòng thủ khi ket_qua vắng mặt để hàm luôn trả được kết quả.
@@ -358,15 +392,7 @@ def detail(db: Session, doc: TaiLieuDoAn, user: CurrentUser) -> CheckDetail:
         for hidden in [_hidden(row)]
     ]
 
-    grouped: dict[str, float] = {}
-    for row in chi_tiet_rows:
-        ty_le = float(row.ty_le)
-        if row.doi_tuong_trung not in grouped or ty_le > grouped[row.doi_tuong_trung]:
-            grouped[row.doi_tuong_trung] = ty_le
-    do_an_trung = sorted(
-        (CheckMatch(doi_tuong_trung=k, ty_le=v) for k, v in grouped.items()),
-        key=lambda m: -m.ty_le,
-    )
+    do_an_trung = _per_source_share(ket_qua, chi_tiet_rows)
 
     return CheckDetail(
         id=ket_qua.id if ket_qua is not None else 0,
