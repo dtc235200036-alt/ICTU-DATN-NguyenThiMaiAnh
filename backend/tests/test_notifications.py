@@ -33,7 +33,7 @@ def _pending(db, cohort_id, *, ten, loai, sinh_vien_id=None, giang_vien_id=None)
 
 
 def _notes(db, tai_khoan_id) -> list[ThongBao]:
-    db.expire_all()
+    db.rollback()  # REPEATABLE READ: bỏ snapshot cũ trước khi đọc lại
     return (
         db.execute(select(ThongBao).where(ThongBao.tai_khoan_id == tai_khoan_id))
         .scalars()
@@ -83,7 +83,7 @@ def test_notifications_are_private_and_follow_state_changes(
         headers=auth_headers(bomon),
     )
     assert again.status_code == 409
-    db.expire_all()
+    db.rollback()  # REPEATABLE READ: bỏ snapshot cũ trước khi đọc lại
     assert db.execute(select(func.count()).select_from(ThongBao)).scalar_one() == total_before
 
     # GV đề xuất, chưa có SV -> GV đề xuất nhận DE_TAI_DUYET.
@@ -118,7 +118,7 @@ def test_notifications_are_private_and_follow_state_changes(
     assert client.post(
         f"/api/notifications/{a_id}/read", headers=auth_headers(other)
     ).status_code == 404
-    db.expire_all()
+    db.rollback()  # REPEATABLE READ: bỏ snapshot cũ trước khi đọc lại
     assert db.get(ThongBao, a_id).da_doc is False
 
     # Đếm / đánh dấu đã đọc / đánh dấu tất cả của chính A.

@@ -3,12 +3,14 @@ from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.deps import CurrentUser
-from app.models.de_tai import CHO_DUYET, DA_DUYET, DA_PHAN_CONG, DeTai, TU_CHOI
+from app.models.de_tai import CHO_DUYET, DA_DUYET, DA_PHAN_CONG, SINH_VIEN, DeTai, TU_CHOI
 from app.models.tai_khoan import GiangVien, TaiKhoan
+from app.models.thong_bao import DE_TAI_DUYET, DE_TAI_PHAN_CONG, DE_TAI_TU_CHOI
 from app.models.trung_lap import HOAN_TAT, TEN_DE_TAI, KetQuaKiemTraTrungLap
 from app.schemas.common import Page
 from app.schemas.topic_approval import PendingTopicItem, TitleCheckSummary
 from app.schemas.topics import CohortRef, TopicOut
+from app.services import notifications
 from app.services import topics as topics_service
 from app.services.topics import _person_refs
 
@@ -20,6 +22,27 @@ _TOPIC_NOT_FOUND_DETAIL = "Không tìm thấy đề tài"
 _NOT_PENDING_DETAIL = "Đề tài không còn ở trạng thái Chờ duyệt"
 _GV_REQUIRED_DETAIL = "Vui lòng chọn giảng viên hướng dẫn"
 _GV_INVALID_DETAIL = "Giảng viên không tồn tại hoặc đã bị khóa"
+_LY_DO_MAX = 200
+
+
+def _lien_ket(topic_id: int) -> str:
+    return f"/de-tai/{topic_id}"
+
+
+def _gv_label(gv: GiangVien) -> str:
+    return " ".join(part for part in (gv.hoc_vi, gv.ho_ten) if part)
+
+
+def _refused(db: Session, topic_id: int) -> HTTPException:
+    """rowcount=0: UPDATE đã tự quyết định thất bại (đề tài đã bị người khác
+    duyệt/từ chối hoặc SV vừa đổi) — rollback để KHÔNG tạo thông báo nào, rồi
+    đọc lại chỉ để chọn đúng thông điệp (T-02-36, T-03-39)."""
+    db.rollback()
+    db.expire_all()
+    fresh = db.get(DeTai, topic_id)
+    if fresh is None:
+        return HTTPException(status_code=404, detail=_TOPIC_NOT_FOUND_DETAIL)
+    return HTTPException(status_code=409, detail=_NOT_PENDING_DETAIL)
 
 
 def _title_check_summary(ket_qua: KetQuaKiemTraTrungLap | None) -> TitleCheckSummary:
@@ -111,6 +134,10 @@ def approve(
     if topic is None:
         raise HTTPException(status_code=404, detail=_TOPIC_NOT_FOUND_DETAIL)
 
+    ten = topic.ten_de_tai
+    # NOTF-01: đọc tên người nhận TRƯỚC UPDATE; quyết định chấp nhận/từ chối
+    # vẫn chỉ do mệnh đề WHERE của UPDATE (T-02-36).
+    events: list[tuple[int, str, str]] = []
     if topic.sinh_vien_id is None:
         stmt = (
             update(DeTai)
@@ -119,6 +146,14 @@ def approve(
             .where(DeTai.sinh_vien_id.is_(None))
             .values(trang_thai=DA_DUYET)
         )
+        if topic.giang_vien is not None:
+            events.append(
+                (
+                    topic.giang_vien.tai_khoan_id,
+                    DE_TAI_DUYET,
+                    f"Đề tài '{ten}' đã được Bộ môn duyệt và mở cho sinh viên đăng ký",
+                )
+            )
     else:
         if giang_vien_id is None:
             raise HTTPException(status_code=422, detail=_GV_REQUIRED_DETAIL)
@@ -132,6 +167,7 @@ def approve(
             raise HTTPException(status_code=422, detail=_GV_INVALID_DETAIL)
 
         sv_seen = topic.sinh_vien_id
+        sv = topic.sinh_vien
         stmt = (
             update(DeTai)
             .where(DeTai.id == topic_id)
@@ -139,19 +175,29 @@ def approve(
             .where(DeTai.sinh_vien_id == sv_seen)
             .values(trang_thai=DA_PHAN_CONG, giang_vien_id=giang_vien_id)
         )
+        events.append(
+            (
+                sv.tai_khoan_id,
+                DE_TAI_PHAN_CONG,
+                f"Đề tài '{ten}' đã được duyệt — GVHD: {_gv_label(gv)}",
+            )
+        )
+        events.append(
+            (
+                gv.tai_khoan_id,
+                DE_TAI_PHAN_CONG,
+                f"Bạn được phân công hướng dẫn {sv.ho_ten or ''} — đề tài '{ten}'",
+            )
+        )
 
     result = db.execute(stmt)
-    db.commit()
-
     if result.rowcount == 0:
-        # Không phải check-then-act: UPDATE đã tự quyết định thất bại (đề tài
-        # đã bị người khác duyệt/từ chối hoặc SV vừa đổi) — đọc lại chỉ để
-        # chọn đúng thông điệp (T-02-36).
-        db.expire_all()
-        fresh = db.get(DeTai, topic_id)
-        if fresh is None:
-            raise HTTPException(status_code=404, detail=_TOPIC_NOT_FOUND_DETAIL)
-        raise HTTPException(status_code=409, detail=_NOT_PENDING_DETAIL)
+        raise _refused(db, topic_id)
+
+    # D-08/T-03-39: thông báo và thay đổi trạng thái chung MỘT commit.
+    for tai_khoan_id, loai, noi_dung in events:
+        notifications.create(db, tai_khoan_id, loai, noi_dung, lien_ket=_lien_ket(topic_id))
+    db.commit()
 
     return topics_service.get_topic(db, user, topic_id)
 
@@ -159,6 +205,18 @@ def approve(
 def reject(db: Session, user: CurrentUser, topic_id: int, ly_do: str) -> TopicOut:
     """UC1.3/A1: lý do bắt buộc, lưu vào de_tai.ly_do_tu_choi; cột sinh
     sinh_vien_id_dang_hoat_dong tự giải phóng SV ngay khi trang_thai=TU_CHOI."""
+    # NOTF-01: một db.get để biết người đề xuất và tên đề tài cho thông báo —
+    # KHÔNG dùng để quyết định; UPDATE có điều kiện vẫn là nơi quyết định.
+    topic = db.get(DeTai, topic_id)
+    recipient: int | None = None
+    ten = ""
+    if topic is not None:
+        ten = topic.ten_de_tai
+        if topic.loai_nguoi_de_xuat == SINH_VIEN and topic.sinh_vien is not None:
+            recipient = topic.sinh_vien.tai_khoan_id
+        elif topic.giang_vien is not None:
+            recipient = topic.giang_vien.tai_khoan_id
+
     stmt = (
         update(DeTai)
         .where(DeTai.id == topic_id)
@@ -166,13 +224,17 @@ def reject(db: Session, user: CurrentUser, topic_id: int, ly_do: str) -> TopicOu
         .values(trang_thai=TU_CHOI, ly_do_tu_choi=ly_do)
     )
     result = db.execute(stmt)
-    db.commit()
-
     if result.rowcount == 0:
-        db.expire_all()
-        fresh = db.get(DeTai, topic_id)
-        if fresh is None:
-            raise HTTPException(status_code=404, detail=_TOPIC_NOT_FOUND_DETAIL)
-        raise HTTPException(status_code=409, detail=_NOT_PENDING_DETAIL)
+        raise _refused(db, topic_id)
+
+    if recipient is not None:
+        notifications.create(
+            db,
+            recipient,
+            DE_TAI_TU_CHOI,
+            f"Đề tài '{ten}' bị từ chối: {ly_do[:_LY_DO_MAX]}",
+            lien_ket=_lien_ket(topic_id),
+        )
+    db.commit()
 
     return topics_service.get_topic(db, user, topic_id)

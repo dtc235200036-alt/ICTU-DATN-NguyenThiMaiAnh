@@ -18,3 +18,7 @@ class NotificationPage(BaseModel):
     page: int
     page_size: int
     chua_doc: int
+
+
+class UnreadCountOut(BaseModel):
+    chua_doc: int

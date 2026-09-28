@@ -4,6 +4,7 @@ import { Outlet, matchPath, useLocation, useNavigate } from 'react-router'
 import { useQueryClient } from '@tanstack/react-query'
 
 import { collectRoutes } from '../app/registry'
+import NotificationBell from '../features/notifications/NotificationBell'
 import { api } from '../api/client'
 import { useAuthStore } from '../stores/auth'
 
@@ -23,8 +24,8 @@ function initialsOf(hoTen: string): string {
 
 /**
  * D-09/AUTH-02: khung admin dùng chung cho mọi route đã xác thực — Sider tối
- * với menu lọc theo vai trò (collectRoutes), Header có breadcrumb + người
- * dùng + Đăng xuất. Chỉ render khi đã có user (RequireAuth đảm bảo điều đó).
+ * với menu lọc theo vai trò (collectRoutes), Header có breadcrumb + chuông
+ * thông báo (NOTF-01) + người dùng + Đăng xuất. Chỉ render khi đã có user (RequireAuth đảm bảo điều đó).
  */
 export default function AppLayout() {
   const location = useLocation()
@@ -123,6 +124,7 @@ export default function AppLayout() {
         >
           <Breadcrumb items={(matchedRoute?.breadcrumb ?? []).map((label) => ({ title: label }))} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <NotificationBell />
             <Avatar style={{ backgroundColor: '#1677ff' }}>{initialsOf(user.ho_ten)}</Avatar>
             <span>{user.ho_ten}</span>
             <Tag color="blue">{ROLE_LABEL[user.vai_tro] ?? user.vai_tro}</Tag>

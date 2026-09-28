@@ -687,10 +687,39 @@ CSVEOF
   ok "Bộ môn xóa một bản ghi import -> 204, đọc lại -> 404"
 }
 
+uc0_notifications() {
+  # --- UC0.5/NOTF-01 (plan 03-07): đếm chưa đọc, riêng tư (404), đánh dấu tất cả ---
+  local status unread note_id phan_cong
+  status="$(call GET /api/notifications/unread-count "${TOKEN_SV098}")"
+  [ "$status" = "200" ] || fail "DTC225200098 không đọc được số thông báo chưa đọc (mã ${status})"
+  unread="$(jget "d['chua_doc']")"
+  [ "${unread:-0}" -gt 0 ] || fail "DTC225200098 không có thông báo chưa đọc sau cả chuỗi UC2-5 (nhận ${unread})"
+
+  status="$(call GET "/api/notifications?page_size=50" "${TOKEN_SV098}")"
+  [ "$status" = "200" ] || fail "DTC225200098 không đọc được danh sách thông báo (mã ${status})"
+  phan_cong="$(jget "sum(1 for i in d['items'] if i['loai'] == 'DE_TAI_PHAN_CONG' and i['lien_ket'] == '/de-tai/${DE_TAI_ID}')")"
+  [ "$phan_cong" = "1" ] || fail "DTC225200098 không có đúng một thông báo DE_TAI_PHAN_CONG cho đề tài ${DE_TAI_ID} (nhận ${phan_cong})"
+  note_id="$(jget "d['items'][0]['id']")"
+  ok "DTC225200098 có ${unread} thông báo chưa đọc, gồm DE_TAI_PHAN_CONG từ quyết định duyệt đề tài (NOTF-01)"
+
+  status="$(call POST "/api/notifications/${note_id}/read" "${TOKEN_SV097}")"
+  [ "$status" = "404" ] || fail "DTC225200097 đánh dấu thông báo của DTC225200098 không bị 404 (mã ${status})"
+  call GET /api/notifications/unread-count "${TOKEN_SV098}" >/dev/null
+  [ "$(jget "d['chua_doc']")" = "$unread" ] || fail "Số chưa đọc của DTC225200098 bị đổi bởi người khác"
+  ok "DTC225200097 đánh dấu thông báo của DTC225200098 -> 404, số chưa đọc không đổi"
+
+  status="$(call POST /api/notifications/read-all "${TOKEN_SV098}")"
+  [ "$status" = "204" ] || fail "DTC225200098 đánh dấu tất cả đã đọc không trả 204 (mã ${status})"
+  call GET /api/notifications/unread-count "${TOKEN_SV098}" >/dev/null
+  [ "$(jget "d['chua_doc']")" = "0" ] || fail "Sau read-all số chưa đọc của DTC225200098 khác 0"
+  ok "DTC225200098 đánh dấu tất cả đã đọc -> 204, số chưa đọc = 0"
+}
+
 setup_assigned_topic
 uc2_outline
 uc3_progress
 uc4_defense
 uc5_archive
+uc0_notifications
 
 echo "OK: e2e UC2-5 (đề cương -> tiến độ -> bảo vệ -> lưu kho -> tra cứu/quản lý kho) hoàn tất — dữ liệu đợt K98 sẽ được dọn khi script kết thúc (trap)"

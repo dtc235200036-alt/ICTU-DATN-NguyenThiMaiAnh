@@ -2,13 +2,14 @@
 KHÔNG BAO GIỜ commit — luôn được gọi bởi service khác, trong CÙNG transaction
 với thay đổi trạng thái mà nó loan báo (title_check.luu_ket_qua's add+flush
 pattern)."""
-from sqlalchemy import func, select
+from fastapi import HTTPException
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
 from app.core.deps import CurrentUser
 from app.core.timeutil import now_utc
 from app.models.thong_bao import ThongBao
-from app.schemas.notifications import NotificationOut, NotificationPage
+from app.schemas.notifications import NotificationOut, NotificationPage, UnreadCountOut
 
 
 def create(
@@ -70,3 +71,44 @@ def list_for_user(
     return NotificationPage(
         items=items, total=total, page=page, page_size=page_size, chua_doc=chua_doc
     )
+
+
+_NOT_FOUND_DETAIL = "Không tìm thấy thông báo"
+
+
+def unread_count(db: Session, user: CurrentUser) -> UnreadCountOut:
+    """D-08/T-03-41: truy vấn nhẹ cho polling 30 s — chỉ đếm dòng của người gọi."""
+    n = db.execute(
+        select(func.count())
+        .select_from(ThongBao)
+        .where(ThongBao.tai_khoan_id == user.tai_khoan_id)
+        .where(ThongBao.da_doc.is_(False))
+    ).scalar_one()
+    return UnreadCountOut(chua_doc=n)
+
+
+def mark_read(db: Session, user: CurrentUser, thong_bao_id: int) -> None:
+    """T-03-37: UPDATE có điều kiện theo chủ sở hữu — id của người khác và id
+    không tồn tại cùng trả 404, không lộ việc id đó có tồn tại hay không."""
+    result = db.execute(
+        update(ThongBao)
+        .where(ThongBao.id == thong_bao_id)
+        .where(ThongBao.tai_khoan_id == user.tai_khoan_id)
+        .values(da_doc=True)
+    )
+    # Dialect MySQL của SQLAlchemy bật CLIENT_FOUND_ROWS: rowcount là số dòng
+    # KHỚP (dòng của mình đã đọc rồi vẫn = 1), nên 0 nghĩa là không phải của mình.
+    if result.rowcount == 0:
+        db.rollback()
+        raise HTTPException(status_code=404, detail=_NOT_FOUND_DETAIL)
+    db.commit()
+
+
+def mark_all_read(db: Session, user: CurrentUser) -> None:
+    db.execute(
+        update(ThongBao)
+        .where(ThongBao.tai_khoan_id == user.tai_khoan_id)
+        .where(ThongBao.da_doc.is_(False))
+        .values(da_doc=True)
+    )
+    db.commit()

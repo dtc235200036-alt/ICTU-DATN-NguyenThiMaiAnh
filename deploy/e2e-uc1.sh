@@ -15,9 +15,14 @@ fail() {
 }
 
 DOT_DO_AN_ID=""
+START_UTC="$(date -u +%Y-%m-%dT%H:%M:%S)"
 
 cleanup() {
   if [ -n "${DOT_DO_AN_ID}" ]; then
+    # NOTF-01 (plan 03-07): duyệt/từ chối đề tài giờ tạo thông báo — chỉ xóa
+    # thông báo của 3 tài khoản dành riêng, phát sinh từ lúc script bắt đầu.
+    DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
+      "DELETE FROM thong_bao WHERE tai_khoan_id IN (SELECT id FROM tai_khoan WHERE ma_dang_nhap IN ('GV030','DTC225200099','DTC225200100')) AND thoi_diem >= '${START_UTC}';" >/dev/null 2>&1 || true
     DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
       "DELETE ct FROM chi_tiet_trung_lap ct JOIN ket_qua_kiem_tra_trung_lap kq ON kq.id = ct.ket_qua_id JOIN de_tai dt ON dt.id = kq.de_tai_id WHERE dt.dot_do_an_id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
     DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
