@@ -162,13 +162,17 @@ import os
 from sqlalchemy import create_engine, text
 engine = create_engine(os.environ['DATABASE_URL'])
 with engine.connect() as conn:
-    try:
-        conn.execute(text('SELECT COUNT(*) FROM thesis_core.tai_khoan')).scalar()
-        print('ALLOWED')
-    except Exception:
-        print('DENIED')
+    out = []
+    # T-04-17 + WR-03: không đọc thesis_core, không DDL trên thesis_ai.
+    for q in ('SELECT COUNT(*) FROM thesis_core.tai_khoan', 'CREATE TABLE thesis_ai.wr03_probe (id INT)'):
+        try:
+            conn.execute(text(q))
+            out.append('ALLOWED')
+        except Exception:
+            out.append('DENIED')
+    print('DENIED' if out == ['DENIED', 'DENIED'] else 'ALLOWED')
 " 2>/dev/null | tail -1)"
-[ "$db_probe" = "DENIED" ] || { nfr07_ok=0; echo "FAIL: tài khoản DB thesis_ai đọc được thesis_core"; }
+[ "$db_probe" = "DENIED" ] || { nfr07_ok=0; echo "FAIL: tài khoản DB thesis_ai đọc được thesis_core hoặc có DDL"; }
 record nfr07_ok "$nfr07_ok"
 record nfr07_codes "$codes"
 record nfr07_apache_code "$apache_code"
@@ -382,7 +386,7 @@ res = {
 dat = lambda b: "Đạt" if b else "**Không đạt**"
 lines = [
     ("NFR-07", "Dịch vụ AI không có đường public; thiếu khóa -> 401",
-     "Host gọi 127.0.0.1:8002; trong mạng nội bộ gọi /check-title thiếu / sai / đúng X-API-Key; tìm route trong ntma.conf và POST https://localhost/check-title; tài khoản DB thesis_ai đọc thesis_core",
+     "Host gọi 127.0.0.1:8002; trong mạng nội bộ gọi /check-title thiếu / sai / đúng X-API-Key; tìm route trong ntma.conf và POST https://localhost/check-title; tài khoản DB thesis_ai đọc thesis_core và CREATE TABLE trên thesis_ai",
      f"Host không kết nối được; mã {kq['nfr07_codes']}; không có route (Apache trả {kq['nfr07_apache_code']} là trang SPA); thesis_core: {kq['nfr07_db']}"),
     ("NFR-08", "P95 kiểm tra tên đề tài ≤ 5 s",
      f"{len(title)} lời gọi trực tiếp POST /check-title (trong container api, kèm khóa), kho {kq['index_size_tieu_de']} tiêu đề",

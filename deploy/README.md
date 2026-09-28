@@ -222,14 +222,16 @@ bash deploy/sql.sh "SELECT COUNT(*) FROM dot_do_an WHERE khoa IN ('K98','K99')" 
 Phase 4 thêm hai service vào `deploy/docker-compose.yml`:
 
 - **`ai`** — FastAPI của `ai-service/` (một worker uvicorn, chỉ mục FAISS trong bộ nhớ). Chỉ nằm trên mạng nội bộ của compose: **không publish cổng, không có route Apache**; Web API gọi `http://ai:8002` kèm header `X-API-Key`. Giới hạn bộ nhớ `AI_MEM_LIMIT` (mặc định `2g`; đo thực tế đỉnh ≈ 850 MiB). Trọng số mô hình cache trên volume **`ai-models`** (`/models`).
-- **`ai-db-init`** — chạy một lần trước `ai`: tạo schema `thesis_ai` và tài khoản MySQL `thesis_ai` chỉ có quyền trên schema đó (không đọc được `thesis_core`).
+- **`ai-db-init`** — chạy một lần trước `ai`: tạo schema `thesis_ai` và hai tài khoản MySQL chỉ có quyền trên schema đó, chỉ kết nối được từ subnet `ntma-internal` (`172.28.238.%`): `thesis_ai` (SELECT/INSERT/UPDATE/DELETE — tiến trình phục vụ request) và `thesis_ai_migrate` (DDL). Không tài khoản nào đọc được `thesis_core` (WR-03).
+- **`ai-migrate`** — one-shot, cùng image với `ai`: `alembic upgrade head` của `thesis_ai` bằng tài khoản `thesis_ai_migrate`; `ai` chỉ khởi động sau khi bước này xong và chạy bằng tài khoản `thesis_ai` (không DDL/DROP, `AI_MIGRATE_ON_START=0`).
 
 ### Biến môi trường (`deploy/.env`)
 
 | Khóa | Ý nghĩa |
 |---|---|
 | `AI_API_KEY` | Khóa nội bộ Web API ↔ Dịch vụ AI (sinh ngẫu nhiên bởi `init.sh`) |
-| `AI_DB_PASSWORD` | Mật khẩu tài khoản MySQL `thesis_ai` (sinh bởi `init.sh`) |
+| `AI_DB_PASSWORD` | Mật khẩu tài khoản MySQL `thesis_ai` — chỉ DML (sinh bởi `init.sh`) |
+| `AI_DB_MIGRATE_PASSWORD` | Mật khẩu tài khoản MySQL `thesis_ai_migrate` — DDL, chỉ `ai-migrate` dùng (sinh bởi `init.sh`; cài đặt cũ: chạy lại `bash deploy/init.sh` để bổ sung) |
 | `AI_CLIENT` | `http` (mặc định — gọi dịch vụ AI thật) hoặc `stub` — **phương án dự phòng D-07**: Web API quay về bộ giả lập Jaccard của Phase 2/3, không cần container `ai` hoạt động |
 | `AI_STUB_MODE` | Chỉ có hiệu lực khi `AI_CLIENT=stub`: `normal` hoặc `loi` (mô phỏng dịch vụ AI không phản hồi, UC0.6/UC0.7 - E2) |
 | `AI_MODEL_PROFILE` | Mô hình embedding đã chốt: `bkai` (`bkai-foundation-models/vietnamese-bi-encoder` + tách từ underthesea); `e5` là phương án thay thế |

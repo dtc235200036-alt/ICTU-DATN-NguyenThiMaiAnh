@@ -226,14 +226,18 @@ from sqlalchemy import create_engine, text
 engine = create_engine(os.environ['DATABASE_URL'])
 with engine.connect() as conn:
     conn.execute(text('SELECT COUNT(*) FROM thesis_ai.chunk')).scalar()
-    try:
-        conn.execute(text('SELECT COUNT(*) FROM thesis_core.tai_khoan')).scalar()
-        print('ALLOWED')
-    except Exception:
-        print('DENIED')
+    out = []
+    # T-04-17 + WR-03: không đọc thesis_core, không DDL/DROP trên thesis_ai.
+    for q in ('SELECT COUNT(*) FROM thesis_core.tai_khoan', 'CREATE TABLE thesis_ai.wr03_probe (id INT)', 'DROP TABLE thesis_ai.embedding'):
+        try:
+            conn.execute(text(q))
+            out.append('ALLOWED')
+        except Exception:
+            out.append('DENIED')
+    print(' '.join(out))
 " 2>/dev/null | tail -1)"
-  [ "$db_probe" = "DENIED" ] || fail "Tài khoản DB thesis_ai đọc được thesis_core (nhận '${db_probe}')"
-  ok "Tài khoản DB thesis_ai chỉ có quyền trên thesis_ai (thesis_core bị từ chối)"
+  [ "$db_probe" = "DENIED DENIED DENIED" ] || fail "Tài khoản DB thesis_ai: thesis_core / CREATE / DROP phải bị từ chối (nhận '${db_probe}')"
+  ok "Tài khoản DB thesis_ai chỉ có DML trên thesis_ai (thesis_core, CREATE, DROP bị từ chối — WR-03)"
 }
 
 # --- ai_title (SC1, AISV-03, AISV-02 NFC=NFD) --------------------------------

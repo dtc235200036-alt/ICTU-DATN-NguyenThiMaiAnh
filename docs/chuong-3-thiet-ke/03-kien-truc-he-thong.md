@@ -32,7 +32,7 @@ Một máy chủ Linux chạy cả ba tiến trình: Apache (443/80), uvicorn We
 | Apache ↔ Web API | HTTP nội bộ (proxy_pass tới 127.0.0.1:8001) | JWT người dùng (Bearer, trong Authorization header, xác thực ở Web API) | REST JSON, multipart (upload file) |
 | Web API ↔ Dịch vụ AI | HTTP nội bộ (httpx tới 127.0.0.1:8002) | API key nội bộ tĩnh (header `X-API-Key`) — **JWT người dùng dừng lại ở Web API, không bao giờ được chuyển tiếp** | REST JSON, chỉ văn bản (text đã trích xuất) — không bao giờ gửi file |
 | Web API ↔ `thesis_core` | SQLAlchemy ORM qua driver MySQL (127.0.0.1:3306) | Tài khoản DB riêng của Web API | SQL |
-| Dịch vụ AI ↔ `thesis_ai` | SQLAlchemy ORM qua driver MySQL (127.0.0.1:3306) | Tài khoản DB riêng của Dịch vụ AI | SQL |
+| Dịch vụ AI ↔ `thesis_ai` | SQLAlchemy ORM qua driver MySQL (127.0.0.1:3306) | Tài khoản DB riêng của Dịch vụ AI, đặc quyền tối thiểu: `thesis_ai` chỉ SELECT/INSERT/UPDATE/DELETE khi phục vụ; migration chạy riêng bằng `thesis_ai_migrate` (DDL) trước khi dịch vụ khởi động | SQL |
 | Web API ↔ lưu trữ tệp | Ghi/đọc file hệ thống (local disk) | Quyền hệ điều hành của tiến trình Web API | Byte nhị phân DOCX/PDF |
 
 ### 3.3.5. Hợp đồng API dịch vụ AI

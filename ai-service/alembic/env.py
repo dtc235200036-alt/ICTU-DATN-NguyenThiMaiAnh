@@ -1,3 +1,4 @@
+import os
 from logging.config import fileConfig
 
 from alembic import context
@@ -16,8 +17,11 @@ target_metadata = Base.metadata
 # URL của schema thesis_ai lấy từ Settings (giống backend) — không bao giờ ghi
 # vào alembic.ini.
 if not config.get_main_option("sqlalchemy.url"):
+    # WR-03: service ai-migrate chỉ có DATABASE_URL (tài khoản DDL), không có
+    # AI_API_KEY — đọc thẳng biến môi trường, Settings chỉ là dự phòng.
+    url = os.environ.get("DATABASE_URL") or get_settings().DATABASE_URL
     # "%" phải nhân đôi vì alembic.ini dùng configparser interpolation.
-    config.set_main_option("sqlalchemy.url", get_settings().DATABASE_URL.replace("%", "%%"))
+    config.set_main_option("sqlalchemy.url", url.replace("%", "%%"))
 
 
 def run_migrations_offline() -> None:

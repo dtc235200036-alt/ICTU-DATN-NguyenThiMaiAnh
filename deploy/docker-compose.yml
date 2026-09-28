@@ -87,14 +87,17 @@ services:
       start_period: 20s
     restart: unless-stopped
 
-  # D-07 / §3.2.1: tạo schema thesis_ai + tài khoản thesis_ai (chỉ quyền trên
-  # thesis_ai.*) — one-shot, idempotent, chạy lại mỗi lần `up`.
+  # D-07 / §3.2.1: tạo schema thesis_ai + hai tài khoản chỉ quyền trên
+  # thesis_ai.* (WR-03: thesis_ai = DML cho tiến trình phục vụ, thesis_ai_migrate
+  # = DDL cho ai-migrate; chỉ từ subnet ntma-internal) — one-shot, idempotent.
   ai-db-init:
     image: mysql:8.4
     entrypoint: ["bash", "/init-thesis-ai.sh"]
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?}
       AI_DB_PASSWORD: ${AI_DB_PASSWORD:?}
+      AI_DB_MIGRATE_PASSWORD: ${AI_DB_MIGRATE_PASSWORD:?}
+      AI_DB_CLIENT_HOST: "172.28.238.%"
       MYSQL_HOST: mysql
     volumes:
       - ./mysql/init-thesis-ai.sh:/init-thesis-ai.sh:ro
@@ -109,11 +112,32 @@ services:
   # bộ (expose, không `ports:`), không có route Apache, mọi endpoint trừ
   # /health đòi X-API-Key. CPU-only, một worker, trần bộ nhớ 2 GiB, trọng số
   # mô hình cache trên volume ai-models (lần đầu tải từ Hugging Face).
+  # WR-03: migration thesis_ai chạy một lần bằng tài khoản DDL, trước khi `ai`
+  # khởi động bằng tài khoản chỉ có DML (cùng image với `ai`).
+  ai-migrate:
+    build:
+      context: ../ai-service
+    image: ntma-ai
+    command: ["migrate"]
+    environment:
+      DATABASE_URL: mysql+pymysql://thesis_ai_migrate:${AI_DB_MIGRATE_PASSWORD:?}@mysql:3306/thesis_ai?charset=utf8mb4
+    networks:
+      - ntma-internal
+    depends_on:
+      mysql:
+        condition: service_healthy
+      ai-db-init:
+        condition: service_completed_successfully
+    restart: "no"
+
   ai:
     build:
       context: ../ai-service
+    image: ntma-ai
     environment:
       DATABASE_URL: mysql+pymysql://thesis_ai:${AI_DB_PASSWORD:?}@mysql:3306/thesis_ai?charset=utf8mb4
+      # WR-03: tài khoản thesis_ai không có DDL — migration do ai-migrate chạy.
+      AI_MIGRATE_ON_START: "0"
       AI_API_KEY: ${AI_API_KEY:?}
       # Mô hình chốt sau bake-off (tools/bakeoff/ket-qua.json: chon = bkai).
       AI_MODEL_PROFILE: ${AI_MODEL_PROFILE:-bkai}
@@ -137,7 +161,7 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-      ai-db-init:
+      ai-migrate:
         condition: service_completed_successfully
     restart: unless-stopped
 
