@@ -39,9 +39,9 @@
 
 ### Quản lý tiến độ (UC3)
 
-- [ ] **PROG-01**: SV nộp báo cáo tiến độ theo các mốc cố định của đợt (nội dung + file đính kèm tùy chọn)
-- [ ] **PROG-02**: GVHD nhận xét và đánh giá từng báo cáo tiến độ
-- [ ] **PROG-03**: Bộ môn xem dashboard tiến độ tất cả SV, đánh dấu SV trễ mốc
+- [x] **PROG-01**: SV nộp báo cáo tiến độ theo các mốc cố định của đợt (nội dung + file đính kèm tùy chọn)
+- [x] **PROG-02**: GVHD nhận xét và đánh giá từng báo cáo tiến độ
+- [x] **PROG-03**: Bộ môn xem dashboard tiến độ tất cả SV, đánh dấu SV trễ mốc
 
 ### Quản lý bảo vệ (UC4)
 
@@ -131,9 +131,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OUTL-01 | Phase 3 | Complete |
 | OUTL-02 | Phase 3 | Complete |
 | OUTL-03 | Phase 3 | Complete |
-| PROG-01 | Phase 3 | Pending |
-| PROG-02 | Phase 3 | Pending |
-| PROG-03 | Phase 3 | Pending |
+| PROG-01 | Phase 3 | Complete |
+| PROG-02 | Phase 3 | Complete |
+| PROG-03 | Phase 3 | Complete |
 | DEFN-01 | Phase 3 | Complete |
 | DEFN-02 | Phase 3 | Complete |
 | DEFN-03 | Phase 3 | Complete |

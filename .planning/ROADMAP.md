@@ -125,7 +125,7 @@ Plans:
   4. Đồ án đã chốt kết quả tự xuất hiện trong kho với đủ metadata; người dùng tìm/lọc kho theo khóa, từ khóa, GVHD và xem chi tiết; Bộ môn thêm/sửa/xóa và import bản ghi các khóa cũ, mỗi bản ghi mới phát sinh lời gọi index sang AI client
   5. Người dùng thấy thông báo in-app (số chưa đọc + danh sách) khi đề tài/đề cương được duyệt hoặc từ chối, khi có nhận xét mới, và khi được phân vào hội đồng hoặc có lịch bảo vệ
 
-**Plans**: 5/7 plans executed (tuần tự — dùng chung một stack Docker Compose và schema MySQL test; thứ tự theo D-09: đề cương → bảo vệ → kho, rồi tiến độ và thông báo)
+**Plans**: 6/7 plans executed (tuần tự — dùng chung một stack Docker Compose và schema MySQL test; thứ tự theo D-09: đề cương → bảo vệ → kho, rồi tiến độ và thông báo)
 Plans:
 **Wave 1**
 - [x] 03-01-PLAN.md — TRACER: SV nộp đề cương → lưu (volume riêng) + trích xuất → kiểm tra stub nền DANG_KIEM_TRA→HOAN_TAT → GVHD duyệt → thông báo (Alembic 0006, cột bổ sung noi_dung_trich_xuat/trich_xuat_loi ghi ngược ERD); vòng yêu cầu sửa, tải file, kiểm tra lại, 4 test; deploy/e2e-uc2-5.sh
@@ -143,7 +143,7 @@ Plans:
 - [x] 03-05-PLAN.md — Kho đồ án: tìm/lọc theo khóa, từ khóa, GVHD, xem chi tiết + tải báo cáo; Bộ môn thêm/sửa/xóa, index lại, import CSV khóa cũ (MH-13)
 
 **Wave 6** *(blocked on Wave 5 completion)*
-- [ ] 03-06-PLAN.md — Tiến độ: Bộ môn thiết lập mốc, SV nộp báo cáo theo mốc (file tùy chọn), GVHD nhận xét/đánh giá, dashboard tiến độ toàn khoa đánh dấu SV trễ mốc (Alembic 0009, MH-10)
+- [x] 03-06-PLAN.md — Tiến độ: Bộ môn thiết lập mốc, SV nộp báo cáo theo mốc (file tùy chọn), GVHD nhận xét/đánh giá, dashboard tiến độ toàn khoa đánh dấu SV trễ mốc (Alembic 0009, MH-10)
 
 **Wave 7** *(blocked on Wave 6 completion)*
 - [ ] 03-07-PLAN.md — Chuông thông báo (số chưa đọc, danh sách, đánh dấu đã đọc, polling 30 s) + thông báo duyệt/từ chối đề tài; widget Phase 3 trên dashboard MH-02/03/04; smoke + e2e + README demo UC2–UC5
@@ -239,6 +239,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Analysis & Design | 6/7 | In Progress|  |
 | 2. Platform, RBAC & Topic Management | 6/6 | In Progress|  |
-| 3. Outline, Progress, Defense & Archive | 5/7 | In Progress|  |
+| 3. Outline, Progress, Defense & Archive | 6/7 | In Progress|  |
 | 4. AI Similarity Service | 0/TBD | Not started | - |
 | 5. System Verification & Defense Package | 0/TBD | Not started | - |

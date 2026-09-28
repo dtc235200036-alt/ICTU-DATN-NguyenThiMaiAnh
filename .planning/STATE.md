@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 3
 current_phase_name: Outline, Progress, Defense & Archive
 status: executing
-stopped_at: Completed 03-05-PLAN.md (UC5.1/5.3/5.4 archive search, maintenance, CSV import)
-last_updated: "2026-09-28T04:26:14.225Z"
+stopped_at: "Completed 03-06-PLAN.md (UC3 progress: milestones, reports, GVHD review, faculty dashboard)"
+last_updated: "2026-09-28T06:21:53.207Z"
 last_activity: 2026-09-28
 last_activity_desc: Phase 3 plan 03-04 complete (UC4.3-4.5 scoring/finalize + UC5.2 auto-archive, 2/2 tasks)
-state_head: 98c5285ae9bc1d0001dcd4279f7be95a2127a541
+state_head: 1d96bae6a41b1f11b518e59b548d2c6264debed1
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 27
-  completed_plans: 21
+  total_plans: 35
+  completed_plans: 22
   percent: 0
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-09-27)
 ## Current Position
 
 Phase: 3 (Outline, Progress, Defense & Archive) — EXECUTING
-Plan: 6 of 7
+Plan: 7 of 7
 Status: Ready to execute
 Last activity: 2026-09-28 — Plan 03-04 complete (committee scoring, chốt, auto-archive + ingest)
 
@@ -73,6 +73,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03 P03 | 38min | 2 tasks | 13 files |
 | Phase 03 P04 | 22min | 2 tasks | 17 files |
 | Phase 03 P05 | 20min | 2 tasks | 11 files |
+| Phase 03 P06 | 16min | 2 tasks | 21 files |
 
 ## Accumulated Context
 
@@ -132,6 +133,9 @@ Recent decisions affecting current work:
 - [Phase 03]: 03-05: Manual/imported archive records are nguon IMPORT without file; any update resets CHUA_INDEX and re-ingests in background
 - [Phase 03]: 03-05: CSV import partial success — per-row errors with physical line number, valid rows in one transaction; ';' fallback + blank rows skipped
 - [Phase 03]: 03-05: DELETE /api/archive removes the thesis_core row only — AI-side delete is a Phase 4 contract gap (§3.3.5 has no /delete)
+- [Phase 03]: 03-06: D-05 late status computed on read by trang_thai_moc (VN date); SV trễ mốc = any NOP_TRE/TRE_MOC
+- [Phase 03]: 03-06: final report (UC4.1) not gated on milestone completion — lateness tracked by UC3.4 only
+- [Phase 03]: 03-06: bao_cao_tien_do.tai_lieu_do_an_id additive column; resubmit without file keeps previous attachment, new file = new BAO_CAO_TIEN_DO version
 
 ### Pending Todos
 
@@ -155,6 +159,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-28T04:26:14.177Z
-Stopped at: Completed 03-05-PLAN.md (UC5.1/5.3/5.4 archive search, maintenance, CSV import)
+Last session: 2026-09-28T06:21:53.157Z
+Stopped at: Completed 03-06-PLAN.md (UC3 progress: milestones, reports, GVHD review, faculty dashboard)
 Resume file: None
