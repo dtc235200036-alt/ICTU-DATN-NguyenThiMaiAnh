@@ -1,0 +1,31 @@
+{
+  "ten": "Ảnh chụp chương 4 — 5 UC × 3 vai trò (1440 px)",
+  "buoc": [
+    {
+      "id": "uc0-tong-quan-bo-mon",
+      "mo_ta": "Bộ môn — trang tổng quan (MH-04)",
+      "vai_tro": "bomon",
+      "hanh_dong": [
+        {"mo": "/tong-quan"},
+        {"cho_chu": "Tổng quan"},
+        {"chup": true}
+      ],
+      "man_hinh_mong_doi": "Thống kê toàn khoa của Bộ môn"
+    },
+    {
+      "id": "uc1-sv-canh-bao-trung-ten",
+      "mo_ta": "SV DTC225200011 nhập tên diễn đạt lại một đề tài kho — cảnh báo trùng tên (MH-06)",
+      "vai_tro": "DTC225200011",
+      "hanh_dong": [
+        {"mo": "/de-tai/de-xuat"},
+        {"cho_chu": "Thông tin đề tài"},
+        {"go": {"o": "Tên đề tài", "chu": "Sử dụng SQL Server để hạch toán thu chi doanh nghiệp cho công ty cổ phần Hoàng Long"}},
+        {"cho_chu": "Phát hiện 1 đề tài tương tự trong kho", "toi_da_giay": 10},
+        {"cho_chu": "Ứng dụng SQL Server trong quản lý kế toán tại công ty CP Hoàng Long"},
+        {"cho_chu": "Kho đồ án"},
+        {"chup": true}
+      ],
+      "man_hinh_mong_doi": "Cảnh báo vàng: nguồn Kho đồ án, K21, tỷ lệ tương đồng ≈ 82 %"
+    }
+  ]
+}
