@@ -4,7 +4,7 @@ SessionLocal RIÊNG (không bao giờ dùng session của request) và PHẢI lu
 thúc ở HOAN_TAT hoặc LOI — không bao giờ để lại DANG_KIEM_TRA
 (trang-thai-kiem-tra-trung-lap.puml)."""
 import logging
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from sqlalchemy import select, update
 from sqlalchemy.exc import NoResultFound
@@ -78,41 +78,58 @@ def _label_for(db: Session, ref_id: int) -> str:
     return label[:255]
 
 
-def _mark_loi(task_db: Session, ket_qua_id: int) -> None:
+def _mark_loi(task_db: Session, ket_qua_id: int, stamp: datetime | None = None) -> None:
+    """`stamp` (WR-05): chỉ lật LOI nếu bản ghi vẫn thuộc về lần chạy này —
+    một lần chạy cũ thất bại muộn không được đè lên lần kiểm tra lại mới."""
     stmt = (
         update(KetQuaKiemTraTrungLap)
         .where(KetQuaKiemTraTrungLap.id == ket_qua_id)
         .where(KetQuaKiemTraTrungLap.trang_thai == DANG_KIEM_TRA)
-        .values(trang_thai=LOI)
     )
-    task_db.execute(stmt)
+    if stamp is not None:
+        stmt = stmt.where(KetQuaKiemTraTrungLap.thoi_diem == stamp)
+    task_db.execute(stmt.values(trang_thai=LOI))
     task_db.commit()
 
 
 def run(ket_qua_id: int) -> None:
     """Chạy nền sau response 202 — mở SessionLocal riêng, broad except cố ý:
     BẤT KỲ lỗi gì cũng phải chuyển bản ghi sang LOI, không bao giờ để lại
-    DANG_KIEM_TRA (Pitfall 1, 03-RESEARCH.md)."""
+    DANG_KIEM_TRA (Pitfall 1, 03-RESEARCH.md).
+
+    WR-05 — dấu sở hữu: `thoi_diem` đọc từ DB lúc bắt đầu là dấu của lần chạy
+    (create_pending/request_recheck đặt mới mỗi lần). Kết quả chỉ được ghi
+    khi UPDATE có điều kiện (DANG_KIEM_TRA + đúng dấu) khớp đúng 1 dòng; nếu
+    không (lần chạy đã hết hạn -> LOI, hoặc đã bị một lần kiểm tra lại thay
+    thế) thì rollback — xóa/chèn chi tiết nằm CÙNG transaction ngắn đó, nên
+    không bao giờ còn chi tiết trên bản ghi LOI hay chi tiết đan xen giữa hai
+    lần chạy. Lời gọi AI nằm ngoài transaction ghi."""
     task_db = SessionLocal()
+    stamp: datetime | None = None
     try:
         ket_qua = task_db.get(KetQuaKiemTraTrungLap, ket_qua_id)
         if ket_qua is None or ket_qua.tai_lieu_do_an_id is None:
             return
+        if ket_qua.trang_thai != DANG_KIEM_TRA:
+            return
+        stamp = ket_qua.thoi_diem
         doc = task_db.get(TaiLieuDoAn, ket_qua.tai_lieu_do_an_id)
         if doc is None or doc.trich_xuat_loi or not doc.noi_dung_trich_xuat:
-            _mark_loi(task_db, ket_qua_id)
+            _mark_loi(task_db, ket_qua_id, stamp)
             return
+        doc_id, text = doc.id, doc.noi_dung_trich_xuat
+        # Kết thúc transaction đọc trước lời gọi AI (có thể tới hàng chục giây).
+        task_db.commit()
 
-        # Xóa chi tiết cũ (trường hợp kiểm tra lại — task 2 recheck) trước
-        # khi chèn lại, tránh trùng lặp dòng chi_tiet_trung_lap.
+        raw = get_ai_client(task_db).check_document(doc_id, text)
+
+        # Xóa chi tiết cũ rồi chèn lại trong CÙNG transaction với UPDATE có
+        # điều kiện bên dưới (WR-05).
         task_db.execute(
             ChiTietTrungLap.__table__.delete().where(
                 ChiTietTrungLap.ket_qua_id == ket_qua_id
             )
         )
-
-        raw = get_ai_client(task_db).check_document(doc.id, doc.noi_dung_trich_xuat)
-
         for item in raw.get("chi_tiet", []):
             label = _label_for(task_db, item["ref_id"])
             task_db.add(
@@ -130,14 +147,22 @@ def run(ket_qua_id: int) -> None:
             update(KetQuaKiemTraTrungLap)
             .where(KetQuaKiemTraTrungLap.id == ket_qua_id)
             .where(KetQuaKiemTraTrungLap.trang_thai == DANG_KIEM_TRA)
+            .where(KetQuaKiemTraTrungLap.thoi_diem == stamp)
             .values(trang_thai=HOAN_TAT, ty_le_tong=raw.get("ty_le_tong", 0.0))
         )
-        task_db.execute(stmt)
+        if task_db.execute(stmt).rowcount != 1:
+            # Lần chạy đã hết hạn (LOI) hoặc bị kiểm tra lại thay thế — bỏ kết quả.
+            task_db.rollback()
+            _logger.warning(
+                "document_check.run bỏ kết quả cũ cho ket_qua_id=%s (đã hết hạn/bị thay thế)",
+                ket_qua_id,
+            )
+            return
         task_db.commit()
     except Exception:
         task_db.rollback()
         try:
-            _mark_loi(task_db, ket_qua_id)
+            _mark_loi(task_db, ket_qua_id, stamp)
         except Exception:
             task_db.rollback()
         _logger.exception("document_check.run thất bại cho ket_qua_id=%s", ket_qua_id)
