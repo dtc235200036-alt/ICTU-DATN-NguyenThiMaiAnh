@@ -61,6 +61,9 @@ _GV_INVALID_DETAIL = "Giảng viên không tồn tại hoặc đã bị khóa"
 
 _COMMITTEE_NOT_FOUND_DETAIL = "Không tìm thấy hội đồng"
 _COMMITTEE_HAS_SCORES_DETAIL = "Hội đồng đã có điểm — không thể sửa thành viên hoặc lịch"
+_COMMITTEE_HAS_SCORES_SCHEDULE_DETAIL = (
+    "Hội đồng đã có điểm — không thể đổi ngày, giờ hoặc phòng bảo vệ"
+)
 _COMMITTEE_HAS_STUDENTS_DETAIL = "Hội đồng đã có sinh viên — gỡ sinh viên trước khi xóa"
 
 _SCHEDULE_NOT_FOUND_DETAIL = "Không tìm thấy lịch bảo vệ"
@@ -78,6 +81,13 @@ _ARCHIVE_DUPLICATE_DETAIL = "Đề tài đã có trong kho đồ án"
 
 def _not_yet_detail(ngay: date) -> str:
     return f"Chưa đến ngày bảo vệ ({ngay.strftime('%d/%m/%Y')})"
+
+
+def _member_scored_detail(names: list[str]) -> str:
+    return (
+        f"Không thể thay {', '.join(names)}: giảng viên đã chấm điểm trong hội đồng này"
+        " — chỉ thay được thành viên chưa chấm"
+    )
 
 
 def _not_enough_scores_detail(n: int, m: int) -> str:
@@ -248,7 +258,12 @@ def get_final_report(db: Session, user: CurrentUser, de_tai_id: int) -> FinalRep
 # ---------------------------------------------------------------------------
 
 
-def _validate_members(db: Session, thanh_vien: list[MemberIn]) -> None:
+def _validate_members(
+    db: Session, thanh_vien: list[MemberIn], keep_ids: frozenset[int] = frozenset()
+) -> None:
+    """`keep_ids`: thành viên ĐANG có trong hội đồng (khi sửa) — vẫn được giữ
+    nếu tài khoản đã bị khóa sau khi phân công (WR-01: điểm họ đã chấm vẫn
+    hợp lệ); GV MỚI thêm vào luôn phải còn hoạt động."""
     if not (3 <= len(thanh_vien) <= 5):
         raise HTTPException(status_code=422, detail=_MEMBER_COUNT_DETAIL)
 
@@ -269,7 +284,7 @@ def _validate_members(db: Session, thanh_vien: list[MemberIn]) -> None:
             select(GiangVien.id)
             .join(TaiKhoan, TaiKhoan.id == GiangVien.tai_khoan_id)
             .where(GiangVien.id.in_(gv_ids))
-            .where(TaiKhoan.bi_khoa.is_(False))
+            .where(TaiKhoan.bi_khoa.is_(False) | GiangVien.id.in_(keep_ids))
         )
         .scalars()
         .all()
@@ -323,22 +338,29 @@ def create_committee(db: Session, payload: CommitteeIn) -> CommitteeOut:
 
 
 def update_committee(db: Session, hoi_dong_id: int, payload: CommitteeIn) -> CommitteeOut:
+    """Khóa dòng hội đồng (score() giữ khóa CHIA SẺ trên cùng dòng — WR-02).
+    WR-01: khi hội đồng ĐÃ có điểm vẫn cho Bộ môn thay thành viên CHƯA chấm
+    (vd. GV bị khóa/vắng mặt — nếu không, finalize kẹt vĩnh viễn ở "chưa đủ
+    điểm"); thành viên đã chấm không gỡ được, ngày/giờ/phòng không đổi được."""
     hoi_dong = db.execute(
         select(HoiDong).where(HoiDong.id == hoi_dong_id).with_for_update()
     ).scalar_one_or_none()
     if hoi_dong is None:
         raise HTTPException(status_code=404, detail=_COMMITTEE_NOT_FOUND_DETAIL)
 
-    has_scores = db.execute(
-        select(func.count())
-        .select_from(DiemBaoVe)
-        .join(LichBaoVe, LichBaoVe.id == DiemBaoVe.lich_bao_ve_id)
-        .where(LichBaoVe.hoi_dong_id == hoi_dong_id)
-    ).scalar_one()
-    if has_scores > 0:
-        raise HTTPException(status_code=409, detail=_COMMITTEE_HAS_SCORES_DETAIL)
+    # Đọc có khóa (đọc bản commit mới nhất, không phải snapshot đầu request).
+    existing_members = (
+        db.execute(
+            select(ThanhVienHoiDong)
+            .where(ThanhVienHoiDong.hoi_dong_id == hoi_dong_id)
+            .with_for_update()
+        )
+        .scalars()
+        .all()
+    )
+    existing_by_gv = {m.giang_vien_id: m for m in existing_members}
 
-    _validate_members(db, payload.thanh_vien)
+    _validate_members(db, payload.thanh_vien, keep_ids=frozenset(existing_by_gv))
 
     new_gv_ids = {m.giang_vien_id for m in payload.thanh_vien}
     scheduled = _scheduled_rows_with_topic_sv(db, hoi_dong_id)
@@ -346,18 +368,33 @@ def update_committee(db: Session, hoi_dong_id: int, payload: CommitteeIn) -> Com
         if de_tai.giang_vien_id is not None and de_tai.giang_vien_id in new_gv_ids:
             raise HTTPException(status_code=409, detail=_gvhd_exclusion_detail(sv))
 
-    existing_members = (
-        db.execute(select(ThanhVienHoiDong).where(ThanhVienHoiDong.hoi_dong_id == hoi_dong_id))
-        .scalars()
-        .all()
-    )
-    existing_by_gv = {m.giang_vien_id: m for m in existing_members}
-
     schedule_changed = (
         hoi_dong.ngay_bao_ve != payload.ngay_bao_ve
         or hoi_dong.gio_bao_ve != payload.gio_bao_ve
         or hoi_dong.phong != payload.phong
     )
+
+    scorer_ids = set(
+        db.execute(
+            select(DiemBaoVe.giang_vien_id)
+            .join(LichBaoVe, LichBaoVe.id == DiemBaoVe.lich_bao_ve_id)
+            .where(LichBaoVe.hoi_dong_id == hoi_dong_id)
+            .with_for_update(read=True)
+        )
+        .scalars()
+        .all()
+    )
+    if scorer_ids:
+        if schedule_changed:
+            raise HTTPException(status_code=409, detail=_COMMITTEE_HAS_SCORES_SCHEDULE_DETAIL)
+        scored_removed = sorted((existing_by_gv.keys() - new_gv_ids) & scorer_ids)
+        if scored_removed:
+            names = [
+                (gv.ho_ten if gv is not None and gv.ho_ten else f"GV #{gv_id}")
+                for gv_id in scored_removed
+                for gv in [db.get(GiangVien, gv_id)]
+            ]
+            raise HTTPException(status_code=409, detail=_member_scored_detail(names))
 
     hoi_dong.ten_hoi_dong = payload.ten_hoi_dong
     hoi_dong.ngay_bao_ve = payload.ngay_bao_ve

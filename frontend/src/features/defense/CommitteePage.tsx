@@ -362,7 +362,7 @@ export default function CommitteePage() {
                       name="ngay_bao_ve"
                       rules={[{ required: true, message: 'Chọn ngày' }]}
                     >
-                      <Input type="date" />
+                      <Input type="date" disabled={hasScores} />
                     </Form.Item>
                   </Col>
                   <Col xs={12} md={5}>
@@ -371,7 +371,7 @@ export default function CommitteePage() {
                       name="gio_bao_ve"
                       rules={[{ required: true, message: 'Chọn giờ' }]}
                     >
-                      <Input type="time" />
+                      <Input type="time" disabled={hasScores} />
                     </Form.Item>
                   </Col>
                   <Col xs={24} md={4}>
@@ -380,7 +380,7 @@ export default function CommitteePage() {
                       name="phong"
                       rules={[{ required: true, message: 'Nhập phòng' }]}
                     >
-                      <Input />
+                      <Input disabled={hasScores} />
                     </Form.Item>
                   </Col>
                 </Row>
@@ -444,10 +444,15 @@ export default function CommitteePage() {
                 </Form.List>
 
                 <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-                  <Tooltip title={hasScores ? 'Hội đồng đã có điểm — không thể sửa' : undefined}>
+                  <Tooltip
+                    title={
+                      hasScores
+                        ? 'Hội đồng đã có điểm — chỉ thay được thành viên chưa chấm; không đổi ngày, giờ, phòng'
+                        : undefined
+                    }
+                  >
                     <Button
                       type="primary"
-                      disabled={hasScores}
                       loading={saveMutation.isPending}
                       onClick={() => void handleSave()}
                     >

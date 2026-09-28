@@ -399,8 +399,33 @@ def test_scoring_is_committee_scoped_and_finalize_is_one_way(
     me = client.get("/api/defense/me", headers=auth_headers(sv)).json()
     assert me["lich"]["ten_hoi_dong"] == "Hội đồng chấm 1" and me["ket_qua"] is None
 
+    # WR-01: đã có điểm vẫn thay được thành viên CHƯA chấm (C -> D); không gỡ
+    # được thành viên đã chấm, không đổi được phòng/giờ
+    def _put_hd1(members, phong="P302"):
+        return client.put(
+            f"/api/defense/committees/{hd1.id}",
+            headers=auth_headers(bomon),
+            json={
+                "ten_hoi_dong": "Hội đồng chấm 1",
+                "ngay_bao_ve": today.isoformat(),
+                "gio_bao_ve": "08:00",
+                "phong": phong,
+                "thanh_vien": [
+                    {"giang_vien_id": g.giang_vien_id, "vai_tro": r}
+                    for g, r in zip(members, ["CHU_TICH", "THU_KY", "UY_VIEN"])
+                ],
+            },
+        )
+
+    resp = _put_hd1([gv_d, gv_b, gv_c])
+    assert resp.status_code == 409 and "đã chấm điểm" in resp.json()["detail"], resp.text
+    assert _put_hd1([gv_a, gv_b, gv_d], phong="P999").status_code == 409
+    resp = _put_hd1([gv_a, gv_b, gv_d])
+    assert resp.status_code == 200, resp.text
+    assert _score(gv_c, 9.0).status_code == 403
+
     ingest_before = len(INGEST_LOG)
-    assert _score(gv_c, 9.0).status_code == 200
+    assert _score(gv_d, 9.0).status_code == 200
     resp = client.post(f"/api/defense/schedules/{lich_id}/finalize", headers=auth_headers(bomon))
     assert resp.status_code == 200, resp.text
     body = resp.json()
