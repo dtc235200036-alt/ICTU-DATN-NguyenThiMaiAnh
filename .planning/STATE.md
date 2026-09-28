@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 3
 current_phase_name: Outline, Progress, Defense & Archive
 status: verifying
-stopped_at: Completed 03-07-PLAN.md
-last_updated: "2026-09-28T06:49:08.752Z"
+stopped_at: Completed 04-05-PLAN.md
+last_updated: "2026-09-28T07:17:26.260Z"
 last_activity: 2026-09-28
-last_activity_desc: Phase 3 plan 03-07 complete (notification bell + topic-decision notifications, Phase-3 dashboards, phase gate green)
-state_head: 1e6caad071b48bd841cec9448642ef397c79481d
+last_activity_desc: Phase 4 plan 04-05 complete (compose ai service internal-only, AiClientHttp, archive title matching with calibrated thresholds, DATA-02 seeding, push-on-write, e2e-ai green)
+state_head: 8f894ecacc4152be8d896e3f1d4bde1365b9ea63
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 35
-  completed_plans: 23
+  completed_plans: 24
   percent: 0
 ---
 
@@ -75,6 +75,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03 P05 | 20min | 2 tasks | 11 files |
 | Phase 03 P06 | 16min | 2 tasks | 21 files |
 | Phase 03 P07 | 26min | 2 tasks | 20 files |
+| Phase 04 P05 | 28min | 2 tasks | 25 files |
 
 ## Accumulated Context
 
@@ -140,6 +141,10 @@ Recent decisions affecting current work:
 - [Phase 03]: 03-07: refused topic decisions roll back before any notification; approve/reject notify SV+GVHD / proposing GV / proposer in the same commit
 - [Phase 03]: 03-07: bell polls only /notifications/unread-count every 30 s (paused in hidden tabs); list loads when the dropdown opens; client navigates only to single-slash app paths
 - [Phase 03]: 03-07: dashboard<->progress use module imports to avoid an import cycle; progress.row_out shared by /tien-do-toan-khoa and the Bộ môn dashboard
+- [Phase 4]: 04-05: title-check dedup keys on the thesis — an ARCHIVE record linked to a de_tai shares the TOPIC key and the higher score wins
+- [Phase 4]: 04-05: Alembic 0010 writes calibrated defaults 67.80/10.40 + NGUONG_DOAN_TRUNG 67.70 only where tai_khoan_id IS NULL; tests pin stub-scale 50/30/80
+- [Phase 4]: 04-05: api depends on ai with service_started only; AiClientHttp maps every failure to AiServiceError (endpoint + status only)
+- [Phase 4]: 04-05: e2e cleanups purge TOPIC/ARCHIVE vectors (ai_index purge) before deleting rows so runs leave the AI index unchanged
 
 ### Pending Todos
 
@@ -163,6 +168,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-28T06:49:08.702Z
-Stopped at: Completed 03-07-PLAN.md
+Last session: 2026-09-28T07:17:26.208Z
+Stopped at: Completed 04-05-PLAN.md
 Resume file: None

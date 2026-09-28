@@ -167,18 +167,18 @@ Plans:
   4. Bộ môn đổi ngưỡng cảnh báo cho tên đề tài và cho nội dung trên UI, và lần kiểm tra kế tiếp áp dụng ngưỡng mới
   5. Dịch vụ AI không truy cập được từ bên ngoài qua Apache và từ chối request thiếu API key nội bộ; bản ghi kho mới thêm được index ngay và xuất hiện trong lần kiểm tra kế tiếp mà không phải tính lại embedding toàn kho
 
-**Plans**: 0/7 plans executed (Wave 1–2 chạy song song với Phase 3 trong worktree riêng — chỉ đụng đường dẫn mới `ai-service/`, `tools/datagen/`, `tools/bakeoff/`, `seed-data/`, `docs/chuong-4-trien-khai/`; Wave 3–5 tuần tự sau khi Phase 3 hoàn tất vì dùng chung stack Docker Compose và CSDL)
+**Plans**: 5/7 plans executed (Wave 1–2 chạy song song với Phase 3 trong worktree riêng — chỉ đụng đường dẫn mới `ai-service/`, `tools/datagen/`, `tools/bakeoff/`, `seed-data/`, `docs/chuong-4-trien-khai/`; Wave 3–5 tuần tự sau khi Phase 3 hoàn tất vì dùng chung stack Docker Compose và CSDL)
 Plans:
 **Wave 1** *(song song, độc lập Phase 3)*
-- [ ] 04-01-PLAN.md — TRACER: ai-service độc lập (FastAPI, Alembic thesis_ai, NFC + tách từ, embedding bkai/e5, FAISS + MinHash, lọc phần mẫu chung, /ingest /check-title /check-document /reindex /health, X-API-Key, image CPU ≤ 2 GiB)
-- [ ] 04-02-PLAN.md — Dữ liệu tổng hợp: 300 đề tài K18–K22 (CSV import kho) + 80 truy vấn tên + 50 file DOCX/PDF gồm 25 cặp trùng chủ đích, 30% cặp giữ lại kiểm chứng (DATA-02/03)
-- [ ] 04-03-PLAN.md — So sánh model embedding bkai vs multilingual-e5 (AUC, độ trễ CPU, RAM), chốt model theo quy tắc định trước (D-01)
+- [x] 04-01-PLAN.md — TRACER: ai-service độc lập (FastAPI, Alembic thesis_ai, NFC + tách từ, embedding bkai/e5, FAISS + MinHash, lọc phần mẫu chung, /ingest /check-title /check-document /reindex /health, X-API-Key, image CPU ≤ 2 GiB)
+- [x] 04-02-PLAN.md — Dữ liệu tổng hợp: 300 đề tài K18–K22 (CSV import kho) + 80 truy vấn tên + 50 file DOCX/PDF gồm 25 cặp trùng chủ đích, 30% cặp giữ lại kiểm chứng (DATA-02/03)
+- [x] 04-03-PLAN.md — So sánh model embedding bkai vs multilingual-e5 (AUC, độ trễ CPU, RAM), chốt model theo quy tắc định trước (D-01)
 
 **Wave 2** *(blocked on Wave 1 completion; vẫn độc lập Phase 3)*
-- [ ] 04-04-PLAN.md — Hiệu chỉnh ngưỡng trên tập hiệu chỉnh (Youden), kiểm chứng trên tập giữ lại, ablation lọc phần mẫu chung, bảng kết quả chương 4
+- [x] 04-04-PLAN.md — Hiệu chỉnh ngưỡng trên tập hiệu chỉnh (Youden), kiểm chứng trên tập giữ lại, ablation lọc phần mẫu chung, bảng kết quả chương 4
 
 **Wave 3** *(blocked on Wave 2 + Phase 3 hoàn tất)*
-- [ ] 04-05-PLAN.md — TRACER liên dịch vụ: compose `ai` nội bộ + AiClientHttp + cảnh báo trùng tên với kho 300 đề tài seed qua import, Alembic 0010 ngưỡng hiệu chỉnh, push-on-write, e2e-ai (bảo mật, tên đề tài, index tức thì)
+- [x] 04-05-PLAN.md — TRACER liên dịch vụ: compose `ai` nội bộ + AiClientHttp + cảnh báo trùng tên với kho 300 đề tài seed qua import, Alembic 0010 ngưỡng hiệu chỉnh, push-on-write, e2e-ai (bảo mật, tên đề tài, index tức thì)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 - [ ] 04-06-PLAN.md — Kiểm tra tài liệu thật (ngưỡng đoạn, loại trừ phiên bản cùng đề tài, ingest sau kiểm tra), seed 25 đồ án nguồn, e2e SC2, đo NFR-07..11
@@ -240,5 +240,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Analysis & Design | 6/7 | In Progress|  |
 | 2. Platform, RBAC & Topic Management | 6/6 | In Progress|  |
 | 3. Outline, Progress, Defense & Archive | 7/7 | In Progress|  |
-| 4. AI Similarity Service | 0/TBD | Not started | - |
+| 4. AI Similarity Service | 5/7 | In Progress|  |
 | 5. System Verification & Defense Package | 0/TBD | Not started | - |

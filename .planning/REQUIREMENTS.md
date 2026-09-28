@@ -58,9 +58,9 @@
 
 ### AI kiểm tra trùng lặp
 
-- [ ] **AISV-01**: Dịch vụ AI là service FastAPI riêng, chỉ Web API gọi được (API key nội bộ, không public qua Apache), có endpoint ingest/check-title/check-document
-- [ ] **AISV-02**: Văn bản được chuẩn hóa Unicode NFC và tách từ tiếng Việt trước khi embedding; embedding kho được tính sẵn lúc ingest, không tính lại mỗi request
-- [ ] **AISV-03**: Khi SV đăng ký/đề xuất đề tài, hệ thống so sánh tên đề tài theo ngữ nghĩa với kho và trả về top các đề tài tương tự kèm tỷ lệ % trong thời gian phản hồi theo NFR
+- [x] **AISV-01**: Dịch vụ AI là service FastAPI riêng, chỉ Web API gọi được (API key nội bộ, không public qua Apache), có endpoint ingest/check-title/check-document
+- [x] **AISV-02**: Văn bản được chuẩn hóa Unicode NFC và tách từ tiếng Việt trước khi embedding; embedding kho được tính sẵn lúc ingest, không tính lại mỗi request
+- [x] **AISV-03**: Khi SV đăng ký/đề xuất đề tài, hệ thống so sánh tên đề tài theo ngữ nghĩa với kho và trả về top các đề tài tương tự kèm tỷ lệ % trong thời gian phản hồi theo NFR
 - [ ] **AISV-04**: Khi nộp đề cương/báo cáo, hệ thống trích text DOCX/PDF, loại phần mẫu chung (tiêu đề mẫu, mục lục, tài liệu tham khảo) và phát hiện các đoạn trùng với đồ án khác trong kho
 - [ ] **AISV-05**: Kết quả kiểm tra tài liệu hiển thị tỷ lệ tương đồng tổng, danh sách đồ án trùng, và từng đoạn trùng được highlight cạnh đoạn nguồn
 - [ ] **AISV-06**: Kiểm tra tài liệu chạy bất đồng bộ; UI hiển thị trạng thái đang kiểm tra / hoàn tất
@@ -75,7 +75,7 @@
 - [x] **DEPL-01**: CSDL MySQL 8 dùng utf8mb4, quản lý schema bằng migration (PI 3.1)
 - [x] **DEPL-02**: Hệ thống chạy trên server sau Apache reverse proxy với HTTPS; client React phục vụ tĩnh, `/api` proxy sang Web API (PI 4.1)
 - [x] **DATA-01**: Seed 100 SV và 30 GV (PI 4.2)
-- [ ] **DATA-02**: Seed 300 đề tài thuộc các khóa, ingest vào dịch vụ AI (PI 4.2)
+- [x] **DATA-02**: Seed 300 đề tài thuộc các khóa, ingest vào dịch vụ AI (PI 4.2)
 - [ ] **DATA-03**: 50 file đề cương/báo cáo thử nghiệm, có các cặp trùng chủ đích (chép nguyên văn, diễn đạt lại, cùng lĩnh vực khác đề tài, không liên quan) và bảng kết quả kiểm chứng (PI 4.2)
 
 ### Quyển báo cáo
@@ -141,9 +141,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REPO-01 | Phase 3 | Complete |
 | REPO-02 | Phase 3 | Complete |
 | REPO-03 | Phase 3 | Complete |
-| AISV-01 | Phase 4 | Pending |
-| AISV-02 | Phase 4 | Pending |
-| AISV-03 | Phase 4 | Pending |
+| AISV-01 | Phase 4 | Complete |
+| AISV-02 | Phase 4 | Complete |
+| AISV-03 | Phase 4 | Complete |
 | AISV-04 | Phase 4 | Pending |
 | AISV-05 | Phase 4 | Pending |
 | AISV-06 | Phase 4 | Pending |
@@ -152,7 +152,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DEPL-01 | Phase 2 | Complete |
 | DEPL-02 | Phase 2 | Complete |
 | DATA-01 | Phase 2 | Complete |
-| DATA-02 | Phase 4 | Pending |
+| DATA-02 | Phase 4 | Complete |
 | DATA-03 | Phase 4 | Pending |
 | RPRT-01 | Phase 5 | Pending |
 | RPRT-02 | Phase 5 | Pending |
