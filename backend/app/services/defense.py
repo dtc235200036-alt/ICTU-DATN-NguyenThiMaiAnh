@@ -868,11 +868,9 @@ def add_schedule(db: Session, hoi_dong_id: int, de_tai_id: int) -> ScheduleRow:
 
 
 def remove_schedule(db: Session, lich_bao_ve_id: int) -> None:
-    lich = db.execute(
-        select(LichBaoVe).where(LichBaoVe.id == lich_bao_ve_id).with_for_update()
-    ).scalar_one_or_none()
-    if lich is None:
-        raise HTTPException(status_code=404, detail=_SCHEDULE_NOT_FOUND_DETAIL)
+    # IN-08: khóa GHI hoi_dong trước (như add_schedule) để việc đánh số lại
+    # thu_tu không đua với MAX(thu_tu)+1 của một lần xếp lịch đồng thời.
+    _hd, lich = _lock_committee_then_schedule(db, lich_bao_ve_id, shared_committee=False)
 
     has_score = db.execute(
         select(func.count()).select_from(DiemBaoVe).where(DiemBaoVe.lich_bao_ve_id == lich_bao_ve_id)
