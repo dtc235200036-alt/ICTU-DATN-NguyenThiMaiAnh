@@ -1013,7 +1013,8 @@ def render_report(nguong: dict, kq: dict) -> str:
     a("")
     a(f"Trung bình tỷ lệ tổng tăng thêm khi không lọc: **{sum(extra) / len(extra):+.2f} điểm %** "
       f"(nhỏ nhất {min(extra):+.2f}, lớn nhất {max(extra):+.2f}). Đây là phần mà mẫu chung sẽ bị tính nhầm là trùng "
-      "nếu không có bước lọc.")
+      "nếu không có bước lọc. Cột *chỉ tài liệu nộp* có thể thấp hơn cả khi lọc: kho đã được lọc nên phần mẫu chung "
+      "của bài nộp không khớp với gì mà chỉ làm tăng mẫu số, đồng thời có thể cắt ngang chuỗi câu trùng.")
     a("")
     lat = kq["latency"]
     a("### Thời gian xử lý (trong tiến trình, máy phát triển)")
@@ -1042,6 +1043,20 @@ def render_report(nguong: dict, kq: dict) -> str:
       f"{1 / max(n_cap[KIEM_CHUNG], 1):.3f}.")
     a("- **Độ trễ đo trên máy phát triển**, trong tiến trình và trên máy dùng chung; con số chính thức cho NFR-08/"
       "NFR-09 do plan 04-06 (container) và Phase 5 (server) đo.")
+    neg_pairs = [c for c in kq["cap"] if not c["ky_vong"]]
+    worst = max(neg_pairs, key=lambda c: c["ty_le_tong"])
+    a(f"- **Tỷ lệ tổng khác tỷ lệ theo đồ án nguồn.** Cặp không được kỳ vọng cảnh báo có tỷ lệ tổng cao nhất là "
+      f"{worst['ma_cap']} ({TEN_LOAI[worst['loai']].lower()}, {worst['tap']}): {worst['ty_le_tong']:.2f} % tổng nhưng "
+      f"chỉ {worst['ty_le_nguon']:.2f} % theo đồ án nguồn, vì các đoạn khớp rải rác trên nhiều đồ án khác cùng lĩnh "
+      "vực. Vì vậy quyết định cảnh báo dựa trên tỷ lệ theo **từng** đồ án (`do_an_trung`) so với ngưỡng tài liệu, còn "
+      "tỷ lệ tổng chỉ để hiển thị kèm.")
+    cau = kq["cau"]
+    a(f"- **Mức câu còn yếu với diễn đạt lại.** AUC của tín hiệu ngữ nghĩa ở mức câu trên tập hiệu chỉnh chỉ "
+      f"{ck['ngu_nghia_cau']['auc']:.4f}. Với ngưỡng cố định, tỷ lệ câu diễn đạt lại bị gắn cờ là "
+      f"{cau[HIEU_CHINH][L_DIEN_DAT]['ty_le']:.3f} (hiệu chỉnh) và {cau[KIEM_CHUNG][L_DIEN_DAT]['ty_le']:.3f} (kiểm "
+      f"chứng); tỷ lệ câu tự viết bị gắn cờ là {cau[HIEU_CHINH][L_TU_VIET]['ty_le']:.3f} và "
+      f"{cau[KIEM_CHUNG][L_TU_VIET]['ty_le']:.3f}. Phát hiện ở mức tài liệu vẫn đúng vì phần diễn đạt lại dồn thành "
+      "đoạn liền nhau cùng nguồn, nhưng từng đoạn trùng ngữ nghĩa nên được giảng viên đọc lại trước khi kết luận.")
     tit_fail = [r for r in kq["truy_van"] if r["tap"] == KIEM_CHUNG and not r["dat"]]
     if tit_fail:
         a(f"- **Tên đề tài trên tập kiểm chứng:** {len(tit_fail)} truy vấn phân loại sai ("

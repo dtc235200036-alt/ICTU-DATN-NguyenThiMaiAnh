@@ -18,15 +18,15 @@ class Settings(BaseSettings):
     APP_ENV: str = "production"
     DATABASE_URL: str
     AI_API_KEY: str
-    AI_MODEL_PROFILE: Literal["bkai", "e5", "fake"] = "bkai"
+    AI_MODEL_PROFILE: Literal["bkai", "e5", "fake"] = "bkai"  # hiệu chỉnh: calibration/nguong-de-xuat.json (2026-09-28)
     TORCH_THREADS: int = 4
 
     MAX_TEXT_CHARS: int = 2_000_000
     MAX_BODY_BYTES: int = 8 * 1024 * 1024
 
-    NGUONG_DOAN_MAC_DINH: float = 80.0
-    NGUONG_NGUYEN_VAN_MAC_DINH: float = 60.0
-    MINHASH_SHINGLE: int = 4
+    NGUONG_DOAN_MAC_DINH: float = 67.7  # hiệu chỉnh: calibration/nguong-de-xuat.json (2026-09-28)
+    NGUONG_NGUYEN_VAN_MAC_DINH: float = 88.7  # hiệu chỉnh: calibration/nguong-de-xuat.json (2026-09-28)
+    MINHASH_SHINGLE: int = 4  # hiệu chỉnh: calibration/nguong-de-xuat.json (2026-09-28)
     MINHASH_NUM_PERM: int = 128
     TOP_K_MAC_DINH: int = 5
     CHI_TIET_TOI_DA: int = 50

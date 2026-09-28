@@ -25,13 +25,13 @@ Khoa CNTT (AISV-01..05).
 | `APP_ENV` | `production` | | `test` bật `/docs` và cho phép profile `fake` |
 | `DATABASE_URL` | — (bắt buộc) | **có** | URL SQLAlchemy của `thesis_ai` (vd. `mysql+pymysql://ai:***@mysql/thesis_ai?charset=utf8mb4`) |
 | `AI_API_KEY` | — (bắt buộc, ≥ 32 ký tự) | **có** | Khóa nội bộ mà Web API gửi trong `X-API-Key` |
-| `AI_MODEL_PROFILE` | `bkai` | | `bkai` \| `e5` \| `fake` (chỉ khi `APP_ENV=test`) |
+| `AI_MODEL_PROFILE` | `bkai` | | `bkai` \| `e5` \| `fake` (chỉ khi `APP_ENV=test`); hiệu chỉnh — `calibration/nguong-de-xuat.json` (2026-09-28) |
 | `TORCH_THREADS` | `4` | | Số luồng CPU của torch |
 | `MAX_TEXT_CHARS` | `2000000` | | Trần độ dài trường `text` (422 khi vượt) |
 | `MAX_BODY_BYTES` | `8388608` | | Trần thân request (413 khi vượt, đếm byte thật) |
-| `NGUONG_DOAN_MAC_DINH` | `80.0` | | Ngưỡng ngữ nghĩa (cosine×100) khi request không gửi — plan 04-04 thay bằng giá trị hiệu chỉnh |
-| `NGUONG_NGUYEN_VAN_MAC_DINH` | `60.0` | | Ngưỡng nguyên văn (Jaccard×100) khi request không gửi |
-| `MINHASH_SHINGLE` | `4` | | k của k-gram âm tiết cho MinHash |
+| `NGUONG_DOAN_MAC_DINH` | `67.7` | | Ngưỡng ngữ nghĩa (cosine×100) khi request không gửi; hiệu chỉnh — `calibration/nguong-de-xuat.json` (2026-09-28) |
+| `NGUONG_NGUYEN_VAN_MAC_DINH` | `88.7` | | Ngưỡng nguyên văn (Jaccard×100) khi request không gửi; hiệu chỉnh — `calibration/nguong-de-xuat.json` (2026-09-28) |
+| `MINHASH_SHINGLE` | `4` | | k của k-gram âm tiết cho MinHash; hiệu chỉnh — `calibration/nguong-de-xuat.json` (2026-09-28) |
 | `MINHASH_NUM_PERM` | `128` | | Số hoán vị MinHash |
 | `TOP_K_MAC_DINH` | `5` | | `top_k` mặc định của `/check-document` |
 | `CHI_TIET_TOI_DA` | `50` | | Số đoạn trùng tối đa trả về |
@@ -147,7 +147,8 @@ khi đổi `AI_MODEL_PROFILE`), rồi dựng lại chỉ mục bộ nhớ; trả
    **[ASSUMED]** chung cho khuôn mẫu đồ án tiếng Việt (bìa, lời cam đoan, lời
    cảm ơn, mục lục và dòng dẫn chấm, danh mục hình/bảng/từ viết tắt, tiêu đề
    chương/mục, chú thích hình/bảng, tài liệu tham khảo, phụ lục, nhận xét GV)
-   **cộng** bộ phát hiện dòng ngắn lặp ≥ 3 lần và số trang (header/footer mà
+   **cộng** nhãn bìa "Đề tài:"/"Ngành:" (kể cả tên đề tài bị PDF bẻ dòng),
+   bộ phát hiện dòng ngắn lặp ≥ 3 lần không kết thúc bằng dấu câu và số trang (header/footer mà
    trích xuất PDF `page.get_text()` phía Web API để lọt). **Thay danh sách khi
    có mẫu chính thức TL-04/TL-05.**
 3. **Chia câu** (`app/nlp/chunking.py`): nối các dòng còn lại thành một dòng
@@ -158,10 +159,41 @@ khi đổi `AI_MODEL_PROFILE`), rồi dựng lại chỉ mục bộ nhớ; trả
    cosine tốt nhất qua FAISS `IndexFlatIP` (chính xác, vector chuẩn hóa L2) và
    Jaccard MinHash tốt nhất trên k-gram âm tiết (k = 4, 128 hoán vị). Gắn cờ
    `NGUYEN_VAN` khi Jaccard×100 ≥ `nguong_nguyen_van` (bằng chứng mạnh hơn nên
-   thắng), ngược lại `NGU_NGHIA` khi cosine×100 ≥ `nguong_doan`.
+   thắng), ngược lại `NGU_NGHIA` khi cosine×100 ≥ `nguong_doan`. Cờ
+   `NGU_NGHIA` chỉ được giữ khi câu nằm trong chuỗi ≥ 2 câu liên tiếp gắn cờ
+   cùng một nguồn (`MIN_RUN_NGU_NGHIA`, plan 04-04): câu tự viết theo khuôn câu
+   chung của lĩnh vực hay trùng ngữ nghĩa với một câu lẻ của đồ án khác, còn
+   phần diễn đạt lại đi thành đoạn liền nhau. Cờ `NGUYEN_VAN` đứng lẻ vẫn giữ.
 5. Chỉ mục FAISS và ma trận MinHash nằm trong bộ nhớ, **dựng lại từ
    `thesis_ai` lúc khởi động** (không encode lại; `index_metadata` phát hiện
    lệch); embedding chỉ tính khi ingest.
+
+## Ngưỡng đã hiệu chỉnh (plan 04-04)
+
+Khối dưới đây do `calibration/calibrate.py evaluate --apply` ghi lại — không sửa tay.
+Kết quả kiểm chứng đầy đủ: `docs/chuong-4-trien-khai/thu-nghiem-ai/03-hieu-chinh-nguong.md`.
+
+<!-- hieu-chinh:start -->
+Giá trị do `calibration/calibrate.py tune` khớp trên tập HIEU_CHINH (2026-09-28, mô hình `bkai-foundation-models/vietnamese-bi-encoder`), kiểm chứng bằng `evaluate`:
+
+| Ngưỡng | Giá trị (%) | Phương pháp | Dùng ở |
+|---|---:|---|---|
+| `nguong_ten_de_tai` | 67.8 | youden | Web API gửi trong `/check-title` (`cau_hinh_nguong`, plan 04-05) |
+| `nguong_doan` | 67.7 | youden | `/check-document`; mặc định `NGUONG_DOAN_MAC_DINH` |
+| `nguong_nguyen_van` | 88.7 | youden | `/check-document`; mặc định `NGUONG_NGUYEN_VAN_MAC_DINH` |
+| `nguong_tai_lieu` | 10.4 | trung_diem | Web API: cảnh báo khi tỷ lệ theo một đồ án ≥ ngưỡng (plan 04-05) |
+| `MINHASH_SHINGLE` | 4 | AUC lớn nhất trong {3, 4, 5} | chữ ký MinHash |
+
+Chạy lại (từ `ai-service/`, cần ≥ 3 GiB RAM trống, không cần docker/MySQL):
+
+```bash
+uv run python calibration/calibrate.py tune --data ../seed-data \
+  --profile-from ../tools/bakeoff/ket-qua.json --out calibration
+uv run python calibration/calibrate.py evaluate --data ../seed-data \
+  --profile-from ../tools/bakeoff/ket-qua.json --out calibration \
+  --report ../docs/chuong-4-trien-khai/thu-nghiem-ai/03-hieu-chinh-nguong.md --apply
+```
+<!-- hieu-chinh:end -->
 
 ## Ghi chú vận hành
 
