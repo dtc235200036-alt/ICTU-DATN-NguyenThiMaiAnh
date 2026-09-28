@@ -380,7 +380,7 @@ def get_ai_client(db: Session) -> AiClient:
         # D-07: dịch vụ AI thật trên mạng nội bộ (Settings đã bắt buộc URL + khóa).
         return AiClientHttp(
             settings.AI_SERVICE_URL or "",
-            settings.AI_API_KEY or "",
+            settings.AI_API_KEY.get_secret_value() if settings.AI_API_KEY else "",
             title_timeout=settings.AI_TITLE_TIMEOUT_SECONDS,
             document_timeout=settings.AI_DOCUMENT_TIMEOUT_SECONDS,
             ingest_timeout=settings.AI_INGEST_TIMEOUT_SECONDS,

@@ -1,14 +1,15 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import field_validator, model_validator
+from pydantic import SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     """Cấu hình đọc từ biến môi trường (12-factor). Không có bí mật nào có giá trị mặc định."""
 
-    model_config = SettingsConfigDict(env_file=None, extra="ignore")
+    # IN-01 (04-REVIEW): ValidationError không in giá trị đầu vào (bí mật).
+    model_config = SettingsConfigDict(env_file=None, extra="ignore", hide_input_in_errors=True)
 
     APP_ENV: str = "production"
     DATABASE_URL: str
@@ -31,7 +32,7 @@ class Settings(BaseSettings):
     AI_CLIENT: Literal["stub", "http"] = "stub"
     AI_STUB_MODE: str = "normal"
     AI_SERVICE_URL: str | None = None
-    AI_API_KEY: str | None = None
+    AI_API_KEY: SecretStr | None = None
     # 04-RESEARCH Open Question 3: NFR title ≤ 5 s, tài liệu ≤ 30 s (chạy nền),
     # ingest chạy nền sau commit nên được phép lâu hơn.
     AI_TITLE_TIMEOUT_SECONDS: float = 4.0
@@ -79,7 +80,7 @@ class Settings(BaseSettings):
         if self.AI_CLIENT == "http":
             if not self.AI_SERVICE_URL:
                 raise ValueError("AI_CLIENT=http cần AI_SERVICE_URL")
-            if not self.AI_API_KEY or len(self.AI_API_KEY) < 32:
+            if not self.AI_API_KEY or len(self.AI_API_KEY.get_secret_value()) < 32:
                 raise ValueError("AI_CLIENT=http cần AI_API_KEY có ít nhất 32 ký tự")
         return self
 

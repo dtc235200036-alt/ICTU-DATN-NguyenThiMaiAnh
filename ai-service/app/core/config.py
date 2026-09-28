@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import field_validator
+from pydantic import SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -13,11 +13,13 @@ class Settings(BaseSettings):
     04-04 thay bằng giá trị đã hiệu chỉnh.
     """
 
-    model_config = SettingsConfigDict(env_file=None, extra="ignore")
+    # IN-01 (04-REVIEW): ValidationError không bao giờ in giá trị đầu vào (khóa
+    # sai độ dài không lọt vào log container lúc khởi động).
+    model_config = SettingsConfigDict(env_file=None, extra="ignore", hide_input_in_errors=True)
 
     APP_ENV: str = "production"
     DATABASE_URL: str
-    AI_API_KEY: str
+    AI_API_KEY: SecretStr
     AI_MODEL_PROFILE: Literal["bkai", "e5", "fake"] = "bkai"  # hiệu chỉnh: calibration/nguong-de-xuat.json (2026-09-28)
     TORCH_THREADS: int = 4
 
@@ -33,8 +35,8 @@ class Settings(BaseSettings):
 
     @field_validator("AI_API_KEY")
     @classmethod
-    def _api_key_min_length(cls, v: str) -> str:
-        if len(v) < 32:
+    def _api_key_min_length(cls, v: SecretStr) -> SecretStr:
+        if len(v.get_secret_value()) < 32:
             raise ValueError("AI_API_KEY phải có ít nhất 32 ký tự")
         return v
 

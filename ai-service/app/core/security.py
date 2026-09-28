@@ -17,7 +17,7 @@ _DETAIL = "Thiếu hoặc sai API key nội bộ"
 
 
 def require_api_key(api_key: str | None = Security(_api_key_header)) -> None:
-    expected = get_settings().AI_API_KEY.encode("utf-8")
+    expected = get_settings().AI_API_KEY.get_secret_value().encode("utf-8")
     received = (api_key or "").encode("utf-8")
     if not api_key or not hmac.compare_digest(received, expected):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=_DETAIL)
