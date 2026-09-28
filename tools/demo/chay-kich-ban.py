@@ -18,6 +18,7 @@ Hành động (mỗi phần tử một khóa):
     {"bam": "chữ"} | {"bam": {"chu", "pham_vi", "hang"}}
     {"tai_len": {"o": selector input[type=file], "tep": đường dẫn (tương đối gốc repo)}}
     {"cuon": "chữ" | số}  {"phim": "Escape"}  {"cho": giây}  {"cho_on_dinh": true}
+    {"mo_http": "/duong-dan"}            mở bằng http://<host>:${HTTP_PORT:-80} (kiểm chuyển hướng sang HTTPS)
     {"url_bat_dau": "https://"}          khẳng định URL hiện tại (vd. sau chuyển hướng HTTP -> HTTPS)
     {"chup": true | "ten-tep.png" | {"tep", "toan_trang": true}}
 
@@ -40,6 +41,7 @@ import os
 import sys
 import tempfile
 import time
+import urllib.parse
 from pathlib import Path
 
 GOC = Path(__file__).resolve().parents[2]
@@ -73,6 +75,9 @@ def duong_dan_hien_thi(p: Path) -> str:
 async def chay_hanh_dong(td: TrinhDuyet, hd: dict, buoc: dict, out_dir: Path, anh: list[str]) -> None:
     if "mo" in hd:
         await td.mo(hd["mo"])
+    elif "mo_http" in hd:
+        host = urllib.parse.urlparse(td.base_url).hostname or "localhost"
+        await td.mo(f"http://{host}:{os.environ.get('HTTP_PORT', '80')}{hd['mo_http']}")
     elif "cho_chu" in hd:
         await td.cho_chu(hd["cho_chu"], float(hd.get("toi_da_giay", 15)))
     elif "cho_het_chu" in hd:
@@ -231,7 +236,8 @@ def ghi_log(p: Path, tt: dict, kich_ban: dict) -> None:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("kich_ban")
-    ap.add_argument("--base-url", default=os.environ.get("BASE_URL", "https://localhost"))
+    ap.add_argument("--base-url", default=os.environ.get(
+        "BASE_URL", f"https://localhost:{os.environ.get('HTTPS_PORT') or '443'}"))
     ap.add_argument("--out-dir", default=str(Path(tempfile.gettempdir()) / "ntma-kich-ban"))
     ap.add_argument("--json")
     ap.add_argument("--log")

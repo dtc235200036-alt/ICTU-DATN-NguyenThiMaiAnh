@@ -566,7 +566,7 @@
           "chup": true
         },
         {
-          "mo": "http://localhost/tong-quan"
+          "mo_http": "/tong-quan"
         },
         {
           "url_bat_dau": "https://"

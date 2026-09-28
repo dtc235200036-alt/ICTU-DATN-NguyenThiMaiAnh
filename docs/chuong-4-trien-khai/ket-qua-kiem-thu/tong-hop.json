@@ -1,10 +1,10 @@
 {
   "lenh": "bash deploy/verify-all.sh --report",
   "che_do": "full",
-  "commit": "b8245edeb50fc7c8717b0d647ffe81f454814277",
-  "tep_san_pham_chua_commit": 3,
-  "thoi_diem_utc": "2026-09-28T10:51:09Z",
-  "tong_giay": 259,
+  "commit": "e57ea99b028a9dc320224b2a4cfa2eba1092c8d5",
+  "tep_san_pham_chua_commit": 0,
+  "thoi_diem_utc": "2026-09-28T11:51:11Z",
+  "tong_giay": 344,
   "may": {
     "nproc": 16,
     "ram_gb": 15.3,
@@ -25,7 +25,7 @@
       "ten": "Dữ liệu thử nghiệm DATA-01/02/03",
       "lenh": "DU_LIEU_JSON='$TMP/du-lieu.json' bash deploy/verify-all.sh --buoc du-lieu",
       "trang_thai": "OK",
-      "giay": 0.6,
+      "giay": 0.7,
       "tom_tat": "3 kiểm tra OK"
     },
     {
@@ -33,7 +33,7 @@
       "ten": "Smoke test qua Apache HTTPS",
       "lenh": "bash deploy/smoke-test.sh",
       "trang_thai": "OK",
-      "giay": 3.7,
+      "giay": 3.8,
       "tom_tat": "24 kiểm tra OK; SMOKE TEST: tất cả kiểm tra đã qua."
     },
     {
@@ -42,7 +42,7 @@
       "lenh": "uv --directory backend run pytest -q",
       "trang_thai": "OK",
       "giay": 103.5,
-      "tom_tat": "53 passed, 1 warning in 101.80s (0:01:41)",
+      "tom_tat": "53 passed, 1 warning in 101.87s (0:01:41)",
       "so_test": {
         "passed": 53
       }
@@ -52,8 +52,8 @@
       "ten": "Pytest dịch vụ AI (ai-service)",
       "lenh": "uv --directory ai-service run pytest -q",
       "trang_thai": "OK",
-      "giay": 2.7,
-      "tom_tat": "8 passed, 1 warning in 1.85s",
+      "giay": 3.0,
+      "tom_tat": "8 passed, 1 warning in 2.10s",
       "so_test": {
         "passed": 8
       }
@@ -63,7 +63,7 @@
       "ten": "E2E UC1 — đề xuất/đăng ký/duyệt đề tài",
       "lenh": "bash deploy/e2e-uc1.sh",
       "trang_thai": "OK",
-      "giay": 4.0,
+      "giay": 4.1,
       "tom_tat": "14 kiểm tra OK"
     },
     {
@@ -71,7 +71,7 @@
       "ten": "E2E UC2–UC5 — đề cương, tiến độ, bảo vệ, lưu kho",
       "lenh": "bash deploy/e2e-uc2-5.sh",
       "trang_thai": "OK",
-      "giay": 15.5,
+      "giay": 15.1,
       "tom_tat": "67 kiểm tra OK"
     },
     {
@@ -79,7 +79,7 @@
       "ten": "E2E dịch vụ AI thật (SC1–SC5)",
       "lenh": "bash deploy/e2e-ai.sh",
       "trang_thai": "OK",
-      "giay": 26.0,
+      "giay": 26.5,
       "tom_tat": "30 kiểm tra OK"
     },
     {
@@ -87,7 +87,7 @@
       "ten": "Đo NFR-07..NFR-11 dịch vụ AI (kho đầy đủ)",
       "lenh": "bash deploy/ai-nfr.sh --json '$TMP/ai-nfr.json' --report docs/chuong-4-trien-khai/thu-nghiem-ai/04-hieu-nang-va-bao-mat.md",
       "trang_thai": "OK",
-      "giay": 92.9,
+      "giay": 91.5,
       "tom_tat": "5 kiểm tra OK"
     },
     {
@@ -95,7 +95,7 @@
       "ten": "Đo NFR hệ thống qua HTTPS (NFR-01..05, 08, 12..15, 17..19)",
       "lenh": "bash deploy/nfr-he-thong.sh --json '$TMP/nfr-he-thong.json'",
       "trang_thai": "OK",
-      "giay": 8.6,
+      "giay": 8.8,
       "tom_tat": "14 kiểm tra OK"
     },
     {
@@ -113,6 +113,22 @@
       "trang_thai": "OK",
       "giay": 0.4,
       "tom_tat": "3 kiểm tra OK"
+    },
+    {
+      "ma": "nfr-16",
+      "ten": "NFR-16 — màn hình chính ở 1440 px qua Chrome headless (chỉ đọc)",
+      "lenh": "NFR16_JSON='$TMP/nfr16.json' bash deploy/verify-all.sh --buoc nfr-16",
+      "trang_thai": "OK",
+      "giay": 84.8,
+      "tom_tat": "25 kiểm tra OK"
+    },
+    {
+      "ma": "trang-thai-demo",
+      "ten": "Kiểm tra trạng thái demo không đổi (hàng của tài khoản demo trước/sau)",
+      "lenh": "TRUOC='$TMP/demo-truoc.tsv' bash deploy/verify-all.sh --buoc trang-thai-demo",
+      "trang_thai": "OK",
+      "giay": 0.6,
+      "tom_tat": "1 kiểm tra OK"
     }
   ],
   "pytest": {
@@ -130,8 +146,8 @@
     "kho_de_tai": 300,
     "kho_da_index": 300,
     "kho_so_khoa": 5,
-    "index_tieu_de": 300,
-    "index_tai_lieu": 2208,
+    "index_tieu_de": 304,
+    "index_tai_lieu": 2554,
     "thieu_embedding": 0,
     "tep_thu_nghiem": 50,
     "cap_trung_lap": 25,
@@ -159,8 +175,8 @@
     {
       "ma": "NFR-01",
       "chi_tieu": "HTTP cổng 80 chuyển hướng sang HTTPS 443",
-      "cach_do": "curl http://<SERVER_NAME>/ và /tong-quan (cổng 80), đọc mã trạng thái và Location",
-      "ket_qua": "HTTP 301, Location https://<SERVER_NAME>/… (https)",
+      "cach_do": "curl http://<SERVER_NAME>:80/ và /tong-quan (cổng 80), đọc mã trạng thái và Location",
+      "ket_qua": "HTTP 301, Location https://<SERVER_NAME>:443/… (https)",
       "dat": true,
       "nguon": "deploy/nfr-he-thong.sh"
     },
@@ -215,8 +231,8 @@
     {
       "ma": "NFR-08",
       "chi_tieu": "P95 kiểm tra tên đề tài <= 5 s (kho 300 đề tài)",
-      "cach_do": "20 lời gọi trực tiếp POST /check-title trong mạng nội bộ, kho 300 tiêu đề; 20 lời gọi POST /api/topics/check-title qua Apache HTTPS (Apache -> Web API -> dịch vụ AI) bằng SV, tên từ seed-data/truy-van-ten-de-tai.csv, đo curl time_total",
-      "ket_qua": "P95 0.053 s (trực tiếp); qua HTTPS: P50 0.053 s, P95 0.057 s, max 0.061 s; 0 lỗi",
+      "cach_do": "20 lời gọi trực tiếp POST /check-title trong mạng nội bộ, kho 304 tiêu đề; 20 lời gọi POST /api/topics/check-title qua Apache HTTPS (Apache -> Web API -> dịch vụ AI) bằng SV, tên từ seed-data/truy-van-ten-de-tai.csv, đo curl time_total",
+      "ket_qua": "P95 0.053 s (trực tiếp); qua HTTPS: P50 0.052 s, P95 0.069 s, max 0.069 s; 0 lỗi",
       "dat": true,
       "nguon": "deploy/ai-nfr.sh + deploy/nfr-he-thong.sh"
     },
@@ -224,7 +240,7 @@
       "ma": "NFR-09",
       "chi_tieu": "P95 nộp -> Hoàn tất <= 30 s (20 file)",
       "cach_do": "Nộp lần lượt 20 file B khác nhau qua Apache HTTPS, thăm dò trạng thái mỗi 0,25 s",
-      "ket_qua": "P95 3.02 s, max 3.02 s; 20/20 Hoàn tất, 0 lỗi",
+      "ket_qua": "P95 3.03 s, max 3.03 s; 20/20 Hoàn tất, 0 lỗi",
       "dat": true,
       "nguon": "deploy/ai-nfr.sh"
     },
@@ -232,7 +248,7 @@
       "ma": "NFR-10",
       "chi_tieu": "API nộp trả phản hồi <= 2 s",
       "cach_do": "Thời gian phản hồi 202 của POST /api/outlines/{id}/submit (cùng 20 lần nộp)",
-      "ket_qua": "max 0.059 s, P95 0.057 s",
+      "ket_qua": "max 0.056 s, P95 0.056 s",
       "dat": true,
       "nguon": "deploy/ai-nfr.sh"
     },
@@ -247,8 +263,8 @@
     {
       "ma": "NFR-12",
       "chi_tieu": "P95 tra cứu kho / danh sách đề tài <= 1 s",
-      "cach_do": "20 lần GET /api/archive?q=…&khoa=… (kho 300 bản ghi) và 20 lần GET /api/topics với bộ lọc đợt/từ khóa/trạng thái, qua Apache HTTPS bằng Bộ môn, đo curl time_total",
-      "ket_qua": "tra cứu kho P95 0.018 s (max 0.020); danh sách đề tài P95 0.014 s (max 0.014); 0 lỗi",
+      "cach_do": "20 lần GET /api/archive?q=…&khoa=… (kho 301 bản ghi) và 20 lần GET /api/topics với bộ lọc đợt/từ khóa/trạng thái, qua Apache HTTPS bằng Bộ môn, đo curl time_total",
+      "ket_qua": "tra cứu kho P95 0.018 s (max 0.018); danh sách đề tài P95 0.018 s (max 0.021); 0 lỗi",
       "dat": true,
       "nguon": "deploy/nfr-he-thong.sh"
     },
@@ -272,17 +288,17 @@
       "ma": "NFR-15",
       "chi_tieu": "Client tĩnh, Apache proxy /api, ProxyTimeout > 30 s",
       "cach_do": "Đọc deploy/apache/ntma.conf (ProxyTimeout, DocumentRoot, ProxyPass /api/); GET / và một tệp /assets/*.js do Apache phục vụ; GET /api/health qua proxy",
-      "ket_qua": "ProxyTimeout 120 s; DocumentRoot htdocs (bản build Vite); / trả SPA (id=\"root\"), /assets/index-WxVN0tz5.js -> 200 text/javascript; /api/health qua proxy: status ok",
+      "ket_qua": "ProxyTimeout 120 s; DocumentRoot htdocs (bản build Vite); / trả SPA (id=\"root\"), /assets/index-DcuopnRD.js -> 200 text/javascript; /api/health qua proxy: status ok",
       "dat": true,
       "nguon": "deploy/nfr-he-thong.sh"
     },
     {
       "ma": "NFR-16",
       "chi_tieu": "Chrome/Edge desktop, khung 1440 px",
-      "cach_do": "Chụp toàn bộ màn hình chính bằng Chrome headless ở 1440 px (plan 05-05)",
-      "ket_qua": "Chưa đo",
-      "dat": null,
-      "nguon": "plan 05-05"
+      "cach_do": "Chrome headless (CDP) khung 1440×900 qua Apache HTTPS, 23 màn hình (uc0, uc1, uc2, uc3, uc4, uc5; vai trò Bộ môn, GV, SV, khách); mỗi màn hình đo document.documentElement.scrollWidth, bắt exception JS, lỗi console, HTTP >= 400 ngoài dự kiến",
+      "ket_qua": "23/23 màn hình OK, scrollWidth max 1440 px, lỗi: không (đo lúc 2026-09-28T11:55:31Z)",
+      "dat": true,
+      "nguon": "verify-all bước nfr-16 (tools/demo/chay-kich-ban.py --chi-doc)"
     },
     {
       "ma": "NFR-17",
@@ -296,7 +312,7 @@
       "ma": "NFR-18",
       "chi_tieu": "300 đề tài nhiều khóa, 100% đã ingest vào dịch vụ AI",
       "cach_do": "Đếm do_an_kho (IMPORT K18–K22) và trạng thái DA_INDEX; /health của dịch vụ AI (index_size_tieu_de, thieu_embedding)",
-      "ket_qua": "300 đề tài thuộc 5 khóa, 300 DA_INDEX; chỉ mục tiêu đề 300 vector, thiếu embedding 0",
+      "ket_qua": "300 đề tài thuộc 5 khóa, 300 DA_INDEX; chỉ mục tiêu đề 304 vector, thiếu embedding 0",
       "dat": true,
       "nguon": "deploy/nfr-he-thong.sh"
     },
@@ -319,23 +335,23 @@
     "nfr_08": {
       "dat": true,
       "n": 20,
-      "p50_s": 0.047,
+      "p50_s": 0.046,
       "p95_s": 0.053,
-      "max_s": 0.054
+      "max_s": 0.053
     },
     "nfr_09": {
       "dat": true,
       "n": 20,
-      "p50_s": 1.14,
-      "p95_s": 3.02,
-      "max_s": 3.02,
+      "p50_s": 1.17,
+      "p95_s": 3.03,
+      "max_s": 3.03,
       "hoan_tat": 20,
       "loi": 0
     },
     "nfr_10": {
       "dat": true,
-      "max_s": 0.059,
-      "p95_s": 0.057
+      "max_s": 0.056,
+      "p95_s": 0.056
     },
     "nfr_11": {
       "dat": true,
@@ -345,24 +361,24 @@
       "dat": true,
       "chars": 350000,
       "timeout_s": 111.5,
-      "doc_s": 40.86,
+      "doc_s": 38.85,
       "so_doan": 2333,
       "title_ms": [
-        170,
-        243,
-        196,
-        143,
-        241
+        449,
+        179,
+        176,
+        108,
+        90
       ]
     },
     "ai_mem_mb": {
       "dat": true,
-      "dinh_mib": 776,
+      "dinh_mib": 1004,
       "tran_mib": 2048,
       "oom_killed": false
     },
-    "index_size_tieu_de": 300,
-    "index_size_tai_lieu": 2208,
+    "index_size_tieu_de": 304,
+    "index_size_tai_lieu": 2554,
     "ten_model": "bkai-foundation-models/vietnamese-bi-encoder@84f9d9ada0d1"
   }
 }

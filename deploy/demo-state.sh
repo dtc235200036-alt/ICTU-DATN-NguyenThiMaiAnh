@@ -40,7 +40,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-BASE="${BASE_URL:-https://localhost}"
+BASE="${BASE_URL:-https://localhost:${HTTPS_PORT:-443}}"
 COMPOSE=(docker compose -f "${SCRIPT_DIR}/docker-compose.yml")
 
 DEMO_SV=(DTC225200011 DTC225200012 DTC225200013 DTC225200014 DTC225200015)
