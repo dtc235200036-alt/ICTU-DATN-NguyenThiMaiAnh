@@ -14,6 +14,7 @@
 #            xong, và 5 lần /check-title chen giữa (timeout 4 s) đều thành công.
 #   Bộ nhớ — container ai: đỉnh cgroup < 2048 MiB và không bị OOM-kill.
 # Dùng: bash deploy/ai-nfr.sh [--report docs/chuong-4-trien-khai/thu-nghiem-ai/04-hieu-nang-va-bao-mat.md]
+#                             [--json PATH]   (kết quả máy đọc được cho deploy/verify-all.sh)
 # (sau `bash deploy/seed-ai.sh`). Phase 5 chạy lại đúng lệnh này trên server.
 #
 # Tài khoản dành riêng: bomon, DTC225200095 (SV), GV023 (GVHD) — dùng chung với
@@ -27,13 +28,15 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 BASE="${BASE_URL:-https://localhost}"
 COMPOSE=(docker compose -f "${SCRIPT_DIR}/docker-compose.yml")
 REPORT=""
+JSON_OUT=""
 N_TITLE=20
 N_FILES=20
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --report) REPORT="$2"; shift 2 ;;
-    *) echo "Dùng: bash deploy/ai-nfr.sh [--report PATH]" >&2; exit 2 ;;
+    --json) JSON_OUT="$2"; shift 2 ;;
+    *) echo "Dùng: bash deploy/ai-nfr.sh [--report PATH] [--json PATH]" >&2; exit 2 ;;
   esac
 done
 
@@ -340,14 +343,14 @@ record oom_killed "$(docker inspect -f '{{.State.OOMKilled}}' "$AI_CID")"
 record restart_count "$(docker inspect -f '{{.RestartCount}}' "$AI_CID")"
 
 # --- Tổng hợp + báo cáo -------------------------------------------------------
-python3 - "$KQ" "$TMP/nfr09.tsv" "${REPORT}" "$N_FILES" <<'PY'
+python3 - "$KQ" "$TMP/nfr09.tsv" "${REPORT}" "$N_FILES" "${JSON_OUT}" <<'PY'
 import json, math, sys
 kq = {}
 for line in open(sys.argv[1], encoding="utf-8"):
     k, _, v = line.rstrip("\n").partition("=")
     kq[k] = v
 rows = [l.rstrip("\n").split("\t") for l in open(sys.argv[2], encoding="utf-8") if l.strip()]
-report, n_files = sys.argv[3], int(sys.argv[4])
+report, n_files, json_out = sys.argv[3], int(sys.argv[4]), sys.argv[5]
 
 def p95(xs):
     s = sorted(xs)
@@ -414,17 +417,17 @@ for (nfr, _, _, kqua), key in zip(lines, res):
 
 if report:
     md = [
-        "## 4.x.4 Hiệu năng và bảo mật của dịch vụ kiểm tra trùng lặp",
+        "### 4.7.4. Hiệu năng và bảo mật của dịch vụ AI",
         "",
         "> **Mã PI:** 3.4, 4.1 — **Yêu cầu:** AISV-01, AISV-02, AISV-03, AISV-06 (NFR-07..NFR-11)",
         "",
         f"> Số liệu trong trang này do `bash deploy/ai-nfr.sh --report {report}` đo và ghi tự động ngày {kq['ngay']} — không sửa tay.",
         "",
-        "### Mục tiêu",
+        "#### Mục tiêu",
         "",
         "Kiểm chứng các yêu cầu phi chức năng NFR-07..NFR-11 (mục 2.4, `docs/chuong-2-khao-sat-phan-tich/04-yeu-cau-phi-chuc-nang.md`) của dịch vụ AI trên stack triển khai thật (Apache → Web API → dịch vụ AI, MySQL), với kho dữ liệu thử nghiệm đã seed đủ (DATA-02, DATA-03).",
         "",
-        "### Môi trường đo",
+        "#### Môi trường đo",
         "",
         "| Thành phần | Giá trị |",
         "|---|---|",
@@ -433,7 +436,7 @@ if report:
         f"| Kho đã index | {kq['index_size_tieu_de']} tiêu đề (300 đề tài kho K18–K22) · {kq['index_size_tai_lieu']} câu tài liệu (25 đồ án nguồn có báo cáo cuối) |",
         "| Đường đi của request | NFR-08: gọi thẳng dịch vụ AI trong mạng nội bộ (không tính độ trễ mạng client, đúng phương pháp của NFR-08); NFR-09/10: qua Apache HTTPS → Web API → BackgroundTasks → dịch vụ AI |",
         "",
-        "### Kết quả",
+        "#### Kết quả",
         "",
         "| NFR | Chỉ tiêu | Cách đo | Kết quả đo | Đạt? |",
         "|---|---|---|---|---|",
@@ -442,7 +445,7 @@ if report:
         md.append(f"| {nfr} | {chi_tieu} | {cach} | {kqua} | {dat(res[key])} |")
     md += [
         "",
-        "### Chi tiết NFR-09 / NFR-10 theo từng file",
+        "#### Chi tiết NFR-09 / NFR-10 theo từng file",
         "",
         "Mỗi file là một phiên bản đề cương mới của cùng một đề tài (GVHD yêu cầu sửa giữa hai lần nộp); các phiên bản trước của đề tài nằm trong danh sách loại trừ nên không bao giờ khớp với nhau. Tỷ lệ là tỷ lệ tương đồng tổng hợp do dịch vụ AI trả về (so với 25 đồ án nguồn và các tài liệu đã nộp trước đó).",
         "",
@@ -455,15 +458,15 @@ if report:
         "",
         f"Thời gian NFR-08 từng lời gọi (ms): {', '.join(f'{x:.0f}' for x in title)}.",
         "",
-        "### Nhận xét",
+        "#### Nhận xét",
         "",
         "- Kiểm tra tài liệu chạy nền: API nộp trả 202 ngay sau khi lưu file và trích xuất văn bản, nên thời gian phản hồi (NFR-10) không phụ thuộc thời gian suy luận của mô hình.",
         "- Thời gian nộp → Hoàn tất gồm độ phân giải thăm dò 0,25 s; phần lớn còn lại là thời gian mã hóa các câu của tài liệu nộp trên CPU (tài liệu dài — báo cáo cuối — tốn nhiều hơn đề cương).",
         "- Tài liệu dài (CR-02): thời gian mã hóa tăng tuyến tính theo số câu (~0,1 s CPU / 1000 ký tự), nên báo cáo ~100 trang vượt chỉ tiêu 30 s của đề cương/báo cáo thông thường; Web API vì vậy đặt timeout `/check-document` theo độ dài (`AI_DOCUMENT_TIMEOUT_SECONDS` + `AI_DOCUMENT_TIMEOUT_PER_1K_CHARS` × nghìn ký tự, trần `AI_DOCUMENT_TIMEOUT_MAX_SECONDS`). Dịch vụ AI mã hóa theo lô con 32 câu và chỉ giữ khóa mô hình trong từng lô con, nên kiểm tra tên gửi giữa chừng chỉ chờ tối đa một lô con; ingest ngay sau kiểm tra dùng lại vector đã mã hóa (không mã hóa lần hai).",
         "- Embedding của kho được tính một lần lúc ingest và giữ trong chỉ mục FAISS trong bộ nhớ; thêm một bản ghi chỉ mã hóa đúng bản ghi đó (NFR-11).",
-        "- Chất lượng phát hiện (tỷ lệ cảnh báo đúng/sai trên các cặp có chủ đích) được trình bày ở mục 4.x.3 — [03-hieu-chinh-nguong.md](03-hieu-chinh-nguong.md).",
+        "- Chất lượng phát hiện (tỷ lệ cảnh báo đúng/sai trên các cặp có chủ đích) được trình bày ở mục 4.7.3 — [03-hieu-chinh-nguong.md](03-hieu-chinh-nguong.md); dữ liệu thử nghiệm ở mục 4.7.1 và so sánh mô hình ở mục 4.7.2.",
         "",
-        "### Chạy lại",
+        "#### Chạy lại",
         "",
         "```bash",
         "bash deploy/seed-ai.sh          # nếu kho chưa seed",
@@ -476,6 +479,23 @@ if report:
     with open(report, "w", encoding="utf-8") as fh:
         fh.write("\n".join(md))
     print(f"\nĐã ghi {report}")
+
+if json_out:
+    out = {
+        "nfr_07": {"dat": res["NFR-07"], "codes": kq["nfr07_codes"], "apache_code": kq["nfr07_apache_code"], "db": kq["nfr07_db"]},
+        "nfr_08": {"dat": res["NFR-08"], "n": len(title), "p50_s": round(sorted(title)[len(title) // 2] / 1000, 3), "p95_s": round(p95(title) / 1000, 3), "max_s": round(max(title) / 1000, 3)},
+        "nfr_09": {"dat": res["NFR-09"], "n": len(rows), "p50_s": round(sorted(done)[len(done) // 2], 2) if done else None, "p95_s": round(p95(done), 2) if done else None, "max_s": round(max(done), 2) if done else None, "hoan_tat": states.count("HOAN_TAT"), "loi": states.count("LOI")},
+        "nfr_10": {"dat": res["NFR-10"], "max_s": round(max(submit), 3) if submit else None, "p95_s": round(p95(submit), 3) if submit else None},
+        "nfr_11": {"dat": res["NFR-11"], "encode_calls_delta": delta11},
+        "tai_lieu_dai": {"dat": res["DAI"], **long_doc},
+        "ai_mem_mb": {"dat": res["MEM"], "dinh_mib": round(peak), "tran_mib": round(limit), "oom_killed": kq["oom_killed"] == "true"},
+        "index_size_tieu_de": int(kq["index_size_tieu_de"]),
+        "index_size_tai_lieu": int(kq["index_size_tai_lieu"]),
+        "ten_model": kq["ten_model"],
+    }
+    with open(json_out, "w", encoding="utf-8") as fh:
+        json.dump(out, fh, ensure_ascii=False, indent=2)
+    print(f"Đã ghi {json_out}")
 
 sys.exit(0 if all(res.values()) else 1)
 PY
