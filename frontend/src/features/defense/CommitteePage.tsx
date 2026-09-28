@@ -25,6 +25,7 @@ import QueryErrorAlert from '../../components/QueryErrorAlert'
 import { formatDate } from '../../utils/format'
 import { useLecturers } from '../accounts/api'
 import CheckStatusTag from '../documents/CheckStatusTag'
+import RecheckButton from '../documents/RecheckButton'
 import {
   useAddSchedule,
   useCommittee,
@@ -267,7 +268,14 @@ export default function CommitteePage() {
     {
       title: 'Kiểm tra trùng lặp',
       key: 'kiem_tra',
-      render: (_value, record) => <CheckStatusTag kiemTra={record.kiem_tra} />,
+      render: (_value, record) => (
+        <Space size={6} wrap>
+          <CheckStatusTag kiemTra={record.kiem_tra} />
+          {record.kiem_tra?.trang_thai === 'LOI' && record.bao_cao_cuoi && (
+            <RecheckButton taiLieuId={record.bao_cao_cuoi.id} />
+          )}
+        </Space>
+      ),
     },
     {
       title: 'Hành động',

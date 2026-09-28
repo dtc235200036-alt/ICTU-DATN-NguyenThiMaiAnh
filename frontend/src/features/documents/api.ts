@@ -92,6 +92,9 @@ export function useRecheck() {
     onSuccess: (_data, taiLieuId) => {
       void queryClient.invalidateQueries({ queryKey: [DOCUMENT_KEY, taiLieuId] })
       void queryClient.invalidateQueries({ queryKey: ['outlines'] })
+      // WR-13: báo cáo cuối hiển thị trạng thái kiểm tra trong các truy vấn
+      // của feature defense (lịch hội đồng, màn chấm điểm, tab báo cáo cuối).
+      void queryClient.invalidateQueries({ queryKey: ['defense'] })
     },
   })
 }

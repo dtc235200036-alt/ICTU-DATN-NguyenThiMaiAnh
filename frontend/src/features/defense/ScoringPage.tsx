@@ -27,6 +27,7 @@ import { formatBytes, formatDate, formatPercent } from '../../utils/format'
 import QueryErrorAlert from '../../components/QueryErrorAlert'
 import ForbiddenPage from '../auth/ForbiddenPage'
 import CheckStatusTag from '../documents/CheckStatusTag'
+import RecheckButton from '../documents/RecheckButton'
 import { useMyCommittees, useScheduleForScoring, useScore } from './api'
 import type { MyCommittee, MyCommitteeRow, ScoringDetail } from './api'
 
@@ -54,6 +55,14 @@ function CheckSummaryBlock({ detail }: { detail: ScoringDetail }) {
         </Text>{' '}
         <Link to={`/kiem-tra-trung-lap/${detail.bao_cao_cuoi.id}`}>Xem chi tiết</Link>
       </div>
+    )
+  }
+  if (kiemTra && kiemTra.trang_thai === 'LOI' && detail.bao_cao_cuoi) {
+    return (
+      <Space size={6} wrap>
+        <CheckStatusTag kiemTra={kiemTra} />
+        <RecheckButton taiLieuId={detail.bao_cao_cuoi.id} />
+      </Space>
     )
   }
   return <CheckStatusTag kiemTra={kiemTra} />
