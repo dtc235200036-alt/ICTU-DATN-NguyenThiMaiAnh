@@ -18,6 +18,7 @@ kết quả trả về đúng thứ tự đầu vào.
 """
 import hashlib
 import threading
+from collections import deque
 from dataclasses import dataclass
 
 import numpy as np
@@ -86,6 +87,33 @@ class HashingEncoder:
 SUB_BATCH = 32
 
 
+class FairLock:
+    """Khóa FIFO (CR-02): threading.Lock không công bằng — luồng vừa nhả khóa
+    giữa hai lô con thường lấy lại ngay, nên một lần kiểm tra tên đang chờ có
+    thể đói tới hết cả tài liệu (đo được: ReadTimeout 4 s). Ở đây ai tới trước
+    được trước: tài liệu dài xếp lại cuối hàng sau mỗi lô con."""
+
+    def __init__(self) -> None:
+        self._cond = threading.Condition()
+        self._queue: deque[object] = deque()
+        self._locked = False
+
+    def __enter__(self) -> "FairLock":
+        ticket = object()
+        with self._cond:
+            self._queue.append(ticket)
+            while self._locked or self._queue[0] is not ticket:
+                self._cond.wait()
+            self._queue.popleft()
+            self._locked = True
+        return self
+
+    def __exit__(self, *exc) -> None:
+        with self._cond:
+            self._locked = False
+            self._cond.notify_all()
+
+
 class Encoder:
     def __init__(self, profile: str, torch_threads: int = 4) -> None:
         if profile not in PROFILES:
@@ -94,7 +122,7 @@ class Encoder:
         self._spec = PROFILES[profile]
         self.name = self._spec.ten_model
         self.encode_calls = 0
-        self._lock = threading.Lock()
+        self._lock = FairLock()
         self._calls_lock = threading.Lock()
         if profile == "fake":
             self._model = HashingEncoder()
