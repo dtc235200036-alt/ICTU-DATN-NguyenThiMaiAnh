@@ -68,7 +68,8 @@ def _resolve_match(
     """Ánh xạ một match của dịch vụ AI về bản ghi thesis_core. Trả (khóa gộp,
     match) — khóa gộp là đề tài gốc khi bản ghi kho liên kết một đề tài, để
     một đồ án không xuất hiện hai lần (TOPIC + ARCHIVE). Ref không còn tồn tại
-    (đã xóa — chỉ mục AI chưa có /delete) thì bỏ qua."""
+    thì bỏ qua — phòng thủ: xóa bản ghi kho và chốt bảo vệ đã gỡ vector tương
+    ứng (WR-04), còn sót chỉ khi lần gỡ nền đó lỗi."""
     if loai == LOAI_ARCHIVE:
         kho = db.get(DoAnKho, ref_id)
         if kho is None:

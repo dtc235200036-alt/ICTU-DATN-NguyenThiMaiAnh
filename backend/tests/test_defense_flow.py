@@ -439,7 +439,10 @@ def test_scoring_is_committee_scoped_and_finalize_is_one_way(
     assert kho.sinh_vien_id == sv.sinh_vien_id and kho.ma_so_sinh_vien and kho.ho_ten_sinh_vien
     assert kho.giang_vien_id == gvhd.giang_vien_id and str(kho.diem) == "8.50" and kho.tu_khoa is None
     assert kho.trang_thai_index == "DA_INDEX"
-    assert len(INGEST_LOG) == ingest_before + 1 and INGEST_LOG[-1]["ref_id"] == kho.id
+    # ARCHIVE mới được index, rồi WR-04: vector TOPIC của đề tài bị gỡ (văn bản rỗng).
+    new_logs = list(INGEST_LOG)[ingest_before:]
+    assert [(e["loai"], e["ref_id"]) for e in new_logs] == [("ARCHIVE", kho.id), ("TOPIC", topic.id)]
+    assert new_logs[0]["text_len"] > 0 and new_logs[1]["text_len"] == 0
 
     notif = client.get("/api/notifications", headers=auth_headers(sv)).json()
     assert any(n["loai"] == "KET_QUA_BAO_VE" for n in notif["items"])

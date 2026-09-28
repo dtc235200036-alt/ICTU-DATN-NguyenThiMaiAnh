@@ -13,9 +13,13 @@
   (ARCHIVE) và mọi phiên bản đề cương/báo cáo cuối có văn bản (DOCUMENT). Văn
   bản không đổi là no-op phía AI, nên chạy lại rẻ và tự chữa khi volume
   thesis_ai bị xóa.
-- `purge(loai, ids)`: /ingest với text rỗng (REPLACE bằng không có gì) — CHỈ
-  dùng cho phần dọn dẹp của test tự động (e2e) để không để lại vector mồ côi;
-  không luồng nghiệp vụ nào gọi hàm này.
+- `purge(loai, ids)`: /ingest với text rỗng (REPLACE bằng không có gì) — dùng
+  cho phần dọn dẹp của test tự động (e2e) để không để lại vector mồ côi.
+- `remove_archive(kho_id)` / `remove_archived_topic(kho_id)` (WR-04, 04-REVIEW):
+  luồng nghiệp vụ gỡ vector — xóa bản ghi kho gỡ vector ARCHIVE của nó; chốt
+  bảo vệ (đồ án vào kho) gỡ vector TOPIC của đề tài, vì bản ghi ARCHIVE mới đại
+  diện cho đồ án đó (khớp backfill TOPIC vốn bỏ đề tài đã vào kho). Vector cũ
+  không còn chiếm chỗ trong top-k của /check-title.
 
 CLI (trong container api, chỉ khi AI_CLIENT=http):
     python -m app.services.ai_index backfill [--loai TOPIC ARCHIVE DOCUMENT]
@@ -91,6 +95,37 @@ def ingest_document(tai_lieu_do_an_id: int) -> None:
         )
     finally:
         task_db.close()
+
+
+def _remove(loai: str, ref_id: int | None) -> None:
+    """WR-04: REPLACE bằng văn bản rỗng = gỡ nguồn khỏi chỉ mục AI; chạy nền
+    sau commit, lỗi chỉ ghi cảnh báo (không bao giờ chặn nghiệp vụ)."""
+    if ref_id is None:
+        return
+    task_db = SessionLocal()
+    try:
+        get_ai_client(task_db).ingest(ref_id, loai, "")
+    except Exception as exc:  # noqa: BLE001 — không bao giờ chặn nghiệp vụ
+        _logger.warning("ai_index gỡ %s %s thất bại (%s)", loai, ref_id, type(exc).__name__)
+    finally:
+        task_db.close()
+
+
+def remove_archive(do_an_kho_id: int) -> None:
+    """WR-04: bản ghi kho đã bị xóa khỏi thesis_core -> gỡ vector ARCHIVE."""
+    _remove(LOAI_ARCHIVE, do_an_kho_id)
+
+
+def remove_archived_topic(do_an_kho_id: int) -> None:
+    """WR-04: đồ án vừa vào kho (chốt bảo vệ) -> gỡ vector TOPIC của đề tài,
+    bản ghi ARCHIVE thay thế nó trong /check-title."""
+    task_db = SessionLocal()
+    try:
+        kho = task_db.get(DoAnKho, do_an_kho_id)
+        de_tai_id = kho.de_tai_id if kho is not None else None
+    finally:
+        task_db.close()
+    _remove(LOAI_TOPIC, de_tai_id)
 
 
 def _backfill_topics(db) -> tuple[int, int]:

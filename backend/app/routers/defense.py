@@ -18,7 +18,7 @@ from app.schemas.defense import (
     ScoreRequest,
     ScoringDetail,
 )
-from app.services import archive, document_check, documents
+from app.services import ai_index, archive, document_check, documents
 from app.services import defense as defense_service
 
 # UC4/DEFN-01..04: nộp báo cáo cuối (SV) + hội đồng/lịch bảo vệ (Bộ môn) +
@@ -161,6 +161,8 @@ def finalize(
     # UC5.2 E1/T-03-24: index AI chạy SAU commit, session riêng — lỗi AI chỉ
     # để lại CHUA_INDEX, không bao giờ chặn chốt kết quả.
     background_tasks.add_task(archive.run_ingest, [do_an_kho_id])
+    # WR-04: đồ án đã vào kho được đại diện bởi bản ghi ARCHIVE — gỡ TOPIC.
+    background_tasks.add_task(ai_index.remove_archived_topic, do_an_kho_id)
     return out
 
 

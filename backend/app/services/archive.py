@@ -10,8 +10,8 @@ chính nó (plan 04-06).
 
 Plan 03-05 (UC5.1/UC5.3/UC5.4): tra cứu, chi tiết + tải báo cáo cuối, CRUD của
 Bộ môn, index lại và import CSV khóa cũ (thành công một phần, báo lỗi theo
-dòng). Xóa bản ghi chỉ xóa khỏi thesis_core — hợp đồng §3.3.5 chưa có
-/delete phía AI (Phase 4)."""
+dòng). Xóa bản ghi: router xếp ai_index.remove_archive sau commit (WR-04 —
+/ingest với văn bản rỗng gỡ vector ARCHIVE khỏi chỉ mục AI)."""
 import csv
 import io
 import logging

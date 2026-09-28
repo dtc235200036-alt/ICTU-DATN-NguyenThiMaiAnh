@@ -7,7 +7,7 @@ from app.core.deps import CurrentUser, require_role
 from app.core.roles import ANY_ROLE, VaiTro
 from app.schemas.archive import ArchiveDetail, ArchiveIn, ArchiveListItem, ImportResult
 from app.schemas.common import Page
-from app.services import archive
+from app.services import ai_index, archive
 
 # UC5.1 (mọi vai trò đọc) + UC5.3/UC5.4 (chỉ Bộ môn ghi, T-03-26) — mỗi route
 # khai báo require_role riêng. Mọi bản ghi mới/sửa/import/index lại được đẩy
@@ -98,10 +98,13 @@ def update_record(
 @router.delete("/{kho_id}", status_code=204)
 def delete_record(
     kho_id: int,
+    background_tasks: BackgroundTasks,
     _user: CurrentUser = Depends(require_role(VaiTro.BO_MON)),
     db: Session = Depends(get_db),
 ) -> None:
     archive.delete(db, kho_id)
+    # WR-04: gỡ vector ARCHIVE sau commit — không còn chiếm top-k /check-title.
+    background_tasks.add_task(ai_index.remove_archive, kho_id)
 
 
 @router.post("/{kho_id}/reindex", response_model=ArchiveDetail, status_code=202)

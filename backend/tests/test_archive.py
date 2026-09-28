@@ -131,3 +131,5 @@ def test_csv_import_partial_success_search_and_reindex(
 
     assert client.delete(f"/api/archive/{rec_a.id}", headers=h).status_code == 204
     assert client.get(f"/api/archive/{rec_a.id}", headers=h).status_code == 404
+    # WR-04: xóa bản ghi gỡ luôn vector ARCHIVE (ingest văn bản rỗng).
+    assert (INGEST_LOG[-1]["loai"], INGEST_LOG[-1]["ref_id"], INGEST_LOG[-1]["text_len"]) == ("ARCHIVE", rec_a.id, 0)
