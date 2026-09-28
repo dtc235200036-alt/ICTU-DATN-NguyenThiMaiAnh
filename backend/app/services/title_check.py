@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
 from sqlalchemy import select
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
@@ -34,6 +35,15 @@ class TitleCheckResult:
     matches: list[TitleCheckMatch] = field(default_factory=list)
 
 
+# WR-02: chỉ dùng để LƯU VẾT khi bảng cau_hinh_nguong thiếu dòng
+# NGUONG_TEN_DE_TAI (bị xóa qua truy cập DB trực tiếp, migration 0004's seed
+# bị bỏ qua/rollback, DB mới...) — KHÔNG dùng để so khớp (kiem_tra_ten trả về
+# LOI ngay, không thực hiện so khớp) nên giá trị này chỉ cần hợp lệ để ghi
+# vào cột nguong_ap_dung, không cần đúng ngưỡng nghiệp vụ hiện hành. Khớp giá
+# trị dòng seed NGUONG_TEN_DE_TAI trong migration 0004 để nhất quán tài liệu.
+_FALLBACK_NGUONG_TEN_DE_TAI = 50.00
+
+
 def _get_threshold(db: Session) -> float:
     gia_tri = db.execute(
         select(CauHinhNguong.gia_tri).where(CauHinhNguong.loai == NGUONG_TEN_DE_TAI)
@@ -44,7 +54,15 @@ def _get_threshold(db: Session) -> float:
 def kiem_tra_ten(db: Session, ten_de_tai: str, exclude_id: int | None = None) -> TitleCheckResult:
     """UC0.6: so sánh ngữ nghĩa tên đề tài với kho — không bao giờ chặn gửi đề
     xuất (E2): khi AiClient lỗi trả về trang_thai LOI với danh sách rỗng."""
-    threshold = _get_threshold(db)
+    try:
+        threshold = _get_threshold(db)
+    except NoResultFound:
+        # WR-02: thiếu cấu hình ngưỡng cũng là một dạng "hạ tầng kiểm tra
+        # trùng không khả dụng" giống hệt AiServiceError — không được để lộ
+        # ra thành lỗi 500 không xử lý, phải suy biến giống E2.
+        return TitleCheckResult(
+            trang_thai=LOI, nguong=_FALLBACK_NGUONG_TEN_DE_TAI, matches=[]
+        )
     settings = get_settings()
 
     try:
