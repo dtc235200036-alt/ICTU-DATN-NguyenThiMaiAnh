@@ -206,7 +206,7 @@ Plans:
   3. Quyển báo cáo 4 chương đúng khuôn mẫu trường (Cơ sở lý thuyết; Khảo sát & phân tích; Thiết kế; Triển khai kèm hướng dẫn cài đặt và kết quả thử nghiệm), mỗi deliverable truy vết được về mã PI 1.1–4.2
   4. Slide bảo vệ và kịch bản demo end-to-end hoàn chỉnh, đã được chạy tập lại ít nhất một lần trên hệ thống thật theo đúng kịch bản
 
-**Plans**: 0/8 plans executed (Wave 1 chạy song song ngay bây giờ với Phase 3/4 — chỉ tạo đường dẫn mới `tools/build-report.sh`, `tools/bao-cao/`, `tools/build-slides.sh`, `tools/slide/`, `bao-cao/`, `docs/phan-dau/`, `docs/mo-dau.md`, `docs/tai-lieu-tham-khao.md`, `docs/slide/`, `docs/chuong-4-trien-khai/0[0124]-*.md`; Wave 2–5 chờ Phase 3 và Phase 4 hoàn tất vì dùng sản phẩm hoàn chỉnh và stack Docker Compose chung — plan 05-04 có precondition kiểm tra 03-07/04-07 SUMMARY)
+**Plans**: 1/8 plans executed (05-04 phần triển khai/kiểm chứng xong 2026-09-28; Wave 1 chạy song song ngay bây giờ với Phase 3/4 — chỉ tạo đường dẫn mới `tools/build-report.sh`, `tools/bao-cao/`, `tools/build-slides.sh`, `tools/slide/`, `bao-cao/`, `docs/phan-dau/`, `docs/mo-dau.md`, `docs/tai-lieu-tham-khao.md`, `docs/slide/`, `docs/chuong-4-trien-khai/0[0124]-*.md`; Wave 2–5 chờ Phase 3 và Phase 4 hoàn tất vì dùng sản phẩm hoàn chỉnh và stack Docker Compose chung — plan 05-04 có precondition kiểm tra 03-07/04-07 SUMMARY)
 Plans:
 **Wave 1** *(song song, độc lập Phase 3/4)*
 - [ ] 05-01-PLAN.md — TRACER: pipeline quyển báo cáo `tools/build-report.sh` (manifest → ghép → bộ lọc pandoc → DOCX), reference.docx GIẢ ĐỊNH (TNR 13, 1,5 dòng, A4), đánh số hình/bảng, Mục lục/Danh mục bảng/hình, xuất PDF qua LibreOffice, bộ kiểm tra `kiem-tra-bao-cao.py` (D-06)
@@ -214,7 +214,7 @@ Plans:
 - [ ] 05-03-PLAN.md — TRACER: pipeline slide `tools/build-slides.sh` (pandoc pptx + theme, PDF, `kiem-tra-slide.py`) + ~15 slide bối cảnh → phân tích → thiết kế → phương pháp/kết quả AI → triển khai, có ghi chú thuyết trình (D-07)
 
 **Wave 2** *(blocked on Wave 1 + Phase 3 và Phase 4 hoàn tất)*
-- [ ] 05-04-PLAN.md — TRACER: cài đặt một lệnh `deploy/install.sh` chứng minh từ clean clone (tải trước model, HF offline), `deploy/verify-all.sh` chạy toàn bộ bộ kiểm thử + `nfr-he-thong.sh` đo NFR-01..19 qua HTTPS trên toàn kho; chương 4: 4.3 hướng dẫn cài đặt, 4.5 dữ liệu thử nghiệm, 4.8 sinh từ kết quả đo (D-01, D-02, D-03)
+- [x] 05-04-PLAN.md — TRACER: cài đặt một lệnh `deploy/install.sh` chứng minh từ clean clone (tải trước model, HF offline), `deploy/verify-all.sh` chạy toàn bộ bộ kiểm thử + `nfr-he-thong.sh` đo NFR-01..19 qua HTTPS trên toàn kho; chương 4: 4.3 hướng dẫn cài đặt, 4.5 dữ liệu thử nghiệm, 4.8 sinh từ kết quả đo (D-01, D-02, D-03) — ĐÃ LÀM phần triển khai/kiểm chứng (install.sh clean clone 216 s, verify-all --report 12/12 OK, NFR-01..19 Đạt trừ NFR-16 chờ 05-05); HOÃN theo yêu cầu người dùng: trang 4.3, 4.5, 4.8 và `tools/bao-cao/sinh-trang-kiem-thu.py` (dữ liệu sẵn ở `ket-qua-kiem-thu/`)
 
 **Wave 3** *(blocked on Wave 2)*
 - [ ] 05-05-PLAN.md — TRACER: `deploy/demo-state.sh` (reset/khôi phục trạng thái demo), driver CDP headless Chrome ghi ảnh 5 UC × 3 vai trò ở 1440 px, 4.6 hướng dẫn sử dụng & kết quả chức năng, NFR-16, `docs/kich-ban-demo.md` + lần tập dượt tự động đầu tiên (D-04, D-08)

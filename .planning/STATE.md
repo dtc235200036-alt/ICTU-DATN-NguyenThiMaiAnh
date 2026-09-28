@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 3
 current_phase_name: Outline, Progress, Defense & Archive
 status: verifying
-stopped_at: Completed 04-07-PLAN.md
-last_updated: "2026-09-28T08:54:22.380Z"
+stopped_at: Completed 05-04-PLAN.md (deploy/verification part; report prose deferred by user)
+last_updated: "2026-09-28T10:58:46.721Z"
 last_activity: 2026-09-28
 last_activity_desc: Phase 4 plan 04-07 complete (UC0.4 threshold screen + /api/thresholds with SC4 e2e, MH-14 highlights + signal tags, per-thesis share fix, chương 3 write-back, deploy README AI section; full phase gate green) — Phase 4 ready for verification
-state_head: 7f0a2a123e3493e9271c022d1a4da14f0fb3c19c
+state_head: a3a98dd10cf06737668dbbe10c729fc21944335b
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 35
-  completed_plans: 26
+  completed_plans: 27
   percent: 0
 ---
 
@@ -78,6 +78,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 04 P05 | 28min | 2 tasks | 25 files |
 | Phase 04 P06 | 27 min | 2 tasks | 12 files |
 | Phase 04 P07 | 26min | 3 tasks | 21 files |
+| Phase 05 P04 | 35min | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -154,6 +155,8 @@ Recent decisions affecting current work:
 - [Phase 04]: 04-07: MH-14/MH-09 per-thesis rate = share of ty_le_tong by stored passage characters (no schema change); fallback max passage score
 - [Phase 04]: 04-07: highlightOverlap marks 3-word runs (NFC+lowercase) rendered as React text + mark elements; signal tag parsed from the vi_tri suffix
 - [Phase 04]: 04-07: e2e/test threshold edits restore value AND editor/time so Alembic 0010 tai_khoan_id IS NULL semantics survive test runs
+- [Phase 05]: 05-04: clean-clone install proven under a separate compose project (ntma-sach) with fresh volumes; working-copy volumes kept; ai runs HF_HUB_OFFLINE=1 after install-time model pre-fetch
+- [Phase 05]: 05-04: report pages 4.3/4.5/4.8 and sinh-trang-kiem-thu.py deferred by user; inputs kept in docs/chuong-4-trien-khai/ket-qua-kiem-thu/ (tong-hop.json, cai-dat-sach.log)
 
 ### Pending Todos
 
@@ -177,6 +180,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-28T08:54:22.326Z
-Stopped at: Completed 04-07-PLAN.md
+Last session: 2026-09-28T10:58:46.665Z
+Stopped at: Completed 05-04-PLAN.md (deploy/verification part; report prose deferred by user)
 Resume file: None
