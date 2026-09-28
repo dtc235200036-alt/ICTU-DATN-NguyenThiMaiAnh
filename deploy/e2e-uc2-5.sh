@@ -97,6 +97,9 @@ trap cleanup EXIT
 
 TOKEN_BOMON=""
 TOKEN_GV025=""
+TOKEN_GV026=""
+TOKEN_GV027=""
+TOKEN_GV028=""
 TOKEN_GV029=""
 TOKEN_SV097=""
 TOKEN_SV098=""
@@ -315,7 +318,145 @@ with zipfile.ZipFile('$fake_docx', 'w') as zf:
   ok "/data/uploads không tồn tại/không lộ trong container apache (D-02)"
 }
 
+uc4_defense() {
+  local pdf_path="$TMP/bao-cao-cuoi.pdf"
+  uv --directory "${SCRIPT_DIR}/../backend" run python - "$pdf_path" <<'PYEOF'
+import sys
+import pymupdf
+
+path = sys.argv[1]
+doc = pymupdf.open()
+page = doc.new_page()
+page.insert_text((72, 72), "Final report end-to-end test content for defense flow")
+page.insert_text((72, 96), "Second line describing methodology and results summary")
+doc.save(path)
+doc.close()
+PYEOF
+  [ -s "$pdf_path" ] || fail "Không sinh được file PDF báo cáo cuối kiểm thử"
+
+  TOKEN_GV026="$(bash "${SCRIPT_DIR}/api-login.sh" GV026)"
+  TOKEN_GV027="$(bash "${SCRIPT_DIR}/api-login.sh" GV027)"
+  TOKEN_GV028="$(bash "${SCRIPT_DIR}/api-login.sh" GV028)"
+
+  local lecturers_body
+  lecturers_body="$(curl -sk "$BASE/api/lecturers" -H "Authorization: Bearer ${TOKEN_BOMON}")"
+  local gv025_id gv026_id gv027_id gv028_id gv029_id
+  gv025_id="$(printf '%s' "$lecturers_body" | python3 -c 'import json,sys
+d = json.load(sys.stdin)
+print(next((gv["id"] for gv in d if gv.get("ma_giang_vien") == "GV025"), ""))' 2>/dev/null)"
+  gv026_id="$(printf '%s' "$lecturers_body" | python3 -c 'import json,sys
+d = json.load(sys.stdin)
+print(next((gv["id"] for gv in d if gv.get("ma_giang_vien") == "GV026"), ""))' 2>/dev/null)"
+  gv027_id="$(printf '%s' "$lecturers_body" | python3 -c 'import json,sys
+d = json.load(sys.stdin)
+print(next((gv["id"] for gv in d if gv.get("ma_giang_vien") == "GV027"), ""))' 2>/dev/null)"
+  gv028_id="$(printf '%s' "$lecturers_body" | python3 -c 'import json,sys
+d = json.load(sys.stdin)
+print(next((gv["id"] for gv in d if gv.get("ma_giang_vien") == "GV028"), ""))' 2>/dev/null)"
+  gv029_id="$(printf '%s' "$lecturers_body" | python3 -c 'import json,sys
+d = json.load(sys.stdin)
+print(next((gv["id"] for gv in d if gv.get("ma_giang_vien") == "GV029"), ""))' 2>/dev/null)"
+  [ -n "$gv025_id" ] && [ -n "$gv026_id" ] && [ -n "$gv027_id" ] && [ -n "$gv028_id" ] && [ -n "$gv029_id" ] \
+    || fail "Không tìm đủ id GV025/026/027/028/029 trong /api/lecturers"
+
+  local status
+  status="$(call POST "/api/defense/final-reports/${DE_TAI_ID}" "${TOKEN_SV098}" \
+    -F "file=@${pdf_path};type=application/pdf")"
+  [ "$status" = "202" ] || fail "Nộp báo cáo cuối không trả 202 (mã ${status}, $(cat "$TMP/body"))"
+  local report_doc_id
+  report_doc_id="$(jget "d['phien_ban'][0]['tai_lieu']['id']")"
+  [ -n "$report_doc_id" ] || fail "Không đọc được id báo cáo cuối vừa nộp"
+  ok "DTC225200098 nộp báo cáo cuối -> 202 (tai_lieu_do_an_id=${report_doc_id})"
+
+  local trang attempt
+  trang=""
+  for attempt in $(seq 1 20); do
+    status="$(call GET "/api/documents/${report_doc_id}/check" "${TOKEN_SV098}")"
+    [ "$status" = "200" ] || fail "GET check báo cáo cuối lỗi (mã ${status})"
+    trang="$(jget "d.get('trang_thai','')")"
+    [ "$trang" != "DANG_KIEM_TRA" ] && break
+    sleep 0.5
+  done
+  [ "$trang" = "HOAN_TAT" ] || fail "Kiểm tra trùng lặp báo cáo cuối không đạt Hoàn tất (trạng thái cuối: ${trang})"
+  ok "Kiểm tra trùng lặp báo cáo cuối hoàn tất (HOAN_TAT)"
+
+  status="$(call GET "/api/defense/final-reports/${DE_TAI_ID}" "${TOKEN_GV029}")"
+  [ "$status" = "200" ] || fail "GV029 (GVHD) không xem được báo cáo cuối (mã ${status})"
+  ok "GV029 (GVHD) xem được báo cáo cuối -> 200"
+
+  status="$(call GET "/api/defense/final-reports/${DE_TAI_ID}" "${TOKEN_SV097}")"
+  [ "$status" = "403" ] || fail "DTC225200097 xem báo cáo cuối không bị từ chối 403 (mã ${status})"
+  ok "DTC225200097 (SV khác) bị từ chối 403 trên xem báo cáo cuối"
+
+  status="$(call GET /api/defense/eligible-students "${TOKEN_BOMON}")"
+  [ "$status" = "200" ] || fail "Bộ môn không lấy được danh sách SV đủ điều kiện bảo vệ (mã ${status})"
+  local has_eligible
+  has_eligible="$(jget "1 if any(i['de_tai_id'] == ${DE_TAI_ID} for i in d) else 0")"
+  [ "$has_eligible" = "1" ] || fail "Danh sách SV đủ điều kiện bảo vệ không có đề tài kiểm thử"
+  ok "Bộ môn thấy đề tài trong danh sách SV đủ điều kiện bảo vệ"
+
+  local today
+  today="$(TZ=Asia/Ho_Chi_Minh date +%F)"
+
+  status="$(call POST /api/defense/committees "${TOKEN_BOMON}" -H 'Content-Type: application/json' \
+    -d "{\"ten_hoi_dong\":\"Hội đồng E2E K98\",\"ngay_bao_ve\":\"${today}\",\"gio_bao_ve\":\"08:00\",\"phong\":\"E2E-302\",\"thanh_vien\":[{\"giang_vien_id\":${gv026_id},\"vai_tro\":\"CHU_TICH\"},{\"giang_vien_id\":${gv027_id},\"vai_tro\":\"THU_KY\"},{\"giang_vien_id\":${gv028_id},\"vai_tro\":\"UY_VIEN\"}]}")"
+  [ "$status" = "201" ] || fail "Bộ môn tạo hội đồng A không trả 201 (mã ${status}, $(cat "$TMP/body"))"
+  local hoi_dong_a_id
+  hoi_dong_a_id="$(jget "d['id']")"
+  [ -n "$hoi_dong_a_id" ] || fail "Không đọc được id hội đồng A vừa tạo"
+  HOI_DONG_IDS="${HOI_DONG_IDS:+$HOI_DONG_IDS,}${hoi_dong_a_id}"
+  ok "Bộ môn tạo hội đồng A (GV026/027/028) -> 201 (id=${hoi_dong_a_id})"
+
+  status="$(call POST /api/defense/committees "${TOKEN_BOMON}" -H 'Content-Type: application/json' \
+    -d "{\"ten_hoi_dong\":\"Hội đồng E2E K98 - B\",\"ngay_bao_ve\":\"${today}\",\"gio_bao_ve\":\"09:00\",\"phong\":\"E2E-303\",\"thanh_vien\":[{\"giang_vien_id\":${gv029_id},\"vai_tro\":\"CHU_TICH\"},{\"giang_vien_id\":${gv025_id},\"vai_tro\":\"UY_VIEN\"},{\"giang_vien_id\":${gv027_id},\"vai_tro\":\"UY_VIEN\"}]}")"
+  [ "$status" = "201" ] || fail "Bộ môn tạo hội đồng B không trả 201 (mã ${status}, $(cat "$TMP/body"))"
+  local hoi_dong_b_id
+  hoi_dong_b_id="$(jget "d['id']")"
+  [ -n "$hoi_dong_b_id" ] || fail "Không đọc được id hội đồng B vừa tạo"
+  HOI_DONG_IDS="${HOI_DONG_IDS:+$HOI_DONG_IDS,}${hoi_dong_b_id}"
+  ok "Bộ môn tạo hội đồng B (chứa GVHD GV029) -> 201 (id=${hoi_dong_b_id})"
+
+  status="$(call POST "/api/defense/committees/${hoi_dong_b_id}/schedules" "${TOKEN_BOMON}" \
+    -H 'Content-Type: application/json' -d "{\"de_tai_id\":${DE_TAI_ID}}")"
+  [ "$status" = "409" ] || fail "Xếp lịch vào hội đồng chứa GVHD không bị từ chối 409 (mã ${status})"
+  ok "Xếp lịch vào hội đồng B (chứa GVHD GV029) bị từ chối 409 (D-06)"
+
+  status="$(call POST "/api/defense/committees/${hoi_dong_a_id}/schedules" "${TOKEN_BOMON}" \
+    -H 'Content-Type: application/json' -d "{\"de_tai_id\":${DE_TAI_ID}}")"
+  [ "$status" = "201" ] || fail "Xếp lịch vào hội đồng A không trả 201 (mã ${status}, $(cat "$TMP/body"))"
+  ok "Bộ môn xếp lịch đề tài vào hội đồng A -> 201"
+
+  status="$(call GET /api/notifications "${TOKEN_GV026}")"
+  [ "$status" = "200" ] || fail "GV026 không lấy được thông báo (mã ${status})"
+  local has_phan_cong
+  has_phan_cong="$(jget "1 if any(i['loai'] == 'HOI_DONG_PHAN_CONG' for i in d['items']) else 0")"
+  [ "$has_phan_cong" = "1" ] || fail "GV026 không có thông báo phân công hội đồng"
+  ok "GV026 có thông báo phân công hội đồng (HOI_DONG_PHAN_CONG)"
+
+  status="$(call GET /api/notifications "${TOKEN_SV098}")"
+  [ "$status" = "200" ] || fail "DTC225200098 không lấy được thông báo (mã ${status})"
+  local has_lich_bao_ve
+  has_lich_bao_ve="$(jget "1 if any(i['loai'] == 'LICH_BAO_VE' for i in d['items']) else 0")"
+  [ "$has_lich_bao_ve" = "1" ] || fail "DTC225200098 không có thông báo lịch bảo vệ"
+  ok "DTC225200098 có thông báo lịch bảo vệ (LICH_BAO_VE)"
+
+  status="$(call POST /api/defense/committees "${TOKEN_SV098}" -H 'Content-Type: application/json' \
+    -d "{\"ten_hoi_dong\":\"x\",\"ngay_bao_ve\":\"${today}\",\"gio_bao_ve\":\"08:00\",\"phong\":\"x\",\"thanh_vien\":[]}")"
+  [ "$status" = "403" ] || fail "DTC225200098 tạo hội đồng không bị từ chối 403 (mã ${status})"
+  ok "DTC225200098 (SV) bị từ chối 403 khi tạo hội đồng"
+
+  status="$(call POST "/api/defense/final-reports/${DE_TAI_ID}" "${TOKEN_SV098}" \
+    -F "file=@${pdf_path};type=application/pdf")"
+  [ "$status" = "409" ] || fail "Nộp lại báo cáo cuối sau khi đã xếp lịch không bị từ chối 409 (mã ${status})"
+  ok "DTC225200098 nộp lại báo cáo cuối sau khi đã xếp lịch bị từ chối 409"
+
+  status="$(call DELETE "/api/defense/committees/${hoi_dong_b_id}" "${TOKEN_BOMON}")"
+  [ "$status" = "204" ] || fail "Bộ môn xóa hội đồng B (chưa có SV) không trả 204 (mã ${status})"
+  ok "Bộ môn xóa hội đồng B (chưa có SV) -> 204"
+}
+
 setup_assigned_topic
 uc2_outline
+uc4_defense
 
-echo "OK: e2e UC2 hoàn tất — dữ liệu đợt K98 sẽ được dọn khi script kết thúc (trap)"
+echo "OK: e2e UC2-4 hoàn tất — dữ liệu đợt K98 sẽ được dọn khi script kết thúc (trap)"

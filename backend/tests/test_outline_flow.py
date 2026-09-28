@@ -20,10 +20,22 @@ _PDF_CT = "application/pdf"
 def test_upload_rejected_before_any_version(
     client, make_account, auth_headers, make_assigned_topic, pdf_bytes, db
 ):
+    import os
+
     sv = make_account(VaiTro.SINH_VIEN)
     gv = make_account(VaiTro.GIANG_VIEN)
     topic = make_assigned_topic(sv, gv)
     headers = auth_headers(sv)
+
+    # UPLOAD_DIR là một thư mục tạm DÙNG CHUNG cho cả phiên pytest (không bị
+    # dọn giữa các test) — các test khác (vd. tests/test_defense_flow.py chạy
+    # trước file này khi gọi `pytest tests/test_defense_flow.py
+    # tests/test_outline_flow.py ...`) hợp lệ ghi file thật vào đây trước khi
+    # test này chạy. Chỉ so sánh phần chênh lệch MỚI sinh ra bởi chính test
+    # này, không quét toàn bộ cây thư mục (Rule 1 — bug lộ ra khi kết hợp hai
+    # file test, không phải khi chạy một mình test_outline_flow.py).
+    upload_dir_before = Path(os.environ["UPLOAD_DIR"])
+    files_before = set(upload_dir_before.rglob("*")) if upload_dir_before.exists() else set()
 
     # (a) .docx là ZIP không có word/document.xml
     zip_buf = BytesIO()
@@ -69,11 +81,9 @@ def test_upload_rejected_before_any_version(
     ).scalar_one_or_none()
     assert de_cuong is None or de_cuong.trang_thai == DC_CHUA_NOP
 
-    import os
-
-    upload_dir = Path(os.environ["UPLOAD_DIR"])
-    files_written = list(upload_dir.rglob("*")) if upload_dir.exists() else []
-    assert not any(f.is_file() for f in files_written)
+    files_after = set(upload_dir_before.rglob("*")) if upload_dir_before.exists() else set()
+    new_files = files_after - files_before
+    assert not any(f.is_file() for f in new_files)
 
 
 def test_outline_state_machine_one_way(
