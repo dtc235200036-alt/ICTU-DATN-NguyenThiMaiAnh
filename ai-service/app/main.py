@@ -5,6 +5,7 @@ dựng CorpusIndex từ thesis_ai qua pipeline.rebuild (không encode) rồi m�
 vụ. Chạy đúng một worker uvicorn: chỉ mục nằm trong bộ nhớ tiến trình.
 """
 import logging
+import time
 from contextlib import asynccontextmanager
 from functools import partial
 
@@ -20,6 +21,10 @@ from app.index import TAI_LIEU, TIEU_DE, CorpusIndex
 from app.schemas import HealthResponse
 
 logger = logging.getLogger("ai_service")
+
+# IN-04 (04-REVIEW): /health được hai healthcheck gọi mỗi 10–15 s — đếm lại
+# chunk thiếu embedding (COUNT … NOT IN) tối đa mỗi 60 s; /reindex cập nhật ngay.
+THIEU_EMBEDDING_TTL = 60.0
 
 
 @asynccontextmanager
@@ -42,6 +47,7 @@ async def lifespan(app: FastAPI):
     app.state.encoder = encoder
     app.state.index = index
     app.state.thieu_embedding = stats.thieu_embedding
+    app.state.thieu_embedding_luc = time.monotonic()
     try:
         yield
     finally:
@@ -65,11 +71,13 @@ def create_app() -> FastAPI:
         index = state.index
         tieu_de = index.size(TIEU_DE)
         tai_lieu = index.size(TAI_LIEU)
-        try:
-            with state.session_factory() as session:
-                state.thieu_embedding = pipeline.count_missing(session, state.encoder)
-        except Exception:  # DB tạm lỗi: giữ số đo gần nhất, không làm hỏng /health
-            logger.warning("Không đếm được chunk thiếu embedding", exc_info=True)
+        if time.monotonic() - state.thieu_embedding_luc >= THIEU_EMBEDDING_TTL:
+            try:
+                with state.session_factory() as session:
+                    state.thieu_embedding = pipeline.count_missing(session, state.encoder)
+                state.thieu_embedding_luc = time.monotonic()
+            except Exception:  # DB tạm lỗi: giữ số đo gần nhất, không làm hỏng /health
+                logger.warning("Không đếm được chunk thiếu embedding", exc_info=True)
         return HealthResponse(
             status="ok",
             model_loaded=state.encoder is not None,

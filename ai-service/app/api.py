@@ -1,6 +1,8 @@
 """Các endpoint nghiệp vụ — tất cả sau MỘT dependency require_api_key cấp
 router (AISV-01, T-04-01). Endpoint là `def` thường: FastAPI chạy trong
 threadpool nên suy luận mô hình không bao giờ chặn event loop."""
+import time
+
 from fastapi import APIRouter, Depends, Request
 
 from app import pipeline
@@ -68,4 +70,7 @@ def reindex(request: Request, body: ReindexRequest | None = None) -> ReindexResp
             pipeline.ingest_many(session, state.index, state.encoder, items)
             return ReindexResponse(indexed_count=len(items))
         stats = pipeline.reembed_missing(session, state.index, state.encoder)
+    # IN-04: /health dùng số đếm này ngay, không chờ hết hạn bộ đệm 60 s.
+    state.thieu_embedding = stats.thieu_embedding
+    state.thieu_embedding_luc = time.monotonic()
     return ReindexResponse(indexed_count=stats.loaded)
