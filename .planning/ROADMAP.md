@@ -125,7 +125,29 @@ Plans:
   4. Đồ án đã chốt kết quả tự xuất hiện trong kho với đủ metadata; người dùng tìm/lọc kho theo khóa, từ khóa, GVHD và xem chi tiết; Bộ môn thêm/sửa/xóa và import bản ghi các khóa cũ, mỗi bản ghi mới phát sinh lời gọi index sang AI client
   5. Người dùng thấy thông báo in-app (số chưa đọc + danh sách) khi đề tài/đề cương được duyệt hoặc từ chối, khi có nhận xét mới, và khi được phân vào hội đồng hoặc có lịch bảo vệ
 
-**Plans**: TBD
+**Plans**: 7 plans (tuần tự — dùng chung một stack Docker Compose và schema MySQL test; thứ tự theo D-09: đề cương → bảo vệ → kho, rồi tiến độ và thông báo)
+Plans:
+**Wave 1**
+- [ ] 03-01-PLAN.md — TRACER: SV nộp đề cương → lưu (volume riêng) + trích xuất → kiểm tra stub nền DANG_KIEM_TRA→HOAN_TAT → GVHD duyệt → thông báo (Alembic 0006, cột bổ sung noi_dung_trich_xuat/trich_xuat_loi ghi ngược ERD); vòng yêu cầu sửa, tải file, kiểm tra lại, 4 test; deploy/e2e-uc2-5.sh
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 03-02-PLAN.md — Màn MH-08 (nộp + lịch sử phiên bản + nhận xét), MH-09 (duyệt với khung kiểm tra trùng lặp polling), MH-14 (chi tiết kết quả); tải file có xác thực
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 03-03-PLAN.md — SV nộp báo cáo cuối (kiểm tra trùng lặp nền) + Bộ môn lập hội đồng, xếp lịch, chặn GVHD ngồi hội đồng SV mình (Alembic 0007, MH-11)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 03-04-PLAN.md — GV hội đồng chấm điểm (403 ngoài hội đồng), Bộ môn chốt TB cộng → tự lưu kho + ingest AI stub, SV xem lịch/kết quả (Alembic 0008, MH-12)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+- [ ] 03-05-PLAN.md — Kho đồ án: tìm/lọc theo khóa, từ khóa, GVHD, xem chi tiết + tải báo cáo; Bộ môn thêm/sửa/xóa, index lại, import CSV khóa cũ (MH-13)
+
+**Wave 6** *(blocked on Wave 5 completion)*
+- [ ] 03-06-PLAN.md — Tiến độ: Bộ môn thiết lập mốc, SV nộp báo cáo theo mốc (file tùy chọn), GVHD nhận xét/đánh giá, dashboard tiến độ toàn khoa đánh dấu SV trễ mốc (Alembic 0009, MH-10)
+
+**Wave 7** *(blocked on Wave 6 completion)*
+- [ ] 03-07-PLAN.md — Chuông thông báo (số chưa đọc, danh sách, đánh dấu đã đọc, polling 30 s) + thông báo duyệt/từ chối đề tài; widget Phase 3 trên dashboard MH-02/03/04; smoke + e2e + README demo UC2–UC5
+
 **UI hint**: yes
 **Notes**:
 - AI client vẫn là stub; khung kết quả kiểm tra và trạng thái "đang kiểm tra / hoàn tất" được dựng sẵn để Phase 4 chỉ cần thay stub.
