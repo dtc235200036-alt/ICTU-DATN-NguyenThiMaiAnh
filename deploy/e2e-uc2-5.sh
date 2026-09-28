@@ -25,6 +25,12 @@ ok() {
 
 TMP="$(mktemp -d)"
 START_UTC="$(date -u +%Y-%m-%dT%H:%M:%S)"
+# IN-09 (03-REVIEW): chỉ dọn bản ghi kho IMPORT K98 do CHÍNH lần chạy này tạo
+# (id lớn hơn id lớn nhất lúc bắt đầu) — không xóa dữ liệu K98 có sẵn.
+KHO_MAX_ID_START="$(DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" "SELECT COALESCE(MAX(id), 0) FROM do_an_kho;" 2>/dev/null || echo "")"
+case "${KHO_MAX_ID_START}" in
+  ''|*[!0-9]*) echo "FAIL: không đọc được MAX(do_an_kho.id) trước khi chạy"; exit 1 ;;
+esac
 DOT_DO_AN_ID=""
 HOI_DONG_IDS=""
 # Bản ghi kho do script tự xóa qua API (UC5.3) — vẫn phải purge khỏi chỉ mục AI
@@ -58,7 +64,7 @@ cleanup() {
     purge_topic_ids="$(DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
       "SELECT id FROM de_tai WHERE dot_do_an_id = ${DOT_DO_AN_ID};" 2>/dev/null | paste -sd, - || true)"
     purge_kho_ids="$(DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
-      "SELECT id FROM do_an_kho WHERE de_tai_id IN (SELECT id FROM de_tai WHERE dot_do_an_id = ${DOT_DO_AN_ID}) OR (khoa='K98' AND nguon='IMPORT');" 2>/dev/null | paste -sd, - || true)"
+      "SELECT id FROM do_an_kho WHERE de_tai_id IN (SELECT id FROM de_tai WHERE dot_do_an_id = ${DOT_DO_AN_ID}) OR (khoa='K98' AND nguon='IMPORT' AND id > ${KHO_MAX_ID_START});" 2>/dev/null | paste -sd, - || true)"
     purge_kho_ids="$(printf '%s,%s' "${purge_kho_ids}" "${DELETED_KHO_IDS}" | tr ',' '\n' | grep -E '^[0-9]+$' | sort -un | paste -sd, - || true)"
     if [ -n "${purge_topic_ids}" ]; then
       docker compose -f "${SCRIPT_DIR}/docker-compose.yml" exec -T api \
@@ -81,7 +87,7 @@ cleanup() {
         "DELETE FROM hoi_dong WHERE id IN (${HOI_DONG_IDS});" >/dev/null 2>&1 || true
     fi
     DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
-      "DELETE FROM do_an_kho WHERE de_tai_id IN (SELECT id FROM de_tai WHERE dot_do_an_id = ${DOT_DO_AN_ID}) OR (khoa='K98' AND nguon='IMPORT');" >/dev/null 2>&1 || true
+      "DELETE FROM do_an_kho WHERE de_tai_id IN (SELECT id FROM de_tai WHERE dot_do_an_id = ${DOT_DO_AN_ID}) OR (khoa='K98' AND nguon='IMPORT' AND id > ${KHO_MAX_ID_START});" >/dev/null 2>&1 || true
     DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
       "DELETE FROM bao_cao_tien_do WHERE de_tai_id IN (SELECT id FROM de_tai WHERE dot_do_an_id = ${DOT_DO_AN_ID});" >/dev/null 2>&1 || true
     DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
