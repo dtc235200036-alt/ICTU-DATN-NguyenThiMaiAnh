@@ -74,6 +74,8 @@ export async function downloadFile(path: string, fallbackName: string): Promise<
     anchor.click()
     anchor.remove()
   } finally {
-    URL.revokeObjectURL(url)
+    // IN-05: một số trình duyệt (Safari, Firefox cũ) bắt đầu tải bất đồng bộ —
+    // thu hồi URL ngay trong cùng tick có thể hủy lượt tải.
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
   }
 }
