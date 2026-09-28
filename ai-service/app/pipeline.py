@@ -10,6 +10,8 @@
 import hashlib
 import logging
 import threading
+import time
+from collections import OrderedDict
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
@@ -45,6 +47,48 @@ def _sha256(text: str) -> str:
 
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+class RecentVectors:
+    """CR-02: vector câu của các lần /check-document gần đây, theo ref_id
+    (tai_lieu_do_an.id) + băm câu. Web API ingest DOCUMENT ngay sau khi kiểm
+    tra xong cùng văn bản đó → ingest dùng lại vector, không mã hóa lần hai
+    (~30 s CPU với một báo cáo ~100 trang). Bị chặn theo tổng số vector và
+    thời gian sống; lấy ra là xóa (mỗi lần kiểm tra dùng cho đúng một ingest)."""
+
+    def __init__(self, max_vectors: int = 20_000, ttl_seconds: float = 900.0) -> None:
+        self.max_vectors = max_vectors
+        self.ttl_seconds = ttl_seconds
+        self._lock = threading.Lock()
+        self._items: OrderedDict[int, tuple[float, dict[str, np.ndarray]]] = OrderedDict()
+        self._size = 0
+
+    def put(self, ref_id: int, texts: list[str], vectors: np.ndarray) -> None:
+        if ref_id <= 0 or not texts or len(texts) > self.max_vectors:
+            return
+        entry = {_sha256(t): v for t, v in zip(texts, vectors)}
+        with self._lock:
+            self._drop(ref_id)
+            self._items[ref_id] = (time.monotonic(), entry)
+            self._size += len(entry)
+            while self._size > self.max_vectors and self._items:
+                self._drop(next(iter(self._items)))
+
+    def take(self, ref_id: int) -> dict[str, np.ndarray]:
+        with self._lock:
+            item = self._items.get(ref_id)
+            self._drop(ref_id)
+        if item is None or time.monotonic() - item[0] > self.ttl_seconds:
+            return {}
+        return item[1]
+
+    def _drop(self, ref_id: int) -> None:
+        old = self._items.pop(ref_id, None)
+        if old is not None:
+            self._size -= len(old[1])
+
+
+RECENT = RecentVectors()
 
 
 def chunk_texts(loai: str, text: str) -> list[str]:
@@ -124,8 +168,21 @@ def ingest_many(
         if not planned:
             return counts
 
+        # CR-02: câu của tài liệu vừa /check-document dùng lại vector đã mã
+        # hóa lúc kiểm tra; chỉ câu chưa có mới được mã hóa (một lần cho lô).
         all_texts = [t for _, texts in planned for t in texts]
-        vectors = encoder.encode(all_texts)
+        reuse: dict[str, np.ndarray] = {}
+        for item, _ in planned:
+            if item.loai == LOAI_DOCUMENT:
+                reuse.update(RECENT.take(item.ma_nguon))
+        hashes = [_sha256(t) for t in all_texts]
+        missing = [i for i, h in enumerate(hashes) if h not in reuse]
+        vectors = np.empty((len(all_texts), encoder.dim), dtype=np.float32)
+        if missing:
+            vectors[missing] = encoder.encode([all_texts[i] for i in missing])
+        for i, h in enumerate(hashes):
+            if h in reuse:
+                vectors[i] = reuse[h]
 
         new_rows: list[tuple[IngestItem, list[ChunkRow], np.ndarray]] = []
         offset = 0
@@ -325,6 +382,7 @@ def score_document(
     strip: bool = True,
     shingle: int = 4,
     num_perm: int = 128,
+    cache_ref: int | None = None,
 ) -> DocumentScores:
     """Điểm tốt nhất của từng câu so với kho DOCUMENT (không phụ thuộc ngưỡng).
 
@@ -345,6 +403,9 @@ def score_document(
         return DocumentScores([], removed, ty_le_loai_tru)
 
     vectors = encoder.encode(sents)
+    if strip and cache_ref:
+        # CR-02: ingest DOCUMENT kế tiếp của cùng tài liệu dùng lại các vector này.
+        RECENT.put(int(cache_ref), sents, vectors)
     signatures = [minhash.signature(s, shingle, num_perm) for s in sents]
     excluded = frozenset(int(r) for r in exclude_refs)
     excluded_arr = np.fromiter(excluded, dtype=np.int64, count=len(excluded))

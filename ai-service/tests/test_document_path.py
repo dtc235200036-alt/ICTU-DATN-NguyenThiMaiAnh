@@ -248,3 +248,21 @@ def test_check_document_signals_exclusion_replace(client, db_path):
         after = set(conn.execute(text("SELECT id FROM embedding")).scalars().all())
     assert kept <= after and len(after - kept) == len(missing)
     assert _check(client, _pdf_like([P1], width=4))["chi_tiet"][0]["ref_id"] == 20
+
+
+def test_check_then_ingest_reuses_vectors(client):
+    """CR-02 (04-REVIEW): Web API ingest DOCUMENT ngay sau /check-document của
+    cùng tài liệu — dùng lại vector đã mã hóa lúc kiểm tra, không mã hóa lần hai."""
+    text = _docx_like([P1, P2, P3])
+    _check(client, text, ref_id=42)
+    before = client.get("/health").json()["encode_calls"]
+    r = client.post("/ingest", json={"id": 42, "type": "DOCUMENT", "text": text}, headers=HEADERS)
+    assert r.status_code == 200 and r.json()["chunk_count"] == 6
+    assert client.get("/health").json()["encode_calls"] == before
+    # Vector dùng lại đúng là vector của các câu đó: bản sao khớp tài liệu 42.
+    result = _check(client, text, ref_id=0)
+    assert result["do_an_trung"][0] == {"ref_id": 42, "ty_le": 100.0}
+    # Ingest lại (không còn trong bộ nhớ đệm, văn bản đổi) thì mã hóa bình thường.
+    before = client.get("/health").json()["encode_calls"]
+    client.post("/ingest", json={"id": 42, "type": "DOCUMENT", "text": _docx_like([P4])}, headers=HEADERS)
+    assert client.get("/health").json()["encode_calls"] == before + 1

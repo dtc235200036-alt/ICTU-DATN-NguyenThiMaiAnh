@@ -37,6 +37,14 @@ class Settings(BaseSettings):
     AI_TITLE_TIMEOUT_SECONDS: float = 4.0
     AI_DOCUMENT_TIMEOUT_SECONDS: float = 24.0
     AI_INGEST_TIMEOUT_SECONDS: float = 60.0
+    # CR-02 (04-REVIEW): mã hóa tài liệu tốn ~0,12 s CPU / 1000 ký tự (báo cáo
+    # ~100 trang ≈ 350 000 ký tự ≈ 40 s trên máy phát triển) nên timeout
+    # /check-document và /ingest DOCUMENT tăng theo độ dài — hệ số gấp đôi để
+    # hai tài liệu dài chạy cùng lúc vẫn kịp — chặn trên bởi
+    # AI_DOCUMENT_TIMEOUT_MAX_SECONDS < DOCUMENT_CHECK_TIMEOUT_SECONDS (lần
+    # chạy quá hạn đó bị expire_if_stale chuyển LOI).
+    AI_DOCUMENT_TIMEOUT_PER_1K_CHARS: float = 0.25
+    AI_DOCUMENT_TIMEOUT_MAX_SECONDS: float = 240.0
     TITLE_CHECK_TOP_K: int = 5
 
     # D-02/D-03/D-04 (Phase 3): tài liệu đề cương/báo cáo lưu ngoài DocumentRoot

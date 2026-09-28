@@ -218,5 +218,11 @@ uv run python calibration/calibrate.py evaluate --data ../seed-data \
 - Máy chủ không có Internet: chạy `python -m app.download_model` ở nơi có mạng
   để làm nóng cache/volume `/models`, rồi đặt `HF_HUB_OFFLINE=1`.
 - Endpoint là `def` thường — FastAPI chạy trong threadpool, suy luận không chặn
-  event loop; lời gọi mô hình được tuần tự hóa bằng một khóa.
+  event loop; lời gọi mô hình được tuần tự hóa bằng một khóa, **giữ theo từng
+  lô con 32 câu** (CR-02): một báo cáo ~100 trang (~2 000 câu, ~40 s CPU) không
+  chặn kiểm tra tên gửi giữa chừng quá ~0,5 s. `encode_calls` vẫn đếm một lần
+  cho mỗi lần mã hóa logic.
+- **Kiểm tra rồi ingest không mã hóa hai lần** (CR-02): `/check-document` giữ
+  vector các câu của `ref_id` trong bộ nhớ đệm (tối đa 20 000 vector, 15 phút);
+  `/ingest` DOCUMENT cùng id ngay sau đó dùng lại, chỉ câu chưa có mới được mã hóa.
 - `/docs` và `/openapi.json` chỉ bật khi `APP_ENV=test`.

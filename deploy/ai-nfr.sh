@@ -9,6 +9,9 @@
 #            nộp -> HOAN_TAT (thăm dò mỗi 0,25 s): P95 <= 30 s, không có LOI.
 #   NFR-10 — thời gian phản hồi của API nộp (202): lớn nhất <= 2 s.
 #   NFR-11 — thêm 1 bản ghi kho -> encode_calls của dịch vụ AI tăng đúng 1.
+#   Tài liệu dài (CR-02, 04-REVIEW) — /check-document ~350 000 ký tự (cỡ báo cáo
+#            ~100 trang) qua AiClientHttp của Web API (timeout theo độ dài) phải
+#            xong, và 5 lần /check-title chen giữa (timeout 4 s) đều thành công.
 #   Bộ nhớ — container ai: đỉnh cgroup < 2048 MiB và không bị OOM-kill.
 # Dùng: bash deploy/ai-nfr.sh [--report docs/chuong-4-trien-khai/thu-nghiem-ai/04-hieu-nang-va-bao-mat.md]
 # (sau `bash deploy/seed-ai.sh`). Phase 5 chạy lại đúng lệnh này trên server.
@@ -190,6 +193,47 @@ PY
 )"
 record nfr08_ms "$title_ms"
 
+# --- Tài liệu dài + kiểm tra tên chen giữa (CR-02) ------------------------------
+long_doc="$("${COMPOSE[@]}" exec -T api python - <<'PY'
+import glob, json, threading, time
+from app.services.ai_client import get_ai_client
+from app.services.documents import extract_text
+parts = []
+for path in sorted(glob.glob("/seed-data/tai-lieu/*")):
+    parts.append(extract_text(open(path, "rb").read(), "PDF" if path.endswith(".pdf") else "DOCX") or "")
+text = "\n".join(parts)
+while len(text) < 350_000:
+    text += "\n" + text
+text = text[:350_000]
+client = get_ai_client(None)  # AI_CLIENT=http: đúng timeout của Web API
+res = {"chars": len(text), "timeout_s": round(client._scaled(client._document_timeout, text), 1)}
+def run():
+    t = time.perf_counter()
+    try:
+        body = client.check_document(0, text, 5)
+        res["doc_s"], res["so_doan"] = round(time.perf_counter() - t, 2), body.get("so_doan")
+    except Exception as exc:
+        res["doc_s"], res["doc_loi"] = round(time.perf_counter() - t, 2), type(exc).__name__
+th = threading.Thread(target=run)
+th.start()
+time.sleep(2)
+titles = []
+for _ in range(5):
+    t = time.perf_counter()
+    try:
+        client.check_title("Xây dựng hệ thống quản lý thư viện trường trung học phổ thông", 5, None)
+        titles.append(round((time.perf_counter() - t) * 1000))
+    except Exception as exc:
+        titles.append(type(exc).__name__)
+    time.sleep(1)
+th.join()
+res["title_ms"] = titles
+print(json.dumps(res))
+PY
+)"
+record long_doc "$long_doc"
+ok "Tài liệu dài: ${long_doc}"
+
 # --- NFR-09 / NFR-10 (AISV-04, AISV-06) ---------------------------------------
 TOKEN_BOMON="$(bash "${SCRIPT_DIR}/api-login.sh" bomon)"
 TOKEN_SV="$(bash "${SCRIPT_DIR}/api-login.sh" DTC225200095)"
@@ -319,11 +363,19 @@ states = [r[4] for r in rows]
 peak = int(kq["mem_peak_bytes"] or 0) / 1048576
 limit = int(kq["mem_limit_bytes"]) / 1048576
 delta11 = int(kq["nfr11_after"]) - int(kq["nfr11_before"])
+long_doc = json.loads(kq["long_doc"])
+long_titles = long_doc["title_ms"]
+long_ok = (
+    "doc_loi" not in long_doc
+    and long_doc["doc_s"] <= long_doc["timeout_s"]
+    and all(isinstance(x, int) and x < 4000 for x in long_titles)
+)
 res = {
     "NFR-07": kq["nfr07_ok"] == "1",
     "NFR-08": len(title) == 20 and p95(title) <= 5000,
     "NFR-09": len(rows) == n_files and all(s == "HOAN_TAT" for s in states) and p95(done) <= 30,
     "NFR-10": len(rows) == n_files and max(submit) <= 2,
+    "DAI": long_ok,
     "NFR-11": delta11 == 1,
     "MEM": 0 < peak < 2048 and kq["oom_killed"] == "false",
 }
@@ -341,6 +393,9 @@ lines = [
     ("NFR-10", "API nộp trả phản hồi ≤ 2 s",
      "Thời gian phản hồi 202 của POST /api/outlines/{id}/submit (cùng 20 lần nộp)",
      f"P95 {p95(submit):.3f} s, **max {max(submit):.3f} s**"),
+    ("NFR-09 (dài)", "Báo cáo ~100 trang hoàn tất trong timeout của Web API; kiểm tra tên chen giữa không bị chặn (< 4 s)",
+     f"POST /check-document {long_doc['chars']} ký tự qua AiClientHttp (timeout theo độ dài {long_doc['timeout_s']} s); 5 lần /check-title (timeout 4 s) gửi trong lúc đó",
+     f"{long_doc.get('so_doan')} câu, **{long_doc['doc_s']} s**{' — lỗi ' + long_doc['doc_loi'] if 'doc_loi' in long_doc else ''}; kiểm tra tên chen giữa: {', '.join(str(x) + (' ms' if isinstance(x, int) else '') for x in long_titles)}"),
     ("NFR-11", "Ingest 1 bản ghi = 1 lần encode",
      "encode_calls (/health) trước và sau khi Bộ môn thêm 1 bản ghi kho (chờ DA_INDEX)",
      f"{kq['nfr11_before']} -> {kq['nfr11_after']} (**+{delta11}**)"),
@@ -400,6 +455,7 @@ if report:
         "",
         "- Kiểm tra tài liệu chạy nền: API nộp trả 202 ngay sau khi lưu file và trích xuất văn bản, nên thời gian phản hồi (NFR-10) không phụ thuộc thời gian suy luận của mô hình.",
         "- Thời gian nộp → Hoàn tất gồm độ phân giải thăm dò 0,25 s; phần lớn còn lại là thời gian mã hóa các câu của tài liệu nộp trên CPU (tài liệu dài — báo cáo cuối — tốn nhiều hơn đề cương).",
+        "- Tài liệu dài (CR-02): thời gian mã hóa tăng tuyến tính theo số câu (~0,1 s CPU / 1000 ký tự), nên báo cáo ~100 trang vượt chỉ tiêu 30 s của đề cương/báo cáo thông thường; Web API vì vậy đặt timeout `/check-document` theo độ dài (`AI_DOCUMENT_TIMEOUT_SECONDS` + `AI_DOCUMENT_TIMEOUT_PER_1K_CHARS` × nghìn ký tự, trần `AI_DOCUMENT_TIMEOUT_MAX_SECONDS`). Dịch vụ AI mã hóa theo lô con 32 câu và chỉ giữ khóa mô hình trong từng lô con, nên kiểm tra tên gửi giữa chừng chỉ chờ tối đa một lô con; ingest ngay sau kiểm tra dùng lại vector đã mã hóa (không mã hóa lần hai).",
         "- Embedding của kho được tính một lần lúc ingest và giữ trong chỉ mục FAISS trong bộ nhớ; thêm một bản ghi chỉ mã hóa đúng bản ghi đó (NFR-11).",
         "- Chất lượng phát hiện (tỷ lệ cảnh báo đúng/sai trên các cặp có chủ đích) được trình bày ở mục 4.x.3 — [03-hieu-chinh-nguong.md](03-hieu-chinh-nguong.md).",
         "",

@@ -46,6 +46,7 @@ def check_document(body: CheckDocumentRequest, request: Request) -> dict:
         exclude,
         shingle=settings.MINHASH_SHINGLE,
         num_perm=settings.MINHASH_NUM_PERM,
+        cache_ref=body.ref_id or None,
     )
     return pipeline.check_document(
         scores,

@@ -233,6 +233,8 @@ class AiClientHttp:
         title_timeout: float,
         document_timeout: float,
         ingest_timeout: float,
+        document_timeout_per_1k_chars: float = 0.0,
+        document_timeout_max: float | None = None,
         transport: httpx.BaseTransport | None = None,
     ) -> None:
         self._base_url = base_url.rstrip("/")
@@ -240,7 +242,17 @@ class AiClientHttp:
         self._title_timeout = title_timeout
         self._document_timeout = document_timeout
         self._ingest_timeout = ingest_timeout
+        self._per_1k = document_timeout_per_1k_chars
+        self._timeout_max = document_timeout_max
         self._transport = transport
+
+    def _scaled(self, base: float, text: str) -> float:
+        """CR-02: timeout theo độ dài văn bản (base + hệ số × nghìn ký tự),
+        không vượt trần; văn bản ngắn giữ đúng base."""
+        timeout = max(base, self._document_timeout + self._per_1k * len(text) / 1000)
+        if self._timeout_max is not None:
+            timeout = min(timeout, max(base, self._timeout_max))
+        return timeout
 
     def _fail(self, message: str) -> AiServiceError:
         _logger.warning(message)
@@ -305,7 +317,7 @@ class AiClientHttp:
         return self._post(
             "/check-document",
             payload,
-            self._document_timeout,
+            self._scaled(self._document_timeout, text),
             ("ty_le_tong", "do_an_trung", "chi_tiet"),
         )
 
@@ -313,7 +325,7 @@ class AiClientHttp:
         return self._post(
             "/ingest",
             {"id": ref_id, "type": loai, "text": text},
-            self._ingest_timeout,
+            self._scaled(self._ingest_timeout, text) if loai == "DOCUMENT" else self._ingest_timeout,
             ("chunk_count", "indexed"),
         )
 
@@ -372,6 +384,8 @@ def get_ai_client(db: Session) -> AiClient:
             title_timeout=settings.AI_TITLE_TIMEOUT_SECONDS,
             document_timeout=settings.AI_DOCUMENT_TIMEOUT_SECONDS,
             ingest_timeout=settings.AI_INGEST_TIMEOUT_SECONDS,
+            document_timeout_per_1k_chars=settings.AI_DOCUMENT_TIMEOUT_PER_1K_CHARS,
+            document_timeout_max=settings.AI_DOCUMENT_TIMEOUT_MAX_SECONDS,
         )
     # Phương án dự phòng (AI_CLIENT=stub): bộ giả lập Phase 2/3.
     return AiClientStub(

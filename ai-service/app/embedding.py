@@ -7,8 +7,14 @@ Hai profile thật của bake-off là hạng nhất, chọn bằng AI_MODEL_PROF
 Profile fake (HashingEncoder) chỉ dùng cho test (Settings từ chối ngoài
 APP_ENV=test): tất định, không import torch.
 
-Mỗi lần gọi encode() = đúng MỘT lần gọi mô hình cho cả lô, encode_calls tăng 1
+Mỗi lần gọi encode() = MỘT lần mã hóa logic cho cả lô, encode_calls tăng 1
 bất kể số văn bản (NFR-11: ingest chỉ mã hóa mục mới, một lần).
+
+CR-02 (04-REVIEW): lô lớn (báo cáo ~2000 câu ≈ 30 s CPU) được mã hóa theo từng
+lô con SUB_BATCH câu, mỗi lô con giữ khóa mô hình riêng — một lần kiểm tra tên
+(1 câu) chen vào giữa chỉ chờ tối đa một lô con (~0,5 s) thay vì cả tài liệu.
+Câu được sắp theo độ dài trước khi chia lô con (ít đệm như khi mã hóa cả lô),
+kết quả trả về đúng thứ tự đầu vào.
 """
 import hashlib
 import threading
@@ -55,6 +61,10 @@ class HashingEncoder:
         return out
 
 
+# CR-02: số câu mỗi lô con giữ khóa mô hình (~0,5 s CPU với bkai, 4 luồng).
+SUB_BATCH = 32
+
+
 class Encoder:
     def __init__(self, profile: str, torch_threads: int = 4) -> None:
         if profile not in PROFILES:
@@ -64,6 +74,7 @@ class Encoder:
         self.name = self._spec.model
         self.encode_calls = 0
         self._lock = threading.Lock()
+        self._calls_lock = threading.Lock()
         if profile == "fake":
             self._model = HashingEncoder()
             self.dim = HashingEncoder.dim
@@ -85,22 +96,31 @@ class Encoder:
             text = segment(text)
         return self._spec.prefix + text
 
+    def _encode_batch(self, texts: list[str]) -> np.ndarray:
+        prepared = [self.preprocess(t) for t in texts]
+        if self.profile == "fake":
+            return self._model.encode(prepared)
+        return self._model.encode(
+            prepared,
+            batch_size=SUB_BATCH,
+            normalize_embeddings=True,
+            convert_to_numpy=True,
+            show_progress_bar=False,
+        )
+
     def encode(self, texts: list[str]) -> np.ndarray:
-        """Mã hóa cả lô trong MỘT lần gọi; trả float32 (n, dim) đã chuẩn hóa L2."""
+        """Mã hóa cả lô (một lần gọi logic); trả float32 (n, dim) đã chuẩn hóa
+        L2 theo đúng thứ tự đầu vào. Khóa mô hình chỉ giữ trong từng lô con."""
         if not texts:
             # Lô rỗng không chạm tới mô hình → không tính là một lần gọi.
             return np.zeros((0, self.dim), dtype=np.float32)
-        with self._lock:
+        with self._calls_lock:
             self.encode_calls += 1
-            prepared = [self.preprocess(t) for t in texts]
-            if self.profile == "fake":
-                vectors = self._model.encode(prepared)
-            else:
-                vectors = self._model.encode(
-                    prepared,
-                    batch_size=32,
-                    normalize_embeddings=True,
-                    convert_to_numpy=True,
-                    show_progress_bar=False,
-                )
-            return np.ascontiguousarray(vectors, dtype=np.float32)
+        order = sorted(range(len(texts)), key=lambda i: -len(texts[i]))
+        out = np.empty((len(texts), self.dim), dtype=np.float32)
+        for start in range(0, len(order), SUB_BATCH):
+            idx = order[start : start + SUB_BATCH]
+            with self._lock:
+                vectors = self._encode_batch([texts[i] for i in idx])
+            out[idx] = np.asarray(vectors, dtype=np.float32)
+        return np.ascontiguousarray(out)

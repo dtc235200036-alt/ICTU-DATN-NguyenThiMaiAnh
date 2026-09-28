@@ -161,6 +161,14 @@ print(json.load(urllib.request.urlopen('http://ai:8002/health', timeout=4))['enc
 "
 }
 
+# index_size_tai_lieu của dịch vụ AI (số câu DOCUMENT đang trong chỉ mục).
+doc_index_size() {
+  "${COMPOSE[@]}" exec -T api python -c "
+import json, urllib.request
+print(json.load(urllib.request.urlopen('http://ai:8002/health', timeout=4))['index_size_tai_lieu'])
+"
+}
+
 # check_title TOKEN TEN — POST /api/topics/check-title, thân ở $TMP/body.
 check_title() {
   python3 -c 'import json,sys; print(json.dumps({"ten_de_tai": sys.argv[1]}, ensure_ascii=False))' "$2" > "$TMP/req.json"
@@ -490,10 +498,21 @@ PY
   nguong="$(sql "SELECT gia_tri FROM cau_hinh_nguong WHERE loai='NGUONG_TAI_LIEU'")"
 
   # (1) Bài chép nguyên văn -> cảnh báo, đúng đồ án nguồn, đoạn nộp cạnh đoạn nguồn.
-  local doc_a t0 own_label summary_a
+  local doc_a t0 own_label summary_a enc0 idx0 enc1 deadline
+  enc0="$(encode_calls)"; idx0="$(doc_index_size)"
   t0=$SECONDS
   doc_a="$(submit_outline "$token_sv_a" "${TOPIC_SV_A_ID}" "$chep_file")"
   wait_check "$token_sv_a" "$doc_a" "$TMP/check-a.json"
+  # CR-02: ingest sau HOAN_TAT dùng lại vector của lần kiểm tra -> cả luồng
+  # nộp (kiểm tra + index) chỉ mã hóa MỘT lần.
+  deadline=$((SECONDS + 20))
+  until [ "$(doc_index_size)" -gt "$idx0" ]; do
+    [ "$SECONDS" -lt "$deadline" ] || fail "Tài liệu ${doc_a} chưa được index sau 20 s"
+    sleep 0.5
+  done
+  enc1="$(encode_calls)"
+  [ "$((enc1 - enc0))" = "1" ] || fail "Nộp + index tài liệu ${doc_a} mã hóa $((enc1 - enc0)) lần (cần 1: ingest dùng lại vector)"
+  ok "Nộp ${chep_ma}-B: kiểm tra + index chỉ mã hóa 1 lần (encode_calls ${enc0} -> ${enc1}, CR-02)"
   own_label="$(sql "SELECT CONCAT(ten_de_tai, ' (K97)') FROM de_tai WHERE id = ${TOPIC_SV_A_ID}")"
   summary_a="$(python3 - "$TMP/check-a.json" "$nguong" "$chep_label" "$own_label" <<'PY'
 import json, sys
