@@ -45,8 +45,8 @@
 
 ### Quản lý bảo vệ (UC4)
 
-- [ ] **DEFN-01**: SV nộp báo cáo cuối (DOCX/PDF); lần nộp này chạy kiểm tra trùng lặp nội dung
-- [ ] **DEFN-02**: Bộ môn lập hội đồng (chọn các GV làm thành viên), xếp lịch (ngày, giờ, phòng) và danh sách SV bảo vệ
+- [x] **DEFN-01**: SV nộp báo cáo cuối (DOCX/PDF); lần nộp này chạy kiểm tra trùng lặp nội dung
+- [x] **DEFN-02**: Bộ môn lập hội đồng (chọn các GV làm thành viên), xếp lịch (ngày, giờ, phòng) và danh sách SV bảo vệ
 - [ ] **DEFN-03**: GV được phân vào hội đồng xem báo cáo của SV thuộc hội đồng mình và nhập điểm + nhận xét
 - [ ] **DEFN-04**: Hệ thống tính điểm bảo vệ bằng trung bình cộng điểm các thành viên; bộ môn chốt kết quả; SV xem lịch và kết quả của mình
 
@@ -68,7 +68,7 @@
 
 ### Thông báo
 
-- [ ] **NOTF-01**: Người dùng nhận thông báo in-app khi đề tài/đề cương được duyệt hoặc từ chối, khi có nhận xét mới và khi được phân vào hội đồng / có lịch bảo vệ
+- [x] **NOTF-01**: Người dùng nhận thông báo in-app khi đề tài/đề cương được duyệt hoặc từ chối, khi có nhận xét mới và khi được phân vào hội đồng / có lịch bảo vệ
 
 ### Triển khai & dữ liệu thử nghiệm (CLO 4)
 
@@ -134,8 +134,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROG-01 | Phase 3 | Pending |
 | PROG-02 | Phase 3 | Pending |
 | PROG-03 | Phase 3 | Pending |
-| DEFN-01 | Phase 3 | Pending |
-| DEFN-02 | Phase 3 | Pending |
+| DEFN-01 | Phase 3 | Complete |
+| DEFN-02 | Phase 3 | Complete |
 | DEFN-03 | Phase 3 | Pending |
 | DEFN-04 | Phase 3 | Pending |
 | REPO-01 | Phase 3 | Pending |
@@ -148,7 +148,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AISV-05 | Phase 4 | Pending |
 | AISV-06 | Phase 4 | Pending |
 | AISV-07 | Phase 4 | Pending |
-| NOTF-01 | Phase 3 | Pending |
+| NOTF-01 | Phase 3 | Complete |
 | DEPL-01 | Phase 2 | Complete |
 | DEPL-02 | Phase 2 | Complete |
 | DATA-01 | Phase 2 | Complete |

@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 3
 current_phase_name: Outline, Progress, Defense & Archive
 status: executing
-stopped_at: Completed 03-02-PLAN.md (MH-08/MH-09/MH-14 full fidelity + shared document UI)
-last_updated: "2026-09-28T03:08:04.314Z"
+stopped_at: Completed 03-03-PLAN.md (UC4.1/4.2 defense — final report + committee/schedule with GVHD exclusion)
+last_updated: "2026-09-28T03:48:25.228Z"
 last_activity: 2026-09-28
 last_activity_desc: Phase 3 plan 03-01 complete (UC2 outline tracer + revision loop, 2/2 tasks, 4 tests)
-state_head: 5dcef8ea901f67bfc91b7d7fb993f289d257146e
+state_head: 24effca29b42a9e779498f5aad24a214756a60ca
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 24
-  completed_plans: 14
+  total_plans: 27
+  completed_plans: 17
   percent: 0
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-09-27)
 ## Current Position
 
 Phase: 3 (Outline, Progress, Defense & Archive) — EXECUTING
-Plan: 3 of 7
+Plan: 4 of 7
 Status: Ready to execute
 Last activity: 2026-09-28 — Plan 03-01 complete (UC2 outline tracer + revision loop)
 
@@ -70,6 +70,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02 P06 | 65min | 2 tasks | 18 files |
 | Phase 03 P01 | 42min | 2 tasks | 39 files |
 | Phase 03 P02 | 55min | 2 tasks | 14 files |
+| Phase 03 P03 | 38min | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -118,6 +119,9 @@ Recent decisions affecting current work:
 - [Phase 03]: documents/api.ts is the single source of DocumentOut/CheckSummary/CheckMatch/CheckSegment/CheckDetail; outlines/api.ts re-exports them
 - [Phase 03]: CheckPanel's canRecheck is caller-supplied (not role-derived internally); OutlineReviewPage passes true since the route is GV/Bo mon-only and the server re-checks ownership
 - [Phase 03]: AppLayout breadcrumb lookup switched to react-router matchPath (was exact pathname equality, silently broke every :param route's breadcrumb)
+- [Phase 03]: [Phase 03]: GVHD-exclusion (D-06) checked in add_schedule AND update_committee, both under a hoi_dong row lock + UNIQUE(lich_bao_ve.sinh_vien_id) as final defense — never a UI-only warning
+- [Phase 03]: [Phase 03]: gio_du_kien (per-student defense slot time) is always computed server-side (SLOT_MINUTES=30 offset from hoi_dong.gio_bao_ve by thu_tu), never stored
+- [Phase 03]: [Phase 03]: FinalReportTab reuses VersionHistory with docLabel='báo cáo cuối' (no review-loop UI) instead of a new version-table component
 
 ### Pending Todos
 
@@ -141,6 +145,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-28T03:08:04.272Z
-Stopped at: Completed 03-02-PLAN.md (MH-08/MH-09/MH-14 full fidelity + shared document UI)
+Last session: 2026-09-28T03:48:25.184Z
+Stopped at: Completed 03-03-PLAN.md (UC4.1/4.2 defense — final report + committee/schedule with GVHD exclusion)
 Resume file: None

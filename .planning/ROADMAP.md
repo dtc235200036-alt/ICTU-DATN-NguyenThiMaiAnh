@@ -125,7 +125,7 @@ Plans:
   4. Đồ án đã chốt kết quả tự xuất hiện trong kho với đủ metadata; người dùng tìm/lọc kho theo khóa, từ khóa, GVHD và xem chi tiết; Bộ môn thêm/sửa/xóa và import bản ghi các khóa cũ, mỗi bản ghi mới phát sinh lời gọi index sang AI client
   5. Người dùng thấy thông báo in-app (số chưa đọc + danh sách) khi đề tài/đề cương được duyệt hoặc từ chối, khi có nhận xét mới, và khi được phân vào hội đồng hoặc có lịch bảo vệ
 
-**Plans**: 2/7 plans executed (tuần tự — dùng chung một stack Docker Compose và schema MySQL test; thứ tự theo D-09: đề cương → bảo vệ → kho, rồi tiến độ và thông báo)
+**Plans**: 3/7 plans executed (tuần tự — dùng chung một stack Docker Compose và schema MySQL test; thứ tự theo D-09: đề cương → bảo vệ → kho, rồi tiến độ và thông báo)
 Plans:
 **Wave 1**
 - [x] 03-01-PLAN.md — TRACER: SV nộp đề cương → lưu (volume riêng) + trích xuất → kiểm tra stub nền DANG_KIEM_TRA→HOAN_TAT → GVHD duyệt → thông báo (Alembic 0006, cột bổ sung noi_dung_trich_xuat/trich_xuat_loi ghi ngược ERD); vòng yêu cầu sửa, tải file, kiểm tra lại, 4 test; deploy/e2e-uc2-5.sh
@@ -134,7 +134,7 @@ Plans:
 - [x] 03-02-PLAN.md — Màn MH-08 (nộp + lịch sử phiên bản + nhận xét), MH-09 (duyệt với khung kiểm tra trùng lặp polling), MH-14 (chi tiết kết quả); tải file có xác thực
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 03-03-PLAN.md — SV nộp báo cáo cuối (kiểm tra trùng lặp nền) + Bộ môn lập hội đồng, xếp lịch, chặn GVHD ngồi hội đồng SV mình (Alembic 0007, MH-11)
+- [x] 03-03-PLAN.md — SV nộp báo cáo cuối (kiểm tra trùng lặp nền) + Bộ môn lập hội đồng, xếp lịch, chặn GVHD ngồi hội đồng SV mình (Alembic 0007, MH-11)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 - [ ] 03-04-PLAN.md — GV hội đồng chấm điểm (403 ngoài hội đồng), Bộ môn chốt TB cộng → tự lưu kho + ingest AI stub, SV xem lịch/kết quả (Alembic 0008, MH-12)
@@ -167,7 +167,25 @@ Plans:
   4. Bộ môn đổi ngưỡng cảnh báo cho tên đề tài và cho nội dung trên UI, và lần kiểm tra kế tiếp áp dụng ngưỡng mới
   5. Dịch vụ AI không truy cập được từ bên ngoài qua Apache và từ chối request thiếu API key nội bộ; bản ghi kho mới thêm được index ngay và xuất hiện trong lần kiểm tra kế tiếp mà không phải tính lại embedding toàn kho
 
-**Plans**: TBD
+**Plans**: 0/7 plans executed (Wave 1–2 chạy song song với Phase 3 trong worktree riêng — chỉ đụng đường dẫn mới `ai-service/`, `tools/datagen/`, `tools/bakeoff/`, `seed-data/`, `docs/chuong-4-trien-khai/`; Wave 3–5 tuần tự sau khi Phase 3 hoàn tất vì dùng chung stack Docker Compose và CSDL)
+Plans:
+**Wave 1** *(song song, độc lập Phase 3)*
+- [ ] 04-01-PLAN.md — TRACER: ai-service độc lập (FastAPI, Alembic thesis_ai, NFC + tách từ, embedding bkai/e5, FAISS + MinHash, lọc phần mẫu chung, /ingest /check-title /check-document /reindex /health, X-API-Key, image CPU ≤ 2 GiB)
+- [ ] 04-02-PLAN.md — Dữ liệu tổng hợp: 300 đề tài K18–K22 (CSV import kho) + 80 truy vấn tên + 50 file DOCX/PDF gồm 25 cặp trùng chủ đích, 30% cặp giữ lại kiểm chứng (DATA-02/03)
+- [ ] 04-03-PLAN.md — So sánh model embedding bkai vs multilingual-e5 (AUC, độ trễ CPU, RAM), chốt model theo quy tắc định trước (D-01)
+
+**Wave 2** *(blocked on Wave 1 completion; vẫn độc lập Phase 3)*
+- [ ] 04-04-PLAN.md — Hiệu chỉnh ngưỡng trên tập hiệu chỉnh (Youden), kiểm chứng trên tập giữ lại, ablation lọc phần mẫu chung, bảng kết quả chương 4
+
+**Wave 3** *(blocked on Wave 2 + Phase 3 hoàn tất)*
+- [ ] 04-05-PLAN.md — TRACER liên dịch vụ: compose `ai` nội bộ + AiClientHttp + cảnh báo trùng tên với kho 300 đề tài seed qua import, Alembic 0010 ngưỡng hiệu chỉnh, push-on-write, e2e-ai (bảo mật, tên đề tài, index tức thì)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 04-06-PLAN.md — Kiểm tra tài liệu thật (ngưỡng đoạn, loại trừ phiên bản cùng đề tài, ingest sau kiểm tra), seed 25 đồ án nguồn, e2e SC2, đo NFR-07..11
+
+**Wave 5** *(blocked on Wave 4 completion)*
+- [ ] 04-07-PLAN.md — Màn cấu hình ngưỡng (UC0.4), highlight đoạn trùng MH-14/MH-09, ghi ngược chương 3, README dịch vụ AI, gate phase
+
 **UI hint**: yes
 **Notes**:
 - Mở đầu phase bằng so sánh model embedding (bkai vietnamese-bi-encoder + tách từ underthesea so với multilingual-e5) trên tập nhỏ các cặp đã biết giống/khác; timebox và chốt model trước khi nối UI.
@@ -202,6 +220,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Analysis & Design | 6/7 | In Progress|  |
 | 2. Platform, RBAC & Topic Management | 6/6 | In Progress|  |
-| 3. Outline, Progress, Defense & Archive | 2/7 | In Progress|  |
+| 3. Outline, Progress, Defense & Archive | 3/7 | In Progress|  |
 | 4. AI Similarity Service | 0/TBD | Not started | - |
 | 5. System Verification & Defense Package | 0/TBD | Not started | - |
