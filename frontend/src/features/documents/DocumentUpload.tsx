@@ -35,10 +35,12 @@ function errorStateFrom(err: unknown): UploadErrorState {
   if (err instanceof AxiosError) {
     const status = err.response?.status
     const detail: unknown = err.response?.data?.detail
-    const detailText = typeof detail === 'string' ? detail : GENERIC_ERROR_DETAIL
-    if (status === 422) {
-      return { title: 'Nộp thất bại: sai định dạng file', detail: detailText }
+    // IN-06: 422 gồm cả "File rỗng"/"vượt 20 MB" — tiêu đề trung tính, lý do
+    // lấy từ detail; 413 của MaxBodySizeMiddleware là text thuần (không detail).
+    if (status === 413) {
+      return { title: 'Nộp thất bại', detail: 'File vượt quá dung lượng tối đa 20 MB (NFR-06).' }
     }
+    const detailText = typeof detail === 'string' ? detail : GENERIC_ERROR_DETAIL
     return { title: 'Nộp thất bại', detail: detailText }
   }
   return { title: 'Nộp thất bại', detail: GENERIC_ERROR_DETAIL }
