@@ -11,7 +11,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-BASE="${BASE_URL:-https://localhost}"
+BASE="${BASE_URL:-https://localhost:${HTTPS_PORT:-443}}"
 CSV="${REPO_ROOT}/seed-data/de-tai-kho.csv"
 COMPOSE=(docker compose -f "${SCRIPT_DIR}/docker-compose.yml")
 EXPECTED=300

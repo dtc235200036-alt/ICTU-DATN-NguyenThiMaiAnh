@@ -311,6 +311,8 @@ ok "Tài khoản seed: ${n_sv} sinh viên, ${n_gv} giảng viên, ${n_bm} Bộ m
 step_end
 
 # --- Bước 6: kho dịch vụ AI (DATA-02, DATA-03) ----------------------------------
+# Các script deploy/*.sh gọi https://localhost:${HTTPS_PORT} (Apache có thể không ở 443).
+export HTTPS_PORT="$(env_get HTTPS_PORT)"; HTTPS_PORT="${HTTPS_PORT:-443}"
 if [ "${SKIP_SEED_AI}" = "1" ]; then
   info "Bỏ qua deploy/seed-ai.sh (--skip-seed-ai)"
 else

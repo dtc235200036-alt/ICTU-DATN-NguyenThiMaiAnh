@@ -3,7 +3,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BASE="${BASE_URL:-https://localhost}"
+BASE="${BASE_URL:-https://localhost:${HTTPS_PORT:-443}}"
 
 fail() {
   echo "FAIL: $1"

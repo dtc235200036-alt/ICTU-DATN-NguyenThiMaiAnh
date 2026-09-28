@@ -8,7 +8,7 @@ DANG_NHAP="$1"
 
 SEED_PW="$(docker compose -f "${SCRIPT_DIR}/docker-compose.yml" exec -T api printenv SEED_DEFAULT_PASSWORD | tr -d '\r')"
 
-BODY="$(curl -sk -X POST "https://localhost/api/auth/login" \
+BODY="$(curl -sk -X POST "${BASE_URL:-https://localhost:${HTTPS_PORT:-443}}/api/auth/login" \
   -H 'Content-Type: application/json' \
   -d "{\"dang_nhap\":\"${DANG_NHAP}\",\"mat_khau\":\"${SEED_PW}\"}")"
 
