@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router'
 
 import DocumentUpload from '../documents/DocumentUpload'
 import { useOutline, useOutlines, useSubmitOutline } from './api'
+import FinalReportTab from './FinalReportTab'
 import VersionHistory from './VersionHistory'
 
 const TRANG_THAI_LABEL: Record<string, { label: string; color: string }> = {
@@ -108,6 +109,11 @@ export default function OutlinePage() {
                 />
               </div>
             ),
+          },
+          {
+            key: 'bao-cao-cuoi',
+            label: 'Báo cáo cuối',
+            children: <FinalReportTab deTaiId={deTaiId} />,
           },
         ]}
       />
