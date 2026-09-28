@@ -15,6 +15,12 @@
 #                 đồ án trùng "{tên A} ({khóa})", đoạn nộp cạnh đoạn nguồn,
 #                 không đoạn khuôn mẫu; B của cặp không liên quan dưới ngưỡng;
 #                 GVHD thấy cùng kết quả; nộp lại không khớp chính đề tài mình.
+#   ai_threshold — ROADMAP SC4/AISV-07/UC0.4 (04-07): Bộ môn nâng
+#                 NGUONG_TEN_DE_TAI lên 99.99 -> lần kiểm tra tên kế tiếp của
+#                 một tên diễn đạt lại trả nguong 99.99 và không còn kết quả Kho;
+#                 đặt lại giá trị cũ -> kết quả Kho trở lại. Trap luôn khôi phục
+#                 ba ngưỡng gốc (kể cả người sửa/thời điểm) và FAIL nếu đọc lại
+#                 không khớp.
 # Dọn dẹp (trap, kể cả khi lỗi giữa chừng): purge vector TOPIC/ARCHIVE/DOCUMENT
 # đã tạo khỏi chỉ mục AI, xóa file đã nộp rồi xóa dữ liệu K97 theo thứ tự khóa
 # ngoại.
@@ -64,13 +70,44 @@ KHO_IDS=""
 # Đề tài K97 do DTC225200095 tự đề xuất trong ai_index — ai_document dùng lại
 # (một SV chỉ được giữ một đề tài đang hoạt động).
 TOPIC_SV_A_ID=""
+# ai_threshold: bản chụp ba dòng cau_hinh_nguong trước khi sửa (loai\tgia_tri\t
+# tai_khoan_id\tthoi_diem) — rỗng = chưa sửa gì, trap không cần khôi phục.
+THRESH_SNAPSHOT=""
 
 sql() {
   DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" "$1"
 }
 
+# restore_thresholds — T-04-32: PUT lại giá trị gốc qua API, trả người sửa và
+# thời điểm về như cũ (lần sửa của script không phải thao tác thật của Bộ môn),
+# rồi đọc lại; trả mã 1 nếu không khớp.
+restore_thresholds() {
+  [ -z "${THRESH_SNAPSHOT}" ] && return 0
+  local token_bomon loai gia_tri tk td now
+  token_bomon="$(bash "${SCRIPT_DIR}/api-login.sh" bomon 2>/dev/null || true)"
+  python3 - "${THRESH_SNAPSHOT}" > "$TMP/thresh-put.json" <<'PY'
+import json, sys
+rows = [l.split("\t") for l in sys.argv[1].splitlines() if l.strip()]
+print(json.dumps({r[0]: float(r[1]) for r in rows}))
+PY
+  curl -sk -o /dev/null -X PUT "$BASE/api/thresholds" -H "Authorization: Bearer ${token_bomon}" \
+    -H 'Content-Type: application/json' --data-binary "@$TMP/thresh-put.json" || true
+  while IFS=$'\t' read -r loai gia_tri tk td; do
+    [ -z "$loai" ] && continue
+    sql "UPDATE cau_hinh_nguong SET gia_tri = ${gia_tri}, tai_khoan_id = ${tk}, thoi_diem_cap_nhat = '${td}' WHERE loai = '${loai}'" </dev/null >/dev/null 2>&1 || true
+  done <<<"${THRESH_SNAPSHOT}"
+  now="$(sql "SELECT loai, gia_tri, IFNULL(tai_khoan_id,'NULL'), thoi_diem_cap_nhat FROM cau_hinh_nguong WHERE loai IN ('NGUONG_TEN_DE_TAI','NGUONG_TAI_LIEU','NGUONG_DOAN_TRUNG') ORDER BY loai" 2>/dev/null || true)"
+  if [ "$now" != "${THRESH_SNAPSHOT}" ]; then
+    echo "FAIL: không khôi phục được ngưỡng gốc — hiện tại: ${now//$'\n'/ | } — gốc: ${THRESH_SNAPSHOT//$'\n'/ | }"
+    return 1
+  fi
+  echo "OK: đã khôi phục ba ngưỡng gốc (${THRESH_SNAPSHOT//$'\n'/ | })"
+  THRESH_SNAPSHOT=""
+}
+
 cleanup() {
-  local topic_ids kho_ids
+  local rc=$? topic_ids kho_ids
+  restore_thresholds || rc=1
   if [ -n "${DOT_DO_AN_ID}" ] || [ -n "${KHO_IDS}" ]; then
     topic_ids=""
     if [ -n "${DOT_DO_AN_ID}" ]; then
@@ -112,6 +149,7 @@ cleanup() {
     fi
   fi
   rm -rf "$TMP"
+  exit "$rc"
 }
 trap cleanup EXIT
 
@@ -252,6 +290,58 @@ PY
       ok "${ma} (cùng lĩnh vực, ${secs}s, NFC=NFD): không có kết quả Kho đồ án vượt ngưỡng"
     fi
   done < "$TMP/queries.tsv"
+}
+
+# --- ai_threshold (SC4, AISV-07, UC0.4, D-04) ---------------------------------
+ai_threshold() {
+  local token_bomon token_sv ten code res
+  token_bomon="$(bash "${SCRIPT_DIR}/api-login.sh" bomon)"
+  token_sv="$(bash "${SCRIPT_DIR}/api-login.sh" DTC225200095)"
+
+  code="$(call GET /api/thresholds "$token_bomon")"
+  [ "${code%% *}" = "200" ] || fail "Bộ môn GET /api/thresholds trả ${code%% *}"
+  [ "$(jget '",".join(r["loai"] for r in d)')" = "NGUONG_TEN_DE_TAI,NGUONG_TAI_LIEU,NGUONG_DOAN_TRUNG" ] \
+    || fail "GET /api/thresholds thiếu ngưỡng: $(cat "$TMP/body")"
+  cp "$TMP/body" "$TMP/thresh-before.json"
+  THRESH_SNAPSHOT="$(sql "SELECT loai, gia_tri, IFNULL(tai_khoan_id,'NULL'), thoi_diem_cap_nhat FROM cau_hinh_nguong WHERE loai IN ('NGUONG_TEN_DE_TAI','NGUONG_TAI_LIEU','NGUONG_DOAN_TRUNG') ORDER BY loai")"
+  [ "$(printf '%s\n' "${THRESH_SNAPSHOT}" | grep -c .)" = "3" ] || fail "Không chụp được ba dòng cau_hinh_nguong"
+
+  # Cùng truy vấn dương đầu tiên của ai_title (diễn đạt lại, top-1 là Kho).
+  ten="$(awk -F'\t' '$1=="POS"{print $4; exit}' "$TMP/queries.tsv")"
+  [ -n "$ten" ] || fail "ai_threshold cần ai_title chạy trước (queries.tsv)"
+
+  put_title_threshold() {
+    python3 - "$TMP/thresh-before.json" "$1" > "$TMP/thresh-put.json" <<'PY'
+import json, sys
+body = {r["loai"]: r["gia_tri"] for r in json.load(open(sys.argv[1]))}
+if sys.argv[2] != "orig":
+    body["NGUONG_TEN_DE_TAI"] = float(sys.argv[2])
+print(json.dumps(body))
+PY
+    res="$(call PUT /api/thresholds "$token_bomon" -H 'Content-Type: application/json' --data-binary "@$TMP/thresh-put.json")"
+    [ "${res%% *}" = "200" ] || fail "Bộ môn PUT /api/thresholds trả ${res%% *}: $(cat "$TMP/body")"
+  }
+
+  put_title_threshold 99.99
+  [ "$(jget '[r for r in d if r["loai"] == "NGUONG_TEN_DE_TAI"][0]["nguoi_cap_nhat"] is not None')" = "True" ] \
+    || fail "PUT không ghi người cập nhật"
+  res="$(check_title "$token_sv" "$ten")"
+  [ "${res%% *}" = "200" ] || fail "check-title sau khi nâng ngưỡng trả ${res%% *}"
+  [ "$(jget 'd["nguong"]')" = "99.99" ] || fail "check-title không dùng ngưỡng mới: $(cat "$TMP/body")"
+  [ "$(jget 'sum(1 for m in d["matches"] if m["nguon"] == "KHO")')" = "0" ] \
+    || fail "Ngưỡng 99.99 vẫn còn kết quả Kho: $(cat "$TMP/body")"
+  ok "Bộ môn nâng Ngưỡng tên đề tài lên 99.99 -> lần kiểm tra kế tiếp: nguong 99.99, không còn cảnh báo Kho"
+
+  put_title_threshold orig
+  res="$(check_title "$token_sv" "$ten")"
+  [ "${res%% *}" = "200" ] || fail "check-title sau khi khôi phục trả ${res%% *}"
+  local orig
+  orig="$(python3 -c 'import json,sys; print([r["gia_tri"] for r in json.load(open(sys.argv[1])) if r["loai"]=="NGUONG_TEN_DE_TAI"][0])' "$TMP/thresh-before.json")"
+  [ "$(jget 'd["nguong"]')" = "${orig}" ] || fail "check-title không về ngưỡng gốc ${orig}: $(cat "$TMP/body")"
+  [ "$(jget 'sum(1 for m in d["matches"] if m["nguon"] == "KHO")')" -ge 1 ] \
+    || fail "Khôi phục ngưỡng ${orig} nhưng cảnh báo Kho không trở lại: $(cat "$TMP/body")"
+  ok "Khôi phục ${orig}% -> cảnh báo Kho trở lại ($(jget 'd["matches"][0]["ty_le"]')%)"
+  restore_thresholds || fail "Khôi phục ngưỡng gốc thất bại"
 }
 
 # --- ai_index (SC5, AISV-02, NFR-11) -----------------------------------------
@@ -480,6 +570,7 @@ PY
 require_seeds
 ai_security
 ai_title
+ai_threshold
 ai_index
 ai_document
 

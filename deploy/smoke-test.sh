@@ -198,4 +198,13 @@ for who in BOMON GV001 SV001; do
 done
 echo "OK: cả ba vai trò đọc được notifications, notifications/unread-count, archive -> 200"
 
+# UC0.4/AISV-07 (04-07, T-04-29): chỉ Bộ môn đọc/sửa ngưỡng trùng lặp.
+for who in GV001 SV001; do
+  tok_var="TOKEN_${who}"
+  expect_status 403 GET /api/thresholds "${!tok_var}" "$who"
+  expect_status 403 PUT /api/thresholds "${!tok_var}" "$who"
+done
+expect_status 200 GET /api/thresholds "${TOKEN_BOMON}" bomon
+echo "OK: /api/thresholds — DTC225200001 và GV001 bị 403 (GET/PUT), bomon GET 200"
+
 echo "SMOKE TEST: tất cả kiểm tra đã qua."

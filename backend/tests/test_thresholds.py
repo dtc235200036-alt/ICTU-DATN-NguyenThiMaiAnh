@@ -41,7 +41,7 @@ def test_thresholds_rbac_validation_and_next_check(
 ):
     original = _snapshot()
     try:
-        bomon = make_account(VaiTro.BO_MON, ho_ten="Bộ môn CNPM")
+        bomon = make_account(VaiTro.BO_MON)
         sv = make_account(VaiTro.SINH_VIEN)
         gv = make_account(VaiTro.GIANG_VIEN)
         bm_h = auth_headers(bomon)
@@ -92,7 +92,8 @@ def test_thresholds_rbac_validation_and_next_check(
         assert resp.status_code == 200, resp.text
         saved = {r["loai"]: r for r in resp.json()}
         assert {k: saved[k]["gia_tri"] for k in _LOAI} == {k: float(v) for k, v in new.items()}
-        assert all(saved[k]["nguoi_cap_nhat"] == "Bộ môn CNPM" for k in _LOAI)
+        # Tài khoản Bộ môn không có hồ sơ SV/GV -> tên hiển thị là email (như deps).
+        assert all(saved[k]["nguoi_cap_nhat"] == bomon.email for k in _LOAI)
         with engine.connect() as conn:
             editors = conn.execute(
                 text(
