@@ -24,8 +24,13 @@ export interface QuyenOut {
 
 export type TitleCheckStatus = 'HOAN_TAT' | 'LOI'
 
+/** AISV-03: DE_TAI = đề tài hiện hành, KHO = đồ án trong kho các khóa trước. */
+export type TitleMatchSource = 'DE_TAI' | 'KHO'
+
 export interface TitleMatch {
-  de_tai_id: number
+  nguon: TitleMatchSource
+  de_tai_id: number | null
+  do_an_kho_id: number | null
   ten_de_tai: string
   khoa: string
   giang_vien: string | null

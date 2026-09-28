@@ -352,6 +352,7 @@ dependencies = [
     { name = "bcrypt" },
     { name = "faker" },
     { name = "fastapi" },
+    { name = "httpx" },
     { name = "pydantic-settings" },
     { name = "pyjwt" },
     { name = "pymupdf" },
@@ -364,7 +365,6 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
-    { name = "httpx" },
     { name = "pytest" },
 ]
 
@@ -374,6 +374,7 @@ requires-dist = [
     { name = "bcrypt", specifier = ">=5.0" },
     { name = "faker", specifier = ">=40.39" },
     { name = "fastapi", specifier = ">=0.141" },
+    { name = "httpx", specifier = ">=0.28" },
     { name = "pydantic-settings", specifier = ">=2.15" },
     { name = "pyjwt", specifier = ">=2.15" },
     { name = "pymupdf", specifier = ">=1.28" },
@@ -385,10 +386,7 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-dev = [
-    { name = "httpx", specifier = ">=0.28" },
-    { name = "pytest", specifier = ">=8.4,<9" },
-]
+dev = [{ name = "pytest", specifier = ">=8.4,<9" }]
 
 [[package]]
 name = "packaging"

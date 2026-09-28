@@ -22,7 +22,35 @@ if [ ! -f "${ENV_FILE}" ]; then
   chmod 600 "${ENV_FILE}"
   echo "Đã tạo ${ENV_FILE} với bí mật sinh tự động."
 else
-  echo "${ENV_FILE} đã tồn tại — giữ nguyên."
+  # Cài đặt cũ: bổ sung các khóa MỚI có trong .env.example nhưng chưa có trong
+  # .env (vd. AI_API_KEY/AI_DB_PASSWORD của Phase 4) — sinh __GENERATE__ giống
+  # lần chạy đầu; KHÔNG bao giờ sửa giá trị một khóa đã có (T-04-22).
+  added=()
+  while IFS= read -r line || [ -n "$line" ]; do
+    case "$line" in
+      ''|'#'*) continue ;;
+    esac
+    [[ "$line" == *=* ]] || continue
+    key="${line%%=*}"
+    if ! grep -q "^${key}=" "${ENV_FILE}"; then
+      if [[ "$line" == *"__GENERATE__"* ]]; then
+        secret="$(openssl rand -hex 32)"
+        line="${line//__GENERATE__/${secret}}"
+      fi
+      # .env có thể thiếu xuống dòng cuối — tránh dính khóa mới vào dòng trước.
+      if [ -s "${ENV_FILE}" ] && [ -n "$(tail -c 1 "${ENV_FILE}")" ]; then
+        printf '\n' >> "${ENV_FILE}"
+      fi
+      printf '%s\n' "$line" >> "${ENV_FILE}"
+      added+=("$key")
+    fi
+  done < "${ENV_EXAMPLE}"
+  chmod 600 "${ENV_FILE}"
+  if [ "${#added[@]}" -gt 0 ]; then
+    echo "${ENV_FILE} đã tồn tại — bổ sung khóa mới: ${added[*]}"
+  else
+    echo "${ENV_FILE} đã tồn tại — giữ nguyên."
+  fi
 fi
 
 bash "${SCRIPT_DIR}/certs/gen-cert.sh"

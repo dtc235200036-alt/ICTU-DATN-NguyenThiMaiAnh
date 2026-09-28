@@ -46,6 +46,12 @@ services:
       BCRYPT_ROUNDS: ${BCRYPT_ROUNDS:-12}
       SEED_ON_START: ${SEED_ON_START:-true}
       SEED_DEFAULT_PASSWORD: ${SEED_DEFAULT_PASSWORD:-}
+      # D-07 (Phase 4): Web API gọi dịch vụ AI thật qua mạng nội bộ; đặt
+      # AI_CLIENT=stub để quay về bộ giả lập Phase 2/3 (AI_STUB_MODE chỉ có
+      # hiệu lực khi AI_CLIENT=stub).
+      AI_CLIENT: ${AI_CLIENT:-http}
+      AI_SERVICE_URL: http://ai:8002
+      AI_API_KEY: ${AI_API_KEY:?}
       AI_STUB_MODE: ${AI_STUB_MODE:-normal}
       APP_ENV: production
       COOKIE_SECURE: "true"
@@ -58,6 +64,10 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      # UC0.7 E1 / UC1.1 E2: KHÔNG bao giờ service_healthy — Web API phải
+      # khởi động và phục vụ được cả khi dịch vụ AI chưa sẵn sàng hoặc lỗi.
+      ai:
+        condition: service_started
     networks:
       - ntma-internal
     expose:
@@ -69,6 +79,60 @@ services:
       interval: 5s
       retries: 30
       start_period: 20s
+    restart: unless-stopped
+
+  # D-07 / §3.2.1: tạo schema thesis_ai + tài khoản thesis_ai (chỉ quyền trên
+  # thesis_ai.*) — one-shot, idempotent, chạy lại mỗi lần `up`.
+  ai-db-init:
+    image: mysql:8.4
+    entrypoint: ["bash", "/init-thesis-ai.sh"]
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?}
+      AI_DB_PASSWORD: ${AI_DB_PASSWORD:?}
+      MYSQL_HOST: mysql
+    volumes:
+      - ./mysql/init-thesis-ai.sh:/init-thesis-ai.sh:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - ntma-internal
+    restart: "no"
+
+  # AISV-01 / D-02 / D-07: dịch vụ AI kiểm tra trùng lặp — CHỈ trên mạng nội
+  # bộ (expose, không `ports:`), không có route Apache, mọi endpoint trừ
+  # /health đòi X-API-Key. CPU-only, một worker, trần bộ nhớ 2 GiB, trọng số
+  # mô hình cache trên volume ai-models (lần đầu tải từ Hugging Face).
+  ai:
+    build:
+      context: ../ai-service
+    environment:
+      DATABASE_URL: mysql+pymysql://thesis_ai:${AI_DB_PASSWORD:?}@mysql:3306/thesis_ai?charset=utf8mb4
+      AI_API_KEY: ${AI_API_KEY:?}
+      # Mô hình chốt sau bake-off (tools/bakeoff/ket-qua.json: chon = bkai).
+      AI_MODEL_PROFILE: ${AI_MODEL_PROFILE:-bkai}
+      APP_ENV: production
+      HF_HOME: /models
+      TORCH_THREADS: ${AI_TORCH_THREADS:-4}
+    volumes:
+      - ai-models:/models
+    networks:
+      - ntma-internal
+    expose:
+      - "8002"
+    mem_limit: ${AI_MEM_LIMIT:-2g}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import json, urllib.request; r = urllib.request.urlopen('http://127.0.0.1:8002/health', timeout=4); raise SystemExit(0 if json.load(r).get('status') == 'ok' else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      # Lần khởi động đầu tiên tải trọng số mô hình vào volume ai-models.
+      start_period: 600s
+    depends_on:
+      mysql:
+        condition: service_healthy
+      ai-db-init:
+        condition: service_completed_successfully
     restart: unless-stopped
 
   apache:
@@ -94,3 +158,4 @@ services:
 volumes:
   mysql-data:
   uploads-data:
+  ai-models:

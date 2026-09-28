@@ -1,4 +1,4 @@
-import { Alert, Button, Progress, Table } from 'antd'
+import { Alert, Button, Progress, Table, Tag } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 
 import type { TitleCheckResult, TitleMatch } from './api'
@@ -10,6 +10,12 @@ interface TitleCheckAlertProps {
 }
 
 const columns: ColumnsType<TitleMatch> = [
+  {
+    title: 'Nguồn',
+    dataIndex: 'nguon',
+    render: (nguon: TitleMatch['nguon']) =>
+      nguon === 'KHO' ? <Tag color="purple">Kho đồ án</Tag> : <Tag color="blue">Đề tài hiện hành</Tag>,
+  },
   { title: 'Tên đề tài', dataIndex: 'ten_de_tai' },
   { title: 'Khóa', dataIndex: 'khoa' },
   { title: 'GVHD', dataIndex: 'giang_vien', render: (v: string | null) => v ?? '—' },
@@ -54,12 +60,12 @@ export default function TitleCheckAlert({
       description={
         <div>
           <p>
-            Hệ thống so sánh ngữ nghĩa tên đề tài với kho đề tài các khóa trước. Đây chỉ là
-            cảnh báo, không chặn việc gửi đề xuất.
+            Hệ thống so sánh ngữ nghĩa tên đề tài với các đề tài hiện hành và kho đồ án các
+            khóa trước. Đây chỉ là cảnh báo, không chặn việc gửi đề xuất.
           </p>
           <Table<TitleMatch>
             size="small"
-            rowKey="de_tai_id"
+            rowKey={(m) => `${m.nguon}-${m.de_tai_id ?? m.do_an_kho_id}`}
             pagination={false}
             columns={columns}
             dataSource={result.matches}

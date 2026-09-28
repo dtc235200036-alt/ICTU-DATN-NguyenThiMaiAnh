@@ -2,9 +2,11 @@
 kết quả bảo vệ (UC5.2) và đẩy bản ghi sang Dịch vụ AI để index qua seam
 `ai_client` sau commit. Plan 03-05 bổ sung tìm kiếm/CRUD/import CSV.
 
-Quy tắc payload /ingest (§3.3.5 `{id, type: TOPIC|DOCUMENT, text}`):
-ref_id = do_an_kho.id; DOCUMENT kèm văn bản trích xuất của phiên bản báo cáo
-cuối mới nhất khi có, ngược lại TOPIC với "ten_de_tai\\ntu_khoa".
+Quy tắc payload /ingest (§3.3.5 `{id, type, text}`, Phase 4 — 04-05): mọi
+bản ghi kho gửi `("ARCHIVE", tên đề tài NFC)` với id = do_an_kho.id — không
+gian id ARCHIVE riêng, không đụng TOPIC (de_tai.id) hay DOCUMENT
+(tai_lieu_do_an.id). Báo cáo cuối của đồ án được index dưới id tài liệu của
+chính nó (plan 04-06).
 
 Plan 03-05 (UC5.1/UC5.3/UC5.4): tra cứu, chi tiết + tải báo cáo cuối, CRUD của
 Bộ môn, index lại và import CSV khóa cũ (thành công một phần, báo lỗi theo
@@ -41,8 +43,7 @@ from app.services.ai_client import get_ai_client
 
 _logger = logging.getLogger(__name__)
 
-INGEST_DOCUMENT = "DOCUMENT"
-INGEST_TOPIC = "TOPIC"
+INGEST_ARCHIVE = "ARCHIVE"
 
 
 def insert_from_defense(db: Session, lich: LichBaoVe) -> DoAnKho:
@@ -89,10 +90,9 @@ def latest_final_report(db: Session, de_tai_id: int | None) -> TaiLieuDoAn | Non
 
 
 def ingest_payload(db: Session, kho: DoAnKho) -> tuple[str, str]:
-    doc = latest_final_report(db, kho.de_tai_id)
-    if doc is not None and not doc.trich_xuat_loi and doc.noi_dung_trich_xuat:
-        return INGEST_DOCUMENT, doc.noi_dung_trich_xuat
-    return INGEST_TOPIC, f"{kho.ten_de_tai}\n{kho.tu_khoa or ''}".strip()
+    """04-05: không gian ARCHIVE (id = do_an_kho.id), CHỈ tên đề tài — cùng
+    dạng văn bản với TOPIC nên /check-title so sánh tên với tên."""
+    return INGEST_ARCHIVE, nfc(kho.ten_de_tai)
 
 
 def run_ingest(do_an_kho_ids: list[int]) -> None:

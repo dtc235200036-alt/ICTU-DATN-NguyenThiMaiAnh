@@ -1,6 +1,7 @@
 from functools import lru_cache
+from typing import Literal
 
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -24,9 +25,18 @@ class Settings(BaseSettings):
     LOGIN_MAX_FAILURES: int = 5
     LOGIN_WINDOW_MINUTES: int = 15
 
-    # D-10/UC0.6: AI client seam — Phase 2 chỉ có "stub" (Phase 4 thay bằng httpx).
-    AI_CLIENT: str = "stub"
+    # D-10/UC0.6 + D-07 (Phase 4): AI client seam — "http" gọi dịch vụ AI thật
+    # (AiClientHttp), "stub" giữ bộ giả lập Phase 2/3 làm phương án dự phòng
+    # (AI_STUB_MODE chỉ có hiệu lực khi AI_CLIENT="stub").
+    AI_CLIENT: Literal["stub", "http"] = "stub"
     AI_STUB_MODE: str = "normal"
+    AI_SERVICE_URL: str | None = None
+    AI_API_KEY: str | None = None
+    # 04-RESEARCH Open Question 3: NFR title ≤ 5 s, tài liệu ≤ 30 s (chạy nền),
+    # ingest chạy nền sau commit nên được phép lâu hơn.
+    AI_TITLE_TIMEOUT_SECONDS: float = 4.0
+    AI_DOCUMENT_TIMEOUT_SECONDS: float = 24.0
+    AI_INGEST_TIMEOUT_SECONDS: float = 60.0
     TITLE_CHECK_TOP_K: int = 5
 
     # D-02/D-03/D-04 (Phase 3): tài liệu đề cương/báo cáo lưu ngoài DocumentRoot
@@ -49,6 +59,16 @@ class Settings(BaseSettings):
         if app_env != "test" and v < 12:
             raise ValueError("BCRYPT_ROUNDS phải >= 12 ngoài môi trường test")
         return v
+
+
+    @model_validator(mode="after")
+    def _http_client_requires_url_and_key(self) -> "Settings":
+        if self.AI_CLIENT == "http":
+            if not self.AI_SERVICE_URL:
+                raise ValueError("AI_CLIENT=http cần AI_SERVICE_URL")
+            if not self.AI_API_KEY or len(self.AI_API_KEY) < 32:
+                raise ValueError("AI_CLIENT=http cần AI_API_KEY có ít nhất 32 ký tự")
+        return self
 
 
 @lru_cache

@@ -100,7 +100,9 @@ def check_title(
         nguong=result.nguong,
         matches=[
             TitleMatch(
+                nguon=m.nguon,
                 de_tai_id=m.de_tai_id,
+                do_an_kho_id=m.do_an_kho_id,
                 ten_de_tai=m.ten_de_tai,
                 khoa=m.khoa,
                 giang_vien=m.giang_vien,

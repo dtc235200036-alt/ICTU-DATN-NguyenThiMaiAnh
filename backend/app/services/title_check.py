@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.config import get_settings
 from app.models.cau_hinh_nguong import NGUONG_TEN_DE_TAI, CauHinhNguong
 from app.models.de_tai import DeTai
+from app.models.kho import DoAnKho
 from app.models.trung_lap import (
     HOAN_TAT,
     LOI,
@@ -19,13 +20,23 @@ from app.schemas.common import nfc
 from app.services.ai_client import AiServiceError, get_ai_client
 
 
+# Nguồn của một kết quả kiểm tra tên (AISV-03): đề tài hiện hành (TOPIC,
+# de_tai.id) hoặc đồ án trong kho (ARCHIVE, do_an_kho.id) — 04-01 id namespaces.
+NGUON_DE_TAI = "DE_TAI"
+NGUON_KHO = "KHO"
+LOAI_TOPIC = "TOPIC"
+LOAI_ARCHIVE = "ARCHIVE"
+
+
 @dataclass
 class TitleCheckMatch:
-    de_tai_id: int
+    de_tai_id: int | None
     ten_de_tai: str
     khoa: str
     giang_vien: str | None
     ty_le: float
+    nguon: str = NGUON_DE_TAI
+    do_an_kho_id: int | None = None
 
 
 @dataclass
@@ -51,9 +62,50 @@ def _get_threshold(db: Session) -> float:
     return float(gia_tri)
 
 
+def _resolve_match(
+    db: Session, loai: str, ref_id: int, ty_le: float, exclude_id: int | None
+) -> tuple[tuple[str, int], TitleCheckMatch] | None:
+    """Ánh xạ một match của dịch vụ AI về bản ghi thesis_core. Trả (khóa gộp,
+    match) — khóa gộp là đề tài gốc khi bản ghi kho liên kết một đề tài, để
+    một đồ án không xuất hiện hai lần (TOPIC + ARCHIVE). Ref không còn tồn tại
+    (đã xóa — chỉ mục AI chưa có /delete) thì bỏ qua."""
+    if loai == LOAI_ARCHIVE:
+        kho = db.get(DoAnKho, ref_id)
+        if kho is None:
+            return None
+        if exclude_id is not None and kho.de_tai_id == exclude_id:
+            return None
+        key = (NGUON_DE_TAI, kho.de_tai_id) if kho.de_tai_id is not None else (NGUON_KHO, kho.id)
+        return key, TitleCheckMatch(
+            de_tai_id=kho.de_tai_id,
+            ten_de_tai=kho.ten_de_tai,
+            khoa=kho.khoa or "",
+            giang_vien=kho.giang_vien.ho_ten if kho.giang_vien is not None else None,
+            ty_le=ty_le,
+            nguon=NGUON_KHO,
+            do_an_kho_id=kho.id,
+        )
+
+    if exclude_id is not None and ref_id == exclude_id:
+        return None
+    topic = db.get(DeTai, ref_id)
+    if topic is None:
+        return None
+    return (NGUON_DE_TAI, topic.id), TitleCheckMatch(
+        de_tai_id=topic.id,
+        ten_de_tai=topic.ten_de_tai,
+        khoa=topic.dot_do_an.khoa if topic.dot_do_an is not None else "",
+        giang_vien=topic.giang_vien.ho_ten if topic.giang_vien is not None else None,
+        ty_le=ty_le,
+        nguon=NGUON_DE_TAI,
+    )
+
+
 def kiem_tra_ten(db: Session, ten_de_tai: str, exclude_id: int | None = None) -> TitleCheckResult:
-    """UC0.6: so sánh ngữ nghĩa tên đề tài với kho — không bao giờ chặn gửi đề
-    xuất (E2): khi AiClient lỗi trả về trang_thai LOI với danh sách rỗng."""
+    """UC0.6/AISV-03: so sánh ngữ nghĩa tên đề tài với đề tài hiện hành (TOPIC)
+    và kho đồ án (ARCHIVE) — không bao giờ chặn gửi đề xuất (E2): khi dịch vụ AI
+    lỗi trả về trang_thai LOI với danh sách rỗng. D-04: Web API gửi ngưỡng hiện
+    hành của Bộ môn theo từng request."""
     try:
         threshold = _get_threshold(db)
     except NoResultFound:
@@ -66,31 +118,30 @@ def kiem_tra_ten(db: Session, ten_de_tai: str, exclude_id: int | None = None) ->
     settings = get_settings()
 
     try:
-        raw = get_ai_client(db).check_title(nfc(ten_de_tai), settings.TITLE_CHECK_TOP_K)
+        # Lấy dư (×2) vì một đồ án có thể trả về hai lần (TOPIC + ARCHIVE) và
+        # ref đã xóa bị bỏ qua.
+        raw = get_ai_client(db).check_title(
+            nfc(ten_de_tai), settings.TITLE_CHECK_TOP_K * 2, nguong=threshold
+        )
     except AiServiceError:
         return TitleCheckResult(trang_thai=LOI, nguong=threshold, matches=[])
 
-    matches: list[TitleCheckMatch] = []
+    best: dict[tuple[str, int], TitleCheckMatch] = {}
     for item in raw.get("matches", []):
-        ref_id = item["ref_id"]
         ty_le = float(item["ty_le"])
-        if exclude_id is not None and ref_id == exclude_id:
-            continue
         if ty_le < threshold:
             continue
-        topic = db.get(DeTai, ref_id)
-        if topic is None:
-            continue
-        matches.append(
-            TitleCheckMatch(
-                de_tai_id=topic.id,
-                ten_de_tai=topic.ten_de_tai,
-                khoa=topic.dot_do_an.khoa if topic.dot_do_an is not None else "",
-                giang_vien=topic.giang_vien.ho_ten if topic.giang_vien is not None else None,
-                ty_le=ty_le,
-            )
+        resolved = _resolve_match(
+            db, item.get("loai", LOAI_TOPIC), int(item["ref_id"]), ty_le, exclude_id
         )
+        if resolved is None:
+            continue
+        key, match = resolved
+        current = best.get(key)
+        if current is None or match.ty_le > current.ty_le:
+            best[key] = match
 
+    matches = sorted(best.values(), key=lambda m: -m.ty_le)[: settings.TITLE_CHECK_TOP_K]
     return TitleCheckResult(trang_thai=HOAN_TAT, nguong=threshold, matches=matches)
 
 
@@ -119,10 +170,14 @@ def luu_ket_qua(
     db.flush()
 
     for match in result.matches:
+        if match.nguon == NGUON_KHO and match.khoa:
+            doi_tuong = f"{match.ten_de_tai} ({match.khoa})"
+        else:
+            doi_tuong = match.ten_de_tai
         db.add(
             ChiTietTrungLap(
                 ket_qua_id=ket_qua.id,
-                doi_tuong_trung=match.ten_de_tai[:255],
+                doi_tuong_trung=doi_tuong[:255],
                 ty_le=match.ty_le,
             )
         )

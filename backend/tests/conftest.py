@@ -35,6 +35,9 @@ def _configure_test_environment() -> None:
     # Phase 3: host pytest không ghi được /data/uploads (container-only) — mỗi
     # phiên test dùng một thư mục tạm riêng, tự dọn khi tiến trình pytest thoát.
     os.environ["UPLOAD_DIR"] = tempfile.mkdtemp(prefix="ntma-uploads-")
+    # D-07 (Phase 4): pytest luôn dùng bộ giả lập — không bao giờ gọi dịch vụ AI
+    # thật (test HTTP client dùng httpx.MockTransport).
+    os.environ["AI_CLIENT"] = "stub"
 
     if os.environ.get("TEST_DATABASE_URL"):
         os.environ["DATABASE_URL"] = os.environ["TEST_DATABASE_URL"]
@@ -104,6 +107,19 @@ def _prepare_database():
     alembic_cfg = Config(str(REPO_ROOT / "backend" / "alembic.ini"))
     alembic_cfg.set_main_option("script_location", str(REPO_ROOT / "backend" / "alembic"))
     command.upgrade(alembic_cfg, "head")
+    # Alembic 0010 ghi ngưỡng hiệu chỉnh thang cosine (67.8/10.4/67.7) cho dịch
+    # vụ AI thật; test chạy bộ giả lập (thang Jaccard trên âm tiết) nên đặt
+    # lại giá trị thang stub — test không được phụ thuộc hiệu chỉnh production.
+    with engine.begin() as conn:
+        for loai, gia_tri in (
+            ("NGUONG_TEN_DE_TAI", 50.00),
+            ("NGUONG_TAI_LIEU", 30.00),
+            ("NGUONG_DOAN_TRUNG", 80.00),
+        ):
+            conn.execute(
+                text("UPDATE cau_hinh_nguong SET gia_tri = :gia_tri WHERE loai = :loai"),
+                {"gia_tri": gia_tri, "loai": loai},
+            )
     yield
 
 

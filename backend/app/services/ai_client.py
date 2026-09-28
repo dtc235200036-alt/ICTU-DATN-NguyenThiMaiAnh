@@ -1,15 +1,19 @@
+import logging
 import re
 import unicodedata
 from collections import deque
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from typing import Protocol
 
+import httpx
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.models.de_cuong import LOAI_BAO_CAO_CUOI, LOAI_DE_CUONG, TaiLieuDoAn
 from app.models.de_tai import NHAP, DeTai
+
+_logger = logging.getLogger(__name__)
 
 _WORD_RE = re.compile(r"\w+", flags=re.UNICODE)
 
@@ -29,12 +33,22 @@ class AiServiceError(Exception):
 
 
 class AiClient(Protocol):
-    def check_title(self, text: str, top_k: int = 5) -> dict:
-        """§3.3.5 /check-title: {matches: [{ref_id, ty_le}]}."""
+    def check_title(self, text: str, top_k: int = 5, nguong: float | None = None) -> dict:
+        """§3.3.5 /check-title: {matches: [{ref_id, loai: TOPIC|ARCHIVE, ty_le}]}
+        — `nguong` là ngưỡng hiện hành do Web API gửi theo từng request (D-04)."""
         ...
 
-    def check_document(self, ref_id: int, text: str, top_k: int = 5) -> dict:
-        """§3.3.5 /check-document: {ty_le_tong, do_an_trung: [...], chi_tiet: [...]}."""
+    def check_document(
+        self,
+        ref_id: int,
+        text: str,
+        top_k: int = 5,
+        nguong_doan: float | None = None,
+        loai_tru: Iterable[int] | None = None,
+    ) -> dict:
+        """§3.3.5 /check-document: {ty_le_tong, do_an_trung: [...], chi_tiet: [...]}
+        — `loai_tru` = id tài liệu không bao giờ được so khớp (vd. các phiên bản
+        trước của cùng đề tài)."""
         ...
 
     def ingest(self, ref_id: int, loai: str, text: str) -> dict:
@@ -92,7 +106,9 @@ class AiClientStub:
         self._mode = mode
         self._document_corpus_provider = document_corpus_provider
 
-    def check_title(self, text: str, top_k: int = 5) -> dict:
+    def check_title(self, text: str, top_k: int = 5, nguong: float | None = None) -> dict:
+        # `nguong` được nhận để cùng chữ ký với AiClientHttp; bộ giả lập không
+        # lọc theo nó (thang Jaccard khác thang cosine) — title_check lọc sau.
         if self._mode == "loi":
             raise AiServiceError("Dịch vụ AI không phản hồi (mô phỏng AI_STUB_MODE=loi)")
 
@@ -105,9 +121,21 @@ class AiClientStub:
 
         scored.sort(key=lambda item: (-item[0], item[1]))
         top = scored[:top_k]
-        return {"matches": [{"ref_id": ref_id, "ty_le": ty_le} for ty_le, ref_id in top]}
+        return {
+            "matches": [
+                {"ref_id": ref_id, "loai": "TOPIC", "ty_le": ty_le} for ty_le, ref_id in top
+            ]
+        }
 
-    def check_document(self, ref_id: int, text: str, top_k: int = 5) -> dict:
+    def check_document(
+        self,
+        ref_id: int,
+        text: str,
+        top_k: int = 5,
+        nguong_doan: float | None = None,
+        loai_tru: Iterable[int] | None = None,
+    ) -> dict:
+        excluded = set(loai_tru or ())
         if self._mode == "loi":
             raise AiServiceError("Dịch vụ AI không phản hồi (mô phỏng AI_STUB_MODE=loi)")
 
@@ -137,7 +165,7 @@ class AiClientStub:
             best_entry_paragraph: str | None = None
 
             for doc_id, de_tai_id, entry_text in corpus:
-                if doc_id == ref_id:
+                if doc_id == ref_id or doc_id in excluded:
                     continue
                 if own_de_tai_id is not None and de_tai_id == own_de_tai_id:
                     continue
@@ -186,6 +214,110 @@ class AiClientStub:
         return {"chunk_count": chunk_count, "indexed": True}
 
 
+class AiClientHttp:
+    """D-07: client HTTP tới dịch vụ AI nội bộ (§3.3.5) — cùng chữ ký với
+    AiClientStub nên không caller nào phải đổi. Mỗi lời gọi một httpx.Client
+    (không chia sẻ trạng thái giữa request/background task), header
+    X-API-Key, timeout connect 2 s + read/write theo từng loại lời gọi.
+
+    MỌI lỗi (kết nối, timeout, HTTP không 2xx, thân trả về sai hợp đồng) đều
+    thành AiServiceError với thông điệp chỉ gồm endpoint + trạng thái — không
+    bao giờ chứa header hay khóa (T-04-16). Caller suy biến theo UC1.1 E2 /
+    UC0.7 E1 (không bao giờ chặn nghiệp vụ)."""
+
+    def __init__(
+        self,
+        base_url: str,
+        api_key: str,
+        *,
+        title_timeout: float,
+        document_timeout: float,
+        ingest_timeout: float,
+        transport: httpx.BaseTransport | None = None,
+    ) -> None:
+        self._base_url = base_url.rstrip("/")
+        self._api_key = api_key
+        self._title_timeout = title_timeout
+        self._document_timeout = document_timeout
+        self._ingest_timeout = ingest_timeout
+        self._transport = transport
+
+    def _fail(self, message: str) -> AiServiceError:
+        _logger.warning(message)
+        return AiServiceError(message)
+
+    def _post(self, path: str, payload: dict, read_timeout: float, required: tuple[str, ...]) -> dict:
+        timeout = httpx.Timeout(read_timeout, connect=2.0)
+        try:
+            with httpx.Client(
+                base_url=self._base_url,
+                headers={"X-API-Key": self._api_key},
+                timeout=timeout,
+                transport=self._transport,
+            ) as client:
+                response = client.post(path, json=payload)
+        except httpx.HTTPError as exc:
+            # Chỉ tên lớp lỗi — không dùng str(exc)/repr(request) (có thể kèm header).
+            raise self._fail(
+                f"Dịch vụ AI không phản hồi khi gọi {path} ({type(exc).__name__})"
+            ) from None
+
+        if not 200 <= response.status_code < 300:
+            raise self._fail(f"Dịch vụ AI trả lỗi khi gọi {path} (HTTP {response.status_code})")
+        try:
+            body = response.json()
+        except ValueError:
+            raise self._fail(f"Dịch vụ AI trả dữ liệu không hợp lệ khi gọi {path}") from None
+        if not isinstance(body, dict) or any(key not in body for key in required):
+            raise self._fail(f"Dịch vụ AI trả dữ liệu sai hợp đồng khi gọi {path}")
+        return body
+
+    def check_title(self, text: str, top_k: int = 5, nguong: float | None = None) -> dict:
+        body = self._post(
+            "/check-title",
+            {"text": text, "top_k": top_k, "nguong": nguong},
+            self._title_timeout,
+            ("matches",),
+        )
+        matches = body["matches"]
+        if not isinstance(matches, list) or not all(
+            isinstance(m, dict) and {"ref_id", "loai", "ty_le"} <= m.keys() for m in matches
+        ):
+            raise self._fail("Dịch vụ AI trả dữ liệu sai hợp đồng khi gọi /check-title")
+        return body
+
+    def check_document(
+        self,
+        ref_id: int,
+        text: str,
+        top_k: int = 5,
+        nguong_doan: float | None = None,
+        loai_tru: Iterable[int] | None = None,
+    ) -> dict:
+        # nguong_nguyen_van cố ý bỏ trống — dịch vụ AI dùng giá trị hiệu chỉnh.
+        payload = {
+            "ref_id": ref_id,
+            "text": text,
+            "top_k": top_k,
+            "nguong_doan": nguong_doan,
+            "loai_tru": sorted(set(loai_tru or ())),
+        }
+        return self._post(
+            "/check-document",
+            payload,
+            self._document_timeout,
+            ("ty_le_tong", "do_an_trung", "chi_tiet"),
+        )
+
+    def ingest(self, ref_id: int, loai: str, text: str) -> dict:
+        return self._post(
+            "/ingest",
+            {"id": ref_id, "type": loai, "text": text},
+            self._ingest_timeout,
+            ("chunk_count", "indexed"),
+        )
+
+
 def _corpus_provider_factory(db: Session) -> Callable[[], list[tuple[int, str]]]:
     def _provider() -> list[tuple[int, str]]:
         rows = db.execute(
@@ -232,7 +364,16 @@ def _document_corpus_provider_factory(
 
 def get_ai_client(db: Session) -> AiClient:
     settings = get_settings()
-    # Phase 2/3 chỉ hỗ trợ "stub"; Phase 4 thêm nhánh AI_CLIENT="http" ở đây.
+    if settings.AI_CLIENT == "http":
+        # D-07: dịch vụ AI thật trên mạng nội bộ (Settings đã bắt buộc URL + khóa).
+        return AiClientHttp(
+            settings.AI_SERVICE_URL or "",
+            settings.AI_API_KEY or "",
+            title_timeout=settings.AI_TITLE_TIMEOUT_SECONDS,
+            document_timeout=settings.AI_DOCUMENT_TIMEOUT_SECONDS,
+            ingest_timeout=settings.AI_INGEST_TIMEOUT_SECONDS,
+        )
+    # Phương án dự phòng (AI_CLIENT=stub): bộ giả lập Phase 2/3.
     return AiClientStub(
         _corpus_provider_factory(db),
         mode=settings.AI_STUB_MODE,

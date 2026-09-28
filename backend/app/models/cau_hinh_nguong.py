@@ -9,6 +9,9 @@ from app.models.base import Base
 # UC0.4/D-10: mỗi loại ngưỡng đúng 1 dòng hiện hành (UNIQUE loai).
 NGUONG_TEN_DE_TAI = "NGUONG_TEN_DE_TAI"
 NGUONG_TAI_LIEU = "NGUONG_TAI_LIEU"
+# D-04 (Phase 4, Alembic 0010): ngưỡng ngữ nghĩa từng đoạn/câu (cosine×100)
+# gửi sang /check-document dưới tên nguong_doan.
+NGUONG_DOAN_TRUNG = "NGUONG_DOAN_TRUNG"
 
 
 class CauHinhNguong(Base):

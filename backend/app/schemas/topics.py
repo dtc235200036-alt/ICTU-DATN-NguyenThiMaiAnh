@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from typing import Literal
 
 from pydantic import BaseModel, Field, field_serializer
 
@@ -53,7 +54,13 @@ class TitleCheckRequest(NFCModel):
 
 
 class TitleMatch(BaseModel):
-    de_tai_id: int
+    """AISV-03: nguon DE_TAI = đề tài hiện hành (de_tai_id), KHO = đồ án
+    trong kho các khóa trước (do_an_kho_id; de_tai_id khi bản ghi kho liên kết
+    một đề tài của hệ thống)."""
+
+    nguon: Literal["DE_TAI", "KHO"] = "DE_TAI"
+    de_tai_id: int | None = None
+    do_an_kho_id: int | None = None
     ten_de_tai: str
     khoa: str
     giang_vien: str | None = None
