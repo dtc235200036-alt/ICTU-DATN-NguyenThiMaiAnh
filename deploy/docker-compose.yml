@@ -111,7 +111,7 @@ services:
   # AISV-01 / D-02 / D-07: dịch vụ AI kiểm tra trùng lặp — CHỈ trên mạng nội
   # bộ (expose, không `ports:`), không có route Apache, mọi endpoint trừ
   # /health đòi X-API-Key. CPU-only, một worker, trần bộ nhớ 2 GiB, trọng số
-  # mô hình cache trên volume ai-models (lần đầu tải từ Hugging Face).
+  # mô hình cache trên volume ai-models (tải trước lúc cài đặt bởi deploy/install.sh — D-02).
   # WR-03: migration thesis_ai chạy một lần bằng tài khoản DDL, trước khi `ai`
   # khởi động bằng tài khoản chỉ có DML (cùng image với `ai`).
   ai-migrate:
@@ -143,6 +143,12 @@ services:
       AI_MODEL_PROFILE: ${AI_MODEL_PROFILE:-bkai}
       APP_ENV: production
       HF_HOME: /models
+      # D-02 (Phase 5): trọng số mô hình được tải trước lúc cài đặt
+      # (deploy/install.sh -> python -m app.download_model vào volume
+      # ai-models); lúc chạy KHÔNG bao giờ gọi Hugging Face, nên demo không
+      # phụ thuộc mạng ngoài. Tải lại thủ công: xem deploy/README.md.
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
       TORCH_THREADS: ${AI_TORCH_THREADS:-4}
     volumes:
       - ai-models:/models
@@ -162,7 +168,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 30
-      # Lần khởi động đầu tiên tải trọng số mô hình vào volume ai-models.
+      # Nạp mô hình (đã tải sẵn trong volume ai-models) + dựng chỉ mục từ
+      # MySQL; rộng tay cho máy yếu.
       start_period: 600s
     depends_on:
       mysql:
