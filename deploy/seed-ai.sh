@@ -92,3 +92,10 @@ if ! wait_indexed 300; then
 fi
 
 ok "${EXPECTED} đề tài kho đã index"
+
+# (4) Backfill: index các đề tài hiện hành (không phải nháp) đã có từ demo
+# Phase 2/3 và tự chữa vector kho còn thiếu (vd. volume thesis_ai bị xóa) —
+# văn bản không đổi là no-op phía dịch vụ AI.
+"${COMPOSE[@]}" exec -T api python -m app.services.ai_index backfill --loai TOPIC ARCHIVE \
+  || fail "ai_index backfill thất bại"
+ok "Backfill TOPIC + ARCHIVE xong"

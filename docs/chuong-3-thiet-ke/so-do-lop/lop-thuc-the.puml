@@ -82,6 +82,7 @@ enum LoaiThongBao {
 enum LoaiCauHinhNguong {
   NGUONG_TEN_DE_TAI
   NGUONG_TAI_LIEU
+  NGUONG_DOAN_TRUNG
 }
 
 ' =====================================================================

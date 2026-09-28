@@ -246,7 +246,7 @@ Lược đồ `thesis_core` gồm 19 bảng, khớp 1-1 với 19 lớp thực th
 | Cột | Kiểu | Null | Khóa | Mô tả |
 |---|---|---|---|---|
 | id | BIGINT | Không | PK | Định danh cấu hình |
-| loai | VARCHAR(30) | Không | UNIQUE | `NGUONG_TEN_DE_TAI` / `NGUONG_TAI_LIEU` — mỗi loại đúng 1 dòng hiện hành |
+| loai | VARCHAR(30) | Không | UNIQUE | `NGUONG_TEN_DE_TAI` / `NGUONG_TAI_LIEU` / `NGUONG_DOAN_TRUNG` (ngưỡng ngữ nghĩa từng đoạn, Phase 4) — mỗi loại đúng 1 dòng hiện hành; giá trị mặc định lấy từ hiệu chỉnh (Alembic 0010: 67,8 / 10,4 / 67,7) |
 | gia_tri | DECIMAL(5,2) | Không | — | Giá trị ngưỡng % (0–100, FR-AI-05) |
 | tai_khoan_id | BIGINT | Có | FK → tai_khoan | Người (Bộ môn) cập nhật lần gần nhất |
 | thoi_diem_cap_nhat | DATETIME | Không | — | Thời điểm lưu cấu hình |

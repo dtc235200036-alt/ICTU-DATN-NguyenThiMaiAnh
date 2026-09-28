@@ -1,6 +1,6 @@
 from typing import Literal
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
@@ -17,6 +17,7 @@ from app.schemas.topics import (
     TopicOut,
     TopicUpdate,
 )
+from app.services import ai_index
 from app.services import title_check as title_check_service
 from app.services import topics as topics_service
 
@@ -61,10 +62,16 @@ def list_topics(
 @router.post("", response_model=TopicOut, status_code=201)
 def create_topic(
     payload: TopicCreate,
+    background_tasks: BackgroundTasks,
     user: CurrentUser = Depends(require_role(VaiTro.SINH_VIEN, VaiTro.GIANG_VIEN)),
     db: Session = Depends(get_db),
 ) -> TopicOut:
-    return topics_service.create_topic(db, user, payload)
+    out = topics_service.create_topic(db, user, payload)
+    if payload.gui:
+        # AISV-02 push-on-write: đề tài vừa vào CHO_DUYET được index sau commit
+        # (một lần encode) — lần kiểm tra tên kế tiếp đã thấy nó.
+        background_tasks.add_task(ai_index.run_ingest_topic, out.id)
+    return out
 
 
 @router.put("/{topic_id}", response_model=TopicOut)
@@ -80,10 +87,14 @@ def update_topic(
 @router.post("/{topic_id}/submit", response_model=TopicOut)
 def submit_topic(
     topic_id: int,
+    background_tasks: BackgroundTasks,
     user: CurrentUser = Depends(require_role(VaiTro.SINH_VIEN, VaiTro.GIANG_VIEN)),
     db: Session = Depends(get_db),
 ) -> TopicOut:
-    return topics_service.submit_topic(db, user, topic_id)
+    out = topics_service.submit_topic(db, user, topic_id)
+    # AISV-02 push-on-write: bản nháp vừa gửi (CHO_DUYET) được index sau commit.
+    background_tasks.add_task(ai_index.run_ingest_topic, out.id)
+    return out
 
 
 @router.post("/check-title", response_model=TitleCheckResult)

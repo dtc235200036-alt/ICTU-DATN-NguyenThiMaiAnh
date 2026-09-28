@@ -27,6 +27,9 @@ TMP="$(mktemp -d)"
 START_UTC="$(date -u +%Y-%m-%dT%H:%M:%S)"
 DOT_DO_AN_ID=""
 HOI_DONG_IDS=""
+# Bản ghi kho do script tự xóa qua API (UC5.3) — vẫn phải purge khỏi chỉ mục AI
+# khi dọn dẹp vì xóa kho chưa gỡ vector (giới hạn đã ghi nhận, 04-05).
+DELETED_KHO_IDS=""
 
 # call METHOD PATH TOKEN [curl args...] — thân trả về ghi vào $TMP/body, in
 # ra mã HTTP.
@@ -48,6 +51,23 @@ print($1)
 
 cleanup() {
   if [ -n "${DOT_DO_AN_ID}" ]; then
+    # Phase 4 (04-05): gỡ vector đề tài K98 (TOPIC) và bản ghi kho K98/của các
+    # đề tài đó (ARCHIVE) khỏi chỉ mục AI TRƯỚC khi xóa hàng — chạy lại test
+    # không để lại vector mồ côi (chỉ có tác dụng khi AI_CLIENT=http).
+    local purge_topic_ids purge_kho_ids
+    purge_topic_ids="$(DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
+      "SELECT id FROM de_tai WHERE dot_do_an_id = ${DOT_DO_AN_ID};" 2>/dev/null | paste -sd, - || true)"
+    purge_kho_ids="$(DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
+      "SELECT id FROM do_an_kho WHERE de_tai_id IN (SELECT id FROM de_tai WHERE dot_do_an_id = ${DOT_DO_AN_ID}) OR (khoa='K98' AND nguon='IMPORT');" 2>/dev/null | paste -sd, - || true)"
+    purge_kho_ids="$(printf '%s,%s' "${purge_kho_ids}" "${DELETED_KHO_IDS}" | tr ',' '\n' | grep -E '^[0-9]+$' | sort -un | paste -sd, - || true)"
+    if [ -n "${purge_topic_ids}" ]; then
+      docker compose -f "${SCRIPT_DIR}/docker-compose.yml" exec -T api \
+        python -m app.services.ai_index purge --loai TOPIC --ids "${purge_topic_ids}" >/dev/null 2>&1 || true
+    fi
+    if [ -n "${purge_kho_ids}" ]; then
+      docker compose -f "${SCRIPT_DIR}/docker-compose.yml" exec -T api \
+        python -m app.services.ai_index purge --loai ARCHIVE --ids "${purge_kho_ids}" >/dev/null 2>&1 || true
+    fi
     DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
       "DELETE FROM thong_bao WHERE tai_khoan_id IN (SELECT id FROM tai_khoan WHERE ma_dang_nhap IN ('GV025','GV026','GV027','GV028','GV029','DTC225200097','DTC225200098')) AND thoi_diem >= '${START_UTC}';" >/dev/null 2>&1 || true
     DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
@@ -680,6 +700,7 @@ CSVEOF
   [ "$status" = "403" ] || fail "GV025 import CSV không bị từ chối 403 (mã ${status})"
   ok "DTC225200097 thêm bản ghi + GV025 import CSV đều bị từ chối 403"
 
+  DELETED_KHO_IDS="${imported_id}"
   status="$(call DELETE "/api/archive/${imported_id}" "${TOKEN_BOMON}")"
   [ "$status" = "204" ] || fail "Bộ môn xóa bản ghi import không trả 204 (mã ${status})"
   status="$(call GET "/api/archive/${imported_id}" "${TOKEN_BOMON}")"

@@ -7,10 +7,15 @@
 #                 tài kho đã seed -> kết quả đầu tiên là đồ án kho đúng đối
 #                 tượng, <= 5 s; NFC và NFD cho kết quả giống hệt; tên cùng
 #                 lĩnh vực không bị cảnh báo trùng kho.
+#   ai_index    — ROADMAP SC5/AISV-02/NFR-11: bản ghi kho mới và đề tài vừa gửi
+#                 duyệt được index ngay (push-on-write), đúng một lần encode,
+#                 và lần kiểm tra tên kế tiếp đã thấy chúng.
+# Dọn dẹp (trap, kể cả khi lỗi giữa chừng): purge vector TOPIC/ARCHIVE đã tạo
+# khỏi chỉ mục AI rồi xóa dữ liệu K97 theo thứ tự khóa ngoại.
 #
 # Tài khoản dành riêng (không script nào khác dùng): bomon, DTC225200095,
-# DTC225200096 (SV), GV023 (GVHD, dự phòng); khóa kiểm thử K97 (e2e-uc1 dùng
-# K99, e2e-uc2-5 dùng K98). Cần chạy `bash deploy/seed-ai.sh` trước.
+# DTC225200096 (SV), GV023 (GVHD, dự phòng — chưa dùng); khóa kiểm thử K97
+# (e2e-uc1 dùng K99, e2e-uc2-5 dùng K98). Cần chạy `bash deploy/seed-ai.sh` trước.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -48,10 +53,59 @@ print($1)
 " 2>/dev/null
 }
 
+DOT_DO_AN_ID=""
+KHO_IDS=""
+
+sql() {
+  DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" "$1"
+}
+
 cleanup() {
+  local topic_ids kho_ids
+  if [ -n "${DOT_DO_AN_ID}" ] || [ -n "${KHO_IDS}" ]; then
+    topic_ids=""
+    if [ -n "${DOT_DO_AN_ID}" ]; then
+      topic_ids="$(sql "SELECT id FROM de_tai WHERE dot_do_an_id = ${DOT_DO_AN_ID}" 2>/dev/null | paste -sd, - || true)"
+    fi
+    kho_ids="$(sql "SELECT id FROM do_an_kho WHERE khoa = 'K97'" 2>/dev/null | paste -sd, - || true)"
+    kho_ids="$(printf '%s,%s' "${KHO_IDS}" "${kho_ids}" | tr ',' '\n' | grep -E '^[0-9]+$' | sort -un | paste -sd, - || true)"
+    # Không để lại vector mồ côi trong chỉ mục AI (T-04-21).
+    if [ -n "${topic_ids}" ]; then
+      "${COMPOSE[@]}" exec -T api python -m app.services.ai_index purge --loai TOPIC --ids "${topic_ids}" >/dev/null 2>&1 || true
+    fi
+    if [ -n "${kho_ids}" ]; then
+      "${COMPOSE[@]}" exec -T api python -m app.services.ai_index purge --loai ARCHIVE --ids "${kho_ids}" >/dev/null 2>&1 || true
+    fi
+    sql "DELETE FROM thong_bao WHERE tai_khoan_id IN (SELECT id FROM tai_khoan WHERE ma_dang_nhap IN ('DTC225200095','DTC225200096','GV023')) AND thoi_diem >= '${START_UTC}';" >/dev/null 2>&1 || true
+    if [ -n "${DOT_DO_AN_ID}" ]; then
+      sql "DELETE ct FROM chi_tiet_trung_lap ct JOIN ket_qua_kiem_tra_trung_lap kq ON kq.id = ct.ket_qua_id JOIN de_tai dt ON dt.id = kq.de_tai_id WHERE dt.dot_do_an_id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
+      sql "DELETE kq FROM ket_qua_kiem_tra_trung_lap kq JOIN de_tai dt ON dt.id = kq.de_tai_id WHERE dt.dot_do_an_id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
+      sql "DELETE FROM de_tai WHERE dot_do_an_id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
+    fi
+    if [ -n "${kho_ids}" ]; then
+      sql "DELETE FROM do_an_kho WHERE id IN (${kho_ids});" >/dev/null 2>&1 || true
+    fi
+    if [ -n "${DOT_DO_AN_ID}" ]; then
+      sql "DELETE FROM dot_do_an WHERE id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
+    fi
+  fi
   rm -rf "$TMP"
 }
 trap cleanup EXIT
+
+# encode_calls của dịch vụ AI (/health không cần khóa, gọi từ trong container api).
+encode_calls() {
+  "${COMPOSE[@]}" exec -T api python -c "
+import json, urllib.request
+print(json.load(urllib.request.urlopen('http://ai:8002/health', timeout=4))['encode_calls'])
+"
+}
+
+# check_title TOKEN TEN — POST /api/topics/check-title, thân ở $TMP/body.
+check_title() {
+  python3 -c 'import json,sys; print(json.dumps({"ten_de_tai": sys.argv[1]}, ensure_ascii=False))' "$2" > "$TMP/req.json"
+  call POST /api/topics/check-title "$1" -H 'Content-Type: application/json' --data-binary "@$TMP/req.json"
+}
 
 require_seeds() {
   local n
@@ -178,8 +232,73 @@ PY
   done < "$TMP/queries.tsv"
 }
 
+# --- ai_index (SC5, AISV-02, NFR-11) -----------------------------------------
+ai_index() {
+  local token_bomon token_sv_a token_sv_b res before after kho_id topic_id deadline hit
+
+  token_bomon="$(bash "${SCRIPT_DIR}/api-login.sh" bomon)"
+  token_sv_a="$(bash "${SCRIPT_DIR}/api-login.sh" DTC225200095)"
+  token_sv_b="$(bash "${SCRIPT_DIR}/api-login.sh" DTC225200096)"
+
+  res="$(call POST /api/cohorts "$token_bomon" -H 'Content-Type: application/json' \
+    -d '{"ten_dot":"Đợt kiểm thử tự động AI","khoa":"K97","nam_hoc":"2026-2027","ngay_bat_dau":"2026-01-01"}')"
+  [ "${res%% *}" = "201" ] || [ "${res%% *}" = "200" ] || fail "Không tạo được đợt K97 (${res%% *}): $(cat "$TMP/body")"
+  DOT_DO_AN_ID="$(jget 'd["id"]')"
+  [ -n "$DOT_DO_AN_ID" ] || fail "Không đọc được id đợt K97"
+  ok "Bộ môn tạo đợt kiểm thử K97 (id=${DOT_DO_AN_ID})"
+
+  # (a) Bản ghi kho mới -> DA_INDEX trong <= 30 s, đúng MỘT lần encode.
+  before="$(encode_calls)"
+  res="$(call POST /api/archive "$token_bomon" -H 'Content-Type: application/json' \
+    -d '{"khoa":"K97","ten_de_tai":"Xây dựng hệ thống quản lý phòng thí nghiệm hóa học cho trường cao đẳng y tế"}')"
+  [ "${res%% *}" = "201" ] || fail "Bộ môn thêm bản ghi kho K97 trả ${res%% *}: $(cat "$TMP/body")"
+  kho_id="$(jget 'd["id"]')"
+  KHO_IDS="${kho_id}"
+  deadline=$((SECONDS + 30))
+  while :; do
+    call GET "/api/archive/${kho_id}" "$token_bomon" >/dev/null
+    [ "$(jget 'd["trang_thai_index"]')" = "DA_INDEX" ] && break
+    [ "$SECONDS" -lt "$deadline" ] || fail "Bản ghi kho ${kho_id} chưa DA_INDEX sau 30 s"
+    sleep 1
+  done
+  after="$(encode_calls)"
+  [ "$((after - before))" = "1" ] || fail "Index bản ghi kho mới tốn $((after - before)) lần encode (kỳ vọng 1 — NFR-11)"
+  ok "Bản ghi kho K97 (id=${kho_id}) DA_INDEX, encode_calls ${before} -> ${after} (+1, không tính lại corpus)"
+
+  res="$(check_title "$token_sv_b" "Phát triển phần mềm quản lý phòng thí nghiệm hóa học tại trường cao đẳng y tế")"
+  [ "${res%% *}" = "200" ] || fail "check-title trả ${res%% *}"
+  hit="$(jget "next((m['ty_le'] for m in d['matches'] if m['nguon'] == 'KHO' and m['do_an_kho_id'] == ${kho_id}), '')")"
+  [ -n "$hit" ] || fail "Lần kiểm tra kế tiếp không thấy bản ghi kho vừa thêm: $(cat "$TMP/body")"
+  ok "DTC225200096 kiểm tra tên diễn đạt lại -> thấy ngay bản ghi kho mới (${hit}%)"
+
+  # (b) Đề tài SV tự đề xuất, gửi duyệt ngay -> index sau commit.
+  before="$(encode_calls)"
+  python3 -c 'import json,sys; print(json.dumps({"dot_do_an_id": int(sys.argv[1]), "ten_de_tai": "Ứng dụng di động theo dõi lịch tiêm chủng cho trẻ em tại trạm y tế xã", "linh_vuc": "Công nghệ phần mềm", "gui": True}, ensure_ascii=False))' "$DOT_DO_AN_ID" > "$TMP/topic.json"
+  res="$(call POST /api/topics "$token_sv_a" -H 'Content-Type: application/json' --data-binary "@$TMP/topic.json")"
+  [ "${res%% *}" = "201" ] || fail "DTC225200095 tự đề xuất đề tài trả ${res%% *}: $(cat "$TMP/body")"
+  topic_id="$(jget 'd["id"]')"
+  [ "$(jget 'd["trang_thai"]')" = "CHO_DUYET" ] || fail "Đề tài mới không ở CHO_DUYET"
+  # +2 = 1 encode truy vấn (kiểm tra tên lưu lúc gửi) + 1 encode ingest TOPIC.
+  deadline=$((SECONDS + 10))
+  while :; do
+    after="$(encode_calls)"
+    [ "$((after - before))" -ge 2 ] && break
+    [ "$SECONDS" -lt "$deadline" ] || fail "Đề tài ${topic_id} chưa được index sau 10 s (encode_calls +$((after - before)))"
+    sleep 1
+  done
+  [ "$((after - before))" = "2" ] || fail "Gửi đề tài tốn $((after - before)) lần encode (kỳ vọng 2 = 1 kiểm tra tên + 1 ingest)"
+  ok "DTC225200095 gửi đề tài K97 (id=${topic_id}) -> CHO_DUYET, index nền (encode_calls +2 = kiểm tra tên + ingest)"
+
+  res="$(check_title "$token_sv_b" "Xây dựng ứng dụng di động quản lý lịch tiêm chủng trẻ em cho trạm y tế xã")"
+  [ "${res%% *}" = "200" ] || fail "check-title trả ${res%% *}"
+  hit="$(jget "next((m['ty_le'] for m in d['matches'] if m['nguon'] == 'DE_TAI' and m['de_tai_id'] == ${topic_id}), '')")"
+  [ -n "$hit" ] || fail "Lần kiểm tra kế tiếp không thấy đề tài vừa gửi: $(cat "$TMP/body")"
+  ok "DTC225200096 kiểm tra tên diễn đạt lại -> thấy ngay đề tài hiện hành vừa gửi (${hit}%)"
+}
+
 require_seeds
 ai_security
 ai_title
+ai_index
 
 echo "OK: e2e dịch vụ AI hoàn tất (bắt đầu ${START_UTC} UTC)"

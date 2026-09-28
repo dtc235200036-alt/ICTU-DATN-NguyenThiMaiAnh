@@ -19,6 +19,15 @@ START_UTC="$(date -u +%Y-%m-%dT%H:%M:%S)"
 
 cleanup() {
   if [ -n "${DOT_DO_AN_ID}" ]; then
+    # Phase 4 (04-05): gỡ vector các đề tài K99 (TOPIC) khỏi chỉ mục AI TRƯỚC
+    # khi xóa hàng — chạy lại test không để lại vector mồ côi.
+    local purge_topic_ids
+    purge_topic_ids="$(DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
+      "SELECT id FROM de_tai WHERE dot_do_an_id = ${DOT_DO_AN_ID};" 2>/dev/null | paste -sd, - || true)"
+    if [ -n "${purge_topic_ids}" ]; then
+      docker compose -f "${SCRIPT_DIR}/docker-compose.yml" exec -T api \
+        python -m app.services.ai_index purge --loai TOPIC --ids "${purge_topic_ids}" >/dev/null 2>&1 || true
+    fi
     # NOTF-01 (plan 03-07): duyệt/từ chối đề tài giờ tạo thông báo — chỉ xóa
     # thông báo của 3 tài khoản dành riêng, phát sinh từ lúc script bắt đầu.
     DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
