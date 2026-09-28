@@ -57,7 +57,12 @@ function CheckSummaryBlock({ detail }: { detail: ScoringDetail }) {
       </div>
     )
   }
-  if (kiemTra && kiemTra.trang_thai === 'LOI' && detail.bao_cao_cuoi) {
+  if (
+    kiemTra &&
+    kiemTra.trang_thai === 'LOI' &&
+    detail.bao_cao_cuoi &&
+    !detail.bao_cao_cuoi.trich_xuat_loi
+  ) {
     return (
       <Space size={6} wrap>
         <CheckStatusTag kiemTra={kiemTra} />

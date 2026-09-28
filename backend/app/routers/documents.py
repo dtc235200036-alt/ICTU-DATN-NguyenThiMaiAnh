@@ -69,6 +69,6 @@ def recheck_document(
     ket_qua = document_check.get_check_for_doc(db, doc)
     if ket_qua is None:
         raise HTTPException(status_code=404, detail=_NO_CHECK_DETAIL)
-    document_check.request_recheck(db, ket_qua)
+    document_check.request_recheck(db, ket_qua, doc)
     background_tasks.add_task(document_check.run, ket_qua.id)
     return document_check.summary(ket_qua)

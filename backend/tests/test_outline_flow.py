@@ -358,6 +358,9 @@ def test_background_check_always_terminates(
         f"/api/documents/{broken_doc_id}/check", headers=auth_headers(gv_b)
     ).json()
     assert broken_check["trang_thai"] == "LOI"
+    # IN-11: không trích xuất được văn bản -> kiểm tra lại là vô ích -> 409
+    resp = client.post(f"/api/documents/{broken_doc_id}/recheck", headers=auth_headers(gv_b))
+    assert resp.status_code == 409, resp.text
 
 
 def test_outline_access_is_scoped(

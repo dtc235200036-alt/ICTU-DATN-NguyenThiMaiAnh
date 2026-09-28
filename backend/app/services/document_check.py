@@ -41,6 +41,7 @@ _logger = logging.getLogger(__name__)
 # NGUONG_TAI_LIEU — khớp giá trị seed ở migration 0004.
 _FALLBACK_NGUONG_TAI_LIEU = 30.00
 _RECHECK_NOT_LOI_DETAIL = "Chỉ kiểm tra lại được khi kết quả đang ở trạng thái Lỗi"
+_RECHECK_NO_TEXT_DETAIL = "Không trích xuất được nội dung file — hãy nộp lại file khác"
 
 
 def _get_threshold(db: Session) -> float:
@@ -324,9 +325,15 @@ def detail(db: Session, doc: TaiLieuDoAn, user: CurrentUser) -> CheckDetail:
     )
 
 
-def request_recheck(db: Session, ket_qua: KetQuaKiemTraTrungLap) -> None:
+def request_recheck(
+    db: Session, ket_qua: KetQuaKiemTraTrungLap, doc: TaiLieuDoAn | None = None
+) -> None:
     """Task 2 (POST /recheck): chỉ cho phép khi đang LOI — conditional UPDATE
-    (rowcount 0 -> 409); xóa chi tiết cũ, commit, router mới schedule `run`."""
+    (rowcount 0 -> 409); xóa chi tiết cũ, commit, router mới schedule `run`.
+    IN-11: tài liệu không trích xuất được văn bản -> 409 (chạy lại chắc chắn
+    lại LOI; cần nộp file khác)."""
+    if doc is not None and (doc.trich_xuat_loi or not doc.noi_dung_trich_xuat):
+        raise HTTPException(status_code=409, detail=_RECHECK_NO_TEXT_DETAIL)
     stmt = (
         update(KetQuaKiemTraTrungLap)
         .where(KetQuaKiemTraTrungLap.id == ket_qua.id)

@@ -98,8 +98,13 @@ export default function CheckPanel({ taiLieuId, canRecheck, pendingText }: Check
         type="warning"
         showIcon
         message="Kiểm tra trùng lặp gặp lỗi — tài liệu vẫn được xử lý bình thường (UC0.7 - E1)"
+        description={
+          data.tai_lieu.trich_xuat_loi
+            ? 'Không trích xuất được nội dung file — cần nộp lại file khác để kiểm tra.'
+            : undefined
+        }
         action={
-          canRecheck ? (
+          canRecheck && !data.tai_lieu.trich_xuat_loi ? (
             <Button size="small" loading={recheckMutation.isPending} onClick={handleRecheck}>
               Kiểm tra lại
             </Button>

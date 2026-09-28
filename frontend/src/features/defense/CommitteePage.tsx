@@ -271,7 +271,9 @@ export default function CommitteePage() {
       render: (_value, record) => (
         <Space size={6} wrap>
           <CheckStatusTag kiemTra={record.kiem_tra} />
-          {record.kiem_tra?.trang_thai === 'LOI' && record.bao_cao_cuoi && (
+          {record.kiem_tra?.trang_thai === 'LOI' &&
+            record.bao_cao_cuoi &&
+            !record.bao_cao_cuoi.trich_xuat_loi && (
             <RecheckButton taiLieuId={record.bao_cao_cuoi.id} />
           )}
         </Space>
