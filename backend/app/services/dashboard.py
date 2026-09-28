@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy import distinct, exists, func, select
 from sqlalchemy.orm import Session, selectinload
 
@@ -365,6 +366,9 @@ def _default_cohort(db: Session) -> DotDoAn | None:
 
 def get_bo_mon_dashboard(db: Session, dot_do_an_id: int | None) -> BmDashboardOut:
     cohort = db.get(DotDoAn, dot_do_an_id) if dot_do_an_id is not None else _default_cohort(db)
+    if dot_do_an_id is not None and cohort is None:
+        # IN-10: id đợt không tồn tại -> 404, không trả bảng điều khiển toàn số 0.
+        raise HTTPException(status_code=404, detail="Không tìm thấy đợt đồ án")
 
     de_tai_cho_duyet = 0
     de_tai_da_phan_cong = 0
