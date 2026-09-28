@@ -16,7 +16,8 @@ class ThresholdOut(BaseModel):
     mo_ta: str
     gia_tri: float
     gia_tri_de_xuat: float
-    thoi_diem_cap_nhat: UtcDateTime
+    # IN-02: None khi CSDL chưa có dòng (form vẫn hiện giá trị đề xuất để lưu).
+    thoi_diem_cap_nhat: UtcDateTime | None = None
     nguoi_cap_nhat: str | None = None
 
 

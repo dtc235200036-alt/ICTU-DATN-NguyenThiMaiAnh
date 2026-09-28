@@ -85,6 +85,17 @@ def list_thresholds(db: Session) -> list[ThresholdOut]:
     for d in DEFINITIONS:
         row = rows.get(d.loai)
         if row is None:
+            # IN-02 (04-REVIEW): dòng còn thiếu vẫn được liệt kê với giá trị đề
+            # xuất, để form có đủ ba trường và PUT (bắt buộc cả ba) chèn dòng.
+            out.append(
+                ThresholdOut(
+                    loai=d.loai,
+                    nhan=d.nhan,
+                    mo_ta=d.mo_ta,
+                    gia_tri=d.gia_tri_de_xuat,
+                    gia_tri_de_xuat=d.gia_tri_de_xuat,
+                )
+            )
             continue
         out.append(
             ThresholdOut(

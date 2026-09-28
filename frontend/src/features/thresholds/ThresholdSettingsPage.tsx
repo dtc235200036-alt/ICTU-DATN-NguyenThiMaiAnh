@@ -18,7 +18,9 @@ function ThresholdExtra({ item }: { item: ThresholdOut }) {
     <div style={{ marginTop: 4, fontSize: 13, lineHeight: 1.6 }}>
       <div>{item.mo_ta}</div>
       <div>{`Giá trị đề xuất sau hiệu chỉnh: ${item.gia_tri_de_xuat}%`}</div>
-      {item.nguoi_cap_nhat ? (
+      {item.thoi_diem_cap_nhat === null ? (
+        <div>Chưa có trong CSDL — lưu cấu hình để ghi giá trị này</div>
+      ) : item.nguoi_cap_nhat ? (
         <div>{`Cập nhật lần cuối: ${formatDateTime(item.thoi_diem_cap_nhat)} bởi ${item.nguoi_cap_nhat}`}</div>
       ) : (
         <div>{`Giá trị mặc định từ hiệu chỉnh (cập nhật ${formatDateTime(item.thoi_diem_cap_nhat)})`}</div>

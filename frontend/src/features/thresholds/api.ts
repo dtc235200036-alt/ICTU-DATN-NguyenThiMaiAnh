@@ -11,7 +11,7 @@ export interface ThresholdOut {
   mo_ta: string
   gia_tri: number
   gia_tri_de_xuat: number
-  thoi_diem_cap_nhat: string
+  thoi_diem_cap_nhat: string | null
   nguoi_cap_nhat: string | null
 }
 
