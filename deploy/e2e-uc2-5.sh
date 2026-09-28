@@ -646,11 +646,17 @@ uc5_archive() {
   # index lại, import CSV khóa cũ (thành công một phần), RBAC ghi ---
   [ -n "$DO_AN_KHO_ID" ] || fail "uc5_archive cần DO_AN_KHO_ID từ uc4_defense"
   local status found
+  status="$(call GET "/api/archive?khoa=K98" "${TOKEN_SV098}")"
+  [ "$status" = "200" ] || fail "DTC225200098 không tra cứu được kho (mã ${status})"
+  found="$(jget "next((f\"{i['diem']}|{i['co_file']}\" for i in d['items'] if i['id'] == ${DO_AN_KHO_ID}), '')")"
+  [ "$found" = "8.5|True" ] || fail "Kho K98 không có đồ án vừa chốt với điểm 8.5 + file (nhận '${found}')"
+  ok "DTC225200098 tra cứu kho K98 thấy đồ án vừa chốt của mình (điểm 8.5, có file)"
+  # WR-10 (03-REVIEW): sinh viên khác thấy đồ án + file nhưng không thấy điểm
   status="$(call GET "/api/archive?khoa=K98" "${TOKEN_SV097}")"
   [ "$status" = "200" ] || fail "DTC225200097 không tra cứu được kho (mã ${status})"
   found="$(jget "next((f\"{i['diem']}|{i['co_file']}\" for i in d['items'] if i['id'] == ${DO_AN_KHO_ID}), '')")"
-  [ "$found" = "8.5|True" ] || fail "Kho K98 không có đồ án vừa chốt với điểm 8.5 + file (nhận '${found}')"
-  ok "DTC225200097 tra cứu kho K98 thấy đồ án vừa chốt (điểm 8.5, có file)"
+  [ "$found" = "None|True" ] || fail "DTC225200097 (SV khác) phải thấy đồ án có file nhưng không thấy điểm (nhận '${found}')"
+  ok "DTC225200097 tra cứu kho K98 thấy đồ án vừa chốt nhưng không thấy điểm của SV khác (WR-10)"
 
   local archived_path="$TMP/kho-bao-cao.pdf"
   status="$(curl -sk -o "$archived_path" -w '%{http_code}' "$BASE/api/archive/${DO_AN_KHO_ID}/file" \
