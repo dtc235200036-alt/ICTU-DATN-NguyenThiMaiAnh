@@ -1,0 +1,14 @@
+[project]
+name = "ntma-datagen"
+version = "0.1.0"
+description = "NTMA - bo sinh du lieu thu nghiem tong hop cho dich vu AI (DATA-02, DATA-03)"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "python-docx>=1.2",
+    "reportlab>=5.0",
+    "pymupdf>=1.28",
+]
+
+[tool.uv]
+# Cong cu mot lan (khong phai thu vien): chay bang `python -m datagen` tu thu muc nay.
+package = false

@@ -1,0 +1,2107 @@
+{
+ "hat_giong": 20261116,
+ "khuon_mau": "[ASSUMED] khuôn mẫu chung của đồ án CNTT (bìa, lời cam đoan, lời cảm ơn, mục lục, danh mục hình, chương, tài liệu tham khảo) — thay khi có mẫu chính thức TL-04/TL-05",
+ "ngay_sinh": "2026-09-28",
+ "topics": [
+  {
+   "cum": "WEB",
+   "khoa": "K18",
+   "ma_doi_tuong": "WEB.tin_tuc",
+   "stt": 1,
+   "ten_de_tai": "Xây dựng và triển khai phần mềm trực tuyến quản lý tin tức cho UBND huyện Sông Công"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K18",
+   "ma_doi_tuong": "HOC_TAP.thoi_khoa_bieu",
+   "stt": 2,
+   "ten_de_tai": "Phát triển hệ thống hỗ trợ xếp thời khóa biểu tại trường THPT Ngô Quyền sử dụng ReactJS"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K18",
+   "ma_doi_tuong": "MOBILE.phan_anh",
+   "stt": 3,
+   "ten_de_tai": "Phát triển ứng dụng điện thoại phản ánh hiện trường đô thị tại sở TT&TT tỉnh Phú Thọ trên nền tảng Firebase"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K18",
+   "ma_doi_tuong": "AI_ML.x_quang",
+   "stt": 4,
+   "ten_de_tai": "Ứng dụng YOLOv8 trong hỗ trợ chẩn đoán ảnh X-quang phổi cho bệnh viện đa khoa tỉnh Hà Giang"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K18",
+   "ma_doi_tuong": "AN_TOAN.nhat_ky",
+   "stt": 5,
+   "ten_de_tai": "Ứng dụng Wazuh trong thu thập và phân tích nhật ký hệ thống tại công ty CP Hưng Thịnh"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K18",
+   "ma_doi_tuong": "HOC_TAP.luyen_thi",
+   "stt": 6,
+   "ten_de_tai": "Thiết kế và xây dựng nền tảng hỗ trợ ôn tập thi trung học phổ thông cho trường THCS Ngô Quyền sử dụng WebRTC"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K18",
+   "ma_doi_tuong": "MOBILE.goi_xe",
+   "stt": 7,
+   "ten_de_tai": "Nghiên cứu và phát triển ứng dụng di động hỗ trợ gọi xe công nghệ cho người thuê trọ tại Đại Từ"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K18",
+   "ma_doi_tuong": "DU_LIEU.dich_benh",
+   "stt": 8,
+   "ten_de_tai": "Nghiên cứu và phát triển hệ thống báo cáo phân tích số liệu dịch bệnh tại trạm y tế cấp xã Sơn Cẩm trên nền tảng Power BI"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K18",
+   "ma_doi_tuong": "IOT.bao_chay",
+   "stt": 9,
+   "ten_de_tai": "Phát triển thiết bị IoT phát hiện khói và nhiệt bất thường cho công ty trách nhiệm hữu hạn Nam Việt sử dụng MQTT"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K18",
+   "ma_doi_tuong": "MOBILE.du_lich",
+   "stt": 10,
+   "ten_de_tai": "Ứng dụng Kotlin trong hướng dẫn du lịch cho cơ sở lưu trú Tân Tiến"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K18",
+   "ma_doi_tuong": "IOT.tuoi_cay",
+   "stt": 11,
+   "ten_de_tai": "Thiết kế và cài đặt hệ thống tưới cây tự động tại hợp tác xã nông nghiệp Quyết Thắng"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K18",
+   "ma_doi_tuong": "AI_ML.doanh_thu",
+   "stt": 12,
+   "ten_de_tai": "Thiết kế và xây dựng mô hình học máy ước lượng doanh số theo thời gian cho siêu thị mini Đại Phát"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K18",
+   "ma_doi_tuong": "IOT.chuong_trai",
+   "stt": 13,
+   "ten_de_tai": "Thiết kế và xây dựng thiết bị IoT theo dõi môi trường chuồng nuôi cho trang trại Hưng Thịnh sử dụng ESP32"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K18",
+   "ma_doi_tuong": "WEB.tuyen_sinh",
+   "stt": 14,
+   "ten_de_tai": "Nghiên cứu và phát triển phần mềm trực tuyến tiếp nhận hồ sơ xét tuyển qua mạng tại trường mầm non Tích Lương sử dụng VueJS"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K18",
+   "ma_doi_tuong": "HOC_TAP.khoa_hoc",
+   "stt": 15,
+   "ten_de_tai": "Thiết kế và cài đặt nền tảng hỗ trợ quản lý khóa học trực tuyến tại trường trung học cơ sở Quang Trung trên nền tảng Django"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K18",
+   "ma_doi_tuong": "AN_TOAN.ma_doc",
+   "stt": 16,
+   "ten_de_tai": "Thiết kế và xây dựng công cụ hỗ trợ nhận diện phần mềm độc hại cho công ty trách nhiệm hữu hạn Phúc An trên nền tảng Wazuh"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K18",
+   "ma_doi_tuong": "ERP.van_tai",
+   "stt": 17,
+   "ten_de_tai": "Phát triển ứng dụng hỗ trợ quản lý vận tải hàng hóa tại công ty TNHH Hoàng Long sử dụng ERPNext"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K18",
+   "ma_doi_tuong": "DU_LIEU.du_lieu_ban",
+   "stt": 18,
+   "ten_de_tai": "Thiết kế và xây dựng ứng dụng phân tích dữ liệu tổng hợp dữ liệu bán hàng tại siêu thị mini Thành Công"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K18",
+   "ma_doi_tuong": "ERP.ban_hang_quay",
+   "stt": 19,
+   "ten_de_tai": "Phát triển ứng dụng quản lý bán hàng tại quầy tại cửa hàng tiện lợi Phúc An sử dụng ERPNext"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K18",
+   "ma_doi_tuong": "IOT.nha_kinh",
+   "stt": 20,
+   "ten_de_tai": "Nghiên cứu và phát triển hệ thống IoT theo dõi vi khí hậu trong nhà màng cho trang trại An Khang sử dụng Node-RED"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K18",
+   "ma_doi_tuong": "AN_TOAN.lo_hong_web",
+   "stt": 21,
+   "ten_de_tai": "Xây dựng và triển khai hệ thống kiểm thử bảo mật website cho công ty TNHH Thành Công trên nền tảng OpenVAS"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K18",
+   "ma_doi_tuong": "AI_ML.cam_xuc",
+   "stt": 22,
+   "ten_de_tai": "Thiết kế và xây dựng ứng dụng trí tuệ nhân tạo phân tích cảm xúc bình luận cho siêu thị quy mô nhỏ Trường Thịnh trên nền tảng PhoBERT"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K18",
+   "ma_doi_tuong": "ERP.nhan_su",
+   "stt": 23,
+   "ten_de_tai": "Thiết kế và xây dựng hệ thống quản lý nhân sự và tiền lương cho công ty cổ phần Tân Tiến"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K18",
+   "ma_doi_tuong": "ERP.crm",
+   "stt": 24,
+   "ten_de_tai": "Xây dựng và triển khai ứng dụng hỗ trợ chăm sóc và theo dõi khách hàng tại công ty CP Thành Công trên nền tảng ERPNext"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K18",
+   "ma_doi_tuong": "AI_ML.tom_tat",
+   "stt": 25,
+   "ten_de_tai": "Nghiên cứu và phát triển mô hình học máy hỗ trợ tóm tắt văn bản tiếng Việt cho ủy ban nhân dân xã Phúc Hà"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K18",
+   "ma_doi_tuong": "AI_ML.chatbot",
+   "stt": 26,
+   "ten_de_tai": "Xây dựng và triển khai mô hình học máy tư vấn tuyển sinh bằng chatbot cho trường THPT Trần Phú"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K18",
+   "ma_doi_tuong": "DU_LIEU.roi_bo",
+   "stt": 27,
+   "ten_de_tai": "Thiết kế và cài đặt hệ thống hỗ trợ dự đoán khách hàng rời bỏ tại công ty CP Phúc An"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K18",
+   "ma_doi_tuong": "IOT.khong_khi",
+   "stt": 28,
+   "ten_de_tai": "Xây dựng thiết bị IoT đo bụi mịn và khí thải môi trường tại sở TT&TT tỉnh Phú Thọ"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K18",
+   "ma_doi_tuong": "WEB.thu_vien",
+   "stt": 29,
+   "ten_de_tai": "Xây dựng và triển khai cổng thông tin quản lý thư viện cho trường mẫu giáo Đồng Bẩm sử dụng NodeJS"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K18",
+   "ma_doi_tuong": "HOC_TAP.hoc_lieu",
+   "stt": 30,
+   "ten_de_tai": "Phát triển website hỗ trợ chia sẻ học liệu số tại trường THPT Trần Phú sử dụng Moodle"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K18",
+   "ma_doi_tuong": "MOBILE.kham_benh",
+   "stt": 31,
+   "ten_de_tai": "Thiết kế và xây dựng ứng dụng điện thoại hỗ trợ hẹn giờ khám chữa bệnh tại trạm y tế xã Cam Giá trên nền tảng React Native"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K18",
+   "ma_doi_tuong": "AI_ML.khuon_mat",
+   "stt": 32,
+   "ten_de_tai": "Phát triển ứng dụng trí tuệ nhân tạo điểm danh bằng nhận diện khuôn mặt tại trường THCS Trần Phú trên nền tảng YOLOv8"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K18",
+   "ma_doi_tuong": "HOC_TAP.so_lien_lac",
+   "stt": 33,
+   "ten_de_tai": "Thiết kế và cài đặt ứng dụng kết nối nhà trường với phụ huynh tại trường THCS Nguyễn Huệ sử dụng ReactJS"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K18",
+   "ma_doi_tuong": "WEB.bat_dong_san",
+   "stt": 34,
+   "ten_de_tai": "Xây dựng ứng dụng web đăng tin rao vặt bất động sản cho công ty TNHH Nam Việt"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K18",
+   "ma_doi_tuong": "AN_TOAN.ma_hoa",
+   "stt": 35,
+   "ten_de_tai": "Phát triển giải pháp bảo vệ tệp tin bằng mật mã tại DNTN An Khang"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K18",
+   "ma_doi_tuong": "AI_ML.bien_so",
+   "stt": 36,
+   "ten_de_tai": "Xây dựng và triển khai ứng dụng trí tuệ nhân tạo nhận dạng biển số xe tại khách sạn Hưng Thịnh sử dụng YOLOv8"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K18",
+   "ma_doi_tuong": "ERP.van_ban",
+   "stt": 37,
+   "ten_de_tai": "Phát triển ứng dụng quản lý văn bản đi đến cho sở TT&TT tỉnh Phú Thọ"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K18",
+   "ma_doi_tuong": "AI_ML.benh_la",
+   "stt": 38,
+   "ten_de_tai": "Xây dựng mô hình học sâu chẩn đoán bệnh cây qua ảnh lá cho trang trại Phúc An"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K18",
+   "ma_doi_tuong": "AN_TOAN.sao_luu",
+   "stt": 39,
+   "ten_de_tai": "Nghiên cứu và phát triển hệ thống dự phòng dữ liệu tự động tại công ty TNHH Hoàng Long"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K18",
+   "ma_doi_tuong": "AI_ML.goi_y",
+   "stt": 40,
+   "ten_de_tai": "Thiết kế và xây dựng mô hình học máy hỗ trợ gợi ý sản phẩm cho cửa hàng tiện lợi Trường Thịnh trên nền tảng PyTorch"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K18",
+   "ma_doi_tuong": "HOC_TAP.trac_nghiem",
+   "stt": 41,
+   "ten_de_tai": "Ứng dụng WebRTC trong thi trắc nghiệm trực tuyến cho trường THPT Nguyễn Trãi"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K18",
+   "ma_doi_tuong": "HOC_TAP.ngoai_ngu",
+   "stt": 42,
+   "ten_de_tai": "Phát triển ứng dụng hỗ trợ học tiếng Anh giao tiếp cho trường THPT Hoàng Văn Thụ"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K18",
+   "ma_doi_tuong": "DU_LIEU.khach_du_lich",
+   "stt": 43,
+   "ten_de_tai": "Phát triển hệ thống phân tích lượt khách du lịch tại khách sạn Minh Phát"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K18",
+   "ma_doi_tuong": "IOT.bai_do_xe",
+   "stt": 44,
+   "ten_de_tai": "Thiết kế và cài đặt hệ thống quản lý bãi đỗ xe thông minh cho bến xe liên tỉnh Bắc Giang"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K18",
+   "ma_doi_tuong": "IOT.ao_nuoi",
+   "stt": 45,
+   "ten_de_tai": "Xây dựng và triển khai bộ điều khiển giám sát ao nuôi thủy sản cho vùng chè Đồng Bẩm"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K18",
+   "ma_doi_tuong": "WEB.ho_so_hs",
+   "stt": 46,
+   "ten_de_tai": "Thiết kế và cài đặt ứng dụng web lưu trữ và tra cứu hồ sơ học sinh tại trung tâm ngoại ngữ Nam Việt"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K18",
+   "ma_doi_tuong": "ERP.tai_san",
+   "stt": 47,
+   "ten_de_tai": "Nghiên cứu và phát triển hệ thống quản lý tài sản cố định tại UBND huyện Na Rì sử dụng ERPNext"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K18",
+   "ma_doi_tuong": "AN_TOAN.tuong_lua",
+   "stt": 48,
+   "ten_de_tai": "Ứng dụng pfSense trong cấu hình tường lửa cho trường trung học cơ sở Ngô Quyền"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K18",
+   "ma_doi_tuong": "IOT.muc_nuoc",
+   "stt": 49,
+   "ten_de_tai": "Ứng dụng Node-RED trong đo mực nước sông suối từ xa cho ủy ban nhân dân huyện Phú Bình"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K18",
+   "ma_doi_tuong": "ERP.cham_cong",
+   "stt": 50,
+   "ten_de_tai": "Thiết kế và xây dựng phân hệ ERP chấm công và quản lý ca làm việc cho xưởng cơ khí Việt Tiến trên nền tảng Laravel"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K18",
+   "ma_doi_tuong": "ERP.mua_hang",
+   "stt": 51,
+   "ten_de_tai": "Nghiên cứu và phát triển phân hệ ERP quản lý mua hàng cho DNTN Bắc Sơn"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K18",
+   "ma_doi_tuong": "MOBILE.tu_vung",
+   "stt": 52,
+   "ten_de_tai": "Ứng dụng Kotlin trong học từ vựng tiếng Anh cho trung tâm ngoại ngữ Minh Phát"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K18",
+   "ma_doi_tuong": "WEB.dat_phong_ks",
+   "stt": 53,
+   "ten_de_tai": "Nghiên cứu và phát triển phần mềm trực tuyến đặt chỗ lưu trú trực tuyến tại bến xe liên tỉnh Lạng Sơn"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K18",
+   "ma_doi_tuong": "HOC_TAP.lop_ao",
+   "stt": 54,
+   "ten_de_tai": "Phát triển hệ thống hỗ trợ giảng dạy trực tuyến có tương tác cho trung tâm GDTX Võ Nhai"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K18",
+   "ma_doi_tuong": "DU_LIEU.tuyen_dung",
+   "stt": 55,
+   "ten_de_tai": "Thiết kế và xây dựng ứng dụng phân tích dữ liệu phân tích nhu cầu tuyển dụng tại UBND xã Gia Sàng trên nền tảng Power BI"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K18",
+   "ma_doi_tuong": "MOBILE.diem_danh",
+   "stt": 56,
+   "ten_de_tai": "Ứng dụng Swift trong điểm danh sinh viên tại trường mẫu giáo Đồng Bẩm"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K18",
+   "ma_doi_tuong": "WEB.ban_hang_online",
+   "stt": 57,
+   "ten_de_tai": "Ứng dụng NodeJS trong kinh doanh bán lẻ qua mạng cho siêu thị mini Trường Thịnh"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K18",
+   "ma_doi_tuong": "MOBILE.nha_tro",
+   "stt": 58,
+   "ten_de_tai": "Xây dựng và triển khai ứng dụng Android tìm phòng trọ cho hộ gia đình tại Phú Bình sử dụng Firebase"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K18",
+   "ma_doi_tuong": "WEB.viec_lam",
+   "stt": 59,
+   "ten_de_tai": "Xây dựng cổng thông tin tìm kiếm việc làm tại công ty TNHH Tân Tiến sử dụng Laravel"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K18",
+   "ma_doi_tuong": "ERP.ke_toan",
+   "stt": 60,
+   "ten_de_tai": "Ứng dụng Spring Boot trong hạch toán thu chi doanh nghiệp cho công ty CP Đại Phát"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K19",
+   "ma_doi_tuong": "ERP.nhan_su",
+   "stt": 61,
+   "ten_de_tai": "Ứng dụng Odoo trong tính lương và theo dõi hồ sơ nhân viên cho DNTN Tân Tiến"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K19",
+   "ma_doi_tuong": "ERP.ban_hang_quay",
+   "stt": 62,
+   "ten_de_tai": "Thiết kế và cài đặt hệ thống thu ngân và lập hóa đơn bán lẻ tại siêu thị mini Hoàng Long sử dụng SQL Server"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K19",
+   "ma_doi_tuong": "IOT.nha_kinh",
+   "stt": 63,
+   "ten_de_tai": "Nghiên cứu và phát triển bộ điều khiển giám sát nhiệt độ nhà kính tại HTX nông nghiệp Tân Cương"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K19",
+   "ma_doi_tuong": "AI_ML.doanh_thu",
+   "stt": 64,
+   "ten_de_tai": "Xây dựng mô hình học sâu dự báo doanh thu bán hàng cho chuỗi cửa hàng Hưng Thịnh"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K19",
+   "ma_doi_tuong": "IOT.muc_nuoc",
+   "stt": 65,
+   "ten_de_tai": "Thiết kế và cài đặt thiết bị IoT hỗ trợ cảnh báo mực nước lũ cho UBND xã Đồng Bẩm"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K19",
+   "ma_doi_tuong": "ERP.kho_hang",
+   "stt": 66,
+   "ten_de_tai": "Xây dựng và triển khai ứng dụng theo dõi nhập xuất tồn kho cho công ty trách nhiệm hữu hạn Việt Tiến sử dụng Spring Boot"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K19",
+   "ma_doi_tuong": "WEB.tuyen_sinh",
+   "stt": 67,
+   "ten_de_tai": "Thiết kế và xây dựng website tuyển sinh trực tuyến cho trường THCS Chu Văn An"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K19",
+   "ma_doi_tuong": "MOBILE.suc_khoe",
+   "stt": 68,
+   "ten_de_tai": "Phát triển ứng dụng đa nền tảng theo dõi sức khỏe cá nhân tại trung tâm y tế huyện Võ Nhai"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K19",
+   "ma_doi_tuong": "MOBILE.giao_do_an",
+   "stt": 69,
+   "ten_de_tai": "Thiết kế và xây dựng ứng dụng di động đặt và giao đồ ăn cho điểm du lịch Võ Nhai"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K19",
+   "ma_doi_tuong": "DU_LIEU.dich_benh",
+   "stt": 70,
+   "ten_de_tai": "Xây dựng và triển khai mô hình hỗ trợ thống kê ca bệnh truyền nhiễm tại trạm y tế xã Đồng Bẩm sử dụng Pandas"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K19",
+   "ma_doi_tuong": "ERP.van_ban",
+   "stt": 71,
+   "ten_de_tai": "Xây dựng phân hệ ERP luân chuyển công văn nội bộ cho UBND xã Hóa Thượng"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K19",
+   "ma_doi_tuong": "WEB.tin_tuc",
+   "stt": 72,
+   "ten_de_tai": "Xây dựng và triển khai website hỗ trợ đăng tải tin bài trên cổng điện tử cho UBND huyện Yên Sơn trên nền tảng ReactJS"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K19",
+   "ma_doi_tuong": "WEB.dat_phong_ks",
+   "stt": 73,
+   "ten_de_tai": "Thiết kế và xây dựng website đặt phòng khách sạn tại cơ sở lưu trú An Khang trên nền tảng Django"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K19",
+   "ma_doi_tuong": "IOT.chuong_trai",
+   "stt": 74,
+   "ten_de_tai": "Ứng dụng Arduino trong giám sát chuồng trại chăn nuôi cho nông trại Minh Phát"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K19",
+   "ma_doi_tuong": "IOT.dien_nang",
+   "stt": 75,
+   "ten_de_tai": "Phát triển giải pháp IoT đo đếm công suất điện từ xa cho công ty CP Hoàng Long"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K19",
+   "ma_doi_tuong": "DU_LIEU.dieu_hanh",
+   "stt": 76,
+   "ten_de_tai": "Phát triển hệ thống báo cáo hỗ trợ hiển thị số liệu quản trị trên bảng điều khiển cho DNTN Hoàng Long sử dụng Pandas"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K19",
+   "ma_doi_tuong": "ERP.tai_san",
+   "stt": 77,
+   "ten_de_tai": "Ứng dụng Laravel trong theo dõi thiết bị và khấu hao tài sản cho UBND xã Quyết Thắng"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K19",
+   "ma_doi_tuong": "DU_LIEU.tieu_thu_dien",
+   "stt": 78,
+   "ten_de_tai": "Phát triển mô hình thống kê sản lượng điện sử dụng tại công ty trách nhiệm hữu hạn Tân Tiến sử dụng Apache Spark"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K19",
+   "ma_doi_tuong": "MOBILE.goi_xe",
+   "stt": 79,
+   "ten_de_tai": "Xây dựng ứng dụng đa nền tảng đặt xe đưa đón theo yêu cầu cho các gia đình ở Na Rì"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K19",
+   "ma_doi_tuong": "MOBILE.diem_danh",
+   "stt": 80,
+   "ten_de_tai": "Xây dựng ứng dụng Android ghi nhận chuyên cần của người học cho trường mẫu giáo Phúc Xuân"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K19",
+   "ma_doi_tuong": "AN_TOAN.lo_hong_web",
+   "stt": 81,
+   "ten_de_tai": "Nghiên cứu và phát triển hệ thống rà quét lỗ hổng ứng dụng web cho doanh nghiệp tư nhân An Khang"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K19",
+   "ma_doi_tuong": "HOC_TAP.lop_ao",
+   "stt": 82,
+   "ten_de_tai": "Phát triển website tổ chức lớp học ảo cho trung tâm GDTX Ba Bể"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K19",
+   "ma_doi_tuong": "ERP.mua_hang",
+   "stt": 83,
+   "ten_de_tai": "Phát triển hệ thống đặt hàng nhà cung cấp tại DNTN Thành Công trên nền tảng ERPNext"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K19",
+   "ma_doi_tuong": "IOT.bao_chay",
+   "stt": 84,
+   "ten_de_tai": "Phát triển thiết bị IoT hỗ trợ cảnh báo cháy sớm tại DNTN An Khang sử dụng Node-RED"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K19",
+   "ma_doi_tuong": "IOT.kho_lanh",
+   "stt": 85,
+   "ten_de_tai": "Phát triển giải pháp IoT hỗ trợ giám sát nhiệt độ kho lạnh cho công ty TNHH An Khang sử dụng MQTT"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K19",
+   "ma_doi_tuong": "AN_TOAN.xac_thuc",
+   "stt": 86,
+   "ten_de_tai": "Nghiên cứu và phát triển công cụ đăng nhập bằng mật khẩu và mã OTP cho công ty CP Bắc Sơn"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K19",
+   "ma_doi_tuong": "DU_LIEU.gia_nong_san",
+   "stt": 87,
+   "ten_de_tai": "Ứng dụng Metabase trong phân tích biến động giá nông sản cho trang trại Trường Thịnh"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K19",
+   "ma_doi_tuong": "HOC_TAP.trac_nghiem",
+   "stt": 88,
+   "ten_de_tai": "Ứng dụng Django trong tổ chức kiểm tra trắc nghiệm qua mạng cho trung tâm ngoại ngữ Thành Công"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K19",
+   "ma_doi_tuong": "HOC_TAP.lap_trinh",
+   "stt": 89,
+   "ten_de_tai": "Thiết kế và xây dựng nền tảng hỗ trợ luyện tập lập trình với trình chấm tự động cho trung tâm giáo dục thường xuyên Chợ Mới sử dụng NodeJS"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K19",
+   "ma_doi_tuong": "HOC_TAP.khoa_hoc",
+   "stt": 90,
+   "ten_de_tai": "Xây dựng nền tảng tổ chức lớp học qua mạng tại trung tâm GDTX Chợ Mới"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K19",
+   "ma_doi_tuong": "HOC_TAP.so_lien_lac",
+   "stt": 91,
+   "ten_de_tai": "Xây dựng nền tảng hỗ trợ trao đổi thông tin qua sổ liên lạc điện tử cho trường THCS Chu Văn An trên nền tảng Django"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K19",
+   "ma_doi_tuong": "AI_ML.te_nga",
+   "stt": 92,
+   "ten_de_tai": "Thiết kế và xây dựng mô hình học sâu hỗ trợ cảnh báo ngã cho người già tại trung tâm y tế huyện Phú Lương sử dụng TensorFlow"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K19",
+   "ma_doi_tuong": "WEB.ban_hang_online",
+   "stt": 93,
+   "ten_de_tai": "Thiết kế và cài đặt ứng dụng web bán hàng trực tuyến cho hệ thống cửa hàng Việt Tiến"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K19",
+   "ma_doi_tuong": "HOC_TAP.hoc_lieu",
+   "stt": 94,
+   "ten_de_tai": "Xây dựng và triển khai website khai thác kho học liệu điện tử tại trường trung học phổ thông Nguyễn Huệ"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K19",
+   "ma_doi_tuong": "MOBILE.nong_san",
+   "stt": 95,
+   "ten_de_tai": "Xây dựng ứng dụng di động kết nối tiêu thụ nông sản tại hợp tác xã nông nghiệp Tân Cương"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K19",
+   "ma_doi_tuong": "AN_TOAN.ma_doc",
+   "stt": 96,
+   "ten_de_tai": "Ứng dụng Suricata trong phát hiện mã độc cho công ty trách nhiệm hữu hạn Trường Thịnh"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K19",
+   "ma_doi_tuong": "AI_ML.phan_loai_rac",
+   "stt": 97,
+   "ten_de_tai": "Thiết kế và cài đặt mô hình học máy nhận biết loại rác bằng camera tại ủy ban nhân dân huyện Đại Từ"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K19",
+   "ma_doi_tuong": "MOBILE.kham_benh",
+   "stt": 98,
+   "ten_de_tai": "Nghiên cứu và phát triển ứng dụng di động đặt lịch khám bệnh tại trạm y tế xã Đồng Bẩm"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K19",
+   "ma_doi_tuong": "MOBILE.phan_anh",
+   "stt": 99,
+   "ten_de_tai": "Xây dựng và triển khai ứng dụng di động hỗ trợ tiếp nhận kiến nghị của người dân tại ủy ban nhân dân huyện Na Rì trên nền tảng Swift"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K19",
+   "ma_doi_tuong": "ERP.cham_cong",
+   "stt": 100,
+   "ten_de_tai": "Ứng dụng Spring Boot trong theo dõi giờ công nhân viên tại xưởng cơ khí Thành Công"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K19",
+   "ma_doi_tuong": "AI_ML.benh_la",
+   "stt": 101,
+   "ten_de_tai": "Xây dựng ứng dụng trí tuệ nhân tạo phát hiện bệnh trên lá cây trồng tại vùng chè Phúc Hà sử dụng OpenCV"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K19",
+   "ma_doi_tuong": "DU_LIEU.khach_du_lich",
+   "stt": 102,
+   "ten_de_tai": "Thiết kế và cài đặt mô hình thống kê lượng du khách theo mùa tại khu du lịch Phú Bình trên nền tảng Apache Spark"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K19",
+   "ma_doi_tuong": "IOT.ao_nuoi",
+   "stt": 103,
+   "ten_de_tai": "Thiết kế và xây dựng hệ thống hỗ trợ đo chất lượng nước ao nuôi cá cho trang trại Hoàng Long"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K19",
+   "ma_doi_tuong": "AN_TOAN.chu_ky_so",
+   "stt": 104,
+   "ten_de_tai": "Nghiên cứu và phát triển công cụ chứng thực tài liệu bằng chữ ký số tại UBND xã Hóa Thượng sử dụng OpenSSL"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K19",
+   "ma_doi_tuong": "MOBILE.uong_thuoc",
+   "stt": 105,
+   "ten_de_tai": "Xây dựng ứng dụng điện thoại quản lý đơn thuốc và giờ dùng thuốc cho cơ sở khám chữa bệnh đa khoa Hưng Thịnh"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K19",
+   "ma_doi_tuong": "WEB.thu_vien",
+   "stt": 106,
+   "ten_de_tai": "Xây dựng cổng thông tin quản lý sách và mượn trả tài liệu cho trường trung học cơ sở Nguyễn Trãi"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K19",
+   "ma_doi_tuong": "AN_TOAN.xam_nhap",
+   "stt": 107,
+   "ten_de_tai": "Phát triển công cụ giám sát và cảnh báo tấn công mạng cho công ty TNHH Tân Tiến"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K19",
+   "ma_doi_tuong": "ERP.san_xuat",
+   "stt": 108,
+   "ten_de_tai": "Ứng dụng Odoo trong lập kế hoạch và theo dõi đơn hàng sản xuất cho xưởng cơ khí Phúc An"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K19",
+   "ma_doi_tuong": "WEB.dich_vu_cong",
+   "stt": 109,
+   "ten_de_tai": "Nghiên cứu và phát triển phần mềm trực tuyến giải quyết hồ sơ một cửa điện tử cho sở thông tin và truyền thông tỉnh Lạng Sơn trên nền tảng ReactJS"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K19",
+   "ma_doi_tuong": "MOBILE.du_lich",
+   "stt": 110,
+   "ten_de_tai": "Xây dựng ứng dụng Android hỗ trợ giới thiệu điểm tham quan tại khách sạn Bắc Sơn sử dụng Flutter"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K19",
+   "ma_doi_tuong": "AN_TOAN.email_lua_dao",
+   "stt": 111,
+   "ten_de_tai": "Thiết kế và xây dựng hệ thống lọc email giả mạo cho công ty TNHH Trường Thịnh sử dụng Wazuh"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K19",
+   "ma_doi_tuong": "HOC_TAP.ngan_hang_cau_hoi",
+   "stt": 112,
+   "ten_de_tai": "Phát triển nền tảng quản lý ngân hàng câu hỏi tại trường THPT Nguyễn Trãi"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K19",
+   "ma_doi_tuong": "DU_LIEU.thoi_hoc",
+   "stt": 113,
+   "ten_de_tai": "Ứng dụng Pandas trong cảnh báo sớm người học bỏ học cho trung tâm GDTX Sông Công"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K19",
+   "ma_doi_tuong": "IOT.khong_khi",
+   "stt": 114,
+   "ten_de_tai": "Nghiên cứu và phát triển hệ thống IoT hỗ trợ quan trắc chất lượng không khí tại ủy ban nhân dân xã Gia Sàng"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K19",
+   "ma_doi_tuong": "DU_LIEU.du_lieu_ban",
+   "stt": 115,
+   "ten_de_tai": "Thiết kế và xây dựng bảng điều khiển tích hợp dữ liệu kinh doanh cho chuỗi cửa hàng Nam Việt sử dụng Metabase"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K19",
+   "ma_doi_tuong": "WEB.viec_lam",
+   "stt": 116,
+   "ten_de_tai": "Nghiên cứu và phát triển website hỗ trợ kết nối nhà tuyển dụng và người tìm việc cho công ty TNHH Phúc An trên nền tảng Spring Boot"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K19",
+   "ma_doi_tuong": "AN_TOAN.sao_luu",
+   "stt": 117,
+   "ten_de_tai": "Phát triển mô hình sao lưu và phục hồi dữ liệu cho doanh nghiệp tư nhân An Khang"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K19",
+   "ma_doi_tuong": "IOT.nha_thong_minh",
+   "stt": 118,
+   "ten_de_tai": "Xây dựng và triển khai thiết bị IoT điều khiển nhà thông minh cho người dân TP Hòa Bình"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K19",
+   "ma_doi_tuong": "ERP.van_tai",
+   "stt": 119,
+   "ten_de_tai": "Xây dựng phân hệ ERP điều phối xe giao hàng cho DNTN Phúc An"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K19",
+   "ma_doi_tuong": "AI_ML.bien_so",
+   "stt": 120,
+   "ten_de_tai": "Ứng dụng PyTorch trong đọc biển kiểm soát phương tiện cho bến xe khách Cao Bằng"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K20",
+   "ma_doi_tuong": "ERP.van_tai",
+   "stt": 121,
+   "ten_de_tai": "Thiết kế và cài đặt hệ thống quản lý vận tải hàng hóa cho công ty trách nhiệm hữu hạn Đại Phát"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K20",
+   "ma_doi_tuong": "ERP.nhan_su",
+   "stt": 122,
+   "ten_de_tai": "Thiết kế và cài đặt phần mềm quản lý nhân sự và tiền lương cho DNTN Việt Tiến trên nền tảng Spring Boot"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K20",
+   "ma_doi_tuong": "AN_TOAN.sao_luu",
+   "stt": 123,
+   "ten_de_tai": "Phát triển hệ thống hỗ trợ dự phòng dữ liệu tự động cho công ty TNHH Phúc An"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K20",
+   "ma_doi_tuong": "WEB.dat_ve_xe",
+   "stt": 124,
+   "ten_de_tai": "Ứng dụng Django trong đặt vé xe khách tại nhà hàng Hoàng Long"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K20",
+   "ma_doi_tuong": "MOBILE.uong_thuoc",
+   "stt": 125,
+   "ten_de_tai": "Ứng dụng Firebase trong nhắc lịch uống thuốc tại bệnh viện tuyến tỉnh Lào Cai"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K20",
+   "ma_doi_tuong": "HOC_TAP.video_bai_giang",
+   "stt": 126,
+   "ten_de_tai": "Thiết kế và xây dựng hệ thống chia sẻ bài giảng video tại trung tâm ngoại ngữ Tân Tiến sử dụng Django"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K20",
+   "ma_doi_tuong": "MOBILE.suc_khoe",
+   "stt": 127,
+   "ten_de_tai": "Xây dựng ứng dụng điện thoại ghi nhận chỉ số sức khỏe hằng ngày tại trung tâm y tế huyện Định Hóa"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K20",
+   "ma_doi_tuong": "HOC_TAP.khoa_hoc",
+   "stt": 128,
+   "ten_de_tai": "Thiết kế và cài đặt ứng dụng quản lý khóa học trực tuyến cho trường mầm non Đồng Bẩm trên nền tảng ReactJS"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K20",
+   "ma_doi_tuong": "IOT.tuoi_cay",
+   "stt": 129,
+   "ten_de_tai": "Ứng dụng ESP32 trong điều khiển tưới tiêu thông minh tại vùng trồng chè Cam Giá"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K20",
+   "ma_doi_tuong": "WEB.dat_phong_ks",
+   "stt": 130,
+   "ten_de_tai": "Xây dựng cổng thông tin đặt chỗ lưu trú trực tuyến tại bến xe liên tỉnh Bắc Giang"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K20",
+   "ma_doi_tuong": "HOC_TAP.trac_nghiem",
+   "stt": 131,
+   "ten_de_tai": "Thiết kế và cài đặt hệ thống thi trắc nghiệm trực tuyến cho trường THPT Nguyễn Huệ sử dụng ReactJS"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K20",
+   "ma_doi_tuong": "IOT.dinh_vi",
+   "stt": 132,
+   "ten_de_tai": "Thiết kế và cài đặt bộ điều khiển theo dõi hành trình xe bằng GPS cho công ty CP Hưng Thịnh"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K20",
+   "ma_doi_tuong": "HOC_TAP.luyen_thi",
+   "stt": 133,
+   "ten_de_tai": "Xây dựng nền tảng luyện thi tốt nghiệp THPT cho trường THCS Quang Trung"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K20",
+   "ma_doi_tuong": "AN_TOAN.vpn",
+   "stt": 134,
+   "ten_de_tai": "Thiết kế và xây dựng công cụ thiết lập kênh truyền bảo mật giữa các văn phòng cho công ty TNHH Thành Công trên nền tảng OpenSSL"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K20",
+   "ma_doi_tuong": "DU_LIEU.thoi_hoc",
+   "stt": 135,
+   "ten_de_tai": "Ứng dụng Apache Spark trong dự đoán nguy cơ thôi học cho trường THCS Quang Trung"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K20",
+   "ma_doi_tuong": "IOT.bai_do_xe",
+   "stt": 136,
+   "ten_de_tai": "Nghiên cứu và phát triển bộ điều khiển hướng dẫn chỗ đỗ xe còn trống tại bến xe khách Hà Giang"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K20",
+   "ma_doi_tuong": "AI_ML.chatbot",
+   "stt": 137,
+   "ten_de_tai": "Thiết kế và xây dựng hệ thống giải đáp thắc mắc tuyển sinh qua trợ lý ảo cho trung tâm đào tạo ngoại ngữ Minh Phát trên nền tảng PhoBERT"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K20",
+   "ma_doi_tuong": "IOT.muc_nuoc",
+   "stt": 138,
+   "ten_de_tai": "Xây dựng và triển khai hệ thống IoT đo mực nước sông suối từ xa cho UBND xã Tân Cương"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K20",
+   "ma_doi_tuong": "HOC_TAP.the_ghi_nho",
+   "stt": 139,
+   "ten_de_tai": "Xây dựng hệ thống ôn tập bằng thẻ ghi nhớ tại trường THPT Lý Tự Trọng"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K20",
+   "ma_doi_tuong": "HOC_TAP.thoi_khoa_bieu",
+   "stt": 140,
+   "ten_de_tai": "Thiết kế và xây dựng nền tảng lập lịch giảng dạy tự động cho trường trung học cơ sở Lê Hồng Phong"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K20",
+   "ma_doi_tuong": "AI_ML.cam_xuc",
+   "stt": 141,
+   "ten_de_tai": "Phát triển mô hình học sâu hỗ trợ phân loại ý kiến khách hàng theo sắc thái tại siêu thị mini Thành Công"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K20",
+   "ma_doi_tuong": "AI_ML.chu_viet",
+   "stt": 142,
+   "ten_de_tai": "Ứng dụng PyTorch trong chuyển ảnh chữ viết tay thành văn bản cho trung tâm GDTX Võ Nhai"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K20",
+   "ma_doi_tuong": "WEB.dat_san",
+   "stt": 143,
+   "ten_de_tai": "Xây dựng ứng dụng web đặt sân thể thao cho bến xe khách Cao Bằng sử dụng Spring Boot"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K20",
+   "ma_doi_tuong": "AI_ML.phan_loai_rac",
+   "stt": 144,
+   "ten_de_tai": "Phát triển hệ thống phân loại rác thải qua hình ảnh cho UBND xã Phúc Xuân sử dụng OpenCV"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K20",
+   "ma_doi_tuong": "HOC_TAP.ngan_hang_cau_hoi",
+   "stt": 145,
+   "ten_de_tai": "Xây dựng và triển khai ứng dụng biên soạn đề thi từ kho câu hỏi tại trung tâm GDTX Ba Bể"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K20",
+   "ma_doi_tuong": "DU_LIEU.hanh_vi_mua",
+   "stt": 146,
+   "ten_de_tai": "Phát triển bảng điều khiển hỗ trợ phân tích hành vi mua sắm cho chuỗi cửa hàng Thành Công"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K20",
+   "ma_doi_tuong": "DU_LIEU.ket_qua_hoc",
+   "stt": 147,
+   "ten_de_tai": "Xây dựng hệ thống phân tích kết quả học tập tại trường trung học phổ thông Nguyễn Trãi"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K20",
+   "ma_doi_tuong": "ERP.mua_hang",
+   "stt": 148,
+   "ten_de_tai": "Xây dựng ứng dụng quản lý mua hàng tại công ty cổ phần An Khang trên nền tảng Spring Boot"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K20",
+   "ma_doi_tuong": "MOBILE.nong_san",
+   "stt": 149,
+   "ten_de_tai": "Ứng dụng Swift trong mua bán nông sản trực tiếp tại nông trại Bắc Sơn"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K20",
+   "ma_doi_tuong": "IOT.nha_thong_minh",
+   "stt": 150,
+   "ten_de_tai": "Thiết kế và cài đặt bộ điều khiển tự động hóa thiết bị gia đình cho cư dân thành phố Bắc Giang trên nền tảng Raspberry Pi"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K20",
+   "ma_doi_tuong": "WEB.tin_tuc",
+   "stt": 151,
+   "ten_de_tai": "Ứng dụng Spring Boot trong quản lý tin tức cho UBND huyện Võ Nhai"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K20",
+   "ma_doi_tuong": "MOBILE.kham_benh",
+   "stt": 152,
+   "ten_de_tai": "Xây dựng ứng dụng điện thoại hẹn giờ khám chữa bệnh tại bệnh viện tuyến tỉnh Thái Nguyên"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K20",
+   "ma_doi_tuong": "AI_ML.khuon_mat",
+   "stt": 153,
+   "ten_de_tai": "Thiết kế và xây dựng ứng dụng trí tuệ nhân tạo hỗ trợ chấm công qua khuôn mặt tại trường trung học phổ thông Lý Tự Trọng"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K20",
+   "ma_doi_tuong": "MOBILE.chi_tieu",
+   "stt": 154,
+   "ten_de_tai": "Nghiên cứu và phát triển ứng dụng Android theo dõi thu chi cá nhân cho người thuê trọ tại Na Rì"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K20",
+   "ma_doi_tuong": "HOC_TAP.ngoai_ngu",
+   "stt": 155,
+   "ten_de_tai": "Xây dựng nền tảng hỗ trợ luyện nói tiếng Anh trực tuyến cho trung tâm GDTX Na Rì"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K20",
+   "ma_doi_tuong": "MOBILE.giao_do_an",
+   "stt": 156,
+   "ten_de_tai": "Phát triển ứng dụng điện thoại gọi món giao tận nơi tại bến xe liên tỉnh Phú Thọ sử dụng React Native"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K20",
+   "ma_doi_tuong": "IOT.dien_nang",
+   "stt": 157,
+   "ten_de_tai": "Nghiên cứu và phát triển thiết bị IoT giám sát điện năng tiêu thụ cho doanh nghiệp tư nhân Thành Công"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K20",
+   "ma_doi_tuong": "ERP.ke_toan",
+   "stt": 158,
+   "ten_de_tai": "Ứng dụng SQL Server trong quản lý kế toán tại công ty CP Hoàng Long"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K20",
+   "ma_doi_tuong": "HOC_TAP.lap_trinh",
+   "stt": 159,
+   "ten_de_tai": "Thiết kế và cài đặt ứng dụng học lập trình có chấm bài tự động tại trung tâm ngoại ngữ Trường Thịnh"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K20",
+   "ma_doi_tuong": "AN_TOAN.tuong_lua",
+   "stt": 160,
+   "ten_de_tai": "Xây dựng và triển khai giải pháp thiết lập bộ lọc lưu lượng mạng tại trung tâm GDTX Phú Lương"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K20",
+   "ma_doi_tuong": "MOBILE.tu_vung",
+   "stt": 161,
+   "ten_de_tai": "Xây dựng và triển khai ứng dụng Android ghi nhớ từ mới tiếng Anh tại trường THCS Lê Hồng Phong sử dụng Firebase"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K20",
+   "ma_doi_tuong": "DU_LIEU.tieu_thu_dien",
+   "stt": 162,
+   "ten_de_tai": "Ứng dụng Apache Airflow trong phân tích dữ liệu tiêu thụ điện tại DNTN An Khang"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K20",
+   "ma_doi_tuong": "AN_TOAN.nhat_ky",
+   "stt": 163,
+   "ten_de_tai": "Phát triển công cụ tập trung hóa log máy chủ cho doanh nghiệp tư nhân Trường Thịnh"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K20",
+   "ma_doi_tuong": "DU_LIEU.roi_bo",
+   "stt": 164,
+   "ten_de_tai": "Thiết kế và cài đặt ứng dụng phân tích dữ liệu nhận diện khách hàng có nguy cơ ngừng dùng dịch vụ cho doanh nghiệp tư nhân An Khang"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K20",
+   "ma_doi_tuong": "ERP.crm",
+   "stt": 165,
+   "ten_de_tai": "Phát triển phân hệ ERP quản lý quan hệ khách hàng tại công ty CP An Khang"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K20",
+   "ma_doi_tuong": "ERP.nha_thuoc",
+   "stt": 166,
+   "ten_de_tai": "Nghiên cứu và phát triển hệ thống hỗ trợ quản lý nhà thuốc tại trung tâm y tế huyện Sông Công"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K20",
+   "ma_doi_tuong": "DU_LIEU.du_lieu_ban",
+   "stt": 167,
+   "ten_de_tai": "Xây dựng bảng điều khiển tổng hợp dữ liệu bán hàng cho siêu thị mini Minh Phát trên nền tảng Apache Airflow"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K20",
+   "ma_doi_tuong": "ERP.san_xuat",
+   "stt": 168,
+   "ten_de_tai": "Xây dựng ứng dụng quản lý sản xuất cho xưởng may An Khang trên nền tảng SQL Server"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K20",
+   "ma_doi_tuong": "WEB.viec_lam",
+   "stt": 169,
+   "ten_de_tai": "Xây dựng ứng dụng web tìm kiếm việc làm tại công ty CP An Khang"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K20",
+   "ma_doi_tuong": "AN_TOAN.email_lua_dao",
+   "stt": 170,
+   "ten_de_tai": "Phát triển công cụ hỗ trợ phát hiện thư điện tử lừa đảo tại DNTN Thành Công trên nền tảng Wazuh"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K20",
+   "ma_doi_tuong": "WEB.ban_hang_online",
+   "stt": 171,
+   "ten_de_tai": "Xây dựng và triển khai hệ thống thông tin kinh doanh bán lẻ qua mạng tại cửa hàng tiện lợi Phúc An"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K20",
+   "ma_doi_tuong": "MOBILE.du_lich",
+   "stt": 172,
+   "ten_de_tai": "Xây dựng ứng dụng di động hỗ trợ hướng dẫn du lịch cho bến xe khách Thái Nguyên"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K20",
+   "ma_doi_tuong": "ERP.kho_hang",
+   "stt": 173,
+   "ten_de_tai": "Thiết kế và cài đặt hệ thống hỗ trợ quản lý kho hàng tại công ty cổ phần Nam Việt trên nền tảng ERPNext"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K20",
+   "ma_doi_tuong": "AI_ML.goi_y",
+   "stt": 174,
+   "ten_de_tai": "Xây dựng mô hình học sâu đề xuất mặt hàng theo sở thích tại siêu thị mini Hoàng Long"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K20",
+   "ma_doi_tuong": "WEB.dat_ban_nh",
+   "stt": 175,
+   "ten_de_tai": "Ứng dụng Django trong đặt bàn nhà hàng tại khu du lịch Na Rì"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K20",
+   "ma_doi_tuong": "AI_ML.te_nga",
+   "stt": 176,
+   "ten_de_tai": "Phát triển công cụ phát hiện té ngã ở người cao tuổi tại trạm y tế xã Phúc Hà"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K20",
+   "ma_doi_tuong": "AN_TOAN.phan_quyen",
+   "stt": 177,
+   "ten_de_tai": "Xây dựng và triển khai giải pháp quản lý định danh và phân quyền truy cập tại công ty cổ phần Tân Tiến trên nền tảng Keycloak"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K20",
+   "ma_doi_tuong": "WEB.bat_dong_san",
+   "stt": 178,
+   "ten_de_tai": "Ứng dụng VueJS trong mua bán nhà đất qua tin đăng cho công ty TNHH Trường Thịnh"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K20",
+   "ma_doi_tuong": "MOBILE.goi_xe",
+   "stt": 179,
+   "ten_de_tai": "Nghiên cứu và phát triển ứng dụng đa nền tảng hỗ trợ gọi xe công nghệ cho cư dân thành phố Hà Giang"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K20",
+   "ma_doi_tuong": "DU_LIEU.tai_nan",
+   "stt": 180,
+   "ten_de_tai": "Nghiên cứu và phát triển hệ thống thống kê vụ va chạm giao thông tại UBND huyện Yên Sơn"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K21",
+   "ma_doi_tuong": "DU_LIEU.tieu_thu_dien",
+   "stt": 181,
+   "ten_de_tai": "Xây dựng và triển khai ứng dụng phân tích dữ liệu thống kê sản lượng điện sử dụng cho công ty CP Trường Thịnh"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K21",
+   "ma_doi_tuong": "AI_ML.chu_viet",
+   "stt": 182,
+   "ten_de_tai": "Ứng dụng TensorFlow trong nhận dạng chữ viết tay tại trường trung học cơ sở Nguyễn Huệ"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K21",
+   "ma_doi_tuong": "AN_TOAN.lo_hong_web",
+   "stt": 183,
+   "ten_de_tai": "Thiết kế và cài đặt hệ thống kiểm thử bảo mật website tại công ty CP Đại Phát trên nền tảng OpenVAS"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K21",
+   "ma_doi_tuong": "HOC_TAP.lap_trinh",
+   "stt": 184,
+   "ten_de_tai": "Thiết kế và cài đặt hệ thống hỗ trợ luyện tập lập trình với trình chấm tự động cho trường THCS Lý Tự Trọng trên nền tảng WebRTC"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K21",
+   "ma_doi_tuong": "AI_ML.cam_xuc",
+   "stt": 185,
+   "ten_de_tai": "Phát triển mô hình học máy hỗ trợ phân tích cảm xúc bình luận tại chuỗi cửa hàng Trường Thịnh"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K21",
+   "ma_doi_tuong": "ERP.crm",
+   "stt": 186,
+   "ten_de_tai": "Xây dựng ứng dụng chăm sóc và theo dõi khách hàng cho công ty trách nhiệm hữu hạn Tân Tiến trên nền tảng Laravel"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K21",
+   "ma_doi_tuong": "DU_LIEU.gia_nong_san",
+   "stt": 187,
+   "ten_de_tai": "Ứng dụng Pandas trong theo dõi giá cả mặt hàng nông nghiệp cho vùng chè Tân Cương"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K21",
+   "ma_doi_tuong": "IOT.muc_nuoc",
+   "stt": 188,
+   "ten_de_tai": "Nghiên cứu và phát triển hệ thống IoT cảnh báo mực nước lũ cho UBND xã Hóa Thượng"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K21",
+   "ma_doi_tuong": "AI_ML.te_nga",
+   "stt": 189,
+   "ten_de_tai": "Thiết kế và cài đặt mô hình học sâu cảnh báo ngã cho người già cho trạm y tế xã Tích Lương"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K21",
+   "ma_doi_tuong": "AN_TOAN.chu_ky_so",
+   "stt": 190,
+   "ten_de_tai": "Thiết kế và xây dựng mô hình hỗ trợ ký số văn bản điện tử tại sở TT&TT tỉnh Cao Bằng trên nền tảng OpenSSL"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K21",
+   "ma_doi_tuong": "WEB.dat_ve_xe",
+   "stt": 191,
+   "ten_de_tai": "Xây dựng ứng dụng web bán vé xe liên tỉnh qua mạng tại nhà hàng Nam Việt trên nền tảng Spring Boot"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K21",
+   "ma_doi_tuong": "IOT.dinh_vi",
+   "stt": 192,
+   "ten_de_tai": "Xây dựng hệ thống định vị và giám sát phương tiện cho doanh nghiệp tư nhân Tân Tiến sử dụng Node-RED"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K21",
+   "ma_doi_tuong": "DU_LIEU.khach_du_lich",
+   "stt": 193,
+   "ten_de_tai": "Thiết kế và xây dựng bảng điều khiển phân tích lượt khách du lịch cho khách sạn Đại Phát sử dụng Pandas"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K21",
+   "ma_doi_tuong": "ERP.ke_toan",
+   "stt": 194,
+   "ten_de_tai": "Phát triển hệ thống hạch toán thu chi doanh nghiệp cho công ty TNHH Tân Tiến"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K21",
+   "ma_doi_tuong": "IOT.khong_khi",
+   "stt": 195,
+   "ten_de_tai": "Ứng dụng Raspberry Pi trong đo bụi mịn và khí thải môi trường cho sở thông tin và truyền thông tỉnh Lào Cai"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K21",
+   "ma_doi_tuong": "WEB.dat_ban_nh",
+   "stt": 196,
+   "ten_de_tai": "Thiết kế và xây dựng ứng dụng web đặt chỗ và gọi món tại nhà hàng cho khu du lịch Đồng Hỷ"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K21",
+   "ma_doi_tuong": "MOBILE.chi_tieu",
+   "stt": 197,
+   "ten_de_tai": "Xây dựng và triển khai ứng dụng Android quản lý chi tiêu cá nhân cho người thuê trọ tại Phú Bình"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K21",
+   "ma_doi_tuong": "MOBILE.uong_thuoc",
+   "stt": 198,
+   "ten_de_tai": "Ứng dụng Flutter trong quản lý đơn thuốc và giờ dùng thuốc cho trung tâm y tế huyện Phú Bình"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K21",
+   "ma_doi_tuong": "ERP.tai_san",
+   "stt": 199,
+   "ten_de_tai": "Xây dựng và triển khai ứng dụng quản lý tài sản cố định cho UBND xã Tân Cương"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K21",
+   "ma_doi_tuong": "AI_ML.x_quang",
+   "stt": 200,
+   "ten_de_tai": "Nghiên cứu và phát triển ứng dụng trí tuệ nhân tạo phân tích phim chụp X-quang ngực tại trung tâm y tế huyện Yên Sơn"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K21",
+   "ma_doi_tuong": "AI_ML.tom_tat",
+   "stt": 201,
+   "ten_de_tai": "Thiết kế và cài đặt mô hình học máy hỗ trợ rút gọn nội dung tài liệu tiếng Việt cho ủy ban nhân dân huyện Phổ Yên"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K21",
+   "ma_doi_tuong": "MOBILE.goi_xe",
+   "stt": 202,
+   "ten_de_tai": "Nghiên cứu và phát triển ứng dụng di động đặt xe đưa đón theo yêu cầu cho người dân TP Bắc Giang"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K21",
+   "ma_doi_tuong": "DU_LIEU.ket_qua_hoc",
+   "stt": 203,
+   "ten_de_tai": "Phát triển mô hình thống kê điểm số của người học tại trường THCS Chu Văn An sử dụng Metabase"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K21",
+   "ma_doi_tuong": "HOC_TAP.luyen_thi",
+   "stt": 204,
+   "ten_de_tai": "Xây dựng nền tảng ôn tập thi trung học phổ thông tại trường mẫu giáo Cam Giá"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K21",
+   "ma_doi_tuong": "HOC_TAP.the_ghi_nho",
+   "stt": 205,
+   "ten_de_tai": "Xây dựng ứng dụng ghi nhớ kiến thức theo phương pháp lặp lại ngắt quãng tại trường mẫu giáo Hóa Thượng sử dụng NodeJS"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K21",
+   "ma_doi_tuong": "IOT.bai_do_xe",
+   "stt": 206,
+   "ten_de_tai": "Nghiên cứu và phát triển thiết bị IoT quản lý bãi đỗ xe thông minh cho quán ăn An Khang"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K21",
+   "ma_doi_tuong": "WEB.dat_phong_ks",
+   "stt": 207,
+   "ten_de_tai": "Xây dựng website hỗ trợ đặt phòng khách sạn tại nhà hàng Đại Phát"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K21",
+   "ma_doi_tuong": "ERP.kho_hang",
+   "stt": 208,
+   "ten_de_tai": "Xây dựng hệ thống hỗ trợ theo dõi nhập xuất tồn kho cho công ty TNHH Minh Phát"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K21",
+   "ma_doi_tuong": "HOC_TAP.so_lien_lac",
+   "stt": 209,
+   "ten_de_tai": "Nghiên cứu và phát triển website kết nối nhà trường với phụ huynh tại trường mầm non Quyết Thắng"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K21",
+   "ma_doi_tuong": "WEB.ho_so_hs",
+   "stt": 210,
+   "ten_de_tai": "Thiết kế và xây dựng ứng dụng web hỗ trợ quản lý hồ sơ học sinh tại trường mẫu giáo Quyết Thắng trên nền tảng NodeJS"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K21",
+   "ma_doi_tuong": "AI_ML.goi_y",
+   "stt": 211,
+   "ten_de_tai": "Xây dựng và triển khai ứng dụng trí tuệ nhân tạo hỗ trợ gợi ý sản phẩm cho siêu thị mini Hưng Thịnh trên nền tảng TensorFlow"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K21",
+   "ma_doi_tuong": "ERP.ban_hang_quay",
+   "stt": 212,
+   "ten_de_tai": "Phát triển phần mềm quản lý bán hàng tại quầy cho siêu thị mini Tân Tiến"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K21",
+   "ma_doi_tuong": "ERP.nha_thuoc",
+   "stt": 213,
+   "ten_de_tai": "Xây dựng ứng dụng bán thuốc và theo dõi hạn dùng cho trạm y tế xã Tích Lương"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K21",
+   "ma_doi_tuong": "DU_LIEU.tuyen_dung",
+   "stt": 214,
+   "ten_de_tai": "Thiết kế và cài đặt ứng dụng phân tích dữ liệu khai phá tin tuyển dụng việc làm tại UBND xã Phúc Xuân"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K21",
+   "ma_doi_tuong": "MOBILE.tu_vung",
+   "stt": 215,
+   "ten_de_tai": "Phát triển ứng dụng điện thoại học từ vựng tiếng Anh cho trung tâm ngoại ngữ Nam Việt sử dụng React Native"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K21",
+   "ma_doi_tuong": "HOC_TAP.ngan_hang_cau_hoi",
+   "stt": 216,
+   "ten_de_tai": "Ứng dụng WebRTC trong quản lý ngân hàng câu hỏi cho trường mẫu giáo Phúc Xuân"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K21",
+   "ma_doi_tuong": "IOT.kho_lanh",
+   "stt": 217,
+   "ten_de_tai": "Thiết kế và cài đặt hệ thống IoT cảnh báo nhiệt độ kho bảo quản tại DNTN Phúc An trên nền tảng Arduino"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K21",
+   "ma_doi_tuong": "MOBILE.phan_anh",
+   "stt": 218,
+   "ten_de_tai": "Nghiên cứu và phát triển ứng dụng đa nền tảng hỗ trợ phản ánh hiện trường đô thị tại sở TT&TT tỉnh Tuyên Quang"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K21",
+   "ma_doi_tuong": "AN_TOAN.xac_thuc",
+   "stt": 219,
+   "ten_de_tai": "Ứng dụng Keycloak trong xác thực hai lớp tại doanh nghiệp tư nhân Đại Phát"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K21",
+   "ma_doi_tuong": "MOBILE.nong_san",
+   "stt": 220,
+   "ten_de_tai": "Ứng dụng Firebase trong kết nối tiêu thụ nông sản cho trang trại Tân Tiến"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K21",
+   "ma_doi_tuong": "WEB.dich_vu_cong",
+   "stt": 221,
+   "ten_de_tai": "Phát triển phần mềm trực tuyến tiếp nhận thủ tục hành chính trực tuyến cho ủy ban nhân dân huyện Phú Lương trên nền tảng Laravel"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K21",
+   "ma_doi_tuong": "HOC_TAP.hoc_lieu",
+   "stt": 222,
+   "ten_de_tai": "Thiết kế và cài đặt nền tảng chia sẻ học liệu số cho trung tâm giáo dục thường xuyên Na Rì"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K21",
+   "ma_doi_tuong": "HOC_TAP.thoi_khoa_bieu",
+   "stt": 223,
+   "ten_de_tai": "Xây dựng website hỗ trợ xếp thời khóa biểu tại trường mầm non Đồng Bẩm trên nền tảng Moodle"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K21",
+   "ma_doi_tuong": "DU_LIEU.dieu_hanh",
+   "stt": 224,
+   "ten_de_tai": "Phát triển hệ thống báo cáo hỗ trợ trực quan hóa báo cáo điều hành tại doanh nghiệp tư nhân Minh Phát sử dụng Metabase"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K21",
+   "ma_doi_tuong": "HOC_TAP.lop_ao",
+   "stt": 225,
+   "ten_de_tai": "Phát triển nền tảng giảng dạy trực tuyến có tương tác cho trường mầm non Sơn Cẩm"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K21",
+   "ma_doi_tuong": "AN_TOAN.tuong_lua",
+   "stt": 226,
+   "ten_de_tai": "Xây dựng và triển khai mô hình cấu hình tường lửa cho trung tâm ngoại ngữ Nam Việt sử dụng Suricata"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K21",
+   "ma_doi_tuong": "MOBILE.nha_tro",
+   "stt": 227,
+   "ten_de_tai": "Xây dựng và triển khai ứng dụng di động thuê nhà trọ cho sinh viên cho người thuê trọ tại Chợ Mới"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K21",
+   "ma_doi_tuong": "AN_TOAN.nhat_ky",
+   "stt": 228,
+   "ten_de_tai": "Thiết kế và xây dựng công cụ hỗ trợ thu thập và phân tích nhật ký hệ thống cho công ty TNHH Việt Tiến sử dụng Wazuh"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K21",
+   "ma_doi_tuong": "AN_TOAN.vpn",
+   "stt": 229,
+   "ten_de_tai": "Thiết kế và cài đặt hệ thống hỗ trợ kết nối chi nhánh qua mạng riêng ảo tại công ty TNHH Việt Tiến sử dụng pfSense"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K21",
+   "ma_doi_tuong": "AI_ML.phan_loai_rac",
+   "stt": 230,
+   "ten_de_tai": "Phát triển hệ thống nhận biết loại rác bằng camera cho UBND huyện Chợ Mới trên nền tảng PyTorch"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K21",
+   "ma_doi_tuong": "WEB.dat_san",
+   "stt": 231,
+   "ten_de_tai": "Ứng dụng Laravel trong cho thuê sân bóng theo khung giờ tại bến xe khách Yên Bái"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K21",
+   "ma_doi_tuong": "HOC_TAP.video_bai_giang",
+   "stt": 232,
+   "ten_de_tai": "Phát triển ứng dụng hỗ trợ phát lại bài giảng đã ghi hình cho trường THPT Trần Phú"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K21",
+   "ma_doi_tuong": "AN_TOAN.phan_quyen",
+   "stt": 233,
+   "ten_de_tai": "Thiết kế và xây dựng mô hình hỗ trợ kiểm soát quyền người dùng tập trung tại công ty cổ phần Nam Việt trên nền tảng Keycloak"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K21",
+   "ma_doi_tuong": "AI_ML.khuon_mat",
+   "stt": 234,
+   "ten_de_tai": "Xây dựng và triển khai mô hình học máy điểm danh bằng nhận diện khuôn mặt cho trung tâm GDTX Ba Bể"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K21",
+   "ma_doi_tuong": "DU_LIEU.tai_nan",
+   "stt": 235,
+   "ten_de_tai": "Phát triển hệ thống hỗ trợ phân tích dữ liệu tai nạn giao thông cho ủy ban nhân dân xã Hóa Thượng trên nền tảng Apache Airflow"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K21",
+   "ma_doi_tuong": "AN_TOAN.ma_hoa",
+   "stt": 236,
+   "ten_de_tai": "Thiết kế và cài đặt công cụ mã hóa dữ liệu lưu trữ cho công ty cổ phần Thành Công"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K21",
+   "ma_doi_tuong": "ERP.san_xuat",
+   "stt": 237,
+   "ten_de_tai": "Nghiên cứu và phát triển phân hệ ERP lập kế hoạch và theo dõi đơn hàng sản xuất tại khu công nghiệp Na Rì"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K21",
+   "ma_doi_tuong": "DU_LIEU.roi_bo",
+   "stt": 238,
+   "ten_de_tai": "Phát triển ứng dụng phân tích dữ liệu dự đoán khách hàng rời bỏ tại DNTN Tân Tiến"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K21",
+   "ma_doi_tuong": "AN_TOAN.xam_nhap",
+   "stt": 239,
+   "ten_de_tai": "Xây dựng giải pháp phát hiện xâm nhập mạng cho doanh nghiệp tư nhân Hưng Thịnh sử dụng Wazuh"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K21",
+   "ma_doi_tuong": "DU_LIEU.hanh_vi_mua",
+   "stt": 240,
+   "ten_de_tai": "Thiết kế và cài đặt bảng điều khiển hỗ trợ khai phá thói quen mua hàng cho siêu thị mini Minh Phát"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K22",
+   "ma_doi_tuong": "IOT.dien_nang",
+   "stt": 241,
+   "ten_de_tai": "Xây dựng và triển khai hệ thống IoT đo đếm công suất điện từ xa tại công ty TNHH Hưng Thịnh"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K22",
+   "ma_doi_tuong": "HOC_TAP.the_ghi_nho",
+   "stt": 242,
+   "ten_de_tai": "Ứng dụng Moodle trong ôn tập bằng thẻ ghi nhớ cho trung tâm giáo dục thường xuyên Sông Công"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K22",
+   "ma_doi_tuong": "WEB.tuyen_sinh",
+   "stt": 243,
+   "ten_de_tai": "Phát triển hệ thống thông tin tiếp nhận hồ sơ xét tuyển qua mạng tại trung tâm giáo dục thường xuyên Đại Từ"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K22",
+   "ma_doi_tuong": "WEB.thu_vien",
+   "stt": 244,
+   "ten_de_tai": "Ứng dụng ReactJS trong quản lý thư viện tại trung tâm GDTX Phú Lương"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K22",
+   "ma_doi_tuong": "DU_LIEU.gia_nong_san",
+   "stt": 245,
+   "ten_de_tai": "Thiết kế và xây dựng hệ thống phân tích biến động giá nông sản cho vùng chè Gia Sàng trên nền tảng Power BI"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K22",
+   "ma_doi_tuong": "IOT.dinh_vi",
+   "stt": 246,
+   "ten_de_tai": "Xây dựng và triển khai bộ điều khiển theo dõi hành trình xe bằng GPS cho DNTN Đại Phát trên nền tảng ESP32"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K22",
+   "ma_doi_tuong": "DU_LIEU.thoi_hoc",
+   "stt": 247,
+   "ten_de_tai": "Thiết kế và xây dựng hệ thống hỗ trợ cảnh báo sớm người học bỏ học tại trường THCS Lê Hồng Phong"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K22",
+   "ma_doi_tuong": "WEB.dich_vu_cong",
+   "stt": 248,
+   "ten_de_tai": "Thiết kế và cài đặt ứng dụng web giải quyết hồ sơ một cửa điện tử cho ủy ban nhân dân huyện Võ Nhai trên nền tảng Django"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K22",
+   "ma_doi_tuong": "AI_ML.goi_y",
+   "stt": 249,
+   "ten_de_tai": "Nghiên cứu và phát triển công cụ hỗ trợ đề xuất mặt hàng theo sở thích cho siêu thị mini Minh Phát trên nền tảng scikit-learn"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K22",
+   "ma_doi_tuong": "ERP.cham_cong",
+   "stt": 250,
+   "ten_de_tai": "Xây dựng và triển khai phân hệ ERP chấm công và quản lý ca làm việc cho xưởng may Việt Tiến trên nền tảng ERPNext"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K22",
+   "ma_doi_tuong": "AI_ML.benh_la",
+   "stt": 251,
+   "ten_de_tai": "Ứng dụng TensorFlow trong chẩn đoán bệnh cây qua ảnh lá cho vùng trồng chè Gia Sàng"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K22",
+   "ma_doi_tuong": "MOBILE.giao_do_an",
+   "stt": 252,
+   "ten_de_tai": "Xây dựng ứng dụng Android hỗ trợ đặt và giao đồ ăn cho cơ sở lưu trú An Khang"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K22",
+   "ma_doi_tuong": "MOBILE.nong_san",
+   "stt": 253,
+   "ten_de_tai": "Thiết kế và xây dựng ứng dụng Android mua bán nông sản trực tiếp cho trang trại Phúc An"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K22",
+   "ma_doi_tuong": "AN_TOAN.ma_doc",
+   "stt": 254,
+   "ten_de_tai": "Nghiên cứu và phát triển mô hình nhận diện phần mềm độc hại tại công ty TNHH Bắc Sơn trên nền tảng Suricata"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K22",
+   "ma_doi_tuong": "AI_ML.chatbot",
+   "stt": 255,
+   "ten_de_tai": "Ứng dụng PyTorch trong tư vấn tuyển sinh bằng chatbot tại trung tâm đào tạo ngoại ngữ An Khang"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K22",
+   "ma_doi_tuong": "MOBILE.diem_danh",
+   "stt": 256,
+   "ten_de_tai": "Ứng dụng Flutter trong điểm danh sinh viên cho trung tâm GDTX Đồng Hỷ"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K22",
+   "ma_doi_tuong": "IOT.kho_lanh",
+   "stt": 257,
+   "ten_de_tai": "Nghiên cứu và phát triển giải pháp IoT giám sát nhiệt độ kho lạnh cho DNTN Trường Thịnh"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K22",
+   "ma_doi_tuong": "IOT.nha_thong_minh",
+   "stt": 258,
+   "ten_de_tai": "Thiết kế và xây dựng giải pháp IoT điều khiển nhà thông minh cho các gia đình ở Yên Sơn trên nền tảng Node-RED"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K22",
+   "ma_doi_tuong": "AI_ML.x_quang",
+   "stt": 259,
+   "ten_de_tai": "Thiết kế và cài đặt công cụ hỗ trợ chẩn đoán ảnh X-quang phổi tại bệnh viện tuyến tỉnh Tuyên Quang sử dụng OpenCV"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K22",
+   "ma_doi_tuong": "AN_TOAN.xac_thuc",
+   "stt": 260,
+   "ten_de_tai": "Ứng dụng Keycloak trong đăng nhập bằng mật khẩu và mã OTP cho công ty TNHH Minh Phát"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K22",
+   "ma_doi_tuong": "AI_ML.bien_so",
+   "stt": 261,
+   "ten_de_tai": "Thiết kế và xây dựng công cụ hỗ trợ nhận dạng biển số xe cho nhà hàng Việt Tiến trên nền tảng OpenCV"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K22",
+   "ma_doi_tuong": "IOT.nha_kinh",
+   "stt": 262,
+   "ten_de_tai": "Xây dựng hệ thống IoT theo dõi vi khí hậu trong nhà màng tại HTX nông nghiệp Tích Lương"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K22",
+   "ma_doi_tuong": "AN_TOAN.sao_luu",
+   "stt": 263,
+   "ten_de_tai": "Phát triển giải pháp sao lưu và phục hồi dữ liệu cho doanh nghiệp tư nhân Đại Phát"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K22",
+   "ma_doi_tuong": "IOT.ao_nuoi",
+   "stt": 264,
+   "ten_de_tai": "Phát triển giải pháp IoT giám sát ao nuôi thủy sản cho vùng chè Gia Sàng"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K22",
+   "ma_doi_tuong": "HOC_TAP.ngan_hang_cau_hoi",
+   "stt": 265,
+   "ten_de_tai": "Xây dựng và triển khai ứng dụng hỗ trợ biên soạn đề thi từ kho câu hỏi cho trường trung học cơ sở Ngô Quyền trên nền tảng NodeJS"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K22",
+   "ma_doi_tuong": "AN_TOAN.phan_quyen",
+   "stt": 266,
+   "ten_de_tai": "Thiết kế và xây dựng hệ thống hỗ trợ quản lý định danh và phân quyền truy cập tại công ty TNHH Hoàng Long"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K22",
+   "ma_doi_tuong": "IOT.chuong_trai",
+   "stt": 267,
+   "ten_de_tai": "Nghiên cứu và phát triển giải pháp IoT hỗ trợ theo dõi môi trường chuồng nuôi tại vùng trồng chè Phúc Hà sử dụng Node-RED"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K22",
+   "ma_doi_tuong": "AN_TOAN.ma_hoa",
+   "stt": 268,
+   "ten_de_tai": "Phát triển hệ thống bảo vệ tệp tin bằng mật mã tại DNTN Đại Phát"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K22",
+   "ma_doi_tuong": "MOBILE.suc_khoe",
+   "stt": 269,
+   "ten_de_tai": "Xây dựng ứng dụng Android theo dõi sức khỏe cá nhân cho TTYT huyện Đồng Hỷ"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K22",
+   "ma_doi_tuong": "HOC_TAP.so_lien_lac",
+   "stt": 270,
+   "ten_de_tai": "Xây dựng và triển khai website hỗ trợ trao đổi thông tin qua sổ liên lạc điện tử cho trung tâm GDTX Yên Sơn"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K22",
+   "ma_doi_tuong": "AN_TOAN.tuong_lua",
+   "stt": 271,
+   "ten_de_tai": "Nghiên cứu và phát triển hệ thống thiết lập bộ lọc lưu lượng mạng tại trường THCS Lê Quý Đôn trên nền tảng pfSense"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K22",
+   "ma_doi_tuong": "IOT.tuoi_cay",
+   "stt": 272,
+   "ten_de_tai": "Thiết kế và cài đặt hệ thống IoT tưới cây tự động cho hợp tác xã nông nghiệp Cam Giá trên nền tảng MQTT"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K22",
+   "ma_doi_tuong": "AI_ML.tom_tat",
+   "stt": 273,
+   "ten_de_tai": "Ứng dụng PhoBERT trong tóm tắt văn bản tiếng Việt tại UBND xã Phúc Xuân"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K22",
+   "ma_doi_tuong": "ERP.van_ban",
+   "stt": 274,
+   "ten_de_tai": "Xây dựng ứng dụng quản lý văn bản đi đến cho UBND huyện Sông Công"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K22",
+   "ma_doi_tuong": "AN_TOAN.vpn",
+   "stt": 275,
+   "ten_de_tai": "Phát triển giải pháp thiết lập kênh truyền bảo mật giữa các văn phòng tại DNTN Trường Thịnh trên nền tảng OpenSSL"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K22",
+   "ma_doi_tuong": "WEB.dat_san",
+   "stt": 276,
+   "ten_de_tai": "Xây dựng ứng dụng web hỗ trợ đặt sân thể thao tại nhà hàng Đại Phát"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K22",
+   "ma_doi_tuong": "HOC_TAP.trac_nghiem",
+   "stt": 277,
+   "ten_de_tai": "Xây dựng và triển khai website tổ chức kiểm tra trắc nghiệm qua mạng cho trung tâm giáo dục thường xuyên Đồng Hỷ"
+  },
+  {
+   "cum": "IOT",
+   "khoa": "K22",
+   "ma_doi_tuong": "IOT.bao_chay",
+   "stt": 278,
+   "ten_de_tai": "Thiết kế và xây dựng hệ thống IoT phát hiện khói và nhiệt bất thường cho công ty cổ phần Nam Việt"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K22",
+   "ma_doi_tuong": "AN_TOAN.chu_ky_so",
+   "stt": 279,
+   "ten_de_tai": "Xây dựng và triển khai mô hình chứng thực tài liệu bằng chữ ký số tại ủy ban nhân dân huyện Phú Lương"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K22",
+   "ma_doi_tuong": "DU_LIEU.ket_qua_hoc",
+   "stt": 280,
+   "ten_de_tai": "Nghiên cứu và phát triển mô hình phân tích kết quả học tập cho trường THPT Lê Hồng Phong"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K22",
+   "ma_doi_tuong": "AI_ML.doanh_thu",
+   "stt": 281,
+   "ten_de_tai": "Xây dựng ứng dụng trí tuệ nhân tạo hỗ trợ ước lượng doanh số theo thời gian tại siêu thị quy mô nhỏ Hoàng Long"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K22",
+   "ma_doi_tuong": "AI_ML.chu_viet",
+   "stt": 282,
+   "ten_de_tai": "Thiết kế và cài đặt mô hình học máy chuyển ảnh chữ viết tay thành văn bản tại trường mầm non Tân Cương"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K22",
+   "ma_doi_tuong": "DU_LIEU.hanh_vi_mua",
+   "stt": 283,
+   "ten_de_tai": "Xây dựng ứng dụng phân tích dữ liệu phân tích hành vi mua sắm cho cửa hàng tiện lợi Hoàng Long sử dụng Metabase"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K22",
+   "ma_doi_tuong": "WEB.dat_ban_nh",
+   "stt": 284,
+   "ten_de_tai": "Thiết kế và xây dựng cổng thông tin hỗ trợ đặt bàn nhà hàng tại nhà hàng Minh Phát"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K22",
+   "ma_doi_tuong": "HOC_TAP.video_bai_giang",
+   "stt": 285,
+   "ten_de_tai": "Phát triển ứng dụng chia sẻ bài giảng video cho trường THCS Ngô Quyền"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K22",
+   "ma_doi_tuong": "DU_LIEU.tuyen_dung",
+   "stt": 286,
+   "ten_de_tai": "Ứng dụng Pandas trong phân tích nhu cầu tuyển dụng cho UBND xã Quyết Thắng"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K22",
+   "ma_doi_tuong": "DU_LIEU.dieu_hanh",
+   "stt": 287,
+   "ten_de_tai": "Phát triển hệ thống báo cáo hiển thị số liệu quản trị trên bảng điều khiển cho doanh nghiệp tư nhân Trường Thịnh sử dụng Apache Airflow"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K22",
+   "ma_doi_tuong": "MOBILE.phan_anh",
+   "stt": 288,
+   "ten_de_tai": "Thiết kế và cài đặt ứng dụng đa nền tảng hỗ trợ tiếp nhận kiến nghị của người dân tại sở TT&TT tỉnh Bắc Kạn sử dụng Kotlin"
+  },
+  {
+   "cum": "AI_ML",
+   "khoa": "K22",
+   "ma_doi_tuong": "AI_ML.phan_loai_rac",
+   "stt": 289,
+   "ten_de_tai": "Xây dựng hệ thống hỗ trợ phân loại rác thải qua hình ảnh tại sở TT&TT tỉnh Thái Nguyên"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K22",
+   "ma_doi_tuong": "AN_TOAN.email_lua_dao",
+   "stt": 290,
+   "ten_de_tai": "Xây dựng và triển khai công cụ lọc email giả mạo cho công ty cổ phần An Khang"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K22",
+   "ma_doi_tuong": "MOBILE.nha_tro",
+   "stt": 291,
+   "ten_de_tai": "Ứng dụng Kotlin trong tìm phòng trọ cho người ở trọ tại Phú Lương"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K22",
+   "ma_doi_tuong": "DU_LIEU.dich_benh",
+   "stt": 292,
+   "ten_de_tai": "Nghiên cứu và phát triển mô hình phân tích số liệu dịch bệnh tại bệnh viện đa khoa tỉnh Tuyên Quang"
+  },
+  {
+   "cum": "ERP",
+   "khoa": "K22",
+   "ma_doi_tuong": "ERP.nha_thuoc",
+   "stt": 293,
+   "ten_de_tai": "Nghiên cứu và phát triển phần mềm hỗ trợ quản lý nhà thuốc cho trạm y tế xã Phúc Xuân trên nền tảng Laravel"
+  },
+  {
+   "cum": "DU_LIEU",
+   "khoa": "K22",
+   "ma_doi_tuong": "DU_LIEU.tai_nan",
+   "stt": 294,
+   "ten_de_tai": "Ứng dụng Metabase trong thống kê vụ va chạm giao thông cho ủy ban nhân dân huyện Phú Lương"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K22",
+   "ma_doi_tuong": "WEB.ho_so_hs",
+   "stt": 295,
+   "ten_de_tai": "Thiết kế và xây dựng website lưu trữ và tra cứu hồ sơ học sinh cho trung tâm GDTX Đồng Hỷ"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K22",
+   "ma_doi_tuong": "WEB.bat_dong_san",
+   "stt": 296,
+   "ten_de_tai": "Thiết kế và cài đặt phần mềm trực tuyến đăng tin rao vặt bất động sản cho công ty CP Hoàng Long sử dụng NodeJS"
+  },
+  {
+   "cum": "WEB",
+   "khoa": "K22",
+   "ma_doi_tuong": "WEB.dat_ve_xe",
+   "stt": 297,
+   "ten_de_tai": "Xây dựng hệ thống thông tin đặt vé xe khách cho quán ăn Phúc An"
+  },
+  {
+   "cum": "HOC_TAP",
+   "khoa": "K22",
+   "ma_doi_tuong": "HOC_TAP.ngoai_ngu",
+   "stt": 298,
+   "ten_de_tai": "Xây dựng nền tảng học tiếng Anh giao tiếp tại trường THCS Nguyễn Trãi sử dụng NodeJS"
+  },
+  {
+   "cum": "AN_TOAN",
+   "khoa": "K22",
+   "ma_doi_tuong": "AN_TOAN.xam_nhap",
+   "stt": 299,
+   "ten_de_tai": "Xây dựng và triển khai hệ thống giám sát và cảnh báo tấn công mạng tại công ty CP Bắc Sơn"
+  },
+  {
+   "cum": "MOBILE",
+   "khoa": "K22",
+   "ma_doi_tuong": "MOBILE.chi_tieu",
+   "stt": 300,
+   "ten_de_tai": "Nghiên cứu và phát triển ứng dụng Android hỗ trợ theo dõi thu chi cá nhân cho người thuê trọ tại Ba Bể"
+  }
+ ]
+}
