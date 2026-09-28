@@ -33,9 +33,9 @@
 
 ### Quản lý đề cương (UC2)
 
-- [ ] **OUTL-01**: SV đã được duyệt đề tài nộp đề cương dạng DOCX hoặc PDF; mỗi lần nộp lại tạo phiên bản mới
-- [ ] **OUTL-02**: GVHD xem đề cương cùng kết quả kiểm tra trùng lặp ngay trên màn hình duyệt
-- [ ] **OUTL-03**: GVHD duyệt hoặc yêu cầu sửa kèm nhận xét; SV sửa và nộp lại đến khi được duyệt
+- [x] **OUTL-01**: SV đã được duyệt đề tài nộp đề cương dạng DOCX hoặc PDF; mỗi lần nộp lại tạo phiên bản mới
+- [x] **OUTL-02**: GVHD xem đề cương cùng kết quả kiểm tra trùng lặp ngay trên màn hình duyệt
+- [x] **OUTL-03**: GVHD duyệt hoặc yêu cầu sửa kèm nhận xét; SV sửa và nộp lại đến khi được duyệt
 
 ### Quản lý tiến độ (UC3)
 
@@ -128,9 +128,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TOPC-02 | Phase 2 | Complete |
 | TOPC-03 | Phase 2 | Complete |
 | TOPC-04 | Phase 2 | Complete |
-| OUTL-01 | Phase 3 | Pending |
-| OUTL-02 | Phase 3 | Pending |
-| OUTL-03 | Phase 3 | Pending |
+| OUTL-01 | Phase 3 | Complete |
+| OUTL-02 | Phase 3 | Complete |
+| OUTL-03 | Phase 3 | Complete |
 | PROG-01 | Phase 3 | Pending |
 | PROG-02 | Phase 3 | Pending |
 | PROG-03 | Phase 3 | Pending |
