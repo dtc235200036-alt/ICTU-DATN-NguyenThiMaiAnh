@@ -315,3 +315,124 @@ def test_committee_rules(
         },
     )
     assert resp.status_code == 409, resp.text
+
+
+def test_scoring_is_committee_scoped_and_finalize_is_one_way(
+    client, make_account, auth_headers, make_assigned_topic, pdf_bytes, db
+):
+    """UC4.3–4.5 + UC5.2 (DEFN-03/04, REPO-01, D-06/D-07): chỉ thành viên hội
+    đồng chấm/xem báo cáo cuối; chốt chỉ khi đủ điểm, một chiều, tự lưu kho
+    và đẩy index (stub) sau commit; SV chỉ thấy điểm sau khi chốt."""
+    from datetime import time, timedelta
+
+    from app.core.timeutil import today_vn
+    from app.models.bao_ve import CHU_TICH, THU_KY, UY_VIEN, HoiDong, ThanhVienHoiDong
+    from app.models.kho import DoAnKho
+    from app.services.ai_client import INGEST_LOG
+
+    bomon = make_account(VaiTro.BO_MON)
+    sv = make_account(VaiTro.SINH_VIEN)
+    gvhd = make_account(VaiTro.GIANG_VIEN)
+    gv_a = make_account(VaiTro.GIANG_VIEN)
+    gv_b = make_account(VaiTro.GIANG_VIEN)
+    gv_c = make_account(VaiTro.GIANG_VIEN)
+    gv_d = make_account(VaiTro.GIANG_VIEN)
+    topic = make_assigned_topic(sv, gvhd)
+    _approve_outline(db, topic)
+
+    resp = client.post(
+        f"/api/defense/final-reports/{topic.id}",
+        headers=auth_headers(sv),
+        files={"file": ("bao-cao.pdf", pdf_bytes(["Final report for scoring test"]), _PDF_CT)},
+    )
+    assert resp.status_code == 202, resp.text
+    final_doc_id = resp.json()["phien_ban"][0]["tai_lieu"]["id"]
+
+    def _committee(ten, ngay, members):
+        hd = HoiDong(ten_hoi_dong=ten, ngay_bao_ve=ngay, gio_bao_ve=time(8, 0), phong="P302")
+        db.add(hd)
+        db.flush()
+        roles = [CHU_TICH, THU_KY, UY_VIEN]
+        for idx, gv in enumerate(members):
+            db.add(ThanhVienHoiDong(hoi_dong_id=hd.id, giang_vien_id=gv.giang_vien_id, vai_tro=roles[idx]))
+        db.flush()
+        return hd
+
+    today = today_vn()
+    hd1 = _committee("Hội đồng chấm 1", today, [gv_a, gv_b, gv_c])
+    _committee("Hội đồng chấm 2", today, [gv_d, gv_b, gv_c])
+    lich = LichBaoVe(hoi_dong_id=hd1.id, de_tai_id=topic.id, sinh_vien_id=sv.sinh_vien_id, thu_tu=1)
+    db.add(lich)
+    db.commit()
+    lich_id = lich.id
+
+    def _score(account, diem, nhan_xet="Trình bày rõ ràng"):
+        return client.put(
+            f"/api/defense/schedules/{lich_id}/score",
+            headers=auth_headers(account),
+            json={"diem": diem, "nhan_xet": nhan_xet},
+        )
+
+    # GV D (hội đồng khác) -> 403 trên cả 4 đường; C (thành viên) tải được
+    assert client.get(f"/api/defense/schedules/{lich_id}", headers=auth_headers(gv_d)).status_code == 403
+    assert _score(gv_d, 7.0).status_code == 403
+    assert client.get(f"/api/documents/{final_doc_id}/download", headers=auth_headers(gv_d)).status_code == 403
+    assert client.get(f"/api/documents/{final_doc_id}/check", headers=auth_headers(gv_d)).status_code == 403
+    assert client.get(f"/api/documents/{final_doc_id}/download", headers=auth_headers(gv_c)).status_code == 200
+    detail = client.get(f"/api/defense/schedules/{lich_id}", headers=auth_headers(gv_c))
+    assert detail.status_code == 200, detail.text
+    assert detail.json()["co_the_cham"] is True
+
+    # sai vai trò -> 403; điểm ngoài khoảng / quá 1 chữ số thập phân -> 422
+    assert _score(sv, 8.0).status_code == 403
+    assert _score(bomon, 8.0).status_code == 403
+    assert _score(gv_a, 10.5).status_code == 422
+    assert _score(gv_a, 8.25).status_code == 422
+
+    assert _score(gv_a, 8.0).status_code == 200
+    assert _score(gv_b, 8.5).status_code == 200
+
+    # chốt khi mới 2/3 -> 409, chưa có bản ghi kho, SV thấy lịch nhưng không thấy điểm
+    resp = client.post(f"/api/defense/schedules/{lich_id}/finalize", headers=auth_headers(bomon))
+    assert resp.status_code == 409 and "2/3" in resp.json()["detail"], resp.text
+    assert db.execute(select(func.count()).select_from(DoAnKho)).scalar_one() == 0
+    me = client.get("/api/defense/me", headers=auth_headers(sv)).json()
+    assert me["lich"]["ten_hoi_dong"] == "Hội đồng chấm 1" and me["ket_qua"] is None
+
+    ingest_before = len(INGEST_LOG)
+    assert _score(gv_c, 9.0).status_code == 200
+    resp = client.post(f"/api/defense/schedules/{lich_id}/finalize", headers=auth_headers(bomon))
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert body["lich"]["da_chot"] is True and body["lich"]["diem_trung_binh"] == 8.5
+
+    db.expire_all()
+    rows = db.execute(select(DoAnKho)).scalars().all()
+    assert len(rows) == 1
+    kho = rows[0]
+    assert (kho.id, kho.nguon, kho.khoa, kho.ten_de_tai) == (body["do_an_kho_id"], "HE_THONG", "KTEST", topic.ten_de_tai)
+    assert kho.sinh_vien_id == sv.sinh_vien_id and kho.ma_so_sinh_vien and kho.ho_ten_sinh_vien
+    assert kho.giang_vien_id == gvhd.giang_vien_id and str(kho.diem) == "8.50" and kho.tu_khoa is None
+    assert kho.trang_thai_index == "DA_INDEX"
+    assert len(INGEST_LOG) == ingest_before + 1 and INGEST_LOG[-1]["ref_id"] == kho.id
+
+    notif = client.get("/api/notifications", headers=auth_headers(sv)).json()
+    assert any(n["loai"] == "KET_QUA_BAO_VE" for n in notif["items"])
+    me = client.get("/api/defense/me", headers=auth_headers(sv)).json()
+    assert me["ket_qua"]["diem_trung_binh"] == 8.5
+
+    # một chiều: chốt lại / sửa điểm sau chốt -> 409
+    assert client.post(f"/api/defense/schedules/{lich_id}/finalize", headers=auth_headers(bomon)).status_code == 409
+    assert _score(gv_a, 9.5).status_code == 409
+
+    # hội đồng ngày mai: thành viên chấm -> 409 (chưa đến ngày bảo vệ)
+    sv2 = make_account(VaiTro.SINH_VIEN)
+    topic2 = make_assigned_topic(sv2, gvhd)
+    hd3 = _committee("Hội đồng ngày mai", today + timedelta(days=1), [gv_a, gv_b, gv_c])
+    lich2 = LichBaoVe(hoi_dong_id=hd3.id, de_tai_id=topic2.id, sinh_vien_id=sv2.sinh_vien_id, thu_tu=1)
+    db.add(lich2)
+    db.commit()
+    resp = client.put(
+        f"/api/defense/schedules/{lich2.id}/score", headers=auth_headers(gv_a), json={"diem": 8.0}
+    )
+    assert resp.status_code == 409, resp.text
