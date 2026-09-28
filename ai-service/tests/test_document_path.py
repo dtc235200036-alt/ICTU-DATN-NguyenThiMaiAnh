@@ -111,6 +111,30 @@ def test_boilerplate_and_sentences():
         assert "......" not in chunk
 
 
+def test_chunking_is_linear_on_adversarial_text():
+    """CR-03 (04-REVIEW): văn bản do sinh viên kiểm soát không được làm lọc +
+    chia câu chạy bậc hai — mỗi mẫu ~200 KB phải xong dưới 2 s, và không mảnh
+    nào vượt trần ký tự."""
+    import time
+
+    from app.nlp.chunking import MAX_CHARS
+
+    n = 200_000
+    cases = {
+        "không âm tiết": "Hệ thống " * 130 + "- , " * (n // 4),
+        "ranh giới dày": "X. " * (n // 3),
+        "chấm phẩy": "; " * (n // 2),
+        "từ dài": "a-b" * (n // 3),
+        "chuỗi chấm": "Nội dung " + "." * n + " x",
+    }
+    for name, text in cases.items():
+        start = time.perf_counter()
+        result = sentences(strip_boilerplate(text).lines)
+        elapsed = time.perf_counter() - start
+        assert elapsed < 2.0, f"{name}: {elapsed:.2f} s"
+        assert all(len(s) <= MAX_CHARS for s in result), name
+
+
 def test_check_document_signals_exclusion_replace(client, db_path):
     corpus_a = _docx_like([P1, P2, P3, P4])
     r = client.post("/ingest", json={"id": 10, "type": "DOCUMENT", "text": corpus_a}, headers=HEADERS)
