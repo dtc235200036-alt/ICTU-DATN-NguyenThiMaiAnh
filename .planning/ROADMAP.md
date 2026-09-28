@@ -206,7 +206,26 @@ Plans:
   3. Quyển báo cáo 4 chương đúng khuôn mẫu trường (Cơ sở lý thuyết; Khảo sát & phân tích; Thiết kế; Triển khai kèm hướng dẫn cài đặt và kết quả thử nghiệm), mỗi deliverable truy vết được về mã PI 1.1–4.2
   4. Slide bảo vệ và kịch bản demo end-to-end hoàn chỉnh, đã được chạy tập lại ít nhất một lần trên hệ thống thật theo đúng kịch bản
 
-**Plans**: TBD
+**Plans**: 0/8 plans executed (Wave 1 chạy song song ngay bây giờ với Phase 3/4 — chỉ tạo đường dẫn mới `tools/build-report.sh`, `tools/bao-cao/`, `tools/build-slides.sh`, `tools/slide/`, `bao-cao/`, `docs/phan-dau/`, `docs/mo-dau.md`, `docs/tai-lieu-tham-khao.md`, `docs/slide/`, `docs/chuong-4-trien-khai/0[0124]-*.md`; Wave 2–5 chờ Phase 3 và Phase 4 hoàn tất vì dùng sản phẩm hoàn chỉnh và stack Docker Compose chung — plan 05-04 có precondition kiểm tra 03-07/04-07 SUMMARY)
+Plans:
+**Wave 1** *(song song, độc lập Phase 3/4)*
+- [ ] 05-01-PLAN.md — TRACER: pipeline quyển báo cáo `tools/build-report.sh` (manifest → ghép → bộ lọc pandoc → DOCX), reference.docx GIẢ ĐỊNH (TNR 13, 1,5 dòng, A4), đánh số hình/bảng, Mục lục/Danh mục bảng/hình, xuất PDF qua LibreOffice, bộ kiểm tra `kiem-tra-bao-cao.py` (D-06)
+- [ ] 05-02-PLAN.md — Nội dung không phụ thuộc sản phẩm: bìa, lời cam đoan, lời cảm ơn, danh mục từ viết tắt, Mở đầu, Tài liệu tham khảo hợp nhất; chương 4 mở đầu + 4.1 môi trường & công nghệ, 4.2 cấu trúc mã nguồn, 4.4 bảo mật & phân quyền (D-05)
+- [ ] 05-03-PLAN.md — TRACER: pipeline slide `tools/build-slides.sh` (pandoc pptx + theme, PDF, `kiem-tra-slide.py`) + ~15 slide bối cảnh → phân tích → thiết kế → phương pháp/kết quả AI → triển khai, có ghi chú thuyết trình (D-07)
+
+**Wave 2** *(blocked on Wave 1 + Phase 3 và Phase 4 hoàn tất)*
+- [ ] 05-04-PLAN.md — TRACER: cài đặt một lệnh `deploy/install.sh` chứng minh từ clean clone (tải trước model, HF offline), `deploy/verify-all.sh` chạy toàn bộ bộ kiểm thử + `nfr-he-thong.sh` đo NFR-01..19 qua HTTPS trên toàn kho; chương 4: 4.3 hướng dẫn cài đặt, 4.5 dữ liệu thử nghiệm, 4.8 sinh từ kết quả đo (D-01, D-02, D-03)
+
+**Wave 3** *(blocked on Wave 2)*
+- [ ] 05-05-PLAN.md — TRACER: `deploy/demo-state.sh` (reset/khôi phục trạng thái demo), driver CDP headless Chrome ghi ảnh 5 UC × 3 vai trò ở 1440 px, 4.6 hướng dẫn sử dụng & kết quả chức năng, NFR-16, `docs/kich-ban-demo.md` + lần tập dượt tự động đầu tiên (D-04, D-08)
+
+**Wave 4** *(blocked on Wave 3; hai plan song song)*
+- [ ] 05-06-PLAN.md — Hoàn thiện chương 4: 4.7 kết quả AI (đánh số lại trang Phase 4, khuôn calibrate.py), 4.9 hạn chế & hướng phát triển, 4.10, KẾT LUẬN theo PI 1.1–4.2, gộp một danh mục tài liệu tham khảo (D-05)
+- [ ] 05-07-PLAN.md — Hoàn thiện slide (kịch bản demo, kết quả kiểm thử/NFR tiêm từ `tong-hop.json`, ảnh chức năng, kết luận) + tập dượt tự động cuối trên hệ thống thật; tập dượt của sinh viên ghi nhận là bước con người, không chặn (D-07, D-08)
+
+**Wave 5** *(blocked on Wave 4)*
+- [ ] 05-08-PLAN.md — Chốt: đối chiếu chương 4 với mã nguồn cuối, sửa mọi lỗi cấu trúc để build `--strict` đạt, chạy `verify-all --report` lần cuối, cập nhật `docs/truy-vet.md` (PI 3.1–4.2), `docs/README.md`, `bao-cao/README.md` (việc sinh viên còn phải làm), xuất DOCX/PDF/PPTX cuối, để hệ thống ở trạng thái demo
+
 **Notes**:
 - Chương 2–3 lấy trực tiếp từ hồ sơ Phase 1; chương 1 (Cơ sở lý thuyết) nên viết dần từ T4 để giảm tải T10.
 - Hạn 07/12/2026 là thứ Hai ngay sau T10, không có tuần đệm; lỗi phát hiện ở T9 cần sửa xong trước giữa T10.
