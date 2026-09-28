@@ -7,6 +7,7 @@ import { formatDateTime, formatPercent } from '../../utils/format'
 import ForbiddenPage from '../auth/ForbiddenPage'
 import { useDocumentCheck } from './api'
 import type { CheckMatch, CheckSegment } from './api'
+import { scopeText } from './scope'
 import CheckStatusTag from './CheckStatusTag'
 import { highlightOverlap, parseViTri } from './highlight'
 
@@ -275,8 +276,19 @@ export default function CheckDetailPage() {
                 type="info"
                 showIcon
                 style={{ marginBottom: 16 }}
-                message="Đã loại trừ phần mẫu chung: tiêu đề mẫu, mục lục, tài liệu tham khảo trước khi so sánh (FR-AI-02)."
+                message={`Đã loại trừ phần mẫu chung: tiêu đề mẫu, mục lục, tài liệu tham khảo trước khi so sánh (FR-AI-02).${
+                  scopeText(data) ? ` ${scopeText(data)}.` : ''
+                }`}
                 description="Phần tô màu là cụm từ (từ 3 từ liên tiếp) xuất hiện ở cả hai đoạn. Đoạn trùng ngữ nghĩa có thể ít từ chung — nhãn cho biết lý do đoạn bị đánh dấu."
+              />
+            ) : null}
+            {data.trang_thai === 'HOAN_TAT' && data.loai_tru_nhieu ? (
+              <Alert
+                type="warning"
+                showIcon
+                style={{ marginBottom: 16 }}
+                message={`${formatPercent(data.ty_le_loai_tru)} nội dung bị loại như phần mẫu chung và không được kiểm tra`}
+                description="Hãy mở trực tiếp tài liệu để xem các mục bị loại (phụ lục, mục lục, tài liệu tham khảo…) có thực sự là phần mẫu chung không."
               />
             ) : null}
             {filteredSegments.length === 0 ? (

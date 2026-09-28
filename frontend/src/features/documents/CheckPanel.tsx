@@ -9,6 +9,7 @@ import { formatPercent } from '../../utils/format'
 import { useDocumentCheck, useRecheck } from './api'
 import type { CheckMatch } from './api'
 import { parseViTri } from './highlight'
+import { scopeText } from './scope'
 
 export interface CheckPanelProps {
   taiLieuId: number | undefined
@@ -146,7 +147,22 @@ export default function CheckPanel({ taiLieuId, canRecheck, pendingText }: Check
         <p style={{ textAlign: 'center', margin: '0 0 16px', fontSize: 13 }}>
           {`Số đoạn trùng: ${soDoan}`}
           {soNguyenVan > 0 ? ` (${soNguyenVan} trùng nguyên văn)` : null}
+          {scopeText(data) ? (
+            <>
+              <br />
+              <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>{scopeText(data)}</span>
+            </>
+          ) : null}
         </p>
+        {data.loai_tru_nhieu ? (
+          <Alert
+            type="warning"
+            showIcon
+            style={{ marginBottom: 16 }}
+            message={`${formatPercent(data.ty_le_loai_tru)} nội dung bị loại như phần mẫu chung và không được kiểm tra`}
+            description="Hãy mở trực tiếp tài liệu để xem các mục bị loại (phụ lục, mục lục, tài liệu tham khảo…) có thực sự là phần mẫu chung không."
+          />
+        ) : null}
         <p style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 500 }}>Đồ án trùng nhiều nhất</p>
         <Table<CheckMatch>
           size="small"

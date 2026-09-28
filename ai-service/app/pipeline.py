@@ -313,6 +313,8 @@ class ChunkScore:
 class DocumentScores:
     chunks: list[ChunkScore]
     removed: int
+    # CR-04: % ký tự bị loại như phần mẫu chung (không được kiểm tra).
+    ty_le_loai_tru: float = 0.0
 
 
 def score_document(
@@ -330,14 +332,17 @@ def score_document(
     câu; nguồn thuộc exclude_refs không bao giờ được so khớp. shingle/num_perm
     phải trùng với signer của CorpusIndex (main.py truyền cùng Settings).
     """
+    ty_le_loai_tru = 0.0
     if strip:
         stripped = strip_boilerplate(text)
         lines, removed = stripped.lines, stripped.removed
+        if stripped.total_chars:
+            ty_le_loai_tru = round(100 * stripped.removed_chars / stripped.total_chars, 2)
     else:
         lines, removed = [line for line in nfc(text).split("\n") if line], 0
     sents = sentences(lines)
     if not sents:
-        return DocumentScores([], removed)
+        return DocumentScores([], removed, ty_le_loai_tru)
 
     vectors = encoder.encode(sents)
     signatures = [minhash.signature(s, shingle, num_perm) for s in sents]
@@ -386,7 +391,7 @@ def score_document(
                     verb_score=verb_score,
                 )
             )
-    return DocumentScores(out, removed)
+    return DocumentScores(out, removed, ty_le_loai_tru)
 
 
 def _weighted(values: list[tuple[float, int]]) -> float:
@@ -490,6 +495,7 @@ def check_document(
         "chi_tiet": chi_tiet[:chi_tiet_toi_da],
         "so_doan": len(chunks),
         "so_doan_loai_tru": scores.removed,
+        "ty_le_loai_tru": scores.ty_le_loai_tru,
     }
 
 

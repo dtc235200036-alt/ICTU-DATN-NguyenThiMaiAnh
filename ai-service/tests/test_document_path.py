@@ -111,6 +111,31 @@ def test_boilerplate_and_sentences():
         assert "......" not in chunk
 
 
+def test_section_headings_cannot_hide_chapters():
+    """CR-04 (04-REVIEW): một dòng "Phụ lục" chèn dưới mỗi tiêu đề chương không
+    được làm cả chương biến khỏi phép kiểm tra; tài liệu không có tiêu đề lớn
+    cũng không bị xóa sạch bằng các dòng "Phụ lục" lặp lại."""
+    body = [
+        "CHƯƠNG 1. TỔNG QUAN", "Phụ lục", *P1, *P2,
+        "CHƯƠNG 2. THIẾT KẾ", "Phụ lục", *P3, *P4,
+        "KẾT LUẬN", "Phụ lục", *U1,
+        "TÀI LIỆU THAM KHẢO", *REFS[1:],
+    ]
+    kept = strip_boilerplate("\n".join(COVER + FRONT + body))
+    assert sentences(kept.lines) == P1 + P2 + P3 + P4
+    assert 0 < kept.removed_chars < kept.total_chars
+
+    # Không có CHƯƠNG/MỞ ĐẦU/KẾT LUẬN: trần độ dài giữ phần lớn nội dung.
+    prose = [f"Câu nội dung số {i} mô tả chức năng quản lý thư viện của trường." for i in range(300)]
+    flat = []
+    for i, line in enumerate(prose):
+        if i % 30 == 0:
+            flat.append("Phụ lục")
+        flat.append(line)
+    result = strip_boilerplate("\n".join(flat))
+    assert len(result.lines) >= 0.55 * len(prose)  # trần tổng 40 % số dòng
+
+
 def test_chunking_is_linear_on_adversarial_text():
     """CR-03 (04-REVIEW): văn bản do sinh viên kiểm soát không được làm lọc +
     chia câu chạy bậc hai — mỗi mẫu ~200 KB phải xong dưới 2 s, và không mảnh

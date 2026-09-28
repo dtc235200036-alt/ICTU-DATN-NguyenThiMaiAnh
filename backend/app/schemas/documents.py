@@ -33,6 +33,12 @@ class CheckSummary(BaseModel):
     vuot_nguong: bool | None = None
     nguong_ap_dung: float
     thoi_diem: UtcDateTime
+    # CR-04: phạm vi được kiểm tra; loai_tru_nhieu = hơn một nửa ký tự bị loại
+    # như phần mẫu chung (GVHD nên xem trực tiếp tài liệu).
+    so_doan: int | None = None
+    so_doan_loai_tru: int | None = None
+    ty_le_loai_tru: float | None = None
+    loai_tru_nhieu: bool = False
 
 
 class CheckMatch(BaseModel):
@@ -61,6 +67,10 @@ class CheckDetail(BaseModel):
     vuot_nguong: bool | None = None
     nguong_ap_dung: float
     thoi_diem: UtcDateTime
+    so_doan: int | None = None
+    so_doan_loai_tru: int | None = None
+    ty_le_loai_tru: float | None = None
+    loai_tru_nhieu: bool = False
     tai_lieu: DocumentOut
     de_tai_id: int
     ten_de_tai: str

@@ -73,6 +73,8 @@ class CheckDocumentResponse(BaseModel):
     chi_tiet: list[PassageDetail]
     so_doan: int
     so_doan_loai_tru: int
+    # CR-04: % ký tự của văn bản bị loại như phần mẫu chung (không kiểm tra).
+    ty_le_loai_tru: float = 0.0
 
 
 class ReindexRequest(BaseModel):

@@ -35,6 +35,14 @@ export interface CheckSummary {
   vuot_nguong: boolean | null
   nguong_ap_dung: number
   thoi_diem: string
+  /** CR-04: số câu được so sánh (null với bộ giả lập / kết quả cũ) */
+  so_doan: number | null
+  /** CR-04: số dòng bị loại như phần mẫu chung */
+  so_doan_loai_tru: number | null
+  /** CR-04: % ký tự bị loại như phần mẫu chung (không được kiểm tra) */
+  ty_le_loai_tru: number | null
+  /** CR-04: hơn một nửa văn bản bị loại — GVHD nên xem trực tiếp tài liệu */
+  loai_tru_nhieu: boolean
 }
 
 export interface CheckMatch {

@@ -506,6 +506,9 @@ if d["ty_le_tong"] is None or d["ty_le_tong"] < nguong:
 # CR-01: cảnh báo theo tỷ lệ trùng với MỘT đồ án (>=), do Web API quyết định.
 if d["vuot_nguong"] is not True or (d["ty_le_nguon_cao_nhat"] or 0) < nguong:
     errs.append(f"vuot_nguong {d['vuot_nguong']} / ty_le_nguon_cao_nhat {d['ty_le_nguon_cao_nhat']} với ngưỡng {nguong}")
+# CR-04: phạm vi kiểm tra được lưu và trả về (số câu, dòng/phần trăm bị loại).
+if not d["so_doan"] or d["so_doan_loai_tru"] is None or d["ty_le_loai_tru"] is None or d["loai_tru_nhieu"]:
+    errs.append(f"phạm vi kiểm tra so_doan={d['so_doan']} loai_tru={d['so_doan_loai_tru']} ({d['ty_le_loai_tru']}%, nhiều={d['loai_tru_nhieu']})")
 if d["do_an_trung"] and abs(d["do_an_trung"][0]["ty_le"] - (d["ty_le_nguon_cao_nhat"] or 0)) > 0.01:
     errs.append(f"MH-14 đồ án trùng {d['do_an_trung'][0]['ty_le']} != ty_le_nguon_cao_nhat {d['ty_le_nguon_cao_nhat']}")
 if not d["do_an_trung"] or d["do_an_trung"][0]["doi_tuong_trung"] != label:
@@ -531,7 +534,7 @@ if any(s["doi_tuong_trung"] == own for s in segs):
 if errs:
     print("; ".join(errs)); sys.exit(1)
 nv = sum(1 for s in segs if "nguyên văn" in (s["vi_tri"] or ""))
-print(f"{d['ty_le_tong']}% >= {nguong}%, {len(segs)} đoạn ({nv} nguyên văn), đồ án trùng '{label}' {d['do_an_trung'][0]['ty_le']}%")
+print(f"{d['ty_le_tong']}% >= {nguong}%, {len(segs)} đoạn ({nv} nguyên văn), đồ án trùng '{label}' {d['do_an_trung'][0]['ty_le']}%, so sánh {d['so_doan']} câu, loại {d['so_doan_loai_tru']} dòng ({d['ty_le_loai_tru']}%)")
 PY
 )" || fail "${chep_ma}-B: kết quả kiểm tra không đạt SC2: ${summary_a}"
   ok "${chep_ma}-B (chép nguyên văn) HOAN_TAT sau $((SECONDS - t0))s: ${summary_a}; đoạn nộp cạnh đoạn nguồn, không đoạn khuôn mẫu"

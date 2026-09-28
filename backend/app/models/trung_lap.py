@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import BigInteger, DateTime, ForeignKey, Numeric, String, Text
+from sqlalchemy import BigInteger, DateTime, ForeignKey, Integer, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -39,6 +39,11 @@ class KetQuaKiemTraTrungLap(Base):
     # CR-01 (04-REVIEW, 0012): tỷ lệ trùng với MỘT đồ án nguồn cao nhất — đúng
     # thống kê NGUONG_TAI_LIEU được hiệu chỉnh; ty_le_tong chỉ để hiển thị.
     ty_le_nguon_cao_nhat: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
+    # CR-04 (0013): phạm vi thực sự được kiểm tra — số câu so sánh, số dòng
+    # và % ký tự bị loại như phần mẫu chung (Dịch vụ AI trả).
+    so_doan: Mapped[int | None] = mapped_column(Integer)
+    so_doan_loai_tru: Mapped[int | None] = mapped_column(Integer)
+    ty_le_loai_tru: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
     nguong_ap_dung: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False)
     doi_tuong_duoc_kiem_tra: Mapped[str | None] = mapped_column(String(255))
     thoi_diem: Mapped[datetime] = mapped_column(DateTime, nullable=False)

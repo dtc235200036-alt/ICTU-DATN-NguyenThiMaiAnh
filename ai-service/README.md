@@ -98,7 +98,7 @@ hơn; tìm trên TOPIC + ARCHIVE, mỗi nguồn một dòng (điểm cao nhất)
    "chi_tiet": [{"ref_id": 10, "doan_nguon": "...", "doan_trung": "...",
                  "vi_tri": "Câu 3–5", "ty_le": 100.0, "tin_hieu": "NGUYEN_VAN",
                  "diem_ngu_nghia": 99.1, "diem_nguyen_van": 100.0}],
-   "so_doan": 120, "so_doan_loai_tru": 57}
+   "so_doan": 120, "so_doan_loai_tru": 57, "ty_le_loai_tru": 18.4}
 ```
 
 - `ref_id` = tài liệu đang kiểm tra (`0` nếu chưa nằm trong kho); tập loại trừ
@@ -116,7 +116,10 @@ hơn; tìm trên TOPIC + ARCHIVE, mỗi nguồn một dòng (điểm cao nhất)
   lại `NGU_NGHIA`; `diem_ngu_nghia`/`diem_nguyen_van` là trung bình trọng số
   điểm tốt nhất từng tín hiệu (chỉ để giải thích). Sắp xếp theo `ty_le` giảm
   dần, tối đa `CHI_TIET_TOI_DA`.
-- `so_doan` = số câu nội dung; `so_doan_loai_tru` = số dòng mẫu chung đã lọc.
+- `so_doan` = số câu nội dung; `so_doan_loai_tru` = số dòng mẫu chung đã lọc;
+  `ty_le_loai_tru` = % ký tự (các dòng không rỗng) bị lọc — phần KHÔNG được
+  kiểm tra. Web API lưu cả ba và hiển thị trên MH-09/MH-14, cảnh báo khi
+  > 50 % (CR-04).
 
 ### `POST /reindex`
 
@@ -150,7 +153,12 @@ khi đổi `AI_MODEL_PROFILE`), rồi dựng lại chỉ mục bộ nhớ; trả
    **cộng** nhãn bìa "Đề tài:"/"Ngành:" (kể cả tên đề tài bị PDF bẻ dòng),
    bộ phát hiện dòng ngắn lặp ≥ 3 lần không kết thúc bằng dấu câu và số trang (header/footer mà
    trích xuất PDF `page.get_text()` phía Web API để lọt). **Thay danh sách khi
-   có mẫu chính thức TL-04/TL-05.**
+   có mẫu chính thức TL-04/TL-05.** Chống lạm dụng (CR-04): tiêu đề mục mẫu
+   (Phụ lục, Tài liệu tham khảo, Lời cảm ơn…) chỉ bỏ nguyên mục khi nằm trước
+   tiêu đề lớn đầu tiên hoặc sau tiêu đề lớn cuối cùng (MỞ ĐẦU/CHƯƠNG n/KẾT
+   LUẬN) — chèn giữa hai chương thì chỉ dòng tiêu đề bị bỏ; mỗi mục bỏ tối đa
+   max(40 dòng, 15 %), mọi mục cộng lại tối đa max(80 dòng, 40 %) số dòng;
+   dòng VIẾT HOA kết thúc bằng dấu câu không bị coi là tiêu đề.
 3. **Chia câu** (`app/nlp/chunking.py`): nối các dòng còn lại thành một dòng
    chảy (đoạn PDF bị bẻ dòng được nối lại — DOCX và PDF cho cùng câu), tách tại
    `. ! ? …` + chữ hoa/số/ngoặc mở (giữ TS., ThS., PGS., GS., Tp., v.v.), bỏ câu

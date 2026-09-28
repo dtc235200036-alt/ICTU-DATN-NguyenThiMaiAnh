@@ -214,6 +214,9 @@ Lược đồ `thesis_core` gồm 19 bảng, khớp 1-1 với 19 lớp thực th
 | trang_thai | VARCHAR(20) | Không | — | `DANG_KIEM_TRA`/`HOAN_TAT`/`LOI` (§3.1.4) |
 | ty_le_tong | DECIMAL(5,2) | Có | — | Tỷ lệ tương đồng tổng (%) — với kiểm tra tài liệu: phần ký tự của mọi câu bị gắn cờ (cộng mọi nguồn), **chỉ để hiển thị** |
 | ty_le_nguon_cao_nhat | DECIMAL(5,2) | Có | — | Kiểm tra tài liệu: tỷ lệ trùng với **một** đồ án nguồn cao nhất (`do_an_trung` của Dịch vụ AI). Đây là thống kê `NGUONG_TAI_LIEU` được hiệu chỉnh: "Vượt ngưỡng cảnh báo" khi `ty_le_nguon_cao_nhat >= nguong_ap_dung` (Web API tính, trả `vuot_nguong`). Bổ sung khi sửa lỗi review Phase 4 (CR-01, Alembic 0012); dòng cũ được điền bằng phần ký tự đoạn của nguồn lớn nhất × tỷ lệ tổng |
+| so_doan | INT | Có | — | Kiểm tra tài liệu: số câu nội dung thực sự được so sánh (Dịch vụ AI trả; CR-04, Alembic 0013) |
+| so_doan_loai_tru | INT | Có | — | Kiểm tra tài liệu: số dòng bị lọc như phần mẫu chung (bìa, mục lục, tài liệu tham khảo, phụ lục…) |
+| ty_le_loai_tru | DECIMAL(5,2) | Có | — | Kiểm tra tài liệu: % ký tự bị lọc — phần **không** được kiểm tra; MH-09/MH-14 hiển thị và cảnh báo GVHD khi > 50 % |
 | nguong_ap_dung | DECIMAL(5,2) | Không | — | Ngưỡng cấu hình tại thời điểm kiểm tra (chụp lại từ `cau_hinh_nguong`) |
 | doi_tuong_duoc_kiem_tra | VARCHAR(255) | Có | — | Mô tả đối tượng cụ thể được kiểm tra (tên đề tài nhập, hoặc số phiên bản tài liệu) |
 | thoi_diem | DATETIME | Không | — | Thời điểm tạo bản ghi |

@@ -146,6 +146,9 @@ class KetQuaKiemTraTrungLap <<Entity>> {
   +trangThai : TrangThaiKiemTra
   +tyLeTong : Double
   +tyLeNguonCaoNhat : Double
+  +soDoan : Integer
+  +soDoanLoaiTru : Integer
+  +tyLeLoaiTru : Double
   +nguongApDung : Double
   +doiTuongDuocKiemTra : String
   +thoiDiem : DateTime

@@ -68,6 +68,27 @@ def _source_shares(raw: dict) -> dict[int, float]:
     return shares
 
 
+# CR-04: hơn một nửa văn bản bị loại như phần mẫu chung -> báo GVHD. Tài
+# liệu tổng hợp ngắn của seed (04-02) bị loại tới 45 % (phần đầu dài so với
+# thân); tài liệu thật dài hơn nhiều nên tỷ lệ thấp hơn.
+LOAI_TRU_NHIEU = 50.0
+
+
+def _optional_int(value) -> int | None:
+    return int(value) if value is not None else None
+
+
+def _scope(ket_qua: KetQuaKiemTraTrungLap) -> dict:
+    """CR-04: phạm vi được kiểm tra cho CheckSummary/CheckDetail."""
+    ty_le = float(ket_qua.ty_le_loai_tru) if ket_qua.ty_le_loai_tru is not None else None
+    return {
+        "so_doan": ket_qua.so_doan,
+        "so_doan_loai_tru": ket_qua.so_doan_loai_tru,
+        "ty_le_loai_tru": ty_le,
+        "loai_tru_nhieu": ty_le is not None and ty_le > LOAI_TRU_NHIEU,
+    }
+
+
 def vuot_nguong(ket_qua: KetQuaKiemTraTrungLap) -> bool | None:
     """CR-01: quyết định "Vượt ngưỡng cảnh báo" DUY NHẤT của Web API —
     tỷ lệ trùng với một đồ án nguồn cao nhất >= ngưỡng áp dụng (định nghĩa
@@ -258,6 +279,13 @@ def run(ket_qua_id: int) -> None:
                 trang_thai=HOAN_TAT,
                 ty_le_tong=_pct(raw.get("ty_le_tong", 0.0)),
                 ty_le_nguon_cao_nhat=max(shares.values(), default=0.0),
+                # CR-04: phạm vi thực sự được so sánh (AI thật; bộ giả lập
+                # không lọc mẫu chung nên để trống).
+                so_doan=_optional_int(raw.get("so_doan")),
+                so_doan_loai_tru=_optional_int(raw.get("so_doan_loai_tru")),
+                ty_le_loai_tru=(
+                    _pct(raw["ty_le_loai_tru"]) if raw.get("ty_le_loai_tru") is not None else None
+                ),
             )
         )
         if task_db.execute(stmt).rowcount != 1:
@@ -330,6 +358,7 @@ def summary(ket_qua: KetQuaKiemTraTrungLap) -> CheckSummary:
         vuot_nguong=vuot_nguong(ket_qua),
         nguong_ap_dung=float(ket_qua.nguong_ap_dung),
         thoi_diem=ket_qua.thoi_diem,
+        **_scope(ket_qua),
     )
 
 
@@ -456,6 +485,7 @@ def detail(db: Session, doc: TaiLieuDoAn, user: CurrentUser) -> CheckDetail:
         vuot_nguong=vuot_nguong(ket_qua) if ket_qua is not None else None,
         nguong_ap_dung=float(ket_qua.nguong_ap_dung) if ket_qua is not None else 0.0,
         thoi_diem=ket_qua.thoi_diem if ket_qua is not None else now_utc(),
+        **(_scope(ket_qua) if ket_qua is not None else {}),
         tai_lieu=to_document_out(doc),
         de_tai_id=doc.de_tai_id,
         ten_de_tai=ten_de_tai,
