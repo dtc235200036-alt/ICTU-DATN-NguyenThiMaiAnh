@@ -62,9 +62,9 @@
 - [x] **AISV-02**: Văn bản được chuẩn hóa Unicode NFC và tách từ tiếng Việt trước khi embedding; embedding kho được tính sẵn lúc ingest, không tính lại mỗi request
 - [x] **AISV-03**: Khi SV đăng ký/đề xuất đề tài, hệ thống so sánh tên đề tài theo ngữ nghĩa với kho và trả về top các đề tài tương tự kèm tỷ lệ % trong thời gian phản hồi theo NFR
 - [x] **AISV-04**: Khi nộp đề cương/báo cáo, hệ thống trích text DOCX/PDF, loại phần mẫu chung (tiêu đề mẫu, mục lục, tài liệu tham khảo) và phát hiện các đoạn trùng với đồ án khác trong kho
-- [ ] **AISV-05**: Kết quả kiểm tra tài liệu hiển thị tỷ lệ tương đồng tổng, danh sách đồ án trùng, và từng đoạn trùng được highlight cạnh đoạn nguồn
+- [x] **AISV-05**: Kết quả kiểm tra tài liệu hiển thị tỷ lệ tương đồng tổng, danh sách đồ án trùng, và từng đoạn trùng được highlight cạnh đoạn nguồn
 - [x] **AISV-06**: Kiểm tra tài liệu chạy bất đồng bộ; UI hiển thị trạng thái đang kiểm tra / hoàn tất
-- [ ] **AISV-07**: Bộ môn cấu hình được ngưỡng cảnh báo trùng lặp (tên đề tài và nội dung)
+- [x] **AISV-07**: Bộ môn cấu hình được ngưỡng cảnh báo trùng lặp (tên đề tài và nội dung)
 
 ### Thông báo
 
@@ -145,9 +145,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AISV-02 | Phase 4 | Complete |
 | AISV-03 | Phase 4 | Complete |
 | AISV-04 | Phase 4 | Complete |
-| AISV-05 | Phase 4 | Pending |
+| AISV-05 | Phase 4 | Complete |
 | AISV-06 | Phase 4 | Complete |
-| AISV-07 | Phase 4 | Pending |
+| AISV-07 | Phase 4 | Complete |
 | NOTF-01 | Phase 3 | Complete |
 | DEPL-01 | Phase 2 | Complete |
 | DEPL-02 | Phase 2 | Complete |

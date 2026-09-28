@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 3
 current_phase_name: Outline, Progress, Defense & Archive
 status: verifying
-stopped_at: Completed 04-06-PLAN.md
-last_updated: "2026-09-28T08:22:48.368Z"
+stopped_at: Completed 04-07-PLAN.md
+last_updated: "2026-09-28T08:54:22.380Z"
 last_activity: 2026-09-28
-last_activity_desc: Phase 4 plan 04-06 complete (real-AI document check with nguong_doan + loai_tru, ingest after check, 25 past-cohort theses seeded, SC2 e2e green, NFR-07..11 measured)
-state_head: 1b3d7560840ce9d147e5fdf3a499cf9e3f700cb4
+last_activity_desc: Phase 4 plan 04-07 complete (UC0.4 threshold screen + /api/thresholds with SC4 e2e, MH-14 highlights + signal tags, per-thesis share fix, chương 3 write-back, deploy README AI section; full phase gate green) — Phase 4 ready for verification
+state_head: 7f0a2a123e3493e9271c022d1a4da14f0fb3c19c
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 35
-  completed_plans: 25
+  completed_plans: 26
   percent: 0
 ---
 
@@ -77,6 +77,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03 P07 | 26min | 2 tasks | 20 files |
 | Phase 04 P05 | 28min | 2 tasks | 25 files |
 | Phase 04 P06 | 27 min | 2 tasks | 12 files |
+| Phase 04 P07 | 26min | 3 tasks | 21 files |
 
 ## Accumulated Context
 
@@ -149,6 +150,10 @@ Recent decisions affecting current work:
 - [Phase 04]: 04-06: document check sends NGUONG_DOAN_TRUNG + loai_tru (all same-topic DE_CUONG/BAO_CAO_CUOI versions); signal suffix in vi_tri; ingest DOCUMENT only after the stamped HOAN_TAT commit
 - [Phase 04]: 04-06: app.seed_ai_corpus seeds 25 past-cohort theses (closed 'Dữ liệu lịch sử {khóa}' đợt, BAO_CAO_CUOI via documents.store) linked to IMPORT archive rows; idempotent
 - [Phase 04]: 04-06: e2e-ai (K97) and ai-nfr (K96) share DTC225200095 + GV023 — never run in parallel
+- [Phase 04]: 04-07: /api/thresholds is BO_MON-only; PUT takes all three rows (0-100, <=2 decimals, UC0.4 - E1); values read per request, never cached
+- [Phase 04]: 04-07: MH-14/MH-09 per-thesis rate = share of ty_le_tong by stored passage characters (no schema change); fallback max passage score
+- [Phase 04]: 04-07: highlightOverlap marks 3-word runs (NFC+lowercase) rendered as React text + mark elements; signal tag parsed from the vi_tri suffix
+- [Phase 04]: 04-07: e2e/test threshold edits restore value AND editor/time so Alembic 0010 tai_khoan_id IS NULL semantics survive test runs
 
 ### Pending Todos
 
@@ -172,6 +177,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-28T08:22:48.314Z
-Stopped at: Completed 04-06-PLAN.md
+Last session: 2026-09-28T08:54:22.326Z
+Stopped at: Completed 04-07-PLAN.md
 Resume file: None
