@@ -207,15 +207,20 @@ def reject(db: Session, user: CurrentUser, topic_id: int, ly_do: str) -> TopicOu
     sinh_vien_id_dang_hoat_dong tự giải phóng SV ngay khi trang_thai=TU_CHOI."""
     # NOTF-01: một db.get để biết người đề xuất và tên đề tài cho thông báo —
     # KHÔNG dùng để quyết định; UPDATE có điều kiện vẫn là nơi quyết định.
+    # WR-11: người đề xuất VÀ SV đã đăng ký đề tài GV đề xuất (bị giải phóng
+    # khi từ chối) đều được báo — mỗi tài khoản một thông báo.
     topic = db.get(DeTai, topic_id)
-    recipient: int | None = None
+    recipients: list[int] = []
     ten = ""
     if topic is not None:
         ten = topic.ten_de_tai
-        if topic.loai_nguoi_de_xuat == SINH_VIEN and topic.sinh_vien is not None:
-            recipient = topic.sinh_vien.tai_khoan_id
+        if topic.loai_nguoi_de_xuat == SINH_VIEN:
+            if topic.sinh_vien is not None:
+                recipients.append(topic.sinh_vien.tai_khoan_id)
         elif topic.giang_vien is not None:
-            recipient = topic.giang_vien.tai_khoan_id
+            recipients.append(topic.giang_vien.tai_khoan_id)
+        if topic.sinh_vien is not None and topic.sinh_vien.tai_khoan_id not in recipients:
+            recipients.append(topic.sinh_vien.tai_khoan_id)
 
     stmt = (
         update(DeTai)
@@ -227,7 +232,7 @@ def reject(db: Session, user: CurrentUser, topic_id: int, ly_do: str) -> TopicOu
     if result.rowcount == 0:
         raise _refused(db, topic_id)
 
-    if recipient is not None:
+    for recipient in recipients:
         notifications.create(
             db,
             recipient,
