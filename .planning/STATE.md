@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 3
 current_phase_name: Outline, Progress, Defense & Archive
 status: verifying
-stopped_at: Completed 05-04-PLAN.md (deploy/verification part; report prose deferred by user)
-last_updated: "2026-09-28T10:58:46.721Z"
+stopped_at: Completed 05-05-PLAN.md (demo-state, CDP screenshots, NFR-16, automated rehearsal; report prose deferred by user)
+last_updated: "2026-09-28T12:05:00.000Z"
 last_activity: 2026-09-28
 last_activity_desc: Phase 4 plan 04-07 complete (UC0.4 threshold screen + /api/thresholds with SC4 e2e, MH-14 highlights + signal tags, per-thesis share fix, chương 3 write-back, deploy README AI section; full phase gate green) — Phase 4 ready for verification
-state_head: a3a98dd10cf06737668dbbe10c729fc21944335b
+state_head: 65aca9eacf82b5aaedab65435b960b64aa6a7300
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 35
-  completed_plans: 27
+  completed_plans: 28
   percent: 0
 ---
 
@@ -79,6 +79,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 04 P06 | 27 min | 2 tasks | 12 files |
 | Phase 04 P07 | 26min | 3 tasks | 21 files |
 | Phase 05 P04 | 35min | 3 tasks | 10 files |
+| Phase 05 P05 | 62min | 3 tasks | 49 files |
 
 ## Accumulated Context
 
@@ -157,6 +158,9 @@ Recent decisions affecting current work:
 - [Phase 04]: 04-07: e2e/test threshold edits restore value AND editor/time so Alembic 0010 tai_khoan_id IS NULL semantics survive test runs
 - [Phase 05]: 05-04: clean-clone install proven under a separate compose project (ntma-sach) with fresh volumes; working-copy volumes kept; ai runs HF_HUB_OFFLINE=1 after install-time model pre-fetch
 - [Phase 05]: 05-04: report pages 4.3/4.5/4.8 and sinh-trang-kiem-thu.py deferred by user; inputs kept in docs/chuong-4-trien-khai/ket-qua-kiem-thu/ (tong-hop.json, cai-dat-sach.log)
+- [Phase 05]: 05-05: demo accounts DTC225200011-015 / GV011-GV014 / bomon in the K22 đợt; deploy/demo-state.sh (default / --chi-xoa / --dem) rebuilds the state in ~19 s; demo files skip the first CHEP/KHONG_LIEN_QUAN pairs used by e2e-ai.sh
+- [Phase 05]: 05-05: headless Chrome CDP driver tools/demo/ + JSON scenarios (27 screenshots uc0..uc5, demo B01..B16); verify-all checks demo rows unchanged and measures NFR-16 live (NFR-01..19 all Đạt)
+- [Phase 05]: 05-05: 4.6 page, 4.8 page and docs/kich-ban-demo.md deferred by user; inputs in anh-chup.json, tong-hop.json and kich-ban-demo.json; student rehearsal on the real system pending (human)
 
 ### Pending Todos
 
@@ -180,6 +184,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-28T10:58:46.665Z
-Stopped at: Completed 05-04-PLAN.md (deploy/verification part; report prose deferred by user)
+Last session: 2026-09-28T12:05:00.000Z
+Stopped at: Completed 05-05-PLAN.md (demo-state, CDP screenshots, NFR-16, automated rehearsal; report prose deferred by user)
 Resume file: None
