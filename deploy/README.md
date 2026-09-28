@@ -1,5 +1,56 @@
 # Triển khai NTMA (Hệ thống quản lý đồ án — Khoa CNTT)
 
+## Cài đặt nhanh (một lệnh)
+
+Trên một máy Linux có Docker Engine + Compose v2, `openssl`, `curl`, `python3`
+(>= 10 GB trống, cổng 80/443 rảnh, Internet chỉ cần trong lúc cài):
+
+```bash
+git clone <repo> ntma && cd ntma
+bash deploy/install.sh            # cài mới hoặc nâng cấp — chạy lại an toàn, không xóa dữ liệu
+bash deploy/verify-all.sh --quick # kiểm tra nhanh (~10 s)
+```
+
+Mở `https://localhost` (hoặc `https://<SERVER_NAME>`). `install.sh` thực hiện
+và đo thời gian từng bước: (0) kiểm tra điều kiện; (1) `init.sh` — sinh
+`deploy/.env` (bí mật ngẫu nhiên, chmod 600) và chứng chỉ TLS tự ký; (2) build
+image AI và **tải trước mô hình** vào volume `ai-models` (D-02 — lúc chạy service
+`ai` đặt `HF_HUB_OFFLINE=1`); (3) `docker compose up -d --build --wait`; (4) kiểm
+tra `alembic_version` = revision mới nhất và `/health` của dịch vụ AI; (5) kiểm
+tra 100 SV / 30 GV / Bộ môn (DATA-01); (6) `seed-ai.sh` — 300 đề tài kho qua
+đường import thật + 25 đồ án nguồn có báo cáo (DATA-02, DATA-03); (7) tóm tắt
+địa chỉ, tài khoản, nguồn mật khẩu.
+
+| Tùy chọn `install.sh` | Ý nghĩa |
+|---|---|
+| `--fresh` | Cài lại sạch: `docker compose down -v` (**xóa CSDL, file đã nộp, cache mô hình**) trước khi cài. Cần thêm `--yes` hoặc gõ `XOA` để xác nhận; không có TTY mà thiếu `--yes` thì từ chối và không xóa gì |
+| `--yes` | Xác nhận `--fresh` không cần hỏi |
+| `--server-name TEN` | Ghi `SERVER_NAME` vào `deploy/.env` và sinh lại chứng chỉ tự ký cho tên/IP đó. Chứng chỉ do CA cấp (đặt tay vào `deploy/certs/server.crt` + `server.key`) không bao giờ bị ghi đè |
+| `--random-seed-password` | Sinh `SEED_DEFAULT_PASSWORD` ngẫu nhiên vào `deploy/.env` (khi còn trống hoặc là mật khẩu dev mặc định và CSDL chưa có tài khoản — dùng cùng `--fresh --yes` nếu đã cài). Bắt buộc cho máy chủ thật; `install.sh` cảnh báo khi `SERVER_NAME` khác `localhost` mà vẫn dùng mật khẩu dev |
+| `--skip-seed-ai` | Bỏ qua bước 6 |
+
+Máy chủ thật (trường/lab): `bash deploy/install.sh --server-name <tên-miền-hoặc-IP> --random-seed-password`,
+thay chứng chỉ tự ký bằng chứng chỉ CA ở `deploy/certs/server.crt` / `server.key`
+rồi `docker compose -f deploy/docker-compose.yml restart apache`, tường lửa chỉ mở 80/443,
+giữ `deploy/.env` ở chế độ 600.
+
+### Kiểm chứng toàn hệ thống — `verify-all.sh`
+
+```bash
+bash deploy/verify-all.sh --quick    # stack + dữ liệu + smoke-test
+bash deploy/verify-all.sh            # đầy đủ (~5 phút trên máy demo: 259 s)
+bash deploy/verify-all.sh --report   # đầy đủ + ghi kết quả cho chương 4
+```
+
+- `--quick`: tình trạng stack (mysql/api/ai healthy, apache chạy, `ai-db-init`/`ai-migrate` exit 0, `ai` có `HF_HUB_OFFLINE=1` và không publish cổng), số liệu DATA-01/02/03 (100 SV, 30 GV, 300 đề tài kho K18–K22 đều `DA_INDEX`, `/health` ≥ 300 vector tiêu đề, 50 tệp, 25 đồ án nguồn có báo cáo), `smoke-test.sh`.
+- Đầy đủ: thêm `uv --directory backend run pytest -q`, `uv --directory ai-service run pytest -q`, `e2e-uc1.sh`, `e2e-uc2-5.sh`, `e2e-ai.sh`, `ai-nfr.sh --json`, `nfr-he-thong.sh --json`, `tools/check-erd-db.py`, và kiểm tra không còn dữ liệu kiểm thử (đợt/bản ghi kho K95–K99, tài khoản bị khóa).
+- `--report`: ghi `docs/chuong-4-trien-khai/ket-qua-kiem-thu/tong-hop.json` (commit, máy, từng bước + trạng thái + giây, số test pytest, `du_lieu`, bảng NFR-01…NFR-19 với `dat` true/false/null) và `nhat-ky-verify-all.log` (nhật ký đầy đủ), đồng thời ghi lại trang `docs/chuong-4-trien-khai/thu-nghiem-ai/04-hieu-nang-va-bao-mat.md` (`ai-nfr.sh --report`). Mọi thứ ghi ra đều đã che: giá trị `deploy/.env` dài ≥ 8 ký tự thành `***` (khóa bí mật) hoặc `<TEN_KHOA>`, chuỗi dạng JWT thành `***`.
+- In bảng các bước (trạng thái + giây) và thoát khác 0 nếu có bước lỗi.
+
+`nfr-he-thong.sh [--json PATH]` đo NFR mức hệ thống qua Apache HTTPS: NFR-01 (301 → https), NFR-02 (bcrypt cost ≥ 12, mật khẩu không có trong log), NFR-03 (token ký bằng helper của app với `exp` quá khứ → 401), NFR-04 (SV gọi route Bộ môn → 403), NFR-05 (Bộ môn khóa → đăng nhập bị từ chối, mở khóa → đăng nhập lại được), NFR-08 qua HTTPS (20 lần kiểm tra tên, P95 ≤ 5 s), NFR-12 (20 lần tra cứu kho + 20 lần danh sách đề tài, P95 ≤ 1 s), NFR-13 (collation `utf8mb4_vietnamese_ci` ở mọi cột/bảng của `thesis_core` và `thesis_ai`, `alembic_version` mới nhất), NFR-14 (NFC = NFD), NFR-15 (ProxyTimeout > 30 s, SPA tĩnh, `/api` qua proxy), NFR-17/18/19 (số liệu seed). NFR-06 do `smoke-test.sh` + pytest chứng minh, NFR-07/09/10/11 do `ai-nfr.sh`, NFR-16 (Chrome 1440 px) do lần chụp màn hình của plan 05-05.
+
+**Tài khoản dành riêng cho `nfr-he-thong.sh` — không dùng cho demo thủ công:** `DTC225200094` (SV, bị khóa/mở khóa trong lúc chạy) cùng `bomon`; khóa **K95** dành riêng (script không tạo đợt nào, nhưng dọn nếu có). Script luôn mở khóa lại `DTC225200094` và xóa thông báo phát sinh của nó (trap, kể cả khi lỗi). Không chạy song song với các script kiểm thử khác.
+
 ## Yêu cầu
 
 - Docker + Docker Compose v2
@@ -68,12 +119,17 @@ Test pytest chạy trực tiếp trên máy host, kết nối tới MySQL của 
 | `seed-ai.sh` | Nạp kho cho dịch vụ AI (300 đề tài kho, 25 đồ án nguồn có báo cáo, backfill chỉ mục) — idempotent (xem "Dịch vụ AI kiểm tra trùng lặp") |
 | `e2e-ai.sh` / `ai-nfr.sh` | Kịch bản end-to-end dịch vụ AI thật (SC1–SC5) và đo NFR-07..NFR-11 — **không chạy song song** |
 | `tools/check-erd-db.py` | Đối chiếu tên cột giữa `docs/chuong-3-thiet-ke/csdl/erd.puml` và schema `thesis_core` thật |
+| `install.sh` | Cài đặt / nâng cấp toàn bộ bằng một lệnh (xem "Cài đặt nhanh") |
+| `verify-all.sh [--quick] [--report]` | Chạy tuần tự mọi bộ kiểm thử + đo NFR, bảng kết quả, ghi `docs/chuong-4-trien-khai/ket-qua-kiem-thu/` |
+| `nfr-he-thong.sh [--json PATH]` | Đo NFR mức hệ thống qua Apache HTTPS (NFR-01..05, 08, 12..15, 17..19) |
 
 ## Reset toàn bộ
 
 ```bash
 docker compose -f deploy/docker-compose.yml down -v
 ```
+
+Hoặc cài lại sạch trong một lệnh (xóa cả cache mô hình rồi tải lại): `bash deploy/install.sh --fresh --yes`.
 
 Lệnh này xóa cả volume `mysql-data` **và** `uploads-data` (file đề cương/báo cáo đã nộp) — lần khởi động sau sẽ tạo lại schema và seed dữ liệu từ đầu. Muốn giữ file tải lên, sao lưu trước theo mục "File tải lên" bên dưới.
 
@@ -178,6 +234,8 @@ trùng là giả lập cho tới Phase 4 (dịch vụ AI thật).
 
 ## Kiểm thử tự động
 
+Toàn bộ danh sách dưới đây chạy tuần tự bằng một lệnh: `bash deploy/verify-all.sh` (xem "Kiểm chứng toàn hệ thống").
+
 ```bash
 uv --directory backend run pytest -q
 bash deploy/smoke-test.sh
@@ -239,13 +297,16 @@ Phase 4 thêm hai service vào `deploy/docker-compose.yml`:
 
 `init.sh` sinh các khóa này khi tạo `.env` mới, và **bổ sung các khóa còn thiếu vào một `.env` đã có** (giữ nguyên giá trị cũ) — chạy lại `bash deploy/init.sh` sau khi cập nhật từ Phase 3. Chỉ ghi giá trị trong `deploy/.env` (chmod 600, đã gitignore), không đưa vào tài liệu hay commit.
 
-### Lần khởi động đầu, máy chủ không có Internet
+### Mô hình AI tải trước lúc cài đặt, máy chủ không có Internet
 
-Lần đầu `ai` khởi động sẽ tải trọng số mô hình (~515 MiB) từ Hugging Face vào volume `ai-models`, nên healthcheck có thể mất vài phút. Máy chủ không có Internet: làm nóng volume ở nơi có mạng trước (hoặc sao chép volume sang):
+`bash deploy/install.sh` tải trọng số mô hình (~518 MiB) từ Hugging Face vào volume `ai-models` **lúc cài đặt** (D-02); service `ai` chạy với `HF_HUB_OFFLINE=1` / `TRANSFORMERS_OFFLINE=1` nên không bao giờ gọi Hugging Face lúc chạy — demo không phụ thuộc mạng ngoài. Tải lại thủ công (idempotent, vài giây khi đã có):
 
 ```bash
-docker compose -f deploy/docker-compose.yml run --rm ai python -m app.download_model
+docker compose -f deploy/docker-compose.yml run --rm --no-deps -T \
+  -e HF_HUB_OFFLINE=0 -e TRANSFORMERS_OFFLINE=0 --entrypoint python ai -m app.download_model
 ```
+
+Máy chủ không có Internet: chạy lệnh trên ở nơi có mạng rồi sao chép volume `<project>_ai-models` sang (ENTRYPOINT của image là `docker-entrypoint.sh`, nên phải đổi `--entrypoint` như trên — nếu không container sẽ khởi động uvicorn thay vì tải mô hình).
 
 ### Nạp dữ liệu và bảo trì chỉ mục
 
