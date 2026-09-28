@@ -17,6 +17,11 @@ class TaiKhoan(Base):
         nullable=False,
     )
     bi_khoa: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="0")
+    # WR-04: tăng lên 1 mỗi lần logout — access/refresh token phát ra trước đó
+    # (claim "tv") không còn khớp nên bị từ chối ngay, kể cả bản sao bị rò rỉ.
+    phien_ban_token: Mapped[int] = mapped_column(
+        BigInteger, nullable=False, default=0, server_default="0"
+    )
 
     sinh_vien: Mapped["SinhVien | None"] = relationship(
         back_populates="tai_khoan", uselist=False

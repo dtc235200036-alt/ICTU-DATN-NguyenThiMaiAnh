@@ -42,23 +42,28 @@ def verify_password_dummy(password: str) -> None:
         pass
 
 
-def create_access_token(tai_khoan_id: int, vai_tro: VaiTro) -> str:
+def create_access_token(tai_khoan_id: int, vai_tro: VaiTro, token_version: int = 0) -> str:
     now = int(time.time())
     payload: dict[str, Any] = {
         "sub": str(tai_khoan_id),
         "vai_tro": str(vai_tro),
         "typ": "access",
+        # WR-04: claim "tv" (token_version) — phải khớp tai_khoan.phien_ban_token
+        # tại thời điểm xác thực; logout tăng phien_ban_token nên mọi token cũ
+        # hết hiệu lực ngay dù chưa tới hạn "exp".
+        "tv": token_version,
         "iat": now,
         "exp": now + settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
     }
     return jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
 
 
-def create_refresh_token(tai_khoan_id: int) -> str:
+def create_refresh_token(tai_khoan_id: int, token_version: int = 0) -> str:
     now = int(time.time())
     payload: dict[str, Any] = {
         "sub": str(tai_khoan_id),
         "typ": "refresh",
+        "tv": token_version,
         "iat": now,
         "exp": now + settings.REFRESH_TOKEN_EXPIRE_MINUTES * 60,
     }

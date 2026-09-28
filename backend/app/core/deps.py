@@ -73,6 +73,12 @@ def get_current_user(
     if str(account.vai_tro) != payload.get("vai_tro"):
         raise _unauthorized()
 
+    # WR-04: token phát trước lần logout gần nhất (phien_ban_token đã tăng)
+    # không còn khớp claim "tv" -> từ chối ngay, không chờ token hết hạn tự
+    # nhiên.
+    if payload.get("tv") != account.phien_ban_token:
+        raise _unauthorized()
+
     ho_ten = account.email
     sinh_vien_id = None
     giang_vien_id = None

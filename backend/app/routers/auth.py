@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Request, Response
 from fastapi.exceptions import HTTPException
-from sqlalchemy import or_, select
+from sqlalchemy import or_, select, update
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
@@ -52,8 +52,10 @@ def _to_nguoi_dung(settings, account: TaiKhoan) -> NguoiDung:
     )
 
 
-def _set_refresh_cookie(response: Response, settings, account_id: int) -> None:
-    refresh_token = create_refresh_token(account_id)
+def _set_refresh_cookie(
+    response: Response, settings, account_id: int, token_version: int
+) -> None:
+    refresh_token = create_refresh_token(account_id, token_version)
     response.set_cookie(
         key=_REFRESH_COOKIE_NAME,
         value=refresh_token,
@@ -107,8 +109,8 @@ def login(
 
     login_throttle.reset(ip, payload.dang_nhap)
 
-    access_token = create_access_token(account.id, account.vai_tro)
-    _set_refresh_cookie(response, settings, account.id)
+    access_token = create_access_token(account.id, account.vai_tro, account.phien_ban_token)
+    _set_refresh_cookie(response, settings, account.id, account.phien_ban_token)
 
     return TokenResponse(
         access_token=access_token,
@@ -147,7 +149,12 @@ def refresh(
     if account is None or account.bi_khoa:
         raise _reject()
 
-    access_token = create_access_token(account.id, account.vai_tro)
+    # WR-04: refresh token phát trước lần logout gần nhất không còn khớp
+    # phien_ban_token hiện tại -> từ chối thay vì cấp access token mới.
+    if payload.get("tv") != account.phien_ban_token:
+        raise _reject()
+
+    access_token = create_access_token(account.id, account.vai_tro, account.phien_ban_token)
 
     return TokenResponse(
         access_token=access_token,
@@ -157,8 +164,26 @@ def refresh(
 
 
 @router.post("/logout", status_code=204)
-def logout(response: Response) -> None:
+def logout(request: Request, response: Response, db: Session = Depends(get_db)) -> None:
+    """WR-04: tăng phien_ban_token của tài khoản khi logout — mọi access và
+    refresh token đã phát ra trước đó (kể cả bản sao bị rò rỉ ngoài phiên
+    hiện tại) hết hiệu lực ngay lập tức, thay vì chỉ xóa cookie phía client
+    và chờ token hết hạn tự nhiên (tối đa REFRESH_TOKEN_EXPIRE_MINUTES)."""
     settings = get_settings()
+    cookie_value = request.cookies.get(_REFRESH_COOKIE_NAME)
+    if cookie_value:
+        try:
+            payload = decode_token(cookie_value, expected_typ="refresh")
+            account_id = int(payload["sub"])
+        except (InvalidToken, KeyError, ValueError):
+            account_id = None
+        if account_id is not None:
+            db.execute(
+                update(TaiKhoan)
+                .where(TaiKhoan.id == account_id)
+                .values(phien_ban_token=TaiKhoan.phien_ban_token + 1)
+            )
+            db.commit()
     _delete_refresh_cookie(response, settings)
 
 
