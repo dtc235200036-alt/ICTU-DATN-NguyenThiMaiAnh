@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router'
 import { useCohorts } from '../cohorts/api'
 import type { MilestoneOut, ProgressRow } from '../progress/api'
 import { TRANG_THAI_MOC, formatDay } from '../progress/constants'
+import QueryErrorAlert from '../../components/QueryErrorAlert'
 import { useBmDashboard } from './api'
 
 /** MH-04: chỉ số toàn khoa theo đợt (đề tài, SV trễ mốc, hội đồng sắp tới),
@@ -14,7 +15,7 @@ export default function BmDashboard() {
   const navigate = useNavigate()
   const [dotDoAnId, setDotDoAnId] = useState<number | undefined>(undefined)
   const { data: cohorts } = useCohorts()
-  const { data, isLoading } = useBmDashboard(dotDoAnId)
+  const { data, isLoading, isError, error, refetch } = useBmDashboard(dotDoAnId)
 
   const progressLink = (extra = '') => {
     const dot = data?.dot_do_an?.id
@@ -62,7 +63,11 @@ export default function BmDashboard() {
         />
       </div>
 
-      {isLoading || !data ? (
+      {isError ? (
+        <Card>
+          <QueryErrorAlert error={error} onRetry={() => void refetch()} />
+        </Card>
+      ) : isLoading || !data ? (
         <Card>
           <Skeleton active />
         </Card>

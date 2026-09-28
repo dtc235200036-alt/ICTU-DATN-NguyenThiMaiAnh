@@ -1,6 +1,7 @@
 import { App as AntApp, Card, Col, Row, Skeleton } from 'antd'
 
 import { useFinalReport, useSubmitFinalReport } from '../defense/api'
+import QueryErrorAlert from '../../components/QueryErrorAlert'
 import CheckPanel from '../documents/CheckPanel'
 import DocumentUpload from '../documents/DocumentUpload'
 import VersionHistory from './VersionHistory'
@@ -17,8 +18,16 @@ export interface FinalReportTabProps {
  */
 export default function FinalReportTab({ deTaiId }: FinalReportTabProps) {
   const { message } = AntApp.useApp()
-  const { data: detail, isLoading } = useFinalReport(deTaiId)
+  const { data: detail, isLoading, isError, error, refetch } = useFinalReport(deTaiId)
   const submitMutation = useSubmitFinalReport()
+
+  if (isError) {
+    return (
+      <Card>
+        <QueryErrorAlert error={error} onRetry={() => void refetch()} />
+      </Card>
+    )
+  }
 
   if (isLoading || !detail) {
     return (

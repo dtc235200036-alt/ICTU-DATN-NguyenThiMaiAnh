@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Badge, Button, Empty, Popover, Spin, Typography } from 'antd'
 import { useNavigate } from 'react-router'
 
+import QueryErrorAlert from '../../components/QueryErrorAlert'
 import { formatRelative } from '../../utils/format'
 import {
   isAppPath,
@@ -127,6 +128,10 @@ export default function NotificationBell() {
         {list.isLoading ? (
           <div style={{ padding: 24, textAlign: 'center' }}>
             <Spin />
+          </div>
+        ) : list.isError ? (
+          <div style={{ padding: 12 }}>
+            <QueryErrorAlert error={list.error} onRetry={() => void list.refetch()} />
           </div>
         ) : items.length === 0 ? (
           <Empty

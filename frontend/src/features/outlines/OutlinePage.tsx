@@ -1,6 +1,7 @@
 import { App as AntApp, Card, Empty, Skeleton, Tabs, Tag } from 'antd'
 import { Link, useSearchParams } from 'react-router'
 
+import QueryErrorAlert from '../../components/QueryErrorAlert'
 import DocumentUpload from '../documents/DocumentUpload'
 import { useOutline, useOutlines, useSubmitOutline } from './api'
 import FinalReportTab from './FinalReportTab'
@@ -31,11 +32,23 @@ export default function OutlinePage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTab = searchParams.get('tab') ?? DEFAULT_TAB
 
-  const { data: outlinesPage, isLoading: isListLoading } = useOutlines({})
+  const {
+    data: outlinesPage,
+    isLoading: isListLoading,
+    isError: isListError,
+    error: listError,
+    refetch: refetchList,
+  } = useOutlines({})
   const ownItem = outlinesPage?.items[0]
   const deTaiId = ownItem?.de_tai_id
 
-  const { data: detail, isLoading: isDetailLoading } = useOutline(deTaiId)
+  const {
+    data: detail,
+    isLoading: isDetailLoading,
+    isError: isDetailError,
+    error: detailError,
+    refetch: refetchDetail,
+  } = useOutline(deTaiId)
   const submitMutation = useSubmitOutline()
 
   if (isListLoading) {
@@ -46,12 +59,28 @@ export default function OutlinePage() {
     )
   }
 
+  if (isListError) {
+    return (
+      <Card>
+        <QueryErrorAlert error={listError} onRetry={() => void refetchList()} />
+      </Card>
+    )
+  }
+
   if (!ownItem || deTaiId === undefined) {
     return (
       <Card>
         <Empty description="Bạn chưa có đề tài được phân công GVHD">
           <Link to="/de-tai">Xem đề tài của tôi</Link>
         </Empty>
+      </Card>
+    )
+  }
+
+  if (isDetailError) {
+    return (
+      <Card>
+        <QueryErrorAlert error={detailError} onRetry={() => void refetchDetail()} />
       </Card>
     )
   }

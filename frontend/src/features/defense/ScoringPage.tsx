@@ -24,6 +24,7 @@ import { Link, useSearchParams } from 'react-router'
 import { getErrorMessage } from '../../api/client'
 import { downloadFile, DownloadError } from '../../api/download'
 import { formatBytes, formatDate, formatPercent } from '../../utils/format'
+import QueryErrorAlert from '../../components/QueryErrorAlert'
 import ForbiddenPage from '../auth/ForbiddenPage'
 import CheckStatusTag from '../documents/CheckStatusTag'
 import { useMyCommittees, useScheduleForScoring, useScore } from './api'
@@ -172,7 +173,7 @@ function ScoringPanel({ lichId }: { lichId: number }) {
  */
 export default function ScoringPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const { data: committees, isLoading, isError, error } = useMyCommittees()
+  const { data: committees, isLoading, isError, error, refetch: refetchCommittees } = useMyCommittees()
 
   const rawHoiDong = searchParams.get('hoi_dong_id')
   const rawLich = searchParams.get('lich_id')
@@ -197,6 +198,12 @@ export default function ScoringPage() {
   if (isError) {
     const status = error instanceof AxiosError ? error.response?.status : undefined
     if (status === 403) return <ForbiddenPage />
+    // WR-12: lỗi khác 403 không được hiển thị như "chưa được phân hội đồng".
+    return (
+      <Card title="Hội đồng của tôi">
+        <QueryErrorAlert error={error} onRetry={() => void refetchCommittees()} />
+      </Card>
+    )
   }
 
   if (isLoading) {

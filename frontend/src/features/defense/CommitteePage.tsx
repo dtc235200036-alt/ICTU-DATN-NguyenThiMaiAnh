@@ -21,6 +21,7 @@ import type { ColumnsType } from 'antd/es/table'
 import { useSearchParams } from 'react-router'
 
 import { getErrorMessage } from '../../api/client'
+import QueryErrorAlert from '../../components/QueryErrorAlert'
 import { formatDate } from '../../utils/format'
 import { useLecturers } from '../accounts/api'
 import CheckStatusTag from '../documents/CheckStatusTag'
@@ -77,10 +78,24 @@ export default function CommitteePage() {
   const isNew = rawId === 'moi'
   const selectedId = !isNew && rawId ? Number(rawId) : undefined
 
-  const { data: committees, isFetching: isListFetching } = useCommittees()
-  const { data: committee, isFetching: isDetailFetching } = useCommittee(selectedId)
-  const { data: lecturers } = useLecturers()
-  const { data: eligibleStudents } = useEligibleStudents()
+  const {
+    data: committees,
+    isFetching: isListFetching,
+    isError: isListError,
+    error: listError,
+    refetch: refetchList,
+  } = useCommittees()
+  const {
+    data: committee,
+    isFetching: isDetailFetching,
+    isError: isDetailError,
+    error: detailError,
+    refetch: refetchDetail,
+  } = useCommittee(selectedId)
+  const lecturersQuery = useLecturers()
+  const lecturers = lecturersQuery.data
+  const eligibleQuery = useEligibleStudents()
+  const eligibleStudents = eligibleQuery.data
 
   const [form] = Form.useForm<CommitteeFormValues>()
   const saveMutation = useSaveCommittee()
@@ -307,6 +322,13 @@ export default function CommitteePage() {
             </Button>
           }
         >
+          {isListError && (
+            <QueryErrorAlert
+              error={listError}
+              onRetry={() => void refetchList()}
+              style={{ marginBottom: 12 }}
+            />
+          )}
           <List<CommitteeListItem>
             loading={isListFetching}
             dataSource={committees ?? []}
@@ -338,12 +360,30 @@ export default function CommitteePage() {
           <Card>
             <Empty description="Chọn một hội đồng ở danh sách bên trái, hoặc tạo hội đồng mới" />
           </Card>
+        ) : isDetailError && !isNew ? (
+          <Card>
+            <QueryErrorAlert error={detailError} onRetry={() => void refetchDetail()} />
+          </Card>
         ) : isDetailFetching && !isNew ? (
           <Card>
             <Skeleton active />
           </Card>
         ) : (
           <>
+            {lecturersQuery.isError && (
+              <QueryErrorAlert
+                error={lecturersQuery.error}
+                onRetry={() => void lecturersQuery.refetch()}
+                style={{ marginBottom: 12 }}
+              />
+            )}
+            {eligibleQuery.isError && (
+              <QueryErrorAlert
+                error={eligibleQuery.error}
+                onRetry={() => void eligibleQuery.refetch()}
+                style={{ marginBottom: 12 }}
+              />
+            )}
             <Card title="Thông tin hội đồng" style={{ marginBottom: 20 }}>
               <Form form={form} layout="vertical" initialValues={{ thanh_vien: [{}, {}, {}] }}>
                 <Row gutter={12}>

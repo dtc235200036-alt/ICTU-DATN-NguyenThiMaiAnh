@@ -2,6 +2,7 @@ import { Button, Card, Skeleton, Statistic, Table, Tag } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useNavigate } from 'react-router'
 
+import QueryErrorAlert from '../../components/QueryErrorAlert'
 import { TRANG_THAI_DE_TAI } from '../topics/constants'
 import { isAppPath } from '../notifications/api'
 import { useGvDashboard } from './api'
@@ -16,7 +17,7 @@ const LOAI_VIEC: Record<LoaiViec, { label: string; color: string; action: string
 /** MH-03: chỉ số + "Việc cần xử lý" (đề cương, tiến độ, chấm điểm) + đề tài của GV. */
 export default function GvDashboard() {
   const navigate = useNavigate()
-  const { data, isLoading } = useGvDashboard()
+  const { data, isLoading, isError, error, refetch } = useGvDashboard()
 
   const columns: ColumnsType<GvTopicItem> = [
     { title: 'Tên đề tài', dataIndex: 'ten_de_tai' },
@@ -66,6 +67,14 @@ export default function GvDashboard() {
       ),
     },
   ]
+
+  if (isError) {
+    return (
+      <Card>
+        <QueryErrorAlert error={error} onRetry={() => void refetch()} />
+      </Card>
+    )
+  }
 
   if (isLoading || !data) {
     return (
