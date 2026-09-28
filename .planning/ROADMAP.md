@@ -167,7 +167,7 @@ Plans:
   4. Bộ môn đổi ngưỡng cảnh báo cho tên đề tài và cho nội dung trên UI, và lần kiểm tra kế tiếp áp dụng ngưỡng mới
   5. Dịch vụ AI không truy cập được từ bên ngoài qua Apache và từ chối request thiếu API key nội bộ; bản ghi kho mới thêm được index ngay và xuất hiện trong lần kiểm tra kế tiếp mà không phải tính lại embedding toàn kho
 
-**Plans**: 5/7 plans executed (Wave 1–2 chạy song song với Phase 3 trong worktree riêng — chỉ đụng đường dẫn mới `ai-service/`, `tools/datagen/`, `tools/bakeoff/`, `seed-data/`, `docs/chuong-4-trien-khai/`; Wave 3–5 tuần tự sau khi Phase 3 hoàn tất vì dùng chung stack Docker Compose và CSDL)
+**Plans**: 6/7 plans executed (Wave 1–2 chạy song song với Phase 3 trong worktree riêng — chỉ đụng đường dẫn mới `ai-service/`, `tools/datagen/`, `tools/bakeoff/`, `seed-data/`, `docs/chuong-4-trien-khai/`; Wave 3–5 tuần tự sau khi Phase 3 hoàn tất vì dùng chung stack Docker Compose và CSDL)
 Plans:
 **Wave 1** *(song song, độc lập Phase 3)*
 - [x] 04-01-PLAN.md — TRACER: ai-service độc lập (FastAPI, Alembic thesis_ai, NFC + tách từ, embedding bkai/e5, FAISS + MinHash, lọc phần mẫu chung, /ingest /check-title /check-document /reindex /health, X-API-Key, image CPU ≤ 2 GiB)
@@ -181,7 +181,7 @@ Plans:
 - [x] 04-05-PLAN.md — TRACER liên dịch vụ: compose `ai` nội bộ + AiClientHttp + cảnh báo trùng tên với kho 300 đề tài seed qua import, Alembic 0010 ngưỡng hiệu chỉnh, push-on-write, e2e-ai (bảo mật, tên đề tài, index tức thì)
 
 **Wave 4** *(blocked on Wave 3 completion)*
-- [ ] 04-06-PLAN.md — Kiểm tra tài liệu thật (ngưỡng đoạn, loại trừ phiên bản cùng đề tài, ingest sau kiểm tra), seed 25 đồ án nguồn, e2e SC2, đo NFR-07..11
+- [x] 04-06-PLAN.md — Kiểm tra tài liệu thật (ngưỡng đoạn, loại trừ phiên bản cùng đề tài, ingest sau kiểm tra), seed 25 đồ án nguồn, e2e SC2, đo NFR-07..11
 
 **Wave 5** *(blocked on Wave 4 completion)*
 - [ ] 04-07-PLAN.md — Màn cấu hình ngưỡng (UC0.4), highlight đoạn trùng MH-14/MH-09, ghi ngược chương 3, README dịch vụ AI, gate phase
@@ -240,5 +240,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Analysis & Design | 6/7 | In Progress|  |
 | 2. Platform, RBAC & Topic Management | 6/6 | In Progress|  |
 | 3. Outline, Progress, Defense & Archive | 7/7 | In Progress|  |
-| 4. AI Similarity Service | 5/7 | In Progress|  |
+| 4. AI Similarity Service | 6/7 | In Progress|  |
 | 5. System Verification & Defense Package | 0/TBD | Not started | - |

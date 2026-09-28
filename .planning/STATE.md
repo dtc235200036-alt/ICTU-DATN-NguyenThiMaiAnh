@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 3
 current_phase_name: Outline, Progress, Defense & Archive
 status: verifying
-stopped_at: Completed 04-05-PLAN.md
-last_updated: "2026-09-28T07:17:26.260Z"
+stopped_at: Completed 04-06-PLAN.md
+last_updated: "2026-09-28T08:22:48.368Z"
 last_activity: 2026-09-28
-last_activity_desc: Phase 4 plan 04-05 complete (compose ai service internal-only, AiClientHttp, archive title matching with calibrated thresholds, DATA-02 seeding, push-on-write, e2e-ai green)
-state_head: 8f894ecacc4152be8d896e3f1d4bde1365b9ea63
+last_activity_desc: Phase 4 plan 04-06 complete (real-AI document check with nguong_doan + loai_tru, ingest after check, 25 past-cohort theses seeded, SC2 e2e green, NFR-07..11 measured)
+state_head: 1b3d7560840ce9d147e5fdf3a499cf9e3f700cb4
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 35
-  completed_plans: 24
+  completed_plans: 25
   percent: 0
 ---
 
@@ -76,6 +76,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03 P06 | 16min | 2 tasks | 21 files |
 | Phase 03 P07 | 26min | 2 tasks | 20 files |
 | Phase 04 P05 | 28min | 2 tasks | 25 files |
+| Phase 04 P06 | 27 min | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -145,6 +146,9 @@ Recent decisions affecting current work:
 - [Phase 4]: 04-05: Alembic 0010 writes calibrated defaults 67.80/10.40 + NGUONG_DOAN_TRUNG 67.70 only where tai_khoan_id IS NULL; tests pin stub-scale 50/30/80
 - [Phase 4]: 04-05: api depends on ai with service_started only; AiClientHttp maps every failure to AiServiceError (endpoint + status only)
 - [Phase 4]: 04-05: e2e cleanups purge TOPIC/ARCHIVE vectors (ai_index purge) before deleting rows so runs leave the AI index unchanged
+- [Phase 04]: 04-06: document check sends NGUONG_DOAN_TRUNG + loai_tru (all same-topic DE_CUONG/BAO_CAO_CUOI versions); signal suffix in vi_tri; ingest DOCUMENT only after the stamped HOAN_TAT commit
+- [Phase 04]: 04-06: app.seed_ai_corpus seeds 25 past-cohort theses (closed 'Dữ liệu lịch sử {khóa}' đợt, BAO_CAO_CUOI via documents.store) linked to IMPORT archive rows; idempotent
+- [Phase 04]: 04-06: e2e-ai (K97) and ai-nfr (K96) share DTC225200095 + GV023 — never run in parallel
 
 ### Pending Todos
 
@@ -168,6 +172,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-28T07:17:26.208Z
-Stopped at: Completed 04-05-PLAN.md
+Last session: 2026-09-28T08:22:48.314Z
+Stopped at: Completed 04-06-PLAN.md
 Resume file: None
