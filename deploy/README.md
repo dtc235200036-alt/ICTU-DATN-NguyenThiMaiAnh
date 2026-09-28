@@ -63,7 +63,8 @@ Test pytest chạy trực tiếp trên máy host, kết nối tới MySQL của 
 | `sql.sh "<SQL>"` | Chạy một câu SQL trong container `mysql` (`DB=thesis_core_test bash deploy/sql.sh "..."` để đổi schema) |
 | `api-login.sh <dang_nhap>` | In ra access_token cho một tài khoản, dùng mật khẩu seed mặc định |
 | `dom-check.sh <path> <text>` | Kiểm tra DOM đã render (headless Chrome) qua HTTPS chứa một chuỗi mong đợi |
-| `smoke-test.sh` | Bộ kiểm tra qua Apache HTTPS (redirect, health, SPA fallback, header bảo mật, đăng nhập, giới hạn kích thước request, phiên/refresh/logout, throttle đăng nhập) |
+| `smoke-test.sh` | Bộ kiểm tra qua Apache HTTPS (redirect, health, SPA fallback, header bảo mật, đăng nhập, giới hạn kích thước request, phiên/refresh/logout, throttle đăng nhập, 403 chéo vai trò trên route Phase 2–3) |
+| `e2e-uc1.sh` / `e2e-uc2-5.sh` | Kịch bản end-to-end UC1 và UC2–UC5 qua Apache (xem "Kiểm thử tự động") |
 | `tools/check-erd-db.py` | Đối chiếu tên cột giữa `docs/chuong-3-thiet-ke/csdl/erd.puml` và schema `thesis_core` thật |
 
 ## Reset toàn bộ
@@ -72,7 +73,7 @@ Test pytest chạy trực tiếp trên máy host, kết nối tới MySQL của 
 docker compose -f deploy/docker-compose.yml down -v
 ```
 
-Lệnh này xóa cả volume `mysql-data` — lần khởi động sau sẽ tạo lại schema và seed dữ liệu từ đầu.
+Lệnh này xóa cả volume `mysql-data` **và** `uploads-data` (file đề cương/báo cáo đã nộp) — lần khởi động sau sẽ tạo lại schema và seed dữ liệu từ đầu. Muốn giữ file tải lên, sao lưu trước theo mục "File tải lên" bên dưới.
 
 ## Kịch bản demo UC1 (thao tác trên trình duyệt)
 
@@ -112,24 +113,118 @@ tự (ROADMAP Phase 2, SC1–SC5):
     hướng dẫn; Bộ môn: đề tài chờ duyệt + SV chưa có đề tài + đề tài đã phân
     công + danh sách chờ duyệt mới nhất).
 
+## Kịch bản demo UC2–UC5 (thao tác trên trình duyệt)
+
+Tiếp nối kịch bản UC1: cần một SV có đề tài **Đã phân công** (ví dụ bước 5–6
+ở trên: `DTC225200002` tự đề xuất, `bomon` "Duyệt và phân công" cho `GV001`).
+Thứ tự theo D-09: đề cương → bảo vệ → lưu kho → tiến độ; chuông thông báo
+(góc phải Header) được kiểm tra ở mọi bước. Dùng các tài khoản `DTC2252000xx`
+/ `GV0xx` thông thường — **không** dùng các tài khoản dành riêng cho e2e
+(xem mục "Kiểm thử tự động").
+
+1. **Thông báo phân công (NOTF-01):** ngay sau khi `bomon` duyệt và phân công,
+   đăng nhập `DTC225200002` và (cửa sổ ẩn danh) `GV001` — trong tối đa 30 giây
+   chuông hiện số chưa đọc; mở chuông thấy "Đề tài '…' đã được duyệt — GVHD: …"
+   (SV) và "Bạn được phân công hướng dẫn …" (GV); bấm vào thông báo → mở chi
+   tiết đề tài, số trên chuông giảm 1.
+2. **SV nộp đề cương (MH-08, OUTL-01):** `DTC225200002` → "Đề cương" → chọn
+   file DOCX/PDF (≤ 20 MB) → "Nộp phiên bản mới". Panel kiểm tra trùng lặp chuyển
+   "Đang kiểm tra" → "Hoàn tất"; bấm "Xem chi tiết" mở MH-14
+   (`/kiem-tra-trung-lap/…`). GVHD nhận thông báo "đề cương mới".
+3. **GVHD yêu cầu sửa (MH-09, OUTL-02):** `GV001` → "Duyệt đề cương" → mở đề
+   cương → nhập nhận xét → "Yêu cầu sửa". SV nhận thông báo; trang Đề cương của
+   SV hiện "Yêu cầu sửa" kèm nhận xét.
+4. **SV nộp lại → GVHD duyệt:** SV nộp phiên bản 2 (lịch sử giữ cả v1, v2);
+   GVHD "Duyệt" → SV nhận thông báo "đề cương đã được duyệt". Dashboard SV
+   ("Tổng quan") hiện "Phiên bản mới nhất: v2 · nộp …", tag "Đã duyệt" và
+   "Tỷ lệ trùng lặp gần nhất".
+5. **SV nộp báo cáo cuối (UC4.1):** "Đề cương" → tab "Báo cáo cuối" → nộp
+   PDF/DOCX → "Nộp báo cáo cuối" (chỉ mở khi đề cương đã duyệt).
+6. **Bộ môn lập hội đồng và xếp lịch (MH-11, DEFN-01):** `bomon` → "Hội đồng &
+   lịch bảo vệ" → "Tạo hội đồng": 3–5 GV (đúng một Chủ tịch), **ngày bảo vệ =
+   hôm nay** (chỉ chấm được từ ngày bảo vệ), giờ, phòng. Thử thêm `GV001`
+   (GVHD của SV) vào hội đồng rồi "Thêm sinh viên" `DTC225200002` → **bị chặn**
+   (GVHD không ngồi hội đồng của SV mình); bỏ `GV001` khỏi hội đồng rồi thêm
+   lại → thành công. Thành viên nhận "phân vào hội đồng", SV nhận "lịch bảo vệ".
+7. **GV chấm điểm (MH-12, DEFN-02):** lần lượt từng thành viên → "Hội đồng bảo
+   vệ" → chọn SV → xem báo cáo cuối + kết quả kiểm tra → nhập điểm (0–10) và
+   nhận xét. Dashboard GV hiện dòng "Chấm điểm bảo vệ" trong "Việc cần xử lý"
+   cho tới khi chấm xong.
+8. **Bộ môn chốt → đồ án vào kho (DEFN-03, REPO-01):** `bomon` mở hội đồng →
+   "Chốt kết quả" (cần đủ điểm mọi thành viên) → điểm trung bình hiện cho SV ở
+   "Bảo vệ" và thẻ "Lịch và kết quả bảo vệ" trên dashboard; bản ghi mới xuất
+   hiện trong "Kho đồ án" (nguồn "Hệ thống", "Đã index").
+9. **Tra cứu kho và import CSV (MH-13, REPO-02/03):** mọi vai trò → "Kho đồ án"
+   lọc theo khóa / từ khóa / GVHD, mở chi tiết, tải báo cáo. `bomon` → "Import
+   khóa cũ" với file mẫu ở mục "Định dạng CSV import kho đồ án" → "Đã nhập 2/3
+   dòng" kèm lỗi theo dòng.
+10. **Tiến độ (MH-10, MH-04, PROG-01..03):** `bomon` → "Tiến độ toàn khoa" →
+    "Thiết lập mốc": Mốc 1 hạn **hôm qua**, Mốc 2 hạn tuần sau. SV → "Báo cáo
+    tiến độ" nộp Mốc 2 (kèm file tùy chọn); `GV001` → "Nhận xét tiến độ" nhận
+    xét + đánh giá → SV nhận thông báo. Quay lại `bomon`: SV bị gắn "Trễ mốc"
+    (Mốc 1 chưa nộp), thẻ "SV trễ mốc" trên dashboard > 0 và dẫn tới bộ lọc
+    "Chỉ SV trễ mốc".
+11. **Dashboard từng vai trò (MH-02/03/04):** "Tổng quan" của SV (thông báo, đề
+    cương, tiến độ, lịch/kết quả bảo vệ), GV (Đề cương chờ duyệt, Báo cáo tiến
+    độ chờ nhận xét, Hội đồng tham gia, Việc cần xử lý) và Bộ môn (SV trễ mốc,
+    Hội đồng sắp tới, "Tiến độ Sinh viên (trích 5/…)", "Mốc tiến độ của đợt").
+    "Đánh dấu tất cả đã đọc" trên chuông đưa số chưa đọc về 0.
+
+Các bước trên phủ ROADMAP Phase 3 SC1–SC5. **Lưu ý:** kiểm tra trùng lặp tài
+liệu và index kho hiện vẫn chạy trên **stub** (`ai_client.py`) — tỷ lệ và đoạn
+trùng là giả lập cho tới Phase 4 (dịch vụ AI thật).
+
 ## Kiểm thử tự động
 
 ```bash
 uv --directory backend run pytest -q
 bash deploy/smoke-test.sh
 bash deploy/e2e-uc1.sh
+bash deploy/e2e-uc2-5.sh
 python3 tools/check-erd-db.py
 ```
+
+Test Phase 3 (pytest): `backend/tests/test_outline_flow.py`,
+`test_defense_flow.py`, `test_archive.py`, `test_progress_flow.py`,
+`test_notifications.py`. `smoke-test.sh` kiểm tra thêm 403 chéo vai trò trên
+mọi nhóm route Phase 3 (outlines, progress, defense, archive) và 200 cho
+notifications/archive ở cả ba vai trò.
 
 `deploy/e2e-uc1.sh` tự dựng riêng một đợt đồ án khóa **K99** và dùng 3 tài
 khoản seed dành riêng cho kịch bản tự động (tách biệt với các tài khoản dùng ở
 demo thủ công phía trên): `GV030` (đề xuất đề tài), `DTC225200099` (tự đề
 xuất đề tài, sau đó bị từ chối) và `DTC225200100` (đăng ký đề tài GV đã
 duyệt). Script tự xóa toàn bộ dữ liệu nó tạo ra (đợt K99 + đề tài + kết quả
-kiểm tra trùng lặp) khi kết thúc, kể cả khi có bước thất bại giữa chừng.
+kiểm tra trùng lặp + thông báo phát sinh) khi kết thúc, kể cả khi có bước thất
+bại giữa chừng.
 
-Widget đề cương/tiến độ/hội đồng/thông báo trên các dashboard (MH-02/03/04)
-sẽ được bổ sung ở Phase 3 khi các UC tương ứng có dữ liệu thật.
+`deploy/e2e-uc2-5.sh` chạy chuỗi đề cương → tiến độ → bảo vệ → lưu kho → thông
+báo → dashboard qua Apache trên một đợt khóa **K98** riêng. Tài khoản dành
+riêng (**không dùng cho demo thủ công**): `GV025` (GV không liên quan),
+`GV026`–`GV028` (hội đồng), `GV029` (GVHD), `DTC225200097` (SV khác),
+`DTC225200098` (SV chính). Khi kết thúc (kể cả lỗi giữa chừng) script xóa mọi
+dữ liệu của đợt K98 (đề tài, đề cương, tài liệu + file vật lý, mốc/báo cáo tiến
+độ, lịch/điểm bảo vệ, hội đồng vừa tạo, bản ghi kho) và thông báo của các tài
+khoản trên phát sinh từ lúc script bắt đầu. Sau khi chạy không còn đợt K98/K99:
+
+```bash
+bash deploy/sql.sh "SELECT COUNT(*) FROM dot_do_an WHERE khoa IN ('K98','K99')"   # 0
+```
+
+## File tải lên
+
+Đề cương, báo cáo tiến độ, báo cáo cuối và file kho lưu trong named volume
+`ntma_uploads-data`, mount tại `/data/uploads` trong container `api` (đường dẫn
+`uploads/<loai>/<uuid>.<ext>`, tên gốc chỉ nằm trong CSDL). Apache **không bao
+giờ** phục vụ thư mục này — file chỉ tải được qua API có kiểm tra quyền
+(`/api/documents/{id}/download`, `/api/archive/{id}/file`).
+
+Sao lưu / khôi phục (chạy ở thư mục gốc repo):
+
+```bash
+docker run --rm -v ntma_uploads-data:/data -v "$PWD":/backup alpine tar czf /backup/uploads-backup.tgz -C /data .
+docker run --rm -v ntma_uploads-data:/data -v "$PWD":/backup alpine tar xzf /backup/uploads-backup.tgz -C /data
+```
 
 ## Định dạng CSV import kho đồ án
 

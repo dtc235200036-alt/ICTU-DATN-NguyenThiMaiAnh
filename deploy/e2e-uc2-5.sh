@@ -715,11 +715,38 @@ uc0_notifications() {
   ok "DTC225200098 đánh dấu tất cả đã đọc -> 204, số chưa đọc = 0"
 }
 
+uc0_dashboards() {
+  # --- MH-02/03/04 (plan 03-07): widget Phase 3 trên dashboard từng vai trò ---
+  local status got
+  status="$(call GET /api/dashboard/sinh-vien "${TOKEN_SV098}")"
+  [ "$status" = "200" ] || fail "DTC225200098 không xem được dashboard (mã ${status})"
+  got="$(jget "f\"{d['de_cuong']['trang_thai']}|{d['bao_ve']['diem_trung_binh']}|{len(d['tien_do'])}|{bool(d['bao_ve']['chu_tich'])}\"")"
+  [ "$got" = "DA_DUYET|8.5|2|True" ] || fail "Dashboard SV sai (đề cương|điểm|số mốc|chủ tịch = ${got})"
+  ok "Dashboard DTC225200098: đề cương Đã duyệt, 2 mốc tiến độ, lịch bảo vệ có Chủ tịch, điểm 8.5 (MH-02)"
+
+  status="$(call GET /api/dashboard/giang-vien "${TOKEN_GV029}")"
+  [ "$status" = "200" ] || fail "GV029 không xem được dashboard (mã ${status})"
+  got="$(jget "all(k in d for k in ('so_de_cuong_cho_duyet','so_bao_cao_cho_nhan_xet','so_hoi_dong_tham_gia','viec_can_xu_ly'))")"
+  [ "$got" = "True" ] || fail "Dashboard GV029 thiếu bộ đếm Phase 3 ($(cat "$TMP/body"))"
+  ok "Dashboard GV029 có Đề cương chờ duyệt / Báo cáo chờ nhận xét / Hội đồng tham gia / Việc cần xử lý (MH-03)"
+
+  status="$(call GET "/api/dashboard/bo-mon?dot_do_an_id=${DOT_DO_AN_ID}" "${TOKEN_BOMON}")"
+  [ "$status" = "200" ] || fail "Bộ môn không xem được dashboard đợt K98 (mã ${status})"
+  got="$(jget "f\"{d['sv_tre_moc']}|{d['tien_do_trich']['tong']}|{len(d['moc_tien_do'])}\"")"
+  [ "${got%%|*}" -ge 1 ] || fail "Dashboard Bộ môn K98 không thấy SV trễ mốc (sv_tre_moc|tong|so_moc = ${got})"
+  ok "Dashboard Bộ môn đợt K98: SV trễ mốc|tổng SV|số mốc = ${got} (MH-04)"
+
+  status="$(call GET /api/dashboard/bo-mon "${TOKEN_SV098}")"
+  [ "$status" = "403" ] || fail "DTC225200098 xem dashboard Bộ môn không bị 403 (mã ${status})"
+  ok "DTC225200098 xem dashboard Bộ môn -> 403"
+}
+
 setup_assigned_topic
 uc2_outline
 uc3_progress
 uc4_defense
 uc5_archive
 uc0_notifications
+uc0_dashboards
 
-echo "OK: e2e UC2-5 (đề cương -> tiến độ -> bảo vệ -> lưu kho -> tra cứu/quản lý kho) hoàn tất — dữ liệu đợt K98 sẽ được dọn khi script kết thúc (trap)"
+echo "OK: e2e UC2-5 (đề cương -> tiến độ -> bảo vệ -> lưu kho -> tra cứu/quản lý kho -> thông báo -> dashboard) hoàn tất — dữ liệu đợt K98 sẽ được dọn khi script kết thúc (trap)"

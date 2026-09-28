@@ -159,4 +159,43 @@ status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/topics" -H "Authori
 [ "$status" = "200" ] || fail "DTC225200001 xem /api/topics không trả 200 (nhận $status)"
 echo "OK: DTC225200001 xem /api/topics -> 200"
 
+# --- Phase 3 (plan 03-07): mỗi nhóm route mới chỉ đúng vai trò gọi được ---
+# expect_status CODE METHOD PATH TOKEN MÔ_TẢ — gửi thân JSON rỗng cho POST/PUT;
+# require_role chặn trước khi kiểm tra thân/đối tượng nên không cần id thật.
+expect_status() {
+  local want="$1" method="$2" path="$3" token="$4" label="$5" got
+  if [ "$method" = "GET" ]; then
+    got="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE$path" -H "Authorization: Bearer ${token}")"
+  else
+    got="$(curl -sk -o /dev/null -w '%{http_code}' -X "$method" "$BASE$path" \
+      -H "Authorization: Bearer ${token}" -H 'Content-Type: application/json' -d '{}')"
+  fi
+  [ "$got" = "$want" ] || fail "${label}: ${method} ${path} không trả ${want} (nhận ${got})"
+}
+
+expect_status 403 POST /api/defense/committees "${TOKEN_SV001}" DTC225200001
+expect_status 403 POST /api/archive "${TOKEN_SV001}" DTC225200001
+expect_status 403 POST /api/archive/import "${TOKEN_SV001}" DTC225200001
+expect_status 403 POST /api/progress/milestones "${TOKEN_SV001}" DTC225200001
+expect_status 403 GET /api/progress/dashboard "${TOKEN_SV001}" DTC225200001
+expect_status 403 POST /api/outlines/1/review "${TOKEN_SV001}" DTC225200001
+echo "OK: DTC225200001 bị 403 trên defense/committees, archive (thêm, import), progress (mốc, dashboard), outlines review"
+
+expect_status 403 POST /api/outlines/1/submit "${TOKEN_GV001}" GV001
+expect_status 403 POST /api/defense/schedules/1/finalize "${TOKEN_GV001}" GV001
+expect_status 403 POST /api/progress/reports/1 "${TOKEN_GV001}" GV001
+echo "OK: GV001 bị 403 trên outlines submit, defense finalize, progress reports"
+
+expect_status 403 POST /api/outlines/1/review "${TOKEN_BOMON}" bomon
+expect_status 403 PUT /api/defense/schedules/1/score "${TOKEN_BOMON}" bomon
+echo "OK: bomon bị 403 trên outlines review, defense score"
+
+for who in BOMON GV001 SV001; do
+  tok_var="TOKEN_${who}"
+  expect_status 200 GET /api/notifications "${!tok_var}" "$who"
+  expect_status 200 GET /api/notifications/unread-count "${!tok_var}" "$who"
+  expect_status 200 GET /api/archive "${!tok_var}" "$who"
+done
+echo "OK: cả ba vai trò đọc được notifications, notifications/unread-count, archive -> 200"
+
 echo "SMOKE TEST: tất cả kiểm tra đã qua."

@@ -44,7 +44,7 @@ from app.schemas.progress import (
 )
 from app.schemas.topics import CohortRef, PersonRef
 from app.services import documents, notifications
-from app.services.dashboard import _default_cohort
+from app.services import dashboard as dashboard_service  # module import: tránh vòng import (03-07)
 from app.services.documents import ValidatedFile
 
 _COHORT_NOT_FOUND = "Không tìm thấy đợt đồ án"
@@ -300,7 +300,7 @@ def _report_counts(db: Session, moc_ids: list[int]) -> dict[int, int]:
 
 def _cohort_or_default(db: Session, dot_do_an_id: int | None) -> DotDoAn | None:
     if dot_do_an_id is None:
-        return _default_cohort(db)
+        return dashboard_service._default_cohort(db)
     cohort = db.get(DotDoAn, dot_do_an_id)
     if cohort is None:
         raise HTTPException(status_code=404, detail=_COHORT_NOT_FOUND)
@@ -576,6 +576,24 @@ def review_report(
 # ---------------------------------------------------------------------------
 # UC3.4 — Tiến độ toàn khoa (Bộ môn)
 # ---------------------------------------------------------------------------
+def row_out(r: ProgressRow) -> ProgressRowOut:
+    """Một dòng SV × mốc — dùng chung cho /tien-do-toan-khoa và dashboard Bộ môn."""
+    return ProgressRowOut(
+        sinh_vien=_sv_ref(r.de_tai.sinh_vien),
+        giang_vien=_gv_ref(r.de_tai.giang_vien),
+        de_tai=TopicRef(id=r.de_tai.id, ten_de_tai=r.de_tai.ten_de_tai),
+        o=[
+            ProgressCellOut(
+                moc_id=c.moc.id,
+                trang_thai=c.trang_thai,
+                bao_cao_id=c.bao_cao.id if c.bao_cao is not None else None,
+            )
+            for c in r.cells
+        ],
+        tre_moc=r.tre_moc,
+    )
+
+
 def dashboard(
     db: Session, dot_do_an_id: int | None, chi_tre_moc: bool, page: int, page_size: int
 ) -> ProgressDashboardOut:
@@ -596,23 +614,7 @@ def dashboard(
     return ProgressDashboardOut(
         dot_do_an=_cohort_ref(cohort),
         moc=[_milestone_out(m, counts.get(m.id, 0)) for m in milestones],
-        items=[
-            ProgressRowOut(
-                sinh_vien=_sv_ref(r.de_tai.sinh_vien),
-                giang_vien=_gv_ref(r.de_tai.giang_vien),
-                de_tai=TopicRef(id=r.de_tai.id, ten_de_tai=r.de_tai.ten_de_tai),
-                o=[
-                    ProgressCellOut(
-                        moc_id=c.moc.id,
-                        trang_thai=c.trang_thai,
-                        bao_cao_id=c.bao_cao.id if c.bao_cao is not None else None,
-                    )
-                    for c in r.cells
-                ],
-                tre_moc=r.tre_moc,
-            )
-            for r in page_rows
-        ],
+        items=[row_out(r) for r in page_rows],
         total=total,
         page=page,
         page_size=page_size,

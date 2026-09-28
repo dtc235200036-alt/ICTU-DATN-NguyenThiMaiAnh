@@ -1,19 +1,36 @@
-from sqlalchemy import exists, func, select
+from sqlalchemy import distinct, exists, func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.deps import CurrentUser
+from app.core.timeutil import to_vn_date, today_vn
+from app.models.bao_ve import CHU_TICH, DiemBaoVe, HoiDong, LichBaoVe, ThanhVienHoiDong
+from app.models.de_cuong import DC_CHO_DUYET, DC_CHUA_NOP, LOAI_DE_CUONG, DeCuong, TaiLieuDoAn
 from app.models.de_tai import CHO_DUYET, DA_PHAN_CONG, DeTai, SINH_VIEN
 from app.models.dot_do_an import DANG_MO, DotDoAn
 from app.models.tai_khoan import SinhVien, TaiKhoan
+from app.models.tien_do import CHUA_DEN_HAN, BaoCaoTienDo, MocTienDo
+from app.models.trung_lap import DANG_KIEM_TRA, HOAN_TAT, KetQuaKiemTraTrungLap
 from app.schemas.dashboard import (
     BmDashboardOut,
     BmPendingTopicRef,
+    BmProgressExcerpt,
+    BmUpcomingCommittee,
     GvDashboardOut,
+    GvTaskItem,
     GvTopicItem,
     SvDashboardOut,
+    SvDefenseOut,
+    SvMilestoneStep,
+    SvNextMilestone,
+    SvOutlineOut,
     SvTopicOut,
 )
 from app.schemas.topics import CohortRef
+from app.services import defense, document_check, progress
+
+_VIEC_MAX = 10
+_TIEN_DO_TRICH = 5
+_HOI_DONG_SAP_TOI = 5
 
 # D-08/T-02-38: một endpoint mỗi vai trò (require_role ở router); mọi truy
 # vấn SV/GV chỉ đọc trong phạm vi own sinh_vien_id/giang_vien_id — không có
@@ -60,7 +77,86 @@ def get_sv_dashboard(db: Session, user: CurrentUser) -> SvDashboardOut:
         is not None
     )
 
-    return SvDashboardOut(de_tai=de_tai_out, co_dot_dang_mo=co_dot_dang_mo)
+    tien_do: list[SvMilestoneStep] = []
+    moc_tiep_theo: SvNextMilestone | None = None
+    my = progress.my_progress(db, user).de_tai
+    if my is not None:
+        today = today_vn()
+        tien_do = [
+            SvMilestoneStep(ten_moc=m.ten_moc, han_nop=m.han_nop, trang_thai=m.trang_thai)
+            for m in my.moc
+        ]
+        nxt = next((m for m in my.moc if m.trang_thai == CHUA_DEN_HAN), None)
+        if nxt is not None:
+            moc_tiep_theo = SvNextMilestone(
+                ten_moc=nxt.ten_moc,
+                han_nop=nxt.han_nop,
+                con_ngay=(nxt.han_nop - today).days if nxt.han_nop is not None else None,
+            )
+
+    return SvDashboardOut(
+        de_tai=de_tai_out,
+        co_dot_dang_mo=co_dot_dang_mo,
+        de_cuong=_sv_outline(db, topic),
+        tien_do=tien_do,
+        moc_tiep_theo=moc_tiep_theo,
+        bao_ve=_sv_defense(db, user),
+    )
+
+
+def _sv_outline(db: Session, topic: DeTai | None) -> SvOutlineOut | None:
+    """OUTL-02/MH-02: chỉ khi đề tài đã phân công GVHD (điểm vào UC2)."""
+    if topic is None or topic.trang_thai != DA_PHAN_CONG:
+        return None
+    de_cuong = db.execute(
+        select(DeCuong).where(DeCuong.de_tai_id == topic.id)
+    ).scalar_one_or_none()
+    if de_cuong is None:
+        return SvOutlineOut(trang_thai=DC_CHUA_NOP)
+    doc = (
+        db.execute(
+            select(TaiLieuDoAn)
+            .where(TaiLieuDoAn.de_cuong_id == de_cuong.id)
+            .where(TaiLieuDoAn.loai == LOAI_DE_CUONG)
+            .order_by(TaiLieuDoAn.so_phien_ban.desc())
+            .limit(1)
+        )
+        .scalars()
+        .first()
+    )
+    if doc is None:
+        return SvOutlineOut(trang_thai=de_cuong.trang_thai)
+    ket_qua = document_check.get_check_for_doc(db, doc)
+    kiem_tra = None
+    if ket_qua is not None:
+        document_check.expire_if_stale(db, ket_qua)
+        kiem_tra = document_check.summary(ket_qua)
+    return SvOutlineOut(
+        trang_thai=de_cuong.trang_thai,
+        phien_ban=doc.so_phien_ban,
+        thoi_diem_nop=doc.thoi_diem_nop,
+        kiem_tra=kiem_tra,
+    )
+
+
+def _sv_defense(db: Session, user: CurrentUser) -> SvDefenseOut | None:
+    """DEFN-04/T-03-40: dùng lại defense.my_defense — điểm chỉ có sau khi chốt."""
+    mine = defense.my_defense(db, user)
+    if mine.lich is None:
+        return None
+    chu_tich = next((m for m in mine.lich.thanh_vien if m.vai_tro == CHU_TICH), None)
+    return SvDefenseOut(
+        ten_hoi_dong=mine.lich.ten_hoi_dong,
+        phong=mine.lich.phong,
+        ngay_bao_ve=mine.lich.ngay_bao_ve,
+        gio_du_kien=mine.lich.gio_du_kien,
+        chu_tich=(
+            " ".join(p for p in (chu_tich.hoc_vi, chu_tich.ho_ten) if p)
+            if chu_tich is not None
+            else None
+        ),
+        diem_trung_binh=mine.ket_qua.diem_trung_binh if mine.ket_qua is not None else None,
+    )
 
 
 def get_gv_dashboard(db: Session, user: CurrentUser) -> GvDashboardOut:
@@ -105,12 +201,148 @@ def get_gv_dashboard(db: Session, user: CurrentUser) -> GvDashboardOut:
         for row in rows
     ]
 
+    own_assigned = (DeTai.giang_vien_id == gv_id, DeTai.trang_thai == DA_PHAN_CONG)
+    so_de_cuong_cho_duyet = db.execute(
+        select(func.count())
+        .select_from(DeCuong)
+        .join(DeTai, DeTai.id == DeCuong.de_tai_id)
+        .where(*own_assigned)
+        .where(DeCuong.trang_thai == DC_CHO_DUYET)
+    ).scalar_one()
+    so_bao_cao_cho_nhan_xet = db.execute(
+        select(func.count())
+        .select_from(BaoCaoTienDo)
+        .join(DeTai, DeTai.id == BaoCaoTienDo.de_tai_id)
+        .where(*own_assigned)
+        .where(BaoCaoTienDo.nhan_xet.is_(None))
+    ).scalar_one()
+    so_hoi_dong_tham_gia = db.execute(
+        select(func.count(distinct(ThanhVienHoiDong.hoi_dong_id))).where(
+            ThanhVienHoiDong.giang_vien_id == gv_id
+        )
+    ).scalar_one()
+
     return GvDashboardOut(
         so_sinh_vien_huong_dan=so_sinh_vien_huong_dan,
         so_de_tai=so_de_tai,
         so_de_tai_cho_duyet=so_de_tai_cho_duyet,
         de_tai=de_tai,
+        so_de_cuong_cho_duyet=so_de_cuong_cho_duyet,
+        so_bao_cao_cho_nhan_xet=so_bao_cao_cho_nhan_xet,
+        so_hoi_dong_tham_gia=so_hoi_dong_tham_gia,
+        viec_can_xu_ly=_gv_tasks(db, gv_id),
     )
+
+
+def _check_note(ket_qua: KetQuaKiemTraTrungLap | None) -> str:
+    if ket_qua is None:
+        return "Kiểm tra trùng lặp: Chưa kiểm tra"
+    if ket_qua.trang_thai == HOAN_TAT:
+        ty_le = float(ket_qua.ty_le_tong or 0)
+        pct = f"{ty_le:.1f}".rstrip("0").rstrip(".")
+        return f"Kiểm tra trùng lặp: Hoàn tất ({pct}%)"
+    if ket_qua.trang_thai == DANG_KIEM_TRA:
+        return "Kiểm tra trùng lặp: Đang kiểm tra"
+    return "Kiểm tra trùng lặp: Lỗi"
+
+
+def _gv_tasks(db: Session, gv_id: int | None) -> list[GvTaskItem]:
+    """MH-03 "Việc cần xử lý" (≤ 10): đề cương chờ duyệt, báo cáo tiến độ chờ
+    nhận xét của đề tài mình hướng dẫn, và lịch bảo vệ (chưa chốt) ở hội đồng
+    mình ngồi mà mình chưa chấm. Mỗi loại một truy vấn, không N+1."""
+    if gv_id is None:
+        return []
+    tasks: list[GvTaskItem] = []
+
+    outlines = db.execute(
+        select(DeCuong.id, DeTai.id, DeTai.ten_de_tai, SinhVien.ho_ten)
+        .join(DeTai, DeTai.id == DeCuong.de_tai_id)
+        .outerjoin(SinhVien, SinhVien.id == DeTai.sinh_vien_id)
+        .where(DeTai.giang_vien_id == gv_id)
+        .where(DeTai.trang_thai == DA_PHAN_CONG)
+        .where(DeCuong.trang_thai == DC_CHO_DUYET)
+        .order_by(DeCuong.id)
+        .limit(_VIEC_MAX)
+    ).all()
+    latest_doc: dict[int, TaiLieuDoAn] = {}
+    if outlines:
+        docs = (
+            db.execute(
+                select(TaiLieuDoAn)
+                .where(TaiLieuDoAn.de_cuong_id.in_([row[0] for row in outlines]))
+                .where(TaiLieuDoAn.loai == LOAI_DE_CUONG)
+                .options(selectinload(TaiLieuDoAn.ket_qua_kiem_tra))
+                .order_by(TaiLieuDoAn.de_cuong_id, TaiLieuDoAn.so_phien_ban.desc())
+            )
+            .scalars()
+            .all()
+        )
+        for doc in docs:
+            latest_doc.setdefault(doc.de_cuong_id, doc)
+    for de_cuong_id, de_tai_id, ten, sv_ten in outlines:
+        doc = latest_doc.get(de_cuong_id)
+        tasks.append(
+            GvTaskItem(
+                loai="DUYET_DE_CUONG",
+                sinh_vien=sv_ten,
+                ten_de_tai=ten,
+                ghi_chu=_check_note(doc.ket_qua_kiem_tra if doc is not None else None),
+                lien_ket=f"/duyet-de-cuong?de_tai_id={de_tai_id}",
+            )
+        )
+
+    reports = db.execute(
+        select(BaoCaoTienDo.thoi_diem_nop, MocTienDo.ten_moc, DeTai.id, DeTai.ten_de_tai, SinhVien.ho_ten)
+        .join(DeTai, DeTai.id == BaoCaoTienDo.de_tai_id)
+        .join(MocTienDo, MocTienDo.id == BaoCaoTienDo.moc_tien_do_id)
+        .outerjoin(SinhVien, SinhVien.id == DeTai.sinh_vien_id)
+        .where(DeTai.giang_vien_id == gv_id)
+        .where(DeTai.trang_thai == DA_PHAN_CONG)
+        .where(BaoCaoTienDo.nhan_xet.is_(None))
+        .order_by(BaoCaoTienDo.thoi_diem_nop, BaoCaoTienDo.id)
+        .limit(_VIEC_MAX)
+    ).all()
+    for thoi_diem_nop, ten_moc, de_tai_id, ten, sv_ten in reports:
+        tasks.append(
+            GvTaskItem(
+                loai="NHAN_XET_TIEN_DO",
+                sinh_vien=sv_ten,
+                ten_de_tai=ten,
+                ghi_chu=f"{ten_moc} - nộp {to_vn_date(thoi_diem_nop).strftime('%d/%m/%Y')}",
+                lien_ket=f"/nhan-xet-tien-do?de_tai_id={de_tai_id}",
+            )
+        )
+
+    my_score = (
+        select(DiemBaoVe.id)
+        .where(DiemBaoVe.lich_bao_ve_id == LichBaoVe.id)
+        .where(DiemBaoVe.giang_vien_id == gv_id)
+    )
+    to_score = db.execute(
+        select(LichBaoVe.id, HoiDong.id, HoiDong.ten_hoi_dong, HoiDong.ngay_bao_ve, DeTai.ten_de_tai, SinhVien.ho_ten)
+        .join(HoiDong, HoiDong.id == LichBaoVe.hoi_dong_id)
+        .join(
+            ThanhVienHoiDong,
+            (ThanhVienHoiDong.hoi_dong_id == HoiDong.id) & (ThanhVienHoiDong.giang_vien_id == gv_id),
+        )
+        .join(DeTai, DeTai.id == LichBaoVe.de_tai_id)
+        .outerjoin(SinhVien, SinhVien.id == LichBaoVe.sinh_vien_id)
+        .where(LichBaoVe.da_chot.is_(False))
+        .where(~exists(my_score))
+        .order_by(HoiDong.ngay_bao_ve, HoiDong.gio_bao_ve, LichBaoVe.thu_tu, LichBaoVe.id)
+        .limit(_VIEC_MAX)
+    ).all()
+    for lich_id, hoi_dong_id, ten_hd, ngay, ten, sv_ten in to_score:
+        tasks.append(
+            GvTaskItem(
+                loai="CHAM_DIEM",
+                sinh_vien=sv_ten,
+                ten_de_tai=ten,
+                ghi_chu=f"{ten_hd} - {ngay.strftime('%d/%m/%Y')}",
+                lien_ket=f"/cham-diem?hoi_dong_id={hoi_dong_id}&lich_id={lich_id}",
+            )
+        )
+    return tasks[:_VIEC_MAX]
 
 
 def _default_cohort(db: Session) -> DotDoAn | None:
@@ -190,7 +422,54 @@ def get_bo_mon_dashboard(db: Session, dot_do_an_id: int | None) -> BmDashboardOu
         .where(TaiKhoan.bi_khoa.is_(False))
     ).scalar_one()
 
+    sv_tre_moc = 0
+    tien_do_trich = None
+    moc_tien_do = []
+    if cohort is not None:
+        # PROG-03/D-05: cùng một hàm tính cờ trễ như /tien-do-toan-khoa.
+        milestones, rows = progress.compute_cohort_progress(db, cohort.id)
+        counts = progress._report_counts(db, [m.id for m in milestones])
+        moc_tien_do = [progress._milestone_out(m, counts.get(m.id, 0)) for m in milestones]
+        sv_tre_moc = sum(1 for r in rows if r.tre_moc)
+        tien_do_trich = BmProgressExcerpt(
+            moc=moc_tien_do,
+            items=[progress.row_out(r) for r in rows[:_TIEN_DO_TRICH]],
+            tong=len(rows),
+        )
+
+    today = today_vn()
+    so_hoi_dong_sap_toi = db.execute(
+        select(func.count()).select_from(HoiDong).where(HoiDong.ngay_bao_ve >= today)
+    ).scalar_one()
+    so_sv_lich = (
+        select(func.count(LichBaoVe.id))
+        .where(LichBaoVe.hoi_dong_id == HoiDong.id)
+        .correlate(HoiDong)
+        .scalar_subquery()
+    )
+    hoi_dong_sap_toi = [
+        BmUpcomingCommittee(
+            id=hd.id,
+            ten_hoi_dong=hd.ten_hoi_dong,
+            ngay_bao_ve=hd.ngay_bao_ve,
+            gio_bao_ve=hd.gio_bao_ve,
+            phong=hd.phong,
+            so_sinh_vien=n,
+        )
+        for hd, n in db.execute(
+            select(HoiDong, so_sv_lich)
+            .where(HoiDong.ngay_bao_ve >= today)
+            .order_by(HoiDong.ngay_bao_ve, HoiDong.gio_bao_ve, HoiDong.id)
+            .limit(_HOI_DONG_SAP_TOI)
+        ).all()
+    ]
+
     return BmDashboardOut(
+        sv_tre_moc=sv_tre_moc,
+        tien_do_trich=tien_do_trich,
+        moc_tien_do=moc_tien_do,
+        so_hoi_dong_sap_toi=so_hoi_dong_sap_toi,
+        hoi_dong_sap_toi=hoi_dong_sap_toi,
         dot_do_an=(
             CohortRef(
                 id=cohort.id, ten_dot=cohort.ten_dot, khoa=cohort.khoa, trang_thai=cohort.trang_thai
