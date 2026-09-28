@@ -11,10 +11,10 @@ fail() {
 }
 
 # (a) http:// redirect 301 -> https://
-redirect_url="$(curl -sk -o /dev/null -w '%{redirect_url}' -D - "http://localhost/" 2>/dev/null | tr -d '\r' | grep -i '^location:' | awk '{print $2}' | tail -1)"
-status_a="$(curl -sk -o /dev/null -w '%{http_code}' "http://localhost/")"
+redirect_url="$(curl -sk -o /dev/null -w '%{redirect_url}' -D - "http://localhost:${HTTP_PORT:-80}/" 2>/dev/null | tr -d '\r' | grep -i '^location:' | awk '{print $2}' | tail -1)"
+status_a="$(curl -sk -o /dev/null -w '%{http_code}' "http://localhost:${HTTP_PORT:-80}/")"
 [ "$status_a" = "301" ] || fail "http://localhost/ không trả 301 (nhận $status_a)"
-echo "OK: http://localhost/ trả 301"
+echo "OK: http://localhost:${HTTP_PORT:-80}/ trả 301"
 
 # (b) /api/health -> 200, status ok, db ok
 health_body="$(curl -sk "$BASE/api/health")"

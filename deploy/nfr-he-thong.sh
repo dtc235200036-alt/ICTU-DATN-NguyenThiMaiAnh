@@ -30,7 +30,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 BASE="${BASE_URL:-https://localhost:${HTTPS_PORT:-443}}"
-HTTP_BASE="${HTTP_BASE_URL:-http://localhost}"
+HTTP_BASE="${HTTP_BASE_URL:-http://localhost:${HTTP_PORT:-80}}"
 COMPOSE=(docker compose -f "${SCRIPT_DIR}/docker-compose.yml")
 SV_MA="DTC225200094"
 KHOA_RIENG="K95"
