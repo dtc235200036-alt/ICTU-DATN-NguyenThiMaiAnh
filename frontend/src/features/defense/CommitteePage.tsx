@@ -30,6 +30,7 @@ import {
   useCommittees,
   useDeleteCommittee,
   useEligibleStudents,
+  useFinalize,
   useRemoveSchedule,
   useSaveCommittee,
 } from './api'
@@ -66,7 +67,8 @@ function renderPerson(person: { ho_ten: string; ma?: string | null } | null): st
  * MH-11/UC4.2: Bộ môn lập hội đồng (tên/ngày/giờ/phòng + 3-5 thành viên,
  * đúng 1 Chủ tịch) và xếp lịch SV đủ điều kiện bảo vệ vào hội đồng — server
  * chặn 409 khi GVHD của SV là thành viên hội đồng (D-06); UI vô hiệu hóa lựa
- * chọn đó trước để tránh round-trip vô ích.
+ * chọn đó trước để tránh round-trip vô ích. UC4.4 (plan 03-04): "Chốt kết
+ * quả" chỉ bật khi đủ mọi thành viên đã chấm; server vẫn tự kiểm tra (409).
  */
 export default function CommitteePage() {
   const { message } = AntApp.useApp()
@@ -85,6 +87,7 @@ export default function CommitteePage() {
   const deleteMutation = useDeleteCommittee()
   const addScheduleMutation = useAddSchedule()
   const removeScheduleMutation = useRemoveSchedule()
+  const finalizeMutation = useFinalize()
   const [selectedStudent, setSelectedStudent] = useState<number | undefined>(undefined)
 
   useEffect(() => {
@@ -175,6 +178,17 @@ export default function CommitteePage() {
     }
   }
 
+  const handleFinalize = async (lichBaoVeId: number) => {
+    if (committee === undefined) return
+    try {
+      const { data } = await finalizeMutation.mutateAsync({ hoiDongId: committee.id, lichId: lichBaoVeId })
+      const diem = data.lich.diem_trung_binh
+      message.success(`Đã chốt kết quả${diem !== null ? ` — điểm ${diem.toFixed(2)}` : ''}; đồ án đã vào kho`)
+    } catch (err) {
+      message.error(getErrorMessage(err))
+    }
+  }
+
   const handleRemoveStudent = async (lichBaoVeId: number) => {
     if (committee === undefined) return
     try {
@@ -243,19 +257,42 @@ export default function CommitteePage() {
     {
       title: 'Hành động',
       key: 'hanh_dong',
-      render: (_value, record) =>
-        record.so_da_cham === 0 ? (
+      render: (_value, record) => {
+        if (record.da_chot) {
+          return <Tag color="success">Đã chốt</Tag>
+        }
+        const waiting = <span style={{ color: 'rgba(0,0,0,0.45)' }}>Chờ tất cả thành viên chấm</span>
+        if (record.so_da_cham === 0) {
+          return (
+            <Space direction="vertical" size={4}>
+              <Popconfirm
+                title="Gỡ sinh viên này khỏi lịch bảo vệ?"
+                onConfirm={() => void handleRemoveStudent(record.id)}
+              >
+                <Button size="small" danger loading={removeScheduleMutation.isPending}>
+                  Gỡ khỏi lịch
+                </Button>
+              </Popconfirm>
+              {waiting}
+            </Space>
+          )
+        }
+        if (record.so_da_cham < record.so_thanh_vien) {
+          return waiting
+        }
+        const tamTinh = record.diem_tam_tinh !== null ? record.diem_tam_tinh.toFixed(2) : '—'
+        return (
           <Popconfirm
-            title="Gỡ sinh viên này khỏi lịch bảo vệ?"
-            onConfirm={() => void handleRemoveStudent(record.id)}
+            title="Chốt kết quả bảo vệ?"
+            description={`Điểm = trung bình cộng ${record.so_thanh_vien} thành viên (${tamTinh}). Sau khi chốt không thể sửa điểm; đồ án được đưa vào kho.`}
+            onConfirm={() => void handleFinalize(record.id)}
           >
-            <Button size="small" danger loading={removeScheduleMutation.isPending}>
-              Gỡ khỏi lịch
+            <Button size="small" type="primary" loading={finalizeMutation.isPending}>
+              Chốt kết quả
             </Button>
           </Popconfirm>
-        ) : (
-          <span style={{ color: 'rgba(0,0,0,0.45)' }}>—</span>
-        ),
+        )
+      },
     },
   ]
 

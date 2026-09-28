@@ -234,3 +234,131 @@ export function useRemoveSchedule() {
     },
   })
 }
+
+// ---------------------------------------------------------------------------
+// UC4.3–4.5 (plan 03-04): chấm điểm (thành viên hội đồng), chốt kết quả (Bộ
+// môn), SV xem lịch/kết quả — mirror app/schemas/defense.py. Server tự giới
+// hạn: GV ngoài hội đồng nhận 403 (UC4.3 E1), SV không thấy điểm trước chốt.
+// ---------------------------------------------------------------------------
+
+export interface MyCommitteeRow {
+  id: number
+  thu_tu: number | null
+  gio_du_kien: string
+  sinh_vien: PersonRef
+  ten_de_tai: string
+  diem_cua_toi: number | null
+  da_chot: boolean
+}
+
+export interface MyCommittee {
+  id: number
+  ten_hoi_dong: string
+  ngay_bao_ve: string
+  gio_bao_ve: string
+  phong: string
+  vai_tro_cua_toi: VaiTroThanhVien
+  lich: MyCommitteeRow[]
+}
+
+export interface ScoringDetail {
+  id: number
+  hoi_dong_id: number
+  ten_hoi_dong: string
+  ngay_bao_ve: string
+  phong: string
+  gio_du_kien: string
+  sinh_vien: PersonRef
+  de_tai_id: number
+  ten_de_tai: string
+  bao_cao_cuoi: DocumentOut | null
+  kiem_tra: CheckSummary | null
+  diem_cua_toi: { diem: number; nhan_xet: string | null } | null
+  da_chot: boolean
+  co_the_cham: boolean
+  ly_do_khong_cham: string | null
+}
+
+export interface ScoreInput {
+  diem: number
+  nhan_xet: string | null
+}
+
+export interface FinalizeOut {
+  lich: ScheduleRow
+  do_an_kho_id: number
+}
+
+export interface MyDefenseOut {
+  lich: {
+    ten_hoi_dong: string
+    ngay_bao_ve: string
+    gio_du_kien: string
+    phong: string
+    thu_tu: number | null
+    thanh_vien: { ho_ten: string; hoc_vi: string | null; vai_tro: VaiTroThanhVien }[]
+  } | null
+  ket_qua: { diem_trung_binh: number } | null
+}
+
+export function useMyCommittees() {
+  return useQuery({
+    queryKey: [DEFENSE_KEY, 'my-committees'],
+    queryFn: async () => {
+      const { data } = await api.get<MyCommittee[]>('/defense/my-committees')
+      return data
+    },
+    retry: noRetryOn4xx,
+  })
+}
+
+export function useScheduleForScoring(lichId: number | undefined) {
+  return useQuery({
+    queryKey: [DEFENSE_KEY, 'schedules', lichId],
+    queryFn: async () => {
+      const { data } = await api.get<ScoringDetail>(`/defense/schedules/${lichId}`)
+      return data
+    },
+    enabled: lichId !== undefined,
+    refetchInterval: (query) => (query.state.data?.kiem_tra?.trang_thai === 'DANG_KIEM_TRA' ? 3000 : false),
+    retry: noRetryOn4xx,
+  })
+}
+
+export function useScore() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ lichId, input }: { lichId: number; input: ScoreInput }) => {
+      const { data } = await api.put<ScoringDetail>(`/defense/schedules/${lichId}/score`, input)
+      return data
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData([DEFENSE_KEY, 'schedules', data.id], data)
+      void queryClient.invalidateQueries({ queryKey: [DEFENSE_KEY, 'my-committees'] })
+    },
+  })
+}
+
+export function useFinalize() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ hoiDongId, lichId }: { hoiDongId: number; lichId: number }) => {
+      const { data } = await api.post<FinalizeOut>(`/defense/schedules/${lichId}/finalize`)
+      return { data, hoiDongId }
+    },
+    onSuccess: ({ hoiDongId }) => {
+      invalidateCommitteeQueries(queryClient, hoiDongId)
+    },
+  })
+}
+
+export function useMyDefense() {
+  return useQuery({
+    queryKey: [DEFENSE_KEY, 'me'],
+    queryFn: async () => {
+      const { data } = await api.get<MyDefenseOut>('/defense/me')
+      return data
+    },
+    retry: noRetryOn4xx,
+  })
+}
