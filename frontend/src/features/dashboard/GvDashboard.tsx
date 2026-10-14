@@ -9,13 +9,13 @@ import { useGvDashboard } from './api'
 import type { GvTaskItem, GvTopicItem, LoaiViec } from './api'
 
 const LOAI_VIEC: Record<LoaiViec, { label: string; color: string; action: string }> = {
-  DUYET_DE_TAI: { label: 'Duyệt đề tài', color: 'cyan', action: 'Duyệt' },
+  GIAO_DE_TAI: { label: 'Giao đề tài', color: 'cyan', action: 'Giao' },
   DUYET_DE_CUONG: { label: 'Duyệt đề cương', color: 'blue', action: 'Duyệt' },
   NHAN_XET_TIEN_DO: { label: 'Nhận xét tiến độ', color: 'gold', action: 'Xem' },
   CHAM_DIEM: { label: 'Chấm điểm bảo vệ', color: 'purple', action: 'Chấm điểm' },
 }
 
-/** MH-03: chỉ số + "Việc cần xử lý" (đề tài, đề cương, tiến độ, chấm điểm) + đề tài của GV. */
+/** MH-03: chỉ số + "Việc cần xử lý" (giao đề tài, đề cương, tiến độ, chấm điểm) + đề tài của GV. */
 export default function GvDashboard() {
   const navigate = useNavigate()
   const { data, isLoading, isError, error, refetch } = useGvDashboard()
@@ -48,7 +48,10 @@ export default function GvDashboard() {
     {
       title: 'Sinh viên / Đề tài',
       key: 'sv',
-      render: (_v, r) => `${r.sinh_vien ?? '—'} - ${r.ten_de_tai}`,
+      render: (_v, r) =>
+        r.sinh_vien === null && r.ten_de_tai === null
+          ? 'Lớp hướng dẫn'
+          : `${r.sinh_vien ?? '—'} - ${r.ten_de_tai ?? '—'}`,
     },
     { title: 'Hạn / Ghi chú', dataIndex: 'ghi_chu' },
     {
@@ -98,11 +101,11 @@ export default function GvDashboard() {
             suffix={`/ ${data.so_de_tai} đề tài`}
           />
         </Card>
-        <Card style={{ minWidth: 220, cursor: 'pointer' }} onClick={() => navigate('/duyet-de-tai')}>
+        <Card style={{ minWidth: 220, cursor: 'pointer' }} onClick={() => navigate('/sinh-vien-huong-dan')}>
           <Statistic
-            title="Đề tài chờ duyệt"
-            value={data.so_de_tai_cho_duyet}
-            valueStyle={data.so_de_tai_cho_duyet > 0 ? { color: '#cf1322' } : undefined}
+            title="SV chưa được giao đề tài"
+            value={data.so_sinh_vien_chua_giao_de_tai}
+            valueStyle={data.so_sinh_vien_chua_giao_de_tai > 0 ? { color: '#cf1322' } : undefined}
           />
         </Card>
         <Card style={{ minWidth: 220, cursor: 'pointer' }} onClick={() => navigate('/duyet-de-cuong')}>

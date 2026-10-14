@@ -89,13 +89,14 @@ docker compose -f deploy/docker-compose.yml exec -T api python -m app.seed
 trường thật (Phase 5).
 
 Seed cũng tạo sẵn một đợt đồ án đang mở, **"Đợt đồ án tốt nghiệp K22 - HK1
-(2026-2027)"** (khóa K22), dùng ngay cho demo UC1 (đề xuất/đăng ký đề tài) mà
+(2026-2027)"** (khóa K22), dùng ngay cho demo UC1 (GVHD giao đề tài) mà
 không cần Bộ môn mở đợt thủ công trước, kèm **phân công GVHD mặc định** cho đợt
 đó (UC0.8, migration 0015): SV thứ *i* → GV thứ ((*i*−1) mod 30)+1, tức
 `DTC235200016` → `GV001`, `DTC235200139` → `GV011`, `DTC235200703` → `GV001`, …
 Seed không bao giờ đổi phân công đã có; Bộ môn đổi ở "Phân công GVHD"
-(`/phan-cong-gvhd`). SV chưa được phân công GVHD trong đợt thì không đề xuất
-được đề tài.
+(`/phan-cong-gvhd`). SV không tự đề xuất hay đăng ký đề tài: SV trao đổi với
+GVHD ngoài hệ thống, rồi chỉ GVHD được Bộ môn phân công mới tạo và giao đề tài
+cho SV trong lớp hướng dẫn (góp ý GVHD mục 1).
 
 ## Thời hạn token (chờ xác nhận GVHD — xem ghi chú NFR-03)
 
@@ -149,12 +150,12 @@ Dùng cho buổi bảo vệ; thay thế các mục "Kịch bản demo UC1", "UC2
 
 | Tài khoản | Trạng thái sau `demo-state.sh` | Dùng trong demo |
 |---|---|---|
-| `DTC235200139` | chưa có đề tài, GVHD `GV011` | đề xuất tên diễn đạt lại → cảnh báo AI → gửi tới GVHD → `GV011` duyệt ("Duyệt đề tài") → Đã phân công; nộp `seed-data/tai-lieu/P03-B.pdf` → Đang kiểm tra → Hoàn tất |
+| `DTC235200139` | chưa có đề tài, GVHD `GV011` | `GV011` ở "Sinh viên của tôi" bấm "Giao đề tài" cho 011, nhập tên diễn đạt lại → cảnh báo AI → "Vẫn giao đề tài" → Đã phân công; 011 đăng nhập thấy đề tài được giao, nộp `seed-data/tai-lieu/P03-B.pdf` → Đang kiểm tra → Hoàn tất |
 | `DTC235200258` | đề cương v1 = `P02-B.docx` (chép nguyên văn), Hoàn tất 48 %, chờ GV011 duyệt | MH-09 / MH-14 đoạn tô sáng, Yêu cầu sửa |
 | `DTC235200325` | đề cương đã duyệt, 2 báo cáo tiến độ (mốc 1 đã nhận xét, mốc 2 chờ) | UC3 |
 | `DTC235200340` | báo cáo cuối đã kiểm tra, "Hội đồng demo K22", 2/3 điểm | GV014 chấm, Bộ môn chốt → tự vào kho |
 | `DTC235270078` | đủ 3 điểm, đã chốt (8.5), đã trong Kho đồ án | UC4 kết quả, UC5 tra cứu |
-| `GV011` / `GV012` / `GV013` / `GV014` | GVHD (Bộ môn phân công) của 011–015 — duyệt đề tài 012–015 / chủ tịch / thư ký / ủy viên hội đồng demo | |
+| `GV011` / `GV012` / `GV013` / `GV014` | GVHD (Bộ môn phân công) của 011–015 — giao đề tài cho 011–015 / chủ tịch / thư ký / ủy viên hội đồng demo | |
 
 ```bash
 bash deploy/demo-state.sh             # xóa trạng thái demo cũ + dựng lại (~20 s; xóa ~3 s, dựng ~13 s)
@@ -192,52 +193,54 @@ tự (ROADMAP Phase 2, SC1–SC5):
    khóa một tài khoản SV (ví dụ `DTC235200036`), thử đăng nhập bằng tài khoản
    đó ở cửa sổ ẩn danh → bị từ chối; mở khóa lại.
 3. **Mở/đóng đợt đồ án (Bộ môn):** vào "Quản lý đợt đồ án", đóng đợt "Đợt đồ
-   án tốt nghiệp K22 - HK1 (2026-2027)", xác nhận GV/SV không đề xuất/đăng ký
-   được đề tài mới trong đợt đã đóng; mở lại đợt trước khi tiếp tục demo.
+   án tốt nghiệp K22 - HK1 (2026-2027)", xác nhận GVHD không giao được đề
+   tài mới trong đợt đã đóng; mở lại đợt trước khi tiếp tục demo.
 4. **Bộ môn phân công GVHD (UC0.8, MH-13):** đăng nhập `bomon`, vào "Phân
    công GVHD" (`/phan-cong-gvhd`), chọn đợt K22 — bảng SV kèm GVHD hiện tại
    (seed mặc định), tải từng GV, lọc đã/chưa phân công. Đổi GVHD của
    `DTC235200036` thành `GV001` rồi lưu (có thể import CSV
    `ma_so_sinh_vien,ma_giang_vien`). Lớp của `GV001` lúc này gồm
    `DTC235200016`, `DTC235200036`, `DTC235200703`, … (GV xem ở "Sinh viên của
-   tôi", `/sinh-vien-huong-dan`). SV chưa có GVHD trong đợt không đề xuất được.
-5. **GV mở đề tài cho lớp / giao thẳng:** đăng nhập `GV001`, vào "Đề xuất đề
-   tài", nhập một tên đề tài gần giống đề tài đã có trong kho — quan sát cảnh
-   báo "N đề tài tương tự" trước khi gửi; gửi **không chọn SV** → "Đã duyệt"
-   (mở cho lớp `GV001` đăng ký). Tạo thêm một đề tài, chọn SV trong lớp chưa
-   có đề tài (vd. `DTC235200489`) rồi gửi → "Đã phân công" ngay, không qua
-   bước duyệt; chọn SV lớp khác thì bị từ chối.
-6. **SV tự đề xuất và đăng ký:** đăng nhập `DTC235200036`, tự đề xuất một đề
-   tài mới → "Chờ duyệt", gửi tới GVHD `GV001`. Ở `DTC235200703` (cùng lớp,
-   chưa có đề tài) vào "Danh sách đề tài" → thấy đề tài `GV001` vừa mở → bấm
-   "Đăng ký" → "Đã phân công" ngay. SV lớp khác (vd. `DTC235200988`, GVHD
-   `GV003`) không thấy đề tài đó.
-7. **GVHD duyệt / từ chối (MH-07):** đăng nhập `GV001`, vào "Duyệt đề tài"
-   (`/duyet-de-tai`) — chỉ có đề tài SV trong lớp mình gửi; mở đề tài của
-   `DTC235200036` → "Duyệt" → "Đã phân công", hoặc "Từ chối" kèm lý do (SV
-   đăng nhập lại, mở chi tiết đề tài thấy đúng lý do và đề xuất lại được).
-   Bộ môn không còn duyệt đề tài; sau khi SV có đề tài "Đã phân công", Bộ môn
-   không đổi được GVHD của SV đó.
+   tôi", `/sinh-vien-huong-dan`). GV không phải GVHD của SV thì không giao được
+   đề tài cho SV đó.
+5. **GVHD tạo và giao đề tài (MH-16 → MH-06):** SV trao đổi và thống nhất đề
+   tài với GVHD ngoài hệ thống; trên hệ thống chỉ GVHD tạo đề tài. Đăng nhập
+   `GV001`, vào "Sinh viên của tôi" → bấm "Giao đề tài" ở dòng một SV chưa có
+   đề tài (vd. `DTC235200489`; form mở sẵn đợt + sinh viên, hoặc vào menu
+   "Giao đề tài" rồi chọn SV — ô sinh viên bắt buộc). Nhập một tên đề tài gần
+   giống đề tài đã có trong kho — quan sát cảnh báo "N đề tài tương tự" rồi
+   chọn "Vẫn giao đề tài" → "Giao đề tài cho sinh viên" → "Đã phân công" ngay,
+   kèm kết quả kiểm tra tên đã lưu. "Lưu nháp" để soạn trước (SV chưa thấy bản
+   nháp), sau đó gửi từ trang chi tiết. Chọn SV lớp khác thì bị từ chối.
+6. **SV xem đề tài được giao:** đăng nhập `DTC235200489` — nhận thông báo
+   "GVHD … đã giao cho bạn đề tài …", "Tổng quan" hiện đề tài Đã phân công →
+   "Xem chi tiết đề tài" (MH-07). Menu SV không có mục đề xuất/đăng ký đề tài;
+   mở trực tiếp `/de-tai/de-xuat` nhận trang 403. SV lớp khác (vd.
+   `DTC235200988`, GVHD `GV003`) không xem được đề tài đó.
+7. **Quyền (RBAC):** SV và Bộ môn gọi `POST /api/topics`, `PUT`/`submit`,
+   `POST /api/topics/check-title` → 403; `POST /api/topics/{id}/register` và
+   `/api/topic-approvals*` đã gỡ → 404 (không còn màn "Duyệt đề tài"). Sau khi
+   SV có đề tài "Đã phân công", Bộ môn không đổi được GVHD của SV đó.
 8. **Danh sách lọc theo đợt/trạng thái/GVHD:** ở "Danh sách đề tài" (mọi vai
    trò), lọc theo Đợt đồ án, Trạng thái và Giảng viên hướng dẫn — bảng chỉ
    còn đúng các đề tài khớp bộ lọc.
 9. **403 khi gọi sai vai trò:** đăng nhập SV, thử mở trực tiếp URL
-   `/tai-khoan`, `/phan-cong-gvhd` hoặc `/duyet-de-tai` — nhận trang 403 "Bạn
-   không có quyền truy cập trang này" (`bomon` mở `/duyet-de-tai` cũng 403).
+   `/tai-khoan`, `/phan-cong-gvhd` hoặc `/de-tai/de-xuat` — nhận trang 403 "Bạn
+   không có quyền truy cập trang này".
 10. **Dashboard theo vai trò:** đăng nhập lần lượt `DTC235200016`, `GV001` và
     `bomon`, mở "Tổng quan" — mỗi vai trò thấy đúng widget của mình (SV: đề
-    tài của tôi + GVHD được phân công; GV: sinh viên hướng dẫn + sĩ số lớp +
-    việc "Duyệt đề tài" + bảng đề tài hướng dẫn; Bộ môn: đề tài chờ duyệt +
-    SV chưa có đề tài + SV chưa phân công GVHD + đề tài đã phân công + danh
-    sách chờ duyệt mới nhất).
+    tài được giao + GVHD được phân công; GV: sinh viên hướng dẫn + sĩ số lớp +
+    "SV chưa được giao đề tài" + việc "Giao đề tài" + bảng đề tài hướng dẫn;
+    Bộ môn: SV chưa được giao đề tài + SV chưa có đề tài + SV chưa phân công
+    GVHD + đề tài đã phân công + danh sách đề tài giao gần nhất).
 
 ## Kịch bản demo UC2–UC5 (thao tác trên trình duyệt)
 
 > Cho buổi bảo vệ dùng mục "Kịch bản demo bảo vệ (Phase 5)" ở trên; mục này giữ lại làm hướng dẫn thao tác chi tiết.
 
 Tiếp nối kịch bản UC1: cần một SV có đề tài **Đã phân công** (ví dụ bước 4–7
-ở trên: `bomon` phân công `DTC235200036` cho GVHD `GV001`, SV tự đề xuất,
-`GV001` "Duyệt").
+ở trên: `bomon` phân công `DTC235200036` cho GVHD `GV001`, `GV001` "Giao đề
+tài" cho `DTC235200036`).
 Thứ tự theo D-09: đề cương → bảo vệ → lưu kho → tiến độ; chuông thông báo
 (góc phải Header) được kiểm tra ở mọi bước. Dùng các tài khoản SV thông thường (vd. `DTC235200159`)
 / `GV0xx` thông thường — **không** dùng các tài khoản dành riêng cho e2e
@@ -318,23 +321,27 @@ Test Phase 3 (pytest): `backend/tests/test_outline_flow.py`,
 `test_notifications.py`. `smoke-test.sh` kiểm tra thêm 403 chéo vai trò trên
 mọi nhóm route Phase 3 (outlines, progress, defense, archive), 200 cho
 notifications/archive ở cả ba vai trò, và luồng phân công GVHD (0015):
-`/api/topic-approvals` chỉ GV (Bộ môn, SV → 403), `/api/assignments` gán/import/
+`POST /api/topics` và `/api/topics/check-title` chỉ GV (SV → 403), route đăng ký
+và `/api/topic-approvals` đã gỡ (404), `/api/assignments` gán/import/
 xem chỉ Bộ môn, `my-students` chỉ GV, `my-advisor` chỉ SV (`DTC235200016` có
 GVHD `GV001` theo seed), các trường dashboard mới `sv_chua_phan_cong` /
 `so_sinh_vien_lop` / `giang_vien_huong_dan`.
 
 `deploy/e2e-uc1.sh` tự dựng riêng một đợt đồ án khóa **K99** và dùng 5 tài
 khoản seed dành riêng cho kịch bản tự động (tách biệt với các tài khoản dùng ở
-demo thủ công phía trên): `GV030` (GVHD — mở đề tài cho lớp, duyệt/từ chối, giao
-thẳng), `DTC235210040` (lớp GV030 — tự đề xuất, bị từ chối, đề xuất lại được
-duyệt), `DTC235210045` (lớp GV030 — đăng ký đề tài GV030 mở), `GV024` (GV không
-phải GVHD) và `DTC235210023` (lớp GV024 — không thấy/không đăng ký được đề tài
-lớp khác, sau đó được chuyển sang lớp GV030 và nhận đề tài giao thẳng). Các bước
-kiểm: SV chưa có GVHD đề xuất → 409; Bộ môn gán (`PUT /api/assignments`) +
-import CSV + danh sách phân công; Bộ môn/SV/GV không phải GVHD duyệt → 403;
-đổi GVHD khi SV đã có đề tài Đã phân công → 409. Script tự xóa toàn bộ dữ liệu
-nó tạo ra (đợt K99 + phân công GVHD + đề tài + kết quả kiểm tra trùng lặp +
-thông báo phát sinh) khi kết thúc, kể cả khi có bước thất bại giữa chừng.
+demo thủ công phía trên): `GV030` (GVHD — kiểm tra tên, tạo và giao đề tài,
+lưu nháp rồi gửi), `DTC235210040` và `DTC235210045` (lớp GV030 — nhận đề tài
+được giao, chỉ thấy đề tài của mình), `GV024` (GV không phải GVHD) và
+`DTC235210023` (lớp GV024 — không xem được đề tài lớp khác, sau đó được chuyển
+sang lớp GV030 và nhận đề tài giao). Các bước kiểm: GV giao cho SV chưa được
+phân công → 409; Bộ môn gán (`PUT /api/assignments`) + import CSV + danh sách
+phân công; GV kiểm tra tên → 200, SV → 403; giao → Đã phân công + thông báo
+SV; SV tạo/sửa/gửi và Bộ môn tạo đề tài → 403, route đăng ký/duyệt → 404, GV
+không phải GVHD giao → 409, giao thêm cho SV đã có đề tài → 409, thiếu
+`sinh_vien_id` → 422; đổi GVHD khi SV đã có đề tài Đã phân công → 409. Script
+tự xóa toàn bộ dữ liệu nó tạo ra (đợt K99 + phân công GVHD + đề tài + kết quả
+kiểm tra trùng lặp + thông báo phát sinh) khi kết thúc, kể cả khi có bước thất
+bại giữa chừng.
 
 `deploy/e2e-uc2-5.sh` chạy chuỗi đề cương → tiến độ → bảo vệ → lưu kho → thông
 báo → dashboard qua Apache trên một đợt khóa **K98** riêng. Tài khoản dành
@@ -434,10 +441,10 @@ bash deploy/sql.sh "SELECT COUNT(*) FROM dot_do_an WHERE khoa IN ('K96','K97','K
 
 Chuẩn bị: stack đã dựng, `bash deploy/seed-ai.sh` đã chạy. Dùng các tài khoản **không** thuộc danh sách dành riêng (tự động: SV thứ 93–100 của danh sách (DTC235210023…DTC235210045), GV023–GV030; demo bảo vệ: DTC235200139, DTC235200258, DTC235200325, DTC235200340, DTC235270078, GV011–GV014), vd. `DTC235200159`, `DTC235200379`, `GV010`; mật khẩu `SEED_DEFAULT_PASSWORD`.
 
-1. **SC1 — tên đề tài diễn đạt lại.** Đăng nhập `DTC235200159` → **Đề xuất / Đăng ký đề tài** → nhập tên "Sử dụng SQL Server để hạch toán thu chi doanh nghiệp cho công ty cổ phần Hoàng Long" rồi rời ô → cảnh báo "Phát hiện … đề tài tương tự trong kho" với đồ án kho "Ứng dụng SQL Server trong quản lý kế toán tại công ty CP Hoàng Long (K21)" kèm tỷ lệ (≈ 82%). Dán cùng tên ở dạng Unicode tổ hợp (NFD, vd. gõ bằng bộ gõ khác) cho cùng kết quả. Một tên cùng lĩnh vực nhưng khác đề tài không bị cảnh báo trùng kho.
-2. **SC2 — tài liệu chép nguyên văn.** Để `DTC235200159` có đề tài đã phân công với GVHD `GV010` (seed phân công `DTC235200159` → `GV010`; `GV010` duyệt đề xuất ở bước 1 trong "Duyệt đề tài", hoặc SV đăng ký một đề tài `GV010` mở cho lớp). Ở **Đề cương**, nộp `seed-data/tai-lieu/P01-B.pdf` → trạng thái "Đang kiểm tra" rồi "Hoàn tất - 50.3%" (không cần tải lại trang). Bấm "Xem kết quả" (MH-14): tỷ lệ tổng 50.3%, ngưỡng 10.4%, đồ án trùng "Phát triển mô hình thống kê điểm số … Metabase (K21)" 50.3%; mỗi đoạn đặt cạnh đoạn nguồn, cụm từ trùng được tô, nhãn "Trùng nguyên văn", ghi chú đã loại trừ phần mẫu chung (FR-AI-02). Đăng nhập `GV010` → **Duyệt đề cương** → "Duyệt": panel MH-09 hiện cùng tỷ lệ, "Vượt ngưỡng cảnh báo" và "Số đoạn trùng: 7 (7 trùng nguyên văn)". Nộp một file diễn đạt lại (vd. `P11-B.docx`) cho một SV khác: các đoạn mang nhãn "Trùng ngữ nghĩa", ít cụm từ được tô hơn.
+1. **SC1 — tên đề tài diễn đạt lại.** Đăng nhập GVHD `GV010` (GVHD của `DTC235200159`) → **Giao đề tài** → chọn SV → nhập tên "Sử dụng SQL Server để hạch toán thu chi doanh nghiệp cho công ty cổ phần Hoàng Long" rồi rời ô → cảnh báo "Phát hiện … đề tài tương tự trong kho" với đồ án kho "Ứng dụng SQL Server trong quản lý kế toán tại công ty CP Hoàng Long (K21)" kèm tỷ lệ (≈ 82%). Dán cùng tên ở dạng Unicode tổ hợp (NFD, vd. gõ bằng bộ gõ khác) cho cùng kết quả. Một tên cùng lĩnh vực nhưng khác đề tài không bị cảnh báo trùng kho.
+2. **SC2 — tài liệu chép nguyên văn.** Để `DTC235200159` có đề tài đã phân công với GVHD `GV010` (seed phân công `DTC235200159` → `GV010`; `GV010` giao đề tài cho `DTC235200159` ở bước 1 bằng "Vẫn giao đề tài"). Ở **Đề cương**, nộp `seed-data/tai-lieu/P01-B.pdf` → trạng thái "Đang kiểm tra" rồi "Hoàn tất - 50.3%" (không cần tải lại trang). Bấm "Xem kết quả" (MH-14): tỷ lệ tổng 50.3%, ngưỡng 10.4%, đồ án trùng "Phát triển mô hình thống kê điểm số … Metabase (K21)" 50.3%; mỗi đoạn đặt cạnh đoạn nguồn, cụm từ trùng được tô, nhãn "Trùng nguyên văn", ghi chú đã loại trừ phần mẫu chung (FR-AI-02). Đăng nhập `GV010` → **Duyệt đề cương** → "Duyệt": panel MH-09 hiện cùng tỷ lệ, "Vượt ngưỡng cảnh báo" và "Số đoạn trùng: 7 (7 trùng nguyên văn)". Nộp một file diễn đạt lại (vd. `P11-B.docx`) cho một SV khác: các đoạn mang nhãn "Trùng ngữ nghĩa", ít cụm từ được tô hơn.
 3. **SC3 — bảng kiểm chứng trên 50 file.** Mở `docs/chuong-4-trien-khai/thu-nghiem-ai/03-hieu-chinh-nguong.md`: điểm từng cặp của 25 cặp (chép nguyên văn, diễn đạt lại bị cảnh báo; cùng lĩnh vực, không liên quan dưới ngưỡng) trên tập hiệu chỉnh và tập kiểm chứng giữ lại, cùng mô hình đã chốt (`02-so-sanh-mo-hinh-embedding.md`).
-4. **SC4 — Bộ môn đổi ngưỡng.** Đăng nhập `bomon` → **Ngưỡng trùng lặp**: ba ngưỡng kèm giải thích, giá trị đề xuất và người cập nhật. Đặt "Ngưỡng tên đề tài" = 99 → "Lưu cấu hình" → xác nhận. `DTC235200159` kiểm tra lại tên ở bước 1 → không còn cảnh báo. Bộ môn bấm "Khôi phục giá trị đề xuất" → lưu → cảnh báo trở lại. Kết quả đã kiểm tra trước đó vẫn hiện ngưỡng lúc kiểm tra.
+4. **SC4 — Bộ môn đổi ngưỡng.** Đăng nhập `bomon` → **Ngưỡng trùng lặp**: ba ngưỡng kèm giải thích, giá trị đề xuất và người cập nhật. Đặt "Ngưỡng tên đề tài" = 99 → "Lưu cấu hình" → xác nhận. `GV010` kiểm tra lại tên ở bước 1 → không còn cảnh báo. Bộ môn bấm "Khôi phục giá trị đề xuất" → lưu → cảnh báo trở lại. Kết quả đã kiểm tra trước đó vẫn hiện ngưỡng lúc kiểm tra.
 5. **SC5 — bản ghi mới được index ngay; dịch vụ AI không lộ ra ngoài.** `bomon` → **Kho đồ án** → thêm bản ghi "Xây dựng hệ thống quản lý phòng thí nghiệm hóa học cho trường cao đẳng y tế" (khóa K22) → cột index chuyển "Đã index" sau vài giây. `DTC235200159` kiểm tra tên "Phát triển phần mềm quản lý phòng thí nghiệm hóa học tại trường cao đẳng y tế" → thấy ngay bản ghi vừa thêm (≈ 90%), không phải tính lại embedding toàn kho (e2e-ai kiểm `encode_calls` +1). Xóa bản ghi sau demo (vector của nó được gỡ khỏi chỉ mục ngay sau khi xóa). Phần cô lập: chạy `bash deploy/ai-nfr.sh` (hoặc `e2e-ai.sh`) — host không kết nối được cổng 8002, thiếu/sai khóa → 401, Apache không có route tới dịch vụ AI, tài khoản DB `thesis_ai` bị từ chối trên `thesis_core`; kèm số đo thời gian kiểm tra tên (P95 ≈ 0,05 s) và nộp → hoàn tất (P95 ≈ 3 s; báo cáo ~350 000 ký tự ≈ 42 s, kiểm tra tên chen giữa vẫn < 0,4 s).
 
 Dọn dữ liệu demo sau khi xong (đề tài/đề cương của tài khoản demo) theo cách thông thường của UC1–UC2; các file đã nộp nằm trong volume `uploads-data`.

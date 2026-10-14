@@ -1,6 +1,6 @@
 {
   "ten": "Ảnh chụp chương 4 — 5 UC × 3 vai trò (1440 px)",
-  "ghi_chu": "Chạy trên trạng thái demo vừa dựng (bash deploy/demo-state.sh); kịch bản có ghi dữ liệu (011 gửi đề xuất tới GVHD GV011, GV014 lưu điểm cho 014) nên chạy lại demo-state.sh sau đó. Mỗi bước khẳng định một chữ chứng minh đúng dữ liệu đang hiển thị. --chi-doc bỏ qua 4 bước ghi_du_lieu (verify-all dùng để đo NFR-16 mà không đổi trạng thái demo).",
+  "ghi_chu": "Chạy trên trạng thái demo vừa dựng (bash deploy/demo-state.sh); kịch bản có ghi dữ liệu (GV011 giao đề tài cho 011, GV014 lưu điểm cho 014) nên chạy lại demo-state.sh sau đó. Mỗi bước khẳng định một chữ chứng minh đúng dữ liệu đang hiển thị. --chi-doc bỏ qua 4 bước ghi_du_lieu (verify-all dùng để đo NFR-16 mà không đổi trạng thái demo).",
   "buoc": [
     {
       "id": "uc0-dang-nhap",
@@ -66,7 +66,7 @@
           "chup": true
         }
       ],
-      "man_hinh_mong_doi": "Popover thông báo chưa đọc: nhận xét tiến độ, duyệt đề cương, duyệt đề tài"
+      "man_hinh_mong_doi": "Popover thông báo chưa đọc: nhận xét tiến độ, duyệt đề cương, GVHD giao đề tài"
     },
     {
       "id": "uc0-trang-403",
@@ -111,7 +111,7 @@
           "chup": true
         }
       ],
-      "man_hinh_mong_doi": "Thẻ Sinh viên trong lớp / Đề tài chờ duyệt; Việc cần xử lý: đề cương chờ duyệt 1 (012, Hoàn tất 48 %), báo cáo tiến độ chờ nhận xét 1 (013)"
+      "man_hinh_mong_doi": "Thẻ Sinh viên trong lớp / SV chưa được giao đề tài (011); Việc cần xử lý: giao đề tài 1 sinh viên chưa có đề tài, đề cương chờ duyệt 1 (012, Hoàn tất 48 %), báo cáo tiến độ chờ nhận xét 1 (013)"
     },
     {
       "id": "uc0-tong-quan-bo-mon",
@@ -135,7 +135,7 @@
           "chup": true
         }
       ],
-      "man_hinh_mong_doi": "Thống kê toàn khoa (SV chưa phân công GVHD, đề tài chờ GVHD duyệt, …), tiến độ sinh viên, mốc tiến độ của đợt K22"
+      "man_hinh_mong_doi": "Thống kê toàn khoa (SV chưa phân công GVHD, SV chưa được giao đề tài, …), tiến độ sinh viên, mốc tiến độ của đợt K22, danh sách Đề tài giao gần nhất"
     },
     {
       "id": "uc0-quan-ly-tai-khoan",
@@ -230,25 +230,31 @@
       "man_hinh_mong_doi": "Chọn đợt, Import CSV; thống kê Tổng sinh viên / Đã phân công / Chưa phân công; tìm kiếm, bộ lọc; bảng SV lọc theo GVHD Trần Hải Thanh (GV011) với ô chọn GVHD từng dòng"
     },
     {
-      "id": "uc1-sv-canh-bao-trung-ten",
-      "mo_ta": "SV DTC235200139 nhập tên diễn đạt lại một đề tài kho — thông tin GVHD + cảnh báo trùng tên (MH-06)",
-      "vai_tro": "DTC235200139",
+      "id": "uc1-gv-canh-bao-trung-ten",
+      "mo_ta": "GV011 — Sinh viên của tôi, bấm Giao đề tài cho DTC235200139 rồi nhập tên diễn đạt lại một đề tài kho — cảnh báo trùng tên (UC0.6, MH-06)",
+      "vai_tro": "GV011",
       "man_hinh": "MH-06",
       "hanh_dong": [
         {
-          "mo": "/de-tai/de-xuat"
+          "mo": "/sinh-vien-huong-dan"
+        },
+        {
+          "cho_chu": "Sinh viên của tôi — Đợt đồ án tốt nghiệp K22"
+        },
+        {
+          "cho_chu": "DTC235200139"
+        },
+        {
+          "bam": {
+            "chu": "Giao đề tài",
+            "hang": "DTC235200139"
+          }
         },
         {
           "cho_chu": "Thông tin đề tài"
         },
         {
-          "go": {
-            "o": "Đợt đồ án",
-            "chu": "Đợt đồ án tốt nghiệp K22 - HK1 (2026-2027) (K22)"
-          }
-        },
-        {
-          "cho_chu": "Giảng viên hướng dẫn của bạn"
+          "cho_chu": "Giao cho sinh viên"
         },
         {
           "go": {
@@ -270,17 +276,17 @@
           "chup": true
         }
       ],
-      "man_hinh_mong_doi": "Thông tin 'Giảng viên hướng dẫn của bạn'; cảnh báo vàng: nguồn Kho đồ án, K21, GVHD, tỷ lệ tương đồng ≈ 82 %; nút Sửa tên / Vẫn gửi đề xuất"
+      "man_hinh_mong_doi": "Form Giao đề tài điền sẵn đợt K22 + sinh viên DTC235200139; cảnh báo vàng: nguồn Kho đồ án, K21, GVHD, tỷ lệ tương đồng ≈ 82 %; nút Sửa tên đề tài / Vẫn giao đề tài"
     },
     {
-      "id": "uc1-sv-gui-de-xuat",
-      "mo_ta": "SV DTC235200139 chọn Vẫn gửi đề xuất -> gửi GVHD duyệt, đề tài Chờ duyệt (UC1.1)",
-      "vai_tro": "DTC235200139",
+      "id": "uc1-gv-giao-de-tai",
+      "mo_ta": "GV011 chọn Vẫn giao đề tài -> Giao đề tài cho sinh viên, 011 có đề tài Đã phân công (UC1.1)",
+      "vai_tro": "GV011",
       "ghi_du_lieu": true,
       "man_hinh": "MH-06",
       "hanh_dong": [
         {
-          "bam": "Vẫn gửi đề xuất"
+          "bam": "Vẫn giao đề tài"
         },
         {
           "go": {
@@ -289,10 +295,10 @@
           }
         },
         {
-          "bam": "Gửi GVHD duyệt"
+          "bam": "Giao đề tài cho sinh viên"
         },
         {
-          "cho_chu": "Chờ duyệt",
+          "cho_chu": "Đã phân công",
           "toi_da_giay": 15
         },
         {
@@ -302,7 +308,7 @@
           "chup": true
         }
       ],
-      "man_hinh_mong_doi": "Chi tiết đề tài vừa gửi: Chờ duyệt, GVHD Trần Hải Thanh, kết quả kiểm tra tên đã lưu"
+      "man_hinh_mong_doi": "Chi tiết đề tài vừa giao: Đã phân công, GVHD Trần Hải Thanh, sinh viên 011, kết quả kiểm tra tên đã lưu"
     },
     {
       "id": "uc1-danh-sach-de-tai",
@@ -332,7 +338,7 @@
           "chup": true
         }
       ],
-      "man_hinh_mong_doi": "Đề tài của đợt K22: 4 Đã phân công (012–015) và — sau bước uc1-sv-gui-de-xuat — 1 Chờ duyệt (011, chờ GVHD GV011)"
+      "man_hinh_mong_doi": "Đề tài của đợt K22: 4 Đã phân công (012–015) và — sau bước uc1-gv-giao-de-tai — 5 Đã phân công (thêm 011, GVHD GV011)"
     },
     {
       "id": "uc1-sinh-vien-cua-toi",
@@ -355,40 +361,36 @@
           "chup": true
         }
       ],
-      "man_hinh_mong_doi": "Bảng lớp hướng dẫn K22: 011 Chờ duyệt (nút Duyệt đề tài — sau bước uc1-sv-gui-de-xuat), 012–015 Đã phân công, SV chưa có đề tài có nút Giao đề tài"
+      "man_hinh_mong_doi": "Bảng lớp hướng dẫn K22: 011 Đã phân công (sau bước uc1-gv-giao-de-tai), 012–015 Đã phân công; SV chưa có đề tài có nút Giao đề tài"
     },
     {
-      "id": "uc1-gv-duyet-de-tai",
-      "mo_ta": "GVHD GV011 — duyệt đề tài chờ duyệt của 011 (UC1.3, MH-07, chưa bấm duyệt)",
-      "vai_tro": "GV011",
+      "id": "uc1-sv-de-tai-duoc-giao",
+      "mo_ta": "SV DTC235200139 — tổng quan: đề tài được GVHD giao, mở chi tiết đề tài được giao (UC1.2, MH-07)",
+      "vai_tro": "DTC235200139",
       "ghi_du_lieu": true,
       "hanh_dong": [
         {
-          "mo": "/duyet-de-tai"
-        },
-        {
-          "cho_chu": "Đề tài chờ duyệt"
+          "mo": "/tong-quan"
         },
         {
           "cho_chu": "Sử dụng SQL Server để hạch toán thu chi doanh nghiệp"
         },
         {
-          "bam": {
-            "chu": "Xem chi tiết",
-            "hang": "Sử dụng SQL Server để hạch toán thu chi doanh nghiệp"
-          }
+          "bam": "Xem chi tiết đề tài"
         },
         {
-          "cho_chu": "Chi tiết đề tài chờ duyệt"
+          "cho_chu": "Đã phân công",
+          "toi_da_giay": 15
         },
         {
-          "cho_chu": "Kết quả kiểm tra tên đã lưu lúc đề xuất"
+          "cho_chu": "Kết quả kiểm tra trùng tên"
         },
         {
           "chup": true
         }
       ],
-      "man_hinh_mong_doi": "Bảng Đề tài chờ duyệt của lớp GV011; ngăn chi tiết: sinh viên, kết quả kiểm tra tên (Kho đồ án ≈ 82 %), nút Từ chối / Duyệt đề tài"
+      "man_hinh_mong_doi": "Chi tiết đề tài được giao: Đã phân công, GVHD, sinh viên, kết quả kiểm tra tên đã lưu (Kho đồ án ≈ 82 %); SV không có nút Sửa / Giao đề tài",
+      "man_hinh": "MH-07"
     },
     {
       "id": "uc2-sv-nop-de-cuong",

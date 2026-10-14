@@ -19,7 +19,6 @@ export interface CohortRef {
 export interface QuyenOut {
   sua: boolean
   gui: boolean
-  dang_ky: boolean
 }
 
 export type TitleCheckStatus = 'HOAN_TAT' | 'LOI'
@@ -81,7 +80,6 @@ export interface TopicListItem {
   nguoi_de_xuat: PersonRef
   giang_vien_huong_dan: PersonRef | null
   sinh_vien: PersonRef | null
-  co_the_dang_ky: boolean
 }
 
 export interface PageResult<T> {
@@ -108,8 +106,8 @@ export interface TopicFormInput {
   ten_de_tai: string
   mo_ta?: string | null
   linh_vuc?: string | null
-  // UC0.8: GV giao thẳng cho SV trong lớp mình; null = mở cho lớp đăng ký.
-  sinh_vien_id?: number | null
+  // UC0.8/UC1.1: GVHD giao cho SV trong lớp hướng dẫn của mình (bắt buộc).
+  sinh_vien_id: number
 }
 
 export interface TopicCreateInput extends TopicFormInput {
@@ -139,7 +137,7 @@ export function useTopic(id: number | undefined) {
   })
 }
 
-// MH-05/UC1.4: danh sách đề tài lọc theo trạng thái/đợt/GVHD/lĩnh vực/từ khóa;
+// MH-05/UC1.2: danh sách đề tài lọc theo trạng thái/đợt/GVHD/lĩnh vực/từ khóa;
 // placeholderData giữ trang cũ khi đổi bộ lọc/trang để tránh flash rỗng.
 export function useTopics(params: TopicsQueryParams) {
   return useQuery({
@@ -193,21 +191,6 @@ export function useSubmitTopic() {
   return useMutation({
     mutationFn: async (id: number) => {
       const { data } = await api.post<TopicOut>(`/topics/${id}/submit`)
-      return data
-    },
-    onSuccess: (_data, id) => {
-      void queryClient.invalidateQueries({ queryKey: [TOPIC_KEY, id] })
-      void queryClient.invalidateQueries({ queryKey: [TOPIC_KEY] })
-    },
-  })
-}
-
-// UC1.2/UC0.8: SV đăng ký đề tài GVHD của mình mở cho lớp -> Đã phân công ngay.
-export function useRegisterTopic() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: async (id: number) => {
-      const { data } = await api.post<TopicOut>(`/topics/${id}/register`)
       return data
     },
     onSuccess: (_data, id) => {

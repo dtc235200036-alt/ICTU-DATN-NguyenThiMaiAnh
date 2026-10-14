@@ -5,7 +5,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router'
 
 import { getErrorMessage } from '../../api/client'
 import { useAuthStore } from '../../stores/auth'
-import { useMyAdvisor, useMyStudents } from '../assignments/api'
+import { useMyStudents } from '../assignments/api'
 import { useCohorts } from '../cohorts/api'
 import ForbiddenPage from '../auth/ForbiddenPage'
 import { LINH_VUC_OPTIONS } from './constants'
@@ -26,15 +26,16 @@ interface FormValues {
   ten_de_tai: string
   linh_vuc?: string
   mo_ta?: string
-  sinh_vien_id?: number
+  sinh_vien_id: number
 }
 
 /**
- * MH-06 (UC1.1): đề xuất đề tài mới ('/de-tai/de-xuat') hoặc sửa nháp
+ * MH-06 (UC1.1): GVHD tạo và giao đề tài ('/de-tai/de-xuat') hoặc sửa nháp
  * ('/de-tai/:id/sua'). Cùng một component cho cả hai chế độ — phân biệt qua
- * có/không có :id trên URL. UC0.8: SV gửi tới GVHD Bộ môn đã phân công (chưa có
- * GVHD thì không gửi được); GV giao thẳng cho một SV trong lớp mình hoặc để
- * trống để mở cho cả lớp đăng ký (?dot_do_an_id=&sinh_vien_id= điền sẵn).
+ * có/không có :id trên URL. Góp ý GVHD mục 1: SV không tự đề xuất/đăng ký; SV
+ * và GV thống nhất đề tài ngoài hệ thống, GVHD (được Bộ môn phân công, UC0.8)
+ * chọn một SV trong lớp hướng dẫn (bắt buộc) và giao -> Đã phân công
+ * (?dot_do_an_id=&sinh_vien_id= điền sẵn từ "Sinh viên của tôi").
  */
 export default function TopicFormPage() {
   const { id } = useParams()
@@ -48,12 +49,10 @@ export default function TopicFormPage() {
   const vaiTro = useAuthStore((s) => s.user?.vai_tro)
   const isGv = vaiTro === 'GIANG_VIEN'
   const selectedCohort = Form.useWatch('dot_do_an_id', form)
-  const selectedSv = Form.useWatch('sinh_vien_id', form)
 
   const { data: cohorts, isLoading: cohortsLoading } = useCohorts({ trang_thai: 'DANG_MO' })
   const { data: topic, isLoading: topicLoading, isFetched: topicFetched } = useTopic(topicId)
   const { data: myStudents } = useMyStudents(selectedCohort, isGv && selectedCohort !== undefined)
-  const { data: myAdvisors } = useMyAdvisor(vaiTro === 'SINH_VIEN')
 
   const createMutation = useCreateTopic()
   const updateMutation = useUpdateTopic()
@@ -61,7 +60,7 @@ export default function TopicFormPage() {
   const checkTitleMutation = useCheckTitle()
 
   // UC0.6/FR-DT-02: kết quả kiểm tra trùng tên tức thời (chưa lưu — bản lưu
-  // chỉ xảy ra khi thật sự gửi đề xuất, ở service topics.py).
+  // chỉ xảy ra khi GVHD thật sự giao đề tài, ở service topics.py).
   const [checkResult, setCheckResult] = useState<TitleCheckResult | null>(null)
   const [lastCheckedTitle, setLastCheckedTitle] = useState<string | null>(null)
   const [acknowledged, setAcknowledged] = useState(false)
@@ -102,29 +101,33 @@ export default function TopicFormPage() {
   }))
   const noCohortOpen = !cohortsLoading && cohortOptions.length === 0
 
-  // UC0.8: SV chỉ đề xuất trong đợt đã có GVHD; GV chỉ giao cho SV lớp mình.
-  const myAdvisor = (myAdvisors ?? []).find((a) => a.dot_do_an.id === selectedCohort)
-  const svNoAdvisor = vaiTro === 'SINH_VIEN' && selectedCohort !== undefined && myAdvisors !== undefined && !myAdvisor
+  // UC0.8: GVHD chỉ giao cho SV lớp mình chưa có đề tài đang hoạt động (khi sửa
+  // nháp vẫn giữ SV đang được chọn trong danh sách).
+  const editingSvId = topic?.sinh_vien?.id
   const classOptions = (myStudents?.[0]?.items ?? [])
-    .filter((st) => st.trang_thai_de_tai !== 'DA_PHAN_CONG' && st.trang_thai_de_tai !== 'CHO_DUYET')
+    .filter(
+      (st) =>
+        st.sinh_vien.id === editingSvId ||
+        (st.trang_thai_de_tai !== 'DA_PHAN_CONG' && st.trang_thai_de_tai !== 'CHO_DUYET'),
+    )
     .map((st) => ({
       value: st.sinh_vien.id,
       label: `${st.sinh_vien.ho_ten} (${st.sinh_vien.ma ?? ''})`,
     }))
-  const submitLabel = isGv ? (selectedSv ? 'Giao đề tài cho sinh viên' : 'Mở cho lớp đăng ký') : 'Gửi GVHD duyệt'
+  const submitLabel = 'Giao đề tài cho sinh viên'
 
   const buildInput = (values: FormValues): TopicFormInput => ({
     dot_do_an_id: values.dot_do_an_id,
     ten_de_tai: values.ten_de_tai,
     linh_vuc: values.linh_vuc ?? null,
     mo_ta: values.mo_ta ?? null,
-    sinh_vien_id: isGv ? (values.sinh_vien_id ?? null) : null,
+    sinh_vien_id: values.sinh_vien_id,
   })
 
   const isSaving =
     createMutation.isPending || updateMutation.isPending || submitMutation.isPending
 
-  // Mọi lần đổi tên đề tài làm kết quả cũ (và xác nhận "vẫn gửi") hết hiệu lực
+  // Mọi lần đổi tên đề tài làm kết quả cũ (và xác nhận "vẫn giao") hết hiệu lực
   // (UC1.1 A1/A2) — check tiếp theo chạy khi rời ô (onBlur) hoặc lúc gửi.
   const handleTitleChange = () => {
     if (acknowledged) {
@@ -198,13 +201,7 @@ export default function TopicFormPage() {
         const created = await createMutation.mutateAsync({ ...buildInput(values), gui: true })
         savedId = created.id
       }
-      message.success(
-        isGv
-          ? values.sinh_vien_id
-            ? 'Đã giao đề tài cho sinh viên'
-            : 'Đã mở đề tài cho sinh viên trong lớp đăng ký'
-          : 'Đã gửi đề tài tới GVHD duyệt',
-      )
+      message.success('Đã giao đề tài cho sinh viên')
       if (savedId !== undefined) {
         navigate(`/de-tai/${savedId}`)
       }
@@ -248,35 +245,15 @@ export default function TopicFormPage() {
         <Alert
           type="warning"
           showIcon
-          message="Hiện không có đợt đồ án nào đang mở nhận đề xuất"
+          message="Hiện không có đợt đồ án nào đang mở"
           style={{ marginBottom: 16 }}
-        />
-      )}
-      {myAdvisor && (
-        <Alert
-          type="info"
-          showIcon
-          style={{ marginBottom: 16 }}
-          message={`Giảng viên hướng dẫn của bạn: ${[myAdvisor.hoc_vi, myAdvisor.giang_vien.ho_ten]
-            .filter(Boolean)
-            .join(' ')}`}
-          description="Đề tài bạn gửi sẽ do giảng viên hướng dẫn duyệt."
-        />
-      )}
-      {svNoAdvisor && (
-        <Alert
-          type="warning"
-          showIcon
-          style={{ marginBottom: 16 }}
-          message="Bạn chưa được Bộ môn phân công giảng viên hướng dẫn trong đợt này"
-          description="Bạn vẫn lưu nháp được; gửi đề xuất sau khi Bộ môn phân công GVHD."
         />
       )}
       <Form form={form} layout="vertical">
         <Form.Item
           label="Đợt đồ án"
           name="dot_do_an_id"
-          extra="Chỉ hiển thị các đợt đang mở nhận đề xuất."
+          extra="Chỉ hiển thị các đợt đang mở."
           rules={[{ required: true, message: 'Vui lòng chọn đợt đồ án' }]}
         >
           <Select
@@ -308,7 +285,7 @@ export default function TopicFormPage() {
           <>
             {acknowledged && checkResult.matches.length > 0 ? (
               <Tag color="warning" style={{ marginBottom: 16 }}>
-                Đã xác nhận gửi kèm cảnh báo
+                Đã xác nhận giao kèm cảnh báo
               </Tag>
             ) : (
               <TitleCheckAlert
@@ -320,22 +297,20 @@ export default function TopicFormPage() {
           </>
         )}
 
-        {isGv && (
-          <Form.Item
-            label="Giao cho sinh viên"
-            name="sinh_vien_id"
-            extra="Chỉ sinh viên trong lớp hướng dẫn của bạn (chưa có đề tài). Để trống = mở cho cả lớp đăng ký."
-          >
-            <Select
-              allowClear
-              showSearch
-              optionFilterProp="label"
-              placeholder="Mở cho lớp đăng ký"
-              disabled={selectedCohort === undefined}
-              options={classOptions}
-            />
-          </Form.Item>
-        )}
+        <Form.Item
+          label="Giao cho sinh viên"
+          name="sinh_vien_id"
+          extra="Chỉ sinh viên trong lớp hướng dẫn của bạn (chưa có đề tài), đã thống nhất đề tài với bạn."
+          rules={[{ required: true, message: 'Vui lòng chọn sinh viên được giao' }]}
+        >
+          <Select
+            showSearch
+            optionFilterProp="label"
+            placeholder="Chọn sinh viên trong lớp hướng dẫn"
+            disabled={selectedCohort === undefined}
+            options={classOptions}
+          />
+        </Form.Item>
 
         <Form.Item label="Lĩnh vực" name="linh_vuc">
           <Select
@@ -357,7 +332,7 @@ export default function TopicFormPage() {
         <Button
           type="primary"
           onClick={handleSubmitProposal}
-          disabled={noCohortOpen || svNoAdvisor}
+          disabled={noCohortOpen}
           loading={isSaving || checkTitleMutation.isPending}
         >
           {submitLabel}

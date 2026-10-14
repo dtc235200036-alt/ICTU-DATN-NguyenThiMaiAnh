@@ -1,5 +1,5 @@
 // D-06 (Asia/Ho_Chi_Minh) — cùng quy ước Intl.DateTimeFormat đã dùng ở
-// TopicApprovalPage/TopicDetailPage, gom về một nơi dùng chung cho Phase 3.
+// TopicDetailPage (trước đây có thêm màn duyệt đề tài, đã gỡ), gom về một nơi dùng chung cho Phase 3.
 
 export function formatDate(iso: string | null | undefined): string {
   if (!iso) return '—'

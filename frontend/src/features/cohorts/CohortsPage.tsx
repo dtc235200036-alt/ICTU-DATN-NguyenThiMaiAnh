@@ -118,7 +118,7 @@ export default function CohortsPage() {
           <Popconfirm
             title={
               record.trang_thai === 'DANG_MO'
-                ? 'Đóng đợt đồ án này? Đóng đợt sẽ chặn đề xuất/đăng ký đề tài mới cho tới khi mở lại.'
+                ? 'Đóng đợt đồ án này? Đóng đợt sẽ chặn giao đề tài mới cho tới khi mở lại.'
                 : 'Mở lại đợt đồ án này?'
             }
             onConfirm={() => handleToggleState(record)}

@@ -1,20 +1,19 @@
-import { App as AntApp, Button, Card, Input, Popconfirm, Select, Table, Tag } from 'antd'
+import { Button, Card, Input, Select, Table, Tag } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 
-import { getErrorMessage } from '../../api/client'
 import { useLecturers } from '../accounts/api'
 import { useCohorts } from '../cohorts/api'
 import { useAuthStore } from '../../stores/auth'
-import { LINH_VUC_OPTIONS, TRANG_THAI_DE_TAI } from './constants'
-import { useRegisterTopic, useTopics } from './api'
+import { LINH_VUC_OPTIONS, TRANG_THAI_DE_TAI, TRANG_THAI_LOC_OPTIONS } from './constants'
+import { useTopics } from './api'
 import type { PersonRef, TopicListItem } from './api'
 
 const { Search } = Input
 
 const TRANG_THAI_SELECT_OPTIONS = [
   { value: 'all', label: 'Tất cả' },
-  ...Object.entries(TRANG_THAI_DE_TAI).map(([value, meta]) => ({ value, label: meta.label })),
+  ...TRANG_THAI_LOC_OPTIONS,
 ]
 
 function renderPerson(person: PersonRef | null): string {
@@ -23,7 +22,7 @@ function renderPerson(person: PersonRef | null): string {
 }
 
 /**
- * MH-05 (UC1.4): danh sách đề tài lọc theo trạng thái/đợt/GVHD/lĩnh vực/từ
+ * MH-05 (UC1.2): danh sách đề tài lọc theo trạng thái/đợt/GVHD/lĩnh vực/từ
  * khóa, luôn trong phạm vi server-side của vai trò đang xem (T-02-29). Mọi bộ
  * lọc + trang sống trong URL (useSearchParams) để menu, reload và back/forward
  * đều giữ đúng góc nhìn hiện tại.
@@ -32,8 +31,6 @@ export default function TopicListPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
-  const { message } = AntApp.useApp()
-  const registerMutation = useRegisterTopic()
 
   const phamVi = searchParams.get('pham_vi') === 'cua_toi' ? 'cua_toi' : 'tat_ca'
   const dotDoAnId = searchParams.get('dot_do_an_id') ?? undefined
@@ -75,17 +72,8 @@ export default function TopicListPage() {
     setSearchParams(next)
   }
 
-  const canPropose = user?.vai_tro === 'SINH_VIEN' || user?.vai_tro === 'GIANG_VIEN'
-
-  const handleRegister = async (record: TopicListItem) => {
-    try {
-      await registerMutation.mutateAsync(record.id)
-      message.success('Đăng ký thành công — đề tài đã được phân công, bạn có thể nộp đề cương')
-      navigate(`/de-tai/${record.id}`)
-    } catch (err) {
-      message.error(getErrorMessage(err))
-    }
-  }
+  // Góp ý GVHD mục 1: chỉ GVHD tạo/giao đề tài; SV chỉ xem đề tài được giao.
+  const canAssign = user?.vai_tro === 'GIANG_VIEN'
 
   const columns: ColumnsType<TopicListItem> = [
     {
@@ -100,11 +88,6 @@ export default function TopicListPage() {
       title: 'Lĩnh vực',
       dataIndex: 'linh_vuc',
       render: (value: string | null) => value ?? '—',
-    },
-    {
-      title: 'Người đề xuất',
-      dataIndex: 'nguoi_de_xuat',
-      render: (person: PersonRef) => renderPerson(person),
     },
     {
       title: 'GVHD',
@@ -132,17 +115,6 @@ export default function TopicListPage() {
           <Button size="small" onClick={() => navigate(`/de-tai/${record.id}`)}>
             Xem
           </Button>
-          {record.co_the_dang_ky && (
-            <Popconfirm
-              title="Đăng ký đề tài này?"
-              description="Đề tài do GVHD của bạn mở cho lớp — đăng ký xong là Đã phân công ngay, không đổi được nữa."
-              onConfirm={() => handleRegister(record)}
-            >
-              <Button size="small" type="primary" loading={registerMutation.isPending}>
-                Đăng ký
-              </Button>
-            </Popconfirm>
-          )}
         </div>
       ),
     },
@@ -161,9 +133,9 @@ export default function TopicListPage() {
         <h2 style={{ margin: 0 }}>
           {phamVi === 'cua_toi' ? 'Đề tài của tôi' : 'Danh sách đề tài'}
         </h2>
-        {canPropose && (
+        {canAssign && (
           <Button type="primary" onClick={() => navigate('/de-tai/de-xuat')}>
-            Đề xuất đề tài
+            Giao đề tài
           </Button>
         )}
       </div>

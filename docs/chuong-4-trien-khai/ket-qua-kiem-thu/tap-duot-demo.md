@@ -54,3 +54,29 @@
 | B16 | Bộ môn xem cấu hình ngưỡng trùng lặp (chỉ xem, không lưu) | 2.1 | OK |
 | B17 | Bảo mật: SV 013 mở trang của Bộ môn -> 403; http:// tự chuyển sang https:// | 4.7 | OK |
 | B18 | Kết: Bộ môn quay lại Tổng quan — số liệu đã cập nhật sau buổi demo | 4.1 | OK |
+
+### Lần chạy 2026-10-14T15:13:20Z — Kịch bản demo bảo vệ — 5 UC × 3 vai trò (bản chạy tự động)
+
+- Kịch bản: `tools/demo/kich-ban-demo.json` · URL: `https://localhost:443` · khung nhìn 1440x900
+- Kết quả: **OK** — 18/18 bước OK, tổng 75.8 s
+
+| Bước | Mô tả | Thời gian (s) | Kết quả |
+|---|---|---:|---|
+| B01 | Bộ môn mở Tổng quan toàn khoa | 4.4 | OK |
+| B02 | Bộ môn mở Phân công GVHD — lọc lớp hướng dẫn của GV011 (5 SV demo) | 3.6 | OK |
+| B03 | GV011 mở Sinh viên của tôi, bấm Giao đề tài cho SV 011 và nhập tên diễn đạt lại một đồ án trong kho | 4.6 | OK |
+| B04 | GV011 chọn Vẫn giao đề tài và giao đề tài cho SV 011 | 2.5 | OK |
+| B05 | GV011 mở Sinh viên của tôi — lớp hướng dẫn, đề tài 011 Đã phân công | 2.1 | OK |
+| B06 | SV 011 mở Tổng quan — thấy đề tài được GVHD giao và mở chi tiết đề tài | 4.5 | OK |
+| B07 | SV 011 nộp đề cương P03-B.pdf (chép nguyên văn) — Đang kiểm tra rồi Hoàn tất, mở kết quả | 10.1 | OK |
+| B08 | GV011 mở đề cương chờ duyệt của 012 — khung kết quả trùng lặp | 4.4 | OK |
+| B09 | GV011 xem chi tiết — đoạn nộp cạnh đoạn nguồn, cụm trùng tô sáng | 2.1 | OK |
+| B10 | GV011 yêu cầu 012 sửa đề cương kèm nhận xét | 2.8 | OK |
+| B11 | SV 013 xem báo cáo tiến độ theo mốc | 4.1 | OK |
+| B12 | GV011 nhận xét báo cáo mốc 2 của 013 | 4.8 | OK |
+| B13 | GV014 (ủy viên Hội đồng demo K22) chấm điểm SV 014 | 4.8 | OK |
+| B14 | Bộ môn chốt kết quả bảo vệ của 014 — tự lưu kho | 5.1 | OK |
+| B15 | Bộ môn tìm đồ án vừa lưu kho theo từ khóa + khóa K22; mở hộp thoại import khóa cũ | 4.5 | OK |
+| B16 | Bộ môn xem cấu hình ngưỡng trùng lặp (chỉ xem, không lưu) | 2.1 | OK |
+| B17 | Bảo mật: SV 013 mở trang của Bộ môn -> 403; http:// tự chuyển sang https:// | 4.9 | OK |
+| B18 | Kết: Bộ môn quay lại Tổng quan — số liệu đã cập nhật sau buổi demo | 4.2 | OK |

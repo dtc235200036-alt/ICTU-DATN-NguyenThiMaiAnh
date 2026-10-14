@@ -60,12 +60,12 @@ export interface GvTopicItem {
   sinh_vien: string | null
 }
 
-export type LoaiViec = 'DUYET_DE_TAI' | 'DUYET_DE_CUONG' | 'NHAN_XET_TIEN_DO' | 'CHAM_DIEM'
+export type LoaiViec = 'GIAO_DE_TAI' | 'DUYET_DE_CUONG' | 'NHAN_XET_TIEN_DO' | 'CHAM_DIEM'
 
 export interface GvTaskItem {
   loai: LoaiViec
   sinh_vien: string | null
-  ten_de_tai: string
+  ten_de_tai: string | null
   ghi_chu: string
   lien_ket: string
 }
@@ -73,7 +73,7 @@ export interface GvTaskItem {
 export interface GvDashboardOut {
   so_sinh_vien_huong_dan: number
   so_de_tai: number
-  so_de_tai_cho_duyet: number
+  so_sinh_vien_chua_giao_de_tai: number
   so_sinh_vien_lop: number
   de_tai: GvTopicItem[]
   so_de_cuong_cho_duyet: number
@@ -82,10 +82,11 @@ export interface GvDashboardOut {
   viec_can_xu_ly: GvTaskItem[]
 }
 
-export interface BmPendingTopicRef {
+export interface BmAssignedTopicRef {
   id: number
   ten_de_tai: string
-  nguoi_de_xuat: string
+  giang_vien: string
+  sinh_vien: string
 }
 
 export interface DashboardCohortRef {
@@ -112,12 +113,12 @@ export interface BmProgressExcerpt {
 
 export interface BmDashboardOut {
   dot_do_an: DashboardCohortRef | null
-  de_tai_cho_duyet: number
+  sv_chua_giao_de_tai: number
   de_tai_da_phan_cong: number
   sv_chua_co_de_tai: number
   sv_chua_phan_cong: number
   tong_sinh_vien: number
-  cho_duyet_moi_nhat: BmPendingTopicRef[]
+  de_tai_moi_giao: BmAssignedTopicRef[]
   sv_tre_moc: number
   tien_do_trich: BmProgressExcerpt | null
   moc_tien_do: MilestoneOut[]

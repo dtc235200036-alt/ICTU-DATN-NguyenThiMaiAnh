@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Col, Empty, List, Row, Skeleton, Statistic, Steps, Tag, Typography } from 'antd'
+import { Button, Card, Col, Empty, List, Row, Skeleton, Statistic, Steps, Tag, Typography } from 'antd'
 import { useNavigate } from 'react-router'
 
 import CheckStatusTag from '../documents/CheckStatusTag'
@@ -21,7 +21,7 @@ const TRANG_THAI_DE_CUONG: Record<string, { label: string; color: string }> = {
 
 function TopicCard({ data }: { data: SvDashboardOut }) {
   const navigate = useNavigate()
-  const { de_tai, co_dot_dang_mo, giang_vien_huong_dan } = data
+  const { de_tai, giang_vien_huong_dan } = data
   const trangThai = de_tai
     ? (TRANG_THAI_DE_TAI[de_tai.trang_thai] ?? { label: de_tai.trang_thai, color: 'default' })
     : null
@@ -37,44 +37,14 @@ function TopicCard({ data }: { data: SvDashboardOut }) {
           <p style={{ margin: '0 0 12px' }}>
             <Tag color={trangThai?.color}>{trangThai?.label}</Tag>
           </p>
-          {de_tai.trang_thai === 'TU_CHOI' && (
-            <Alert
-              type="error"
-              showIcon
-              message={`Lý do từ chối: ${de_tai.ly_do_tu_choi ?? ''}`}
-              style={{ marginBottom: 12 }}
-            />
-          )}
           <Button onClick={() => navigate(`/de-tai/${de_tai.id}`)}>Xem chi tiết đề tài</Button>
         </>
       ) : (
         <Empty
-          description={
-            giang_vien_huong_dan
-              ? `Bạn chưa có đề tài — GVHD của bạn: ${giang_vien_huong_dan}`
-              : co_dot_dang_mo
-                ? 'Bạn chưa có đề tài và chưa được Bộ môn phân công GVHD'
-                : 'Bạn chưa có đề tài'
-          }
-        >
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-            <Button
-              type="primary"
-              disabled={!co_dot_dang_mo || !giang_vien_huong_dan}
-              title={co_dot_dang_mo ? undefined : 'Chưa có đợt đồ án đang mở'}
-              onClick={() => navigate('/de-tai/de-xuat')}
-            >
-              Đề xuất đề tài
-            </Button>
-            <Button
-              disabled={!co_dot_dang_mo || !giang_vien_huong_dan}
-              title={co_dot_dang_mo ? undefined : 'Chưa có đợt đồ án đang mở'}
-              onClick={() => navigate('/de-tai')}
-            >
-              Đăng ký đề tài GVHD mở
-            </Button>
-          </div>
-        </Empty>
+          description={`Bạn chưa được giao đề tài. Hãy trao đổi trực tiếp với GVHD${
+            giang_vien_huong_dan ? ` ${giang_vien_huong_dan}` : ''
+          }; khi GVHD giao đề tài trên hệ thống, bạn sẽ nhận được thông báo.`}
+        />
       )}
     </Card>
   )

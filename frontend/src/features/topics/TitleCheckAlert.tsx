@@ -27,8 +27,8 @@ const columns: ColumnsType<TitleMatch> = [
 ]
 
 /**
- * MH-06 (UC0.6/FR-DT-02): cảnh báo đề tài tương tự trước khi gửi đề xuất —
- * KHÔNG BAO GIỜ chặn việc gửi, chỉ cảnh báo (UC1.1 A1/A2). Khi Dịch vụ AI lỗi
+ * MH-06 (UC0.6/FR-DT-02): cảnh báo đề tài tương tự trước khi GVHD giao đề tài —
+ * KHÔNG BAO GIỜ chặn việc giao, chỉ cảnh báo (UC1.1 A1/A2). Khi Dịch vụ AI lỗi
  * (E2), hiển thị thông báo "Chưa kiểm tra" thay vì bảng so sánh.
  */
 export default function TitleCheckAlert({
@@ -42,7 +42,7 @@ export default function TitleCheckAlert({
         type="info"
         showIcon
         style={{ marginBottom: 16 }}
-        message="Chưa kiểm tra được trùng lặp tên đề tài (dịch vụ kiểm tra không phản hồi). Bạn vẫn có thể gửi đề xuất; GVHD sẽ thấy trạng thái Chưa kiểm tra."
+        message="Chưa kiểm tra được trùng lặp tên đề tài (dịch vụ kiểm tra không phản hồi). Bạn vẫn có thể giao đề tài; kết quả được lưu với trạng thái Chưa kiểm tra."
       />
     )
   }
@@ -61,7 +61,7 @@ export default function TitleCheckAlert({
         <div>
           <p>
             Hệ thống so sánh ngữ nghĩa tên đề tài với các đề tài hiện hành và kho đồ án các
-            khóa trước. Đây chỉ là cảnh báo, không chặn việc gửi đề xuất.
+            khóa trước. Đây chỉ là cảnh báo, không chặn việc giao đề tài.
           </p>
           <Table<TitleMatch>
             size="small"
@@ -76,7 +76,7 @@ export default function TitleCheckAlert({
               Sửa tên đề tài
             </Button>
             <Button size="small" type="primary" onClick={onSendAnyway}>
-              Vẫn gửi đề xuất
+              Vẫn giao đề tài
             </Button>
           </div>
         </div>

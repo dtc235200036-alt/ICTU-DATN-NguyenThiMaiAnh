@@ -9,7 +9,7 @@ import type { MyStudentItem } from './api'
 /**
  * MH-16/UC0.8: "Sinh viên của tôi" — lớp hướng dẫn Bộ môn phân công cho GV
  * trong các đợt đang mở, kèm đề tài hiện tại của từng SV. GV giao đề tài cho
- * SV chưa có đề tài ngay từ đây (mở form đề xuất với SV điền sẵn).
+ * SV chưa có đề tài ngay từ đây (mở form "Giao đề tài" với SV điền sẵn).
  */
 export default function MyStudentsPage() {
   const navigate = useNavigate()
@@ -55,13 +55,6 @@ export default function MyStudentsPage() {
             key: 'hanh_dong',
             width: 150,
             render: (_v, r) => {
-              if (r.trang_thai_de_tai === 'CHO_DUYET') {
-                return (
-                  <Button size="small" type="primary" onClick={() => navigate(`/duyet-de-tai?de_tai_id=${r.de_tai_id}`)}>
-                    Duyệt đề tài
-                  </Button>
-                )
-              }
               const active = r.trang_thai_de_tai === 'DA_PHAN_CONG'
               return active ? null : (
                 <Button

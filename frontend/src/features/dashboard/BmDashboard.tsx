@@ -10,7 +10,7 @@ import QueryErrorAlert from '../../components/QueryErrorAlert'
 import { useBmDashboard } from './api'
 
 /** MH-04: chỉ số toàn khoa theo đợt (đề tài, SV trễ mốc, hội đồng sắp tới),
- * trích tiến độ 5 SV, mốc của đợt và danh sách đề tài chờ duyệt mới nhất. */
+ * trích tiến độ 5 SV, mốc của đợt và danh sách đề tài giao gần nhất. */
 export default function BmDashboard() {
   const navigate = useNavigate()
   const [dotDoAnId, setDotDoAnId] = useState<number | undefined>(undefined)
@@ -82,11 +82,12 @@ export default function BmDashboard() {
                 valueStyle={data.sv_chua_phan_cong > 0 ? { color: '#cf1322' } : undefined}
               />
             </Card>
-            <Card
-              style={{ minWidth: 220, cursor: 'pointer' }}
-              onClick={() => navigate('/de-tai?trang_thai=CHO_DUYET')}
-            >
-              <Statistic title="Đề tài chờ GVHD duyệt" value={data.de_tai_cho_duyet} />
+            <Card style={{ minWidth: 220, cursor: 'pointer' }} onClick={() => navigate('/phan-cong-gvhd')}>
+              <Statistic
+                title="SV chưa được giao đề tài"
+                value={data.sv_chua_giao_de_tai}
+                valueStyle={data.sv_chua_giao_de_tai > 0 ? { color: '#cf1322' } : undefined}
+              />
             </Card>
             <Card style={{ minWidth: 220 }}>
               <Statistic
@@ -164,16 +165,18 @@ export default function BmDashboard() {
           </Row>
 
           <Card
-            title="Đề tài chờ GVHD duyệt mới nhất"
-            extra={<a onClick={() => navigate('/de-tai?trang_thai=CHO_DUYET')}>Xem tất cả</a>}
+            title="Đề tài giao gần nhất"
+            extra={<a onClick={() => navigate('/de-tai?trang_thai=DA_PHAN_CONG')}>Xem tất cả</a>}
           >
             <List
-              locale={{ emptyText: 'Không có đề tài chờ duyệt' }}
-              dataSource={data.cho_duyet_moi_nhat}
+              locale={{ emptyText: 'Chưa có đề tài được giao' }}
+              dataSource={data.de_tai_moi_giao}
               renderItem={(item) => (
                 <List.Item>
                   <a onClick={() => navigate(`/de-tai/${item.id}`)}>{item.ten_de_tai}</a>
-                  <span style={{ color: 'rgba(0,0,0,0.45)' }}>{item.nguoi_de_xuat}</span>
+                  <span style={{ color: 'rgba(0,0,0,0.45)' }}>
+                    GVHD: {item.giang_vien} · SV: {item.sinh_vien}
+                  </span>
                 </List.Item>
               )}
             />

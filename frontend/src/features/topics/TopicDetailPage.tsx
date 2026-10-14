@@ -1,10 +1,8 @@
 import {
   App as AntApp,
-  Alert,
   Button,
   Card,
   Descriptions,
-  Popconfirm,
   Result,
   Skeleton,
   Table,
@@ -17,7 +15,7 @@ import { useNavigate, useParams } from 'react-router'
 import { getErrorMessage } from '../../api/client'
 import ForbiddenPage from '../auth/ForbiddenPage'
 import { TRANG_THAI_DE_TAI } from './constants'
-import { useRegisterTopic, useSubmitTopic, useTopic } from './api'
+import { useSubmitTopic, useTopic } from './api'
 import type { SavedChiTietTrungLap } from './api'
 
 const chiTietColumns: ColumnsType<SavedChiTietTrungLap> = [
@@ -34,9 +32,10 @@ function formatThoiDiem(iso: string): string {
 }
 
 /**
- * MH-06 chế độ chỉ đọc (§3.4.7 "Xem"): chi tiết một đề tài — Đợt đồ án, Lĩnh
- * vực, Người đề xuất, GVHD, Sinh viên, Mô tả, lý do từ chối (nếu có), cùng các
- * hành động Sửa/Gửi đề xuất khi người xem là chủ sở hữu và đề tài còn ở Nháp.
+ * MH-07 "Chi tiết đề tài được giao" (§3.4.7 "Xem", UC1.2): Đợt đồ án, Lĩnh vực,
+ * GVHD, Sinh viên, Mô tả, kết quả kiểm tra trùng tên đã lưu (UC0.6), cùng các
+ * hành động Sửa / Giao đề tài cho sinh viên khi người xem là GVHD sở hữu và đề
+ * tài còn ở Nháp.
  */
 export default function TopicDetailPage() {
   const { id } = useParams()
@@ -46,11 +45,10 @@ export default function TopicDetailPage() {
 
   const { data: topic, isLoading, isError, error } = useTopic(topicId)
   const submitMutation = useSubmitTopic()
-  const registerMutation = useRegisterTopic()
 
   if (isError) {
-    // T-02-23/UC0.8: server trả 403 khi người xem không phải chủ sở hữu, GVHD,
-    // Bộ môn hay SV lớp được mở đề tài — không được kẹt ở Skeleton mãi mãi.
+    // T-02-23/UC0.8: server trả 403 khi người xem không phải GVHD, Bộ môn hay
+    // SV được giao đề tài — không được kẹt ở Skeleton mãi mãi.
     const status = error instanceof AxiosError ? error.response?.status : undefined
     if (status === 403) {
       return <ForbiddenPage />
@@ -79,17 +77,7 @@ export default function TopicDetailPage() {
     if (topicId === undefined) return
     try {
       await submitMutation.mutateAsync(topicId)
-      message.success('Đã gửi đề xuất đề tài')
-    } catch (err) {
-      message.error(getErrorMessage(err))
-    }
-  }
-
-  const handleRegister = async () => {
-    if (topicId === undefined) return
-    try {
-      await registerMutation.mutateAsync(topicId)
-      message.success('Đăng ký thành công — đề tài đã được phân công, bạn có thể nộp đề cương')
+      message.success('Đã giao đề tài cho sinh viên')
     } catch (err) {
       message.error(getErrorMessage(err))
     }
@@ -104,24 +92,11 @@ export default function TopicDetailPage() {
         </div>
       }
     >
-      {topic.trang_thai === 'TU_CHOI' && (
-        <Alert
-          type="error"
-          showIcon
-          message={`Lý do từ chối: ${topic.ly_do_tu_choi ?? ''}`}
-          style={{ marginBottom: 16 }}
-        />
-      )}
-
       <Descriptions column={1} bordered size="small" style={{ marginBottom: 16 }}>
         <Descriptions.Item label="Đợt đồ án">
           {topic.dot_do_an.ten_dot} ({topic.dot_do_an.khoa})
         </Descriptions.Item>
         <Descriptions.Item label="Lĩnh vực">{topic.linh_vuc ?? '—'}</Descriptions.Item>
-        <Descriptions.Item label="Người đề xuất">
-          {topic.nguoi_de_xuat.ho_ten}
-          {topic.nguoi_de_xuat.ma ? ` (${topic.nguoi_de_xuat.ma})` : ''}
-        </Descriptions.Item>
         <Descriptions.Item label="Giảng viên hướng dẫn">
           {topic.giang_vien_huong_dan
             ? `${topic.giang_vien_huong_dan.ho_ten}${
@@ -174,23 +149,8 @@ export default function TopicDetailPage() {
         )}
         {topic.quyen.gui && (
           <Button type="primary" loading={submitMutation.isPending} onClick={handleSubmit}>
-            {topic.loai_nguoi_de_xuat === 'SINH_VIEN'
-              ? 'Gửi GVHD duyệt'
-              : topic.sinh_vien
-                ? 'Giao đề tài cho sinh viên'
-                : 'Mở cho lớp đăng ký'}
+            Giao đề tài cho sinh viên
           </Button>
-        )}
-        {topic.quyen.dang_ky && (
-          <Popconfirm
-            title="Đăng ký đề tài này?"
-            description="Đề tài do GVHD của bạn mở cho lớp — đăng ký xong là Đã phân công ngay, không đổi được nữa."
-            onConfirm={handleRegister}
-          >
-            <Button type="primary" loading={registerMutation.isPending}>
-              Đăng ký
-            </Button>
-          </Popconfirm>
         )}
       </div>
     </Card>
