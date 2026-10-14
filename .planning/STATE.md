@@ -4,10 +4,10 @@ current_phase: 3
 current_phase_name: Outline, Progress, Defense & Archive
 status: verifying
 stopped_at: Completed 05-05-PLAN.md (demo-state, CDP screenshots, NFR-16, automated rehearsal; report prose deferred by user)
-last_updated: "2026-09-28T12:05:00.000Z"
+last_updated: "2026-10-14T15:30:59.073Z"
 last_activity: 2026-09-28
 last_activity_desc: Phase 4 plan 04-07 complete (UC0.4 threshold screen + /api/thresholds with SC4 e2e, MH-14 highlights + signal tags, per-thesis share fix, chương 3 write-back, deploy README AI section; full phase gate green) — Phase 4 ready for verification
-state_head: 65aca9eacf82b5aaedab65435b960b64aa6a7300
+state_head: 1b34f0b4921ab54f4a9170589e1dfd764d2cd148
 progress:
   total_phases: 5
   completed_phases: 0
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-27)
 Phase: 3 (Outline, Progress, Defense & Archive) — EXECUTING
 Plan: 7 of 7
 Status: Phase complete — ready for verification
-Last activity: 2026-09-28 — Plan 03-07 complete (bell + dashboards + smoke/e2e/README; Phase 3 gate green)
+Last activity: 2026-10-14 - Completed quick task 261014-u0j: Bỏ luồng SV tự đề xuất/đăng ký đề tài — chỉ GVHD tạo và giao đề tài
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -173,6 +173,12 @@ None yet.
 - [Phase 4]: Độ chính xác model embedding tiếng Việt trên văn bản đồ án chưa kiểm chứng (bkai vs multilingual-e5) — so sánh đầu phase, có timebox
 - [Timeline]: Hạn cứng 07/12/2026, không có tuần đệm
 - [Research]: research/SUMMARY.md giả định T1–T3 đã xong; thực tế tiến độ bắt đầu 28/09/2026 — roadmap coi như chưa có gì hoàn thành
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 261014-u0j | Bỏ luồng SV tự đề xuất/đăng ký đề tài — chỉ GVHD tạo và giao đề tài (góp ý GVHD mục 1) | 2026-10-14 | 1b34f0b | [261014-u0j-b-lu-ng-sv-t-xu-t-t-i-ch-gvhd-t-o-v-giao](./quick/261014-u0j-b-lu-ng-sv-t-xu-t-t-i-ch-gvhd-t-o-v-giao/) |
 
 ## Deferred Items
 
