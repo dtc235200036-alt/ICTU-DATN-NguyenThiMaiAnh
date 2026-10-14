@@ -25,8 +25,8 @@
 # đã tạo khỏi chỉ mục AI, xóa file đã nộp rồi xóa dữ liệu K97 theo thứ tự khóa
 # ngoại.
 #
-# Tài khoản dành riêng (không script nào khác dùng): bomon, DTC225200095,
-# DTC225200096 (SV), GV023 (GVHD); khóa kiểm thử K97 (e2e-uc1 dùng K99,
+# Tài khoản dành riêng (không script nào khác dùng): bomon, DTC235210032,
+# DTC235210074 (SV), GV023 (GVHD); khóa kiểm thử K97 (e2e-uc1 dùng K99,
 # e2e-uc2-5 dùng K98, ai-nfr dùng K96). Cần chạy `bash deploy/seed-ai.sh` trước.
 set -euo pipefail
 
@@ -67,7 +67,7 @@ print($1)
 
 DOT_DO_AN_ID=""
 KHO_IDS=""
-# Đề tài K97 do DTC225200095 tự đề xuất trong ai_index — ai_document dùng lại
+# Đề tài K97 do DTC235210032 tự đề xuất trong ai_index — ai_document dùng lại
 # (một SV chỉ được giữ một đề tài đang hoạt động).
 TOPIC_SV_A_ID=""
 # ai_threshold: bản chụp ba dòng cau_hinh_nguong trước khi sửa (loai\tgia_tri\t
@@ -122,7 +122,7 @@ cleanup() {
     if [ -n "${kho_ids}" ]; then
       "${COMPOSE[@]}" exec -T api python -m app.services.ai_index purge --loai ARCHIVE --ids "${kho_ids}" >/dev/null 2>&1 || true
     fi
-    sql "DELETE FROM thong_bao WHERE tai_khoan_id IN (SELECT id FROM tai_khoan WHERE ma_dang_nhap IN ('DTC225200095','DTC225200096','GV023')) AND thoi_diem >= '${START_UTC}';" >/dev/null 2>&1 || true
+    sql "DELETE FROM thong_bao WHERE tai_khoan_id IN (SELECT id FROM tai_khoan WHERE ma_dang_nhap IN ('DTC235210032','DTC235210074','GV023')) AND thoi_diem >= '${START_UTC}';" >/dev/null 2>&1 || true
     if [ -n "${DOT_DO_AN_ID}" ]; then
       local doc_ids files ten
       doc_ids="$(sql "SELECT t.id FROM tai_lieu_do_an t JOIN de_tai dt ON dt.id = t.de_tai_id WHERE dt.dot_do_an_id = ${DOT_DO_AN_ID}" 2>/dev/null | paste -sd, - || true)"
@@ -145,6 +145,8 @@ cleanup() {
       sql "DELETE FROM do_an_kho WHERE id IN (${kho_ids});" >/dev/null 2>&1 || true
     fi
     if [ -n "${DOT_DO_AN_ID}" ]; then
+      # 0015: phân công GVHD trỏ tới đợt (FK không cascade) — xóa trước đợt.
+      sql "DELETE FROM phan_cong_huong_dan WHERE dot_do_an_id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
       sql "DELETE FROM dot_do_an WHERE id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
     fi
   fi
@@ -243,7 +245,7 @@ with engine.connect() as conn:
 # --- ai_title (SC1, AISV-03, AISV-02 NFC=NFD) --------------------------------
 ai_title() {
   local token_sv
-  token_sv="$(bash "${SCRIPT_DIR}/api-login.sh" DTC225200095)"
+  token_sv="$(bash "${SCRIPT_DIR}/api-login.sh" DTC235210032)"
 
   # Truy vấn đã được hiệu chỉnh đánh giá đúng (04-04): 3 DIEN_DAT_LAI bị cảnh
   # báo + đúng top-1 và 1 CUNG_LINH_VUC đúng là không cảnh báo.
@@ -308,7 +310,7 @@ PY
 ai_threshold() {
   local token_bomon token_sv ten code res
   token_bomon="$(bash "${SCRIPT_DIR}/api-login.sh" bomon)"
-  token_sv="$(bash "${SCRIPT_DIR}/api-login.sh" DTC225200095)"
+  token_sv="$(bash "${SCRIPT_DIR}/api-login.sh" DTC235210032)"
 
   code="$(call GET /api/thresholds "$token_bomon")"
   [ "${code%% *}" = "200" ] || fail "Bộ môn GET /api/thresholds trả ${code%% *}"
@@ -361,8 +363,8 @@ ai_index() {
   local token_bomon token_sv_a token_sv_b res before after kho_id topic_id deadline hit
 
   token_bomon="$(bash "${SCRIPT_DIR}/api-login.sh" bomon)"
-  token_sv_a="$(bash "${SCRIPT_DIR}/api-login.sh" DTC225200095)"
-  token_sv_b="$(bash "${SCRIPT_DIR}/api-login.sh" DTC225200096)"
+  token_sv_a="$(bash "${SCRIPT_DIR}/api-login.sh" DTC235210032)"
+  token_sv_b="$(bash "${SCRIPT_DIR}/api-login.sh" DTC235210074)"
 
   res="$(call POST /api/cohorts "$token_bomon" -H 'Content-Type: application/json' \
     -d '{"ten_dot":"Đợt kiểm thử tự động AI","khoa":"K97","nam_hoc":"2026-2027","ngay_bat_dau":"2026-01-01"}')"
@@ -370,6 +372,14 @@ ai_index() {
   DOT_DO_AN_ID="$(jget 'd["id"]')"
   [ -n "$DOT_DO_AN_ID" ] || fail "Không đọc được id đợt K97"
   ok "Bộ môn tạo đợt kiểm thử K97 (id=${DOT_DO_AN_ID})"
+
+  # UC0.8 (0015): SV chỉ đề xuất được khi đã có GVHD trong đợt — Bộ môn import
+  # phân công DTC235210032, DTC235210074 -> GV023 cho đợt K97.
+  python3 -c 'import json,sys; print(json.dumps({"dot_do_an_id": int(sys.argv[1]), "noi_dung": "DTC235210032,GV023\nDTC235210074,GV023\n"}))' "$DOT_DO_AN_ID" > "$TMP/assign.json"
+  res="$(call POST /api/assignments/import "$token_bomon" -H 'Content-Type: application/json' --data-binary "@$TMP/assign.json")"
+  [ "${res%% *}" = "200" ] || fail "Bộ môn import phân công GVHD K97 trả ${res%% *}: $(cat "$TMP/body")"
+  [ "$(jget 'd["cap_nhat"] == 2 and not d["loi"]')" = "True" ] || fail "Import phân công GVHD K97 không gán đủ 2 SV: $(cat "$TMP/body")"
+  ok "Bộ môn phân công DTC235210032, DTC235210074 -> GVHD GV023 trong đợt K97"
 
   # (a) Bản ghi kho mới -> DA_INDEX trong <= 30 s, đúng MỘT lần encode.
   before="$(encode_calls)"
@@ -393,13 +403,13 @@ ai_index() {
   [ "${res%% *}" = "200" ] || fail "check-title trả ${res%% *}"
   hit="$(jget "next((m['ty_le'] for m in d['matches'] if m['nguon'] == 'KHO' and m['do_an_kho_id'] == ${kho_id}), '')")"
   [ -n "$hit" ] || fail "Lần kiểm tra kế tiếp không thấy bản ghi kho vừa thêm: $(cat "$TMP/body")"
-  ok "DTC225200096 kiểm tra tên diễn đạt lại -> thấy ngay bản ghi kho mới (${hit}%)"
+  ok "DTC235210074 kiểm tra tên diễn đạt lại -> thấy ngay bản ghi kho mới (${hit}%)"
 
   # (b) Đề tài SV tự đề xuất, gửi duyệt ngay -> index sau commit.
   before="$(encode_calls)"
   python3 -c 'import json,sys; print(json.dumps({"dot_do_an_id": int(sys.argv[1]), "ten_de_tai": "Ứng dụng di động theo dõi lịch tiêm chủng cho trẻ em tại trạm y tế xã", "linh_vuc": "Công nghệ phần mềm", "gui": True}, ensure_ascii=False))' "$DOT_DO_AN_ID" > "$TMP/topic.json"
   res="$(call POST /api/topics "$token_sv_a" -H 'Content-Type: application/json' --data-binary "@$TMP/topic.json")"
-  [ "${res%% *}" = "201" ] || fail "DTC225200095 tự đề xuất đề tài trả ${res%% *}: $(cat "$TMP/body")"
+  [ "${res%% *}" = "201" ] || fail "DTC235210032 tự đề xuất đề tài trả ${res%% *}: $(cat "$TMP/body")"
   topic_id="$(jget 'd["id"]')"
   TOPIC_SV_A_ID="${topic_id}"
   [ "$(jget 'd["trang_thai"]')" = "CHO_DUYET" ] || fail "Đề tài mới không ở CHO_DUYET"
@@ -412,13 +422,13 @@ ai_index() {
     sleep 1
   done
   [ "$((after - before))" = "2" ] || fail "Gửi đề tài tốn $((after - before)) lần encode (kỳ vọng 2 = 1 kiểm tra tên + 1 ingest)"
-  ok "DTC225200095 gửi đề tài K97 (id=${topic_id}) -> CHO_DUYET, index nền (encode_calls +2 = kiểm tra tên + ingest)"
+  ok "DTC235210032 gửi đề tài K97 (id=${topic_id}) -> CHO_DUYET, index nền (encode_calls +2 = kiểm tra tên + ingest)"
 
   res="$(check_title "$token_sv_b" "Xây dựng ứng dụng di động quản lý lịch tiêm chủng trẻ em cho trạm y tế xã")"
   [ "${res%% *}" = "200" ] || fail "check-title trả ${res%% *}"
   hit="$(jget "next((m['ty_le'] for m in d['matches'] if m['nguon'] == 'DE_TAI' and m['de_tai_id'] == ${topic_id}), '')")"
   [ -n "$hit" ] || fail "Lần kiểm tra kế tiếp không thấy đề tài vừa gửi: $(cat "$TMP/body")"
-  ok "DTC225200096 kiểm tra tên diễn đạt lại -> thấy ngay đề tài hiện hành vừa gửi (${hit}%)"
+  ok "DTC235210074 kiểm tra tên diễn đạt lại -> thấy ngay đề tài hiện hành vừa gửi (${hit}%)"
 }
 
 # --- ai_document (SC2, AISV-04/05/06, D-03/D-04) ------------------------------
@@ -457,28 +467,24 @@ review_changes() {
 }
 
 ai_document() {
-  local token_bomon token_sv_a token_sv_b token_gv gv_id topic_b res nguong t
-  token_bomon="$(bash "${SCRIPT_DIR}/api-login.sh" bomon)"
-  token_sv_a="$(bash "${SCRIPT_DIR}/api-login.sh" DTC225200095)"
-  token_sv_b="$(bash "${SCRIPT_DIR}/api-login.sh" DTC225200096)"
+  local token_sv_a token_sv_b token_gv topic_b res nguong t
+  token_sv_a="$(bash "${SCRIPT_DIR}/api-login.sh" DTC235210032)"
+  token_sv_b="$(bash "${SCRIPT_DIR}/api-login.sh" DTC235210074)"
   token_gv="$(bash "${SCRIPT_DIR}/api-login.sh" GV023)"
-  [ -n "${TOPIC_SV_A_ID}" ] || fail "ai_document cần đề tài K97 của DTC225200095 từ ai_index"
-
-  call GET /api/lecturers "$token_bomon" >/dev/null
-  gv_id="$(jget 'next((g["id"] for g in d if g.get("ma_giang_vien") == "GV023"), "")')"
-  [ -n "$gv_id" ] || fail "Không tìm được id GV023"
+  [ -n "${TOPIC_SV_A_ID}" ] || fail "ai_document cần đề tài K97 của DTC235210032 từ ai_index"
 
   python3 -c 'import json,sys; print(json.dumps({"dot_do_an_id": int(sys.argv[1]), "ten_de_tai": "Hệ thống đặt lịch sân bóng mini trực tuyến cho câu lạc bộ thể thao phường", "linh_vuc": "Công nghệ phần mềm", "gui": True}, ensure_ascii=False))' "$DOT_DO_AN_ID" > "$TMP/topic-b.json"
   res="$(call POST /api/topics "$token_sv_b" -H 'Content-Type: application/json' --data-binary "@$TMP/topic-b.json")"
-  [ "${res%% *}" = "201" ] || fail "DTC225200096 tự đề xuất đề tài trả ${res%% *}: $(cat "$TMP/body")"
+  [ "${res%% *}" = "201" ] || fail "DTC235210074 tự đề xuất đề tài trả ${res%% *}: $(cat "$TMP/body")"
   topic_b="$(jget 'd["id"]')"
 
   for t in "${TOPIC_SV_A_ID}" "${topic_b}"; do
-    res="$(call POST "/api/topic-approvals/${t}/approve" "$token_bomon" -H 'Content-Type: application/json' -d "{\"giang_vien_id\":${gv_id}}")"
-    [ "${res%% *}" = "200" ] || fail "Bộ môn duyệt đề tài ${t} trả ${res%% *}: $(cat "$TMP/body")"
+    # UC1.3 (0015): GVHD GV023 (không phải Bộ môn) duyệt, không gửi thân.
+    res="$(call POST "/api/topic-approvals/${t}/approve" "$token_gv")"
+    [ "${res%% *}" = "200" ] || fail "GVHD GV023 duyệt đề tài ${t} trả ${res%% *}: $(cat "$TMP/body")"
     [ "$(jget 'd["trang_thai"]')" = "DA_PHAN_CONG" ] || fail "Đề tài ${t} không DA_PHAN_CONG"
   done
-  ok "Bộ môn duyệt 2 đề tài K97 (${TOPIC_SV_A_ID}, ${topic_b}) với GVHD GV023 -> DA_PHAN_CONG"
+  ok "GVHD GV023 duyệt 2 đề tài K97 (${TOPIC_SV_A_ID}, ${topic_b}) -> DA_PHAN_CONG"
 
   # Cặp chép nguyên văn và cặp không liên quan đầu tiên mà hiệu chỉnh (04-04) đánh giá đạt.
   python3 - "$REPO_ROOT" > "$TMP/pairs.tsv" <<'PY'

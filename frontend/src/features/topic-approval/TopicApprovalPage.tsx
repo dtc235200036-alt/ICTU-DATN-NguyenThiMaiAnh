@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { App as AntApp, Alert, Button, Card, Drawer, Input, Modal, Select, Table, Tag } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
+import { useSearchParams } from 'react-router'
 
 import { getErrorMessage } from '../../api/client'
-import { useLecturers } from '../accounts/api'
 import { useCohorts } from '../cohorts/api'
 import { useTopic } from '../topics/api'
 import type { PersonRef, SavedChiTietTrungLap } from '../topics/api'
@@ -44,10 +44,10 @@ const chiTietColumns: ColumnsType<SavedChiTietTrungLap> = [
 ]
 
 /**
- * MH-07/UC1.3: bảng "Đề tài chờ duyệt" + Drawer chi tiết (kết quả kiểm tra
- * tên đã lưu, chọn GVHD) + Modal "Từ chối đề tài". Bộ môn duyệt (mở đăng ký
- * khi chưa có SV), duyệt và phân công GVHD thủ công (khi đã có SV — không
- * bao giờ tự động chọn, UC1.3 E1), hoặc từ chối kèm lý do bắt buộc.
+ * MH-07/UC1.3 (đổi ở 0015): GVHD xem đề tài SV trong lớp mình gửi lên — bảng
+ * "Đề tài chờ duyệt" + Drawer chi tiết (kết quả kiểm tra tên đã lưu) + Modal
+ * "Từ chối đề tài". Duyệt -> Đã phân công (SV bắt đầu nộp đề cương); từ chối
+ * kèm lý do bắt buộc -> SV đề xuất lại đề tài khác.
  */
 export default function TopicApprovalPage() {
   const { message } = AntApp.useApp()
@@ -55,13 +55,12 @@ export default function TopicApprovalPage() {
   const [dotDoAnId, setDotDoAnId] = useState<number | undefined>(undefined)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
+  const [searchParams] = useSearchParams()
   const [openId, setOpenId] = useState<number | undefined>(undefined)
-  const [selectedGv, setSelectedGv] = useState<number | undefined>(undefined)
   const [rejectOpen, setRejectOpen] = useState(false)
   const [rejectReason, setRejectReason] = useState('')
 
   const { data: cohorts } = useCohorts()
-  const { data: lecturers } = useLecturers()
   const { data, isFetching } = usePendingTopics({
     dot_do_an_id: dotDoAnId,
     page,
@@ -71,11 +70,16 @@ export default function TopicApprovalPage() {
   const approveMutation = useApproveTopic()
   const rejectMutation = useRejectTopic()
 
-  const hasSv = detail?.sinh_vien != null
+  // Liên kết từ "Việc cần xử lý"/thông báo: /duyet-de-tai?de_tai_id=… mở sẵn Drawer.
+  useEffect(() => {
+    const fromLink = Number(searchParams.get('de_tai_id'))
+    if (Number.isInteger(fromLink) && fromLink > 0) {
+      setOpenId(fromLink)
+    }
+  }, [searchParams])
 
   const closeDrawer = () => {
     setOpenId(undefined)
-    setSelectedGv(undefined)
     setRejectOpen(false)
     setRejectReason('')
   }
@@ -83,8 +87,8 @@ export default function TopicApprovalPage() {
   const handleApprove = async () => {
     if (openId === undefined) return
     try {
-      await approveMutation.mutateAsync({ id: openId, giang_vien_id: selectedGv ?? null })
-      message.success(hasSv ? 'Đã duyệt và phân công GVHD' : 'Đã duyệt đề tài')
+      await approveMutation.mutateAsync(openId)
+      message.success('Đã duyệt đề tài — sinh viên có thể nộp đề cương')
       closeDrawer()
     } catch (err) {
       message.error(getErrorMessage(err))
@@ -105,7 +109,7 @@ export default function TopicApprovalPage() {
   const columns: ColumnsType<PendingTopicItem> = [
     { title: 'Tên đề tài', dataIndex: 'ten_de_tai' },
     {
-      title: 'Người đề xuất',
+      title: 'Sinh viên',
       dataIndex: 'nguoi_de_xuat',
       render: (person: PersonRef) => renderPerson(person),
     },
@@ -189,11 +193,11 @@ export default function TopicApprovalPage() {
               </Button>
               <Button
                 type="primary"
-                disabled={hasSv && selectedGv === undefined}
+                disabled={detail.trang_thai !== 'CHO_DUYET'}
                 loading={approveMutation.isPending}
                 onClick={handleApprove}
               >
-                {hasSv ? 'Duyệt và phân công' : 'Duyệt'}
+                Duyệt đề tài
               </Button>
             </div>
           )
@@ -203,7 +207,7 @@ export default function TopicApprovalPage() {
           <>
             <h2 style={{ margin: '0 0 4px', fontSize: 15 }}>{detail.ten_de_tai}</h2>
             <p style={{ margin: '0 0 16px', fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>
-              Người đề xuất: {renderPerson(detail.nguoi_de_xuat)} · Lĩnh vực:{' '}
+              Sinh viên: {renderPerson(detail.nguoi_de_xuat)} · Lĩnh vực:{' '}
               {detail.linh_vuc ?? '—'} · Đợt {detail.dot_do_an.khoa}
             </p>
             <p style={{ margin: '0 0 16px', fontSize: 13 }}>{detail.mo_ta ?? '—'}</p>
@@ -233,39 +237,13 @@ export default function TopicApprovalPage() {
               />
             )}
 
-            {hasSv ? (
-              <div style={{ marginBottom: 20 }}>
-                <p style={{ marginBottom: 8 }}>Sinh viên: {renderPerson(detail.sinh_vien)}</p>
-                <div className="ant-form-item-label" style={{ marginBottom: 4 }}>
-                  Giảng viên hướng dẫn
-                </div>
-                <Select
-                  showSearch
-                  style={{ width: '100%' }}
-                  placeholder="Chọn giảng viên hướng dẫn"
-                  value={selectedGv}
-                  onChange={(value: number) => setSelectedGv(value)}
-                  filterOption={(input, option) =>
-                    (option?.label as string)?.toLowerCase().includes(input.toLowerCase())
-                  }
-                  options={(lecturers ?? []).map((gv) => ({
-                    value: gv.id,
-                    label:
-                      detail.loai_nguoi_de_xuat === 'GIANG_VIEN' &&
-                      detail.nguoi_de_xuat.id === gv.id
-                        ? `${gv.ho_ten ?? ''} (người đề xuất)`
-                        : (gv.ho_ten ?? ''),
-                  }))}
-                />
-                <p style={{ marginTop: 8, fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>
-                  Bộ môn vẫn phải xác nhận thủ công kể cả khi GV đề xuất là người phù hợp duy nhất
-                  (UC1.3 - E1).
-                </p>
-              </div>
-            ) : (
-              <p style={{ marginBottom: 20 }}>
-                Đề tài do GV đề xuất, chưa có sinh viên — duyệt để mở cho sinh viên đăng ký.
-              </p>
+            {detail.trang_thai !== 'CHO_DUYET' && (
+              <Alert
+                type="info"
+                showIcon
+                style={{ marginBottom: 20 }}
+                message="Đề tài không còn ở trạng thái Chờ duyệt"
+              />
             )}
           </>
         )}
@@ -292,7 +270,7 @@ export default function TopicApprovalPage() {
           rows={3}
           value={rejectReason}
           onChange={(e) => setRejectReason(e.target.value)}
-          placeholder="Nhập lý do để người đề xuất biết cách chỉnh sửa..."
+          placeholder="Nhập lý do để sinh viên biết cách chỉnh sửa hoặc đề xuất lại..."
         />
       </Modal>
     </div>

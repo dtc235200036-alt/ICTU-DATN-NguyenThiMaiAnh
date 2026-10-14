@@ -1,15 +1,20 @@
-"""Seed dữ liệu mẫu (DATA-01, D-13): Bộ môn, 100 SV, 30 GV, một đợt đồ án mở.
+"""Seed dữ liệu (DATA-01, D-13): Bộ môn, danh sách SV K22 thật (seed_data/sinh_vien.csv,
+đăng nhập bằng mã SV), danh sách GV Khoa CNTT thật (seed_data/giang_vien.csv, mã
+GV001.. theo STT, đăng nhập bằng mã hoặc email), một đợt đồ án mở và phân công
+GVHD mặc định cho đợt đó (UC0.8: SV thứ i -> GV thứ ((i-1) mod số GV)+1).
+Mọi tài khoản dùng chung mật khẩu SEED_DEFAULT_PASSWORD.
 
 Chạy: python -m app.seed
 
 Idempotent: chạy lại không tạo trùng, không đổi dữ liệu của tài khoản/đợt đồ án
 đã tồn tại — chỉ tạo phần còn thiếu (khớp ma_dang_nhap / ten_dot).
 """
+import csv
 import sys
 import unicodedata
 from datetime import date
+from pathlib import Path
 
-from faker import Faker
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -17,16 +22,15 @@ from app.core.config import get_settings
 from app.core.db import SessionLocal
 from app.core.roles import VaiTro
 from app.core.security import hash_password
+from app.core.timeutil import now_utc
 from app.models.dot_do_an import DANG_MO, DotDoAn
+from app.models.phan_cong import PhanCongHuongDan
 from app.models.tai_khoan import GiangVien, SinhVien, TaiKhoan
 
 BO_MON_MA_DANG_NHAP = "bomon"
 BO_MON_EMAIL = "bomon@ictu.edu.vn"
 
-GV_COUNT = 30
-SV_COUNT = 100
-HOC_VI_CYCLE = ("ThS.", "TS.", "ThS.", "PGS.TS.")
-LOP_CYCLE = ("CNTT K22A", "CNTT K22B", "CNTT K22C", "CNTT K22D")
+SEED_DATA_DIR = Path(__file__).parent / "seed_data"
 KHOA_SV = "Công nghệ thông tin"
 
 # UC1 demo: một đợt đồ án đang mở theo K22 — không bao giờ đổi trạng thái nếu
@@ -42,19 +46,12 @@ def _nfc(value: str) -> str:
     return unicodedata.normalize("NFC", value)
 
 
-def _generate_ho_ten(fake: Faker, *, female: bool) -> str:
-    """D-06/Pitfall 5: không dùng Faker `.name()` (trộn thứ tự Tây + đôi khi thêm
-    prefix Ông/Bà) hay provider địa chỉ vi_VN (rò rỉ token "John" — xem
-    02-RESEARCH.md). Ghép thủ công theo thứ tự Việt Nam Họ + [đệm] + Tên từ các
-    provider tên riêng lẻ, luôn NFC-normalize và tự kiểm tra trước khi dùng.
-    """
-    last = fake.last_name()
-    middle = fake.middle_name()
-    first = fake.first_name_female() if female else fake.first_name_male()
-    ho_ten = _nfc(f"{last} {middle} {first}")
-    assert len(ho_ten.split()) >= 2, f"Tên sinh ra không hợp lệ (thiếu từ): {ho_ten!r}"
-    assert "John" not in ho_ten, f"Faker rò rỉ token tiếng Anh vào tên: {ho_ten!r}"
-    return ho_ten
+def _load_csv(name: str) -> list[dict[str, str]]:
+    with open(SEED_DATA_DIR / name, encoding="utf-8-sig", newline="") as f:
+        return [
+            {k: _nfc(v.strip()) for k, v in row.items()}
+            for row in csv.DictReader(f)
+        ]
 
 
 def _ensure_bo_mon(db: Session, password_hash: str) -> None:
@@ -74,18 +71,17 @@ def _ensure_bo_mon(db: Session, password_hash: str) -> None:
     )
 
 
-def _ensure_giang_vien(db: Session, fake: Faker, password_hash: str) -> int:
+def _ensure_giang_vien(db: Session, rows: list[dict[str, str]], password_hash: str) -> int:
     created = 0
-    for i in range(1, GV_COUNT + 1):
-        code = f"GV{i:03d}"
+    for row in rows:
+        code = row["ma_giang_vien"]
         existing = db.execute(
             select(TaiKhoan).where(TaiKhoan.ma_dang_nhap == code)
         ).scalar_one_or_none()
         if existing is not None:
             continue
 
-        ho_ten = _generate_ho_ten(fake, female=(i % 2 == 0))
-        email = f"{code.lower()}@ictu.edu.vn"
+        email = row["email"]
 
         account = TaiKhoan(
             ma_dang_nhap=code,
@@ -101,26 +97,25 @@ def _ensure_giang_vien(db: Session, fake: Faker, password_hash: str) -> int:
             GiangVien(
                 tai_khoan_id=account.id,
                 ma_giang_vien=code,
-                ho_ten=ho_ten,
+                ho_ten=row["ho_ten"],
                 email=email,
-                hoc_vi=HOC_VI_CYCLE[(i - 1) % len(HOC_VI_CYCLE)],
+                hoc_vi=row["hoc_vi"] or None,
             )
         )
         created += 1
     return created
 
 
-def _ensure_sinh_vien(db: Session, fake: Faker, password_hash: str) -> int:
+def _ensure_sinh_vien(db: Session, rows: list[dict[str, str]], password_hash: str) -> int:
     created = 0
-    for i in range(1, SV_COUNT + 1):
-        code = f"DTC225200{i:03d}"
+    for row in rows:
+        code = row["ma_so_sinh_vien"]
         existing = db.execute(
             select(TaiKhoan).where(TaiKhoan.ma_dang_nhap == code)
         ).scalar_one_or_none()
         if existing is not None:
             continue
 
-        ho_ten = _generate_ho_ten(fake, female=(i % 2 == 0))
         email = f"{code.lower()}@ictu.edu.vn"
 
         account = TaiKhoan(
@@ -137,9 +132,9 @@ def _ensure_sinh_vien(db: Session, fake: Faker, password_hash: str) -> int:
             SinhVien(
                 tai_khoan_id=account.id,
                 ma_so_sinh_vien=code,
-                ho_ten=ho_ten,
+                ho_ten=row["ho_ten"],
                 email=email,
-                lop=LOP_CYCLE[(i - 1) % len(LOP_CYCLE)],
+                lop=row["lop"],
                 khoa=KHOA_SV,
             )
         )
@@ -167,27 +162,67 @@ def _ensure_open_cohort(db: Session) -> bool:
     return True
 
 
+def _ensure_assignments(
+    db: Session, sv_rows: list[dict[str, str]], gv_rows: list[dict[str, str]]
+) -> int:
+    """UC0.8: SV chưa có GVHD trong đợt demo được gán vòng tròn theo thứ tự trong
+    danh sách (SV thứ 11 -> GV011, …) — không đổi phân công đã có (idempotent)."""
+    cohort = db.execute(
+        select(DotDoAn).where(DotDoAn.ten_dot == COHORT_TEN_DOT)
+    ).scalar_one_or_none()
+    if cohort is None:
+        return 0
+    assigned = set(
+        db.execute(
+            select(PhanCongHuongDan.sinh_vien_id).where(
+                PhanCongHuongDan.dot_do_an_id == cohort.id
+            )
+        ).scalars()
+    )
+    gv_by_ma = {
+        gv.ma_giang_vien: gv.id
+        for gv in db.execute(select(GiangVien)).scalars()
+    }
+    created = 0
+    now = now_utc()
+    sv_by_ma = {
+        sv.ma_so_sinh_vien: sv for sv in db.execute(select(SinhVien)).scalars()
+    }
+    for i, row in enumerate(sv_rows):
+        sv = sv_by_ma.get(row["ma_so_sinh_vien"])
+        gv_id = gv_by_ma.get(gv_rows[i % len(gv_rows)]["ma_giang_vien"])
+        if sv is None or gv_id is None or sv.id in assigned:
+            continue
+        db.add(
+            PhanCongHuongDan(
+                dot_do_an_id=cohort.id, sinh_vien_id=sv.id, giang_vien_id=gv_id, thoi_diem=now
+            )
+        )
+        created += 1
+    return created
+
+
 def seed_all() -> None:
     settings = get_settings()
     if not settings.SEED_DEFAULT_PASSWORD:
         print("LỖI: SEED_DEFAULT_PASSWORD chưa được thiết lập — không thể seed dữ liệu.")
         sys.exit(1)
 
-    # NFR-17: băm bcrypt cost 12 cho ~130 tài khoản tốn ~30s nếu lặp lại cho từng
+    # NFR-17: băm bcrypt cost 12 cho ~650 tài khoản tốn ~30s nếu lặp lại cho từng
     # tài khoản — băm một lần, dùng lại cho mọi tài khoản MỚI của lần chạy này.
     # Tài khoản đã tồn tại giữ nguyên mật khẩu cũ (idempotent).
     password_hash = hash_password(settings.SEED_DEFAULT_PASSWORD)
 
-    # D-13/Pitfall 5: một Faker(vi_VN) cố định seed, gọi theo thứ tự GV rồi SV để
-    # lần chạy nào cũng sinh ra đúng cùng một dãy tên (khi tài khoản chưa tồn tại).
-    fake = Faker("vi_VN")
-    Faker.seed(2026)
+    gv_rows = _load_csv("giang_vien.csv")
+    sv_rows = _load_csv("sinh_vien.csv")
 
     with SessionLocal() as db:
         _ensure_bo_mon(db, password_hash)
-        gv_created = _ensure_giang_vien(db, fake, password_hash)
-        sv_created = _ensure_sinh_vien(db, fake, password_hash)
+        gv_created = _ensure_giang_vien(db, gv_rows, password_hash)
+        sv_created = _ensure_sinh_vien(db, sv_rows, password_hash)
         cohort_created = _ensure_open_cohort(db)
+        db.flush()
+        pc_created = _ensure_assignments(db, sv_rows, gv_rows)
         db.commit()
 
         gv_total = db.execute(
@@ -205,7 +240,8 @@ def seed_all() -> None:
         f"GV mới {gv_created} (tổng {len(gv_total)}), "
         f"SV mới {sv_created} (tổng {len(sv_total)}), "
         f"đợt đồ án {'đã tạo' if cohort_created else 'đã tồn tại'} "
-        f"'{COHORT_TEN_DOT}' (tổng đang mở: {len(open_cohorts_total)})."
+        f"'{COHORT_TEN_DOT}' (tổng đang mở: {len(open_cohorts_total)}), "
+        f"phân công GVHD mới {pc_created}."
     )
 
 

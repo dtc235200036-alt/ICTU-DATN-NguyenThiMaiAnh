@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field, field_serializer
 from app.schemas.common import NFCModel
 from app.schemas.topics import CohortRef, PersonRef
 
-# UC1.3/MH-07: 3 trạng thái hiển thị cho Bộ môn khi duyệt — khác với
+# UC1.3/MH-07: 3 trạng thái hiển thị cho GVHD khi duyệt — khác với
 # trang_thai lưu trong ket_qua_kiem_tra_trung_lap (HOAN_TAT/LOI); đây là kết
 # quả đã được diễn giải lại cho màn hình (Không trùng / N đề tài tương tự /
 # Chưa kiểm tra).
@@ -17,7 +17,7 @@ class TitleCheckSummary(BaseModel):
 
 
 class PendingTopicItem(BaseModel):
-    """UC1.3/MH-07: một dòng trong bảng 'Đề tài chờ duyệt'."""
+    """UC1.3/MH-07: một dòng trong bảng 'Đề tài chờ duyệt' của GVHD."""
 
     id: int
     ten_de_tai: str
@@ -39,14 +39,6 @@ class PendingTopicItem(BaseModel):
         if value.tzinfo is None:
             value = value.replace(tzinfo=timezone.utc)
         return value.isoformat()
-
-
-class ApproveRequest(NFCModel):
-    """UC1.3: giang_vien_id bắt buộc khi đề tài đã có SV (đăng ký hoặc tự đề
-    xuất); bỏ trống khi đề tài do GV đề xuất và chưa có SV (UC1.3 E1: không
-    bao giờ tự động gán GVHD)."""
-
-    giang_vien_id: int | None = None
 
 
 class RejectRequest(NFCModel):

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="mockup-size" content="1440x1360">
-<title>MH-07 · Duyệt đề tài và phân công GVHD</title>
+<title>MH-07 · Duyệt đề tài</title>
 <link rel="stylesheet" href="antd-admin.css">
 </head>
 <body>
@@ -19,15 +19,23 @@
     <ul class="ant-menu">
       <li class="ant-menu-item">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
-        <span>Tổng quan toàn khoa</span>
+        <span>Tổng quan</span>
       </li>
       <li class="ant-menu-item">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
-        <span>Quản lý đợt đồ án</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <span>Sinh viên của tôi</span>
       </li>
       <li class="ant-menu-item ant-menu-item-selected">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path><path d="m9 12 2 2 4-4"></path></svg>
-        <span>Duyệt &amp; phân công đề tài</span>
+        <span>Duyệt đề tài</span>
+      </li>
+      <li class="ant-menu-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        <span>Đề tài hướng dẫn</span>
+      </li>
+      <li class="ant-menu-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+        <span>Đề xuất đề tài</span>
       </li>
       <li class="ant-menu-item">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path><path d="M14 2v6h6"></path><path d="m9 15 2 2 4-4"></path></svg>
@@ -35,19 +43,15 @@
       </li>
       <li class="ant-menu-item">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"></path><path d="M18.7 8.3 12 15l-3-3-4 4"></path></svg>
-        <span>Tiến độ toàn khoa</span>
+        <span>Nhận xét tiến độ</span>
       </li>
       <li class="ant-menu-item">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"></path><path d="M8.5 14.5 4 21l3-1 1 3 3.5-6"></path><path d="M15.5 14.5 20 21l-3-1-1 3-3.5-6"></path></svg>
-        <span>Hội đồng &amp; lịch bảo vệ</span>
+        <span>Hội đồng bảo vệ</span>
       </li>
       <li class="ant-menu-item">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8V7l-3-4H6L3 7v1"></path><path d="M3 8h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path><path d="M12 12h.01"></path></svg>
         <span>Kho đồ án</span>
-      </li>
-      <li class="ant-menu-item">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-        <span>Cấu hình ngưỡng trùng lặp</span>
       </li>
     </ul>
   </aside>
@@ -57,29 +61,29 @@
       <nav class="ant-breadcrumb">
         <span>Quản lý đề tài</span>
         <span class="ant-breadcrumb-separator">/</span>
-        <span class="ant-breadcrumb-current">Duyệt &amp; phân công đề tài</span>
+        <span class="ant-breadcrumb-current">Duyệt đề tài</span>
       </nav>
       <div class="ant-header-actions">
         <span class="ant-badge" title="Thông báo">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-opacity="0.65" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-          <span class="ant-badge-count">7</span>
+          <span class="ant-badge-count">3</span>
         </span>
         <span class="ant-header-user">
-          <span class="ant-avatar">BM</span>
-          <span>Bộ môn CNTT</span>
+          <span class="ant-avatar">GV</span>
+          <span>TS. Ngô Quang Huy</span>
         </span>
       </div>
     </header>
 
     <main class="ant-layout-content">
-      <h1 class="ant-page-title">Đề tài chờ duyệt</h1>
+      <h1 class="ant-page-title">Đề tài chờ duyệt (lớp hướng dẫn của tôi)</h1>
       <table class="ant-table">
         <thead>
           <tr>
             <th>Tên đề tài</th>
-            <th>Người đề xuất</th>
+            <th>Sinh viên</th>
             <th>Lĩnh vực</th>
-            <th>Ngày đề xuất</th>
+            <th>Ngày gửi</th>
             <th>Kiểm tra tên</th>
             <th>Hành động</th>
           </tr>
@@ -87,7 +91,7 @@
         <tbody>
           <tr style="background:#e6f4ff;">
             <td>Hệ thống quản lý kho vận bằng mã QR</td>
-            <td>TS. Ngô Quang Huy</td>
+            <td>Lê Thị Mẫu G<br><span style="font-size:12px;color:var(--ant-color-text-secondary);">SV22A058</span></td>
             <td>Hệ thống thông tin</td>
             <td>18/09/2026</td>
             <td><span class="ant-tag ant-tag-warning">3 đề tài tương tự</span></td>
@@ -95,7 +99,7 @@
           </tr>
           <tr>
             <td>Xây dựng chatbot tư vấn tuyển sinh</td>
-            <td>Phạm Văn Mẫu E</td>
+            <td>Phạm Văn Mẫu E<br><span style="font-size:12px;color:var(--ant-color-text-secondary);">SV22A041</span></td>
             <td>AI &amp; NLP</td>
             <td>17/09/2026</td>
             <td><span class="ant-tag ant-tag-success">Không trùng</span></td>
@@ -103,7 +107,7 @@
           </tr>
           <tr>
             <td>Ứng dụng IoT giám sát nhiệt độ kho lạnh</td>
-            <td>Đỗ Thị Mẫu F</td>
+            <td>Đỗ Thị Mẫu F<br><span style="font-size:12px;color:var(--ant-color-text-secondary);">SV22A052</span></td>
             <td>IoT &amp; Nhúng</td>
             <td>16/09/2026</td>
             <td><span class="ant-tag ant-tag-default">Chưa kiểm tra</span></td>
@@ -121,7 +125,7 @@
         </div>
         <div class="ant-drawer-body">
           <h2 style="margin:0 0 4px;font-size:15px;">Hệ thống quản lý kho vận bằng mã QR</h2>
-          <p style="margin:0 0 16px;font-size:13px;color:var(--ant-color-text-secondary);">Người đề xuất: TS. Ngô Quang Huy · Lĩnh vực: Hệ thống thông tin · Đợt K22A</p>
+          <p style="margin:0 0 16px;font-size:13px;color:var(--ant-color-text-secondary);">Sinh viên đề xuất: Lê Thị Mẫu G (SV22A058) · Lĩnh vực: Hệ thống thông tin · Đợt K22A</p>
           <p style="margin:0 0 16px;font-size:13px;">Xây dựng hệ thống quản lý nhập xuất kho bằng quét mã QR, tích hợp báo cáo tồn kho theo thời gian thực cho doanh nghiệp vừa và nhỏ.</p>
 
           <div class="ant-alert ant-alert-warning" role="note" style="margin-bottom:20px;">
@@ -141,19 +145,18 @@
             </div>
           </div>
 
-          <div class="ant-form-item">
-            <label class="ant-form-item-label ant-form-item-required" for="f-gvhd">Giảng viên hướng dẫn</label>
-            <select class="ant-select-selector" id="f-gvhd">
-              <option>TS. Ngô Quang Huy (người đề xuất)</option>
-              <option>ThS. Hà Thị Thanh Vân</option>
-              <option>ThS. Lê Hoài Nam</option>
-            </select>
-            <p class="ant-form-item-extra">Bộ môn vẫn phải xác nhận thủ công kể cả khi GV đề xuất là người phù hợp duy nhất (UC1.3 - E1).</p>
+          <div class="ant-alert ant-alert-info" role="note">
+            <span class="ant-alert-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+            </span>
+            <div class="ant-alert-content">
+              <p class="ant-alert-message">Bạn là GVHD của sinh viên này trong đợt (Bộ môn phân công, UC0.8) — duyệt là đề tài chuyển Đã phân công ngay.</p>
+            </div>
           </div>
         </div>
         <div class="ant-drawer-footer">
           <button class="ant-btn ant-btn-danger" type="button">Từ chối</button>
-          <button class="ant-btn ant-btn-primary" type="button">Duyệt và phân công</button>
+          <button class="ant-btn ant-btn-primary" type="button">Duyệt đề tài</button>
         </div>
       </div>
     </div>
@@ -165,10 +168,11 @@
   <div class="ant-modal">
     <div class="ant-modal-header">Từ chối đề tài</div>
     <div class="ant-modal-body">
-      <p style="margin:0 0 12px;font-size:13px;color:var(--ant-color-text-secondary);">Đề tài: Hệ thống quản lý kho vận bằng mã QR</p>
+      <p style="margin:0 0 12px;font-size:13px;color:var(--ant-color-text-secondary);">Đề tài: Hệ thống quản lý kho vận bằng mã QR · Sinh viên: Lê Thị Mẫu G</p>
       <div class="ant-form-item">
         <label class="ant-form-item-label ant-form-item-required" for="f-lydo">Lý do từ chối</label>
-        <textarea class="ant-input-textarea" id="f-lydo" rows="3" placeholder="Nhập lý do để người đề xuất biết cách chỉnh sửa..."></textarea>
+        <textarea class="ant-input-textarea" id="f-lydo" rows="3" placeholder="Nhập lý do để sinh viên biết cách chỉnh sửa..."></textarea>
+        <p class="ant-form-item-extra">Sinh viên nhận thông báo kèm lý do và có thể đề xuất đề tài mới gửi lại cho chính bạn (GVHD).</p>
       </div>
     </div>
     <div class="ant-modal-footer">

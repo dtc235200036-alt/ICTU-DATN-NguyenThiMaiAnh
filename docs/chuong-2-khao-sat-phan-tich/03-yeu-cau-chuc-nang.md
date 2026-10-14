@@ -2,7 +2,7 @@
 
 > **Mã PI:** 1.2 — **Yêu cầu:** ANLS-03
 
-Bảng dưới đây liệt kê các yêu cầu chức năng chi tiết, nhóm theo module nghiệp vụ. Mỗi hàng có mã (FR-\<module\>-NN), tên chức năng, mô tả chi tiết, tác nhân thực hiện, UC liên quan và nguồn (yêu cầu v1 tương ứng trong `.planning/REQUIREMENTS.md`). Module DT (Quản lý đề tài) được hoàn thiện trong kế hoạch 01-02; module TK (Tài khoản và phân quyền) và các module còn lại (DC, TD, BV, KHO, TB, AI) do plan 01-04 bổ sung.
+Bảng dưới đây liệt kê các yêu cầu chức năng chi tiết, nhóm theo module nghiệp vụ. Mỗi hàng có mã (FR-\<module\>-NN), tên chức năng, mô tả chi tiết, tác nhân thực hiện, UC liên quan và nguồn (yêu cầu v1 tương ứng trong `.planning/REQUIREMENTS.md`). Module DT (Quản lý đề tài) được hoàn thiện trong kế hoạch 01-02 và được điều chỉnh theo nghiệp vụ phân công GVHD đầu đợt (Bộ môn phân lớp hướng dẫn, GVHD duyệt đề tài — bổ sung FR-DT-08..FR-DT-11, đổi tác nhân FR-DT-04 và nội dung FR-DT-05); module TK (Tài khoản và phân quyền) và các module còn lại (DC, TD, BV, KHO, TB, AI) do plan 01-04 bổ sung.
 
 ### 2.3.1. Tài khoản và phân quyền (TK)
 
@@ -18,13 +18,17 @@ Bảng dưới đây liệt kê các yêu cầu chức năng chi tiết, nhóm t
 
 | Mã | Tên chức năng | Mô tả chi tiết | Tác nhân | UC | Nguồn |
 |----|---------------|-----------------|----------|----|-------|
-| FR-DT-01 | Đề xuất đề tài | Giảng viên hoặc Sinh viên đề xuất đề tài mới gồm tên, mô tả, lĩnh vực; chỉ thực hiện được khi đợt đồ án đang mở | Giảng viên, Sinh viên | UC1.1 | TOPC-01, TOPC-02 |
+| FR-DT-01 | Đề xuất đề tài | Giảng viên hoặc Sinh viên đề xuất đề tài mới gồm tên, mô tả, lĩnh vực; chỉ gửi được khi đợt đồ án đang mở (lưu nháp thì luôn được). Sinh viên chỉ gửi được đề xuất trong đợt mà mình đã được Bộ môn phân công GVHD (FR-DT-05), nếu chưa có hệ thống báo "Bạn chưa được Bộ môn phân công giảng viên hướng dẫn trong đợt này"; đề tài SV gửi được gắn ngay với GVHD đó, chuyển "Chờ duyệt" và GVHD nhận thông báo | Giảng viên, Sinh viên | UC1.1 | TOPC-01, TOPC-02 |
 | FR-DT-02 | Cảnh báo đề tài tương tự khi đề xuất | Khi đề xuất/đăng ký, hệ thống so sánh tên đề tài theo ngữ nghĩa với kho đề tài đã có, trả về top các đề tài tương tự kèm tỷ lệ % tương đồng; chỉ cảnh báo, không chặn gửi; ngưỡng cảnh báo do Bộ môn cấu hình | Hệ thống (Dịch vụ AI) | UC1.1 | AISV-03, AISV-07 |
-| FR-DT-03 | Đăng ký đề tài GV đã đề xuất và còn trống | Sinh viên chọn một đề tài do Giảng viên đề xuất, đang ở trạng thái đã duyệt/còn trống, để đăng ký | Sinh viên | UC1.2 | TOPC-02 |
-| FR-DT-04 | Duyệt hoặc từ chối đề tài kèm lý do | Bộ môn xem đề tài ở trạng thái Chờ duyệt, quyết định duyệt hoặc từ chối; nếu từ chối phải ghi lý do | Bộ môn | UC1.3 | TOPC-03 |
-| FR-DT-05 | Phân công GVHD | Khi duyệt một đề tài, Bộ môn phân công Giảng viên hướng dẫn cho đề tài đó | Bộ môn | UC1.3 | TOPC-03 |
-| FR-DT-06 | Ràng buộc mỗi SV chỉ một đề tài đang hoạt động và mỗi đề tài chỉ một SV | Hệ thống chặn một Sinh viên có 2 đề tài đang hoạt động và chặn 2 Sinh viên cùng đăng ký một đề tài, kể cả khi hai SV đăng ký cùng lúc (race condition) | Hệ thống | UC1.2 | TOPC-03 |
-| FR-DT-07 | Xem danh sách đề tài theo trạng thái, lọc theo đợt và GV | Mọi vai trò xem danh sách đề tài theo trạng thái (Nháp → Chờ duyệt → Đã duyệt/Từ chối → Đã phân công), lọc theo đợt đồ án và theo Giảng viên | Sinh viên, Giảng viên, Bộ môn | UC1.4 | TOPC-04 |
+| FR-DT-03 | Đăng ký đề tài GVHD mở cho lớp | Sinh viên chọn một đề tài ở trạng thái "Mở cho lớp đăng ký" do chính GVHD của mình mở trong đợt đó để đăng ký; đăng ký thành công thì đề tài chuyển "Đã phân công" ngay (không qua bước duyệt) và GVHD nhận thông báo | Sinh viên | UC1.2 | TOPC-02 |
+| FR-DT-04 | Duyệt hoặc từ chối đề tài kèm lý do | GVHD của sinh viên xem đề tài "Chờ duyệt" do sinh viên trong lớp hướng dẫn của mình đề xuất, quyết định duyệt (chuyển "Đã phân công") hoặc từ chối (chuyển "Từ chối", bắt buộc ghi lý do; SV được đề xuất lại, vẫn gửi tới GVHD đó). Bộ môn, Sinh viên và Giảng viên khác không có quyền duyệt (server trả 403) | Giảng viên (GVHD) | UC1.3 | TOPC-03 |
+| FR-DT-05 | Phân công GVHD | Đầu mỗi đợt đồ án, Bộ môn phân công mỗi Sinh viên cho đúng một Giảng viên hướng dẫn (lớp hướng dẫn của GV) — gán từng dòng hoặc gán hàng loạt cho các SV đã chọn; màn hình có thống kê tổng SV / đã phân công / chưa phân công, số SV mỗi GV đang hướng dẫn, lọc theo từ khóa, GVHD và tình trạng phân công. SV và GV nhận thông báo khi phân công thay đổi | Bộ môn | UC0.8 | TOPC-03 |
+| FR-DT-06 | Ràng buộc mỗi SV chỉ một đề tài đang hoạt động và mỗi đề tài chỉ một SV | Hệ thống chặn một Sinh viên có 2 đề tài đang hoạt động và chặn 2 Sinh viên cùng đăng ký một đề tài, kể cả khi hai SV đăng ký cùng lúc (race condition) — chỉ một đăng ký thắng | Hệ thống | UC1.2 | TOPC-03 |
+| FR-DT-07 | Xem danh sách đề tài theo trạng thái, lọc theo đợt và GV | Mọi vai trò xem danh sách đề tài theo trạng thái (Nháp → Chờ duyệt → Mở cho lớp đăng ký/Từ chối → Đã phân công), lọc theo đợt đồ án và theo Giảng viên; phạm vi hiển thị theo vai trò: GV chỉ thấy đề tài mình hướng dẫn/đề xuất (không thấy bản nháp của SV), SV thấy đề tài của mình và đề tài do GVHD của mình mở cho lớp, Bộ môn thấy toàn bộ (chỉ xem) | Sinh viên, Giảng viên, Bộ môn | UC1.4 | TOPC-04 |
+| FR-DT-08 | Import phân công GVHD từ CSV | Bộ môn import phân công hàng loạt từ tệp CSV mỗi dòng `ma_so_sinh_vien,ma_giang_vien`; các dòng hợp lệ được lưu, các dòng lỗi (không tìm thấy mã SV/GV, vi phạm ràng buộc FR-DT-09) được báo lại kèm số dòng và lý do | Bộ môn | UC0.8 | TOPC-03 |
+| FR-DT-09 | Ràng buộc đổi/gỡ GVHD | Hệ thống chặn đổi hoặc gỡ GVHD của một SV khi SV đã có đề tài "Đã phân công" trong đợt (đề cương, tiến độ, bảo vệ đều gắn với GVHD đó); chặn gỡ GVHD khi SV đang có đề tài "Chờ duyệt"; khi đổi GVHD, đề tài "Chờ duyệt" của SV chuyển sang GVHD mới duyệt | Hệ thống | UC0.8 | TOPC-03 |
+| FR-DT-10 | GV giao đề tài hoặc mở cho lớp đăng ký | Khi tạo đề tài, Giảng viên chọn một SV trong lớp hướng dẫn của mình ở đợt đó — gửi đi thì đề tài chuyển "Đã phân công" ngay và SV nhận thông báo (GV giao đề tài); hoặc để trống — gửi đi thì đề tài chuyển "Mở cho lớp đăng ký", chỉ SV trong lớp của GV ở đợt đó nhìn thấy và đăng ký được | Giảng viên | UC1.1 | TOPC-01 |
+| FR-DT-11 | Xem lớp hướng dẫn | Giảng viên xem danh sách SV Bộ môn đã phân công cho mình theo từng đợt đang mở, kèm đề tài hiện tại của từng SV, và đi thẳng tới thao tác "Duyệt đề tài" hoặc "Giao đề tài"; Sinh viên xem GVHD của mình trên trang tổng quan | Giảng viên, Sinh viên | UC0.8 | TOPC-03 |
 
 ### 2.3.3. Quản lý đề cương (DC)
 
@@ -71,7 +75,7 @@ Bảng dưới đây liệt kê các yêu cầu chức năng chi tiết, nhóm t
 
 | Mã | Tên chức năng | Mô tả chi tiết | Tác nhân | UC | Nguồn |
 |----|---------------|-----------------|----------|----|-------|
-| FR-TB-01 | Thông báo in-app | Người dùng nhận thông báo in-app (số lượng chưa đọc + danh sách, đánh dấu đã đọc) khi đề tài/đề cương được duyệt hoặc từ chối, khi có nhận xét mới, khi được phân vào hội đồng hoặc có lịch bảo vệ | Sinh viên, Giảng viên, Bộ môn | UC0.5 | NOTF-01 |
+| FR-TB-01 | Thông báo in-app | Người dùng nhận thông báo in-app (số lượng chưa đọc + danh sách, đánh dấu đã đọc) khi được Bộ môn phân công/đổi GVHD, khi có đề tài chờ GVHD duyệt, khi được GV giao đề tài hoặc có SV đăng ký đề tài của GV, khi đề tài/đề cương được duyệt hoặc từ chối, khi có nhận xét mới, khi được phân vào hội đồng hoặc có lịch bảo vệ | Sinh viên, Giảng viên, Bộ môn | UC0.5 | NOTF-01 |
 
 ### 2.3.8. Kiểm tra trùng lặp bằng AI (AI)
 

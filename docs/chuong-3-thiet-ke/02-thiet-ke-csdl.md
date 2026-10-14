@@ -17,7 +17,7 @@ Các nguyên tắc áp dụng cho toàn bộ `thesis_core`:
 
 ### 3.2.2. Lược đồ thesis_core
 
-Lược đồ `thesis_core` gồm 19 bảng, khớp 1-1 với 19 lớp thực thể ở §3.1 (không có bảng liên kết N-N nào không map tới lớp — `thanh_vien_hoi_dong` và `diem_bao_ve` là các lớp liên kết đã được mô hình hóa tường minh thành lớp ở §3.1, không phải bảng kỹ thuật ẩn). Hình 3.5 ở trên thể hiện đầy đủ khóa chính, khóa ngoại, kiểu dữ liệu MySQL 8 và ràng buộc NOT NULL/UNIQUE của cả 19 bảng.
+Lược đồ `thesis_core` gồm 20 bảng, khớp 1-1 với 20 lớp thực thể ở §3.1 (không có bảng liên kết N-N nào không map tới lớp — `thanh_vien_hoi_dong` và `diem_bao_ve` là các lớp liên kết đã được mô hình hóa tường minh thành lớp ở §3.1, không phải bảng kỹ thuật ẩn). Hình 3.5 ở trên thể hiện đầy đủ khóa chính, khóa ngoại, kiểu dữ liệu MySQL 8 và ràng buộc NOT NULL/UNIQUE của cả 20 bảng. Bảng thứ 20, `phan_cong_huong_dan`, được bổ sung ở Alembic 0015 khi điều chỉnh nghiệp vụ phân công GVHD đầu đợt (UC0.8).
 
 ### 3.2.3. Từ điển dữ liệu
 
@@ -78,21 +78,33 @@ Lược đồ `thesis_core` gồm 19 bảng, khớp 1-1 với 19 lớp thực th
 | thu_tu | INT | Không | — | Thứ tự hiển thị/hạn nộp |
 | han_nop | DATE | Có | — | Hạn nộp báo cáo cho mốc |
 
+#### `phan_cong_huong_dan`
+
+| Cột | Kiểu | Null | Khóa | Mô tả |
+|---|---|---|---|---|
+| id | BIGINT | Không | PK | Định danh dòng phân công |
+| dot_do_an_id | BIGINT | Không | FK → dot_do_an (`fk_phan_cong_dot_do_an`), UNIQUE cùng sinh_vien_id | Đợt đồ án áp dụng phân công |
+| sinh_vien_id | BIGINT | Không | FK → sinh_vien (`fk_phan_cong_sinh_vien`) | Sinh viên được phân công; `uk_phan_cong_sv_dot (dot_do_an_id, sinh_vien_id)` bảo đảm mỗi SV tối đa một GVHD mỗi đợt (FR-DT-05) |
+| giang_vien_id | BIGINT | Không | FK → giang_vien (`fk_phan_cong_giang_vien`) | GVHD — tập SV của một GV trong đợt là "lớp hướng dẫn" của GV đó |
+| thoi_diem | DATETIME | Không | — | Thời điểm gán/đổi GVHD gần nhất |
+
+Khi chuyển dữ liệu (Alembic 0015), mọi đề tài đang hoạt động đã có cả SV và GV sinh ra một dòng phân công tương ứng, và đề tài GV đề xuất mà SV đã đăng ký còn ở `CHO_DUYET` (bước Bộ môn xác nhận của luồng cũ) được chuyển thẳng sang `DA_PHAN_CONG`.
+
 #### `de_tai`
 
 | Cột | Kiểu | Null | Khóa | Mô tả |
 |---|---|---|---|---|
 | id | BIGINT | Không | PK | Định danh đề tài |
 | dot_do_an_id | BIGINT | Không | FK → dot_do_an | Đợt đồ án chứa đề tài |
-| giang_vien_id | BIGINT | Có | FK → giang_vien | GV đề xuất hoặc GVHD |
+| giang_vien_id | BIGINT | Có | FK → giang_vien | GV đề xuất hoặc GVHD; đề tài SV gửi được gán ngay GVHD lấy từ `phan_cong_huong_dan` của đợt |
 | sinh_vien_id | BIGINT | Có | FK → sinh_vien | SV đề xuất hoặc đã đăng ký |
 | sinh_vien_id_dang_hoat_dong | BIGINT | Có (derived) | UNIQUE | Cột sinh — xem §3.2.5, cơ chế (a) |
 | ten_de_tai | VARCHAR(255) | Không | — | Tên đề tài |
 | mo_ta | TEXT | Có | — | Mô tả |
 | linh_vuc | VARCHAR(100) | Có | — | Lĩnh vực |
-| trang_thai | VARCHAR(20) | Không | — | `NHAP`/`CHO_DUYET`/`DA_DUYET`/`TU_CHOI`/`DA_PHAN_CONG` (§3.1.2) |
+| trang_thai | VARCHAR(20) | Không | — | `NHAP`/`CHO_DUYET`/`DA_DUYET`/`TU_CHOI`/`DA_PHAN_CONG` (§3.1.2); `DA_DUYET` hiển thị là "Mở cho lớp đăng ký" |
 | loai_nguoi_de_xuat | VARCHAR(10) | Không | — | `GIANG_VIEN` / `SINH_VIEN` |
-| ly_do_tu_choi | TEXT | Có | — | Lý do Bộ môn từ chối đề tài (FR-DT-04, UC1.3 – A1); cột bổ sung khi thi công Phase 2 |
+| ly_do_tu_choi | TEXT | Có | — | Lý do GVHD từ chối đề tài (FR-DT-04, UC1.3 – A1); cột bổ sung khi thi công Phase 2 |
 
 #### `de_cuong`
 
@@ -243,7 +255,7 @@ Lược đồ `thesis_core` gồm 19 bảng, khớp 1-1 với 19 lớp thực th
 |---|---|---|---|---|
 | id | BIGINT | Không | PK | Định danh thông báo |
 | tai_khoan_id | BIGINT | Không | FK → tai_khoan | Người nhận |
-| loai | VARCHAR(30) | Không | — | Loại sự kiện (duyệt đề tài, nhận xét mới...) |
+| loai | VARCHAR(30) | Không | — | Loại sự kiện (phân công GVHD `PHAN_CONG_GVHD`, đề tài chờ GVHD duyệt `DE_TAI_CHO_DUYET`, duyệt/từ chối đề tài, nhận xét mới...) |
 | noi_dung | TEXT | Không | — | Nội dung hiển thị |
 | lien_ket | VARCHAR(255) | Có | — | Đường dẫn tới màn hình liên quan |
 | da_doc | BOOLEAN | Không | — | Đã đọc hay chưa (FR-TB-01) |
@@ -267,6 +279,7 @@ Lược đồ `thesis_core` gồm 19 bảng, khớp 1-1 với 19 lớp thực th
 | SinhVien | sinh_vien | — |
 | GiangVien | giang_vien | — |
 | DotDoAn | dot_do_an | — |
+| PhanCongHuongDan | phan_cong_huong_dan | Bổ sung ở Alembic 0015 (UC0.8) |
 | MocTienDo | moc_tien_do | — |
 | DeTai | de_tai | — |
 | DeCuong | de_cuong | — |
@@ -300,13 +313,14 @@ Cột chỉ mang giá trị `sinh_vien_id` khi đề tài đang ở một trong 
 
 **(b) Mỗi đề tài chỉ có tối đa một Sinh viên, kể cả khi hai SV đăng ký gần như đồng thời.** Vì `de_tai.sinh_vien_id` là một cột đơn (không phải bảng N-N), rủi ro race condition không nằm ở "một dòng có 2 SV" mà ở "hai request cùng lúc đều tưởng mình đăng ký thành công" cho cùng một dòng. Tầng ứng dụng (Web API) bắt buộc dùng một trong hai cơ chế, không chỉ kiểm tra rồi ghi (check-then-act):
 
-- **UPDATE có điều kiện, kiểm tra số dòng bị ảnh hưởng:** `UPDATE de_tai SET sinh_vien_id = :sv, trang_thai = 'CHO_DUYET' WHERE id = :dt AND sinh_vien_id IS NULL`; nếu số dòng ảnh hưởng trả về là 0, đăng ký bị từ chối ("đề tài vừa được người khác đăng ký" — đúng luồng ngoại lệ E1 của UC1.2). InnoDB khóa dòng cho transaction đang ghi, transaction thứ hai chờ và luôn thấy `sinh_vien_id` đã khác NULL.
+- **UPDATE có điều kiện, kiểm tra số dòng bị ảnh hưởng:** `UPDATE de_tai SET sinh_vien_id = :sv, trang_thai = 'DA_PHAN_CONG' WHERE id = :dt AND sinh_vien_id IS NULL AND trang_thai = 'DA_DUYET' AND giang_vien_id = :gvhd_cua_sv` (`:gvhd_cua_sv` lấy từ `phan_cong_huong_dan` của đợt — chỉ đề tài GVHD của SV mở cho lớp mới khớp điều kiện); nếu số dòng ảnh hưởng trả về là 0, đăng ký bị từ chối ("đề tài vừa được người khác đăng ký" — đúng luồng ngoại lệ E1 của UC1.2). InnoDB khóa dòng cho transaction đang ghi, transaction thứ hai chờ và luôn thấy `sinh_vien_id` đã khác NULL.
 - **Tương đương:** `SELECT ... FOR UPDATE` trên dòng `de_tai` trước khi kiểm tra và ghi trong cùng transaction.
 
 **(c) Các ràng buộc UNIQUE khác đã thể hiện trực tiếp trên lược đồ (Hình 3.5):**
 
 | Ràng buộc | Bảng | Mục đích |
 |---|---|---|
+| UNIQUE(dot_do_an_id, sinh_vien_id) — `uk_phan_cong_sv_dot` | phan_cong_huong_dan | Mỗi SV có tối đa một GVHD trong một đợt (BR-PC-01); khi Bộ môn lưu phân công, Web API khóa (`SELECT ... FOR UPDATE`) các dòng phân công và đề tài đang hoạt động của các SV liên quan để không đua với SV đang gửi/đăng ký đề tài cùng lúc |
 | UNIQUE(de_tai_id, loai, so_phien_ban) | tai_lieu_do_an | Số phiên bản duy nhất trong cùng một loại tài liệu của một đề tài |
 | UNIQUE(tai_lieu_do_an_id) trên luot_duyet_de_cuong | luot_duyet_de_cuong | Mỗi phiên bản đề cương chỉ có một lượt duyệt kết luận |
 | UNIQUE(de_tai_id, moc_tien_do_id) | bao_cao_tien_do | Một báo cáo cho mỗi (đề tài, mốc) |

@@ -68,7 +68,7 @@ def create_topic(
 ) -> TopicOut:
     out = topics_service.create_topic(db, user, payload)
     if payload.gui:
-        # AISV-02 push-on-write: đề tài vừa vào CHO_DUYET được index sau commit
+        # AISV-02 push-on-write: đề tài vừa gửi (CHO_DUYET / mở cho lớp / giao SV) được index sau commit
         # (một lần encode) — lần kiểm tra tên kế tiếp đã thấy nó.
         background_tasks.add_task(ai_index.run_ingest_topic, out.id)
     return out
@@ -92,7 +92,7 @@ def submit_topic(
     db: Session = Depends(get_db),
 ) -> TopicOut:
     out = topics_service.submit_topic(db, user, topic_id)
-    # AISV-02 push-on-write: bản nháp vừa gửi (CHO_DUYET) được index sau commit.
+    # AISV-02 push-on-write: bản nháp vừa gửi được index sau commit.
     background_tasks.add_task(ai_index.run_ingest_topic, out.id)
     return out
 
@@ -139,5 +139,5 @@ def register_topic(
     user: CurrentUser = Depends(require_role(VaiTro.SINH_VIEN)),
     db: Session = Depends(get_db),
 ) -> TopicOut:
-    """UC1.2: chỉ SV đăng ký đề tài GV đã đề xuất còn trống — T-02-31."""
+    """UC1.2/UC0.8: chỉ SV đăng ký đề tài GVHD của mình mở cho lớp — T-02-31."""
     return topics_service.register_topic(db, user, topic_id)

@@ -20,6 +20,7 @@ rectangle "Hệ thống quản lý đồ án – Khoa CNTT" {
   usecase "UC0.5 – Xem thông báo" as UC0_5
   usecase "UC0.6 – Kiểm tra trùng lặp tên đề tài" as UC0_6
   usecase "UC0.7 – Kiểm tra trùng lặp tài liệu" as UC0_7
+  usecase "UC0.8 – Phân công GVHD" as UC0_8
 }
 
 SV --> UC1
@@ -48,6 +49,8 @@ BM --> UC0_1
 BM --> UC0_2
 BM --> UC0_3
 BM --> UC0_4
+BM --> UC0_8
+GV --> UC0_8
 
 SV --> UC0_5
 GV --> UC0_5
@@ -56,10 +59,18 @@ BM --> UC0_5
 UC1 ..> UC0_6 : <<include>>
 UC2 ..> UC0_7 : <<include>>
 UC4 ..> UC0_7 : <<include>>
+UC1 ..> UC0_8 : dựa trên\nphân công GVHD
 
 note bottom of UC0_2
-  UC0.2..UC0.7 thuộc nhóm chức năng chung,
+  UC0.2..UC0.8 thuộc nhóm chức năng chung,
   đặc tả chi tiết ở 11-dac-ta-uc0-chuc-nang-chung.md.
+end note
+
+note right of UC0_8
+  Đầu đợt Bộ môn phân công mỗi SV cho đúng
+  một GVHD; GV xem lớp hướng dẫn của mình.
+  UC1: SV đề xuất/đăng ký với GVHD này,
+  GVHD duyệt đề tài (Bộ môn chỉ theo dõi).
 end note
 
 note right of UC2

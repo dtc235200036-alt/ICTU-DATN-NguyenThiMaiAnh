@@ -8,7 +8,8 @@ from app.models.bao_ve import CHU_TICH, DiemBaoVe, HoiDong, LichBaoVe, ThanhVien
 from app.models.de_cuong import DC_CHO_DUYET, DC_CHUA_NOP, LOAI_DE_CUONG, DeCuong, TaiLieuDoAn
 from app.models.de_tai import CHO_DUYET, DA_PHAN_CONG, DeTai, SINH_VIEN
 from app.models.dot_do_an import DANG_MO, DotDoAn
-from app.models.tai_khoan import SinhVien, TaiKhoan
+from app.models.phan_cong import PhanCongHuongDan
+from app.models.tai_khoan import GiangVien, SinhVien, TaiKhoan
 from app.models.tien_do import CHUA_DEN_HAN, BaoCaoTienDo, MocTienDo
 from app.models.trung_lap import DANG_KIEM_TRA, HOAN_TAT, KetQuaKiemTraTrungLap
 from app.schemas.dashboard import (
@@ -100,8 +101,22 @@ def get_sv_dashboard(db: Session, user: CurrentUser) -> SvDashboardOut:
                 con_ngay=(nxt.han_nop - today).days if nxt.han_nop is not None else None,
             )
 
+    # UC0.8: GVHD của SV trong đợt đang mở mới nhất (SV chỉ làm việc với GVHD).
+    gvhd = db.execute(
+        select(GiangVien)
+        .join(PhanCongHuongDan, PhanCongHuongDan.giang_vien_id == GiangVien.id)
+        .join(DotDoAn, DotDoAn.id == PhanCongHuongDan.dot_do_an_id)
+        .where(PhanCongHuongDan.sinh_vien_id == sv_id)
+        .where(DotDoAn.trang_thai == DANG_MO)
+        .order_by(DotDoAn.id.desc())
+        .limit(1)
+    ).scalar_one_or_none()
+
     return SvDashboardOut(
         de_tai=de_tai_out,
+        giang_vien_huong_dan=(
+            " ".join(p for p in (gvhd.hoc_vi, gvhd.ho_ten) if p) if gvhd is not None else None
+        ),
         co_dot_dang_mo=co_dot_dang_mo,
         de_cuong=_sv_outline(db, topic),
         tien_do=tien_do,
@@ -179,6 +194,15 @@ def get_gv_dashboard(db: Session, user: CurrentUser) -> GvDashboardOut:
         select(func.count()).select_from(DeTai).where(DeTai.giang_vien_id == gv_id)
     ).scalar_one()
 
+    # UC0.8: sĩ số lớp hướng dẫn trong các đợt đang mở (Bộ môn phân công).
+    so_sinh_vien_lop = db.execute(
+        select(func.count())
+        .select_from(PhanCongHuongDan)
+        .join(DotDoAn, DotDoAn.id == PhanCongHuongDan.dot_do_an_id)
+        .where(PhanCongHuongDan.giang_vien_id == gv_id)
+        .where(DotDoAn.trang_thai == DANG_MO)
+    ).scalar_one()
+
     so_de_tai_cho_duyet = db.execute(
         select(func.count())
         .select_from(DeTai)
@@ -230,6 +254,7 @@ def get_gv_dashboard(db: Session, user: CurrentUser) -> GvDashboardOut:
 
     return GvDashboardOut(
         so_sinh_vien_huong_dan=so_sinh_vien_huong_dan,
+        so_sinh_vien_lop=so_sinh_vien_lop,
         so_de_tai=so_de_tai,
         so_de_tai_cho_duyet=so_de_tai_cho_duyet,
         de_tai=de_tai,
@@ -253,12 +278,32 @@ def _check_note(ket_qua: KetQuaKiemTraTrungLap | None) -> str:
 
 
 def _gv_tasks(db: Session, gv_id: int | None) -> list[GvTaskItem]:
-    """MH-03 "Việc cần xử lý" (≤ 10): đề cương chờ duyệt, báo cáo tiến độ chờ
+    """MH-03 "Việc cần xử lý" (≤ 10): đề tài SV gửi chờ duyệt, đề cương chờ duyệt, báo cáo tiến độ chờ
     nhận xét của đề tài mình hướng dẫn, và lịch bảo vệ (chưa chốt) ở hội đồng
     mình ngồi mà mình chưa chấm. Mỗi loại một truy vấn, không N+1."""
     if gv_id is None:
         return []
     tasks: list[GvTaskItem] = []
+
+    # UC1.3 (0015): đề tài SV trong lớp gửi, chờ chính GVHD duyệt.
+    pending_topics = db.execute(
+        select(DeTai.id, DeTai.ten_de_tai, SinhVien.ho_ten)
+        .outerjoin(SinhVien, SinhVien.id == DeTai.sinh_vien_id)
+        .where(DeTai.giang_vien_id == gv_id)
+        .where(DeTai.trang_thai == CHO_DUYET)
+        .order_by(DeTai.id)
+        .limit(_VIEC_MAX)
+    ).all()
+    for de_tai_id, ten, sv_ten in pending_topics:
+        tasks.append(
+            GvTaskItem(
+                loai="DUYET_DE_TAI",
+                sinh_vien=sv_ten,
+                ten_de_tai=ten,
+                ghi_chu="Đề tài sinh viên đề xuất chờ bạn duyệt",
+                lien_ket=f"/duyet-de-tai?de_tai_id={de_tai_id}",
+            )
+        )
 
     outlines = db.execute(
         select(DeCuong.id, DeTai.id, DeTai.ten_de_tai, SinhVien.ho_ten)
@@ -431,6 +476,22 @@ def get_bo_mon_dashboard(db: Session, dot_do_an_id: int | None) -> BmDashboardOu
         .where(TaiKhoan.bi_khoa.is_(False))
     ).scalar_one()
 
+    sv_chua_phan_cong = 0
+    if cohort is not None:
+        sv_chua_phan_cong = db.execute(
+            select(func.count())
+            .select_from(SinhVien)
+            .join(TaiKhoan, TaiKhoan.id == SinhVien.tai_khoan_id)
+            .where(TaiKhoan.bi_khoa.is_(False))
+            .where(
+                ~exists(
+                    select(PhanCongHuongDan.id)
+                    .where(PhanCongHuongDan.sinh_vien_id == SinhVien.id)
+                    .where(PhanCongHuongDan.dot_do_an_id == cohort.id)
+                )
+            )
+        ).scalar_one()
+
     sv_tre_moc = 0
     tien_do_trich = None
     moc_tien_do = []
@@ -490,6 +551,7 @@ def get_bo_mon_dashboard(db: Session, dot_do_an_id: int | None) -> BmDashboardOu
         de_tai_cho_duyet=de_tai_cho_duyet,
         de_tai_da_phan_cong=de_tai_da_phan_cong,
         sv_chua_co_de_tai=sv_chua_co_de_tai,
+        sv_chua_phan_cong=sv_chua_phan_cong,
         tong_sinh_vien=tong_sinh_vien,
         cho_duyet_moi_nhat=cho_duyet_moi_nhat,
     )

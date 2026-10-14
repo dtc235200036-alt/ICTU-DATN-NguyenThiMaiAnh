@@ -42,7 +42,7 @@ export default function TitleCheckAlert({
         type="info"
         showIcon
         style={{ marginBottom: 16 }}
-        message="Chưa kiểm tra được trùng lặp tên đề tài (dịch vụ kiểm tra không phản hồi). Bạn vẫn có thể gửi đề xuất; Bộ môn sẽ thấy trạng thái Chưa kiểm tra."
+        message="Chưa kiểm tra được trùng lặp tên đề tài (dịch vụ kiểm tra không phản hồi). Bạn vẫn có thể gửi đề xuất; GVHD sẽ thấy trạng thái Chưa kiểm tra."
       />
     )
   }

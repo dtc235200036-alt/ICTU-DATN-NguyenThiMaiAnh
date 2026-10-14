@@ -250,6 +250,28 @@ def auth_headers():
 
 
 @pytest.fixture
+def assign_gvhd(db):
+    """UC0.8: gán SV cho GVHD trong một đợt (điều kiện để SV đề xuất/đăng ký đề
+    tài và GV giao đề tài cho SV) — ghi thẳng DB như Bộ môn đã phân công."""
+
+    def _assign(sv: SeededAccount, gv: SeededAccount, dot_do_an_id: int) -> None:
+        from app.core.timeutil import now_utc
+        from app.models.phan_cong import PhanCongHuongDan
+
+        db.add(
+            PhanCongHuongDan(
+                dot_do_an_id=dot_do_an_id,
+                sinh_vien_id=sv.sinh_vien_id,
+                giang_vien_id=gv.giang_vien_id,
+                thoi_diem=now_utc(),
+            )
+        )
+        db.commit()
+
+    return _assign
+
+
+@pytest.fixture
 def make_assigned_topic(db):
     """Phase 3/UC2: một DeTai ở DA_PHAN_CONG (SV + GVHD đã gán) qua một
     DotDoAn đang mở tự tạo — điểm vào bắt buộc cho mọi nộp đề cương."""

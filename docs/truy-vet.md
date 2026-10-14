@@ -9,9 +9,9 @@ Bảng này giúp GVHD kiểm tra tiến độ theo đúng tiêu chí PI của �
 | 1.1 | Mô tả được quy trình nghiệp vụ | ANLS-01, ANLS-02 | [khao-sat/](chuong-2-khao-sat-phan-tich/khao-sat/) (Phụ lục A–D); [01-khao-sat-hien-trang.md](chuong-2-khao-sat-phan-tich/01-khao-sat-hien-trang.md), [02-quy-trinh-nghiep-vu.md](chuong-2-khao-sat-phan-tich/02-quy-trinh-nghiep-vu.md) (AS-IS + TO-BE đầy đủ 1 tổng quan + 5 quy trình con — bản nháp gắn nhãn GIẢ ĐỊNH — chờ xác nhận, đối chiếu với biên bản phỏng vấn thật ở Task 3 của kế hoạch này) | Chờ dữ liệu khảo sát thật |
 | 1.2 | Mô tả được yêu cầu chức năng và phi chức năng | ANLS-03, ANLS-04 | [03-yeu-cau-chuc-nang.md](chuong-2-khao-sat-phan-tich/03-yeu-cau-chuc-nang.md) (8 module: TK, DT, DC, TD, BV, KHO, TB, AI); [04-yeu-cau-phi-chuc-nang.md](chuong-2-khao-sat-phan-tich/04-yeu-cau-phi-chuc-nang.md) | Đạt |
 | 1.3 | Xây dựng được sơ đồ UC và đặc tả UC | ANLS-05 | [05-so-do-use-case.md](chuong-2-khao-sat-phan-tich/05-so-do-use-case.md) (sơ đồ UC tổng quát 5 UC chính + UC0); [06](chuong-2-khao-sat-phan-tich/06-dac-ta-uc1-quan-ly-de-tai.md)/[07](chuong-2-khao-sat-phan-tich/07-dac-ta-uc2-quan-ly-de-cuong.md)/[08](chuong-2-khao-sat-phan-tich/08-dac-ta-uc3-quan-ly-tien-do.md)/[09](chuong-2-khao-sat-phan-tich/09-dac-ta-uc4-quan-ly-bao-ve.md)/[10](chuong-2-khao-sat-phan-tich/10-dac-ta-uc5-quan-ly-kho-do-an.md)/[11](chuong-2-khao-sat-phan-tich/11-dac-ta-uc0-chuc-nang-chung.md) (đặc tả UC1..UC5 và UC0) | Đạt |
-| 2.1 | Thiết kế được cấu trúc dữ liệu | DSGN-01, DSGN-02 | [01-so-do-lop-thuc-the.md](chuong-3-thiet-ke/01-so-do-lop-thuc-the.md) (19 lớp thực thể), [02-thiet-ke-csdl.md](chuong-3-thiet-ke/02-thiet-ke-csdl.md) (19 bảng `thesis_core` + lược đồ `thesis_ai`) | Đạt |
+| 2.1 | Thiết kế được cấu trúc dữ liệu | DSGN-01, DSGN-02 | [01-so-do-lop-thuc-the.md](chuong-3-thiet-ke/01-so-do-lop-thuc-the.md) (20 lớp thực thể), [02-thiet-ke-csdl.md](chuong-3-thiet-ke/02-thiet-ke-csdl.md) (20 bảng `thesis_core` + lược đồ `thesis_ai`) | Đạt |
 | 2.2 | Thiết kế được kiến trúc phần mềm | DSGN-03 | [03-kien-truc-he-thong.md](chuong-3-thiet-ke/03-kien-truc-he-thong.md) (kiến trúc SOA, component/deployment/sequence) | Đạt |
-| 2.3 | Thiết kế mockup được giao diện | DSGN-04 | [04-thiet-ke-giao-dien.md](chuong-3-thiet-ke/04-thiet-ke-giao-dien.md) (14/14 màn hình đã dựng, xem [mockup/](chuong-3-thiet-ke/mockup/)) | Đạt |
+| 2.3 | Thiết kế mockup được giao diện | DSGN-04 | [04-thiet-ke-giao-dien.md](chuong-3-thiet-ke/04-thiet-ke-giao-dien.md) (16/16 màn hình đã dựng, xem [mockup/](chuong-3-thiet-ke/mockup/)) | Đạt |
 | 3.1 | Thi công được phần dữ liệu | DEPL-01 | (Phase 2) | Chưa thực hiện |
 | 3.2 | Thi công đủ các thành phần theo kiến trúc | — | (Phase 2, Web API/client/dịch vụ AI) | Chưa thực hiện |
 | 3.3 | Thi công được các UC / yêu cầu chức năng | TOPC-\*, OUTL-\*, PROG-\*, DEFN-\*, REPO-\* | (Phase 2–3) | Chưa thực hiện |
@@ -42,13 +42,17 @@ Bảng này giúp GVHD kiểm tra tiến độ theo đúng tiêu chí PI của �
 | FR-TK-03 | UC0.1 | — | TaiKhoan | tai_khoan | MH-01 |
 | FR-TK-04 | UC0.2 | — | TaiKhoan | tai_khoan | — |
 | FR-TK-05 | UC0.3 | TB-TQ-01 | DotDoAn | dot_do_an | — |
-| FR-DT-01 | UC1.1 | TB-DT-01a, TB-DT-01b | DeTai | de_tai | MH-06 |
+| FR-DT-01 | UC1.1 | TB-DT-01b, TB-DT-06, TB-DT-06a | DeTai, PhanCongHuongDan | de_tai, phan_cong_huong_dan | MH-06 |
 | FR-DT-02 | UC1.1 | TB-DT-02, TB-DT-03, TB-DT-04 | KetQuaKiemTraTrungLap, ChiTietTrungLap | ket_qua_kiem_tra_trung_lap, chi_tiet_trung_lap | MH-06 |
-| FR-DT-03 | UC1.2 | TB-DT-07 | DeTai | de_tai | MH-05 |
-| FR-DT-04 | UC1.3 | TB-DT-12, TB-DT-13, TB-DT-16, TB-DT-17 | DeTai | de_tai | MH-07 |
-| FR-DT-05 | UC1.3 | TB-DT-14, TB-DT-15 | DeTai | de_tai | MH-07 |
+| FR-DT-03 | UC1.2 | TB-DT-07, TB-DT-10 | DeTai, PhanCongHuongDan | de_tai, phan_cong_huong_dan | MH-05 |
+| FR-DT-04 | UC1.3 | TB-DT-12, TB-DT-13, TB-DT-14, TB-DT-15, TB-DT-16, TB-DT-17 | DeTai | de_tai | MH-07 |
+| FR-DT-05 | UC0.8 | TB-TQ-01, TB-DT-00a, TB-DT-00c | PhanCongHuongDan | phan_cong_huong_dan | MH-15 |
 | FR-DT-06 | UC1.2 | TB-DT-08, TB-DT-09, TB-DT-10, TB-DT-11 | DeTai | de_tai | — |
 | FR-DT-07 | UC1.4 | TB-DT-18 | DeTai | de_tai | MH-05 |
+| FR-DT-08 | UC0.8 | TB-DT-00a, TB-DT-00b | PhanCongHuongDan | phan_cong_huong_dan | MH-15 |
+| FR-DT-09 | UC0.8 | TB-DT-00b | PhanCongHuongDan, DeTai | phan_cong_huong_dan, de_tai | MH-15 |
+| FR-DT-10 | UC1.1 | TB-DT-01a, TB-DT-06b, TB-DT-06c | DeTai, PhanCongHuongDan | de_tai, phan_cong_huong_dan | MH-06 |
+| FR-DT-11 | UC0.8 | TB-DT-00c | PhanCongHuongDan | phan_cong_huong_dan | MH-16, MH-02 |
 | FR-DC-01 | UC2.1 | TB-DC-01 | DeCuong, TaiLieuDoAn | de_cuong, tai_lieu_do_an | MH-08 |
 | FR-DC-02 | UC2.1 | TB-DC-02 | TaiLieuDoAn | tai_lieu_do_an | MH-08 |
 | FR-DC-03 | UC2.2 | TB-DC-05 | DeCuong, KetQuaKiemTraTrungLap | de_cuong, ket_qua_kiem_tra_trung_lap | MH-09 |

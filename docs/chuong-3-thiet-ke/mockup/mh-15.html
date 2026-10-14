@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="mockup-size" content="1440x1560">
+<title>MH-15 · Phân công GVHD</title>
+<link rel="stylesheet" href="antd-admin.css">
+</head>
+<body>
+<div class="ant-layout">
+  <aside class="ant-layout-sider">
+    <div class="ant-layout-sider-logo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
+        <rect x="3" y="3" width="18" height="18" rx="3"></rect>
+        <path d="M8 12h8M8 8h8M8 16h5"></path>
+      </svg>
+      <span>QL Đồ án CNTT</span>
+    </div>
+    <ul class="ant-menu">
+      <li class="ant-menu-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+        <span>Tổng quan toàn khoa</span>
+      </li>
+      <li class="ant-menu-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+        <span>Quản lý đợt đồ án</span>
+      </li>
+      <li class="ant-menu-item ant-menu-item-selected">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6"></path><path d="M22 11h-6"></path></svg>
+        <span>Phân công GVHD</span>
+      </li>
+      <li class="ant-menu-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>
+        <span>Đề tài toàn khoa</span>
+      </li>
+      <li class="ant-menu-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path><path d="M14 2v6h6"></path><path d="m9 15 2 2 4-4"></path></svg>
+        <span>Duyệt đề cương</span>
+      </li>
+      <li class="ant-menu-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"></path><path d="M18.7 8.3 12 15l-3-3-4 4"></path></svg>
+        <span>Tiến độ toàn khoa</span>
+      </li>
+      <li class="ant-menu-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"></path><path d="M8.5 14.5 4 21l3-1 1 3 3.5-6"></path><path d="M15.5 14.5 20 21l-3-1-1 3-3.5-6"></path></svg>
+        <span>Hội đồng &amp; lịch bảo vệ</span>
+      </li>
+      <li class="ant-menu-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8V7l-3-4H6L3 7v1"></path><path d="M3 8h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path><path d="M12 12h.01"></path></svg>
+        <span>Kho đồ án</span>
+      </li>
+      <li class="ant-menu-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        <span>Cấu hình ngưỡng trùng lặp</span>
+      </li>
+    </ul>
+  </aside>
+
+  <div class="ant-layout-main">
+    <header class="ant-layout-header">
+      <nav class="ant-breadcrumb">
+        <span>Quản lý đề tài</span>
+        <span class="ant-breadcrumb-separator">/</span>
+        <span class="ant-breadcrumb-current">Phân công GVHD</span>
+      </nav>
+      <div class="ant-header-actions">
+        <span class="ant-badge" title="Thông báo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-opacity="0.65" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span class="ant-badge-count">7</span>
+        </span>
+        <span class="ant-header-user">
+          <span class="ant-avatar">BM</span>
+          <span>Bộ môn CNTT</span>
+        </span>
+      </div>
+    </header>
+
+    <main class="ant-layout-content">
+      <div class="mockup-content-header">
+        <h1 class="ant-page-title">Phân công GVHD</h1>
+        <div style="display:flex;gap:12px;align-items:center;">
+          <select class="ant-select-selector" aria-label="Đợt đồ án" style="min-width:220px;"><option>Đợt K22A — đang mở</option></select>
+          <button class="ant-btn ant-btn-default" type="button">Import CSV</button>
+          <button class="ant-btn ant-btn-primary" type="button">Lưu phân công</button>
+        </div>
+      </div>
+
+      <div class="mockup-grid-4">
+        <div class="ant-card" style="margin-top:0;">
+          <div class="ant-statistic">
+            <span class="ant-statistic-title">Tổng sinh viên</span>
+            <span class="ant-statistic-value">120</span>
+          </div>
+        </div>
+        <div class="ant-card" style="margin-top:0;">
+          <div class="ant-statistic">
+            <span class="ant-statistic-title">Đã phân công</span>
+            <span class="ant-statistic-value">104</span>
+          </div>
+        </div>
+        <div class="ant-card" style="margin-top:0;">
+          <div class="ant-statistic">
+            <span class="ant-statistic-title">Chưa phân công</span>
+            <span class="ant-statistic-value ant-statistic-value-danger">16</span>
+          </div>
+        </div>
+        <div class="ant-card" style="margin-top:0;">
+          <div class="ant-statistic">
+            <span class="ant-statistic-title">Giảng viên hướng dẫn</span>
+            <span class="ant-statistic-value">30</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mockup-panel-2col" style="margin-top:20px;grid-template-columns:2.2fr 1fr;">
+        <div class="ant-card">
+          <div class="ant-filter-bar">
+            <div class="ant-filter-item" style="min-width:220px;">
+              <label for="f-kw">Từ khóa</label>
+              <input class="ant-input" id="f-kw" type="text" placeholder="MSSV hoặc họ tên...">
+            </div>
+            <div class="ant-filter-item">
+              <label for="f-gv">GVHD</label>
+              <select class="ant-select-selector" id="f-gv"><option>Tất cả</option><option>ThS. Hà Thị Thanh Vân</option><option>TS. Ngô Quang Huy</option></select>
+            </div>
+            <div class="ant-filter-item">
+              <label for="f-tt">Tình trạng</label>
+              <select class="ant-select-selector" id="f-tt"><option>Tất cả</option><option>Đã phân công</option><option>Chưa phân công</option></select>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;align-items:center;padding:10px 16px;margin:0 0 16px;background:#e6f4ff;border:1px solid #91caff;border-radius:6px;">
+            <span style="font-weight:600;white-space:nowrap;">Đã chọn 3 sinh viên → Gán cho GVHD</span>
+            <select class="ant-select-selector" aria-label="GVHD gán hàng loạt" style="width:220px;"><option>ThS. Lê Hoài Nam</option></select>
+            <button class="ant-btn ant-btn-primary" type="button">Gán hàng loạt</button>
+          </div>
+
+          <table class="ant-table">
+            <thead>
+              <tr>
+                <th style="width:40px;"></th>
+                <th>MSSV</th>
+                <th>Họ tên</th>
+                <th>Lớp</th>
+                <th>GVHD</th>
+                <th>Đề tài hiện tại</th>
+              </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td><input type="checkbox" disabled aria-label="Chọn Đinh Văn Sinh Viên"></td>
+              <td>SV22A001</td>
+              <td>Đinh Văn Sinh Viên</td>
+              <td>DTC22A1</td>
+              <td><select class="ant-select-selector" disabled style="min-width:200px;"><option selected>ThS. Hà Thị Thanh Vân</option><option>TS. Ngô Quang Huy</option><option>ThS. Lê Hoài Nam</option><option>ThS. Trần Bích Ngọc</option></select><br><span style="font-size:12px;color:var(--ant-color-text-secondary);">Khóa — đã có đề tài Đã phân công</span></td>
+              <td><span class="ant-tag ant-tag-success">Đã phân công</span></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" aria-label="Chọn Trần Thị Mẫu B"></td>
+              <td>SV22A014</td>
+              <td>Trần Thị Mẫu B</td>
+              <td>DTC22A1</td>
+              <td><select class="ant-select-selector" style="min-width:200px;"><option selected>ThS. Hà Thị Thanh Vân</option><option>TS. Ngô Quang Huy</option><option>ThS. Lê Hoài Nam</option><option>ThS. Trần Bích Ngọc</option></select></td>
+              <td><span class="ant-tag ant-tag-processing">Chờ duyệt</span></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" aria-label="Chọn Phạm Văn Mẫu E"></td>
+              <td>SV22A041</td>
+              <td>Phạm Văn Mẫu E</td>
+              <td>DTC22A2</td>
+              <td><select class="ant-select-selector" style="min-width:200px;"><option>ThS. Hà Thị Thanh Vân</option><option selected>TS. Ngô Quang Huy</option><option>ThS. Lê Hoài Nam</option><option>ThS. Trần Bích Ngọc</option></select></td>
+              <td><span class="ant-tag ant-tag-default">Chưa có</span></td>
+            </tr>
+            <tr style="background:#e6f4ff;">
+              <td><input type="checkbox" checked aria-label="Chọn Vũ Minh Mẫu H"></td>
+              <td>SV22A063</td>
+              <td>Vũ Minh Mẫu H</td>
+              <td>DTC22A2</td>
+              <td><select class="ant-select-selector" style="min-width:200px;"><option selected>— Chọn GVHD —</option><option>ThS. Hà Thị Thanh Vân</option><option>TS. Ngô Quang Huy</option><option>ThS. Lê Hoài Nam</option><option>ThS. Trần Bích Ngọc</option></select></td>
+              <td><span class="ant-tag ant-tag-default">Chưa có</span></td>
+            </tr>
+            <tr style="background:#e6f4ff;">
+              <td><input type="checkbox" checked aria-label="Chọn Hoàng Thị Mẫu K"></td>
+              <td>SV22A071</td>
+              <td>Hoàng Thị Mẫu K</td>
+              <td>DTC22A3</td>
+              <td><select class="ant-select-selector" style="min-width:200px;"><option selected>— Chọn GVHD —</option><option>ThS. Hà Thị Thanh Vân</option><option>TS. Ngô Quang Huy</option><option>ThS. Lê Hoài Nam</option><option>ThS. Trần Bích Ngọc</option></select></td>
+              <td><span class="ant-tag ant-tag-default">Chưa có</span></td>
+            </tr>
+            <tr style="background:#e6f4ff;">
+              <td><input type="checkbox" checked aria-label="Chọn Bùi Văn Mẫu L"></td>
+              <td>SV22A088</td>
+              <td>Bùi Văn Mẫu L</td>
+              <td>DTC22A3</td>
+              <td><select class="ant-select-selector" style="min-width:200px;"><option selected>— Chọn GVHD —</option><option>ThS. Hà Thị Thanh Vân</option><option>TS. Ngô Quang Huy</option><option>ThS. Lê Hoài Nam</option><option>ThS. Trần Bích Ngọc</option></select></td>
+              <td><span class="ant-tag ant-tag-default">Chưa có</span></td>
+            </tr>
+            </tbody>
+          </table>
+
+          <div class="ant-pagination">
+            <span class="ant-pagination-item ant-pagination-item-active">1</span>
+            <span class="ant-pagination-item">2</span>
+            <span class="ant-pagination-item">3</span>
+            <span class="ant-pagination-item">…</span>
+            <span class="ant-pagination-item">20</span>
+          </div>
+        </div>
+
+        <div class="ant-card" style="margin-top:0;">
+          <h2 class="ant-card-title">Tải theo giảng viên</h2>
+          <table class="ant-table">
+            <thead><tr><th>Giảng viên</th><th>Số SV</th></tr></thead>
+            <tbody>
+            <tr><td>ThS. Hà Thị Thanh Vân</td><td>4</td></tr>
+            <tr><td>TS. Ngô Quang Huy</td><td>4</td></tr>
+            <tr><td>ThS. Lê Hoài Nam</td><td>3</td></tr>
+            <tr><td>ThS. Trần Bích Ngọc</td><td>5</td></tr>
+            <tr><td>TS. Đặng Văn Mẫu M</td><td>3</td></tr>
+            <tr><td>ThS. Nguyễn Thị Mẫu N</td><td>4</td></tr>
+            </tbody>
+          </table>
+          <p style="margin:12px 0 0;font-size:12px;color:var(--ant-color-text-secondary);">Trích 6/30 giảng viên của đợt K22A.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="mockup-state-panel">
+  <p class="mockup-state-label">Trạng thái: Import phân công từ CSV — dòng hợp lệ được lưu, dòng lỗi được báo lại</p>
+  <div class="ant-modal">
+    <div class="ant-modal-header">Import phân công từ CSV</div>
+    <div class="ant-modal-body">
+      <p style="margin:0 0 12px;font-size:13px;color:var(--ant-color-text-secondary);">Định dạng: mỗi dòng một sinh viên <code>ma_so_sinh_vien,ma_giang_vien</code>; dòng tiêu đề tùy chọn; phân tách bằng dấu phẩy hoặc chấm phẩy.</p>
+      <div class="ant-upload-dragger">
+        <p class="ant-upload-text">Kéo thả file CSV vào đây hoặc bấm để chọn file</p>
+        <p class="ant-upload-hint">phan-cong-k22a.csv · 40 dòng</p>
+      </div>
+      <div class="ant-alert ant-alert-warning" role="note" style="margin-top:16px;">
+        <span class="ant-alert-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></span>
+        <div class="ant-alert-content">
+          <p class="ant-alert-message">Đã lưu 38 dòng, 2 dòng lỗi</p>
+          <p class="ant-alert-description">Dòng 7: không tìm thấy sinh viên 'SV22A9XX'<br>Dòng 12: SV22A001 Đinh Văn Sinh Viên: đã có đề tài Đã phân công — không đổi được GVHD</p>
+        </div>
+      </div>
+    </div>
+    <div class="ant-modal-footer">
+      <button class="ant-btn ant-btn-default" type="button">Đóng</button>
+      <button class="ant-btn ant-btn-primary" type="button">Import</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

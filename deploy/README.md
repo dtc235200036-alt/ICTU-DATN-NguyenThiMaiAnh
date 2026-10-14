@@ -17,7 +17,7 @@ và đo thời gian từng bước: (0) kiểm tra điều kiện; (1) `init.sh`
 image AI và **tải trước mô hình** vào volume `ai-models` (D-02 — lúc chạy service
 `ai` đặt `HF_HUB_OFFLINE=1`); (3) `docker compose up -d --build --wait`; (4) kiểm
 tra `alembic_version` = revision mới nhất và `/health` của dịch vụ AI; (5) kiểm
-tra 100 SV / 30 GV / Bộ môn (DATA-01); (6) `seed-ai.sh` — 300 đề tài kho qua
+tra 580 SV / 70 GV / Bộ môn (DATA-01); (6) `seed-ai.sh` — 300 đề tài kho qua
 đường import thật + 25 đồ án nguồn có báo cáo (DATA-02, DATA-03); (7) tóm tắt
 địa chỉ, tài khoản, nguồn mật khẩu.
 
@@ -42,7 +42,7 @@ bash deploy/verify-all.sh            # đầy đủ (~5 phút trên máy demo: 2
 bash deploy/verify-all.sh --report   # đầy đủ + ghi kết quả cho chương 4
 ```
 
-- `--quick`: tình trạng stack (mysql/api/ai healthy, apache chạy, `ai-db-init`/`ai-migrate` exit 0, `ai` có `HF_HUB_OFFLINE=1` và không publish cổng), số liệu DATA-01/02/03 (100 SV, 30 GV, 300 đề tài kho K18–K22 đều `DA_INDEX`, `/health` ≥ 300 vector tiêu đề, 50 tệp, 25 đồ án nguồn có báo cáo), `smoke-test.sh`.
+- `--quick`: tình trạng stack (mysql/api/ai healthy, apache chạy, `ai-db-init`/`ai-migrate` exit 0, `ai` có `HF_HUB_OFFLINE=1` và không publish cổng), số liệu DATA-01/02/03 (580 SV, 70 GV, 300 đề tài kho K18–K22 đều `DA_INDEX`, `/health` ≥ 300 vector tiêu đề, 50 tệp, 25 đồ án nguồn có báo cáo), `smoke-test.sh`.
 - Đầy đủ: thêm `uv --directory backend run pytest -q`, `uv --directory ai-service run pytest -q`, `e2e-uc1.sh`, `e2e-uc2-5.sh`, `e2e-ai.sh`, `ai-nfr.sh --json`, `nfr-he-thong.sh --json`, `tools/check-erd-db.py`, kiểm tra không còn dữ liệu kiểm thử (đợt/bản ghi kho K95–K99, tài khoản bị khóa) và bước **nfr-16**: chạy `tools/demo/kich-ban-anh.json --chi-doc` (23 màn hình, 3 vai trò) bằng Chrome headless 1440 px qua HTTPS — FAIL nếu có lỗi JS/console, HTTP ≥ 400 ngoài dự kiến hoặc tràn ngang (bỏ qua, dùng `anh-chup.json` đã commit, khi chưa có trạng thái demo).
 - Mọi chế độ (05-05): ghi chữ ký hàng của tài khoản demo (`demo-state.sh --dem`: số hàng + md5 cột trạng thái/điểm) **trước** các bộ kiểm thử và so lại ở bước cuối **"trạng thái demo"** — lệch là FAIL (các bộ tự động không được đụng trạng thái demo).
 - `--report`: ghi `docs/chuong-4-trien-khai/ket-qua-kiem-thu/tong-hop.json` (commit, máy, từng bước + trạng thái + giây, số test pytest, `du_lieu`, bảng NFR-01…NFR-19 với `dat` true/false/null) và `nhat-ky-verify-all.log` (nhật ký đầy đủ), đồng thời ghi lại trang `docs/chuong-4-trien-khai/thu-nghiem-ai/04-hieu-nang-va-bao-mat.md` (`ai-nfr.sh --report`). Mọi thứ ghi ra đều đã che: giá trị `deploy/.env` dài ≥ 8 ký tự thành `***` (khóa bí mật) hoặc `<TEN_KHOA>`, chuỗi dạng JWT thành `***`.
@@ -50,7 +50,7 @@ bash deploy/verify-all.sh --report   # đầy đủ + ghi kết quả cho chươ
 
 `nfr-he-thong.sh [--json PATH]` đo NFR mức hệ thống qua Apache HTTPS: NFR-01 (301 → https), NFR-02 (bcrypt cost ≥ 12, mật khẩu không có trong log), NFR-03 (token ký bằng helper của app với `exp` quá khứ → 401), NFR-04 (SV gọi route Bộ môn → 403), NFR-05 (Bộ môn khóa → đăng nhập bị từ chối, mở khóa → đăng nhập lại được), NFR-08 qua HTTPS (20 lần kiểm tra tên, P95 ≤ 5 s), NFR-12 (20 lần tra cứu kho + 20 lần danh sách đề tài, P95 ≤ 1 s), NFR-13 (collation `utf8mb4_vietnamese_ci` ở mọi cột/bảng của `thesis_core` và `thesis_ai`, `alembic_version` mới nhất), NFR-14 (NFC = NFD), NFR-15 (ProxyTimeout > 30 s, SPA tĩnh, `/api` qua proxy), NFR-17/18/19 (số liệu seed). NFR-06 do `smoke-test.sh` + pytest chứng minh, NFR-07/09/10/11 do `ai-nfr.sh`, NFR-16 (Chrome 1440 px) do bước `nfr-16` của verify-all (hoặc `ket-qua-kiem-thu/anh-chup.json`).
 
-**Tài khoản dành riêng cho `nfr-he-thong.sh` — không dùng cho demo thủ công:** `DTC225200094` (SV, bị khóa/mở khóa trong lúc chạy) cùng `bomon`; khóa **K95** dành riêng (script không tạo đợt nào, nhưng dọn nếu có). Script luôn mở khóa lại `DTC225200094` và xóa thông báo phát sinh của nó (trap, kể cả khi lỗi). Không chạy song song với các script kiểm thử khác.
+**Tài khoản dành riêng cho `nfr-he-thong.sh` — không dùng cho demo thủ công:** `DTC235210073` (SV, bị khóa/mở khóa trong lúc chạy) cùng `bomon`; khóa **K95** dành riêng (script không tạo đợt nào, nhưng dọn nếu có). Script luôn mở khóa lại `DTC235210073` và xóa thông báo phát sinh của nó (trap, kể cả khi lỗi). Không chạy song song với các script kiểm thử khác.
 
 ## Yêu cầu
 
@@ -83,14 +83,19 @@ docker compose -f deploy/docker-compose.yml exec -T api python -m app.seed
 |---|---|---|---|
 | Bộ môn | `bomon` | `bomon@ictu.edu.vn` | `SEED_DEFAULT_PASSWORD` (mặc định `DoAn@2026`) |
 | Giảng viên | `GV001` .. `GV030` | `gv001@ictu.edu.vn` .. `gv030@ictu.edu.vn` | như trên |
-| Sinh viên | `DTC225200001` .. `DTC225200100` | `dtc225200001@ictu.edu.vn` .. `dtc225200100@ictu.edu.vn` | như trên |
+| Sinh viên | `DTC235200016` .. `DTC235210045` | `dtc225200001@ictu.edu.vn` .. `dtc225200100@ictu.edu.vn` | như trên |
 
 **Chỉ dùng cho dev/demo** — đổi `SEED_DEFAULT_PASSWORD` trước khi đưa lên môi
 trường thật (Phase 5).
 
 Seed cũng tạo sẵn một đợt đồ án đang mở, **"Đợt đồ án tốt nghiệp K22 - HK1
 (2026-2027)"** (khóa K22), dùng ngay cho demo UC1 (đề xuất/đăng ký đề tài) mà
-không cần Bộ môn mở đợt thủ công trước.
+không cần Bộ môn mở đợt thủ công trước, kèm **phân công GVHD mặc định** cho đợt
+đó (UC0.8, migration 0015): SV thứ *i* → GV thứ ((*i*−1) mod 30)+1, tức
+`DTC235200016` → `GV001`, `DTC235200139` → `GV011`, `DTC235200703` → `GV001`, …
+Seed không bao giờ đổi phân công đã có; Bộ môn đổi ở "Phân công GVHD"
+(`/phan-cong-gvhd`). SV chưa được phân công GVHD trong đợt thì không đề xuất
+được đề tài.
 
 ## Thời hạn token (chờ xác nhận GVHD — xem ghi chú NFR-03)
 
@@ -138,35 +143,35 @@ Lệnh này xóa cả volume `mysql-data` **và** `uploads-data` (file đề cư
 
 ## Kịch bản demo bảo vệ (Phase 5) — trạng thái demo và chạy lại kịch bản
 
-Dùng cho buổi bảo vệ; thay thế các mục "Kịch bản demo UC1", "UC2–UC5" và "Kịch bản demo AI" bên dưới (giữ lại làm hướng dẫn thao tác chi tiết theo từng phase). Bản trình bày cho người đọc (`docs/kich-ban-demo.md`, lời nói theo từng bước) sẽ viết cùng quyển báo cáo; bản máy chạy được là `tools/demo/kich-ban-demo.json` (B01…B16, mốc thời gian dự kiến, tài khoản, tệp, chữ mong đợi, ý cần nói).
+Dùng cho buổi bảo vệ; thay thế các mục "Kịch bản demo UC1", "UC2–UC5" và "Kịch bản demo AI" bên dưới (giữ lại làm hướng dẫn thao tác chi tiết theo từng phase). Bản trình bày cho người đọc (`docs/kich-ban-demo.md`, lời nói theo từng bước) sẽ viết cùng quyển báo cáo; bản máy chạy được là `tools/demo/kich-ban-demo.json` (B01…B18, mốc thời gian dự kiến, tài khoản, tệp, chữ mong đợi, ý cần nói).
 
 **Tài khoản demo dành riêng** (không bộ kiểm thử tự động nào ghi vào; đợt: "Đợt đồ án tốt nghiệp K22 - HK1 (2026-2027)", mật khẩu `SEED_DEFAULT_PASSWORD`):
 
 | Tài khoản | Trạng thái sau `demo-state.sh` | Dùng trong demo |
 |---|---|---|
-| `DTC225200011` | chưa có đề tài | đề xuất tên diễn đạt lại → cảnh báo AI → gửi; nộp `seed-data/tai-lieu/P03-B.pdf` → Đang kiểm tra → Hoàn tất |
-| `DTC225200012` | đề cương v1 = `P02-B.docx` (chép nguyên văn), Hoàn tất 48 %, chờ GV011 duyệt | MH-09 / MH-14 đoạn tô sáng, Yêu cầu sửa |
-| `DTC225200013` | đề cương đã duyệt, 2 báo cáo tiến độ (mốc 1 đã nhận xét, mốc 2 chờ) | UC3 |
-| `DTC225200014` | báo cáo cuối đã kiểm tra, "Hội đồng demo K22", 2/3 điểm | GV014 chấm, Bộ môn chốt → tự vào kho |
-| `DTC225200015` | đủ 3 điểm, đã chốt (8.5), đã trong Kho đồ án | UC4 kết quả, UC5 tra cứu |
-| `GV011` / `GV012` / `GV013` / `GV014` | GVHD của 011–015 / chủ tịch / thư ký / ủy viên hội đồng demo | |
+| `DTC235200139` | chưa có đề tài, GVHD `GV011` | đề xuất tên diễn đạt lại → cảnh báo AI → gửi tới GVHD → `GV011` duyệt ("Duyệt đề tài") → Đã phân công; nộp `seed-data/tai-lieu/P03-B.pdf` → Đang kiểm tra → Hoàn tất |
+| `DTC235200258` | đề cương v1 = `P02-B.docx` (chép nguyên văn), Hoàn tất 48 %, chờ GV011 duyệt | MH-09 / MH-14 đoạn tô sáng, Yêu cầu sửa |
+| `DTC235200325` | đề cương đã duyệt, 2 báo cáo tiến độ (mốc 1 đã nhận xét, mốc 2 chờ) | UC3 |
+| `DTC235200340` | báo cáo cuối đã kiểm tra, "Hội đồng demo K22", 2/3 điểm | GV014 chấm, Bộ môn chốt → tự vào kho |
+| `DTC235270078` | đủ 3 điểm, đã chốt (8.5), đã trong Kho đồ án | UC4 kết quả, UC5 tra cứu |
+| `GV011` / `GV012` / `GV013` / `GV014` | GVHD (Bộ môn phân công) của 011–015 — duyệt đề tài 012–015 / chủ tịch / thư ký / ủy viên hội đồng demo | |
 
 ```bash
 bash deploy/demo-state.sh             # xóa trạng thái demo cũ + dựng lại (~20 s; xóa ~3 s, dựng ~13 s)
-bash deploy/demo-state.sh --chi-xoa   # chỉ xóa (5 SV demo không còn đề tài, hội đồng demo bị xóa)
+bash deploy/demo-state.sh --chi-xoa   # chỉ xóa (5 SV demo không còn đề tài, vẫn GVHD GV011; hội đồng demo bị xóa)
 bash deploy/demo-state.sh --dem       # chỉ đọc: chữ ký hàng demo (verify-all dùng)
 ```
 
-`demo-state.sh` chỉ chọn hàng của 5 SV demo trong đợt K22 và hội đồng tên "Hội đồng demo K22", gỡ TOPIC/DOCUMENT/ARCHIVE của chúng khỏi chỉ mục AI rồi xóa theo thứ tự khóa ngoại; **dừng, không xóa gì** nếu hội đồng demo có lịch/thành viên ngoài tài khoản demo. Mốc tiến độ của đợt K22 được get-or-create (không bao giờ xóa) và đặt hạn +3/+17/+45 ngày theo ngày chạy (kẹp trong đợt). Tệp nộp lấy từ các cặp đã hiệu chỉnh Đạt, **bỏ qua** cặp CHEP_NGUYEN_VAN/KHONG_LIEN_QUAN đầu tiên vì `e2e-ai.sh` dùng chúng.
+`demo-state.sh` chỉ chọn hàng của 5 SV demo trong đợt K22 và hội đồng tên "Hội đồng demo K22", gỡ TOPIC/DOCUMENT/ARCHIVE của chúng khỏi chỉ mục AI rồi xóa theo thứ tự khóa ngoại; **dừng, không xóa gì** nếu hội đồng demo có lịch/thành viên ngoài tài khoản demo. Sau bước xóa (kể cả `--chi-xoa`), Bộ môn gán lại cả 5 SV demo cho GVHD `GV011` trong đợt K22 qua `PUT /api/assignments` (seed mặc định là 012→GV012 … 015→GV015) và xóa thông báo phân công phát sinh để trạng thái demo luôn giống nhau; khi dựng lại, đề tài 012–015 do SV gửi rồi **GVHD `GV011` duyệt** (không còn bước Bộ môn duyệt/phân công). Mốc tiến độ của đợt K22 được get-or-create (không bao giờ xóa) và đặt hạn +3/+17/+45 ngày theo ngày chạy (kẹp trong đợt). Tệp nộp lấy từ các cặp đã hiệu chỉnh Đạt, **bỏ qua** cặp CHEP_NGUYEN_VAN/KHONG_LIEN_QUAN đầu tiên vì `e2e-ai.sh` dùng chúng.
 
 Chạy lại kịch bản trên giao diện thật (Chrome headless qua `https://localhost`, 1440×900; cần `/usr/bin/google-chrome` hoặc `CHROME=...` và gói Python `websockets` có sẵn trên máy):
 
 ```bash
-# Tập dượt tự động B01…B16 (ghi dữ liệu) — thêm một mục vào nhật ký
+# Tập dượt tự động B01…B18 (ghi dữ liệu) — thêm một mục vào nhật ký
 bash deploy/demo-state.sh && python3 tools/demo/chay-kich-ban.py tools/demo/kich-ban-demo.json \
   --out-dir /tmp/ntma-tap-duot --log docs/chuong-4-trien-khai/ket-qua-kiem-thu/tap-duot-demo.md && bash deploy/demo-state.sh
 
-# Chụp lại 27 ảnh chương 4 (uc0…uc5) + bảng kê anh-chup.json (NFR-16)
+# Chụp lại 29 ảnh chương 4 (uc0…uc5) + bảng kê anh-chup.json (NFR-16)
 bash deploy/demo-state.sh && python3 tools/demo/chay-kich-ban.py tools/demo/kich-ban-anh.json \
   --out-dir docs/chuong-4-trien-khai/anh --json docs/chuong-4-trien-khai/ket-qua-kiem-thu/anh-chup.json && bash deploy/demo-state.sh
 ```
@@ -184,52 +189,68 @@ tự (ROADMAP Phase 2, SC1–SC5):
    nhập lại bằng `bomon@ictu.edu.vn` (email) — cùng vào được. Tải lại trang
    (F5) — vẫn còn phiên đăng nhập (refresh token cookie).
 2. **Khóa/mở tài khoản (Bộ môn):** vào "Quản lý tài khoản" (`/tai-khoan`),
-   khóa một tài khoản SV (ví dụ `DTC225200002`), thử đăng nhập bằng tài khoản
+   khóa một tài khoản SV (ví dụ `DTC235200036`), thử đăng nhập bằng tài khoản
    đó ở cửa sổ ẩn danh → bị từ chối; mở khóa lại.
 3. **Mở/đóng đợt đồ án (Bộ môn):** vào "Quản lý đợt đồ án", đóng đợt "Đợt đồ
    án tốt nghiệp K22 - HK1 (2026-2027)", xác nhận GV/SV không đề xuất/đăng ký
    được đề tài mới trong đợt đã đóng; mở lại đợt trước khi tiếp tục demo.
-4. **GV đề xuất đề tài:** đăng nhập `GV001`, vào "Đề xuất đề tài", nhập một
-   tên đề tài gần giống đề tài đã có trong kho — quan sát cảnh báo "N đề tài
-   tương tự" trước khi gửi; gửi đề xuất → đề tài ở trạng thái "Chờ duyệt".
-5. **SV tự đề xuất và đăng ký:** đăng nhập `DTC225200002`, tự đề xuất một đề
-   tài mới; ở một tài khoản SV khác chưa có đề tài, vào "Danh sách đề tài",
-   lọc đề tài "Đã duyệt" còn trống do GV đề xuất và bấm "Đăng ký".
-6. **Bộ môn duyệt / phân công / từ chối (MH-07):** đăng nhập `bomon`, vào
-   "Duyệt & phân công đề tài" (`/duyet-de-tai`); mở đề tài GV đề xuất chưa có
-   SV → "Duyệt"; mở đề tài đã có SV đăng ký → chọn Giảng viên hướng dẫn rồi
-   "Duyệt và phân công"; mở một đề tài khác → "Từ chối" kèm lý do.
-7. **SV xem lý do từ chối:** đăng nhập lại tài khoản SV bị từ chối ở bước 6,
-   mở chi tiết đề tài, xác nhận thấy đúng lý do từ chối.
+4. **Bộ môn phân công GVHD (UC0.8, MH-13):** đăng nhập `bomon`, vào "Phân
+   công GVHD" (`/phan-cong-gvhd`), chọn đợt K22 — bảng SV kèm GVHD hiện tại
+   (seed mặc định), tải từng GV, lọc đã/chưa phân công. Đổi GVHD của
+   `DTC235200036` thành `GV001` rồi lưu (có thể import CSV
+   `ma_so_sinh_vien,ma_giang_vien`). Lớp của `GV001` lúc này gồm
+   `DTC235200016`, `DTC235200036`, `DTC235200703`, … (GV xem ở "Sinh viên của
+   tôi", `/sinh-vien-huong-dan`). SV chưa có GVHD trong đợt không đề xuất được.
+5. **GV mở đề tài cho lớp / giao thẳng:** đăng nhập `GV001`, vào "Đề xuất đề
+   tài", nhập một tên đề tài gần giống đề tài đã có trong kho — quan sát cảnh
+   báo "N đề tài tương tự" trước khi gửi; gửi **không chọn SV** → "Đã duyệt"
+   (mở cho lớp `GV001` đăng ký). Tạo thêm một đề tài, chọn SV trong lớp chưa
+   có đề tài (vd. `DTC235200489`) rồi gửi → "Đã phân công" ngay, không qua
+   bước duyệt; chọn SV lớp khác thì bị từ chối.
+6. **SV tự đề xuất và đăng ký:** đăng nhập `DTC235200036`, tự đề xuất một đề
+   tài mới → "Chờ duyệt", gửi tới GVHD `GV001`. Ở `DTC235200703` (cùng lớp,
+   chưa có đề tài) vào "Danh sách đề tài" → thấy đề tài `GV001` vừa mở → bấm
+   "Đăng ký" → "Đã phân công" ngay. SV lớp khác (vd. `DTC235200988`, GVHD
+   `GV003`) không thấy đề tài đó.
+7. **GVHD duyệt / từ chối (MH-07):** đăng nhập `GV001`, vào "Duyệt đề tài"
+   (`/duyet-de-tai`) — chỉ có đề tài SV trong lớp mình gửi; mở đề tài của
+   `DTC235200036` → "Duyệt" → "Đã phân công", hoặc "Từ chối" kèm lý do (SV
+   đăng nhập lại, mở chi tiết đề tài thấy đúng lý do và đề xuất lại được).
+   Bộ môn không còn duyệt đề tài; sau khi SV có đề tài "Đã phân công", Bộ môn
+   không đổi được GVHD của SV đó.
 8. **Danh sách lọc theo đợt/trạng thái/GVHD:** ở "Danh sách đề tài" (mọi vai
    trò), lọc theo Đợt đồ án, Trạng thái và Giảng viên hướng dẫn — bảng chỉ
    còn đúng các đề tài khớp bộ lọc.
 9. **403 khi gọi sai vai trò:** đăng nhập SV, thử mở trực tiếp URL
-   `/tai-khoan` hoặc `/duyet-de-tai` — nhận trang 403 "Bạn không có quyền
-   truy cập trang này".
-10. **Dashboard theo vai trò:** đăng nhập lần lượt `DTC225200001`, `GV001` và
+   `/tai-khoan`, `/phan-cong-gvhd` hoặc `/duyet-de-tai` — nhận trang 403 "Bạn
+   không có quyền truy cập trang này" (`bomon` mở `/duyet-de-tai` cũng 403).
+10. **Dashboard theo vai trò:** đăng nhập lần lượt `DTC235200016`, `GV001` và
     `bomon`, mở "Tổng quan" — mỗi vai trò thấy đúng widget của mình (SV: đề
-    tài của tôi; GV: sinh viên hướng dẫn + đề tài chờ duyệt + bảng đề tài
-    hướng dẫn; Bộ môn: đề tài chờ duyệt + SV chưa có đề tài + đề tài đã phân
-    công + danh sách chờ duyệt mới nhất).
+    tài của tôi + GVHD được phân công; GV: sinh viên hướng dẫn + sĩ số lớp +
+    việc "Duyệt đề tài" + bảng đề tài hướng dẫn; Bộ môn: đề tài chờ duyệt +
+    SV chưa có đề tài + SV chưa phân công GVHD + đề tài đã phân công + danh
+    sách chờ duyệt mới nhất).
 
 ## Kịch bản demo UC2–UC5 (thao tác trên trình duyệt)
 
 > Cho buổi bảo vệ dùng mục "Kịch bản demo bảo vệ (Phase 5)" ở trên; mục này giữ lại làm hướng dẫn thao tác chi tiết.
 
-Tiếp nối kịch bản UC1: cần một SV có đề tài **Đã phân công** (ví dụ bước 5–6
-ở trên: `DTC225200002` tự đề xuất, `bomon` "Duyệt và phân công" cho `GV001`).
+Tiếp nối kịch bản UC1: cần một SV có đề tài **Đã phân công** (ví dụ bước 4–7
+ở trên: `bomon` phân công `DTC235200036` cho GVHD `GV001`, SV tự đề xuất,
+`GV001` "Duyệt").
 Thứ tự theo D-09: đề cương → bảo vệ → lưu kho → tiến độ; chuông thông báo
-(góc phải Header) được kiểm tra ở mọi bước. Dùng các tài khoản `DTC2252000xx`
+(góc phải Header) được kiểm tra ở mọi bước. Dùng các tài khoản SV thông thường (vd. `DTC235200159`)
 / `GV0xx` thông thường — **không** dùng các tài khoản dành riêng cho e2e
 (xem mục "Kiểm thử tự động").
 
-1. **Thông báo phân công (NOTF-01):** ngay sau khi `bomon` duyệt và phân công,
-   đăng nhập `DTC225200002` và (cửa sổ ẩn danh) `GV001` — trong tối đa 30 giây
-   chuông hiện số chưa đọc; mở chuông thấy "Đề tài '…' đã được duyệt — GVHD: …"
-   (SV) và "Bạn được phân công hướng dẫn …" (GV); bấm vào thông báo → mở chi
-   tiết đề tài, số trên chuông giảm 1.
-2. **SV nộp đề cương (MH-08, OUTL-01):** `DTC225200002` → "Đề cương" → chọn
+1. **Thông báo phân công (NOTF-01):** sau khi `bomon` phân công GVHD, SV nhận
+   "Giảng viên hướng dẫn của bạn trong '…': …" và GV nhận "Bạn được phân công
+   hướng dẫn thêm n sinh viên …"; khi `DTC235200036` gửi đề tài, `GV001` nhận
+   "… gửi đề tài '…' chờ bạn duyệt"; ngay sau khi `GV001` duyệt, đăng nhập
+   `DTC235200036` — trong tối đa 30 giây chuông hiện số chưa đọc; mở chuông
+   thấy "Đề tài '…' đã được GVHD … duyệt"; bấm vào thông báo → mở chi tiết đề
+   tài, số trên chuông giảm 1.
+2. **SV nộp đề cương (MH-08, OUTL-01):** `DTC235200036` → "Đề cương" → chọn
    file DOCX/PDF (≤ 20 MB) → "Nộp phiên bản mới". Panel kiểm tra trùng lặp chuyển
    "Đang kiểm tra" → "Hoàn tất"; bấm "Xem chi tiết" mở MH-14
    (`/kiem-tra-trung-lap/…`). GVHD nhận thông báo "đề cương mới".
@@ -245,7 +266,7 @@ Thứ tự theo D-09: đề cương → bảo vệ → lưu kho → tiến độ
 6. **Bộ môn lập hội đồng và xếp lịch (MH-11, DEFN-01):** `bomon` → "Hội đồng &
    lịch bảo vệ" → "Tạo hội đồng": 3–5 GV (đúng một Chủ tịch), **ngày bảo vệ =
    hôm nay** (chỉ chấm được từ ngày bảo vệ), giờ, phòng. Thử thêm `GV001`
-   (GVHD của SV) vào hội đồng rồi "Thêm sinh viên" `DTC225200002` → **bị chặn**
+   (GVHD của SV) vào hội đồng rồi "Thêm sinh viên" `DTC235200036` → **bị chặn**
    (GVHD không ngồi hội đồng của SV mình); bỏ `GV001` khỏi hội đồng rồi thêm
    lại → thành công. Thành viên nhận "phân vào hội đồng", SV nhận "lịch bảo vệ".
 7. **GV chấm điểm (MH-12, DEFN-02):** lần lượt từng thành viên → "Hội đồng bảo
@@ -295,22 +316,31 @@ python3 tools/check-erd-db.py
 Test Phase 3 (pytest): `backend/tests/test_outline_flow.py`,
 `test_defense_flow.py`, `test_archive.py`, `test_progress_flow.py`,
 `test_notifications.py`. `smoke-test.sh` kiểm tra thêm 403 chéo vai trò trên
-mọi nhóm route Phase 3 (outlines, progress, defense, archive) và 200 cho
-notifications/archive ở cả ba vai trò.
+mọi nhóm route Phase 3 (outlines, progress, defense, archive), 200 cho
+notifications/archive ở cả ba vai trò, và luồng phân công GVHD (0015):
+`/api/topic-approvals` chỉ GV (Bộ môn, SV → 403), `/api/assignments` gán/import/
+xem chỉ Bộ môn, `my-students` chỉ GV, `my-advisor` chỉ SV (`DTC235200016` có
+GVHD `GV001` theo seed), các trường dashboard mới `sv_chua_phan_cong` /
+`so_sinh_vien_lop` / `giang_vien_huong_dan`.
 
-`deploy/e2e-uc1.sh` tự dựng riêng một đợt đồ án khóa **K99** và dùng 3 tài
+`deploy/e2e-uc1.sh` tự dựng riêng một đợt đồ án khóa **K99** và dùng 5 tài
 khoản seed dành riêng cho kịch bản tự động (tách biệt với các tài khoản dùng ở
-demo thủ công phía trên): `GV030` (đề xuất đề tài), `DTC225200099` (tự đề
-xuất đề tài, sau đó bị từ chối) và `DTC225200100` (đăng ký đề tài GV đã
-duyệt). Script tự xóa toàn bộ dữ liệu nó tạo ra (đợt K99 + đề tài + kết quả
-kiểm tra trùng lặp + thông báo phát sinh) khi kết thúc, kể cả khi có bước thất
-bại giữa chừng.
+demo thủ công phía trên): `GV030` (GVHD — mở đề tài cho lớp, duyệt/từ chối, giao
+thẳng), `DTC235210040` (lớp GV030 — tự đề xuất, bị từ chối, đề xuất lại được
+duyệt), `DTC235210045` (lớp GV030 — đăng ký đề tài GV030 mở), `GV024` (GV không
+phải GVHD) và `DTC235210023` (lớp GV024 — không thấy/không đăng ký được đề tài
+lớp khác, sau đó được chuyển sang lớp GV030 và nhận đề tài giao thẳng). Các bước
+kiểm: SV chưa có GVHD đề xuất → 409; Bộ môn gán (`PUT /api/assignments`) +
+import CSV + danh sách phân công; Bộ môn/SV/GV không phải GVHD duyệt → 403;
+đổi GVHD khi SV đã có đề tài Đã phân công → 409. Script tự xóa toàn bộ dữ liệu
+nó tạo ra (đợt K99 + phân công GVHD + đề tài + kết quả kiểm tra trùng lặp +
+thông báo phát sinh) khi kết thúc, kể cả khi có bước thất bại giữa chừng.
 
 `deploy/e2e-uc2-5.sh` chạy chuỗi đề cương → tiến độ → bảo vệ → lưu kho → thông
 báo → dashboard qua Apache trên một đợt khóa **K98** riêng. Tài khoản dành
 riêng (**không dùng cho demo thủ công**): `GV025` (GV không liên quan),
-`GV026`–`GV028` (hội đồng), `GV029` (GVHD), `DTC225200097` (SV khác),
-`DTC225200098` (SV chính). Khi kết thúc (kể cả lỗi giữa chừng) script xóa mọi
+`GV026`–`GV028` (hội đồng), `GV029` (GVHD), `DTC235210037` (SV khác),
+`DTC235210039` (SV chính). Khi kết thúc (kể cả lỗi giữa chừng) script xóa mọi
 dữ liệu của đợt K98 (đề tài, đề cương, tài liệu + file vật lý, mốc/báo cáo tiến
 độ, lịch/điểm bảo vệ, hội đồng vừa tạo, bản ghi kho) và thông báo của các tài
 khoản trên phát sinh từ lúc script bắt đầu. Sau khi chạy không còn đợt K98/K99:
@@ -381,7 +411,7 @@ bash deploy/ai-nfr.sh --report docs/chuong-4-trien-khai/thu-nghiem-ai/04-hieu-na
 - `e2e-ai.sh` — bảo mật dịch vụ AI, tên đề tài diễn đạt lại (cả NFC và NFD), Bộ môn đổi ngưỡng thì lần kiểm tra kế tiếp áp dụng (script luôn khôi phục ba ngưỡng gốc kể cả khi lỗi, và báo FAIL nếu đọc lại không khớp), push-on-write, tài liệu chép nguyên văn / không liên quan. Khóa kiểm thử **K97**.
 - `ai-nfr.sh` — đo NFR-07..NFR-11 và bộ nhớ; `--report` ghi đè trang số liệu chương 4. Khóa kiểm thử **K96**.
 
-**Tài khoản dành riêng — không dùng cho demo thủ công:** `DTC225200095`, `DTC225200096` (SV), `GV023` (GVHD), cùng `bomon`; khóa **K96** và **K97**. `e2e-ai.sh` và `ai-nfr.sh` **dùng chung `DTC225200095` và `GV023` nên không bao giờ chạy song song** (`ai-nfr.sh` từ chối chạy nếu `DTC225200095` đang giữ một đề tài hoạt động). Hai script tự dọn dữ liệu, file và vector đã tạo; sau khi chạy:
+**Tài khoản dành riêng — không dùng cho demo thủ công:** `DTC235210032`, `DTC235210074` (SV), `GV023` (GVHD), cùng `bomon`; khóa **K96** và **K97**. Trong mỗi đợt kiểm thử, `bomon` import phân công (`POST /api/assignments/import`) các SV này cho GVHD `GV023`, SV gửi đề tài và **`GV023` duyệt** (luồng 0015). `e2e-ai.sh` và `ai-nfr.sh` **dùng chung `DTC235210032` và `GV023` nên không bao giờ chạy song song** (`ai-nfr.sh` từ chối chạy nếu `DTC235210032` đang giữ một đề tài hoạt động). Hai script tự dọn dữ liệu, file và vector đã tạo; sau khi chạy:
 
 ```bash
 bash deploy/sql.sh "SELECT COUNT(*) FROM dot_do_an WHERE khoa IN ('K96','K97','K98','K99')"   # 0
@@ -402,13 +432,13 @@ bash deploy/sql.sh "SELECT COUNT(*) FROM dot_do_an WHERE khoa IN ('K96','K97','K
 
 > Cho buổi bảo vệ dùng mục "Kịch bản demo bảo vệ (Phase 5)" ở trên; mục này giữ lại làm hướng dẫn thao tác chi tiết.
 
-Chuẩn bị: stack đã dựng, `bash deploy/seed-ai.sh` đã chạy. Dùng các tài khoản **không** thuộc danh sách dành riêng (tự động: DTC225200094–100, GV023, GV025–GV030; demo bảo vệ: DTC225200011–015, GV011–GV014), vd. `DTC225200010`, `DTC225200016`, `GV005`; mật khẩu `SEED_DEFAULT_PASSWORD`.
+Chuẩn bị: stack đã dựng, `bash deploy/seed-ai.sh` đã chạy. Dùng các tài khoản **không** thuộc danh sách dành riêng (tự động: SV thứ 93–100 của danh sách (DTC235210023…DTC235210045), GV023–GV030; demo bảo vệ: DTC235200139, DTC235200258, DTC235200325, DTC235200340, DTC235270078, GV011–GV014), vd. `DTC235200159`, `DTC235200379`, `GV010`; mật khẩu `SEED_DEFAULT_PASSWORD`.
 
-1. **SC1 — tên đề tài diễn đạt lại.** Đăng nhập `DTC225200010` → **Đề xuất / Đăng ký đề tài** → nhập tên "Sử dụng SQL Server để hạch toán thu chi doanh nghiệp cho công ty cổ phần Hoàng Long" rồi rời ô → cảnh báo "Phát hiện … đề tài tương tự trong kho" với đồ án kho "Ứng dụng SQL Server trong quản lý kế toán tại công ty CP Hoàng Long (K21)" kèm tỷ lệ (≈ 82%). Dán cùng tên ở dạng Unicode tổ hợp (NFD, vd. gõ bằng bộ gõ khác) cho cùng kết quả. Một tên cùng lĩnh vực nhưng khác đề tài không bị cảnh báo trùng kho.
-2. **SC2 — tài liệu chép nguyên văn.** Để `DTC225200010` có đề tài đã phân công GVHD `GV005` (Bộ môn duyệt đề xuất ở bước 1 hoặc cho SV đăng ký một đề tài GV đã duyệt). Ở **Đề cương**, nộp `seed-data/tai-lieu/P01-B.pdf` → trạng thái "Đang kiểm tra" rồi "Hoàn tất - 50.3%" (không cần tải lại trang). Bấm "Xem kết quả" (MH-14): tỷ lệ tổng 50.3%, ngưỡng 10.4%, đồ án trùng "Phát triển mô hình thống kê điểm số … Metabase (K21)" 50.3%; mỗi đoạn đặt cạnh đoạn nguồn, cụm từ trùng được tô, nhãn "Trùng nguyên văn", ghi chú đã loại trừ phần mẫu chung (FR-AI-02). Đăng nhập `GV005` → **Duyệt đề cương** → "Duyệt": panel MH-09 hiện cùng tỷ lệ, "Vượt ngưỡng cảnh báo" và "Số đoạn trùng: 7 (7 trùng nguyên văn)". Nộp một file diễn đạt lại (vd. `P11-B.docx`) cho một SV khác: các đoạn mang nhãn "Trùng ngữ nghĩa", ít cụm từ được tô hơn.
+1. **SC1 — tên đề tài diễn đạt lại.** Đăng nhập `DTC235200159` → **Đề xuất / Đăng ký đề tài** → nhập tên "Sử dụng SQL Server để hạch toán thu chi doanh nghiệp cho công ty cổ phần Hoàng Long" rồi rời ô → cảnh báo "Phát hiện … đề tài tương tự trong kho" với đồ án kho "Ứng dụng SQL Server trong quản lý kế toán tại công ty CP Hoàng Long (K21)" kèm tỷ lệ (≈ 82%). Dán cùng tên ở dạng Unicode tổ hợp (NFD, vd. gõ bằng bộ gõ khác) cho cùng kết quả. Một tên cùng lĩnh vực nhưng khác đề tài không bị cảnh báo trùng kho.
+2. **SC2 — tài liệu chép nguyên văn.** Để `DTC235200159` có đề tài đã phân công với GVHD `GV010` (seed phân công `DTC235200159` → `GV010`; `GV010` duyệt đề xuất ở bước 1 trong "Duyệt đề tài", hoặc SV đăng ký một đề tài `GV010` mở cho lớp). Ở **Đề cương**, nộp `seed-data/tai-lieu/P01-B.pdf` → trạng thái "Đang kiểm tra" rồi "Hoàn tất - 50.3%" (không cần tải lại trang). Bấm "Xem kết quả" (MH-14): tỷ lệ tổng 50.3%, ngưỡng 10.4%, đồ án trùng "Phát triển mô hình thống kê điểm số … Metabase (K21)" 50.3%; mỗi đoạn đặt cạnh đoạn nguồn, cụm từ trùng được tô, nhãn "Trùng nguyên văn", ghi chú đã loại trừ phần mẫu chung (FR-AI-02). Đăng nhập `GV010` → **Duyệt đề cương** → "Duyệt": panel MH-09 hiện cùng tỷ lệ, "Vượt ngưỡng cảnh báo" và "Số đoạn trùng: 7 (7 trùng nguyên văn)". Nộp một file diễn đạt lại (vd. `P11-B.docx`) cho một SV khác: các đoạn mang nhãn "Trùng ngữ nghĩa", ít cụm từ được tô hơn.
 3. **SC3 — bảng kiểm chứng trên 50 file.** Mở `docs/chuong-4-trien-khai/thu-nghiem-ai/03-hieu-chinh-nguong.md`: điểm từng cặp của 25 cặp (chép nguyên văn, diễn đạt lại bị cảnh báo; cùng lĩnh vực, không liên quan dưới ngưỡng) trên tập hiệu chỉnh và tập kiểm chứng giữ lại, cùng mô hình đã chốt (`02-so-sanh-mo-hinh-embedding.md`).
-4. **SC4 — Bộ môn đổi ngưỡng.** Đăng nhập `bomon` → **Ngưỡng trùng lặp**: ba ngưỡng kèm giải thích, giá trị đề xuất và người cập nhật. Đặt "Ngưỡng tên đề tài" = 99 → "Lưu cấu hình" → xác nhận. `DTC225200010` kiểm tra lại tên ở bước 1 → không còn cảnh báo. Bộ môn bấm "Khôi phục giá trị đề xuất" → lưu → cảnh báo trở lại. Kết quả đã kiểm tra trước đó vẫn hiện ngưỡng lúc kiểm tra.
-5. **SC5 — bản ghi mới được index ngay; dịch vụ AI không lộ ra ngoài.** `bomon` → **Kho đồ án** → thêm bản ghi "Xây dựng hệ thống quản lý phòng thí nghiệm hóa học cho trường cao đẳng y tế" (khóa K22) → cột index chuyển "Đã index" sau vài giây. `DTC225200010` kiểm tra tên "Phát triển phần mềm quản lý phòng thí nghiệm hóa học tại trường cao đẳng y tế" → thấy ngay bản ghi vừa thêm (≈ 90%), không phải tính lại embedding toàn kho (e2e-ai kiểm `encode_calls` +1). Xóa bản ghi sau demo (vector của nó được gỡ khỏi chỉ mục ngay sau khi xóa). Phần cô lập: chạy `bash deploy/ai-nfr.sh` (hoặc `e2e-ai.sh`) — host không kết nối được cổng 8002, thiếu/sai khóa → 401, Apache không có route tới dịch vụ AI, tài khoản DB `thesis_ai` bị từ chối trên `thesis_core`; kèm số đo thời gian kiểm tra tên (P95 ≈ 0,05 s) và nộp → hoàn tất (P95 ≈ 3 s; báo cáo ~350 000 ký tự ≈ 42 s, kiểm tra tên chen giữa vẫn < 0,4 s).
+4. **SC4 — Bộ môn đổi ngưỡng.** Đăng nhập `bomon` → **Ngưỡng trùng lặp**: ba ngưỡng kèm giải thích, giá trị đề xuất và người cập nhật. Đặt "Ngưỡng tên đề tài" = 99 → "Lưu cấu hình" → xác nhận. `DTC235200159` kiểm tra lại tên ở bước 1 → không còn cảnh báo. Bộ môn bấm "Khôi phục giá trị đề xuất" → lưu → cảnh báo trở lại. Kết quả đã kiểm tra trước đó vẫn hiện ngưỡng lúc kiểm tra.
+5. **SC5 — bản ghi mới được index ngay; dịch vụ AI không lộ ra ngoài.** `bomon` → **Kho đồ án** → thêm bản ghi "Xây dựng hệ thống quản lý phòng thí nghiệm hóa học cho trường cao đẳng y tế" (khóa K22) → cột index chuyển "Đã index" sau vài giây. `DTC235200159` kiểm tra tên "Phát triển phần mềm quản lý phòng thí nghiệm hóa học tại trường cao đẳng y tế" → thấy ngay bản ghi vừa thêm (≈ 90%), không phải tính lại embedding toàn kho (e2e-ai kiểm `encode_calls` +1). Xóa bản ghi sau demo (vector của nó được gỡ khỏi chỉ mục ngay sau khi xóa). Phần cô lập: chạy `bash deploy/ai-nfr.sh` (hoặc `e2e-ai.sh`) — host không kết nối được cổng 8002, thiếu/sai khóa → 401, Apache không có route tới dịch vụ AI, tài khoản DB `thesis_ai` bị từ chối trên `thesis_core`; kèm số đo thời gian kiểm tra tên (P95 ≈ 0,05 s) và nộp → hoàn tất (P95 ≈ 3 s; báo cáo ~350 000 ký tự ≈ 42 s, kiểm tra tên chen giữa vẫn < 0,4 s).
 
 Dọn dữ liệu demo sau khi xong (đề tài/đề cương của tài khoản demo) theo cách thông thường của UC1–UC2; các file đã nộp nằm trong volume `uploads-data`.
 

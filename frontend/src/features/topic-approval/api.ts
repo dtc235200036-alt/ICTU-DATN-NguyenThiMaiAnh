@@ -39,7 +39,7 @@ export interface PendingTopicsQueryParams {
 const PENDING_KEY = 'topic-approvals'
 const TOPIC_KEY = 'topics'
 
-// MH-07/UC1.3: danh sách đề tài Chờ duyệt (lọc theo đợt nếu chọn).
+// MH-07/UC1.3: đề tài Chờ duyệt của lớp GV gọi (lọc theo đợt nếu chọn).
 export function usePendingTopics(params: PendingTopicsQueryParams) {
   return useQuery({
     queryKey: [PENDING_KEY, params],
@@ -56,16 +56,15 @@ function invalidateApprovalQueries(queryClient: ReturnType<typeof useQueryClient
   void queryClient.invalidateQueries({ queryKey: [TOPIC_KEY] })
 }
 
-// UC1.3: duyệt (không SV -> Đã duyệt) hoặc duyệt + phân công GVHD (có SV ->
-// Đã phân công, giang_vien_id bắt buộc — không bao giờ tự động chọn, E1).
+// UC1.3: GVHD duyệt đề tài SV trong lớp mình đề xuất -> Đã phân công.
 export function useApproveTopic() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ id, giang_vien_id }: { id: number; giang_vien_id: number | null }) => {
-      const { data } = await api.post(`/topic-approvals/${id}/approve`, { giang_vien_id })
+    mutationFn: async (id: number) => {
+      const { data } = await api.post(`/topic-approvals/${id}/approve`)
       return data
     },
-    onSuccess: (_data, variables) => invalidateApprovalQueries(queryClient, variables.id),
+    onSuccess: (_data, id) => invalidateApprovalQueries(queryClient, id),
   })
 }
 

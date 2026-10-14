@@ -21,7 +21,7 @@ const TRANG_THAI_DE_CUONG: Record<string, { label: string; color: string }> = {
 
 function TopicCard({ data }: { data: SvDashboardOut }) {
   const navigate = useNavigate()
-  const { de_tai, co_dot_dang_mo } = data
+  const { de_tai, co_dot_dang_mo, giang_vien_huong_dan } = data
   const trangThai = de_tai
     ? (TRANG_THAI_DE_TAI[de_tai.trang_thai] ?? { label: de_tai.trang_thai, color: 'default' })
     : null
@@ -48,22 +48,30 @@ function TopicCard({ data }: { data: SvDashboardOut }) {
           <Button onClick={() => navigate(`/de-tai/${de_tai.id}`)}>Xem chi tiết đề tài</Button>
         </>
       ) : (
-        <Empty description="Bạn chưa có đề tài">
+        <Empty
+          description={
+            giang_vien_huong_dan
+              ? `Bạn chưa có đề tài — GVHD của bạn: ${giang_vien_huong_dan}`
+              : co_dot_dang_mo
+                ? 'Bạn chưa có đề tài và chưa được Bộ môn phân công GVHD'
+                : 'Bạn chưa có đề tài'
+          }
+        >
           <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
             <Button
               type="primary"
-              disabled={!co_dot_dang_mo}
+              disabled={!co_dot_dang_mo || !giang_vien_huong_dan}
               title={co_dot_dang_mo ? undefined : 'Chưa có đợt đồ án đang mở'}
               onClick={() => navigate('/de-tai/de-xuat')}
             >
               Đề xuất đề tài
             </Button>
             <Button
-              disabled={!co_dot_dang_mo}
+              disabled={!co_dot_dang_mo || !giang_vien_huong_dan}
               title={co_dot_dang_mo ? undefined : 'Chưa có đợt đồ án đang mở'}
               onClick={() => navigate('/de-tai')}
             >
-              Đăng ký đề tài có sẵn
+              Đăng ký đề tài GVHD mở
             </Button>
           </div>
         </Empty>

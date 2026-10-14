@@ -17,7 +17,7 @@ enum TrangThaiDot {
 enum TrangThaiDeTai {
   NHAP
   CHO_DUYET
-  DA_DUYET
+  DA_DUYET (Mở cho lớp đăng ký)
   TU_CHOI
   DA_PHAN_CONG
 }
@@ -69,6 +69,8 @@ enum LoaiNguon {
 }
 
 enum LoaiThongBao {
+  PHAN_CONG_GVHD
+  DE_TAI_CHO_DUYET
   DUYET_DE_TAI
   TU_CHOI_DE_TAI
   DUYET_DE_CUONG
@@ -130,6 +132,10 @@ class DotDoAn <<Entity>> {
   +ngayBatDau : Date
   +ngayKetThuc : Date
   +trangThai : TrangThaiDot
+}
+
+class PhanCongHuongDan <<Entity>> {
+  +thoiDiem : DateTime
 }
 
 class DeTai <<Entity>> {
@@ -274,6 +280,14 @@ GiangVien "0..1" -- "*" DeTai : "đề xuất / hướng dẫn"
 SinhVien "0..1" -- "0..1" DeTai : "đăng ký"
 DeTai "1" -- "*" KetQuaKiemTraTrungLap : "có kết quả kiểm tra"
 KetQuaKiemTraTrungLap "1" -- "*" ChiTietTrungLap : "gồm chi tiết"
+
+' =====================================================================
+' Associations — phân công GVHD theo đợt (UC0.8, Alembic 0015)
+' Mỗi (DotDoAn, SinhVien) có tối đa một PhanCongHuongDan.
+' =====================================================================
+DotDoAn "1" -- "*" PhanCongHuongDan : "phân công trong đợt"
+SinhVien "1" -- "*" PhanCongHuongDan : "được phân công\n(≤ 1 mỗi đợt)"
+GiangVien "1" -- "*" PhanCongHuongDan : "hướng dẫn (lớp)"
 
 ' =====================================================================
 ' Associations — đề cương, tài liệu, tiến độ

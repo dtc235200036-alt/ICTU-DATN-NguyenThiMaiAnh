@@ -45,6 +45,7 @@ export interface SvDefenseOut {
 
 export interface SvDashboardOut {
   de_tai: SvTopicOut | null
+  giang_vien_huong_dan: string | null
   co_dot_dang_mo: boolean
   de_cuong: SvOutlineOut | null
   tien_do: SvMilestoneStep[]
@@ -59,7 +60,7 @@ export interface GvTopicItem {
   sinh_vien: string | null
 }
 
-export type LoaiViec = 'DUYET_DE_CUONG' | 'NHAN_XET_TIEN_DO' | 'CHAM_DIEM'
+export type LoaiViec = 'DUYET_DE_TAI' | 'DUYET_DE_CUONG' | 'NHAN_XET_TIEN_DO' | 'CHAM_DIEM'
 
 export interface GvTaskItem {
   loai: LoaiViec
@@ -73,6 +74,7 @@ export interface GvDashboardOut {
   so_sinh_vien_huong_dan: number
   so_de_tai: number
   so_de_tai_cho_duyet: number
+  so_sinh_vien_lop: number
   de_tai: GvTopicItem[]
   so_de_cuong_cho_duyet: number
   so_bao_cao_cho_nhan_xet: number
@@ -113,6 +115,7 @@ export interface BmDashboardOut {
   de_tai_cho_duyet: number
   de_tai_da_phan_cong: number
   sv_chua_co_de_tai: number
+  sv_chua_phan_cong: number
   tong_sinh_vien: number
   cho_duyet_moi_nhat: BmPendingTopicRef[]
   sv_tre_moc: number

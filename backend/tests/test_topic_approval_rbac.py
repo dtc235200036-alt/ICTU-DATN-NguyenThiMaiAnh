@@ -3,22 +3,20 @@ from datetime import date
 import pytest
 
 from app.core.roles import VaiTro
-from app.models.de_tai import CHO_DUYET, DeTai, GIANG_VIEN
+from app.models.de_tai import CHO_DUYET, DA_PHAN_CONG, DeTai, SINH_VIEN
 from app.models.dot_do_an import DANG_MO, DotDoAn
 
-# T-02-34/UC1.3/AUTH-03/ROADMAP SC5: mọi endpoint trên /api/topic-approvals
-# chỉ Bộ môn được gọi — SV, một GV không liên quan và CHÍNH GV đã đề xuất đề
-# tài đó đều phải nhận 403, đề tài không đổi trạng thái/GVHD. Đây là ví dụ
-# "SV không duyệt được đề tài" của SC5 — không thêm test nào khác.
+# T-02-34/UC1.3/AUTH-03 (đổi ở 0015): đề tài SV đề xuất chỉ GVHD của SV duyệt
+# hoặc từ chối — SV, Bộ môn và một GV không phải GVHD đều nhận 403, đề tài
+# không đổi trạng thái; GVHD duyệt thì đề tài sang Đã phân công.
 
 _APPROVAL_ENDPOINTS = [
-    ("GET", "/api/topic-approvals", None),
-    ("POST", "/api/topic-approvals/{id}/approve", {"giang_vien_id": None}),
+    ("POST", "/api/topic-approvals/{id}/approve", None),
     ("POST", "/api/topic-approvals/{id}/reject", {"ly_do": "Không phù hợp"}),
 ]
 
 
-def _make_pending_topic_with_sv(db, giang_vien_id: int, sinh_vien_id: int) -> DeTai:
+def _make_pending_sv_topic(db, giang_vien_id: int, sinh_vien_id: int) -> DeTai:
     cohort = DotDoAn(
         ten_dot="Đợt RBAC duyệt đề tài",
         khoa="K22",
@@ -36,7 +34,7 @@ def _make_pending_topic_with_sv(db, giang_vien_id: int, sinh_vien_id: int) -> De
         ten_de_tai="Đề tài kiểm thử RBAC duyệt",
         linh_vuc="Hệ thống thông tin",
         trang_thai=CHO_DUYET,
-        loai_nguoi_de_xuat=GIANG_VIEN,
+        loai_nguoi_de_xuat=SINH_VIEN,
     )
     db.add(topic)
     db.commit()
@@ -44,27 +42,46 @@ def _make_pending_topic_with_sv(db, giang_vien_id: int, sinh_vien_id: int) -> De
     return topic
 
 
-@pytest.mark.parametrize("caller_role", ["sv", "unrelated_gv", "proposing_gv"])
+@pytest.mark.parametrize("caller_role", ["sv", "bomon", "other_gv"])
 @pytest.mark.parametrize("method,path_template,body", _APPROVAL_ENDPOINTS)
-def test_non_bomon_gets_403_on_every_approval_endpoint(
+def test_only_gvhd_can_decide(
     client, make_account, auth_headers, db, caller_role, method, path_template, body
 ):
-    proposing_gv = make_account(VaiTro.GIANG_VIEN)
-    unrelated_gv = make_account(VaiTro.GIANG_VIEN)
+    gvhd = make_account(VaiTro.GIANG_VIEN)
+    other_gv = make_account(VaiTro.GIANG_VIEN)
     sv = make_account(VaiTro.SINH_VIEN)
+    bomon = make_account(VaiTro.BO_MON)
 
-    topic = _make_pending_topic_with_sv(db, proposing_gv.giang_vien_id, sv.sinh_vien_id)
+    topic = _make_pending_sv_topic(db, gvhd.giang_vien_id, sv.sinh_vien_id)
 
-    actor = {"sv": sv, "unrelated_gv": unrelated_gv, "proposing_gv": proposing_gv}[caller_role]
-    path = path_template.format(id=topic.id)
-
-    resp = client.request(method, path, json=body, headers=auth_headers(actor))
-
+    actor = {"sv": sv, "bomon": bomon, "other_gv": other_gv}[caller_role]
+    resp = client.request(
+        method, path_template.format(id=topic.id), json=body, headers=auth_headers(actor)
+    )
     assert resp.status_code == 403
 
+    db.rollback()
     row = db.get(DeTai, topic.id)
-    assert row is not None
     assert row.trang_thai == CHO_DUYET
-    assert row.giang_vien_id == proposing_gv.giang_vien_id
-    assert row.sinh_vien_id == sv.sinh_vien_id
+    assert row.giang_vien_id == gvhd.giang_vien_id
     assert row.ly_do_tu_choi is None
+
+
+def test_gvhd_sees_only_own_pending_and_approves(client, make_account, auth_headers, db):
+    gvhd = make_account(VaiTro.GIANG_VIEN)
+    other_gv = make_account(VaiTro.GIANG_VIEN)
+    sv = make_account(VaiTro.SINH_VIEN)
+    topic = _make_pending_sv_topic(db, gvhd.giang_vien_id, sv.sinh_vien_id)
+
+    mine = client.get("/api/topic-approvals", headers=auth_headers(gvhd)).json()
+    assert [t["id"] for t in mine["items"]] == [topic.id]
+    theirs = client.get("/api/topic-approvals", headers=auth_headers(other_gv)).json()
+    assert theirs["items"] == []
+
+    resp = client.post(f"/api/topic-approvals/{topic.id}/approve", headers=auth_headers(gvhd))
+    assert resp.status_code == 200
+    assert resp.json()["trang_thai"] == DA_PHAN_CONG
+    assert resp.json()["giang_vien_huong_dan"]["id"] == gvhd.giang_vien_id
+
+    again = client.post(f"/api/topic-approvals/{topic.id}/approve", headers=auth_headers(gvhd))
+    assert again.status_code == 409

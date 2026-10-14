@@ -7,12 +7,13 @@ from sqlalchemy import select
 from app.core.roles import VaiTro
 from app.core.db import SessionLocal
 from app.main import app
-from app.models.de_tai import CHO_DUYET, DA_DUYET, DeTai, GIANG_VIEN
+from app.models.de_tai import DA_DUYET, DA_PHAN_CONG, DeTai, GIANG_VIEN
 from app.models.dot_do_an import DANG_MO, DotDoAn
 
 # ROADMAP SC4/D-05/§3.2.5: hai bất biến concurrency của UC1.2 — Race A (một đề
 # tài không thể có hai SV thắng cùng lúc) và Race B (một SV không thể có hai
-# đề tài đang hoạt động cùng lúc). Không thêm test nào khác ngoài hai cái này.
+# đề tài đang hoạt động cùng lúc). UC0.8 (0015): SV chỉ đăng ký được đề tài
+# do GVHD của mình mở cho lớp, và đăng ký là Đã phân công ngay.
 
 
 def _make_open_cohort(db) -> DotDoAn:
@@ -75,11 +76,11 @@ def _register_concurrently(requests: list[tuple[int, dict]]) -> tuple[list[int],
     return statuses, details  # type: ignore[return-value]
 
 
-def test_register_topic_race_one_winner_per_topic(make_account, auth_headers, db):
-    """Race A (UC1.2 E1, §3.2.5-b): hai SV đăng ký cùng lúc MỘT đề tài — đúng 1
-    người thắng (200, sinh_vien_id của người thắng, CHO_DUYET), người còn lại
-    409 với đúng thông điệp E1. Lặp lại 5 lần, mỗi lần một cặp SV MỚI (người
-    thắng vòng trước đã có đề tài hoạt động nên không thể tham gia vòng sau)."""
+def test_register_topic_race_one_winner_per_topic(make_account, auth_headers, assign_gvhd, db):
+    """Race A (UC1.2 E1, §3.2.5-b): hai SV cùng lớp đăng ký cùng lúc MỘT đề tài
+    — đúng 1 người thắng (200, sinh_vien_id của người thắng, DA_PHAN_CONG),
+    người còn lại 409 với đúng thông điệp E1. Lặp lại 5 lần, mỗi lần một cặp
+    SV MỚI (người thắng vòng trước đã có đề tài hoạt động)."""
     cohort = _make_open_cohort(db)
     gv = make_account(VaiTro.GIANG_VIEN)
 
@@ -87,6 +88,8 @@ def test_register_topic_race_one_winner_per_topic(make_account, auth_headers, db
         topic = _make_open_gv_topic(db, cohort.id, gv.giang_vien_id, f"Đề tài đăng ký đồng thời {i}")
         sv_a = make_account(VaiTro.SINH_VIEN)
         sv_b = make_account(VaiTro.SINH_VIEN)
+        assign_gvhd(sv_a, gv, cohort.id)
+        assign_gvhd(sv_b, gv, cohort.id)
 
         statuses, details = _register_concurrently(
             [
@@ -103,15 +106,16 @@ def test_register_topic_race_one_winner_per_topic(make_account, auth_headers, db
 
         with SessionLocal() as fresh_session:
             fresh = fresh_session.execute(select(DeTai).where(DeTai.id == topic.id)).scalar_one()
-            assert fresh.trang_thai == CHO_DUYET
+            assert fresh.trang_thai == DA_PHAN_CONG
             assert fresh.sinh_vien_id == winner.sinh_vien_id
 
 
-def test_register_topic_race_one_active_topic_per_student(make_account, auth_headers, db):
+def test_register_topic_race_one_active_topic_per_student(
+    make_account, auth_headers, assign_gvhd, db
+):
     """Race B (UC1.2 A1, §3.2.5-a): một SV đăng ký đồng thời HAI đề tài khác
-    nhau — đúng 1 request thắng (200), request còn lại 409 với đúng thông điệp
-    A1; sau cùng SV đó có đúng 1 đề tài đang hoạt động. Lặp lại 3 lần, mỗi lần
-    một SV MỚI."""
+    nhau của GVHD mình — đúng 1 request thắng (200), request còn lại 409 với
+    đúng thông điệp A1; sau cùng SV đó có đúng 1 đề tài đang hoạt động."""
     cohort = _make_open_cohort(db)
     gv = make_account(VaiTro.GIANG_VIEN)
 
@@ -119,6 +123,7 @@ def test_register_topic_race_one_active_topic_per_student(make_account, auth_hea
         topic_a = _make_open_gv_topic(db, cohort.id, gv.giang_vien_id, f"Đề tài A đồng thời {i}")
         topic_b = _make_open_gv_topic(db, cohort.id, gv.giang_vien_id, f"Đề tài B đồng thời {i}")
         sv = make_account(VaiTro.SINH_VIEN)
+        assign_gvhd(sv, gv, cohort.id)
         headers = auth_headers(sv)
 
         statuses, details = _register_concurrently(
@@ -143,3 +148,28 @@ def test_register_topic_race_one_active_topic_per_student(make_account, auth_hea
                 .all()
             )
             assert len(active_ids) == 1
+
+
+def test_register_only_own_advisors_topic(client, make_account, auth_headers, assign_gvhd, db):
+    """UC0.8: đề tài GV khác mở không hiện và không đăng ký được (403); SV chưa
+    có GVHD trong đợt nhận 409 'chưa được phân công'."""
+    cohort = _make_open_cohort(db)
+    gv_mine = make_account(VaiTro.GIANG_VIEN)
+    gv_other = make_account(VaiTro.GIANG_VIEN)
+    sv = make_account(VaiTro.SINH_VIEN)
+    sv_unassigned = make_account(VaiTro.SINH_VIEN)
+    assign_gvhd(sv, gv_mine, cohort.id)
+
+    mine = _make_open_gv_topic(db, cohort.id, gv_mine.giang_vien_id, "Đề tài lớp của tôi")
+    other = _make_open_gv_topic(db, cohort.id, gv_other.giang_vien_id, "Đề tài lớp khác")
+
+    listed = client.get("/api/topics", headers=auth_headers(sv)).json()["items"]
+    assert [t["id"] for t in listed] == [mine.id]
+    assert listed[0]["co_the_dang_ky"] is True
+    assert client.get(f"/api/topics/{other.id}", headers=auth_headers(sv)).status_code == 403
+
+    resp = client.post(f"/api/topics/{other.id}/register", headers=auth_headers(sv))
+    assert resp.status_code == 403
+    resp = client.post(f"/api/topics/{mine.id}/register", headers=auth_headers(sv_unassigned))
+    assert resp.status_code == 409
+    assert "chưa được Bộ môn phân công" in resp.json()["detail"]

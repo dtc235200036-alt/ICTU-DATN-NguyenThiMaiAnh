@@ -7,7 +7,7 @@
 #
 # Tài khoản dành riêng cho script này (không dùng chung với e2e-uc1.sh):
 # GV025 (GV không liên quan), GV026/GV027/GV028 (hội đồng, plan 03-03),
-# GV029 (GVHD), DTC225200097 (SV khác), DTC225200098 (SV chính). Đợt kiểm thử
+# GV029 (GVHD), DTC235210037 (SV khác), DTC235210039 (SV chính). Đợt kiểm thử
 # dùng khoa K98 (e2e-uc1.sh dùng K99).
 set -euo pipefail
 
@@ -83,7 +83,7 @@ cleanup() {
         python -m app.services.ai_index purge --loai DOCUMENT --ids "${purge_doc_ids}" >/dev/null 2>&1 || true
     fi
     DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
-      "DELETE FROM thong_bao WHERE tai_khoan_id IN (SELECT id FROM tai_khoan WHERE ma_dang_nhap IN ('GV025','GV026','GV027','GV028','GV029','DTC225200097','DTC225200098')) AND thoi_diem >= '${START_UTC}';" >/dev/null 2>&1 || true
+      "DELETE FROM thong_bao WHERE tai_khoan_id IN (SELECT id FROM tai_khoan WHERE ma_dang_nhap IN ('GV025','GV026','GV027','GV028','GV029','DTC235210037','DTC235210039')) AND thoi_diem >= '${START_UTC}';" >/dev/null 2>&1 || true
     DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
       "DELETE FROM diem_bao_ve WHERE lich_bao_ve_id IN (SELECT id FROM lich_bao_ve WHERE de_tai_id IN (SELECT id FROM de_tai WHERE dot_do_an_id = ${DOT_DO_AN_ID}));" >/dev/null 2>&1 || true
     DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
@@ -122,6 +122,9 @@ cleanup() {
       "DELETE FROM de_cuong WHERE de_tai_id IN (SELECT id FROM de_tai WHERE dot_do_an_id = ${DOT_DO_AN_ID});" >/dev/null 2>&1 || true
     DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
       "DELETE FROM de_tai WHERE dot_do_an_id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
+    # 0015: phân công GVHD trỏ tới đợt (FK không cascade) — xóa trước đợt.
+    DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
+      "DELETE FROM phan_cong_huong_dan WHERE dot_do_an_id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
     DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" \
       "DELETE FROM dot_do_an WHERE id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
   fi
@@ -146,14 +149,14 @@ setup_assigned_topic() {
   TOKEN_BOMON="$(bash "${SCRIPT_DIR}/api-login.sh" bomon)"
   TOKEN_GV025="$(bash "${SCRIPT_DIR}/api-login.sh" GV025)"
   TOKEN_GV029="$(bash "${SCRIPT_DIR}/api-login.sh" GV029)"
-  TOKEN_SV097="$(bash "${SCRIPT_DIR}/api-login.sh" DTC225200097)"
-  TOKEN_SV098="$(bash "${SCRIPT_DIR}/api-login.sh" DTC225200098)"
+  TOKEN_SV097="$(bash "${SCRIPT_DIR}/api-login.sh" DTC235210037)"
+  TOKEN_SV098="$(bash "${SCRIPT_DIR}/api-login.sh" DTC235210039)"
 
   local status has_active
   status="$(call GET /api/dashboard/sinh-vien "${TOKEN_SV098}")"
-  [ "$status" = "200" ] || fail "Không lấy được dashboard SV DTC225200098 (mã ${status})"
+  [ "$status" = "200" ] || fail "Không lấy được dashboard SV DTC235210039 (mã ${status})"
   has_active="$(jget "1 if d.get('de_tai') else 0")"
-  [ "$has_active" = "0" ] || fail "DTC225200098 đã có đề tài đang hoạt động — dọn dữ liệu cũ rồi chạy lại"
+  [ "$has_active" = "0" ] || fail "DTC235210039 đã có đề tài đang hoạt động — dọn dữ liệu cũ rồi chạy lại"
 
   status="$(call POST /api/cohorts "${TOKEN_BOMON}" -H 'Content-Type: application/json' \
     -d '{"ten_dot":"Đợt kiểm thử tự động UC2-5","khoa":"K98","nam_hoc":"2026-2027","ngay_bat_dau":"2026-01-01"}')"
@@ -162,27 +165,29 @@ setup_assigned_topic() {
   [ -n "$DOT_DO_AN_ID" ] || fail "Không đọc được id đợt K98 vừa tạo"
   ok "Bộ môn tạo đợt kiểm thử K98 (id=${DOT_DO_AN_ID})"
 
+  # UC0.8 (0015): SV chỉ đề xuất được khi đã có GVHD trong đợt — Bộ môn import
+  # phân công DTC235210039 -> GV029 (DTC235210037 "SV khác" để chưa phân công).
+  status="$(call POST /api/assignments/import "${TOKEN_BOMON}" -H 'Content-Type: application/json' \
+    -d "{\"dot_do_an_id\":${DOT_DO_AN_ID},\"noi_dung\":\"DTC235210039,GV029\"}")"
+  [ "$status" = "200" ] || fail "Bộ môn không import được phân công GVHD (mã ${status}, $(cat "$TMP/body"))"
+  [ "$(jget "1 if d['cap_nhat'] == 1 and not d['loi'] else 0")" = "1" ] \
+    || fail "Import phân công không gán DTC235210039 -> GV029 ($(cat "$TMP/body"))"
+  ok "Bộ môn phân công DTC235210039 -> GVHD GV029 trong đợt K98"
+
   status="$(call POST /api/topics "${TOKEN_SV098}" -H 'Content-Type: application/json' \
     -d "{\"dot_do_an_id\":${DOT_DO_AN_ID},\"ten_de_tai\":\"E2E UC2-5 - Đề tài tự đề xuất\",\"linh_vuc\":\"Hệ thống thông tin\",\"gui\":true}")"
-  [ "$status" = "201" ] || fail "DTC225200098 không tự đề xuất được đề tài (mã ${status}, $(cat "$TMP/body"))"
+  [ "$status" = "201" ] || fail "DTC235210039 không tự đề xuất được đề tài (mã ${status}, $(cat "$TMP/body"))"
   DE_TAI_ID="$(jget "d['id']")"
   [ -n "$DE_TAI_ID" ] || fail "Không đọc được id đề tài vừa tự đề xuất"
-  ok "DTC225200098 tự đề xuất đề tài (id=${DE_TAI_ID})"
+  ok "DTC235210039 tự đề xuất đề tài (id=${DE_TAI_ID}) -> Chờ GVHD GV029 duyệt"
 
-  local lecturers_body gv029_id
-  lecturers_body="$(curl -sk "$BASE/api/lecturers" -H "Authorization: Bearer ${TOKEN_BOMON}")"
-  gv029_id="$(printf '%s' "$lecturers_body" | python3 -c 'import json,sys
-d = json.load(sys.stdin)
-print(next((gv["id"] for gv in d if gv.get("ma_giang_vien") == "GV029"), ""))' 2>/dev/null)"
-  [ -n "$gv029_id" ] || fail "Không tìm được id GV029 trong /api/lecturers"
-
-  status="$(call POST "/api/topic-approvals/${DE_TAI_ID}/approve" "${TOKEN_BOMON}" \
-    -H 'Content-Type: application/json' -d "{\"giang_vien_id\":${gv029_id}}")"
-  [ "$status" = "200" ] || fail "Bộ môn không phân công GVHD được cho đề tài (mã ${status}, $(cat "$TMP/body"))"
+  # UC1.3 (0015): GVHD GV029 (không phải Bộ môn) duyệt, không gửi thân.
+  status="$(call POST "/api/topic-approvals/${DE_TAI_ID}/approve" "${TOKEN_GV029}")"
+  [ "$status" = "200" ] || fail "GVHD GV029 không duyệt được đề tài (mã ${status}, $(cat "$TMP/body"))"
   local trang_thai
   trang_thai="$(jget "d.get('trang_thai','')")"
   [ "$trang_thai" = "DA_PHAN_CONG" ] || fail "Đề tài không chuyển Đã phân công (nhận ${trang_thai})"
-  ok "Bộ môn phân công GV029 làm GVHD cho đề tài -> Đã phân công"
+  ok "GVHD GV029 duyệt đề tài -> Đã phân công"
 }
 
 uc2_outline() {
@@ -218,7 +223,7 @@ PYEOF
   [ "$status" = "202" ] || fail "Nộp đề cương v1 không trả 202 (mã ${status}, $(cat "$TMP/body"))"
   doc_id="$(jget "d['phien_ban'][0]['tai_lieu']['id']")"
   [ -n "$doc_id" ] || fail "Không đọc được id tài liệu v1 vừa nộp"
-  ok "DTC225200098 nộp đề cương v1 -> 202 (tai_lieu_do_an_id=${doc_id})"
+  ok "DTC235210039 nộp đề cương v1 -> 202 (tai_lieu_do_an_id=${doc_id})"
 
   trang=""
   for attempt in $(seq 1 20); do
@@ -257,13 +262,13 @@ PYEOF
   ok "GV029 yêu cầu sửa đề cương kèm nhận xét -> Yêu cầu sửa"
 
   status="$(call GET /api/notifications "${TOKEN_SV098}")"
-  [ "$status" = "200" ] || fail "DTC225200098 không lấy được thông báo (mã ${status})"
+  [ "$status" = "200" ] || fail "DTC235210039 không lấy được thông báo (mã ${status})"
   local has_yeu_cau_sua_notif
   has_yeu_cau_sua_notif="$(jget "1 if any(i['loai'] == 'DE_CUONG_YEU_CAU_SUA' for i in d['items']) else 0")"
-  [ "$has_yeu_cau_sua_notif" = "1" ] || fail "DTC225200098 không có thông báo Yêu cầu sửa đề cương"
-  ok "DTC225200098 có thông báo Yêu cầu sửa đề cương (NOTF-01)"
+  [ "$has_yeu_cau_sua_notif" = "1" ] || fail "DTC235210039 không có thông báo Yêu cầu sửa đề cương"
+  ok "DTC235210039 có thông báo Yêu cầu sửa đề cương (NOTF-01)"
 
-  # DTC225200098 nộp lại phiên bản 2 dạng PDF
+  # DTC235210039 nộp lại phiên bản 2 dạng PDF
   local pdf_path="$TMP/de-cuong-v2.pdf"
   uv --directory "${SCRIPT_DIR}/../backend" run python - "$pdf_path" <<'PYEOF'
 import sys
@@ -285,7 +290,7 @@ PYEOF
   [ "$status" = "202" ] || fail "Nộp đề cương v2 (PDF) không trả 202 (mã ${status}, $(cat "$TMP/body"))"
   doc_id_v2="$(jget "d['phien_ban'][0]['tai_lieu']['id']")"
   [ -n "$doc_id_v2" ] || fail "Không đọc được id tài liệu v2 vừa nộp"
-  ok "DTC225200098 nộp đề cương v2 (PDF) -> 202 (tai_lieu_do_an_id=${doc_id_v2})"
+  ok "DTC235210039 nộp đề cương v2 (PDF) -> 202 (tai_lieu_do_an_id=${doc_id_v2})"
 
   trang=""
   for attempt in $(seq 1 20); do
@@ -307,11 +312,11 @@ PYEOF
   ok "GV029 duyệt đề cương v2 -> Đã duyệt"
 
   status="$(call GET /api/notifications "${TOKEN_SV098}")"
-  [ "$status" = "200" ] || fail "DTC225200098 không lấy được thông báo (mã ${status})"
+  [ "$status" = "200" ] || fail "DTC235210039 không lấy được thông báo (mã ${status})"
   local has_notification
   has_notification="$(jget "1 if any(i['loai'] == 'DE_CUONG_DUYET' for i in d['items']) else 0")"
-  [ "$has_notification" = "1" ] || fail "DTC225200098 không có thông báo Đề cương được duyệt"
-  ok "DTC225200098 có thông báo Đề cương được duyệt (NOTF-01)"
+  [ "$has_notification" = "1" ] || fail "DTC235210039 không có thông báo Đề cương được duyệt"
+  ok "DTC235210039 có thông báo Đề cương được duyệt (NOTF-01)"
 
   # ZIP đổi tên .docx -> 422 (kiểm tra theo nội dung nhị phân, không theo đuôi file)
   local fake_docx="$TMP/fake.docx"
@@ -325,12 +330,12 @@ with zipfile.ZipFile('$fake_docx', 'w') as zf:
   [ "$status" = "422" ] || fail "ZIP đổi tên .docx không bị từ chối 422 (mã ${status})"
   ok "ZIP đổi tên .docx bị từ chối 422 (kiểm tra theo nội dung nhị phân)"
 
-  # DTC225200097 (SV khác) -> 403
+  # DTC235210037 (SV khác) -> 403
   status="$(call GET "/api/outlines/${DE_TAI_ID}" "${TOKEN_SV097}")"
-  [ "$status" = "403" ] || fail "DTC225200097 xem chi tiết đề cương không bị từ chối 403 (mã ${status})"
+  [ "$status" = "403" ] || fail "DTC235210037 xem chi tiết đề cương không bị từ chối 403 (mã ${status})"
   status="$(call GET "/api/documents/${doc_id}/download" "${TOKEN_SV097}")"
-  [ "$status" = "403" ] || fail "DTC225200097 tải tài liệu không bị từ chối 403 (mã ${status})"
-  ok "DTC225200097 (SV khác) bị từ chối 403 trên xem chi tiết + tải tài liệu"
+  [ "$status" = "403" ] || fail "DTC235210037 tải tài liệu không bị từ chối 403 (mã ${status})"
+  ok "DTC235210037 (SV khác) bị từ chối 403 trên xem chi tiết + tải tài liệu"
 
   # GV025 (GV không liên quan) -> 403 khi duyệt
   status="$(call POST "/api/outlines/${DE_TAI_ID}/review" "${TOKEN_GV025}" \
@@ -339,7 +344,7 @@ with zipfile.ZipFile('$fake_docx', 'w') as zf:
   [ "$status" = "403" ] || fail "GV025 duyệt đề cương không bị từ chối 403 (mã ${status})"
   ok "GV025 (GV không liên quan) bị từ chối 403 khi duyệt"
 
-  # DTC225200098 tải lại v1 -> byte giống hệt file đã nộp
+  # DTC235210039 tải lại v1 -> byte giống hệt file đã nộp
   local downloaded_path="$TMP/downloaded-v1"
   curl -sk -o "$downloaded_path" -X GET "$BASE/api/documents/${doc_id}/download" \
     -H "Authorization: Bearer ${TOKEN_SV098}"
@@ -347,7 +352,7 @@ with zipfile.ZipFile('$fake_docx', 'w') as zf:
   original_sha="$(sha256sum "$docx_path" | awk '{print $1}')"
   downloaded_sha="$(sha256sum "$downloaded_path" | awk '{print $1}')"
   [ "$original_sha" = "$downloaded_sha" ] || fail "Bytes tải về của v1 không khớp file đã nộp"
-  ok "DTC225200098 tải lại v1 -> bytes khớp sha256 với file gốc"
+  ok "DTC235210039 tải lại v1 -> bytes khớp sha256 với file gốc"
 
   if docker compose -f "${SCRIPT_DIR}/docker-compose.yml" exec -T apache test -e /data/uploads 2>/dev/null; then
     fail "/data/uploads có thể truy cập được từ container apache (vi phạm D-02)"
@@ -386,8 +391,8 @@ PYEOF
 
   status="$(call POST "/api/progress/reports/${m2}" "${TOKEN_SV098}" \
     -F "noi_dung=Đã hoàn thành thiết kế CSDL và API (E2E)" -F "file=@${pdf_path};type=application/pdf")"
-  [ "$status" = "200" ] || fail "DTC225200098 không nộp được báo cáo Mốc 2 (mã ${status}, $(cat "$TMP/body"))"
-  ok "DTC225200098 nộp báo cáo Mốc 2 kèm PDF"
+  [ "$status" = "200" ] || fail "DTC235210039 không nộp được báo cáo Mốc 2 (mã ${status}, $(cat "$TMP/body"))"
+  ok "DTC235210039 nộp báo cáo Mốc 2 kèm PDF"
 
   status="$(call GET /api/progress/me "${TOKEN_SV098}")"
   [ "$status" = "200" ] || fail "GET /api/progress/me lỗi (mã ${status})"
@@ -401,7 +406,7 @@ PYEOF
   local cho
   cho="$(jget "next((str(i['so_cho_nhan_xet']) + '|' + str(i['tre_moc']) for i in d if i['de_tai_id'] == ${DE_TAI_ID}), '')")"
   [ "$cho" = "1|True" ] || fail "GV029 không thấy SV với 1 báo cáo chờ nhận xét + trễ mốc (nhận '${cho}')"
-  ok "GV029 thấy DTC225200098: 1 báo cáo chờ nhận xét, cờ trễ mốc"
+  ok "GV029 thấy DTC235210039: 1 báo cáo chờ nhận xét, cờ trễ mốc"
 
   local bao_cao_id
   status="$(call GET "/api/progress/topics/${DE_TAI_ID}" "${TOKEN_GV029}")"
@@ -421,8 +426,8 @@ PYEOF
 
   status="$(call GET /api/notifications "${TOKEN_SV098}")"
   [ "$(jget "1 if any(i['loai'] == 'TIEN_DO_NHAN_XET' for i in d['items']) else 0")" = "1" ] \
-    || fail "DTC225200098 không có thông báo TIEN_DO_NHAN_XET"
-  ok "DTC225200098 có thông báo nhận xét tiến độ (NOTF-01)"
+    || fail "DTC235210039 không có thông báo TIEN_DO_NHAN_XET"
+  ok "DTC235210039 có thông báo nhận xét tiến độ (NOTF-01)"
 
   status="$(call POST "/api/progress/reports/${m2}" "${TOKEN_SV098}" -F "noi_dung=Nộp lại sau nhận xét")"
   [ "$status" = "409" ] || fail "Nộp lại sau khi GVHD nhận xét không bị từ chối 409 (mã ${status})"
@@ -433,11 +438,11 @@ PYEOF
   local flagged
   flagged="$(jget "str(any(r['de_tai']['id'] == ${DE_TAI_ID} and r['tre_moc'] for r in d['items'])) + '|' + str(d['so_sv_tre_moc'])")"
   [ "$flagged" = "True|1" ] || fail "Dashboard toàn khoa không đánh dấu SV trễ mốc (nhận '${flagged}')"
-  ok "Bộ môn thấy DTC225200098 bị đánh dấu Trễ mốc trên tiến độ toàn khoa"
+  ok "Bộ môn thấy DTC235210039 bị đánh dấu Trễ mốc trên tiến độ toàn khoa"
 
   status="$(call GET /api/progress/dashboard "${TOKEN_SV097}")"
-  [ "$status" = "403" ] || fail "DTC225200097 xem tiến độ toàn khoa không bị từ chối 403 (mã ${status})"
-  ok "DTC225200097 bị từ chối 403 trên tiến độ toàn khoa"
+  [ "$status" = "403" ] || fail "DTC235210037 xem tiến độ toàn khoa không bị từ chối 403 (mã ${status})"
+  ok "DTC235210037 bị từ chối 403 trên tiến độ toàn khoa"
 }
 
 uc4_defense() {
@@ -488,7 +493,7 @@ print(next((gv["id"] for gv in d if gv.get("ma_giang_vien") == "GV029"), ""))' 2
   local report_doc_id
   report_doc_id="$(jget "d['phien_ban'][0]['tai_lieu']['id']")"
   [ -n "$report_doc_id" ] || fail "Không đọc được id báo cáo cuối vừa nộp"
-  ok "DTC225200098 nộp báo cáo cuối -> 202 (tai_lieu_do_an_id=${report_doc_id})"
+  ok "DTC235210039 nộp báo cáo cuối -> 202 (tai_lieu_do_an_id=${report_doc_id})"
 
   local trang attempt
   trang=""
@@ -507,8 +512,8 @@ print(next((gv["id"] for gv in d if gv.get("ma_giang_vien") == "GV029"), ""))' 2
   ok "GV029 (GVHD) xem được báo cáo cuối -> 200"
 
   status="$(call GET "/api/defense/final-reports/${DE_TAI_ID}" "${TOKEN_SV097}")"
-  [ "$status" = "403" ] || fail "DTC225200097 xem báo cáo cuối không bị từ chối 403 (mã ${status})"
-  ok "DTC225200097 (SV khác) bị từ chối 403 trên xem báo cáo cuối"
+  [ "$status" = "403" ] || fail "DTC235210037 xem báo cáo cuối không bị từ chối 403 (mã ${status})"
+  ok "DTC235210037 (SV khác) bị từ chối 403 trên xem báo cáo cuối"
 
   status="$(call GET /api/defense/eligible-students "${TOKEN_BOMON}")"
   [ "$status" = "200" ] || fail "Bộ môn không lấy được danh sách SV đủ điều kiện bảo vệ (mã ${status})"
@@ -556,21 +561,21 @@ print(next((gv["id"] for gv in d if gv.get("ma_giang_vien") == "GV029"), ""))' 2
   ok "GV026 có thông báo phân công hội đồng (HOI_DONG_PHAN_CONG)"
 
   status="$(call GET /api/notifications "${TOKEN_SV098}")"
-  [ "$status" = "200" ] || fail "DTC225200098 không lấy được thông báo (mã ${status})"
+  [ "$status" = "200" ] || fail "DTC235210039 không lấy được thông báo (mã ${status})"
   local has_lich_bao_ve
   has_lich_bao_ve="$(jget "1 if any(i['loai'] == 'LICH_BAO_VE' for i in d['items']) else 0")"
-  [ "$has_lich_bao_ve" = "1" ] || fail "DTC225200098 không có thông báo lịch bảo vệ"
-  ok "DTC225200098 có thông báo lịch bảo vệ (LICH_BAO_VE)"
+  [ "$has_lich_bao_ve" = "1" ] || fail "DTC235210039 không có thông báo lịch bảo vệ"
+  ok "DTC235210039 có thông báo lịch bảo vệ (LICH_BAO_VE)"
 
   status="$(call POST /api/defense/committees "${TOKEN_SV098}" -H 'Content-Type: application/json' \
     -d "{\"ten_hoi_dong\":\"x\",\"ngay_bao_ve\":\"${today}\",\"gio_bao_ve\":\"08:00\",\"phong\":\"x\",\"thanh_vien\":[]}")"
-  [ "$status" = "403" ] || fail "DTC225200098 tạo hội đồng không bị từ chối 403 (mã ${status})"
-  ok "DTC225200098 (SV) bị từ chối 403 khi tạo hội đồng"
+  [ "$status" = "403" ] || fail "DTC235210039 tạo hội đồng không bị từ chối 403 (mã ${status})"
+  ok "DTC235210039 (SV) bị từ chối 403 khi tạo hội đồng"
 
   status="$(call POST "/api/defense/final-reports/${DE_TAI_ID}" "${TOKEN_SV098}" \
     -F "file=@${pdf_path};type=application/pdf")"
   [ "$status" = "409" ] || fail "Nộp lại báo cáo cuối sau khi đã xếp lịch không bị từ chối 409 (mã ${status})"
-  ok "DTC225200098 nộp lại báo cáo cuối sau khi đã xếp lịch bị từ chối 409"
+  ok "DTC235210039 nộp lại báo cáo cuối sau khi đã xếp lịch bị từ chối 409"
 
   status="$(call DELETE "/api/defense/committees/${hoi_dong_b_id}" "${TOKEN_BOMON}")"
   [ "$status" = "204" ] || fail "Bộ môn xóa hội đồng B (chưa có SV) không trả 204 (mã ${status})"
@@ -624,14 +629,14 @@ print(next((gv["id"] for gv in d if gv.get("ma_giang_vien") == "GV029"), ""))' 2
   ok "Bộ môn chốt kết quả -> 200, điểm TB 8.5, lưu kho (do_an_kho_id=${DO_AN_KHO_ID})"
 
   status="$(call GET /api/defense/me "${TOKEN_SV098}")"
-  [ "$status" = "200" ] || fail "DTC225200098 không lấy được lịch/kết quả bảo vệ (mã ${status})"
+  [ "$status" = "200" ] || fail "DTC235210039 không lấy được lịch/kết quả bảo vệ (mã ${status})"
   diem_tb="$(jget "(d.get('ket_qua') or {}).get('diem_trung_binh')")"
-  [ "$diem_tb" = "8.5" ] || fail "DTC225200098 không thấy điểm 8.5 sau chốt (nhận ${diem_tb})"
+  [ "$diem_tb" = "8.5" ] || fail "DTC235210039 không thấy điểm 8.5 sau chốt (nhận ${diem_tb})"
   status="$(call GET /api/notifications "${TOKEN_SV098}")"
   local has_ket_qua
   has_ket_qua="$(jget "1 if any(i['loai'] == 'KET_QUA_BAO_VE' for i in d['items']) else 0")"
-  [ "$has_ket_qua" = "1" ] || fail "DTC225200098 không có thông báo kết quả bảo vệ"
-  ok "DTC225200098 thấy điểm 8.5 + thông báo KET_QUA_BAO_VE (UC4.5, NOTF-01)"
+  [ "$has_ket_qua" = "1" ] || fail "DTC235210039 không có thông báo kết quả bảo vệ"
+  ok "DTC235210039 thấy điểm 8.5 + thông báo KET_QUA_BAO_VE (UC4.5, NOTF-01)"
 
   status="$(call PUT "/api/defense/schedules/${LICH_BAO_VE_ID}/score" "${TOKEN_GV026}" \
     -H 'Content-Type: application/json' -d '{"diem":9.5}')"
@@ -655,24 +660,24 @@ uc5_archive() {
   [ -n "$DO_AN_KHO_ID" ] || fail "uc5_archive cần DO_AN_KHO_ID từ uc4_defense"
   local status found
   status="$(call GET "/api/archive?khoa=K98" "${TOKEN_SV098}")"
-  [ "$status" = "200" ] || fail "DTC225200098 không tra cứu được kho (mã ${status})"
+  [ "$status" = "200" ] || fail "DTC235210039 không tra cứu được kho (mã ${status})"
   found="$(jget "next((f\"{i['diem']}|{i['co_file']}\" for i in d['items'] if i['id'] == ${DO_AN_KHO_ID}), '')")"
   [ "$found" = "8.5|True" ] || fail "Kho K98 không có đồ án vừa chốt với điểm 8.5 + file (nhận '${found}')"
-  ok "DTC225200098 tra cứu kho K98 thấy đồ án vừa chốt của mình (điểm 8.5, có file)"
+  ok "DTC235210039 tra cứu kho K98 thấy đồ án vừa chốt của mình (điểm 8.5, có file)"
   # WR-10 (03-REVIEW): sinh viên khác thấy đồ án + file nhưng không thấy điểm
   status="$(call GET "/api/archive?khoa=K98" "${TOKEN_SV097}")"
-  [ "$status" = "200" ] || fail "DTC225200097 không tra cứu được kho (mã ${status})"
+  [ "$status" = "200" ] || fail "DTC235210037 không tra cứu được kho (mã ${status})"
   found="$(jget "next((f\"{i['diem']}|{i['co_file']}\" for i in d['items'] if i['id'] == ${DO_AN_KHO_ID}), '')")"
-  [ "$found" = "None|True" ] || fail "DTC225200097 (SV khác) phải thấy đồ án có file nhưng không thấy điểm (nhận '${found}')"
-  ok "DTC225200097 tra cứu kho K98 thấy đồ án vừa chốt nhưng không thấy điểm của SV khác (WR-10)"
+  [ "$found" = "None|True" ] || fail "DTC235210037 (SV khác) phải thấy đồ án có file nhưng không thấy điểm (nhận '${found}')"
+  ok "DTC235210037 tra cứu kho K98 thấy đồ án vừa chốt nhưng không thấy điểm của SV khác (WR-10)"
 
   local archived_path="$TMP/kho-bao-cao.pdf"
   status="$(curl -sk -o "$archived_path" -w '%{http_code}' "$BASE/api/archive/${DO_AN_KHO_ID}/file" \
     -H "Authorization: Bearer ${TOKEN_SV097}")"
-  [ "$status" = "200" ] || fail "DTC225200097 không tải được báo cáo đã lưu kho (mã ${status})"
+  [ "$status" = "200" ] || fail "DTC235210037 không tải được báo cáo đã lưu kho (mã ${status})"
   [ "$(sha256sum "$archived_path" | awk '{print $1}')" = "$(sha256sum "$TMP/bao-cao-cuoi.pdf" | awk '{print $1}')" ] \
     || fail "Báo cáo tải từ kho không khớp sha256 với báo cáo cuối đã nộp"
-  ok "DTC225200097 tải báo cáo cuối từ kho -> bytes khớp sha256 với file đã nộp"
+  ok "DTC235210037 tải báo cáo cuối từ kho -> bytes khớp sha256 với file đã nộp"
 
   local put_body
   status="$(call GET "/api/archive/${DO_AN_KHO_ID}" "${TOKEN_BOMON}")"
@@ -715,10 +720,10 @@ CSVEOF
 
   status="$(call POST /api/archive "${TOKEN_SV097}" -H 'Content-Type: application/json' \
     -d '{"khoa":"K98","ten_de_tai":"SV thêm trái phép"}')"
-  [ "$status" = "403" ] || fail "DTC225200097 thêm bản ghi kho không bị từ chối 403 (mã ${status})"
+  [ "$status" = "403" ] || fail "DTC235210037 thêm bản ghi kho không bị từ chối 403 (mã ${status})"
   status="$(call POST /api/archive/import "${TOKEN_GV025}" -F "file=@${csv_path};type=text/csv")"
   [ "$status" = "403" ] || fail "GV025 import CSV không bị từ chối 403 (mã ${status})"
-  ok "DTC225200097 thêm bản ghi + GV025 import CSV đều bị từ chối 403"
+  ok "DTC235210037 thêm bản ghi + GV025 import CSV đều bị từ chối 403"
 
   DELETED_KHO_IDS="${imported_id}"
   status="$(call DELETE "/api/archive/${imported_id}" "${TOKEN_BOMON}")"
@@ -732,44 +737,44 @@ uc0_notifications() {
   # --- UC0.5/NOTF-01 (plan 03-07): đếm chưa đọc, riêng tư (404), đánh dấu tất cả ---
   local status unread note_id phan_cong
   status="$(call GET /api/notifications/unread-count "${TOKEN_SV098}")"
-  [ "$status" = "200" ] || fail "DTC225200098 không đọc được số thông báo chưa đọc (mã ${status})"
+  [ "$status" = "200" ] || fail "DTC235210039 không đọc được số thông báo chưa đọc (mã ${status})"
   unread="$(jget "d['chua_doc']")"
-  [ "${unread:-0}" -gt 0 ] || fail "DTC225200098 không có thông báo chưa đọc sau cả chuỗi UC2-5 (nhận ${unread})"
+  [ "${unread:-0}" -gt 0 ] || fail "DTC235210039 không có thông báo chưa đọc sau cả chuỗi UC2-5 (nhận ${unread})"
 
   status="$(call GET "/api/notifications?page_size=50" "${TOKEN_SV098}")"
-  [ "$status" = "200" ] || fail "DTC225200098 không đọc được danh sách thông báo (mã ${status})"
+  [ "$status" = "200" ] || fail "DTC235210039 không đọc được danh sách thông báo (mã ${status})"
   phan_cong="$(jget "sum(1 for i in d['items'] if i['loai'] == 'DE_TAI_PHAN_CONG' and i['lien_ket'] == '/de-tai/${DE_TAI_ID}')")"
-  [ "$phan_cong" = "1" ] || fail "DTC225200098 không có đúng một thông báo DE_TAI_PHAN_CONG cho đề tài ${DE_TAI_ID} (nhận ${phan_cong})"
+  [ "$phan_cong" = "1" ] || fail "DTC235210039 không có đúng một thông báo DE_TAI_PHAN_CONG cho đề tài ${DE_TAI_ID} (nhận ${phan_cong})"
   note_id="$(jget "d['items'][0]['id']")"
-  ok "DTC225200098 có ${unread} thông báo chưa đọc, gồm DE_TAI_PHAN_CONG từ quyết định duyệt đề tài (NOTF-01)"
+  ok "DTC235210039 có ${unread} thông báo chưa đọc, gồm DE_TAI_PHAN_CONG từ quyết định duyệt đề tài (NOTF-01)"
 
   status="$(call POST "/api/notifications/${note_id}/read" "${TOKEN_SV097}")"
-  [ "$status" = "404" ] || fail "DTC225200097 đánh dấu thông báo của DTC225200098 không bị 404 (mã ${status})"
+  [ "$status" = "404" ] || fail "DTC235210037 đánh dấu thông báo của DTC235210039 không bị 404 (mã ${status})"
   call GET /api/notifications/unread-count "${TOKEN_SV098}" >/dev/null
-  [ "$(jget "d['chua_doc']")" = "$unread" ] || fail "Số chưa đọc của DTC225200098 bị đổi bởi người khác"
-  ok "DTC225200097 đánh dấu thông báo của DTC225200098 -> 404, số chưa đọc không đổi"
+  [ "$(jget "d['chua_doc']")" = "$unread" ] || fail "Số chưa đọc của DTC235210039 bị đổi bởi người khác"
+  ok "DTC235210037 đánh dấu thông báo của DTC235210039 -> 404, số chưa đọc không đổi"
 
   status="$(call POST /api/notifications/read-all "${TOKEN_SV098}")"
-  [ "$status" = "204" ] || fail "DTC225200098 đánh dấu tất cả đã đọc không trả 204 (mã ${status})"
+  [ "$status" = "204" ] || fail "DTC235210039 đánh dấu tất cả đã đọc không trả 204 (mã ${status})"
   call GET /api/notifications/unread-count "${TOKEN_SV098}" >/dev/null
-  [ "$(jget "d['chua_doc']")" = "0" ] || fail "Sau read-all số chưa đọc của DTC225200098 khác 0"
-  ok "DTC225200098 đánh dấu tất cả đã đọc -> 204, số chưa đọc = 0"
+  [ "$(jget "d['chua_doc']")" = "0" ] || fail "Sau read-all số chưa đọc của DTC235210039 khác 0"
+  ok "DTC235210039 đánh dấu tất cả đã đọc -> 204, số chưa đọc = 0"
 }
 
 uc0_dashboards() {
   # --- MH-02/03/04 (plan 03-07): widget Phase 3 trên dashboard từng vai trò ---
   local status got
   status="$(call GET /api/dashboard/sinh-vien "${TOKEN_SV098}")"
-  [ "$status" = "200" ] || fail "DTC225200098 không xem được dashboard (mã ${status})"
+  [ "$status" = "200" ] || fail "DTC235210039 không xem được dashboard (mã ${status})"
   got="$(jget "f\"{d['de_cuong']['trang_thai']}|{d['bao_ve']['diem_trung_binh']}|{len(d['tien_do'])}|{bool(d['bao_ve']['chu_tich'])}\"")"
   [ "$got" = "DA_DUYET|8.5|2|True" ] || fail "Dashboard SV sai (đề cương|điểm|số mốc|chủ tịch = ${got})"
-  ok "Dashboard DTC225200098: đề cương Đã duyệt, 2 mốc tiến độ, lịch bảo vệ có Chủ tịch, điểm 8.5 (MH-02)"
+  ok "Dashboard DTC235210039: đề cương Đã duyệt, 2 mốc tiến độ, lịch bảo vệ có Chủ tịch, điểm 8.5 (MH-02)"
 
   status="$(call GET /api/dashboard/giang-vien "${TOKEN_GV029}")"
   [ "$status" = "200" ] || fail "GV029 không xem được dashboard (mã ${status})"
-  got="$(jget "all(k in d for k in ('so_de_cuong_cho_duyet','so_bao_cao_cho_nhan_xet','so_hoi_dong_tham_gia','viec_can_xu_ly'))")"
-  [ "$got" = "True" ] || fail "Dashboard GV029 thiếu bộ đếm Phase 3 ($(cat "$TMP/body"))"
-  ok "Dashboard GV029 có Đề cương chờ duyệt / Báo cáo chờ nhận xét / Hội đồng tham gia / Việc cần xử lý (MH-03)"
+  got="$(jget "all(k in d for k in ('so_de_cuong_cho_duyet','so_bao_cao_cho_nhan_xet','so_hoi_dong_tham_gia','viec_can_xu_ly')) and d.get('so_sinh_vien_lop', 0) >= 1")"
+  [ "$got" = "True" ] || fail "Dashboard GV029 thiếu bộ đếm Phase 3 / số SV lớp hướng dẫn ($(cat "$TMP/body"))"
+  ok "Dashboard GV029 có Đề cương chờ duyệt / Báo cáo chờ nhận xét / Hội đồng tham gia / Việc cần xử lý / SV lớp hướng dẫn >= 1 (MH-03)"
 
   status="$(call GET "/api/dashboard/bo-mon?dot_do_an_id=${DOT_DO_AN_ID}" "${TOKEN_BOMON}")"
   [ "$status" = "200" ] || fail "Bộ môn không xem được dashboard đợt K98 (mã ${status})"
@@ -778,8 +783,8 @@ uc0_dashboards() {
   ok "Dashboard Bộ môn đợt K98: SV trễ mốc|tổng SV|số mốc = ${got} (MH-04)"
 
   status="$(call GET /api/dashboard/bo-mon "${TOKEN_SV098}")"
-  [ "$status" = "403" ] || fail "DTC225200098 xem dashboard Bộ môn không bị 403 (mã ${status})"
-  ok "DTC225200098 xem dashboard Bộ môn -> 403"
+  [ "$status" = "403" ] || fail "DTC235210039 xem dashboard Bộ môn không bị 403 (mã ${status})"
+  ok "DTC235210039 xem dashboard Bộ môn -> 403"
 }
 
 setup_assigned_topic

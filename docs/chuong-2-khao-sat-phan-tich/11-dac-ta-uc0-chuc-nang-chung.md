@@ -2,7 +2,7 @@
 
 > **Mã PI:** 1.3 — **Yêu cầu:** ANLS-05
 
-UC0 – Chức năng chung gồm 7 UC con dùng chung bởi nhiều use case chính: UC0.1 Đăng nhập và đăng xuất, UC0.2 Quản lý tài khoản SV/GV, UC0.3 Quản lý đợt đồ án, UC0.4 Cấu hình ngưỡng cảnh báo trùng lặp, UC0.5 Xem thông báo, UC0.6 Kiểm tra trùng lặp tên đề tài, UC0.7 Kiểm tra trùng lặp tài liệu. UC0.6 và UC0.7 có tác nhân chính là **Hệ thống** (Dịch vụ AI) — chúng không được người dùng gọi trực tiếp mà được `<<include>>` từ UC1.1 (UC0.6) và từ UC2.1/UC4.1 (UC0.7).
+UC0 – Chức năng chung gồm 8 UC con dùng chung bởi nhiều use case chính: UC0.1 Đăng nhập và đăng xuất, UC0.2 Quản lý tài khoản SV/GV, UC0.3 Quản lý đợt đồ án, UC0.4 Cấu hình ngưỡng cảnh báo trùng lặp, UC0.5 Xem thông báo, UC0.6 Kiểm tra trùng lặp tên đề tài, UC0.7 Kiểm tra trùng lặp tài liệu, UC0.8 Phân công GVHD. UC0.8 được thực hiện ngay sau khi mở đợt (UC0.3) và là điều kiện tiền đề của UC1 (sinh viên chỉ đề xuất/đăng ký đề tài với GVHD được phân công) cũng như của UC2–UC4 (GVHD duyệt đề cương, nhận xét tiến độ). UC0.6 và UC0.7 có tác nhân chính là **Hệ thống** (Dịch vụ AI) — chúng không được người dùng gọi trực tiếp mà được `<<include>>` từ UC1.1 (UC0.6) và từ UC2.1/UC4.1 (UC0.7).
 
 ![Hình 2.22 – Sơ đồ UC0 – Chức năng chung](uc/uc0-chuc-nang-chung.png)
 
@@ -79,7 +79,8 @@ UC0 – Chức năng chung gồm 7 UC con dùng chung bởi nhiều use case ch�
 **Luồng sự kiện chính**
 
 1. Bộ môn mở màn hình quản lý đợt đồ án, tạo một đợt mới (tên đợt, khóa áp dụng) ở trạng thái "đang mở".
-2. Khi đợt kết thúc, Bộ môn đóng đợt; hệ thống chặn các thao tác đề xuất/đăng ký đề tài mới cho đợt đó (UC1.1 – E1).
+2. Sau khi mở đợt, Bộ môn phân công GVHD cho sinh viên của đợt (UC0.8).
+3. Khi đợt kết thúc, Bộ môn đóng đợt; hệ thống chặn các thao tác đề xuất/đăng ký đề tài mới cho đợt đó (UC1.1 – E1).
 
 **Luồng thay thế**
 
@@ -123,7 +124,7 @@ UC0 – Chức năng chung gồm 7 UC con dùng chung bởi nhiều use case ch�
 | Mã UC | UC0.5 |
 | Tên UC | Xem thông báo |
 | Tác nhân | Sinh viên, Giảng viên, Bộ môn |
-| Mô tả | Người dùng nhận thông báo in-app (số lượng chưa đọc + danh sách, đánh dấu đã đọc) khi đề tài/đề cương được duyệt/từ chối, có nhận xét mới, được phân vào hội đồng, hoặc có lịch bảo vệ. |
+| Mô tả | Người dùng nhận thông báo in-app (số lượng chưa đọc + danh sách, đánh dấu đã đọc) khi được Bộ môn phân công/đổi GVHD (UC0.8), khi có đề tài chờ GVHD duyệt, khi được giao đề tài hoặc có sinh viên đăng ký đề tài, khi đề tài/đề cương được duyệt/từ chối, có nhận xét mới, được phân vào hội đồng, hoặc có lịch bảo vệ. |
 | Tiền điều kiện | Người dùng đã đăng nhập |
 | Hậu điều kiện | Danh sách thông báo được hiển thị; thông báo đã xem được đánh dấu đã đọc |
 | Yêu cầu liên quan | FR-TB-01 |
@@ -201,3 +202,48 @@ UC0 – Chức năng chung gồm 7 UC con dùng chung bởi nhiều use case ch�
 
 - **E1**: Dịch vụ AI lỗi trong lúc xử lý (file hỏng, không trích xuất được text) → trạng thái chuyển "Lỗi"; UC2.2/UC4.1 vẫn cho phép GVHD/Bộ môn xem tài liệu gốc và có thể yêu cầu kiểm tra lại, không bị chặn quy trình duyệt.
 - **E2**: Thời gian xử lý vượt ngưỡng NFR-09 (30 giây) nhiều lần liên tiếp → ghi nhận là vấn đề hiệu năng cần xem xét lại ở Phase 4 khi đo thực tế trên corpus seed, không phải lỗi nghiệp vụ.
+
+#### UC0.8 – Phân công GVHD
+
+| Thuộc tính | Nội dung |
+|---|---|
+| Mã UC | UC0.8 |
+| Tên UC | Phân công GVHD |
+| Tác nhân | Bộ môn (thực hiện); Giảng viên, Sinh viên (xem kết quả) |
+| Mô tả | Đầu mỗi đợt đồ án, Bộ môn phân công mỗi sinh viên cho đúng một Giảng viên hướng dẫn — tập sinh viên của một giảng viên trong đợt gọi là "lớp hướng dẫn". Bộ môn gán từng dòng, gán hàng loạt cho các sinh viên đã chọn, hoặc import tệp CSV; theo dõi số sinh viên mỗi giảng viên đang hướng dẫn để cân đối khối lượng. Giảng viên xem lớp hướng dẫn của mình (MH-16), sinh viên xem GVHD của mình trên trang tổng quan. |
+| Tiền điều kiện | Bộ môn đã đăng nhập; đợt đồ án đã được tạo (UC0.3); tài khoản sinh viên và giảng viên đã có (UC0.2) |
+| Hậu điều kiện | Mỗi sinh viên được gán có đúng một dòng phân công (đợt, sinh viên, giảng viên, thời điểm) trong đợt; sinh viên và giảng viên liên quan nhận thông báo in-app; từ đây sinh viên đề xuất/đăng ký đề tài với GVHD này (UC1) |
+| Yêu cầu liên quan | FR-DT-05, FR-DT-08, FR-DT-09, FR-DT-11 |
+| Màn hình | MH-15, MH-16 |
+
+**Luồng sự kiện chính**
+
+1. Bộ môn mở màn hình "Phân công GVHD" (MH-15) — từ menu hoặc từ thẻ "SV chưa phân công GVHD" trên trang tổng quan (MH-04) — và chọn đợt đồ án.
+2. Hệ thống hiển thị thống kê (tổng sinh viên / đã phân công / chưa phân công), số sinh viên mỗi giảng viên đang hướng dẫn và bảng sinh viên kèm GVHD hiện tại và đề tài hiện tại; Bộ môn lọc theo từ khóa (MSSV, họ tên), GVHD hoặc tình trạng phân công.
+3. Bộ môn chọn GVHD cho từng sinh viên ngay trên dòng, hoặc chọn nhiều sinh viên rồi gán hàng loạt cho một giảng viên, sau đó lưu.
+4. Hệ thống kiểm tra các ràng buộc (BR-PC-01..BR-PC-04) cho từng sinh viên và lưu toàn bộ thay đổi trong một transaction.
+5. Hệ thống gửi thông báo in-app cho từng sinh viên được gán/đổi GVHD và một thông báo tổng hợp cho mỗi giảng viên nhận thêm sinh viên; thống kê và tải theo giảng viên được cập nhật.
+
+**Luồng thay thế**
+
+- **A1** (thay cho bước 3–4, import CSV): Bộ môn chọn "Import CSV" và tải lên tệp mỗi dòng `ma_so_sinh_vien,ma_giang_vien` (dấu phẩy hoặc chấm phẩy, dòng tiêu đề tùy chọn); hệ thống lưu các dòng hợp lệ và trả về danh sách dòng lỗi kèm số dòng và lý do (không tìm thấy mã sinh viên/giảng viên, vi phạm BR-PC-03/BR-PC-04) để Bộ môn sửa và import lại.
+- **A2** (đổi GVHD): Bộ môn chọn giảng viên khác cho một sinh viên đã được phân công; nếu sinh viên đang có đề tài "Chờ duyệt", đề tài đó chuyển sang GVHD mới duyệt (BR-PC-05).
+- **A3** (gỡ phân công): Bộ môn bỏ chọn GVHD của một sinh viên; hệ thống xóa dòng phân công và báo cho sinh viên rằng mình chưa có GVHD.
+- **A4** (Giảng viên xem lớp): Giảng viên mở "Sinh viên của tôi" (MH-16), xem danh sách sinh viên của mình theo từng đợt đang mở kèm đề tài hiện tại, chọn "Duyệt đề tài" (sang UC1.3) hoặc "Giao đề tài" (sang UC1.1 – A3).
+
+**Ngoại lệ**
+
+- **E1**: Sinh viên đã có đề tài "Đã phân công" trong đợt → hệ thống không cho đổi/gỡ GVHD của sinh viên đó (BR-PC-03); khi lưu từ màn hình, toàn bộ lần lưu bị từ chối kèm danh sách sinh viên vi phạm.
+- **E2**: Gỡ GVHD của sinh viên đang có đề tài "Chờ duyệt" → hệ thống từ chối (BR-PC-04).
+- **E3**: Giảng viên được chọn không tồn tại hoặc tài khoản đã bị khóa → hệ thống từ chối dòng đó.
+- **E4**: Sinh viên, giảng viên gọi API phân công → hệ thống trả 403 (chỉ Bộ môn được phân công).
+
+**Quy tắc nghiệp vụ**
+
+| Mã | Quy tắc |
+|---|---|
+| BR-PC-01 | Trong một đợt đồ án, mỗi sinh viên có tối đa một GVHD — bảo đảm bằng ràng buộc duy nhất `uk_phan_cong_sv_dot (dot_do_an_id, sinh_vien_id)` trên bảng `phan_cong_huong_dan` (§3.2). |
+| BR-PC-02 | Chỉ Bộ môn được tạo, đổi, gỡ phân công; giảng viên chỉ xem lớp hướng dẫn của mình, sinh viên chỉ xem GVHD của mình. |
+| BR-PC-03 | Không đổi hoặc gỡ GVHD của sinh viên đã có đề tài "Đã phân công" trong đợt, vì đề cương, tiến độ và bảo vệ đều gắn với GVHD của đề tài đó. |
+| BR-PC-04 | Không gỡ GVHD của sinh viên đang có đề tài "Chờ duyệt" (đề tài đó cần một GVHD để được duyệt). |
+| BR-PC-05 | Khi đổi GVHD, đề tài "Chờ duyệt" và bản nháp do sinh viên đề xuất chuyển sang GVHD mới; bản nháp giảng viên cũ định giao cho sinh viên đó được gỡ sinh viên. |

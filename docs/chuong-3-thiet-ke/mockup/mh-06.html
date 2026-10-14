@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="mockup-size" content="1440x1180">
+<meta name="mockup-size" content="1440x1420">
 <title>MH-06 · Đề xuất đề tài</title>
 <link rel="stylesheet" href="antd-admin.css">
 </head>
@@ -79,6 +79,12 @@
             <option>Đợt đồ án tốt nghiệp K22A - Học kỳ 1 (2026-2027)</option>
           </select>
           <p class="ant-form-item-extra">Chỉ hiển thị các đợt đang mở nhận đề xuất.</p>
+        </div>
+
+        <div class="ant-form-item">
+          <label class="ant-form-item-label" for="f-gvhd">Giảng viên hướng dẫn</label>
+          <input class="ant-input" id="f-gvhd" type="text" value="ThS. Hà Thị Thanh Vân" readonly disabled>
+          <p class="ant-form-item-extra">Bộ môn đã phân công — đề tài gửi tới GVHD duyệt (UC1.3).</p>
         </div>
 
         <div class="ant-form-item">
@@ -166,6 +172,22 @@
         </div>
       </form>
     </main>
+  </div>
+</div>
+
+<div class="mockup-state-panel">
+  <p class="mockup-state-label">Trạng thái: Giảng viên tạo đề tài — giao cho sinh viên trong lớp hoặc mở cho lớp đăng ký (UC1.1)</p>
+  <div class="ant-card" style="max-width:720px;">
+    <div class="ant-form-item">
+      <label class="ant-form-item-label" for="f-giao-sv">Giao cho sinh viên (tùy chọn)</label>
+      <select class="ant-select-selector" id="f-giao-sv">
+        <option>— Để trống: Mở cho lớp đăng ký —</option>
+        <option>Trần Thị Mẫu B (SV22A014)</option>
+        <option>Lê Thị Mẫu G (SV22A058)</option>
+        <option>Phạm Văn Mẫu E (SV22A041)</option>
+      </select>
+      <p class="ant-form-item-extra">Chỉ liệt kê sinh viên trong lớp hướng dẫn của bạn ở đợt này. Để trống = Mở cho lớp đăng ký; chọn SV = giao đề tài, chuyển Đã phân công ngay khi gửi.</p>
+    </div>
   </div>
 </div>
 </body>

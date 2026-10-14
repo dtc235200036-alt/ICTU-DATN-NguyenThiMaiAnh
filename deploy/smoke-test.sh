@@ -122,7 +122,7 @@ TOKEN_GV001="$(curl -sk -X POST "$BASE/api/auth/login" -H 'Content-Type: applica
   -d "{\"dang_nhap\":\"GV001\",\"mat_khau\":\"${SEED_PW}\"}" \
   | python3 -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')"
 TOKEN_SV001="$(curl -sk -X POST "$BASE/api/auth/login" -H 'Content-Type: application/json' \
-  -d "{\"dang_nhap\":\"DTC225200001\",\"mat_khau\":\"${SEED_PW}\"}" \
+  -d "{\"dang_nhap\":\"DTC235200016\",\"mat_khau\":\"${SEED_PW}\"}" \
   | python3 -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')"
 
 status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/dashboard/bo-mon" -H "Authorization: Bearer ${TOKEN_BOMON}")"
@@ -130,11 +130,21 @@ status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/dashboard/bo-mon" -
 status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/dashboard/giang-vien" -H "Authorization: Bearer ${TOKEN_GV001}")"
 [ "$status" = "200" ] || fail "GV001 xem /api/dashboard/giang-vien không trả 200 (nhận $status)"
 status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/dashboard/sinh-vien" -H "Authorization: Bearer ${TOKEN_SV001}")"
-[ "$status" = "200" ] || fail "DTC225200001 xem /api/dashboard/sinh-vien không trả 200 (nhận $status)"
+[ "$status" = "200" ] || fail "DTC235200016 xem /api/dashboard/sinh-vien không trả 200 (nhận $status)"
 echo "OK: mỗi vai trò xem được dashboard của chính mình"
 
+# UC0.8 (0015): dashboard có trường phân công GVHD mới của từng vai trò.
+for spec in "bo-mon BOMON sv_chua_phan_cong" "giang-vien GV001 so_sinh_vien_lop" "sinh-vien SV001 giang_vien_huong_dan"; do
+  read -r dash who field <<<"$spec"
+  tok_var="TOKEN_${who}"
+  curl -sk "$BASE/api/dashboard/${dash}" -H "Authorization: Bearer ${!tok_var}" \
+    | python3 -c 'import json,sys; sys.exit(0 if sys.argv[1] in json.load(sys.stdin) else 1)' "$field" 2>/dev/null \
+    || fail "/api/dashboard/${dash} thiếu trường ${field}"
+done
+echo "OK: dashboard có sv_chua_phan_cong (bo-mon), so_sinh_vien_lop (giang-vien), giang_vien_huong_dan (sinh-vien)"
+
 status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/dashboard/bo-mon" -H "Authorization: Bearer ${TOKEN_SV001}")"
-[ "$status" = "403" ] || fail "DTC225200001 xem /api/dashboard/bo-mon không trả 403 (nhận $status)"
+[ "$status" = "403" ] || fail "DTC235200016 xem /api/dashboard/bo-mon không trả 403 (nhận $status)"
 status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/dashboard/sinh-vien" -H "Authorization: Bearer ${TOKEN_GV001}")"
 [ "$status" = "403" ] || fail "GV001 xem /api/dashboard/sinh-vien không trả 403 (nhận $status)"
 status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/dashboard/giang-vien" -H "Authorization: Bearer ${TOKEN_BOMON}")"
@@ -142,22 +152,56 @@ status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/dashboard/giang-vie
 echo "OK: dashboard của vai trò khác bị từ chối 403"
 
 status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/accounts?vai_tro=SINH_VIEN" -H "Authorization: Bearer ${TOKEN_SV001}")"
-[ "$status" = "403" ] || fail "DTC225200001 xem /api/accounts không trả 403 (nhận $status)"
+[ "$status" = "403" ] || fail "DTC235200016 xem /api/accounts không trả 403 (nhận $status)"
 status="$(curl -sk -o /dev/null -w '%{http_code}' -X POST "$BASE/api/cohorts" -H "Authorization: Bearer ${TOKEN_SV001}" -H 'Content-Type: application/json' -d '{}')"
-[ "$status" = "403" ] || fail "DTC225200001 tạo đợt đồ án không trả 403 (nhận $status)"
+[ "$status" = "403" ] || fail "DTC235200016 tạo đợt đồ án không trả 403 (nhận $status)"
 status="$(curl -sk -o /dev/null -w '%{http_code}' -X POST "$BASE/api/topic-approvals/1/approve" -H "Authorization: Bearer ${TOKEN_SV001}" -H 'Content-Type: application/json' -d '{}')"
-[ "$status" = "403" ] || fail "DTC225200001 duyệt đề tài không trả 403 (nhận $status)"
-echo "OK: DTC225200001 bị 403 trên accounts/cohorts/topic-approvals"
+[ "$status" = "403" ] || fail "DTC235200016 duyệt đề tài không trả 403 (nhận $status)"
+echo "OK: DTC235200016 bị 403 trên accounts/cohorts/topic-approvals"
 
+# UC1.3 (0015): duyệt đề tài là việc của GVHD — router /api/topic-approvals chỉ
+# GV gọi được (GV001 xem danh sách chờ duyệt của lớp mình -> 200), Bộ môn 403.
 status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/topic-approvals" -H "Authorization: Bearer ${TOKEN_GV001}")"
-[ "$status" = "403" ] || fail "GV001 xem /api/topic-approvals không trả 403 (nhận $status)"
+[ "$status" = "200" ] || fail "GV001 xem /api/topic-approvals không trả 200 (nhận $status)"
+status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/topic-approvals" -H "Authorization: Bearer ${TOKEN_BOMON}")"
+[ "$status" = "403" ] || fail "bomon xem /api/topic-approvals không trả 403 (nhận $status)"
+status="$(curl -sk -o /dev/null -w '%{http_code}' -X POST "$BASE/api/topic-approvals/1/approve" -H "Authorization: Bearer ${TOKEN_BOMON}")"
+[ "$status" = "403" ] || fail "bomon duyệt đề tài không trả 403 (nhận $status)"
+echo "OK: GV001 xem danh sách chờ duyệt -> 200; bomon bị 403 trên topic-approvals (xem, duyệt)"
+
 status="$(curl -sk -o /dev/null -w '%{http_code}' -X POST "$BASE/api/topics/1/register" -H "Authorization: Bearer ${TOKEN_GV001}")"
 [ "$status" = "403" ] || fail "GV001 đăng ký đề tài không trả 403 (nhận $status)"
-echo "OK: GV001 bị 403 trên topic-approvals/register"
+echo "OK: GV001 bị 403 trên register"
+
+# UC0.8 (0015): phân công GVHD — Bộ môn gán/import, GV xem lớp của mình, SV
+# xem GVHD của mình; seed gán DTC235200016 -> GV001 trong đợt demo.
+for who in GV001 SV001; do
+  tok_var="TOKEN_${who}"
+  status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/assignments?dot_do_an_id=1" -H "Authorization: Bearer ${!tok_var}")"
+  [ "$status" = "403" ] || fail "${who} xem /api/assignments không trả 403 (nhận $status)"
+  for spec in "PUT /api/assignments" "POST /api/assignments/import"; do
+    read -r method path <<<"$spec"
+    status="$(curl -sk -o /dev/null -w '%{http_code}' -X "$method" "$BASE$path" \
+      -H "Authorization: Bearer ${!tok_var}" -H 'Content-Type: application/json' -d '{}')"
+    [ "$status" = "403" ] || fail "${who} ${method} ${path} không trả 403 (nhận $status)"
+  done
+done
+status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/assignments/my-students" -H "Authorization: Bearer ${TOKEN_BOMON}")"
+[ "$status" = "403" ] || fail "bomon xem /api/assignments/my-students không trả 403 (nhận $status)"
+status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/assignments/my-advisor" -H "Authorization: Bearer ${TOKEN_GV001}")"
+[ "$status" = "403" ] || fail "GV001 xem /api/assignments/my-advisor không trả 403 (nhận $status)"
+status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/assignments/my-students" -H "Authorization: Bearer ${TOKEN_GV001}")"
+[ "$status" = "200" ] || fail "GV001 xem /api/assignments/my-students không trả 200 (nhận $status)"
+advisor_body="$(curl -sk "$BASE/api/assignments/my-advisor" -H "Authorization: Bearer ${TOKEN_SV001}")"
+advisor_ok="$(printf '%s' "$advisor_body" | python3 -c 'import json,sys
+d = json.load(sys.stdin)
+print(1 if any(r["giang_vien"]["ma"] == "GV001" for r in d) else 0)' 2>/dev/null || true)"
+[ "$advisor_ok" = "1" ] || fail "DTC235200016 xem /api/assignments/my-advisor không thấy GVHD GV001 (seed mặc định) (${advisor_body})"
+echo "OK: /api/assignments — gán/import/xem chỉ bomon (GV001, DTC235200016 bị 403); my-students chỉ GV, my-advisor chỉ SV; DTC235200016 có GVHD GV001"
 
 status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/topics" -H "Authorization: Bearer ${TOKEN_SV001}")"
-[ "$status" = "200" ] || fail "DTC225200001 xem /api/topics không trả 200 (nhận $status)"
-echo "OK: DTC225200001 xem /api/topics -> 200"
+[ "$status" = "200" ] || fail "DTC235200016 xem /api/topics không trả 200 (nhận $status)"
+echo "OK: DTC235200016 xem /api/topics -> 200"
 
 # --- Phase 3 (plan 03-07): mỗi nhóm route mới chỉ đúng vai trò gọi được ---
 # expect_status CODE METHOD PATH TOKEN MÔ_TẢ — gửi thân JSON rỗng cho POST/PUT;
@@ -173,13 +217,13 @@ expect_status() {
   [ "$got" = "$want" ] || fail "${label}: ${method} ${path} không trả ${want} (nhận ${got})"
 }
 
-expect_status 403 POST /api/defense/committees "${TOKEN_SV001}" DTC225200001
-expect_status 403 POST /api/archive "${TOKEN_SV001}" DTC225200001
-expect_status 403 POST /api/archive/import "${TOKEN_SV001}" DTC225200001
-expect_status 403 POST /api/progress/milestones "${TOKEN_SV001}" DTC225200001
-expect_status 403 GET /api/progress/dashboard "${TOKEN_SV001}" DTC225200001
-expect_status 403 POST /api/outlines/1/review "${TOKEN_SV001}" DTC225200001
-echo "OK: DTC225200001 bị 403 trên defense/committees, archive (thêm, import), progress (mốc, dashboard), outlines review"
+expect_status 403 POST /api/defense/committees "${TOKEN_SV001}" DTC235200016
+expect_status 403 POST /api/archive "${TOKEN_SV001}" DTC235200016
+expect_status 403 POST /api/archive/import "${TOKEN_SV001}" DTC235200016
+expect_status 403 POST /api/progress/milestones "${TOKEN_SV001}" DTC235200016
+expect_status 403 GET /api/progress/dashboard "${TOKEN_SV001}" DTC235200016
+expect_status 403 POST /api/outlines/1/review "${TOKEN_SV001}" DTC235200016
+echo "OK: DTC235200016 bị 403 trên defense/committees, archive (thêm, import), progress (mốc, dashboard), outlines review"
 
 expect_status 403 POST /api/outlines/1/submit "${TOKEN_GV001}" GV001
 expect_status 403 POST /api/defense/schedules/1/finalize "${TOKEN_GV001}" GV001
@@ -205,6 +249,6 @@ for who in GV001 SV001; do
   expect_status 403 PUT /api/thresholds "${!tok_var}" "$who"
 done
 expect_status 200 GET /api/thresholds "${TOKEN_BOMON}" bomon
-echo "OK: /api/thresholds — DTC225200001 và GV001 bị 403 (GET/PUT), bomon GET 200"
+echo "OK: /api/thresholds — DTC235200016 và GV001 bị 403 (GET/PUT), bomon GET 200"
 
 echo "SMOKE TEST: tất cả kiểm tra đã qua."

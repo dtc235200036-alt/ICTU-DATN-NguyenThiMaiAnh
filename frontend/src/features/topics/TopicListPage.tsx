@@ -80,7 +80,7 @@ export default function TopicListPage() {
   const handleRegister = async (record: TopicListItem) => {
     try {
       await registerMutation.mutateAsync(record.id)
-      message.success('Đăng ký thành công — đề tài đang chờ Bộ môn duyệt')
+      message.success('Đăng ký thành công — đề tài đã được phân công, bạn có thể nộp đề cương')
       navigate(`/de-tai/${record.id}`)
     } catch (err) {
       message.error(getErrorMessage(err))
@@ -135,7 +135,7 @@ export default function TopicListPage() {
           {record.co_the_dang_ky && (
             <Popconfirm
               title="Đăng ký đề tài này?"
-              description="Sau khi đăng ký, đề tài chuyển sang Chờ duyệt để Bộ môn xác nhận và phân công GVHD."
+              description="Đề tài do GVHD của bạn mở cho lớp — đăng ký xong là Đã phân công ngay, không đổi được nữa."
               onConfirm={() => handleRegister(record)}
             >
               <Button size="small" type="primary" loading={registerMutation.isPending}>

@@ -20,8 +20,8 @@
 # NFR-06 do smoke-test + pytest chứng minh, NFR-07/09/10/11 do ai-nfr.sh,
 # NFR-16 do plan 05-05 (verify-all.sh ghép lại).
 #
-# Tài khoản dành riêng: DTC225200094 (SV) + bomon; khóa K95 dành riêng (script
-# không tạo đợt nào). Dọn dẹp (trap, kể cả khi lỗi): mở khóa DTC225200094, xóa
+# Tài khoản dành riêng: DTC235210073 (SV) + bomon; khóa K95 dành riêng (script
+# không tạo đợt nào). Dọn dẹp (trap, kể cả khi lỗi): mở khóa DTC235210073, xóa
 # thông báo của nó phát sinh từ lúc bắt đầu, xóa đề tài/đợt K95 nếu có.
 #
 # Dùng: bash deploy/nfr-he-thong.sh [--json PATH]
@@ -32,7 +32,7 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 BASE="${BASE_URL:-https://localhost:${HTTPS_PORT:-443}}"
 HTTP_BASE="${HTTP_BASE_URL:-http://localhost:${HTTP_PORT:-80}}"
 COMPOSE=(docker compose -f "${SCRIPT_DIR}/docker-compose.yml")
-SV_MA="DTC225200094"
+SV_MA="DTC235210073"
 KHOA_RIENG="K95"
 N=20
 JSON_OUT=""
@@ -73,6 +73,8 @@ cleanup() {
       sql "DELETE FROM ket_qua_kiem_tra_trung_lap WHERE de_tai_id IN (${topic_ids});" >/dev/null 2>&1 || true
       sql "DELETE FROM de_tai WHERE id IN (${topic_ids});" >/dev/null 2>&1 || true
     fi
+    # 0015: phân công GVHD trỏ tới đợt (FK không cascade) — xóa trước đợt.
+    sql "DELETE FROM phan_cong_huong_dan WHERE dot_do_an_id IN (${dot_ids});" >/dev/null 2>&1 || true
     sql "DELETE FROM dot_do_an WHERE id IN (${dot_ids});" >/dev/null 2>&1 || true
   fi
   rm -rf "$TMP"
@@ -333,7 +335,7 @@ ghi_kq NFR-15 "$d" "Đọc deploy/apache/ntma.conf (ProxyTimeout, DocumentRoot, 
 
 # --- NFR-17 / 18 / 19 ----------------------------------------------------------------
 read -r n_sv n_gv <<<"$(sql "SELECT SUM(vai_tro='SINH_VIEN'), SUM(vai_tro='GIANG_VIEN') FROM tai_khoan")"
-if [ "$n_sv" = "100" ] && [ "$n_gv" = "30" ]; then d=true; else d=false; fi
+if [ "$n_sv" = "580" ] && [ "$n_gv" = "70" ]; then d=true; else d=false; fi
 ghi_kq NFR-17 "$d" "Đếm tai_khoan theo vai_tro sau khi seed" "${n_sv} sinh viên, ${n_gv} giảng viên"
 
 read -r k_n k_idx k_khoa <<<"$(sql "SELECT COUNT(*), SUM(trang_thai_index='DA_INDEX'), COUNT(DISTINCT khoa) FROM do_an_kho WHERE nguon='IMPORT' AND khoa IN ('K18','K19','K20','K21','K22')")"

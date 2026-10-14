@@ -6,7 +6,7 @@ Chương này trình bày thiết kế dữ liệu, kiến trúc phần mềm v�
 
 Các mục của chương:
 
-- **3.1. Sơ đồ lớp thực thể** — 19 lớp thực thể (PlantUML), state machine của Đề tài/Đề cương/Kết quả kiểm tra trùng lặp.
-- **3.2. Thiết kế cơ sở dữ liệu** — lược đồ `thesis_core` (19 bảng) và `thesis_ai`, từ điển dữ liệu, ràng buộc toàn vẹn và xử lý đồng thời (race condition).
+- **3.1. Sơ đồ lớp thực thể** — 20 lớp thực thể (PlantUML), state machine của Đề tài/Đề cương/Kết quả kiểm tra trùng lặp.
+- **3.2. Thiết kế cơ sở dữ liệu** — lược đồ `thesis_core` (20 bảng) và `thesis_ai`, từ điển dữ liệu, ràng buộc toàn vẹn và xử lý đồng thời (race condition).
 - **3.3. Kiến trúc hệ thống** — kiến trúc SOA (component, deployment, sequence luồng kiểm tra trùng lặp đồng bộ/bất đồng bộ).
-- **3.4. Thiết kế giao diện** — quy ước giao diện Ant Design admin và 14 màn hình mockup chính (đăng nhập, dashboard 3 vai trò, đề tài, đề cương, tiến độ, bảo vệ, kho đồ án, chi tiết kiểm tra trùng lặp).
+- **3.4. Thiết kế giao diện** — quy ước giao diện Ant Design admin và 16 màn hình mockup chính (đăng nhập, dashboard 3 vai trò, đề tài, đề cương, tiến độ, bảo vệ, kho đồ án, chi tiết kiểm tra trùng lặp).

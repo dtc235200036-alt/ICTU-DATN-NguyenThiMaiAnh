@@ -2,7 +2,7 @@
 
 ## What This Is
 
-Hệ thống quản lý đồ án/khóa luận tốt nghiệp của Khoa Công nghệ thông tin (Trường ĐH CNTT&TT Thái Nguyên), phục vụ Sinh viên, Giảng viên hướng dẫn và Bộ môn/Khoa trong toàn bộ quy trình: đề xuất/đăng ký đề tài → duyệt đề cương → theo dõi tiến độ → nộp báo cáo → phân công hội đồng và tổ chức bảo vệ, đồng thời lưu kho đồ án của khoa qua các khóa. Hệ thống tích hợp dịch vụ AI kiểm tra trùng lặp (tên đề tài theo ngữ nghĩa; đoạn nội dung đề cương/báo cáo) trong phạm vi kho đồ án của khoa. Đây là đồ án tốt nghiệp của SV Nguyễn Thị Mai Anh (DTC235200036, CN CNTT K22A), GVHD: Hà Thị Thanh.
+Hệ thống quản lý đồ án/khóa luận tốt nghiệp của Khoa Công nghệ thông tin (Trường ĐH CNTT&TT Thái Nguyên), phục vụ Sinh viên, Giảng viên hướng dẫn và Bộ môn/Khoa trong toàn bộ quy trình: phân công GVHD đầu đợt → đề xuất/đăng ký đề tài (GVHD duyệt) → duyệt đề cương → theo dõi tiến độ → nộp báo cáo → phân công hội đồng và tổ chức bảo vệ, đồng thời lưu kho đồ án của khoa qua các khóa. Hệ thống tích hợp dịch vụ AI kiểm tra trùng lặp (tên đề tài theo ngữ nghĩa; đoạn nội dung đề cương/báo cáo) trong phạm vi kho đồ án của khoa. Đây là đồ án tốt nghiệp của SV Nguyễn Thị Mai Anh (DTC235200036, CN CNTT K22A), GVHD: Hà Thị Thanh.
 
 ## Core Value
 
@@ -27,7 +27,7 @@ Quy trình đồ án 5 UC chính chạy trọn vẹn end-to-end trên Web, và k
 **Phần mềm (CLO 3):**
 - [ ] CSDL MySQL (PI 3.1)
 - [ ] 3 thành phần: Web API (FastAPI), client Web (React), dịch vụ AI trùng lặp (FastAPI riêng) (PI 3.2)
-- [ ] UC Quản lý đề tài: GV/SV đề xuất, SV đăng ký, bộ môn duyệt/phân công GVHD (PI 3.3)
+- [ ] UC Quản lý đề tài: bộ môn phân công GVHD cho SV đầu đợt; SV đề xuất tới GVHD hoặc đăng ký đề tài GVHD mở cho lớp, GV giao đề tài; GVHD duyệt (PI 3.3)
 - [ ] UC Quản lý đề cương: SV nộp, GVHD duyệt/yêu cầu sửa (PI 3.3)
 - [ ] UC Quản lý tiến độ thực hiện: SV nộp báo cáo tiến độ, GVHD nhận xét (PI 3.3)
 - [ ] UC Quản lý bảo vệ: bộ môn lập hội đồng (GV làm thành viên), xếp lịch, nhập điểm/kết quả (PI 3.3)

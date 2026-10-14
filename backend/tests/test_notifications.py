@@ -3,33 +3,17 @@ from datetime import date
 from sqlalchemy import func, select
 
 from app.core.roles import VaiTro
-from app.models.de_tai import CHO_DUYET, GIANG_VIEN, SINH_VIEN, DeTai
 from app.models.dot_do_an import DANG_MO, DotDoAn
 from app.models.thong_bao import (
-    DE_TAI_DUYET,
+    DE_TAI_CHO_DUYET,
     DE_TAI_PHAN_CONG,
     DE_TAI_TU_CHOI,
     ThongBao,
 )
 
-# NOTF-01/D-08/T-03-37/T-03-39: quyết định duyệt/từ chối đề tài (Phase 2) tạo
+# NOTF-01/D-08/T-03-37/T-03-39: SV gửi đề tài và quyết định duyệt/từ chối của GVHD tạo
 # thông báo trong CÙNG transaction với UPDATE trạng thái, quyết định bị từ chối
 # (409) không tạo gì; mỗi người chỉ đọc/đếm/đánh dấu thông báo của chính mình.
-
-
-def _pending(db, cohort_id, *, ten, loai, sinh_vien_id=None, giang_vien_id=None) -> DeTai:
-    topic = DeTai(
-        dot_do_an_id=cohort_id,
-        giang_vien_id=giang_vien_id,
-        sinh_vien_id=sinh_vien_id,
-        ten_de_tai=ten,
-        trang_thai=CHO_DUYET,
-        loai_nguoi_de_xuat=loai,
-    )
-    db.add(topic)
-    db.commit()
-    db.refresh(topic)
-    return topic
 
 
 def _notes(db, tai_khoan_id) -> list[ThongBao]:
@@ -41,10 +25,19 @@ def _notes(db, tai_khoan_id) -> list[ThongBao]:
     )
 
 
+def _propose(client, auth_headers, sv, cohort_id, ten) -> int:
+    resp = client.post(
+        "/api/topics",
+        json={"dot_do_an_id": cohort_id, "ten_de_tai": ten, "gui": True},
+        headers=auth_headers(sv),
+    )
+    assert resp.status_code == 201
+    return resp.json()["id"]
+
+
 def test_notifications_are_private_and_follow_state_changes(
-    client, make_account, auth_headers, db
+    client, make_account, auth_headers, assign_gvhd, db
 ):
-    bomon = make_account(VaiTro.BO_MON)
     gv = make_account(VaiTro.GIANG_VIEN, ho_ten="Trần Văn Hướng")
     sv = make_account(VaiTro.SINH_VIEN, ho_ten="Nguyễn Thị An")
     sv2 = make_account(VaiTro.SINH_VIEN)
@@ -59,50 +52,35 @@ def test_notifications_are_private_and_follow_state_changes(
     )
     db.add(cohort)
     db.commit()
+    assign_gvhd(sv, gv, cohort.id)
+    assign_gvhd(sv2, gv, cohort.id)
 
-    # Duyệt đề tài SV tự đề xuất + phân công GVHD -> SV và GVHD cùng nhận.
-    t1 = _pending(db, cohort.id, ten="Hệ thống A", loai=SINH_VIEN, sinh_vien_id=sv.sinh_vien_id)
-    resp = client.post(
-        f"/api/topic-approvals/{t1.id}/approve",
-        json={"giang_vien_id": gv.giang_vien_id},
-        headers=auth_headers(bomon),
-    )
-    assert resp.status_code == 200
-    sv_notes = _notes(db, sv.tai_khoan_id)
+    # SV gửi đề tài -> GVHD có việc duyệt; GVHD duyệt -> SV nhận DE_TAI_PHAN_CONG.
+    t1 = _propose(client, auth_headers, sv, cohort.id, "Hệ thống quản lý ký túc xá")
     gv_notes = _notes(db, gv.tai_khoan_id)
-    assert [n.loai for n in sv_notes] == [DE_TAI_PHAN_CONG]
-    assert "Thạc sĩ Trần Văn Hướng" in sv_notes[0].noi_dung
-    assert sv_notes[0].lien_ket == f"/de-tai/{t1.id}"
-    assert [n.loai for n in gv_notes] == [DE_TAI_PHAN_CONG]
+    assert [n.loai for n in gv_notes] == [DE_TAI_CHO_DUYET]
     assert "Nguyễn Thị An" in gv_notes[0].noi_dung
 
+    resp = client.post(f"/api/topic-approvals/{t1}/approve", headers=auth_headers(gv))
+    assert resp.status_code == 200
+    sv_notes = _notes(db, sv.tai_khoan_id)
+    assert [n.loai for n in sv_notes] == [DE_TAI_PHAN_CONG]
+    assert "Thạc sĩ Trần Văn Hướng" in sv_notes[0].noi_dung
+    assert sv_notes[0].lien_ket == f"/de-tai/{t1}"
+
     total_before = db.execute(select(func.count()).select_from(ThongBao)).scalar_one()
-    again = client.post(
-        f"/api/topic-approvals/{t1.id}/approve",
-        json={"giang_vien_id": gv.giang_vien_id},
-        headers=auth_headers(bomon),
-    )
+    again = client.post(f"/api/topic-approvals/{t1}/approve", headers=auth_headers(gv))
     assert again.status_code == 409
     db.rollback()  # REPEATABLE READ: bỏ snapshot cũ trước khi đọc lại
     assert db.execute(select(func.count()).select_from(ThongBao)).scalar_one() == total_before
 
-    # GV đề xuất, chưa có SV -> GV đề xuất nhận DE_TAI_DUYET.
-    t2 = _pending(db, cohort.id, ten="Hệ thống B", loai=GIANG_VIEN, giang_vien_id=gv.giang_vien_id)
+    # Từ chối -> SV đề xuất nhận DE_TAI_TU_CHOI kèm lý do.
+    t3 = _propose(client, auth_headers, sv2, cohort.id, "Ứng dụng đặt lịch khám bệnh")
     assert (
         client.post(
-            f"/api/topic-approvals/{t2.id}/approve", json={}, headers=auth_headers(bomon)
-        ).status_code
-        == 200
-    )
-    assert DE_TAI_DUYET in [n.loai for n in _notes(db, gv.tai_khoan_id)]
-
-    # Từ chối -> người đề xuất (SV) nhận DE_TAI_TU_CHOI kèm lý do.
-    t3 = _pending(db, cohort.id, ten="Hệ thống C", loai=SINH_VIEN, sinh_vien_id=sv2.sinh_vien_id)
-    assert (
-        client.post(
-            f"/api/topic-approvals/{t3.id}/reject",
+            f"/api/topic-approvals/{t3}/reject",
             json={"ly_do": "Trùng hướng với đề tài khóa trước"},
-            headers=auth_headers(bomon),
+            headers=auth_headers(gv),
         ).status_code
         == 200
     )
@@ -123,7 +101,7 @@ def test_notifications_are_private_and_follow_state_changes(
 
     # Đếm / đánh dấu đã đọc / đánh dấu tất cả của chính A.
     extra = client.post(
-        f"/api/topic-approvals/{t2.id}/reject", json={"ly_do": "x"}, headers=auth_headers(bomon)
+        f"/api/topic-approvals/{t1}/reject", json={"ly_do": "x"}, headers=auth_headers(gv)
     )
     assert extra.status_code == 409  # đã duyệt rồi — không tạo thêm
     gv_count = client.get("/api/notifications/unread-count", headers=auth_headers(gv))

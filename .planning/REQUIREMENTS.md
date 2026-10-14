@@ -26,10 +26,10 @@
 
 ### Quản lý đề tài (UC1)
 
-- [x] **TOPC-01**: Giảng viên đề xuất đề tài (tên, mô tả, lĩnh vực) vào đợt đồ án đang mở
-- [x] **TOPC-02**: Sinh viên tự đề xuất đề tài hoặc đăng ký một đề tài GV đã đề xuất và đang còn trống
-- [x] **TOPC-03**: Bộ môn duyệt/từ chối đề tài (có lý do) và phân công GVHD; mỗi SV chỉ có 1 đề tài đang hoạt động, mỗi đề tài chỉ có 1 SV
-- [x] **TOPC-04**: Mọi vai trò xem danh sách đề tài theo trạng thái (nháp → chờ duyệt → đã duyệt/từ chối → đã phân công), lọc theo đợt và GV
+- [x] **TOPC-01**: Giảng viên đề xuất đề tài (tên, mô tả, lĩnh vực) vào đợt đồ án đang mở — giao thẳng cho một SV trong lớp hướng dẫn của mình hoặc mở cho lớp đăng ký
+- [x] **TOPC-02**: Sinh viên tự đề xuất đề tài gửi tới GVHD của mình hoặc đăng ký một đề tài do GVHD của mình mở cho lớp và đang còn trống (đăng ký thành công là đã phân công)
+- [x] **TOPC-03**: Bộ môn phân công GVHD cho từng SV đầu mỗi đợt (mỗi SV đúng một GVHD; gán trên màn hình hoặc import CSV); GVHD của SV duyệt/từ chối đề tài SV đề xuất (có lý do); mỗi SV chỉ có 1 đề tài đang hoạt động, mỗi đề tài chỉ có 1 SV
+- [x] **TOPC-04**: Mọi vai trò xem danh sách đề tài trong phạm vi của mình theo trạng thái (nháp → chờ duyệt → mở cho lớp đăng ký/từ chối → đã phân công), lọc theo đợt và GV
 
 ### Quản lý đề cương (UC2)
 
@@ -68,7 +68,7 @@
 
 ### Thông báo
 
-- [x] **NOTF-01**: Người dùng nhận thông báo in-app khi đề tài/đề cương được duyệt hoặc từ chối, khi có nhận xét mới và khi được phân vào hội đồng / có lịch bảo vệ
+- [x] **NOTF-01**: Người dùng nhận thông báo in-app khi được phân công GVHD, khi có đề tài chờ GVHD duyệt, khi đề tài/đề cương được duyệt hoặc từ chối, khi có nhận xét mới và khi được phân vào hội đồng / có lịch bảo vệ
 
 ### Triển khai & dữ liệu thử nghiệm (CLO 4)
 

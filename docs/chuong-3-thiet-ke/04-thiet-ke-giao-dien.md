@@ -20,23 +20,23 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 | `ant-btn`, `ant-btn-primary`, `ant-btn-default`, `ant-btn-danger` | Button | Tất cả |
 | `ant-tag`, `ant-tag-processing`, `ant-tag-warning`, `ant-tag-success`, `ant-tag-error` | Tag | MH-05, MH-06, MH-07... |
 | `ant-alert`, `ant-alert-warning`, `ant-alert-error`, `ant-alert-info` | Alert | MH-06, MH-09, MH-14 |
-| `ant-table` | Table | MH-05, MH-06, MH-09, MH-13... |
+| `ant-table` | Table | MH-05, MH-06, MH-09, MH-13, MH-15, MH-16... |
 | `ant-progress` | Progress | MH-06, MH-09, MH-14 |
-| `ant-statistic`, `ant-statistic-value`, `ant-statistic-title` | Statistic | MH-03, MH-04 |
+| `ant-statistic`, `ant-statistic-value`, `ant-statistic-title` | Statistic | MH-03, MH-04, MH-15 |
 | `ant-steps`, `ant-steps-item`, `ant-steps-item-finish`, `ant-steps-item-process` | Steps | MH-02, MH-10 |
 | `ant-dropdown`, `ant-dropdown-header`, `ant-dropdown-item` | Dropdown (chuông thông báo mở sẵn) | MH-02, MH-03, MH-04 |
-| `ant-pagination`, `ant-pagination-item` | Pagination | MH-04, MH-05, MH-13 |
-| `ant-filter-bar`, `ant-filter-item` | Form (thanh lọc trên Table) | MH-05, MH-13 |
+| `ant-pagination`, `ant-pagination-item` | Pagination | MH-04, MH-05, MH-13, MH-15 |
+| `ant-filter-bar`, `ant-filter-item` | Form (thanh lọc trên Table) | MH-05, MH-13, MH-15 |
 | `login-layout`, `login-card` (`login-card` kế thừa `ant-card`) | Layout riêng cho màn đăng nhập (không có Sider/Header) | MH-01 |
 | `ant-drawer-mask`, `ant-drawer`, `ant-drawer-header`, `ant-drawer-body`, `ant-drawer-footer` | Drawer | MH-07 |
-| `ant-modal-mask`, `ant-modal`, `ant-modal-header`, `ant-modal-body`, `ant-modal-footer` | Modal | MH-07 |
+| `ant-modal-mask`, `ant-modal`, `ant-modal-header`, `ant-modal-body`, `ant-modal-footer` | Modal | MH-07, MH-15 |
 | `ant-tabs-nav`, `ant-tabs-tab`, `ant-tabs-tab-active` | Tabs | MH-08 |
-| `ant-upload-dragger`, `ant-upload-text`, `ant-upload-hint` | Upload.Dragger | MH-08 |
+| `ant-upload-dragger`, `ant-upload-text`, `ant-upload-hint` | Upload.Dragger | MH-08, MH-15 |
 | `ant-spin` | Spin | MH-08, MH-09 |
 | `ant-timeline`, `ant-timeline-item` | Timeline | MH-08 |
 | `ant-progress-circle-wrap`, `ant-progress-circle-value` | Progress (dạng vòng tròn) | MH-09 |
 | `dup-passage`, `dup-passage-high/medium/low`, `dup-passage-label`, `dup-thesis-list`, `dup-thesis-item` | Khối highlight đoạn trùng và danh sách đồ án trùng (không phải component AntD, quy ước riêng nêu ở §3.4.16) | MH-09, MH-14 |
-| `mockup-state-panel` | Khối minh họa trạng thái thay thế đặt sau `ant-layout` đóng, tránh chồng 2 lớp overlay (không phải component AntD) | MH-07, MH-08, MH-09, MH-13 |
+| `mockup-state-panel` | Khối minh họa trạng thái thay thế đặt sau `ant-layout` đóng, tránh chồng 2 lớp overlay (không phải component AntD) | MH-06, MH-07, MH-08, MH-09, MH-13, MH-15 |
 | `ant-tooltip-wrap`, `ant-tooltip` | Tooltip (hiển thị thường trực vì ảnh tĩnh không có hover) | MH-11 |
 | `member-picker-row`, `member-picker-name` | Danh sách chọn thành viên kèm Select vai trò (không phải component AntD đơn lẻ) | MH-11 |
 | `ant-input-number` | InputNumber | MH-12 |
@@ -44,20 +44,20 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 **Sider menu theo vai trò** (chốt tại đây, kế hoạch 01-06 sao chép nguyên văn):
 
 - **Sinh viên:** Tổng quan · Đề tài của tôi · Đề xuất / Đăng ký đề tài · Đề cương · Báo cáo tiến độ · Bảo vệ · Kho đồ án
-- **Giảng viên:** Tổng quan · Đề tài hướng dẫn · Đề xuất đề tài · Duyệt đề cương · Nhận xét tiến độ · Hội đồng bảo vệ · Kho đồ án
-- **Bộ môn:** Tổng quan toàn khoa · Quản lý đợt đồ án · Duyệt & phân công đề tài · Duyệt đề cương · Tiến độ toàn khoa · Hội đồng & lịch bảo vệ · Kho đồ án · Cấu hình ngưỡng trùng lặp
+- **Giảng viên:** Tổng quan · Sinh viên của tôi · Duyệt đề tài · Đề tài hướng dẫn · Đề xuất đề tài · Duyệt đề cương · Nhận xét tiến độ · Hội đồng bảo vệ · Kho đồ án
+- **Bộ môn:** Tổng quan toàn khoa · Quản lý đợt đồ án · Phân công GVHD · Đề tài toàn khoa (chỉ xem) · Duyệt đề cương · Tiến độ toàn khoa · Hội đồng & lịch bảo vệ · Kho đồ án · Cấu hình ngưỡng trùng lặp
 
 ### 3.4.2. Danh mục màn hình
 
 | Mã MH | Tên màn hình | Vai trò | UC | Tệp nguồn | Ảnh | Trạng thái |
 |---|---|---|---|---|---|---|
 | MH-01 | Đăng nhập | Cả 3 vai trò | UC0.1 | [mh-01.html](mockup/mh-01.html) | [mh-01.png](mockup/mh-01.png) | Đã dựng |
-| MH-02 | Dashboard Sinh viên | Sinh viên | UC0.5, UC4.5 | [mh-02.html](mockup/mh-02.html) | [mh-02.png](mockup/mh-02.png) | Đã dựng |
-| MH-03 | Dashboard Giảng viên | Giảng viên | — | [mh-03.html](mockup/mh-03.html) | [mh-03.png](mockup/mh-03.png) | Đã dựng |
-| MH-04 | Dashboard Bộ môn (kèm tiến độ toàn khoa) | Bộ môn | UC3.1, UC3.4 | [mh-04.html](mockup/mh-04.html) | [mh-04.png](mockup/mh-04.png) | Đã dựng |
+| MH-02 | Dashboard Sinh viên | Sinh viên | UC0.5, UC4.5, UC0.8 | [mh-02.html](mockup/mh-02.html) | [mh-02.png](mockup/mh-02.png) | Đã dựng |
+| MH-03 | Dashboard Giảng viên | Giảng viên | UC1.3, UC0.8 | [mh-03.html](mockup/mh-03.html) | [mh-03.png](mockup/mh-03.png) | Đã dựng |
+| MH-04 | Dashboard Bộ môn (kèm tiến độ toàn khoa) | Bộ môn | UC3.1, UC3.4, UC0.8 | [mh-04.html](mockup/mh-04.html) | [mh-04.png](mockup/mh-04.png) | Đã dựng |
 | MH-05 | Danh sách đề tài (lọc trạng thái/đợt/GV) | Cả 3 vai trò | UC1.4, UC1.2 | [mh-05.html](mockup/mh-05.html) | [mh-05.png](mockup/mh-05.png) | Đã dựng |
-| MH-06 | Đề xuất / đăng ký đề tài có cảnh báo trùng tên | Giảng viên, Sinh viên | UC1.1, UC0.6 | [mh-06.html](mockup/mh-06.html) | [mh-06.png](mockup/mh-06.png) | Đã dựng |
-| MH-07 | Duyệt đề tài và phân công GVHD | Bộ môn | UC1.3 | [mh-07.html](mockup/mh-07.html) | [mh-07.png](mockup/mh-07.png) | Đã dựng |
+| MH-06 | Đề xuất / giao / đăng ký đề tài có cảnh báo trùng tên | Giảng viên, Sinh viên | UC1.1, UC0.6 | [mh-06.html](mockup/mh-06.html) | [mh-06.png](mockup/mh-06.png) | Đã dựng |
+| MH-07 | Duyệt đề tài (GVHD) | Giảng viên | UC1.3 | [mh-07.html](mockup/mh-07.html) | [mh-07.png](mockup/mh-07.png) | Đã dựng |
 | MH-08 | Nộp đề cương / báo cáo cuối (phiên bản, trạng thái kiểm tra) | Sinh viên | UC2.1, UC2.3, UC4.1 | [mh-08.html](mockup/mh-08.html) | [mh-08.png](mockup/mh-08.png) | Đã dựng |
 | MH-09 | Duyệt đề cương có panel kết quả trùng lặp | Giảng viên | UC2.2 | [mh-09.html](mockup/mh-09.html) | [mh-09.png](mockup/mh-09.png) | Đã dựng |
 | MH-10 | Báo cáo tiến độ và nhận xét | Sinh viên, Giảng viên | UC3.2, UC3.3 | [mh-10.html](mockup/mh-10.html) | [mh-10.png](mockup/mh-10.png) | Đã dựng |
@@ -65,6 +65,8 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 | MH-12 | Chấm điểm bảo vệ | Giảng viên | UC4.3 | [mh-12.html](mockup/mh-12.html) | [mh-12.png](mockup/mh-12.png) | Đã dựng |
 | MH-13 | Kho đồ án (tìm kiếm, lọc) | Cả 3 vai trò | UC5.1, UC5.3, UC5.4 | [mh-13.html](mockup/mh-13.html) | [mh-13.png](mockup/mh-13.png) | Đã dựng |
 | MH-14 | Chi tiết kết quả kiểm tra trùng lặp | Giảng viên, Bộ môn | UC0.7 | [mh-14.html](mockup/mh-14.html) | [mh-14.png](mockup/mh-14.png) | Đã dựng |
+| MH-15 | Phân công GVHD | Bộ môn | UC0.8 | [mh-15.html](mockup/mh-15.html) | [mh-15.png](mockup/mh-15.png) | Đã dựng |
+| MH-16 | Sinh viên của tôi (lớp hướng dẫn) | Giảng viên | UC0.8, UC1.3 | [mh-16.html](mockup/mh-16.html) | [mh-16.png](mockup/mh-16.png) | Đã dựng |
 
 ### 3.4.3. MH-01 – Đăng nhập
 
@@ -85,11 +87,11 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 
 ### 3.4.4. MH-02 – Dashboard Sinh viên
 
-**Vai trò:** Sinh viên · **UC:** UC0.5, UC4.5 (tổng hợp UC1–UC3) · **FR:** FR-TB-01, FR-BV-07
+**Vai trò:** Sinh viên · **UC:** UC0.5, UC4.5, UC0.8 (tổng hợp UC1–UC3) · **FR:** FR-TB-01, FR-BV-07, FR-DT-11
 
 **Mục đích:** Cho Sinh viên thấy nhanh trạng thái đề tài, đề cương, tiến độ và lịch/kết quả bảo vệ của chính mình ngay khi đăng nhập.
 
-**Vùng (regions):** Sider Sinh viên (mục "Tổng quan" đang chọn); Header có chuông thông báo (badge số chưa đọc) và tên người dùng; nội dung chính chia lưới 2 cột 4 thẻ: Đề tài của tôi (Tag trạng thái, GVHD), Đề cương (phiên bản, trạng thái duyệt, tỷ lệ trùng lặp gần nhất bằng `ant-progress`), Tiến độ (`ant-steps` các mốc kèm mốc tiếp theo), Lịch và kết quả bảo vệ.
+**Vùng (regions):** Sider Sinh viên (mục "Tổng quan" đang chọn); Header có chuông thông báo (badge số chưa đọc) và tên người dùng; nội dung chính chia lưới 2 cột 4 thẻ: Đề tài của tôi (Tag trạng thái, dòng "Giảng viên hướng dẫn: … (Bộ môn phân công)" — GVHD được phân công ở UC0.8), Đề cương (phiên bản, trạng thái duyệt, tỷ lệ trùng lặp gần nhất bằng `ant-progress`), Tiến độ (`ant-steps` các mốc kèm mốc tiếp theo), Lịch và kết quả bảo vệ.
 
 **Trạng thái (states):**
 - Chuông thông báo mở sẵn (minh họa trong ảnh, NOTF-01): panel `ant-dropdown` liệt kê 3 thông báo chưa đọc, mỗi dòng có tiêu đề và thời gian.
@@ -103,17 +105,19 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 
 ### 3.4.5. MH-03 – Dashboard Giảng viên
 
-**Vai trò:** Giảng viên · **UC:** tổng hợp UC1.3, UC2.2, UC3.3, UC4.3 · **FR:** FR-DC-03, FR-TD-03, FR-BV-04
+**Vai trò:** Giảng viên · **UC:** tổng hợp UC0.8, UC1.3, UC2.2, UC3.3 · **FR:** FR-DT-04, FR-DT-11, FR-DC-03, FR-TD-03
 
-**Mục đích:** Cho Giảng viên hướng dẫn thấy khối lượng công việc đang chờ (đề cương chờ duyệt, báo cáo tiến độ chờ nhận xét, hội đồng tham gia) và đi thẳng tới màn xử lý tương ứng.
+**Mục đích:** Cho Giảng viên hướng dẫn thấy sĩ số lớp hướng dẫn và khối lượng công việc đang chờ (đề tài chờ duyệt, đề cương chờ duyệt, báo cáo tiến độ chờ nhận xét) và đi thẳng tới màn xử lý tương ứng.
 
-**Vùng (regions):** Sider Giảng viên (mục "Tổng quan" đang chọn); Header không mở panel thông báo ở màn này; 4 thẻ `ant-statistic` (SV hướng dẫn, đề cương chờ duyệt, báo cáo tiến độ chờ nhận xét, hội đồng tham gia); bảng "Việc cần xử lý" với cột Loại việc (Tag), Sinh viên/Đề tài, Hạn/Ghi chú, Hành động.
+**Vùng (regions):** Sider Giảng viên (mục "Tổng quan" đang chọn); Header không mở panel thông báo ở màn này; 4 thẻ `ant-statistic` (Sinh viên trong lớp — kèm tên đợt, Đề tài chờ duyệt, Đề cương chờ duyệt, Báo cáo tiến độ chờ nhận xét); bảng "Việc cần xử lý" với cột Loại việc (Tag), Sinh viên/Đề tài, Hạn/Ghi chú, Hành động.
 
 **Trạng thái (states):**
-- Số liệu Statistic phản ánh trực tiếp số dòng cần xử lý; "Đề cương chờ duyệt" tô màu đỏ (`ant-statistic-value-danger`) khi có việc tồn đọng.
+- Số liệu Statistic phản ánh trực tiếp số dòng cần xử lý; "Đề tài chờ duyệt" tô màu đỏ (`ant-statistic-value-danger`) khi có đề tài của sinh viên trong lớp đang chờ GVHD quyết định.
+- "Việc cần xử lý" có 4 loại việc: Duyệt đề tài (mới, UC1.3), Duyệt đề cương, Nhận xét tiến độ, Chấm điểm bảo vệ.
 
 **Tương tác (interactions):**
-- Nút "Duyệt" ở dòng đề cương mở MH-09 (Duyệt đề cương).
+- Thẻ "Sinh viên trong lớp" mở MH-16 (Sinh viên của tôi).
+- Nút "Duyệt" ở dòng "Duyệt đề tài" mở MH-07 (Duyệt đề tài) với Drawer của đề tài đó mở sẵn; nút "Duyệt" ở dòng đề cương mở MH-09 (Duyệt đề cương).
 - Nút "Xem" ở dòng báo cáo tiến độ mở MH-10 (Báo cáo tiến độ và nhận xét).
 - Nút "Chấm điểm" ở dòng hội đồng mở MH-12 (Chấm điểm bảo vệ).
 
@@ -121,17 +125,18 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 
 ### 3.4.6. MH-04 – Dashboard Bộ môn (kèm tiến độ toàn khoa)
 
-**Vai trò:** Bộ môn · **UC:** UC3.1, UC3.4 · **FR:** FR-TD-01, FR-TD-04
+**Vai trò:** Bộ môn · **UC:** UC3.1, UC3.4, UC0.8 · **FR:** FR-TD-01, FR-TD-04, FR-DT-05
 
-**Mục đích:** Cho Bộ môn một màn tổng quan toàn khoa: số đề tài chờ duyệt, SV chưa có đề tài, SV trễ mốc, hội đồng sắp tới, cùng bảng tiến độ chi tiết từng SV và mốc của đợt đang chọn.
+**Mục đích:** Cho Bộ môn một màn tổng quan toàn khoa: số SV chưa được phân công GVHD, số đề tài đang chờ GVHD duyệt (chỉ theo dõi), SV trễ mốc, hội đồng sắp tới, cùng bảng tiến độ chi tiết từng SV và mốc của đợt đang chọn.
 
-**Vùng (regions):** Sider Bộ môn (mục "Tổng quan toàn khoa" đang chọn); Select chọn đợt đồ án ở góc phải tiêu đề; 4 thẻ `ant-statistic`; bảng "Tiến độ Sinh viên" một cột cho mỗi mốc (Mốc 1, Mốc 2, Mốc cuối), mỗi ô là Tag trạng thái; thẻ "Mốc tiến độ của đợt" liệt kê tên mốc + hạn nộp và nút "Thiết lập mốc".
+**Vùng (regions):** Sider Bộ môn (mục "Tổng quan toàn khoa" đang chọn); Select chọn đợt đồ án ở góc phải tiêu đề; 4 thẻ `ant-statistic` (SV chưa phân công GVHD — dạng "4 / 100" kèm liên kết "Phân công GVHD →", Đề tài chờ GVHD duyệt — chú thích "Chỉ xem — GVHD của từng SV duyệt", SV trễ mốc, Hội đồng sắp tới); bảng "Tiến độ Sinh viên" một cột cho mỗi mốc (Mốc 1, Mốc 2, Mốc cuối), mỗi ô là Tag trạng thái; thẻ "Mốc tiến độ của đợt" liệt kê tên mốc + hạn nộp và nút "Thiết lập mốc".
 
 **Trạng thái (states):**
 - Cột mốc dùng 4 Tag: `ant-tag-success` "Đúng hạn", `ant-tag-error` "Trễ mốc" (đỏ, đánh dấu tự động theo PROG-03 khi qua hạn mà SV chưa nộp), `ant-tag-processing` "Chưa đến hạn" (mốc hiện tại của SV chưa qua hạn) và `ant-tag-default` "Chưa đến hạn" (mốc tương lai, phân biệt bằng thứ tự cột).
 - Bảng có phân trang (`ant-pagination`) vì hiển thị tối đa một trang trong 100 SV.
 
 **Tương tác (interactions):**
+- Thẻ "SV chưa phân công GVHD" (tô đỏ khi khác 0) mở MH-15 (Phân công GVHD); thẻ "Đề tài chờ GVHD duyệt" chỉ để theo dõi — Bộ môn không duyệt đề tài (UC1.3 do GVHD thực hiện).
 - "Thiết lập mốc" mở form thêm/sửa mốc tiến độ (UC3.1, màn CRUD phụ ngoài bộ mockup chính theo D-14).
 - Đổi Select đợt đồ án tải lại toàn bộ số liệu và bảng theo đợt mới.
 
@@ -141,31 +146,31 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 
 **Vai trò:** Sinh viên, Giảng viên, Bộ môn · **UC:** UC1.4, UC1.2 · **FR:** FR-DT-07, FR-DT-03
 
-**Mục đích:** Cho cả 3 vai trò xem và lọc danh sách đề tài theo đợt, trạng thái, GVHD và lĩnh vực; là điểm vào để Sinh viên đăng ký một đề tài do GV đề xuất còn trống (UC1.2).
+**Mục đích:** Cho cả 3 vai trò xem và lọc danh sách đề tài trong phạm vi của mình theo đợt, trạng thái, GVHD và lĩnh vực; là điểm vào để Sinh viên đăng ký một đề tài do chính GVHD của mình mở cho lớp (UC1.2).
 
-**Vùng (regions):** Sider theo vai trò đang đăng nhập (ảnh minh họa dùng Sider Sinh viên, mục "Đề xuất / Đăng ký đề tài"); `ant-filter-bar` gồm 5 bộ lọc (Đợt đồ án, Trạng thái, Giảng viên hướng dẫn, Lĩnh vực, ô tìm kiếm tự do); bảng liệt kê Tên đề tài, Lĩnh vực, Người đề xuất, GVHD, Sinh viên, Trạng thái (Tag), Hành động; `ant-pagination`; nút chính "Đề xuất đề tài" ở góc phải tiêu đề.
+**Vùng (regions):** Sider theo vai trò đang đăng nhập (ảnh minh họa dùng Sider Sinh viên, mục "Đề xuất / Đăng ký đề tài"); `ant-filter-bar` gồm 5 bộ lọc (Đợt đồ án, Trạng thái, Giảng viên hướng dẫn, Lĩnh vực, ô tìm kiếm tự do); `ant-alert-info` dưới thanh lọc nhắc phạm vi hiển thị ("Bạn chỉ thấy đề tài của mình và đề tài do GVHD của bạn (…) mở cho lớp đăng ký. Đăng ký thành công là đề tài chuyển Đã phân công ngay."); bảng liệt kê Tên đề tài, Lĩnh vực, Người đề xuất, GVHD, Sinh viên, Trạng thái (Tag), Hành động; `ant-pagination`; nút chính "Đề xuất đề tài" ở góc phải tiêu đề.
 
 **Trạng thái (states):**
-- 5 trạng thái đề tài theo FR-DT-07: `ant-tag-default` Nháp, `ant-tag-processing` Chờ duyệt, `ant-tag-warning` Đã duyệt (còn trống, mở đăng ký), `ant-tag-error` Từ chối, `ant-tag-success` Đã phân công.
-- Cột Hành động đổi theo trạng thái và vai trò xem: SV thấy nút chính "Đăng ký" trên đề tài "Đã duyệt" còn trống, các trạng thái khác chỉ có "Xem" (A1, UC1.4).
+- 5 trạng thái đề tài theo FR-DT-07: `ant-tag-default` Nháp, `ant-tag-processing` Chờ duyệt, `ant-tag-warning` Mở cho lớp đăng ký (mã `DA_DUYET`), `ant-tag-error` Từ chối, `ant-tag-success` Đã phân công.
+- Cột Hành động đổi theo trạng thái và vai trò xem: SV thấy nút chính "Đăng ký" trên đề tài "Mở cho lớp đăng ký" của GVHD mình, các trạng thái khác chỉ có "Xem"; bộ lọc GVHD của SV chỉ có GVHD của mình; GV chỉ thấy đề tài mình hướng dẫn/đề xuất; Bộ môn thấy toàn bộ, chỉ xem (A1, UC1.4).
 
 **Tương tác (interactions):**
 - "Đề xuất đề tài" mở MH-06.
-- "Đăng ký" trên một đề tài "Đã duyệt" còn trống thực hiện UC1.2 (đăng ký đề tài có sẵn).
+- "Đăng ký" trên một đề tài "Mở cho lớp đăng ký" thực hiện UC1.2; thành công thì đề tài chuyển "Đã phân công" ngay.
 - "Xem" mở chi tiết đề tài (không có mockup riêng, dùng lại bố cục MH-06 ở chế độ chỉ đọc).
 
 ![Hình 3.15 – MH-05 · Danh sách đề tài](mockup/mh-05.png)
 
 ### 3.4.8. MH-06 – Đề xuất đề tài
 
-**Vai trò:** Giảng viên, Sinh viên · **UC:** UC1.1, UC0.6 · **FR:** FR-DT-01, FR-DT-02
+**Vai trò:** Giảng viên, Sinh viên · **UC:** UC1.1, UC0.6 · **FR:** FR-DT-01, FR-DT-02, FR-DT-10
 
 **Mục đích:** Cho phép người dùng nhập một đề xuất đề tài mới và thấy ngay cảnh báo nếu có đề tài tương tự trong kho, trước khi quyết định sửa tên hay vẫn gửi.
 
 **Vùng (regions):**
 - Sider trái: menu điều hướng theo vai trò (mục "Đề xuất / Đăng ký đề tài" đang chọn)
 - Header: breadcrumb "Quản lý đề tài / Đề xuất đề tài", chuông thông báo có badge số chưa đọc, tên người dùng
-- Nội dung chính: form một cột trong `ant-card` gồm Đợt đồ án, Tên đề tài, cảnh báo trùng lặp (nếu có), Lĩnh vực, Mô tả, và hai nút hành động cuối form
+- Nội dung chính: form một cột trong `ant-card` gồm Đợt đồ án, Giảng viên hướng dẫn (chỉ đọc với Sinh viên, ghi chú "Bộ môn đã phân công — đề tài gửi tới GVHD duyệt (UC1.3)"), Tên đề tài, cảnh báo trùng lặp (nếu có), Lĩnh vực, Mô tả, và hai nút hành động cuối form
 
 **Trạng thái (states):**
 - Chưa nhập đủ trường bắt buộc: nút "Gửi đề xuất" vẫn hiển thị nhưng submit sẽ báo lỗi validate tại từng trường (không hiển thị ở bản tĩnh này)
@@ -175,28 +180,30 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 **Tương tác (interactions):**
 - "Sửa tên đề tài" đưa focus lại về ô Tên đề tài để người dùng chỉnh sửa (luồng thay thế A1, UC1.1)
 - "Vẫn gửi đề xuất" đóng cảnh báo và tiếp tục điền các trường còn lại (luồng thay thế A2, UC1.1)
-- "Gửi đề xuất" tạo đề tài trạng thái "Chờ duyệt" (bước TB-DT-06)
+- "Gửi đề xuất" của Sinh viên tạo đề tài trạng thái "Chờ duyệt" gửi tới GVHD (bước TB-DT-06a); SV chưa được phân công GVHD nhận lỗi "Bạn chưa được Bộ môn phân công giảng viên hướng dẫn trong đợt này" (UC1.1 – E3)
+- Biến thể Giảng viên (khối `mockup-state-panel` dưới ảnh chính): Select "Giao cho sinh viên (tùy chọn)" chỉ liệt kê sinh viên trong lớp hướng dẫn của GV ở đợt đó, mặc định "— Để trống: Mở cho lớp đăng ký —"; chọn SV thì khi gửi đề tài chuyển "Đã phân công" ngay (TB-DT-06b), để trống thì chuyển "Mở cho lớp đăng ký" (TB-DT-06c)
 
 ![Hình 3.16 – MH-06 · Đề xuất đề tài](mockup/mh-06.png)
 
-### 3.4.9. MH-07 – Duyệt đề tài và phân công GVHD
+### 3.4.9. MH-07 – Duyệt đề tài
 
-**Vai trò:** Bộ môn · **UC:** UC1.3 · **FR:** FR-DT-04, FR-DT-05
+**Vai trò:** Giảng viên (GVHD) · **UC:** UC1.3 · **FR:** FR-DT-04
 
-**Mục đích:** Cho Bộ môn xem chi tiết một đề tài đang "Chờ duyệt" kèm kết quả kiểm tra tên đã lưu từ lúc đề xuất, rồi quyết định duyệt kèm phân công GVHD hoặc từ chối kèm lý do.
+**Mục đích:** Cho GVHD xem chi tiết một đề tài đang "Chờ duyệt" do sinh viên trong lớp hướng dẫn của mình đề xuất, kèm kết quả kiểm tra tên đã lưu từ lúc đề xuất, rồi quyết định duyệt hoặc từ chối kèm lý do. GVHD đã được Bộ môn phân công từ đầu đợt (UC0.8) nên màn hình không còn bước chọn GVHD.
 
-**Vùng (regions):** Sider Bộ môn (mục "Duyệt & phân công đề tài" đang chọn); bảng "Đề tài chờ duyệt" (Tên đề tài, Người đề xuất, Lĩnh vực, Ngày đề xuất, Kiểm tra tên, Hành động); Drawer phải mở sẵn cho dòng đang xem, gồm thông tin đề tài, `ant-alert-warning` chứa bảng kết quả kiểm tra tên đã lưu ở UC1.1 (top 3 đề tài tương tự kèm %), Select "Giảng viên hướng dẫn", footer Drawer có "Từ chối" / "Duyệt và phân công".
+**Vùng (regions):** Sider Giảng viên (mục "Duyệt đề tài" đang chọn); bảng "Đề tài chờ duyệt (lớp hướng dẫn của tôi)" (Tên đề tài, Sinh viên — họ tên và MSSV, Lĩnh vực, Ngày gửi, Kiểm tra tên, Hành động); Drawer phải "Chi tiết đề tài chờ duyệt" mở sẵn cho dòng đang xem, gồm thông tin đề tài (sinh viên đề xuất, lĩnh vực, đợt), mô tả, `ant-alert-warning` chứa bảng kết quả kiểm tra tên đã lưu ở UC1.1 (top 3 đề tài tương tự kèm %), `ant-alert-info` "Bạn là GVHD của sinh viên này trong đợt (Bộ môn phân công, UC0.8) — duyệt là đề tài chuyển Đã phân công ngay", footer Drawer có "Từ chối" / "Duyệt đề tài".
 
 **Trạng thái (states):**
-- Kiểm tra tên: `ant-tag-success` "Không trùng", `ant-tag-warning` "N đề tài tương tự", `ant-tag-default` "Chưa kiểm tra" (UC1.1 - E1, dịch vụ AI không phản hồi lúc đề xuất).
-- Hộp thoại xác nhận từ chối (minh họa bên dưới ảnh chính, UC1.3 - A1): `ant-modal` với TextArea "Lý do từ chối" bắt buộc và nút "Xác nhận từ chối".
+- Kiểm tra tên: `ant-tag-success` "Không trùng", `ant-tag-warning` "N đề tài tương tự", `ant-tag-default` "Chưa kiểm tra" (UC1.1 - E2, dịch vụ AI không phản hồi lúc đề xuất).
+- Hộp thoại xác nhận từ chối (minh họa bên dưới ảnh chính, UC1.3 - A1): `ant-modal` với TextArea "Lý do từ chối" bắt buộc, ghi chú "Sinh viên nhận thông báo kèm lý do và có thể đề xuất đề tài mới gửi lại cho chính bạn (GVHD)", nút "Xác nhận từ chối".
+- Bảng chỉ chứa đề tài của sinh viên trong lớp hướng dẫn của giảng viên đang đăng nhập; Bộ môn và giảng viên khác không truy cập được màn này (403, UC1.3 - E1).
 
 **Tương tác (interactions):**
-- "Duyệt và phân công" chuyển đề tài sang "Đã phân công", gửi thông báo in-app cho SV và GV được phân công.
-- "Từ chối" mở Modal yêu cầu nhập lý do bắt buộc; "Xác nhận từ chối" chuyển đề tài sang "Từ chối" kèm lý do.
-- Select "Giảng viên hướng dẫn" vẫn yêu cầu Bộ môn xác nhận thủ công kể cả khi GV đề xuất là người phù hợp duy nhất (UC1.3 - E1).
+- "Duyệt đề tài" chuyển đề tài sang "Đã phân công" và gửi thông báo in-app cho sinh viên.
+- "Từ chối" mở Modal yêu cầu nhập lý do bắt buộc; "Xác nhận từ chối" chuyển đề tài sang "Từ chối" kèm lý do và thông báo cho sinh viên.
+- Màn được mở từ menu, từ dòng "Duyệt đề tài" trong "Việc cần xử lý" (MH-03), từ nút "Duyệt đề tài" ở MH-16 hoặc từ thông báo "đề tài chờ duyệt" — khi mở kèm mã đề tài, Drawer của đề tài đó mở sẵn.
 
-![Hình 3.17 – MH-07 · Duyệt đề tài và phân công GVHD](mockup/mh-07.png)
+![Hình 3.17 – MH-07 · Duyệt đề tài](mockup/mh-07.png)
 
 ### 3.4.10. MH-08 – Nộp đề cương / báo cáo cuối
 
@@ -325,3 +332,40 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 - Màn được mở từ link "Xem chi tiết" ở MH-09 và từ Tag "Hoàn tất - N%" ở MH-08/lịch sử phiên bản.
 
 ![Hình 3.24 – MH-14 · Chi tiết kết quả kiểm tra trùng lặp](mockup/mh-14.png)
+
+### 3.4.17. MH-15 – Phân công GVHD
+
+**Vai trò:** Bộ môn · **UC:** UC0.8 · **FR:** FR-DT-05, FR-DT-08, FR-DT-09
+
+**Mục đích:** Cho Bộ môn phân công mỗi sinh viên của đợt cho đúng một GVHD ngay đầu đợt, cân đối số sinh viên mỗi giảng viên hướng dẫn, và theo dõi sinh viên chưa được phân công.
+
+**Vùng (regions):** Sider Bộ môn (mục "Phân công GVHD" đang chọn); góc phải tiêu đề: Select đợt đồ án ("Đợt K22A — đang mở"), nút "Import CSV" và nút chính "Lưu phân công"; 4 thẻ `ant-statistic` (Tổng sinh viên, Đã phân công, Chưa phân công — tô đỏ, Giảng viên hướng dẫn); `ant-filter-bar` (Từ khóa — MSSV hoặc họ tên, GVHD, Tình trạng: Tất cả/Đã phân công/Chưa phân công); thanh thao tác hàng loạt "Đã chọn N sinh viên → Gán cho GVHD [Select] [Gán hàng loạt]"; bảng sinh viên (ô chọn, MSSV, Họ tên, Lớp, GVHD — Select ngay trên dòng hoặc "— Chọn GVHD —", Đề tài hiện tại — Tag "Chưa có"/"Chờ duyệt"/"Đã phân công") kèm `ant-pagination`; thẻ bên phải "Tải theo giảng viên" (Giảng viên, Số SV).
+
+**Trạng thái (states):**
+- Dòng sinh viên đã có đề tài "Đã phân công": Select GVHD bị khóa kèm ghi chú "Khóa — đã có đề tài Đã phân công" (BR-PC-03).
+- Hộp thoại "Import phân công từ CSV" (minh họa trong `mockup-state-panel` dưới ảnh chính, UC0.8 - A1): hướng dẫn định dạng `ma_so_sinh_vien,ma_giang_vien` (dòng tiêu đề tùy chọn, dấu phẩy hoặc chấm phẩy), `ant-upload-dragger`, và `ant-alert-warning` kết quả "Đã lưu N dòng, M dòng lỗi" liệt kê từng dòng lỗi kèm số dòng và lý do.
+
+**Tương tác (interactions):**
+- Đổi Select GVHD trên một dòng hoặc dùng "Gán hàng loạt" cho các dòng đã chọn chỉ thay đổi trên màn hình; "Lưu phân công" gửi toàn bộ thay đổi — nếu có sinh viên vi phạm ràng buộc, cả lần lưu bị từ chối kèm danh sách lỗi (UC0.8 - E1); thành công thì thống kê, tải theo giảng viên được cập nhật và SV/GV nhận thông báo.
+- "Import CSV" lưu các dòng hợp lệ ngay và trả về các dòng lỗi để Bộ môn sửa tệp và import lại.
+- Bộ lọc Tình trạng "Chưa phân công" là đích của thẻ "SV chưa phân công GVHD" trên MH-04.
+
+![Hình 3.25 – MH-15 · Phân công GVHD](mockup/mh-15.png)
+
+### 3.4.18. MH-16 – Sinh viên của tôi
+
+**Vai trò:** Giảng viên · **UC:** UC0.8 (A4), UC1.3, UC1.1 (A3) · **FR:** FR-DT-11, FR-DT-04, FR-DT-10
+
+**Mục đích:** Cho Giảng viên xem lớp hướng dẫn Bộ môn đã phân công cho mình trong từng đợt đang mở, nắm tình trạng đề tài của từng sinh viên và đi thẳng tới thao tác duyệt hoặc giao đề tài.
+
+**Vùng (regions):** Sider Giảng viên (mục "Sinh viên của tôi" đang chọn); `ant-alert-info` "Danh sách do Bộ môn phân công đầu đợt (UC0.8). Đề tài bạn mở cho lớp đăng ký chỉ sinh viên trong danh sách này nhìn thấy."; mỗi đợt đang mở là một thẻ (tiêu đề "Đợt K22A — 6 sinh viên") chứa bảng MSSV, Họ tên, Lớp, Đề tài hiện tại, Trạng thái đề tài, Hành động.
+
+**Trạng thái (states):**
+- Trạng thái đề tài dùng Tag: "Chưa có đề tài", "Chờ duyệt", "Đã phân công", "Từ chối".
+
+**Tương tác (interactions):**
+- "Duyệt đề tài" (nút chính, ở dòng "Chờ duyệt") mở MH-07 với Drawer của đề tài đó.
+- "Giao đề tài" (ở dòng chưa có đề tài đang hoạt động, kể cả sau "Từ chối") mở MH-06 ở biến thể Giảng viên với sinh viên đó được chọn sẵn (UC1.1 - A3).
+- "Xem" mở chi tiết đề tài của sinh viên.
+
+![Hình 3.26 – MH-16 · Sinh viên của tôi](mockup/mh-16.png)

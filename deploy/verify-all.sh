@@ -153,7 +153,7 @@ d = {
     "ten_model": h.get("ten_model"),
 }
 checks = [
-    ("DATA-01", sv == 100 and gv == 30 and bm >= 1, f"{sv} sinh viên, {gv} giảng viên, {bm} Bộ môn (kỳ vọng 100 / 30 / >= 1)"),
+    ("DATA-01", sv == 580 and gv == 70 and bm >= 1, f"{sv} sinh viên, {gv} giảng viên, {bm} Bộ môn (kỳ vọng 580 / 70 / >= 1)"),
     ("DATA-02", kho_n == 300 and kho_idx == 300 and kho_khoa >= 2 and d["index_tieu_de"] >= 300 and d["thieu_embedding"] == 0,
      f"{kho_n} đề tài kho IMPORT K18–K22 ({kho_khoa} khóa), {kho_idx} DA_INDEX; /health index_size_tieu_de={d['index_tieu_de']}, thieu_embedding={d['thieu_embedding']}"),
     ("DATA-03", n_files == 50 and len(cap) == 25 and int(linked) == 25 and d["index_tai_lieu"] > 0 and len(d["cap_theo_loai"]) == 4,
@@ -335,7 +335,7 @@ run_step smoke "Smoke test qua Apache HTTPS" 300 "bash deploy/smoke-test.sh"
 if [ "$MODE" = "full" ]; then
   run_step pytest-backend "Pytest Web API (backend)" 1800 "uv --directory backend run pytest -q"
   run_step pytest-ai "Pytest dịch vụ AI (ai-service)" 1800 "uv --directory ai-service run pytest -q"
-  run_step e2e-uc1 "E2E UC1 — đề xuất/đăng ký/duyệt đề tài" 600 "bash deploy/e2e-uc1.sh"
+  run_step e2e-uc1 "E2E UC1 — phân công GVHD, đề xuất/đăng ký/GVHD duyệt đề tài" 600 "bash deploy/e2e-uc1.sh"
   run_step e2e-uc2-5 "E2E UC2–UC5 — đề cương, tiến độ, bảo vệ, lưu kho" 900 "bash deploy/e2e-uc2-5.sh"
   run_step e2e-ai "E2E dịch vụ AI thật (SC1–SC5)" 1200 "bash deploy/e2e-ai.sh"
   if [ "$REPORT" = "1" ]; then
@@ -449,7 +449,7 @@ CHI_TIEU = {
     "NFR-14": "NFC và NFD cho cùng kết quả so sánh",
     "NFR-15": "Client tĩnh, Apache proxy /api, ProxyTimeout > 30 s",
     "NFR-16": "Chrome/Edge desktop, khung 1440 px",
-    "NFR-17": "100 tài khoản SV + 30 tài khoản GV",
+    "NFR-17": "580 tài khoản SV + 70 tài khoản GV",
     "NFR-18": "300 đề tài nhiều khóa, 100% đã ingest vào dịch vụ AI",
     "NFR-19": "50 file thử nghiệm, đủ 4 loại trùng + bảng kiểm chứng",
 }
@@ -475,7 +475,7 @@ def ghep(ma, mas, cach, kq_suite):
 
 ok_txt = lambda mas: "; ".join(f"{m}: {status_of.get(m, 'không chạy')}" for m in mas)
 ghep("NFR-04", ["pytest-backend", "smoke", "e2e-uc1", "e2e-uc2-5"],
-     "403 chéo vai trò trên mọi nhóm route (smoke-test), SV/GV khác gọi route không thuộc quyền (e2e-uc1 bước g, e2e-uc2-5), pytest RBAC/ownership",
+     "403 chéo vai trò trên mọi nhóm route (smoke-test), SV/Bộ môn/GV không phải GVHD duyệt đề tài, SV lớp khác xem/đăng ký đề tài (e2e-uc1 bước g, h), SV/GV khác gọi route không thuộc quyền (e2e-uc2-5), pytest RBAC/ownership",
      ok_txt(["pytest-backend", "smoke", "e2e-uc1", "e2e-uc2-5"]))
 ghep("NFR-05", ["pytest-backend"],
      "pytest test_auth::test_locked_account_cannot_login_or_refresh, test_accounts_rbac::test_bomon_lock_blocks_login_and_unlock_restores_it",

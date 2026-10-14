@@ -26,7 +26,7 @@ else Timeout hoặc lỗi (UC0.6 — E1/E2)
   WebAPI -> DBCore : INSERT ket_qua_kiem_tra_trung_lap\n(trang_thai=LOI, ghi "chưa kiểm tra")
   note right of WebAPI
     Không chặn đề xuất đề tài — UC1.1 tiếp tục
-    bình thường, Bộ môn thấy trạng thái "chưa
+    bình thường, GVHD thấy trạng thái "chưa
     kiểm tra" khi duyệt (UC1.3).
   end note
 end

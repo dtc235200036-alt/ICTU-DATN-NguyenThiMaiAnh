@@ -74,12 +74,19 @@ export default function BmDashboard() {
       ) : (
         <>
           <div style={{ display: 'flex', gap: 16, marginBottom: 20, flexWrap: 'wrap' }}>
-            <Card style={{ minWidth: 220, cursor: 'pointer' }} onClick={() => navigate('/duyet-de-tai')}>
+            <Card style={{ minWidth: 220, cursor: 'pointer' }} onClick={() => navigate('/phan-cong-gvhd')}>
               <Statistic
-                title="Đề tài chờ duyệt"
-                value={data.de_tai_cho_duyet}
-                valueStyle={data.de_tai_cho_duyet > 0 ? { color: '#cf1322' } : undefined}
+                title="SV chưa phân công GVHD"
+                value={data.sv_chua_phan_cong}
+                suffix={`/ ${data.tong_sinh_vien}`}
+                valueStyle={data.sv_chua_phan_cong > 0 ? { color: '#cf1322' } : undefined}
               />
+            </Card>
+            <Card
+              style={{ minWidth: 220, cursor: 'pointer' }}
+              onClick={() => navigate('/de-tai?trang_thai=CHO_DUYET')}
+            >
+              <Statistic title="Đề tài chờ GVHD duyệt" value={data.de_tai_cho_duyet} />
             </Card>
             <Card style={{ minWidth: 220 }}>
               <Statistic
@@ -157,15 +164,15 @@ export default function BmDashboard() {
           </Row>
 
           <Card
-            title="Đề tài chờ duyệt mới nhất"
-            extra={<a onClick={() => navigate('/duyet-de-tai')}>Xem tất cả</a>}
+            title="Đề tài chờ GVHD duyệt mới nhất"
+            extra={<a onClick={() => navigate('/de-tai?trang_thai=CHO_DUYET')}>Xem tất cả</a>}
           >
             <List
               locale={{ emptyText: 'Không có đề tài chờ duyệt' }}
               dataSource={data.cho_duyet_moi_nhat}
               renderItem={(item) => (
                 <List.Item>
-                  <span>{item.ten_de_tai}</span>
+                  <a onClick={() => navigate(`/de-tai/${item.id}`)}>{item.ten_de_tai}</a>
                   <span style={{ color: 'rgba(0,0,0,0.45)' }}>{item.nguoi_de_xuat}</span>
                 </List.Item>
               )}

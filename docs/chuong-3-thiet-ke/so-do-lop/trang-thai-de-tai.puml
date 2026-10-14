@@ -1,31 +1,34 @@
 @startuml trang-thai-de-tai
 hide empty description
 
+state "DA_DUYET\n(Mở cho lớp đăng ký)" as DA_DUYET
+
 [*] --> NHAP : GV hoặc SV tạo đề tài (lưu nháp)
 
-NHAP --> CHO_DUYET : Người đề xuất gửi đề tài\n(UC1.1 — đợt đồ án đang mở)
+NHAP --> CHO_DUYET : SV gửi đề xuất\n(đợt đang mở, SV đã có GVHD — UC1.1)
+NHAP --> DA_PHAN_CONG : GV gửi, đã chọn SV trong lớp\n("GV giao đề tài" — UC1.1 A3)
+NHAP --> DA_DUYET : GV gửi, chưa chọn SV\n(UC1.1 A4)
 
-CHO_DUYET --> DA_DUYET : Bộ môn duyệt\n(đề tài GV đề xuất, chưa có SV — UC1.3)
-CHO_DUYET --> DA_PHAN_CONG : Bộ môn duyệt + phân công GVHD\n(đề tài đã có SV — UC1.3)
-CHO_DUYET --> TU_CHOI : Bộ môn từ chối kèm lý do\n(UC1.3)
+CHO_DUYET --> DA_PHAN_CONG : GVHD duyệt\n(UC1.3)
+CHO_DUYET --> TU_CHOI : GVHD từ chối kèm lý do\n(UC1.3 A1)
 
-DA_DUYET --> CHO_DUYET : SV đăng ký đề tài còn trống\n(UC1.2)
+DA_DUYET --> DA_PHAN_CONG : SV cùng lớp hướng dẫn\nđăng ký thành công (UC1.2)
 
 DA_PHAN_CONG --> [*]
 TU_CHOI --> [*]
 
 note right of DA_DUYET
-  Đường GV đề xuất: duyệt -> còn trống (đề tài
-  hiển thị cho SV đăng ký, UC1.2) -> SV đăng ký
-  -> quay lại Chờ duyệt để Bộ môn xác nhận/
-  phân công GVHD chính thức -> Đã phân công.
+  Chỉ SV trong lớp hướng dẫn của GV
+  (Bộ môn phân công ở UC0.8) trong đợt
+  đó nhìn thấy và đăng ký được; đăng ký
+  thắng là Đã phân công ngay, không duyệt.
 end note
 
-note left of DA_PHAN_CONG
-  Đường SV đề xuất: đề tài đã có SV ngay từ đầu,
-  Bộ môn duyệt và phân công GVHD trong cùng một
-  thao tác (UC1.3) -> Đã phân công trực tiếp,
-  không qua trạng thái Đã duyệt.
+note left of CHO_DUYET
+  Chỉ đề tài SV đề xuất mới qua Chờ duyệt;
+  người duyệt là GVHD của SV (không còn
+  bước Bộ môn duyệt/chọn GVHD). Sau Từ chối
+  SV đề xuất lại, vẫn gửi tới GVHD đó.
 end note
 
 @enduml

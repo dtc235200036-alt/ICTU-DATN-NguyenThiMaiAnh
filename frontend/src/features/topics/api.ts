@@ -108,6 +108,8 @@ export interface TopicFormInput {
   ten_de_tai: string
   mo_ta?: string | null
   linh_vuc?: string | null
+  // UC0.8: GV giao thẳng cho SV trong lớp mình; null = mở cho lớp đăng ký.
+  sinh_vien_id?: number | null
 }
 
 export interface TopicCreateInput extends TopicFormInput {
@@ -200,7 +202,7 @@ export function useSubmitTopic() {
   })
 }
 
-// UC1.2: SV đăng ký một đề tài GV đã đề xuất còn trống (MH-05/MH-06 chi tiết).
+// UC1.2/UC0.8: SV đăng ký đề tài GVHD của mình mở cho lớp -> Đã phân công ngay.
 export function useRegisterTopic() {
   const queryClient = useQueryClient()
   return useMutation({

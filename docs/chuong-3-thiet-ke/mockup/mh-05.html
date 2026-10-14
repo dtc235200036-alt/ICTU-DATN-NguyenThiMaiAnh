@@ -88,7 +88,7 @@
               <option>Tất cả</option>
               <option>Nháp</option>
               <option>Chờ duyệt</option>
-              <option>Đã duyệt</option>
+              <option>Mở cho lớp đăng ký</option>
               <option>Từ chối</option>
               <option>Đã phân công</option>
             </select>
@@ -96,9 +96,7 @@
           <div class="ant-filter-item">
             <label for="f-gv">Giảng viên hướng dẫn</label>
             <select class="ant-select-selector" id="f-gv">
-              <option>Tất cả</option>
-              <option>ThS. Hà Thị Thanh Vân</option>
-              <option>TS. Ngô Quang Huy</option>
+              <option>ThS. Hà Thị Thanh Vân (GVHD của bạn)</option>
             </select>
           </div>
           <div class="ant-filter-item">
@@ -112,6 +110,15 @@
           <div class="ant-filter-item" style="min-width:240px;">
             <label for="f-search">Tìm kiếm</label>
             <input class="ant-input" id="f-search" type="text" placeholder="Tìm theo tên đề tài...">
+          </div>
+        </div>
+
+        <div class="ant-alert ant-alert-info" role="note" style="margin:0 0 16px;">
+          <span class="ant-alert-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+          </span>
+          <div class="ant-alert-content">
+            <p class="ant-alert-message">Bạn chỉ thấy đề tài của mình và đề tài do GVHD của bạn (ThS. Hà Thị Thanh Vân) mở cho lớp đăng ký. Đăng ký thành công là đề tài chuyển Đã phân công ngay.</p>
           </div>
         </div>
 
@@ -129,56 +136,38 @@
           </thead>
           <tbody>
             <tr>
-              <td>Hệ thống hỗ trợ tra cứu tài liệu học thuật bằng tìm kiếm ngữ nghĩa</td>
-              <td>AI &amp; NLP</td>
-              <td>Đinh Văn Sinh Viên</td>
-              <td>ThS. Hà Thị Thanh Vân</td>
-              <td>Đinh Văn Sinh Viên</td>
-              <td><span class="ant-tag ant-tag-success">Đã phân công</span></td>
-              <td><a class="ant-btn ant-btn-default" href="#" style="text-decoration:none;">Xem</a></td>
-            </tr>
-            <tr>
               <td>Ứng dụng gợi ý học liệu cá nhân hóa</td>
               <td>AI &amp; NLP</td>
               <td>ThS. Hà Thị Thanh Vân</td>
               <td>ThS. Hà Thị Thanh Vân</td>
-              <td>Trần Thị Mẫu B</td>
-              <td><span class="ant-tag ant-tag-success">Đã phân công</span></td>
-              <td><a class="ant-btn ant-btn-default" href="#" style="text-decoration:none;">Xem</a></td>
-            </tr>
-            <tr>
-              <td>Hệ thống quản lý kho vận bằng mã QR</td>
-              <td>Hệ thống thông tin</td>
-              <td>TS. Ngô Quang Huy</td>
-              <td>TS. Ngô Quang Huy</td>
               <td>—</td>
-              <td><span class="ant-tag ant-tag-warning">Đã duyệt</span></td>
+              <td><span class="ant-tag ant-tag-warning">Mở cho lớp đăng ký</span></td>
               <td><a class="ant-btn ant-btn-primary" href="#" style="text-decoration:none;">Đăng ký</a></td>
             </tr>
             <tr>
-              <td>Xây dựng chatbot tư vấn tuyển sinh</td>
+              <td>Hệ thống hỗ trợ tra cứu tài liệu học thuật bằng tìm kiếm ngữ nghĩa</td>
               <td>AI &amp; NLP</td>
-              <td>Phạm Văn Mẫu E</td>
+              <td>ThS. Hà Thị Thanh Vân</td>
+              <td>ThS. Hà Thị Thanh Vân</td>
               <td>—</td>
-              <td>Phạm Văn Mẫu E</td>
-              <td><span class="ant-tag ant-tag-processing">Chờ duyệt</span></td>
-              <td><a class="ant-btn ant-btn-default" href="#" style="text-decoration:none;">Xem</a></td>
+              <td><span class="ant-tag ant-tag-warning">Mở cho lớp đăng ký</span></td>
+              <td><a class="ant-btn ant-btn-primary" href="#" style="text-decoration:none;">Đăng ký</a></td>
             </tr>
             <tr>
               <td>Phân tích cảm xúc bình luận mạng xã hội tiếng Việt</td>
               <td>AI &amp; NLP</td>
-              <td>Lê Thị Mẫu D</td>
-              <td>—</td>
-              <td>—</td>
+              <td>Đinh Văn Sinh Viên</td>
+              <td>ThS. Hà Thị Thanh Vân</td>
+              <td>Đinh Văn Sinh Viên</td>
               <td><span class="ant-tag ant-tag-error">Từ chối</span></td>
               <td><a class="ant-btn ant-btn-default" href="#" style="text-decoration:none;">Xem</a></td>
             </tr>
             <tr>
-              <td>Hệ thống giám sát an ninh mạng nội bộ</td>
-              <td>An toàn thông tin</td>
-              <td>TS. Ngô Quang Huy</td>
-              <td>—</td>
-              <td>—</td>
+              <td>Chatbot hỗ trợ tra cứu quy chế đào tạo</td>
+              <td>AI &amp; NLP</td>
+              <td>Đinh Văn Sinh Viên</td>
+              <td>ThS. Hà Thị Thanh Vân</td>
+              <td>Đinh Văn Sinh Viên</td>
               <td><span class="ant-tag ant-tag-default">Nháp</span></td>
               <td><a class="ant-btn ant-btn-default" href="#" style="text-decoration:none;">Xem</a></td>
             </tr>
@@ -187,10 +176,6 @@
 
         <div class="ant-pagination">
           <span class="ant-pagination-item ant-pagination-item-active">1</span>
-          <span class="ant-pagination-item">2</span>
-          <span class="ant-pagination-item">3</span>
-          <span class="ant-pagination-item">…</span>
-          <span class="ant-pagination-item">15</span>
         </div>
       </div>
     </main>

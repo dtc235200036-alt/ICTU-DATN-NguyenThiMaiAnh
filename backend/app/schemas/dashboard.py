@@ -57,6 +57,8 @@ class SvDefenseOut(BaseModel):
 
 class SvDashboardOut(BaseModel):
     de_tai: SvTopicOut | None = None
+    # UC0.8: GVHD Bộ môn phân công trong đợt đang mở (None = chưa phân công).
+    giang_vien_huong_dan: str | None = None
     co_dot_dang_mo: bool
     de_cuong: SvOutlineOut | None = None
     tien_do: list[SvMilestoneStep] = []
@@ -71,7 +73,7 @@ class GvTopicItem(BaseModel):
     sinh_vien: str | None = None
 
 
-LoaiViec = Literal["DUYET_DE_CUONG", "NHAN_XET_TIEN_DO", "CHAM_DIEM"]
+LoaiViec = Literal["DUYET_DE_TAI", "DUYET_DE_CUONG", "NHAN_XET_TIEN_DO", "CHAM_DIEM"]
 
 
 class GvTaskItem(BaseModel):
@@ -88,6 +90,7 @@ class GvDashboardOut(BaseModel):
     """MH-03: chỉ số + danh sách đề tài của chính GV gọi (own giang_vien_id)."""
 
     so_sinh_vien_huong_dan: int
+    so_sinh_vien_lop: int = 0
     so_de_tai: int
     so_de_tai_cho_duyet: int
     de_tai: list[GvTopicItem]
@@ -127,6 +130,7 @@ class BmDashboardOut(BaseModel):
     de_tai_cho_duyet: int
     de_tai_da_phan_cong: int
     sv_chua_co_de_tai: int
+    sv_chua_phan_cong: int = 0
     tong_sinh_vien: int
     cho_duyet_moi_nhat: list[BmPendingTopicRef]
     sv_tre_moc: int = 0

@@ -17,7 +17,7 @@
 #                             [--json PATH]   (kết quả máy đọc được cho deploy/verify-all.sh)
 # (sau `bash deploy/seed-ai.sh`). Phase 5 chạy lại đúng lệnh này trên server.
 #
-# Tài khoản dành riêng: bomon, DTC225200095 (SV), GV023 (GVHD) — dùng chung với
+# Tài khoản dành riêng: bomon, DTC235210032 (SV), GV023 (GVHD) — dùng chung với
 # e2e-ai (K97) nên KHÔNG chạy song song hai script; khóa kiểm thử K96. Dọn dẹp
 # (trap, kể cả khi lỗi): purge vector DOCUMENT/TOPIC/ARCHIVE đã tạo, xóa file đã
 # nộp, xóa dữ liệu K96 theo thứ tự khóa ngoại.
@@ -101,7 +101,7 @@ cleanup() {
     "${COMPOSE[@]}" exec -T api python -m app.services.ai_index purge --loai ARCHIVE --ids "${KHO_ID}" >/dev/null 2>&1 || true
     sql "DELETE FROM do_an_kho WHERE id = ${KHO_ID};" >/dev/null 2>&1 || true
   fi
-  sql "DELETE FROM thong_bao WHERE tai_khoan_id IN (SELECT id FROM tai_khoan WHERE ma_dang_nhap IN ('DTC225200095','GV023')) AND thoi_diem >= '${START_UTC}';" >/dev/null 2>&1 || true
+  sql "DELETE FROM thong_bao WHERE tai_khoan_id IN (SELECT id FROM tai_khoan WHERE ma_dang_nhap IN ('DTC235210032','GV023')) AND thoi_diem >= '${START_UTC}';" >/dev/null 2>&1 || true
   if [ -n "${DOT_DO_AN_ID}" ]; then
     sql "DELETE ct FROM chi_tiet_trung_lap ct JOIN ket_qua_kiem_tra_trung_lap kq ON kq.id = ct.ket_qua_id JOIN de_tai dt ON dt.id = kq.de_tai_id WHERE dt.dot_do_an_id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
     sql "DELETE kq FROM ket_qua_kiem_tra_trung_lap kq JOIN de_tai dt ON dt.id = kq.de_tai_id WHERE dt.dot_do_an_id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
@@ -109,6 +109,8 @@ cleanup() {
     sql "DELETE t FROM tai_lieu_do_an t JOIN de_tai dt ON dt.id = t.de_tai_id WHERE dt.dot_do_an_id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
     sql "DELETE dc FROM de_cuong dc JOIN de_tai dt ON dt.id = dc.de_tai_id WHERE dt.dot_do_an_id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
     sql "DELETE FROM de_tai WHERE dot_do_an_id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
+    # 0015: phân công GVHD trỏ tới đợt (FK không cascade) — xóa trước đợt.
+    sql "DELETE FROM phan_cong_huong_dan WHERE dot_do_an_id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
     sql "DELETE FROM dot_do_an WHERE id = ${DOT_DO_AN_ID};" >/dev/null 2>&1 || true
   fi
   rm -rf "$TMP"
@@ -243,25 +245,30 @@ ok "Tài liệu dài: ${long_doc}"
 
 # --- NFR-09 / NFR-10 (AISV-04, AISV-06) ---------------------------------------
 TOKEN_BOMON="$(bash "${SCRIPT_DIR}/api-login.sh" bomon)"
-TOKEN_SV="$(bash "${SCRIPT_DIR}/api-login.sh" DTC225200095)"
+TOKEN_SV="$(bash "${SCRIPT_DIR}/api-login.sh" DTC235210032)"
 TOKEN_GV="$(bash "${SCRIPT_DIR}/api-login.sh" GV023)"
 
-[ "$(call GET /api/dashboard/sinh-vien "$TOKEN_SV")" = "200" ] || fail "Không đọc được dashboard DTC225200095"
-[ "$(jget '1 if d.get("de_tai") else 0')" = "0" ] || fail "DTC225200095 đang có đề tài hoạt động (e2e-ai đang chạy?) — dọn rồi chạy lại"
+[ "$(call GET /api/dashboard/sinh-vien "$TOKEN_SV")" = "200" ] || fail "Không đọc được dashboard DTC235210032"
+[ "$(jget '1 if d.get("de_tai") else 0')" = "0" ] || fail "DTC235210032 đang có đề tài hoạt động (e2e-ai đang chạy?) — dọn rồi chạy lại"
 
 [ "$(call POST /api/cohorts "$TOKEN_BOMON" -H 'Content-Type: application/json' \
   -d '{"ten_dot":"Đợt đo hiệu năng AI","khoa":"K96","nam_hoc":"2026-2027","ngay_bat_dau":"2026-01-01"}')" = "201" ] \
   || fail "Không tạo được đợt K96: $(cat "$TMP/body")"
 DOT_DO_AN_ID="$(jget 'd["id"]')"
+# UC0.8 (0015): SV chỉ đề xuất được khi đã có GVHD trong đợt — Bộ môn import
+# phân công DTC235210032 -> GV023 cho đợt K96.
+python3 -c 'import json,sys; print(json.dumps({"dot_do_an_id": int(sys.argv[1]), "noi_dung": "DTC235210032,GV023\n"}))' "$DOT_DO_AN_ID" > "$TMP/assign.json"
+[ "$(call POST /api/assignments/import "$TOKEN_BOMON" -H 'Content-Type: application/json' --data-binary "@$TMP/assign.json")" = "200" ] \
+  && [ "$(jget 'd["cap_nhat"] == 1 and not d["loi"]')" = "True" ] \
+  || fail "Bộ môn không phân công được DTC235210032 -> GV023 trong đợt K96: $(cat "$TMP/body")"
 python3 -c 'import json,sys; print(json.dumps({"dot_do_an_id": int(sys.argv[1]), "ten_de_tai": "Đo hiệu năng kiểm tra trùng lặp tài liệu của hệ thống quản lý đồ án", "linh_vuc": "Công nghệ phần mềm", "gui": True}, ensure_ascii=False))' "$DOT_DO_AN_ID" > "$TMP/topic.json"
 [ "$(call POST /api/topics "$TOKEN_SV" -H 'Content-Type: application/json' --data-binary "@$TMP/topic.json")" = "201" ] \
-  || fail "DTC225200095 không tạo được đề tài K96: $(cat "$TMP/body")"
+  || fail "DTC235210032 không tạo được đề tài K96: $(cat "$TMP/body")"
 TOPIC_ID="$(jget 'd["id"]')"
-call GET /api/lecturers "$TOKEN_BOMON" >/dev/null
-GV_ID="$(jget 'next((g["id"] for g in d if g.get("ma_giang_vien") == "GV023"), "")')"
-[ "$(call POST "/api/topic-approvals/${TOPIC_ID}/approve" "$TOKEN_BOMON" -H 'Content-Type: application/json' -d "{\"giang_vien_id\":${GV_ID}}")" = "200" ] \
-  || fail "Bộ môn không duyệt được đề tài K96: $(cat "$TMP/body")"
-ok "Đợt K96 (id=${DOT_DO_AN_ID}), đề tài ${TOPIC_ID} của DTC225200095, GVHD GV023"
+# UC1.3 (0015): GVHD GV023 duyệt đề tài SV (không gửi thân) -> Đã phân công.
+[ "$(call POST "/api/topic-approvals/${TOPIC_ID}/approve" "$TOKEN_GV")" = "200" ] \
+  || fail "GVHD GV023 không duyệt được đề tài K96: $(cat "$TMP/body")"
+ok "Đợt K96 (id=${DOT_DO_AN_ID}), đề tài ${TOPIC_ID} của DTC235210032, GVHD GV023"
 
 mem_before="$(docker stats --no-stream --format '{{.MemUsage}}' "$AI_CID" | awk '{print $1}')"
 python3 - "$BASE" "$TOKEN_SV" "$TOKEN_GV" "$TOPIC_ID" "$REPO_ROOT" "$N_FILES" "$TMP/nfr09.tsv" <<'PY' || fail "Vòng đo NFR-09/NFR-10 lỗi"

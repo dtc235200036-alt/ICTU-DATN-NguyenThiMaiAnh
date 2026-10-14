@@ -1,13 +1,11 @@
 from datetime import date
 
-import pytest
-
 from app.core.roles import VaiTro
 from app.models.dot_do_an import DANG_MO, DotDoAn
 
-# T-02-22/T-02-23 (D-08): chỉ chủ sở hữu đề tài (người đứng tên đề xuất) mới
-# được sửa/gửi đề xuất; chi tiết đề tài chỉ chủ sở hữu, Bộ môn, hoặc (khi đã
-# duyệt và còn trống) bất kỳ ai mới được xem.
+# T-02-22/T-02-23 (D-08) + UC0.8 (0015): chỉ chủ sở hữu đề tài (người đứng tên
+# đề xuất) mới được sửa/gửi; đề tài SV đề xuất chỉ SV đó, GVHD của SV và Bộ môn
+# xem được; GV giao đề tài thẳng cho SV trong lớp mình, không cho SV lớp khác.
 
 
 def _make_open_cohort(db) -> DotDoAn:
@@ -63,38 +61,82 @@ def test_gv_draft_ownership_enforced(client, make_account, auth_headers, db):
     )
     assert submit_by_other_resp.status_code == 403
 
+    # Không giao cho SV nào -> mở cho lớp của GV đăng ký (không qua Bộ môn).
     submit_resp = client.post(f"/api/topics/{topic_id}/submit", headers=auth_headers(gv_a))
     assert submit_resp.status_code == 200
-    assert submit_resp.json()["trang_thai"] == "CHO_DUYET"
+    assert submit_resp.json()["trang_thai"] == "DA_DUYET"
 
 
-def test_sv_proposal_visibility_enforced(client, make_account, auth_headers, db):
+def test_gv_assigns_topic_only_to_own_student(
+    client, make_account, auth_headers, assign_gvhd, db
+):
+    cohort = _make_open_cohort(db)
+    gv = make_account(VaiTro.GIANG_VIEN)
+    gv_other = make_account(VaiTro.GIANG_VIEN)
+    sv_mine = make_account(VaiTro.SINH_VIEN)
+    sv_other = make_account(VaiTro.SINH_VIEN)
+    assign_gvhd(sv_mine, gv, cohort.id)
+    assign_gvhd(sv_other, gv_other, cohort.id)
+
+    body = {
+        "dot_do_an_id": cohort.id,
+        "ten_de_tai": "Ứng dụng quản lý thư viện số",
+        "gui": True,
+    }
+    bad = client.post(
+        "/api/topics", json={**body, "sinh_vien_id": sv_other.sinh_vien_id}, headers=auth_headers(gv)
+    )
+    assert bad.status_code == 409
+    assert bad.json()["detail"] == "Sinh viên không thuộc lớp hướng dẫn của bạn trong đợt này"
+
+    ok = client.post(
+        "/api/topics", json={**body, "sinh_vien_id": sv_mine.sinh_vien_id}, headers=auth_headers(gv)
+    )
+    assert ok.status_code == 201
+    assert ok.json()["trang_thai"] == "DA_PHAN_CONG"
+    assert ok.json()["sinh_vien"]["id"] == sv_mine.sinh_vien_id
+
+    # SV đã có đề tài đang hoạt động -> giao thêm bị chặn.
+    dup = client.post(
+        "/api/topics",
+        json={**body, "ten_de_tai": "Một đề tài khác hẳn", "sinh_vien_id": sv_mine.sinh_vien_id},
+        headers=auth_headers(gv),
+    )
+    assert dup.status_code == 409
+    assert dup.json()["detail"] == "Sinh viên này đã có một đề tài đang hoạt động"
+
+
+def test_sv_proposal_goes_to_own_gvhd(client, make_account, auth_headers, assign_gvhd, db):
     cohort = _make_open_cohort(db)
     sv_a = make_account(VaiTro.SINH_VIEN)
     sv_b = make_account(VaiTro.SINH_VIEN)
-    gv = make_account(VaiTro.GIANG_VIEN)
+    gvhd = make_account(VaiTro.GIANG_VIEN)
+    other_gv = make_account(VaiTro.GIANG_VIEN)
     bomon = make_account(VaiTro.BO_MON)
 
-    create_resp = client.post(
-        "/api/topics",
-        json={
-            "dot_do_an_id": cohort.id,
-            "ten_de_tai": "Ứng dụng học tiếng Anh cho trẻ em",
-            "linh_vuc": "Công nghệ phần mềm",
-            "gui": True,
-        },
-        headers=auth_headers(sv_a),
-    )
+    payload = {
+        "dot_do_an_id": cohort.id,
+        "ten_de_tai": "Ứng dụng học tiếng Anh cho trẻ em",
+        "linh_vuc": "Công nghệ phần mềm",
+        "gui": True,
+    }
+    # Chưa được phân công GVHD -> không đề xuất được.
+    no_gvhd = client.post("/api/topics", json=payload, headers=auth_headers(sv_a))
+    assert no_gvhd.status_code == 409
+
+    assign_gvhd(sv_a, gvhd, cohort.id)
+    create_resp = client.post("/api/topics", json=payload, headers=auth_headers(sv_a))
     assert create_resp.status_code == 201
     topic_id = create_resp.json()["id"]
     assert create_resp.json()["trang_thai"] == "CHO_DUYET"
+    assert create_resp.json()["giang_vien_huong_dan"]["id"] == gvhd.giang_vien_id
 
-    for actor in (sv_b, gv):
+    for actor in (sv_b, other_gv):
         resp = client.get(f"/api/topics/{topic_id}", headers=auth_headers(actor))
         assert resp.status_code == 403
 
-    resp_owner = client.get(f"/api/topics/{topic_id}", headers=auth_headers(sv_a))
-    assert resp_owner.status_code == 200
+    for actor in (sv_a, gvhd):
+        assert client.get(f"/api/topics/{topic_id}", headers=auth_headers(actor)).status_code == 200
 
     resp_bomon = client.get(f"/api/topics/{topic_id}", headers=auth_headers(bomon))
     assert resp_bomon.status_code == 200
@@ -106,20 +148,14 @@ def test_sv_proposal_visibility_enforced(client, make_account, auth_headers, db)
     assert kiem_tra_ten["nguong_ap_dung"] == 50.0
 
     # T-02-29/UC1.4 A1: GET /api/topics scope không bao giờ lộ đề tài Chờ duyệt
-    # của SV khác cho SV B, kể cả khi cố lọc trực tiếp trạng thái + pham_vi=tat_ca
-    # (filter chỉ được AND vào phạm vi, không bao giờ mở rộng phạm vi).
-    list_resp_b = client.get("/api/topics", headers=auth_headers(sv_b))
-    assert list_resp_b.status_code == 200
-    assert topic_id not in [item["id"] for item in list_resp_b.json()["items"]]
+    # của SV khác cho SV B / GV khác, kể cả khi lọc trạng thái + pham_vi=tat_ca.
+    for actor in (sv_b, other_gv):
+        listed = client.get(
+            "/api/topics?trang_thai=CHO_DUYET&pham_vi=tat_ca", headers=auth_headers(actor)
+        )
+        assert listed.status_code == 200
+        assert topic_id not in [item["id"] for item in listed.json()["items"]]
 
-    list_resp_b_filtered = client.get(
-        "/api/topics?trang_thai=CHO_DUYET&pham_vi=tat_ca", headers=auth_headers(sv_b)
-    )
-    assert list_resp_b_filtered.status_code == 200
-    assert topic_id not in [item["id"] for item in list_resp_b_filtered.json()["items"]]
-
-    list_resp_bomon = client.get(
-        "/api/topics?trang_thai=CHO_DUYET", headers=auth_headers(bomon)
-    )
-    assert list_resp_bomon.status_code == 200
-    assert topic_id in [item["id"] for item in list_resp_bomon.json()["items"]]
+    for actor in (gvhd, bomon):
+        listed = client.get("/api/topics?trang_thai=CHO_DUYET", headers=auth_headers(actor))
+        assert topic_id in [item["id"] for item in listed.json()["items"]]

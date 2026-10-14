@@ -49,8 +49,8 @@ export default function TopicDetailPage() {
   const registerMutation = useRegisterTopic()
 
   if (isError) {
-    // T-02-23: server trả 403 khi người xem không phải chủ sở hữu/Bộ môn và đề
-    // tài chưa đủ điều kiện xem công khai — không được kẹt ở Skeleton mãi mãi.
+    // T-02-23/UC0.8: server trả 403 khi người xem không phải chủ sở hữu, GVHD,
+    // Bộ môn hay SV lớp được mở đề tài — không được kẹt ở Skeleton mãi mãi.
     const status = error instanceof AxiosError ? error.response?.status : undefined
     if (status === 403) {
       return <ForbiddenPage />
@@ -89,7 +89,7 @@ export default function TopicDetailPage() {
     if (topicId === undefined) return
     try {
       await registerMutation.mutateAsync(topicId)
-      message.success('Đăng ký thành công — đề tài đang chờ Bộ môn duyệt')
+      message.success('Đăng ký thành công — đề tài đã được phân công, bạn có thể nộp đề cương')
     } catch (err) {
       message.error(getErrorMessage(err))
     }
@@ -174,13 +174,17 @@ export default function TopicDetailPage() {
         )}
         {topic.quyen.gui && (
           <Button type="primary" loading={submitMutation.isPending} onClick={handleSubmit}>
-            Gửi đề xuất
+            {topic.loai_nguoi_de_xuat === 'SINH_VIEN'
+              ? 'Gửi GVHD duyệt'
+              : topic.sinh_vien
+                ? 'Giao đề tài cho sinh viên'
+                : 'Mở cho lớp đăng ký'}
           </Button>
         )}
         {topic.quyen.dang_ky && (
           <Popconfirm
             title="Đăng ký đề tài này?"
-            description="Sau khi đăng ký, đề tài chuyển sang Chờ duyệt để Bộ môn xác nhận và phân công GVHD."
+            description="Đề tài do GVHD của bạn mở cho lớp — đăng ký xong là Đã phân công ngay, không đổi được nữa."
             onConfirm={handleRegister}
           >
             <Button type="primary" loading={registerMutation.isPending}>

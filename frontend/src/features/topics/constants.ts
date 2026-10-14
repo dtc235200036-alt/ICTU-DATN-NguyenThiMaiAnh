@@ -2,7 +2,8 @@
 export const TRANG_THAI_DE_TAI: Record<string, { label: string; color: string }> = {
   NHAP: { label: 'Nháp', color: 'default' },
   CHO_DUYET: { label: 'Chờ duyệt', color: 'processing' },
-  DA_DUYET: { label: 'Đã duyệt', color: 'warning' },
+  // UC0.8: DA_DUYET = đề tài GV mở cho SV trong lớp hướng dẫn đăng ký.
+  DA_DUYET: { label: 'Mở cho lớp đăng ký', color: 'warning' },
   TU_CHOI: { label: 'Từ chối', color: 'error' },
   DA_PHAN_CONG: { label: 'Đã phân công', color: 'success' },
 }

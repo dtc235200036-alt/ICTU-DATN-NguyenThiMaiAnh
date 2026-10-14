@@ -9,7 +9,7 @@
 #      service ai đặt HF_HUB_OFFLINE=1, không bao giờ gọi Hugging Face
 #   3. docker compose up -d --build --wait (mysql / api / apache HTTPS / ai nội bộ)
 #   4. kiểm tra migration (alembic_version = revision mới nhất) + ai /health
-#   5. kiểm tra dữ liệu seed DATA-01 (100 SV, 30 GV, Bộ môn)
+#   5. kiểm tra dữ liệu seed DATA-01 (580 SV, 70 GV, Bộ môn)
 #   6. deploy/seed-ai.sh — 300 đề tài kho qua đường import thật + 25 đồ án
 #      nguồn có báo cáo (DATA-02, DATA-03); idempotent
 #   7. tóm tắt: URL, tài khoản, nguồn mật khẩu, thời gian từng bước
@@ -305,8 +305,8 @@ step_end
 step_begin "5 — Kiểm tra tài khoản seed (DATA-01)"
 counts="$(bash deploy/sql.sh "SELECT SUM(vai_tro='SINH_VIEN'), SUM(vai_tro='GIANG_VIEN'), SUM(vai_tro='BO_MON') FROM tai_khoan" | tr -d '\r')"
 read -r n_sv n_gv n_bm <<<"${counts}"
-[ "${n_sv}" = "100" ] && [ "${n_gv}" = "30" ] && [ "${n_bm:-0}" -ge 1 ] \
-  || fail "Tài khoản seed: ${n_sv} SV / ${n_gv} GV / ${n_bm} Bộ môn (kỳ vọng 100 / 30 / >= 1)"
+[ "${n_sv}" = "580" ] && [ "${n_gv}" = "70" ] && [ "${n_bm:-0}" -ge 1 ] \
+  || fail "Tài khoản seed: ${n_sv} SV / ${n_gv} GV / ${n_bm} Bộ môn (kỳ vọng 580 / 70 / >= 1)"
 ok "Tài khoản seed: ${n_sv} sinh viên, ${n_gv} giảng viên, ${n_bm} Bộ môn"
 step_end
 
@@ -328,7 +328,7 @@ pw_now="$(env_get SEED_DEFAULT_PASSWORD)"
 echo ""
 echo "=== Tóm tắt"
 echo "Địa chỉ:     https://${SERVER_NAME}$([ "${https_port}" = "443" ] || echo ":${https_port}")/"
-echo "Tài khoản:   bomon (Bộ môn), GV001–GV030 (giảng viên), DTC225200001–DTC225200100 (sinh viên); đăng nhập bằng mã hoặc email"
+echo "Tài khoản:   bomon (Bộ môn), GV001–GV070 (giảng viên, theo STT danh sách GV Khoa CNTT), mã SV thật K22 — 580 SV trong backend/app/seed_data/sinh_vien.csv (sinh viên); đăng nhập bằng mã hoặc email"
 if [ "${pw_now}" = "${DEV_DEFAULT_PW}" ]; then
   echo "Mật khẩu:    mật khẩu dev mặc định (deploy/README.md, mục Tài khoản demo) — SEED_DEFAULT_PASSWORD trong deploy/.env"
   if [ "${SERVER_NAME}" != "localhost" ]; then

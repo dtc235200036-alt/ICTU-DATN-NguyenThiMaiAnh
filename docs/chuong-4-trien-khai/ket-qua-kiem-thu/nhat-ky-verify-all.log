@@ -1,7 +1,7 @@
 # Nhật ký bash deploy/verify-all.sh --report
-# commit: e57ea99b028a9dc320224b2a4cfa2eba1092c8d5
-# bắt đầu (UTC): 2026-09-28T11:51:11Z; tổng thời gian: 344 s
-# máy: 16 CPU, 15 GiB RAM, Linux 7.0.0-31-generic
+# commit: cfb7e5bda0febc3fde1a4fc39a7e12920aaaf4d2 (+45 tệp sản phẩm chưa commit)
+# bắt đầu (UTC): 2026-10-02T05:26:21Z; tổng thời gian: 351 s
+# máy: 16 CPU, 15 GiB RAM, Linux 7.0.0-34-generic
 
 ================================================================
 [1] Tình trạng stack (mysql/api/ai healthy, apache, one-shot exit 0, AI offline)
@@ -25,7 +25,7 @@ kết quả: OK (0.7 s)
 ----------------------------------------------------------------
 OK: DATA-01 — 100 sinh viên, 30 giảng viên, 1 Bộ môn (kỳ vọng 100 / 30 / >= 1)
 OK: DATA-02 — 300 đề tài kho IMPORT K18–K22 (5 khóa), 300 DA_INDEX; /health index_size_tieu_de=304, thieu_embedding=0
-OK: DATA-03 — 50 tệp trong seed-data/tai-lieu, 25 cặp thuộc 4 loại trùng, 25 đồ án nguồn có báo cáo cuối, index_size_tai_lieu=2554
+OK: DATA-03 — 50 tệp trong seed-data/tai-lieu, 25 cặp thuộc 4 loại trùng, 25 đồ án nguồn có báo cáo cuối, index_size_tai_lieu=2777
 
 ================================================================
 [3] Smoke test qua Apache HTTPS
@@ -47,9 +47,12 @@ OK: GET /api/auth/me trả 200 có token, 401 không token
 OK: logout trả 204 và xóa cookie refresh (refresh sau đó trả 401)
 OK: lần đăng nhập sai thứ 6 trả 429
 OK: mỗi vai trò xem được dashboard của chính mình
+OK: dashboard có sv_chua_phan_cong (bo-mon), so_sinh_vien_lop (giang-vien), giang_vien_huong_dan (sinh-vien)
 OK: dashboard của vai trò khác bị từ chối 403
 OK: DTC225200001 bị 403 trên accounts/cohorts/topic-approvals
-OK: GV001 bị 403 trên topic-approvals/register
+OK: GV001 xem danh sách chờ duyệt -> 200; bomon bị 403 trên topic-approvals (xem, duyệt)
+OK: GV001 bị 403 trên register
+OK: /api/assignments — gán/import/xem chỉ bomon (GV001, DTC225200001 bị 403); my-students chỉ GV, my-advisor chỉ SV; DTC225200001 có GVHD GV001
 OK: DTC225200001 xem /api/topics -> 200
 OK: DTC225200001 bị 403 trên defense/committees, archive (thêm, import), progress (mốc, dashboard), outlines review
 OK: GV001 bị 403 trên outlines submit, defense finalize, progress reports
@@ -61,16 +64,16 @@ SMOKE TEST: tất cả kiểm tra đã qua.
 ================================================================
 [4] Pytest Web API (backend)
 lệnh: uv --directory backend run pytest -q
-kết quả: OK (103.5 s)
+kết quả: OK (91.4 s)
 ----------------------------------------------------------------
-.....................................................                    [100%]
+..........................................................               [100%]
 =============================== warnings summary ===============================
 .venv/lib/python3.12/site-packages/fastapi/testclient.py:1
   /home/hahoang/Documents/DoAn/NTMA/backend/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
     from starlette.testclient import TestClient as TestClient  # noqa
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-53 passed, 1 warning in 101.87s (0:01:41)
+58 passed, 1 warning in 89.83s (0:01:29)
 
 ================================================================
 [5] Pytest dịch vụ AI (ai-service)
@@ -87,40 +90,48 @@ kết quả: OK (3.0 s)
 8 passed, 1 warning in 2.10s
 
 ================================================================
-[6] E2E UC1 — đề xuất/đăng ký/duyệt đề tài
+[6] E2E UC1 — phân công GVHD, đề xuất/đăng ký/GVHD duyệt đề tài
 lệnh: bash deploy/e2e-uc1.sh
-kết quả: OK (4.1 s)
+kết quả: OK (5.8 s)
 ----------------------------------------------------------------
-OK: Bộ môn tạo đợt kiểm thử K99 (id=103)
-OK: GV030 đề xuất đề tài -> Chờ duyệt, có kiểm tra tên
-OK: DTC225200099 tự đề xuất đề tài -> Chờ duyệt
-OK: Bộ môn thấy cả hai đề tài trong danh sách chờ duyệt
-OK: Bộ môn duyệt đề tài GV -> Đã duyệt
-OK: DTC225200100 đăng ký đề tài GV đã duyệt -> Chờ duyệt
+OK: Bộ môn tạo đợt kiểm thử K99 (id=118)
+OK: SV chưa được phân công GVHD đề xuất đề tài -> 409
+OK: Bộ môn gán DTC225200099, DTC225200100 -> GV030 (PUT) và import DTC225200093 -> GV024 (dòng mã lạ báo lỗi)
+OK: danh sách phân công đợt K99 lọc theo GV030 có đúng 2 SV, đợt có 3 SV đã phân công, tải GV030 = 2
+OK: SV thấy GVHD của mình (my-advisor), GV030 thấy lớp hướng dẫn 2 SV (my-students)
+OK: GV030 mở đề tài cho lớp -> Đã duyệt (chờ SV trong lớp đăng ký), có kiểm tra tên
+OK: DTC225200099 tự đề xuất đề tài -> Chờ duyệt, gửi tới GVHD GV030
+OK: GV030 thấy đề tài SV trong danh sách chờ duyệt; GV024 không thấy
+OK: SV, Bộ môn, GV024 duyệt/từ chối -> 403, đề tài vẫn Chờ duyệt
+OK: GV sửa đề tài do SV đề xuất -> 403
+OK: SV lớp khác xem/đăng ký đề tài GV030 mở -> 403, không có trong danh sách; SV lớp GV030 thấy và đăng ký được
+OK: DTC225200100 đăng ký đề tài GV030 mở cho lớp -> Đã phân công (không qua Bộ môn)
 OK: đăng ký lần hai bị từ chối 409
-OK: SV duyệt đề tài -> 403
-OK: GV sửa đề tài của SV khác -> 403
-OK: Bộ môn phân công GVHD cho đề tài GV -> Đã phân công
-OK: Bộ môn từ chối đề tài SV với lý do
+OK: đổi GVHD của SV đã có đề tài Đã phân công -> 409, vẫn là GV030
+OK: GVHD GV030 từ chối đề tài SV với lý do
 OK: SV thấy đúng lý do từ chối
-OK: lọc danh sách theo đợt/trạng thái/GVHD trả đúng đề tài đã phân công
-OK: e2e UC1 hoàn tất — dữ liệu đợt K99 sẽ được dọn khi script kết thúc (trap)
+OK: SV đề xuất lại -> GVHD GV030 duyệt -> Đã phân công
+OK: GV030 giao đề tài cho SV lớp khác -> 409; cho SV đã có đề tài đang hoạt động -> 409
+OK: Bộ môn đổi GVHD của SV chưa có đề tài (GV024 -> GV030); GV030 giao thẳng đề tài -> Đã phân công ngay
+OK: lọc danh sách theo đợt/trạng thái/GVHD trả đúng 3 đề tài đã phân công
+OK: e2e UC1 hoàn tất — dữ liệu đợt K99 (đề tài, phân công GVHD) sẽ được dọn khi script kết thúc (trap)
 
 ================================================================
 [7] E2E UC2–UC5 — đề cương, tiến độ, bảo vệ, lưu kho
 lệnh: bash deploy/e2e-uc2-5.sh
-kết quả: OK (15.1 s)
+kết quả: OK (15.0 s)
 ----------------------------------------------------------------
-OK: Bộ môn tạo đợt kiểm thử K98 (id=104)
-OK: DTC225200098 tự đề xuất đề tài (id=247)
-OK: Bộ môn phân công GV029 làm GVHD cho đề tài -> Đã phân công
-OK: DTC225200098 nộp đề cương v1 -> 202 (tai_lieu_do_an_id=446)
+OK: Bộ môn tạo đợt kiểm thử K98 (id=119)
+OK: Bộ môn phân công DTC225200098 -> GVHD GV029 trong đợt K98
+OK: DTC225200098 tự đề xuất đề tài (id=368) -> Chờ GVHD GV029 duyệt
+OK: GVHD GV029 duyệt đề tài -> Đã phân công
+OK: DTC225200098 nộp đề cương v1 -> 202 (tai_lieu_do_an_id=650)
 OK: Kiểm tra trùng lặp tài liệu v1 hoàn tất (HOAN_TAT)
 OK: GV029 thấy đề tài trong danh sách đề cương (Chờ duyệt)
 OK: GV029 thấy tóm tắt trích xuất (D-03) + kiểm tra Hoàn tất trên màn duyệt
 OK: GV029 yêu cầu sửa đề cương kèm nhận xét -> Yêu cầu sửa
 OK: DTC225200098 có thông báo Yêu cầu sửa đề cương (NOTF-01)
-OK: DTC225200098 nộp đề cương v2 (PDF) -> 202 (tai_lieu_do_an_id=447)
+OK: DTC225200098 nộp đề cương v2 (PDF) -> 202 (tai_lieu_do_an_id=651)
 OK: Kiểm tra trùng lặp tài liệu v2 hoàn tất (HOAN_TAT)
 OK: GV029 duyệt đề cương v2 -> Đã duyệt
 OK: DTC225200098 có thông báo Đề cương được duyệt (NOTF-01)
@@ -129,7 +140,7 @@ OK: DTC225200097 (SV khác) bị từ chối 403 trên xem chi tiết + tải t�
 OK: GV025 (GV không liên quan) bị từ chối 403 khi duyệt
 OK: DTC225200098 tải lại v1 -> bytes khớp sha256 với file gốc
 OK: /data/uploads không tồn tại/không lộ trong container apache (D-02)
-OK: Bộ môn thiết lập 2 mốc tiến độ cho đợt K98 (hạn 2026-09-27 và 2026-10-05)
+OK: Bộ môn thiết lập 2 mốc tiến độ cho đợt K98 (hạn 2026-10-01 và 2026-10-09)
 OK: DTC225200098 nộp báo cáo Mốc 2 kèm PDF
 OK: SV thấy Mốc 1 Trễ mốc, Mốc 2 Đúng hạn có tệp đính kèm (D-05)
 OK: GV029 thấy DTC225200098: 1 báo cáo chờ nhận xét, cờ trễ mốc
@@ -139,13 +150,13 @@ OK: DTC225200098 có thông báo nhận xét tiến độ (NOTF-01)
 OK: Nộp lại Mốc 2 sau khi GVHD nhận xét bị từ chối 409
 OK: Bộ môn thấy DTC225200098 bị đánh dấu Trễ mốc trên tiến độ toàn khoa
 OK: DTC225200097 bị từ chối 403 trên tiến độ toàn khoa
-OK: DTC225200098 nộp báo cáo cuối -> 202 (tai_lieu_do_an_id=449)
+OK: DTC225200098 nộp báo cáo cuối -> 202 (tai_lieu_do_an_id=653)
 OK: Kiểm tra trùng lặp báo cáo cuối hoàn tất (HOAN_TAT)
 OK: GV029 (GVHD) xem được báo cáo cuối -> 200
 OK: DTC225200097 (SV khác) bị từ chối 403 trên xem báo cáo cuối
 OK: Bộ môn thấy đề tài trong danh sách SV đủ điều kiện bảo vệ
-OK: Bộ môn tạo hội đồng A (GV026/027/028) -> 201 (id=76)
-OK: Bộ môn tạo hội đồng B (chứa GVHD GV029) -> 201 (id=77)
+OK: Bộ môn tạo hội đồng A (GV026/027/028) -> 201 (id=99)
+OK: Bộ môn tạo hội đồng B (chứa GVHD GV029) -> 201 (id=100)
 OK: Xếp lịch vào hội đồng B (chứa GVHD GV029) bị từ chối 409 (D-06)
 OK: Bộ môn xếp lịch đề tài vào hội đồng A -> 201
 OK: GV026 có thông báo phân công hội đồng (HOI_DONG_PHAN_CONG)
@@ -158,23 +169,23 @@ OK: GV026 thấy SV trong hội đồng của mình và tải được báo cáo
 OK: GV026 chấm 8.0, GV027 chấm 8.5 (kèm nhận xét) -> 200
 OK: Bộ môn chốt khi mới 2/3 thành viên chấm -> 409 (Chưa đủ thành viên hội đồng chấm điểm (2/3))
 OK: GV028 chấm 9.0 -> 200
-OK: Bộ môn chốt kết quả -> 200, điểm TB 8.5, lưu kho (do_an_kho_id=412)
+OK: Bộ môn chốt kết quả -> 200, điểm TB 8.5, lưu kho (do_an_kho_id=451)
 OK: DTC225200098 thấy điểm 8.5 + thông báo KET_QUA_BAO_VE (UC4.5, NOTF-01)
 OK: GV026 sửa điểm sau chốt bị từ chối 409
-OK: do_an_kho id=412: nguồn HE_THONG, đã index (DA_INDEX)
+OK: do_an_kho id=451: nguồn HE_THONG, đã index (DA_INDEX)
 OK: DTC225200098 tra cứu kho K98 thấy đồ án vừa chốt của mình (điểm 8.5, có file)
 OK: DTC225200097 tra cứu kho K98 thấy đồ án vừa chốt nhưng không thấy điểm của SV khác (WR-10)
 OK: DTC225200097 tải báo cáo cuối từ kho -> bytes khớp sha256 với file đã nộp
 OK: Bộ môn sửa từ khóa 'kiểm thử, tự động' -> index lại nền -> DA_INDEX
 OK: Bộ môn import CSV 3 dòng -> 2 thành công, dòng 4 bị bỏ qua (Thiếu tên đề tài)
-OK: GV025 tìm 'biển số' trong kho -> đúng bản ghi vừa import (id=413)
+OK: GV025 tìm 'biển số' trong kho -> đúng bản ghi vừa import (id=452)
 OK: DTC225200097 thêm bản ghi + GV025 import CSV đều bị từ chối 403
 OK: Bộ môn xóa một bản ghi import -> 204, đọc lại -> 404
-OK: DTC225200098 có 6 thông báo chưa đọc, gồm DE_TAI_PHAN_CONG từ quyết định duyệt đề tài (NOTF-01)
+OK: DTC225200098 có 7 thông báo chưa đọc, gồm DE_TAI_PHAN_CONG từ quyết định duyệt đề tài (NOTF-01)
 OK: DTC225200097 đánh dấu thông báo của DTC225200098 -> 404, số chưa đọc không đổi
 OK: DTC225200098 đánh dấu tất cả đã đọc -> 204, số chưa đọc = 0
 OK: Dashboard DTC225200098: đề cương Đã duyệt, 2 mốc tiến độ, lịch bảo vệ có Chủ tịch, điểm 8.5 (MH-02)
-OK: Dashboard GV029 có Đề cương chờ duyệt / Báo cáo chờ nhận xét / Hội đồng tham gia / Việc cần xử lý (MH-03)
+OK: Dashboard GV029 có Đề cương chờ duyệt / Báo cáo chờ nhận xét / Hội đồng tham gia / Việc cần xử lý / SV lớp hướng dẫn >= 1 (MH-03)
 OK: Dashboard Bộ môn đợt K98: SV trễ mốc|tổng SV|số mốc = 1|1|2 (MH-04)
 OK: DTC225200098 xem dashboard Bộ môn -> 403
 OK: e2e UC2-5 (đề cương -> tiến độ -> bảo vệ -> lưu kho -> tra cứu/quản lý kho -> thông báo -> dashboard) hoàn tất — dữ liệu đợt K98 sẽ được dọn khi script kết thúc (trap)
@@ -182,102 +193,103 @@ OK: e2e UC2-5 (đề cương -> tiến độ -> bảo vệ -> lưu kho -> tra c�
 ================================================================
 [8] E2E dịch vụ AI thật (SC1–SC5)
 lệnh: bash deploy/e2e-ai.sh
-kết quả: OK (26.5 s)
+kết quả: OK (27.1 s)
 ----------------------------------------------------------------
 OK: Kho đã seed: 300 đề tài kho DA_INDEX
 OK: Host không kết nối được tới 127.0.0.1:8002 (không publish cổng AI)
 OK: Trong mạng nội bộ: thiếu khóa 401, sai khóa 401, đúng khóa 200
 OK: Apache không có route tới dịch vụ AI (POST /check-title -> HTTP 200, không phải AI)
 OK: Tài khoản DB thesis_ai chỉ có DML trên thesis_ai (thesis_core, CREATE, DROP bị từ chối — WR-03)
-OK: TV001 (diễn đạt lại, 0.048884s, NFC=NFD): top-1 Kho đồ án 81.92% — Ứng dụng SQL Server trong quản lý kế toán tại công ty CP Hoàng Long (K21, GVHD Mai Đức Xuân)
-OK: TV002 (diễn đạt lại, 0.045421s, NFC=NFD): top-1 Kho đồ án 69.83% — Nghiên cứu và phát triển hệ thống hỗ trợ bán thuốc và theo dõi hạn dùng tại trung tâm y tế huyện Sông Công (K22, GVHD Hoàng Mai Bảo Hồng)
-OK: TV003 (diễn đạt lại, 0.038293s, NFC=NFD): top-1 Kho đồ án 72.89% — Xây dựng và triển khai nền tảng quản lý khóa học trực tuyến tại trường trung học cơ sở Trần Phú (K20, GVHD Hoàng Mai Quang)
-OK: TV004 (cùng lĩnh vực, 0.051535s, NFC=NFD): không có kết quả Kho đồ án vượt ngưỡng
+OK: TV001 (diễn đạt lại, 0.042223s, NFC=NFD): top-1 Kho đồ án 81.92% — Ứng dụng SQL Server trong quản lý kế toán tại công ty CP Hoàng Long (K21, GVHD Mai Đức Xuân)
+OK: TV002 (diễn đạt lại, 0.052037s, NFC=NFD): top-1 Kho đồ án 69.83% — Nghiên cứu và phát triển hệ thống hỗ trợ bán thuốc và theo dõi hạn dùng tại trung tâm y tế huyện Sông Công (K22, GVHD Hoàng Mai Bảo Hồng)
+OK: TV003 (diễn đạt lại, 0.052623s, NFC=NFD): top-1 Kho đồ án 72.89% — Xây dựng và triển khai nền tảng quản lý khóa học trực tuyến tại trường trung học cơ sở Trần Phú (K20, GVHD Hoàng Mai Quang)
+OK: TV004 (cùng lĩnh vực, 0.057295s, NFC=NFD): không có kết quả Kho đồ án vượt ngưỡng
 OK: Bộ môn nâng Ngưỡng tên đề tài lên 99.99 -> lần kiểm tra kế tiếp: nguong 99.99, không còn cảnh báo Kho
 OK: Khôi phục 67.8% -> cảnh báo Kho trở lại (81.92%)
 OK: đã khôi phục ba ngưỡng gốc (NGUONG_DOAN_TRUNG	67.70	NULL	2026-09-28 06:58:07 | NGUONG_TAI_LIEU	10.40	NULL	2026-09-28 06:58:07 | NGUONG_TEN_DE_TAI	67.80	NULL	2026-09-28 06:58:07)
-OK: Bộ môn tạo đợt kiểm thử K97 (id=105)
-OK: Bản ghi kho K97 (id=415) DA_INDEX, encode_calls 234 -> 235 (+1, không tính lại corpus)
+OK: Bộ môn tạo đợt kiểm thử K97 (id=120)
+OK: Bộ môn phân công DTC225200095, DTC225200096 -> GVHD GV023 trong đợt K97
+OK: Bản ghi kho K97 (id=454) DA_INDEX, encode_calls 351 -> 352 (+1, không tính lại corpus)
 OK: DTC225200096 kiểm tra tên diễn đạt lại -> thấy ngay bản ghi kho mới (90.12%)
-OK: DTC225200095 gửi đề tài K97 (id=248) -> CHO_DUYET, index nền (encode_calls +2 = kiểm tra tên + ingest)
+OK: DTC225200095 gửi đề tài K97 (id=369) -> CHO_DUYET, index nền (encode_calls +2 = kiểm tra tên + ingest)
 OK: DTC225200096 kiểm tra tên diễn đạt lại -> thấy ngay đề tài hiện hành vừa gửi (93.51%)
-OK: Bộ môn duyệt 2 đề tài K97 (248, 249) với GVHD GV023 -> DA_PHAN_CONG
-OK: nộp P01-B.pdf cho đề tài 248 -> 202 trong 0.069123s
-OK: Nộp P01-B: kiểm tra + index chỉ mã hóa 1 lần (encode_calls 241 -> 242, CR-02)
-OK: P01-B (chép nguyên văn) HOAN_TAT sau 1s: 50.3% >= 10.4%, 7 đoạn (7 nguyên văn), đồ án trùng 'Phát triển mô hình thống kê điểm số của người học tại trường THCS Chu Văn An sử dụng Metabase (K21)' 50.3%, so sánh 61 câu, loại 112 dòng (42.29%); đoạn nộp cạnh đoạn nguồn, không đoạn khuôn mẫu
+OK: GVHD GV023 duyệt 2 đề tài K97 (369, 370) -> DA_PHAN_CONG
+OK: nộp P01-B.pdf cho đề tài 369 -> 202 trong 0.045040s
+OK: Nộp P01-B: kiểm tra + index chỉ mã hóa 1 lần (encode_calls 358 -> 359, CR-02)
+OK: P01-B (chép nguyên văn) HOAN_TAT sau 2s: 50.3% >= 10.4%, 7 đoạn (7 nguyên văn), đồ án trùng 'Phát triển mô hình thống kê điểm số của người học tại trường THCS Chu Văn An sử dụng Metabase (K21)' 50.3%, so sánh 61 câu, loại 112 dòng (42.29%); đoạn nộp cạnh đoạn nguồn, không đoạn khuôn mẫu
 OK: GV023 thấy cùng tỷ lệ, đồ án trùng và đoạn trùng trên màn duyệt đề cương + chi tiết
-OK: nộp P21-B.pdf cho đề tài 249 -> 202 trong 0.051538s
+OK: nộp P21-B.pdf cho đề tài 370 -> 202 trong 0.051384s
 OK: P21-B (không liên quan) HOAN_TAT: tổng/theo nguồn 4.77 1.51% < 10.40%, không cảnh báo
-OK: nộp P21-B.pdf cho đề tài 249 -> 202 trong 0.053889s
+OK: nộp P21-B.pdf cho đề tài 370 -> 202 trong 0.046907s
 OK: đã khôi phục ba ngưỡng gốc (NGUONG_DOAN_TRUNG	67.70	NULL	2026-09-28 06:58:07 | NGUONG_TAI_LIEU	10.40	NULL	2026-09-28 06:58:07 | NGUONG_TEN_DE_TAI	67.80	NULL	2026-09-28 06:58:07)
 OK: P21-B nộp lại với ngưỡng tạm 3.14%: ngưỡng 3.14%: tổng 4.77% >= ngưỡng, theo nguồn cao nhất 1.51% < ngưỡng, vuot_nguong False -> Dưới ngưỡng cảnh báo (CR-01)
-OK: nộp P01-B.pdf cho đề tài 248 -> 202 trong 0.042412s
+OK: nộp P01-B.pdf cho đề tài 369 -> 202 trong 0.041028s
 OK: Nộp lại cùng file (v2) HOAN_TAT: 50.3%, không nhãn của chính đề tài, nguồn vẫn 'Phát triển mô hình thống kê điểm số của người học tại trường THCS Chu Văn An sử dụng Metabase (K21)'
-OK: e2e dịch vụ AI hoàn tất (bắt đầu 2026-09-28T11:53:23 UTC)
+OK: e2e dịch vụ AI hoàn tất (bắt đầu 2026-10-02T05:28:22 UTC)
 
 ================================================================
 [9] Đo NFR-07..NFR-11 dịch vụ AI (kho đầy đủ)
 lệnh: bash deploy/ai-nfr.sh --json '$TMP/ai-nfr.json' --report docs/chuong-4-trien-khai/thu-nghiem-ai/04-hieu-nang-va-bao-mat.md
-kết quả: OK (91.5 s)
+kết quả: OK (102.6 s)
 ----------------------------------------------------------------
-OK: Môi trường: 16 CPU, 15711 MiB RAM, kho 304 tiêu đề / 2554 câu tài liệu
+OK: Môi trường: 16 CPU, 15711 MiB RAM, kho 304 tiêu đề / 2777 câu tài liệu
 OK: NFR-07: host không tới được 8002; thiếu/sai/đúng khóa = 401 401 200; Apache không route (POST /check-title -> 200 SPA); thesis_ai DB user DENIED trên thesis_core
-OK: Tài liệu dài: {"chars": 350000, "timeout_s": 111.5, "doc_s": 38.85, "so_doan": 2333, "title_ms": [449, 179, 176, 108, 90]}
-OK: Đợt K96 (id=106), đề tài 250 của DTC225200095, GVHD GV023
-   1. P01-B.pdf: nộp 0.056s, HOAN_TAT sau 1.14s (HOAN_TAT, 50.3%)
-   2. P02-B.docx: nộp 0.039s, HOAN_TAT sau 1.13s (HOAN_TAT, 100.0%)
-   3. P03-B.pdf: nộp 0.056s, HOAN_TAT sau 2.75s (HOAN_TAT, 49.32%)
-   4. P04-B.docx: nộp 0.049s, HOAN_TAT sau 0.87s (HOAN_TAT, 49.33%)
-   5. P05-B.pdf: nộp 0.049s, HOAN_TAT sau 3.03s (HOAN_TAT, 44.83%)
-   6. P06-B.docx: nộp 0.050s, HOAN_TAT sau 1.41s (HOAN_TAT, 49.74%)
-   7. P07-B.pdf: nộp 0.038s, HOAN_TAT sau 1.41s (HOAN_TAT, 57.76%)
-   8. P08-B.pdf: nộp 0.049s, HOAN_TAT sau 1.13s (HOAN_TAT, 21.23%)
-   9. P09-B.docx: nộp 0.044s, HOAN_TAT sau 1.13s (HOAN_TAT, 11.73%)
-  10. P10-B.pdf: nộp 0.049s, HOAN_TAT sau 1.15s (HOAN_TAT, 20.88%)
-  11. P11-B.docx: nộp 0.044s, HOAN_TAT sau 1.14s (HOAN_TAT, 25.54%)
-  12. P12-B.pdf: nộp 0.050s, HOAN_TAT sau 2.76s (HOAN_TAT, 31.86%)
-  13. P13-B.docx: nộp 0.049s, HOAN_TAT sau 1.13s (HOAN_TAT, 30.29%)
-  14. P14-B.pdf: nộp 0.049s, HOAN_TAT sau 3.03s (HOAN_TAT, 33.55%)
-  15. P15-B.pdf: nộp 0.055s, HOAN_TAT sau 2.75s (HOAN_TAT, 4.78%)
-  16. P16-B.docx: nộp 0.040s, HOAN_TAT sau 1.12s (HOAN_TAT, 100.0%)
-  17. P17-B.pdf: nộp 0.053s, HOAN_TAT sau 1.41s (HOAN_TAT, 100.0%)
-  18. P18-B.docx: nộp 0.051s, HOAN_TAT sau 1.17s (HOAN_TAT, 2.86%)
-  19. P19-B.pdf: nộp 0.054s, HOAN_TAT sau 2.76s (HOAN_TAT, 23.96%)
-  20. P20-B.docx: nộp 0.044s, HOAN_TAT sau 1.14s (HOAN_TAT, 0.0%)
+OK: Tài liệu dài: {"chars": 350000, "timeout_s": 111.5, "doc_s": 45.83, "so_doan": 2333, "title_ms": [352, 184, 647, 199, 231]}
+OK: Đợt K96 (id=121), đề tài 371 của DTC225200095, GVHD GV023
+   1. P01-B.pdf: nộp 0.050s, HOAN_TAT sau 1.40s (HOAN_TAT, 50.3%)
+   2. P02-B.docx: nộp 0.037s, HOAN_TAT sau 1.65s (HOAN_TAT, 100.0%)
+   3. P03-B.pdf: nộp 0.047s, HOAN_TAT sau 3.27s (HOAN_TAT, 49.32%)
+   4. P04-B.docx: nộp 0.041s, HOAN_TAT sau 0.86s (HOAN_TAT, 49.33%)
+   5. P05-B.pdf: nộp 0.052s, HOAN_TAT sau 3.56s (HOAN_TAT, 44.83%)
+   6. P06-B.docx: nộp 0.036s, HOAN_TAT sau 1.65s (HOAN_TAT, 49.74%)
+   7. P07-B.pdf: nộp 0.043s, HOAN_TAT sau 1.39s (HOAN_TAT, 57.76%)
+   8. P08-B.pdf: nộp 0.047s, HOAN_TAT sau 1.66s (HOAN_TAT, 21.23%)
+   9. P09-B.docx: nộp 0.042s, HOAN_TAT sau 1.13s (HOAN_TAT, 11.73%)
+  10. P10-B.pdf: nộp 0.051s, HOAN_TAT sau 1.92s (HOAN_TAT, 20.88%)
+  11. P11-B.docx: nộp 0.039s, HOAN_TAT sau 1.40s (HOAN_TAT, 25.54%)
+  12. P12-B.pdf: nộp 0.044s, HOAN_TAT sau 2.48s (HOAN_TAT, 31.86%)
+  13. P13-B.docx: nộp 0.050s, HOAN_TAT sau 1.14s (HOAN_TAT, 30.29%)
+  14. P14-B.pdf: nộp 0.048s, HOAN_TAT sau 3.80s (HOAN_TAT, 33.55%)
+  15. P15-B.pdf: nộp 0.043s, HOAN_TAT sau 2.74s (HOAN_TAT, 4.78%)
+  16. P16-B.docx: nộp 0.038s, HOAN_TAT sau 1.12s (HOAN_TAT, 100.0%)
+  17. P17-B.pdf: nộp 0.041s, HOAN_TAT sau 1.39s (HOAN_TAT, 100.0%)
+  18. P18-B.docx: nộp 0.041s, HOAN_TAT sau 1.13s (HOAN_TAT, 2.86%)
+  19. P19-B.pdf: nộp 0.063s, HOAN_TAT sau 3.55s (HOAN_TAT, 23.96%)
+  20. P20-B.docx: nộp 0.045s, HOAN_TAT sau 1.13s (HOAN_TAT, 0.0%)
 
 NFR      Kết quả                                                                Đạt?
 NFR-07   Host không kết nối được; mã 401 401 200; không có route (Apache trả 20 Đạt
-NFR-08   P50 46 ms, P95 53 ms, max 53 ms                                        Đạt
-NFR-09   P50 1.17 s, P95 3.03 s, max 3.03 s; 20/20 HOAN_TAT, 0 LOI              Đạt
-NFR-10   P95 0.056 s, max 0.056 s                                               Đạt
-NFR-09 (dài) 2333 câu, 38.85 s; kiểm tra tên chen giữa: 449 ms, 179 ms, 176 ms, 108 Đạt
-NFR-11   294 -> 295 (+1)                                                        Đạt
-Bộ nhớ   907MiB -> 911.4MiB; đỉnh 1004 MiB; OOMKilled=false                     Đạt
+NFR-08   P50 45 ms, P95 51 ms, max 59 ms                                        Đạt
+NFR-09   P50 1.65 s, P95 3.56 s, max 3.80 s; 20/20 HOAN_TAT, 0 LOI              Đạt
+NFR-10   P95 0.052 s, max 0.063 s                                               Đạt
+NFR-09 (dài) 2333 câu, 45.83 s; kiểm tra tên chen giữa: 352 ms, 184 ms, 647 ms, 199 Đạt
+NFR-11   411 -> 412 (+1)                                                        Đạt
+Bộ nhớ   983MiB -> 984.4MiB; đỉnh 1202 MiB; OOMKilled=false                     Đạt
 
 Đã ghi docs/chuong-4-trien-khai/thu-nghiem-ai/04-hieu-nang-va-bao-mat.md
-Đã ghi /tmp/tmp.flxKqMGqbr/ai-nfr.json
-OK: đo NFR-07..NFR-11 hoàn tất (bắt đầu 2026-09-28T11:53:49 UTC)
+Đã ghi /tmp/tmp.TV2NGQnNdl/ai-nfr.json
+OK: đo NFR-07..NFR-11 hoàn tất (bắt đầu 2026-10-02T05:28:49 UTC)
 
 ================================================================
 [10] Đo NFR hệ thống qua HTTPS (NFR-01..05, 08, 12..15, 17..19)
 lệnh: bash deploy/nfr-he-thong.sh --json '$TMP/nfr-he-thong.json'
-kết quả: OK (8.8 s)
+kết quả: OK (8.5 s)
 ----------------------------------------------------------------
 OK: NFR-01 — HTTP 301, Location https://<SERVER_NAME>:443/… (https)
 OK: NFR-02 — 131 tài khoản, tiền tố $2b$12$ (bcrypt cost 12), 0 tài khoản không đạt; mật khẩu seed xuất hiện 0 lần trong log
 OK: NFR-03 — JWT_SECRET 64 ký tự từ môi trường; token hết hạn -> 401, token còn hạn -> 200, không token -> 401
 OK: NFR-04 — mã 403 / 403 / 403
 OK: NFR-05 — khóa 200; đăng nhập khi bị khóa -> 401; token cũ -> 401; mở khóa 200; đăng nhập lại -> 200
-OK: NFR-08 — qua HTTPS: P50 0.052 s, P95 0.069 s, max 0.069 s; 0 lỗi
-OK: NFR-12 — tra cứu kho P95 0.018 s (max 0.018); danh sách đề tài P95 0.018 s (max 0.021); 0 lỗi
-OK: NFR-13 — 65 cột văn bản / 24 bảng, 0 cột và 0 bảng sai collation; thesis_core 0014 (mới nhất 0014), thesis_ai 0002 (mới nhất 0002)
+OK: NFR-08 — qua HTTPS: P50 0.054 s, P95 0.060 s, max 0.061 s; 0 lỗi
+OK: NFR-12 — tra cứu kho P95 0.014 s (max 0.014); danh sách đề tài P95 0.015 s (max 0.016); 0 lỗi
+OK: NFR-13 — 65 cột văn bản / 25 bảng, 0 cột và 0 bảng sai collation; thesis_core 0015 (mới nhất 0015), thesis_ai 0002 (mới nhất 0002)
 OK: NFR-14 — 1 kết quả giống hệt nhau ở hai dạng (trạng thái HOAN_TAT, tỷ lệ cao nhất 81.92 %)
-OK: NFR-15 — ProxyTimeout 120 s; DocumentRoot htdocs (bản build Vite); / trả SPA (id="root"), /assets/index-DcuopnRD.js -> 200 text/javascript; /api/health qua proxy: status ok
+OK: NFR-15 — ProxyTimeout 120 s; DocumentRoot htdocs (bản build Vite); / trả SPA (id="root"), /assets/index-CiFYbc0c.js -> 200 text/javascript; /api/health qua proxy: status ok
 OK: NFR-17 — 100 sinh viên, 30 giảng viên
 OK: NFR-18 — 300 đề tài thuộc 5 khóa, 300 DA_INDEX; chỉ mục tiêu đề 304 vector, thiếu embedding 0
 OK: NFR-19 — 50 tệp (25 DOCX, 25 PDF), 25 cặp A/B, 4 loại: CHEP_NGUYEN_VAN 7, CUNG_LINH_VUC 6, DIEN_DAT_LAI 7, KHONG_LIEN_QUAN 5; bảng kiểm chứng P01–P25 ở thu-nghiem-ai/03-hieu-chinh-nguong.md; 25 đồ án nguồn có báo cáo cuối đã nạp
-Đã ghi /tmp/tmp.flxKqMGqbr/nfr-he-thong.json
-OK: đo NFR hệ thống hoàn tất (bắt đầu 2026-09-28 11:55:21 UTC)
+Đã ghi /tmp/tmp.TV2NGQnNdl/nfr-he-thong.json
+OK: đo NFR hệ thống hoàn tất (bắt đầu 2026-10-02 05:30:32 UTC)
 
 ================================================================
 [11] Đối chiếu ERD với schema thesis_core
@@ -289,7 +301,7 @@ OK: schema thesis_core khớp erd.puml cho các bảng đã tạo.
 ================================================================
 [12] Không còn dữ liệu kiểm thử (K95–K99, tài khoản khóa)
 lệnh: bash deploy/verify-all.sh --buoc con-sot
-kết quả: OK (0.4 s)
+kết quả: OK (0.3 s)
 ----------------------------------------------------------------
 OK: không còn đợt đồ án kiểm thử K95–K99
 OK: không còn bản ghi kho khóa kiểm thử K95–K99
@@ -298,37 +310,39 @@ OK: không có tài khoản nào bị khóa
 ================================================================
 [13] NFR-16 — màn hình chính ở 1440 px qua Chrome headless (chỉ đọc)
 lệnh: NFR16_JSON='$TMP/nfr16.json' bash deploy/verify-all.sh --buoc nfr-16
-kết quả: OK (84.8 s)
+kết quả: OK (90.5 s)
 ----------------------------------------------------------------
-OK: uc0-dang-nhap (2.4 s)
-OK: uc0-tong-quan-sinh-vien (4.3 s)
-OK: uc0-thong-bao (2.4 s)
+OK: uc0-dang-nhap (2.3 s)
+OK: uc0-tong-quan-sinh-vien (4.2 s)
+OK: uc0-thong-bao (2.3 s)
 OK: uc0-trang-403 (2.1 s)
-OK: uc0-tong-quan-giang-vien (4.2 s)
-OK: uc0-tong-quan-bo-mon (4.2 s)
-OK: uc0-quan-ly-tai-khoan (2.2 s)
+OK: uc0-tong-quan-giang-vien (4.1 s)
+OK: uc0-tong-quan-bo-mon (4.1 s)
+OK: uc0-quan-ly-tai-khoan (2.1 s)
 OK: uc0-dot-do-an (2.1 s)
 OK: uc0-cau-hinh-nguong (2.1 s)
-OK: uc1-sv-canh-bao-trung-ten (5.0 s)
-OK: uc1-danh-sach-de-tai (5.3 s)
-OK: uc2-sv-nop-de-cuong (4.2 s)
-OK: uc2-gv-duyet-de-cuong (4.5 s)
+OK: uc0-phan-cong-gvhd (3.6 s)
+OK: uc1-sv-canh-bao-trung-ten (4.8 s)
+OK: uc1-danh-sach-de-tai (5.1 s)
+OK: uc1-sinh-vien-cua-toi (4.1 s)
+OK: uc2-sv-nop-de-cuong (4.1 s)
+OK: uc2-gv-duyet-de-cuong (4.4 s)
 OK: uc2-chi-tiet-trung-lap (2.1 s)
-OK: uc3-sv-bao-cao-tien-do (4.2 s)
-OK: uc3-gv-nhan-xet-tien-do (4.5 s)
+OK: uc3-sv-bao-cao-tien-do (4.1 s)
+OK: uc3-gv-nhan-xet-tien-do (4.4 s)
 OK: uc3-bo-mon-theo-doi-tien-do (4.3 s)
-OK: uc4-hoi-dong-lich (2.5 s)
-OK: uc4-sv-bao-cao-cuoi (4.5 s)
-OK: uc4-sv-ket-qua-bao-ve (4.2 s)
-OK: uc5-kho-tim-kiem (5.5 s)
-OK: uc5-kho-chi-tiet (4.6 s)
+OK: uc4-hoi-dong-lich (2.4 s)
+OK: uc4-sv-bao-cao-cuoi (4.4 s)
+OK: uc4-sv-ket-qua-bao-ve (4.1 s)
+OK: uc5-kho-tim-kiem (5.4 s)
+OK: uc5-kho-chi-tiet (4.4 s)
 OK: uc5-kho-import (2.3 s)
-OK: 23/23 bước, 84.1 s
-OK: NFR-16 23 màn hình, ảnh [(1440, 900)], scrollWidth max 1440 px, lỗi không
+OK: 25/25 bước, 89.9 s
+OK: NFR-16 25 màn hình, ảnh [(1440, 900)], scrollWidth max 1440 px, lỗi không
 
 ================================================================
 [14] Kiểm tra trạng thái demo không đổi (hàng của tài khoản demo trước/sau)
 lệnh: TRUOC='$TMP/demo-truoc.tsv' bash deploy/verify-all.sh --buoc trang-thai-demo
 kết quả: OK (0.6 s)
 ----------------------------------------------------------------
-OK: hàng demo trước = sau: de_tai 4, tai_lieu_do_an 6, de_cuong 4, ket_qua_kiem_tra 10, bao_cao_tien_do 2, hoi_dong 1, lich_bao_ve 2, diem_bao_ve 5, do_an_kho 1, thong_bao 22
+OK: hàng demo trước = sau: de_tai 4, tai_lieu_do_an 6, de_cuong 4, ket_qua_kiem_tra 10, bao_cao_tien_do 2, hoi_dong 1, lich_bao_ve 2, diem_bao_ve 5, do_an_kho 1, thong_bao 22, phan_cong_huong_dan 5

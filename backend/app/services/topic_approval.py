@@ -3,9 +3,9 @@ from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.deps import CurrentUser
-from app.models.de_tai import CHO_DUYET, DA_DUYET, DA_PHAN_CONG, SINH_VIEN, DeTai, TU_CHOI
-from app.models.tai_khoan import GiangVien, TaiKhoan
-from app.models.thong_bao import DE_TAI_DUYET, DE_TAI_PHAN_CONG, DE_TAI_TU_CHOI
+from app.models.de_tai import CHO_DUYET, DA_PHAN_CONG, SINH_VIEN, DeTai, TU_CHOI
+from app.models.tai_khoan import GiangVien
+from app.models.thong_bao import DE_TAI_PHAN_CONG, DE_TAI_TU_CHOI
 from app.models.trung_lap import HOAN_TAT, TEN_DE_TAI, KetQuaKiemTraTrungLap
 from app.schemas.common import Page
 from app.schemas.topic_approval import PendingTopicItem, TitleCheckSummary
@@ -14,14 +14,14 @@ from app.services import notifications
 from app.services import topics as topics_service
 from app.services.topics import _person_refs
 
-# UC1.3/D-08: Bộ môn duyệt (kèm phân công GVHD) hoặc từ chối (kèm lý do) một
-# đề tài đang Chờ duyệt — mọi thay đổi trạng thái là MỘT UPDATE có điều kiện
-# trên trang_thai = 'CHO_DUYET' (T-02-36), không đọc rồi ghi cho quyết định
-# chấp nhận/từ chối; đọc lại chỉ để chọn đúng thông điệp lỗi khi rowcount=0.
+# UC1.3/D-08 (đổi ở 0015): GVHD của SV duyệt hoặc từ chối (kèm lý do) đề tài SV
+# đề xuất đang Chờ duyệt — Bộ môn không còn duyệt đề tài; GVHD đã được Bộ môn
+# phân công từ đầu đợt (UC0.8). Mọi thay đổi trạng thái là MỘT UPDATE có điều
+# kiện trên trang_thai = 'CHO_DUYET' và giang_vien_id = người gọi (T-02-36),
+# không đọc rồi ghi; đọc lại chỉ để chọn đúng thông điệp lỗi khi rowcount=0.
 _TOPIC_NOT_FOUND_DETAIL = "Không tìm thấy đề tài"
 _NOT_PENDING_DETAIL = "Đề tài không còn ở trạng thái Chờ duyệt"
-_GV_REQUIRED_DETAIL = "Vui lòng chọn giảng viên hướng dẫn"
-_GV_INVALID_DETAIL = "Giảng viên không tồn tại hoặc đã bị khóa"
+_NOT_ADVISOR_DETAIL = "Bạn không phải giảng viên hướng dẫn của đề tài này"
 _LY_DO_MAX = 200
 
 
@@ -75,10 +75,15 @@ def _pending_item_out(topic: DeTai, ket_qua: KetQuaKiemTraTrungLap | None) -> Pe
 
 
 def list_pending(
-    db: Session, dot_do_an_id: int | None, page: int, page_size: int
+    db: Session, user: CurrentUser, dot_do_an_id: int | None, page: int, page_size: int
 ) -> Page[PendingTopicItem]:
-    """UC1.3/MH-07: mọi đề tài Chờ duyệt (lọc theo đợt nếu có), cũ nhất trước."""
-    stmt = select(DeTai).where(DeTai.trang_thai == CHO_DUYET)
+    """UC1.3/MH-07: đề tài SV trong lớp mình gửi đang Chờ duyệt (lọc theo đợt
+    nếu có), cũ nhất trước."""
+    stmt = (
+        select(DeTai)
+        .where(DeTai.trang_thai == CHO_DUYET)
+        .where(DeTai.giang_vien_id == user.giang_vien_id)
+    )
     if dot_do_an_id is not None:
         stmt = stmt.where(DeTai.dot_do_an_id == dot_do_an_id)
 
@@ -124,79 +129,45 @@ def list_pending(
     return Page[PendingTopicItem](items=items, total=total, page=page, page_size=page_size)
 
 
-def approve(
-    db: Session, user: CurrentUser, topic_id: int, giang_vien_id: int | None
-) -> TopicOut:
-    """UC1.3: GV-proposed chưa có SV -> Đã duyệt (mở đăng ký); đã có SV (tự đề
-    xuất hoặc đã đăng ký) -> Đã phân công, BẮT BUỘC chọn GVHD thủ công (E1,
-    không bao giờ tự động gán kể cả khi GV đề xuất là lựa chọn duy nhất)."""
+def _own_topic_or_error(db: Session, user: CurrentUser, topic_id: int) -> DeTai:
     topic = db.get(DeTai, topic_id)
     if topic is None:
         raise HTTPException(status_code=404, detail=_TOPIC_NOT_FOUND_DETAIL)
+    if user.giang_vien_id is None or topic.giang_vien_id != user.giang_vien_id:
+        raise HTTPException(status_code=403, detail=_NOT_ADVISOR_DETAIL)
+    return topic
 
+
+def approve(db: Session, user: CurrentUser, topic_id: int) -> TopicOut:
+    """UC1.3: GVHD duyệt đề tài SV trong lớp mình đề xuất -> Đã phân công."""
+    topic = _own_topic_or_error(db, user, topic_id)
     ten = topic.ten_de_tai
-    # NOTF-01: đọc tên người nhận TRƯỚC UPDATE; quyết định chấp nhận/từ chối
-    # vẫn chỉ do mệnh đề WHERE của UPDATE (T-02-36).
-    events: list[tuple[int, str, str]] = []
-    if topic.sinh_vien_id is None:
-        stmt = (
-            update(DeTai)
-            .where(DeTai.id == topic_id)
-            .where(DeTai.trang_thai == CHO_DUYET)
-            .where(DeTai.sinh_vien_id.is_(None))
-            .values(trang_thai=DA_DUYET)
-        )
-        if topic.giang_vien is not None:
-            events.append(
-                (
-                    topic.giang_vien.tai_khoan_id,
-                    DE_TAI_DUYET,
-                    f"Đề tài '{ten}' đã được Bộ môn duyệt và mở cho sinh viên đăng ký",
-                )
-            )
-    else:
-        if giang_vien_id is None:
-            raise HTTPException(status_code=422, detail=_GV_REQUIRED_DETAIL)
-        gv = db.execute(
-            select(GiangVien)
-            .join(TaiKhoan, TaiKhoan.id == GiangVien.tai_khoan_id)
-            .where(GiangVien.id == giang_vien_id)
-            .where(TaiKhoan.bi_khoa.is_(False))
-        ).scalar_one_or_none()
-        if gv is None:
-            raise HTTPException(status_code=422, detail=_GV_INVALID_DETAIL)
+    sv_seen = topic.sinh_vien_id
+    sv = topic.sinh_vien
+    gv = db.get(GiangVien, user.giang_vien_id)
 
-        sv_seen = topic.sinh_vien_id
-        sv = topic.sinh_vien
-        stmt = (
-            update(DeTai)
-            .where(DeTai.id == topic_id)
-            .where(DeTai.trang_thai == CHO_DUYET)
-            .where(DeTai.sinh_vien_id == sv_seen)
-            .values(trang_thai=DA_PHAN_CONG, giang_vien_id=giang_vien_id)
-        )
-        events.append(
-            (
-                sv.tai_khoan_id,
-                DE_TAI_PHAN_CONG,
-                f"Đề tài '{ten}' đã được duyệt — GVHD: {_gv_label(gv)}",
-            )
-        )
-        events.append(
-            (
-                gv.tai_khoan_id,
-                DE_TAI_PHAN_CONG,
-                f"Bạn được phân công hướng dẫn {sv.ho_ten or ''} — đề tài '{ten}'",
-            )
-        )
-
+    stmt = (
+        update(DeTai)
+        .where(DeTai.id == topic_id)
+        .where(DeTai.trang_thai == CHO_DUYET)
+        .where(DeTai.giang_vien_id == user.giang_vien_id)
+        .where(DeTai.loai_nguoi_de_xuat == SINH_VIEN)
+        .where(DeTai.sinh_vien_id == sv_seen)
+        .values(trang_thai=DA_PHAN_CONG)
+    )
     result = db.execute(stmt)
     if result.rowcount == 0:
         raise _refused(db, topic_id)
 
     # D-08/T-03-39: thông báo và thay đổi trạng thái chung MỘT commit.
-    for tai_khoan_id, loai, noi_dung in events:
-        notifications.create(db, tai_khoan_id, loai, noi_dung, lien_ket=_lien_ket(topic_id))
+    if sv is not None:
+        notifications.create(
+            db,
+            sv.tai_khoan_id,
+            DE_TAI_PHAN_CONG,
+            f"Đề tài '{ten}' đã được GVHD {_gv_label(gv)} duyệt",
+            lien_ket=_lien_ket(topic_id),
+        )
     db.commit()
 
     return topics_service.get_topic(db, user, topic_id)
@@ -204,40 +175,29 @@ def approve(
 
 def reject(db: Session, user: CurrentUser, topic_id: int, ly_do: str) -> TopicOut:
     """UC1.3/A1: lý do bắt buộc, lưu vào de_tai.ly_do_tu_choi; cột sinh
-    sinh_vien_id_dang_hoat_dong tự giải phóng SV ngay khi trang_thai=TU_CHOI."""
-    # NOTF-01: một db.get để biết người đề xuất và tên đề tài cho thông báo —
-    # KHÔNG dùng để quyết định; UPDATE có điều kiện vẫn là nơi quyết định.
-    # WR-11: người đề xuất VÀ SV đã đăng ký đề tài GV đề xuất (bị giải phóng
-    # khi từ chối) đều được báo — mỗi tài khoản một thông báo.
-    topic = db.get(DeTai, topic_id)
-    recipients: list[int] = []
-    ten = ""
-    if topic is not None:
-        ten = topic.ten_de_tai
-        if topic.loai_nguoi_de_xuat == SINH_VIEN:
-            if topic.sinh_vien is not None:
-                recipients.append(topic.sinh_vien.tai_khoan_id)
-        elif topic.giang_vien is not None:
-            recipients.append(topic.giang_vien.tai_khoan_id)
-        if topic.sinh_vien is not None and topic.sinh_vien.tai_khoan_id not in recipients:
-            recipients.append(topic.sinh_vien.tai_khoan_id)
+    sinh_vien_id_dang_hoat_dong tự giải phóng SV ngay khi trang_thai=TU_CHOI —
+    SV đề xuất đề tài khác (vẫn gửi tới cùng GVHD)."""
+    topic = _own_topic_or_error(db, user, topic_id)
+    ten = topic.ten_de_tai
+    sv = topic.sinh_vien
 
     stmt = (
         update(DeTai)
         .where(DeTai.id == topic_id)
         .where(DeTai.trang_thai == CHO_DUYET)
+        .where(DeTai.giang_vien_id == user.giang_vien_id)
         .values(trang_thai=TU_CHOI, ly_do_tu_choi=ly_do)
     )
     result = db.execute(stmt)
     if result.rowcount == 0:
         raise _refused(db, topic_id)
 
-    for recipient in recipients:
+    if sv is not None:
         notifications.create(
             db,
-            recipient,
+            sv.tai_khoan_id,
             DE_TAI_TU_CHOI,
-            f"Đề tài '{ten}' bị từ chối: {ly_do[:_LY_DO_MAX]}",
+            f"Đề tài '{ten}' bị GVHD từ chối: {ly_do[:_LY_DO_MAX]}",
             lien_ket=_lien_ket(topic_id),
         )
     db.commit()

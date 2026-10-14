@@ -14,6 +14,7 @@ rectangle "UC0 – Chức năng chung" {
   usecase "UC0.5 – Xem thông báo" as UC0_5
   usecase "UC0.6 – Kiểm tra trùng lặp tên đề tài" as UC0_6
   usecase "UC0.7 – Kiểm tra trùng lặp tài liệu" as UC0_7
+  usecase "UC0.8 – Phân công GVHD" as UC0_8
 }
 
 SV --> UC0_1
@@ -23,6 +24,9 @@ BM --> UC0_1
 BM --> UC0_2
 BM --> UC0_3
 BM --> UC0_4
+BM --> UC0_8
+GV --> UC0_8
+SV --> UC0_8
 
 SV --> UC0_5
 GV --> UC0_5
@@ -34,5 +38,11 @@ note bottom of UC0_6
   <<include>> từ UC1 (UC0.6) và UC2/UC4
   (UC0.7), không có tác nhân người dùng
   trực tiếp gọi thẳng trên sơ đồ này.
+end note
+note right of UC0_8
+  UC0.8: Bộ môn gán mỗi SV cho đúng một GVHD
+  trong đợt (từng dòng / hàng loạt / CSV);
+  GV xem "Sinh viên của tôi", SV xem GVHD
+  của mình (chỉ đọc).
 end note
 @enduml

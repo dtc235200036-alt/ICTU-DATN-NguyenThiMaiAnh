@@ -51,6 +51,16 @@ entity "dot_do_an" as dot_do_an {
   trang_thai : VARCHAR(20)
 }
 
+entity "phan_cong_huong_dan" as phan_cong_huong_dan {
+  *id : BIGINT <<PK>>
+  --
+  dot_do_an_id : BIGINT <<FK>> <<NOT NULL>>
+  sinh_vien_id : BIGINT <<FK>> <<NOT NULL>>
+  giang_vien_id : BIGINT <<FK>> <<NOT NULL>>
+  thoi_diem : DATETIME <<NOT NULL>>
+  ..UNIQUE uk_phan_cong_sv_dot (dot_do_an_id, sinh_vien_id)..
+}
+
 entity "de_tai" as de_tai {
   *id : BIGINT <<PK>>
   --
@@ -259,6 +269,13 @@ giang_vien |o--o{ de_tai : "GV đề xuất/hướng dẫn 0..*"
 sinh_vien |o--o| de_tai : "SV đăng ký 0..1"
 de_tai ||--o{ ket_qua_kiem_tra_trung_lap : "1 đề tài có nhiều kết quả kiểm tra"
 ket_qua_kiem_tra_trung_lap ||--o{ chi_tiet_trung_lap : "1 kết quả có nhiều chi tiết"
+
+' =====================================================================
+' Quan hệ — phân công GVHD theo đợt (UC0.8, Alembic 0015)
+' =====================================================================
+dot_do_an ||--o{ phan_cong_huong_dan : "fk_phan_cong_dot_do_an"
+sinh_vien ||--o{ phan_cong_huong_dan : "fk_phan_cong_sinh_vien (≤ 1 mỗi đợt)"
+giang_vien ||--o{ phan_cong_huong_dan : "fk_phan_cong_giang_vien (lớp hướng dẫn)"
 
 ' =====================================================================
 ' Quan hệ — đề cương, tài liệu, tiến độ

@@ -3,26 +3,29 @@
 # đã seed — chạy trước mỗi buổi demo/tập dượt và sau mỗi lần chạy kịch bản.
 #
 #   bash deploy/demo-state.sh             # xóa trạng thái demo cũ + dựng lại
-#   bash deploy/demo-state.sh --chi-xoa   # chỉ xóa (đợt K22 trống cho 5 SV demo)
+#   bash deploy/demo-state.sh --chi-xoa   # chỉ xóa (đợt K22 trống cho 5 SV demo, GVHD GV011)
 #   bash deploy/demo-state.sh --dem       # chỉ ĐỌC: in chữ ký (số hàng + md5 cột trạng
 #                                         # thái) của mọi hàng demo — verify-all so trước/sau
 #
 # Tài khoản demo DÀNH RIÊNG (không bộ kiểm thử tự động nào dùng; tự động dùng
-# K95–K99, DTC225200094–100, GV023, GV025–GV030; smoke-test chỉ ĐỌC với
-# DTC225200001/GV001):
-#   SV  DTC225200011  chưa có đề tài — demo trực tiếp: đề xuất tên diễn đạt lại
-#                     đề tài kho -> cảnh báo AI -> gửi; Bộ môn duyệt + phân
-#                     công GV011; nộp đề cương chép nguyên văn -> "Đang kiểm tra"
+# K95–K99, SV thứ 93–100 của danh sách (DTC235210023…DTC235210045), GV023–GV030; smoke-test chỉ ĐỌC với
+# DTC235200016/GV001):
+#   Phân công GVHD (UC0.8, 0015): cả 5 SV demo được Bộ môn gán cho GVHD GV011
+#                     trong đợt K22 (đặt lại mỗi lần chạy, kể cả --chi-xoa;
+#                     seed mặc định gán 012..015 cho GV012..GV015)
+#   SV  DTC235200139  chưa có đề tài — demo trực tiếp: đề xuất tên diễn đạt lại
+#                     đề tài kho -> cảnh báo AI -> gửi tới GVHD GV011; GV011
+#                     duyệt; nộp đề cương chép nguyên văn -> "Đang kiểm tra"
 #                     -> "Hoàn tất – x%"
-#   SV  DTC225200012  đề tài đã phân công GV011; đề cương v1 = tệp B của một cặp
+#   SV  DTC235200258  đề tài tự đề xuất, GVHD GV011 đã duyệt; đề cương v1 = tệp B của một cặp
 #                     CHEP_NGUYEN_VAN, kiểm tra xong (liệt kê đồ án nguồn trong
 #                     kho), CHỜ GV011 duyệt (MH-09 / MH-14 đoạn tô sáng)
-#   SV  DTC225200013  đề cương đã duyệt (tệp B cặp KHONG_LIEN_QUAN), 2 báo cáo
+#   SV  DTC235200325  đề cương đã duyệt (tệp B cặp KHONG_LIEN_QUAN), 2 báo cáo
 #                     tiến độ: mốc 1 đã được GV011 nhận xét, mốc 2 chờ nhận xét
-#   SV  DTC225200014  báo cáo cuối đã kiểm tra, xếp lịch "Hội đồng demo K22",
+#   SV  DTC235200340  báo cáo cuối đã kiểm tra, xếp lịch "Hội đồng demo K22",
 #                     GV012 + GV013 đã chấm, GV014 CHƯA chấm (demo: GV014 chấm,
 #                     Bộ môn chốt điểm -> tự lưu kho)
-#   SV  DTC225200015  như 014 nhưng đủ 3 điểm, đã chốt và đã nằm trong Kho đồ án
+#   SV  DTC235270078  như 014 nhưng đủ 3 điểm, đã chốt và đã nằm trong Kho đồ án
 #   GV  GV011 (GVHD), GV012 (chủ tịch), GV013 (thư ký), GV014 (ủy viên); Bộ môn `bomon`
 #   Đợt: "Đợt đồ án tốt nghiệp K22 - HK1 (2026-2027)" (đợt K22 đang mở của seed)
 #
@@ -43,7 +46,9 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 BASE="${BASE_URL:-https://localhost:${HTTPS_PORT:-443}}"
 COMPOSE=(docker compose -f "${SCRIPT_DIR}/docker-compose.yml")
 
-DEMO_SV=(DTC225200011 DTC225200012 DTC225200013 DTC225200014 DTC225200015)
+DEMO_SV=(DTC235200139 DTC235200258 DTC235200325 DTC235200340 DTC235270078)
+# Số hiệu kịch bản demo (011..015) của từng SV — khóa tệp mẫu DC0xx/BC0xx.
+declare -A SO=([DTC235200139]=011 [DTC235200258]=012 [DTC235200325]=013 [DTC235200340]=014 [DTC235270078]=015)
 DEMO_GV=(GV011 GV012 GV013 GV014)
 DOT_TEN="Đợt đồ án tốt nghiệp K22 - HK1 (2026-2027)"
 HOI_DONG_TEN="Hội đồng demo K22"
@@ -120,7 +125,8 @@ UNION ALL SELECT 'hoi_dong', COUNT(*), IFNULL(MD5(GROUP_CONCAT(CONCAT_WS(':', id
 UNION ALL SELECT 'lich_bao_ve', COUNT(*), IFNULL(MD5(GROUP_CONCAT(CONCAT_WS(':', id, da_chot, IFNULL(diem_trung_binh, '-')) ORDER BY id)), '-') FROM lich_bao_ve WHERE id IN (SELECT id FROM (${L_SEL}) x)
 UNION ALL SELECT 'diem_bao_ve', COUNT(*), IFNULL(MD5(GROUP_CONCAT(CONCAT_WS(':', id, diem) ORDER BY id)), '-') FROM diem_bao_ve WHERE lich_bao_ve_id IN (SELECT id FROM (${L_SEL}) x)
 UNION ALL SELECT 'do_an_kho', COUNT(*), IFNULL(MD5(GROUP_CONCAT(CONCAT_WS(':', id, trang_thai_index, IFNULL(diem, '-'), IFNULL(tu_khoa, '-')) ORDER BY id)), '-') FROM do_an_kho WHERE de_tai_id IN (${T_SEL})
-UNION ALL SELECT 'thong_bao', COUNT(*), IFNULL(MD5(GROUP_CONCAT(CONCAT_WS(':', id, da_doc) ORDER BY id)), '-') FROM thong_bao WHERE tai_khoan_id IN (${TK_DEMO_IDS})"
+UNION ALL SELECT 'thong_bao', COUNT(*), IFNULL(MD5(GROUP_CONCAT(CONCAT_WS(':', id, da_doc) ORDER BY id)), '-') FROM thong_bao WHERE tai_khoan_id IN (${TK_DEMO_IDS})
+UNION ALL SELECT 'phan_cong_huong_dan', COUNT(*), IFNULL(MD5(GROUP_CONCAT(CONCAT_WS(':', sinh_vien_id, giang_vien_id) ORDER BY sinh_vien_id)), '-') FROM phan_cong_huong_dan WHERE dot_do_an_id = ${DOT_ID} AND sinh_vien_id IN (${SV_IDS})"
   exit 0
 fi
 ok "5 SV demo (sinh_vien.id ${SV_IDS}), 4 GV demo, đợt K22 id=${DOT_ID}"
@@ -189,9 +195,23 @@ DELETE FROM de_tai WHERE id IN (${T_IN});" >/dev/null
 
 CON="$(sql "SELECT (SELECT COUNT(*) FROM de_tai WHERE dot_do_an_id = ${DOT_ID} AND sinh_vien_id IN (${SV_IDS})) + (SELECT COUNT(*) FROM hoi_dong WHERE ten_hoi_dong = '${HOI_DONG_TEN}')")"
 [ "$CON" = "0" ] || fail "Sau khi xóa vẫn còn ${CON} đề tài/hội đồng demo"
-N011="$(sql "SELECT COUNT(*) FROM de_tai dt JOIN sinh_vien sv ON sv.id = dt.sinh_vien_id JOIN tai_khoan tk ON tk.id = sv.tai_khoan_id WHERE tk.ma_dang_nhap = 'DTC225200011'")"
-[ "$N011" = "0" ] || fail "DTC225200011 vẫn còn ${N011} đề tài"
-ok "Đã xóa trạng thái demo (DTC225200011 không còn đề tài nào) sau $((SECONDS - T_BAT_DAU)) s"
+N011="$(sql "SELECT COUNT(*) FROM de_tai dt JOIN sinh_vien sv ON sv.id = dt.sinh_vien_id JOIN tai_khoan tk ON tk.id = sv.tai_khoan_id WHERE tk.ma_dang_nhap = 'DTC235200139'")"
+[ "$N011" = "0" ] || fail "DTC235200139 vẫn còn ${N011} đề tài"
+ok "Đã xóa trạng thái demo (DTC235200139 không còn đề tài nào) sau $((SECONDS - T_BAT_DAU)) s"
+
+# UC0.8 (0015): Bộ môn gán cả 5 SV demo cho GVHD GV011 trong đợt K22 (qua API
+# PUT /api/assignments; SV không còn đề tài nên luôn đổi được). Gán lại một SV
+# đã đúng GV011 là no-op. Thông báo PHAN_CONG_GVHD phát sinh bị xóa ngay để
+# trạng thái demo giống hệt nhau dù chạy lần đầu hay lần thứ n.
+GV011_ID="$(sql "SELECT gv.id FROM giang_vien gv JOIN tai_khoan tk ON tk.id = gv.tai_khoan_id WHERE tk.ma_dang_nhap = 'GV011'")"
+[ -n "$GV011_ID" ] || fail "Không tìm thấy giảng viên GV011"
+TOKEN_BOMON_PC="$(bash "${SCRIPT_DIR}/api-login.sh" bomon)" || fail "Không đăng nhập được bomon"
+json_req PUT "${TOKEN_BOMON_PC}" /api/assignments "{'dot_do_an_id': ${DOT_ID}, 'items': [{'sinh_vien_id': i, 'giang_vien_id': ${GV011_ID}} for i in (${SV_IDS},)]}" 200
+PC_DOI="$(jget "d['cap_nhat']")"
+sql "DELETE FROM thong_bao WHERE tai_khoan_id IN (${TK_DEMO_IDS});" >/dev/null
+PC_GV011="$(sql "SELECT COUNT(*) FROM phan_cong_huong_dan WHERE dot_do_an_id = ${DOT_ID} AND sinh_vien_id IN (${SV_IDS}) AND giang_vien_id = ${GV011_ID}")"
+[ "$PC_GV011" = "5" ] || fail "Sau khi gán chỉ ${PC_GV011}/5 SV demo có GVHD GV011"
+ok "Phân công GVHD: 5 SV demo -> GV011 trong đợt K22 (đổi ${PC_DOI} dòng)"
 
 if [ "$CHI_XOA" = "1" ]; then
   ok "--chi-xoa: dừng sau bước xóa ($((SECONDS - T_BAT_DAU)) s)"
@@ -232,7 +252,7 @@ gv_id() {
   python3 -c "import json,sys; print(next(g['id'] for g in json.load(open('$TMP/gv.json')) if g.get('ma_giang_vien') == sys.argv[1]))" "$1" \
     || fail "Không tìm được id ${1} trong /api/lecturers"
 }
-GV011="$(gv_id GV011)"; GV012="$(gv_id GV012)"; GV013="$(gv_id GV013)"; GV014="$(gv_id GV014)"
+GV012="$(gv_id GV012)"; GV013="$(gv_id GV013)"; GV014="$(gv_id GV014)"
 
 # Mốc tiến độ của đợt (get-or-create, hạn tương đối theo ngày chạy, kẹp trong đợt).
 HOM_NAY="$(TZ=Asia/Ho_Chi_Minh date +%F)"
@@ -255,17 +275,23 @@ done
 ok "Mốc tiến độ đợt K22: ${MOC[1]}, ${MOC[2]}, ${MOC[3]} (hạn +3/+17/+45 ngày, tối đa ${DOT_KT})"
 
 declare -A DE_TAI
+# UC1.3 (0015): SV gửi đề tài -> Chờ duyệt, tới GVHD GV011; GV011 duyệt (không
+# gửi thân) -> Đã phân công. Bộ môn không còn bước duyệt/phân công đề tài.
 de_xuat() {  # ma ten linh_vuc
   json_req POST "${TOKEN[$1]}" /api/topics "{'dot_do_an_id': ${DOT_ID}, 'ten_de_tai': '''$2''', 'linh_vuc': '''$3''', 'gui': True}" 201
   DE_TAI[$1]="$(jget "d['id']")"
-  json_req POST "${TOKEN[bomon]}" "/api/topic-approvals/${DE_TAI[$1]}/approve" "{'giang_vien_id': ${GV011}}" 200
+  [ "$(jget "d['trang_thai'] + '|' + (d['giang_vien_huong_dan'] or {}).get('ma', '')")" = "CHO_DUYET|GV011" ] \
+    || fail "Đề tài của $1 không Chờ duyệt GVHD GV011: $(head -c 400 "$TMP/body")"
+  local code
+  code="$(call POST "/api/topic-approvals/${DE_TAI[$1]}/approve" "${TOKEN[GV011]}")"
+  [ "$code" = "200" ] || fail "GV011 duyệt đề tài của $1 trả ${code}: $(head -c 400 "$TMP/body")"
   [ "$(jget "d['trang_thai']")" = "DA_PHAN_CONG" ] || fail "Đề tài của $1 không Đã phân công"
 }
-de_xuat DTC225200012 "Xây dựng hệ thống quản lý thiết bị phòng máy thực hành cho Khoa Công nghệ thông tin" "Hệ thống thông tin"
-de_xuat DTC225200013 "Phát triển ứng dụng hỗ trợ sinh viên tìm nhà trọ quanh Đại học Thái Nguyên" "Công nghệ phần mềm"
-de_xuat DTC225200014 "Xây dựng hệ thống quản lý câu lạc bộ sinh viên Trường Đại học Công nghệ Thông tin và Truyền thông" "Hệ thống thông tin"
-de_xuat DTC225200015 "Phát triển ứng dụng di động theo dõi lịch tiêm chủng cho trẻ em tại trạm y tế phường Tân Thịnh" "Công nghệ phần mềm"
-ok "4 đề tài tự đề xuất (012..015) đã được Bộ môn duyệt, phân công GV011: ${DE_TAI[DTC225200012]}, ${DE_TAI[DTC225200013]}, ${DE_TAI[DTC225200014]}, ${DE_TAI[DTC225200015]}"
+de_xuat DTC235200258 "Xây dựng hệ thống quản lý thiết bị phòng máy thực hành cho Khoa Công nghệ thông tin" "Hệ thống thông tin"
+de_xuat DTC235200325 "Phát triển ứng dụng hỗ trợ sinh viên tìm nhà trọ quanh Đại học Thái Nguyên" "Công nghệ phần mềm"
+de_xuat DTC235200340 "Xây dựng hệ thống quản lý câu lạc bộ sinh viên Trường Đại học Công nghệ Thông tin và Truyền thông" "Hệ thống thông tin"
+de_xuat DTC235270078 "Phát triển ứng dụng di động theo dõi lịch tiêm chủng cho trẻ em tại trạm y tế phường Tân Thịnh" "Công nghệ phần mềm"
+ok "4 đề tài tự đề xuất (012..015) đã được GVHD GV011 duyệt (Đã phân công): ${DE_TAI[DTC235200258]}, ${DE_TAI[DTC235200325]}, ${DE_TAI[DTC235200340]}, ${DE_TAI[DTC235270078]}"
 
 # nop PATH_API TOKEN FILE -> id tài liệu; cho_kiem_tra TOKEN DOC_ID -> "ty_le|so_doan"
 nop() {
@@ -294,13 +320,13 @@ duyet_de_cuong() {  # ma doc_id
 }
 
 declare -A DOC
-for ma in DTC225200012 DTC225200013 DTC225200014 DTC225200015; do
-  k="DC${ma: -3}"
+for ma in DTC235200258 DTC235200325 DTC235200340 DTC235270078; do
+  k="DC${SO[$ma]}"
   DOC[$k]="$(nop "/api/outlines/${DE_TAI[$ma]}/submit" "${TOKEN[$ma]}" "$(tep "$k")")"
 done
 declare -A TL
-for ma in DTC225200012 DTC225200013 DTC225200014 DTC225200015; do
-  k="DC${ma: -3}"
+for ma in DTC235200258 DTC235200325 DTC235200340 DTC235270078; do
+  k="DC${SO[$ma]}"
   TL[$k]="$(cho_kiem_tra "${TOKEN[$ma]}" "${DOC[$k]}")"
 done
 python3 - "$TMP/check-${DOC[DC012]}.json" "$CHEP012_NGUON" <<'PY' || fail "Đề cương 012 không liệt kê đúng đồ án nguồn chép nguyên văn"
@@ -311,40 +337,40 @@ assert d["do_an_trung"] and d["do_an_trung"][0]["doi_tuong_trung"] == sys.argv[2
 assert any("nguyên văn" in (s["vi_tri"] or "") for s in d["chi_tiet"])
 PY
 ok "Đề cương 012 ($(nhan DC012)-B) Hoàn tất ${TL[DC012]}, vượt ngưỡng, đồ án nguồn '${CHEP012_NGUON}' — CHỜ GV011 duyệt"
-for ma in DTC225200013 DTC225200014 DTC225200015; do duyet_de_cuong "$ma" "${DOC[DC${ma: -3}]}"; done
+for ma in DTC235200325 DTC235200340 DTC235270078; do duyet_de_cuong "$ma" "${DOC[DC${SO[$ma]}]}"; done
 ok "Đề cương 013/014/015 ($(nhan DC013)/$(nhan DC014)/$(nhan DC015)-B, ${TL[DC013]}/${TL[DC014]}/${TL[DC015]}) — GV011 đã duyệt"
 
 # UC3: 013 nộp mốc 1 + mốc 2; GV011 nhận xét mốc 1.
 for spec in "1|Đã hoàn thành khảo sát nhu cầu thuê trọ của 120 sinh viên, đặc tả 14 use case và thiết kế CSDL (9 bảng)." \
             "2|Đã cài đặt tìm kiếm phòng trọ theo bản đồ, lọc theo giá/khoảng cách và đăng tin cho chủ trọ; đang tích hợp đánh giá phòng."; do
   IFS='|' read -r so nd <<<"$spec"
-  code="$(call POST "/api/progress/reports/${MOC[$so]}" "${TOKEN[DTC225200013]}" --form-string "noi_dung=${nd}")"
+  code="$(call POST "/api/progress/reports/${MOC[$so]}" "${TOKEN[DTC235200325]}" --form-string "noi_dung=${nd}")"
   [ "$code" = "200" ] || fail "013 nộp báo cáo mốc ${so} trả ${code}: $(head -c 300 "$TMP/body")"
 done
-call GET "/api/progress/topics/${DE_TAI[DTC225200013]}" "${TOKEN[GV011]}" >/dev/null
+call GET "/api/progress/topics/${DE_TAI[DTC235200325]}" "${TOKEN[GV011]}" >/dev/null
 BC1="$(jget "next(m['bao_cao']['id'] for m in d['moc'] if m['id'] == ${MOC[1]})")"
 json_req POST "${TOKEN[GV011]}" "/api/progress/reports/${BC1}/review" "{'nhan_xet': 'Phân tích đầy đủ, thiết kế CSDL hợp lý. Bổ sung sơ đồ tuần tự cho chức năng đăng tin.', 'danh_gia': 'DAT'}" 200
 ok "013: 2 báo cáo tiến độ (mốc 1 GV011 đã nhận xét Đạt, mốc 2 chờ nhận xét)"
 
 # UC4: báo cáo cuối 014/015 -> hội đồng demo -> điểm.
-for ma in DTC225200014 DTC225200015; do
-  k="BC${ma: -3}"
+for ma in DTC235200340 DTC235270078; do
+  k="BC${SO[$ma]}"
   DOC[$k]="$(nop "/api/defense/final-reports/${DE_TAI[$ma]}" "${TOKEN[$ma]}" "$(tep "$k")")"
 done
-for ma in DTC225200014 DTC225200015; do
-  k="BC${ma: -3}"
+for ma in DTC235200340 DTC235270078; do
+  k="BC${SO[$ma]}"
   TL[$k]="$(cho_kiem_tra "${TOKEN[$ma]}" "${DOC[$k]}")"
 done
 ok "Báo cáo cuối 014/015 ($(nhan BC014)/$(nhan BC015)-B) Hoàn tất ${TL[BC014]}/${TL[BC015]}"
 
 json_req POST "${TOKEN[bomon]}" /api/defense/committees "{'ten_hoi_dong': '''${HOI_DONG_TEN}''', 'ngay_bao_ve': '${HOM_NAY}', 'gio_bao_ve': '08:00', 'phong': 'C2-301', 'thanh_vien': [{'giang_vien_id': ${GV012}, 'vai_tro': 'CHU_TICH'}, {'giang_vien_id': ${GV013}, 'vai_tro': 'THU_KY'}, {'giang_vien_id': ${GV014}, 'vai_tro': 'UY_VIEN'}]}" 201
 HD="$(jget "d['id']")"
-for ma in DTC225200015 DTC225200014; do
+for ma in DTC235270078 DTC235200340; do
   json_req POST "${TOKEN[bomon]}" "/api/defense/committees/${HD}/schedules" "{'de_tai_id': ${DE_TAI[$ma]}}" 201
 done
 call GET "/api/defense/committees/${HD}" "${TOKEN[bomon]}" >/dev/null
-LICH015="$(jget "next(r['id'] for r in d['lich'] if r['de_tai_id'] == ${DE_TAI[DTC225200015]})")"
-LICH014="$(jget "next(r['id'] for r in d['lich'] if r['de_tai_id'] == ${DE_TAI[DTC225200014]})")"
+LICH015="$(jget "next(r['id'] for r in d['lich'] if r['de_tai_id'] == ${DE_TAI[DTC235270078]})")"
+LICH014="$(jget "next(r['id'] for r in d['lich'] if r['de_tai_id'] == ${DE_TAI[DTC235200340]})")"
 cham() {  # gv lich diem nhan_xet
   json_req PUT "${TOKEN[$1]}" "/api/defense/schedules/$2/score" "{'diem': $3, 'nhan_xet': '''$4'''}" 200
 }
@@ -366,7 +392,7 @@ ok "Hội đồng demo K22 (id=${HD}, ${HOM_NAY} 08:00, C2-301: GV012 chủ tị
 
 echo
 echo "=== Trạng thái demo (đợt K22 id=${DOT_ID})"
-printf '%-14s %-9s %s\n' "DTC225200011" "—" "chưa có đề tài (demo trực tiếp: đề xuất -> cảnh báo AI -> gửi -> duyệt -> nộp $(python3 - "$REPO_ROOT" <<'PY'
+printf '%-14s %-9s %s\n' "DTC235200139" "—" "chưa có đề tài, GVHD GV011 (demo trực tiếp: đề xuất -> cảnh báo AI -> gửi -> GV011 duyệt -> nộp $(python3 - "$REPO_ROOT" <<'PY'
 import json, sys
 root = sys.argv[1]
 m = json.load(open(f"{root}/seed-data/manifest.json", encoding="utf-8"))
@@ -374,8 +400,8 @@ dat = {c["ma_cap"] for c in json.load(open(f"{root}/ai-service/calibration/ket-q
 print([c for c in m["cap"] if c["loai"] == "CHEP_NGUYEN_VAN" and c["ma_cap"] in dat][2]["B"]["tep"])
 PY
 ))"
-printf '%-14s %-9s %s\n' "DTC225200012" "${DE_TAI[DTC225200012]}" "đề cương v1 $(nhan DC012)-B, Hoàn tất ${TL[DC012]}, chờ GV011 duyệt"
-printf '%-14s %-9s %s\n' "DTC225200013" "${DE_TAI[DTC225200013]}" "đề cương đã duyệt; tiến độ: mốc 1 đã nhận xét, mốc 2 chờ nhận xét"
-printf '%-14s %-9s %s\n' "DTC225200014" "${DE_TAI[DTC225200014]}" "báo cáo cuối ${TL[BC014]}; Hội đồng demo K22: 2/3 điểm (GV014 chưa chấm)"
-printf '%-14s %-9s %s\n' "DTC225200015" "${DE_TAI[DTC225200015]}" "đã chốt TB ${DTB015}, trong Kho đồ án (id ${KHO015})"
+printf '%-14s %-9s %s\n' "DTC235200258" "${DE_TAI[DTC235200258]}" "đề cương v1 $(nhan DC012)-B, Hoàn tất ${TL[DC012]}, chờ GV011 duyệt"
+printf '%-14s %-9s %s\n' "DTC235200325" "${DE_TAI[DTC235200325]}" "đề cương đã duyệt; tiến độ: mốc 1 đã nhận xét, mốc 2 chờ nhận xét"
+printf '%-14s %-9s %s\n' "DTC235200340" "${DE_TAI[DTC235200340]}" "báo cáo cuối ${TL[BC014]}; Hội đồng demo K22: 2/3 điểm (GV014 chưa chấm)"
+printf '%-14s %-9s %s\n' "DTC235270078" "${DE_TAI[DTC235270078]}" "đã chốt TB ${DTB015}, trong Kho đồ án (id ${KHO015})"
 ok "Dựng trạng thái demo xong: dựng $((SECONDS - T_DUNG)) s, tổng $((SECONDS - T_BAT_DAU)) s"

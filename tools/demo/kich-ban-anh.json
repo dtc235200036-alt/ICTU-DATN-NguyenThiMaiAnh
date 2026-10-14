@@ -1,6 +1,6 @@
 {
   "ten": "Ảnh chụp chương 4 — 5 UC × 3 vai trò (1440 px)",
-  "ghi_chu": "Chạy trên trạng thái demo vừa dựng (bash deploy/demo-state.sh); kịch bản có ghi dữ liệu (011 gửi đề xuất, GV014 lưu điểm cho 014) nên chạy lại demo-state.sh sau đó. Mỗi bước khẳng định một chữ chứng minh đúng dữ liệu đang hiển thị. --chi-doc bỏ qua 4 bước ghi_du_lieu (verify-all dùng để đo NFR-16 mà không đổi trạng thái demo).",
+  "ghi_chu": "Chạy trên trạng thái demo vừa dựng (bash deploy/demo-state.sh); kịch bản có ghi dữ liệu (011 gửi đề xuất tới GVHD GV011, GV014 lưu điểm cho 014) nên chạy lại demo-state.sh sau đó. Mỗi bước khẳng định một chữ chứng minh đúng dữ liệu đang hiển thị. --chi-doc bỏ qua 4 bước ghi_du_lieu (verify-all dùng để đo NFR-16 mà không đổi trạng thái demo).",
   "buoc": [
     {
       "id": "uc0-dang-nhap",
@@ -25,8 +25,8 @@
     },
     {
       "id": "uc0-tong-quan-sinh-vien",
-      "mo_ta": "SV DTC225200013 — tổng quan (MH-02): đề tài, đề cương đã duyệt, tiến độ, thông báo",
-      "vai_tro": "DTC225200013",
+      "mo_ta": "SV DTC235200325 — tổng quan (MH-02): đề tài, đề cương đã duyệt, tiến độ, thông báo",
+      "vai_tro": "DTC235200325",
       "man_hinh": "MH-02",
       "hanh_dong": [
         {
@@ -46,8 +46,8 @@
     },
     {
       "id": "uc0-thong-bao",
-      "mo_ta": "SV DTC225200013 — mở chuông thông báo (NOTF-01)",
-      "vai_tro": "DTC225200013",
+      "mo_ta": "SV DTC235200325 — mở chuông thông báo (NOTF-01)",
+      "vai_tro": "DTC235200325",
       "man_hinh": "MH-02",
       "hanh_dong": [
         {
@@ -70,8 +70,8 @@
     },
     {
       "id": "uc0-trang-403",
-      "mo_ta": "SV DTC225200013 mở /tai-khoan (chức năng Bộ môn) — trang 403 (NFR-04)",
-      "vai_tro": "DTC225200013",
+      "mo_ta": "SV DTC235200325 mở /tai-khoan (chức năng Bộ môn) — trang 403 (NFR-04)",
+      "vai_tro": "DTC235200325",
       "man_hinh": "—",
       "hanh_dong": [
         {
@@ -102,13 +102,16 @@
           "cho_chu": "Việc cần xử lý"
         },
         {
+          "cho_chu": "Sinh viên trong lớp"
+        },
+        {
           "cho_chu": "Kiểm tra trùng lặp: Hoàn tất"
         },
         {
           "chup": true
         }
       ],
-      "man_hinh_mong_doi": "Đề cương chờ duyệt 1 (012, Hoàn tất 48 %), báo cáo tiến độ chờ nhận xét 1 (013)"
+      "man_hinh_mong_doi": "Thẻ Sinh viên trong lớp / Đề tài chờ duyệt; Việc cần xử lý: đề cương chờ duyệt 1 (012, Hoàn tất 48 %), báo cáo tiến độ chờ nhận xét 1 (013)"
     },
     {
       "id": "uc0-tong-quan-bo-mon",
@@ -123,13 +126,16 @@
           "cho_chu": "Tổng quan toàn khoa"
         },
         {
+          "cho_chu": "SV chưa phân công GVHD"
+        },
+        {
           "cho_chu": "Mốc 1 – Phân tích và thiết kế hệ thống"
         },
         {
           "chup": true
         }
       ],
-      "man_hinh_mong_doi": "Thống kê toàn khoa, tiến độ sinh viên, mốc tiến độ của đợt K22"
+      "man_hinh_mong_doi": "Thống kê toàn khoa (SV chưa phân công GVHD, đề tài chờ GVHD duyệt, …), tiến độ sinh viên, mốc tiến độ của đợt K22"
     },
     {
       "id": "uc0-quan-ly-tai-khoan",
@@ -189,9 +195,44 @@
       "man_hinh_mong_doi": "Ba ngưỡng kèm giải thích, giá trị đề xuất và người cập nhật"
     },
     {
+      "id": "uc0-phan-cong-gvhd",
+      "mo_ta": "Bộ môn — phân công GVHD theo đợt (UC0.8, MH-15), lọc lớp của GV011",
+      "vai_tro": "bomon",
+      "hanh_dong": [
+        {
+          "mo": "/phan-cong-gvhd"
+        },
+        {
+          "cho_chu": "Phân công giảng viên hướng dẫn"
+        },
+        {
+          "cho_chu": "Tổng sinh viên"
+        },
+        {
+          "go": {
+            "o": "Lọc theo GVHD",
+            "chu": "Trần Hải Thanh"
+          }
+        },
+        {
+          "cho_on_dinh": true
+        },
+        {
+          "cho_chu": "DTC235200139"
+        },
+        {
+          "cho_chu": "DTC235270078"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Chọn đợt, Import CSV; thống kê Tổng sinh viên / Đã phân công / Chưa phân công; tìm kiếm, bộ lọc; bảng SV lọc theo GVHD Trần Hải Thanh (GV011) với ô chọn GVHD từng dòng"
+    },
+    {
       "id": "uc1-sv-canh-bao-trung-ten",
-      "mo_ta": "SV DTC225200011 nhập tên diễn đạt lại một đề tài kho — cảnh báo trùng tên (MH-06)",
-      "vai_tro": "DTC225200011",
+      "mo_ta": "SV DTC235200139 nhập tên diễn đạt lại một đề tài kho — thông tin GVHD + cảnh báo trùng tên (MH-06)",
+      "vai_tro": "DTC235200139",
       "man_hinh": "MH-06",
       "hanh_dong": [
         {
@@ -205,6 +246,9 @@
             "o": "Đợt đồ án",
             "chu": "Đợt đồ án tốt nghiệp K22 - HK1 (2026-2027) (K22)"
           }
+        },
+        {
+          "cho_chu": "Giảng viên hướng dẫn của bạn"
         },
         {
           "go": {
@@ -226,12 +270,12 @@
           "chup": true
         }
       ],
-      "man_hinh_mong_doi": "Cảnh báo vàng: nguồn Kho đồ án, K21, GVHD, tỷ lệ tương đồng ≈ 82 %; nút Sửa tên / Vẫn gửi đề xuất"
+      "man_hinh_mong_doi": "Thông tin 'Giảng viên hướng dẫn của bạn'; cảnh báo vàng: nguồn Kho đồ án, K21, GVHD, tỷ lệ tương đồng ≈ 82 %; nút Sửa tên / Vẫn gửi đề xuất"
     },
     {
       "id": "uc1-sv-gui-de-xuat",
-      "mo_ta": "SV DTC225200011 chọn Vẫn gửi đề xuất -> đề tài Chờ duyệt (UC1.1)",
-      "vai_tro": "DTC225200011",
+      "mo_ta": "SV DTC235200139 chọn Vẫn gửi đề xuất -> gửi GVHD duyệt, đề tài Chờ duyệt (UC1.1)",
+      "vai_tro": "DTC235200139",
       "ghi_du_lieu": true,
       "man_hinh": "MH-06",
       "hanh_dong": [
@@ -245,7 +289,7 @@
           }
         },
         {
-          "bam": "Gửi đề xuất"
+          "bam": "Gửi GVHD duyệt"
         },
         {
           "cho_chu": "Chờ duyệt",
@@ -258,7 +302,7 @@
           "chup": true
         }
       ],
-      "man_hinh_mong_doi": "Chi tiết đề tài vừa gửi, trạng thái Chờ duyệt, kết quả kiểm tra tên đã lưu"
+      "man_hinh_mong_doi": "Chi tiết đề tài vừa gửi: Chờ duyệt, GVHD Trần Hải Thanh, kết quả kiểm tra tên đã lưu"
     },
     {
       "id": "uc1-danh-sach-de-tai",
@@ -288,17 +332,42 @@
           "chup": true
         }
       ],
-      "man_hinh_mong_doi": "Đề tài của đợt K22: 4 Đã phân công (012–015) và — sau bước uc1-sv-gui-de-xuat — 1 Chờ duyệt (011)"
+      "man_hinh_mong_doi": "Đề tài của đợt K22: 4 Đã phân công (012–015) và — sau bước uc1-sv-gui-de-xuat — 1 Chờ duyệt (011, chờ GVHD GV011)"
     },
     {
-      "id": "uc1-duyet-phan-cong",
-      "mo_ta": "Bộ môn — duyệt và phân công GVHD cho đề tài chờ duyệt của 011 (MH-07, chưa bấm duyệt)",
-      "vai_tro": "bomon",
+      "id": "uc1-sinh-vien-cua-toi",
+      "mo_ta": "GV011 — Sinh viên của tôi: lớp hướng dẫn Bộ môn phân công kèm đề tài từng SV (UC0.8, MH-16)",
+      "vai_tro": "GV011",
+      "hanh_dong": [
+        {
+          "mo": "/sinh-vien-huong-dan"
+        },
+        {
+          "cho_chu": "Sinh viên của tôi — Đợt đồ án tốt nghiệp K22"
+        },
+        {
+          "cho_chu": "DTC235200139"
+        },
+        {
+          "cho_chu": "Phát triển ứng dụng hỗ trợ sinh viên tìm nhà trọ quanh Đại học Thái Nguyên"
+        },
+        {
+          "chup": true
+        }
+      ],
+      "man_hinh_mong_doi": "Bảng lớp hướng dẫn K22: 011 Chờ duyệt (nút Duyệt đề tài — sau bước uc1-sv-gui-de-xuat), 012–015 Đã phân công, SV chưa có đề tài có nút Giao đề tài"
+    },
+    {
+      "id": "uc1-gv-duyet-de-tai",
+      "mo_ta": "GVHD GV011 — duyệt đề tài chờ duyệt của 011 (UC1.3, MH-07, chưa bấm duyệt)",
+      "vai_tro": "GV011",
       "ghi_du_lieu": true,
-      "man_hinh": "MH-07",
       "hanh_dong": [
         {
           "mo": "/duyet-de-tai"
+        },
+        {
+          "cho_chu": "Đề tài chờ duyệt"
         },
         {
           "cho_chu": "Sử dụng SQL Server để hạch toán thu chi doanh nghiệp"
@@ -316,21 +385,15 @@
           "cho_chu": "Kết quả kiểm tra tên đã lưu lúc đề xuất"
         },
         {
-          "go": {
-            "o": "Chọn giảng viên hướng dẫn",
-            "chu": "Đặng Hữu Minh"
-          }
-        },
-        {
           "chup": true
         }
       ],
-      "man_hinh_mong_doi": "Ngăn chi tiết: sinh viên, kết quả kiểm tra tên (Kho đồ án ≈ 82 %), GVHD được chọn, nút Duyệt và phân công"
+      "man_hinh_mong_doi": "Bảng Đề tài chờ duyệt của lớp GV011; ngăn chi tiết: sinh viên, kết quả kiểm tra tên (Kho đồ án ≈ 82 %), nút Từ chối / Duyệt đề tài"
     },
     {
       "id": "uc2-sv-nop-de-cuong",
-      "mo_ta": "SV DTC225200012 — trang đề cương sau khi nộp: Hoàn tất – 48 % (MH-08)",
-      "vai_tro": "DTC225200012",
+      "mo_ta": "SV DTC235200258 — trang đề cương sau khi nộp: Hoàn tất – 48 % (MH-08)",
+      "vai_tro": "DTC235200258",
       "man_hinh": "MH-08",
       "hanh_dong": [
         {
@@ -358,16 +421,16 @@
           "mo": "/duyet-de-cuong"
         },
         {
-          "cho_chu": "Lê Bảo Ánh (DTC225200012)"
+          "cho_chu": "Ngô Thị Thanh Hiền (DTC235200258)"
         },
         {
           "bam": {
             "chu": "Duyệt",
-            "hang": "DTC225200012"
+            "hang": "DTC235200258"
           }
         },
         {
-          "cho_chu": "Duyệt đề cương - Lê Bảo Ánh"
+          "cho_chu": "Duyệt đề cương - Ngô Thị Thanh Hiền"
         },
         {
           "cho_chu": "Vượt ngưỡng cảnh báo"
@@ -410,8 +473,8 @@
     },
     {
       "id": "uc3-sv-bao-cao-tien-do",
-      "mo_ta": "SV DTC225200013 — báo cáo tiến độ theo mốc (MH-10)",
-      "vai_tro": "DTC225200013",
+      "mo_ta": "SV DTC235200325 — báo cáo tiến độ theo mốc (MH-10)",
+      "vai_tro": "DTC235200325",
       "man_hinh": "MH-10",
       "hanh_dong": [
         {
@@ -439,7 +502,7 @@
           "mo": "/nhan-xet-tien-do"
         },
         {
-          "bam": "Dương Quang Anh (DTC225200013)"
+          "bam": "Doãn Thị Minh Huệ (DTC235200325)"
         },
         {
           "cho_chu": "Mốc 2 – Cài đặt các chức năng chính"
@@ -469,7 +532,7 @@
           "cho_chu": "SV trễ mốc"
         },
         {
-          "cho_chu": "Dương Quang Anh (DTC225200013)"
+          "cho_chu": "Doãn Thị Minh Huệ (DTC235200325)"
         },
         {
           "chup": true
@@ -503,8 +566,8 @@
     },
     {
       "id": "uc4-sv-bao-cao-cuoi",
-      "mo_ta": "SV DTC225200014 — tab Báo cáo cuối: đã kiểm tra, đã xếp lịch",
-      "vai_tro": "DTC225200014",
+      "mo_ta": "SV DTC235200340 — tab Báo cáo cuối: đã kiểm tra, đã xếp lịch",
+      "vai_tro": "DTC235200340",
       "man_hinh": "MH-08",
       "hanh_dong": [
         {
@@ -527,7 +590,7 @@
     },
     {
       "id": "uc4-gv-cham-diem",
-      "mo_ta": "GV014 (ủy viên) — chấm điểm SV DTC225200014 (MH-12)",
+      "mo_ta": "GV014 (ủy viên) — chấm điểm SV DTC235200340 (MH-12)",
       "vai_tro": "GV014",
       "ghi_du_lieu": true,
       "man_hinh": "MH-12",
@@ -536,10 +599,10 @@
           "mo": "/cham-diem"
         },
         {
-          "bam": "Dương Phú Hương"
+          "bam": "Vi Tuấn Hùng"
         },
         {
-          "cho_chu": "Chấm điểm - Dương Phú Hương"
+          "cho_chu": "Chấm điểm - Vi Tuấn Hùng"
         },
         {
           "go": {
@@ -588,7 +651,7 @@
         {
           "bam": {
             "chu": "Chốt kết quả",
-            "hang": "DTC225200014"
+            "hang": "DTC235200340"
           }
         },
         {
@@ -602,8 +665,8 @@
     },
     {
       "id": "uc4-sv-ket-qua-bao-ve",
-      "mo_ta": "SV DTC225200015 — lịch và kết quả bảo vệ đã chốt",
-      "vai_tro": "DTC225200015",
+      "mo_ta": "SV DTC235270078 — lịch và kết quả bảo vệ đã chốt",
+      "vai_tro": "DTC235270078",
       "man_hinh": "MH-12",
       "hanh_dong": [
         {
@@ -623,8 +686,8 @@
     },
     {
       "id": "uc5-kho-tim-kiem",
-      "mo_ta": "SV DTC225200012 — tra cứu kho theo từ khóa + khóa K22 (MH-13)",
-      "vai_tro": "DTC225200012",
+      "mo_ta": "SV DTC235200258 — tra cứu kho theo từ khóa + khóa K22 (MH-13)",
+      "vai_tro": "DTC235200258",
       "man_hinh": "MH-13",
       "hanh_dong": [
         {

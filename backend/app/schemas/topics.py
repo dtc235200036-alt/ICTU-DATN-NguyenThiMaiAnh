@@ -10,12 +10,15 @@ from app.schemas.common import NFCModel
 
 
 class TopicCreate(NFCModel):
-    """UC1.1: đề xuất đề tài mới — gui=False lưu nháp, gui=True gửi đề xuất ngay."""
+    """UC1.1: đề xuất đề tài mới — gui=False lưu nháp, gui=True gửi ngay (SV:
+    tới GVHD duyệt; GV: giao cho `sinh_vien_id` trong lớp mình, hoặc để trống
+    = mở cho lớp mình đăng ký). SV gửi `sinh_vien_id` bị bỏ qua."""
 
     dot_do_an_id: int
     ten_de_tai: str = Field(min_length=5, max_length=255)
     mo_ta: str | None = Field(default=None, max_length=5000)
     linh_vuc: str | None = Field(default=None, max_length=100)
+    sinh_vien_id: int | None = None
     gui: bool = False
 
 
@@ -26,6 +29,7 @@ class TopicUpdate(NFCModel):
     ten_de_tai: str = Field(min_length=5, max_length=255)
     mo_ta: str | None = Field(default=None, max_length=5000)
     linh_vuc: str | None = Field(default=None, max_length=100)
+    sinh_vien_id: int | None = None
 
 
 class PersonRef(BaseModel):
