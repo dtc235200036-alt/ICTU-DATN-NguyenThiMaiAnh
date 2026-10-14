@@ -2,11 +2,11 @@
 
 ## What This Is
 
-Hệ thống quản lý đồ án/khóa luận tốt nghiệp của Khoa Công nghệ thông tin (Trường ĐH CNTT&TT Thái Nguyên), phục vụ Sinh viên, Giảng viên hướng dẫn và Bộ môn/Khoa trong toàn bộ quy trình: phân công GVHD đầu đợt → đề xuất/đăng ký đề tài (GVHD duyệt) → duyệt đề cương → theo dõi tiến độ → nộp báo cáo → phân công hội đồng và tổ chức bảo vệ, đồng thời lưu kho đồ án của khoa qua các khóa. Hệ thống tích hợp dịch vụ AI kiểm tra trùng lặp (tên đề tài theo ngữ nghĩa; đoạn nội dung đề cương/báo cáo) trong phạm vi kho đồ án của khoa. Đây là đồ án tốt nghiệp của SV Nguyễn Thị Mai Anh (DTC235200036, CN CNTT K22A), GVHD: Hà Thị Thanh.
+Hệ thống quản lý đồ án/khóa luận tốt nghiệp của Khoa Công nghệ thông tin (Trường ĐH CNTT&TT Thái Nguyên), phục vụ Sinh viên, Giảng viên hướng dẫn và Bộ môn/Khoa trong toàn bộ quy trình: phân công GVHD đầu đợt → GVHD tạo và giao đề tài cho SV (SV thống nhất đề tài với GVHD ngoài hệ thống) → duyệt đề cương → theo dõi tiến độ → nộp báo cáo → phân công hội đồng và tổ chức bảo vệ, đồng thời lưu kho đồ án của khoa qua các khóa. Hệ thống tích hợp dịch vụ AI kiểm tra trùng lặp (tên đề tài theo ngữ nghĩa; đoạn nội dung đề cương/báo cáo) trong phạm vi kho đồ án của khoa. Đây là đồ án tốt nghiệp của SV Nguyễn Thị Mai Anh (DTC235200036, CN CNTT K22A), GVHD: Hà Thị Thanh.
 
 ## Core Value
 
-Quy trình đồ án 5 UC chính chạy trọn vẹn end-to-end trên Web, và khi sinh viên đăng ký đề tài hoặc nộp đề cương/báo cáo, hệ thống cảnh báo trùng lặp kèm đề tài/đồ án trùng, đoạn trùng và tỷ lệ tương đồng — đủ để demo và đạt toàn bộ tiêu chí CLO/PI khi bảo vệ.
+Quy trình đồ án 5 UC chính chạy trọn vẹn end-to-end trên Web, và khi GVHD giao đề tài cho sinh viên hoặc sinh viên nộp đề cương/báo cáo, hệ thống cảnh báo trùng lặp kèm đề tài/đồ án trùng, đoạn trùng và tỷ lệ tương đồng — đủ để demo và đạt toàn bộ tiêu chí CLO/PI khi bảo vệ.
 
 ## Requirements
 
@@ -27,12 +27,12 @@ Quy trình đồ án 5 UC chính chạy trọn vẹn end-to-end trên Web, và k
 **Phần mềm (CLO 3):**
 - [ ] CSDL MySQL (PI 3.1)
 - [ ] 3 thành phần: Web API (FastAPI), client Web (React), dịch vụ AI trùng lặp (FastAPI riêng) (PI 3.2)
-- [ ] UC Quản lý đề tài: bộ môn phân công GVHD cho SV đầu đợt; SV đề xuất tới GVHD hoặc đăng ký đề tài GVHD mở cho lớp, GV giao đề tài; GVHD duyệt (PI 3.3)
+- [ ] UC Quản lý đề tài: bộ môn phân công GVHD cho SV đầu đợt; chỉ GVHD tạo và giao đề tài cho SV trong lớp hướng dẫn (SV không tự đề xuất/đăng ký, không còn bước duyệt); SV xem đề tài được giao (PI 3.3)
 - [ ] UC Quản lý đề cương: SV nộp, GVHD duyệt/yêu cầu sửa (PI 3.3)
 - [ ] UC Quản lý tiến độ thực hiện: SV nộp báo cáo tiến độ, GVHD nhận xét (PI 3.3)
 - [ ] UC Quản lý bảo vệ: bộ môn lập hội đồng (GV làm thành viên), xếp lịch, nhập điểm/kết quả (PI 3.3)
 - [ ] UC Quản lý kho dữ liệu đồ án: lưu trữ, tra cứu đồ án các khóa (PI 3.3)
-- [ ] AI: so sánh ngữ nghĩa tên đề tài khi SV đăng ký, cảnh báo đề tài tương tự kèm tỷ lệ (PI 3.4)
+- [ ] AI: so sánh ngữ nghĩa tên đề tài khi GVHD tạo/giao đề tài, cảnh báo đề tài tương tự kèm tỷ lệ (PI 3.4)
 - [ ] AI: phát hiện trùng lặp đề cương/báo cáo (DOCX + PDF), chỉ rõ đoạn trùng, đồ án trùng, tỷ lệ tương đồng (PI 3.4)
 - [ ] Phân quyền theo 3 vai trò: Sinh viên, Giảng viên, Bộ môn/Khoa (admin) (PI 3.4)
 
@@ -80,6 +80,7 @@ Quy trình đồ án 5 UC chính chạy trọn vẹn end-to-end trên Web, và k
 | 3 role: SV, GV, Bộ môn; hội đồng = GV được phân công | Người dùng xác nhận | — Pending |
 | Roadmap gồm cả tài liệu và code | Đồ án chấm cả phân tích/thiết kế lẫn thi công | — Pending |
 | Repo git riêng tại NTMA (không dùng repo ~) | Tránh commit vào repo home | ✓ Good |
+| Góp ý GVHD mục 1: bỏ SV đề xuất/đăng ký và GVHD duyệt; chỉ GVHD tạo và giao đề tài (quick 261014-u0j) | SV thống nhất đề tài với GVHD ngoài hệ thống; giá trị enum/cột cũ giữ trong CSDL, không migration | ✓ Good |
 
 ## Evolution
 

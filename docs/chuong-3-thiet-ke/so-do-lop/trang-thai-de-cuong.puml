@@ -1,7 +1,7 @@
 @startuml trang-thai-de-cuong
 hide empty description
 
-[*] --> CHUA_NOP : Đề tài chuyển Đã phân công (UC1.1 – A3, UC1.2, UC1.3)
+[*] --> CHUA_NOP : Đề tài chuyển Đã phân công (UC1.1)
 
 CHUA_NOP --> CHO_DUYET : SV nộp đề cương\n(tạo TaiLieuDoAn phiên bản 1 — UC2.1)
 

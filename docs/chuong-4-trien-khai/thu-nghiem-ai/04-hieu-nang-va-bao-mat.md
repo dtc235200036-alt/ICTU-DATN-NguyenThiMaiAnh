@@ -2,7 +2,7 @@
 
 > **Mã PI:** 3.4, 4.1 — **Yêu cầu:** AISV-01, AISV-02, AISV-03, AISV-06 (NFR-07..NFR-11)
 
-> Số liệu trong trang này do `bash deploy/ai-nfr.sh --report docs/chuong-4-trien-khai/thu-nghiem-ai/04-hieu-nang-va-bao-mat.md` đo và ghi tự động ngày 2026-10-02 — không sửa tay.
+> Số liệu trong trang này do `bash deploy/ai-nfr.sh --report docs/chuong-4-trien-khai/thu-nghiem-ai/04-hieu-nang-va-bao-mat.md` đo và ghi tự động ngày 2026-10-14 — không sửa tay.
 
 #### Mục tiêu
 
@@ -14,7 +14,7 @@ Kiểm chứng các yêu cầu phi chức năng NFR-07..NFR-11 (mục 2.4, `docs
 |---|---|
 | Máy | Máy phát triển dùng chung (không phải server triển khai) — 16 CPU logic (12th Gen Intel(R) Core(TM) i5-12500H), RAM 15.3 GiB, chạy đồng thời các ứng dụng khác |
 | Dịch vụ AI | Container `ai` (CPU, `TORCH_THREADS=4`, trần bộ nhớ 2048 MiB), hồ sơ mô hình `bkai` — `bkai-foundation-models/vietnamese-bi-encoder@84f9d9ada0d1` |
-| Kho đã index | 304 tiêu đề (300 đề tài kho K18–K22) · 2777 câu tài liệu (25 đồ án nguồn có báo cáo cuối) |
+| Kho đã index | 304 tiêu đề (300 đề tài kho K18–K22) · 2554 câu tài liệu (25 đồ án nguồn có báo cáo cuối) |
 | Đường đi của request | NFR-08: gọi thẳng dịch vụ AI trong mạng nội bộ (không tính độ trễ mạng client, đúng phương pháp của NFR-08); NFR-09/10: qua Apache HTTPS → Web API → BackgroundTasks → dịch vụ AI |
 
 #### Kết quả
@@ -22,12 +22,12 @@ Kiểm chứng các yêu cầu phi chức năng NFR-07..NFR-11 (mục 2.4, `docs
 | NFR | Chỉ tiêu | Cách đo | Kết quả đo | Đạt? |
 |---|---|---|---|---|
 | NFR-07 | Dịch vụ AI không có đường public; thiếu khóa -> 401 | Host gọi 127.0.0.1:8002; trong mạng nội bộ gọi /check-title thiếu / sai / đúng X-API-Key; tìm route trong ntma.conf và POST https://localhost/check-title; tài khoản DB thesis_ai đọc thesis_core và CREATE TABLE trên thesis_ai | Host không kết nối được; mã 401 401 200; không có route (Apache trả 200 là trang SPA); thesis_core: DENIED | Đạt |
-| NFR-08 | P95 kiểm tra tên đề tài ≤ 5 s | 20 lời gọi trực tiếp POST /check-title (trong container api, kèm khóa), kho 304 tiêu đề | P50 45 ms, **P95 51 ms**, max 59 ms | Đạt |
-| NFR-09 | P95 nộp -> Hoàn tất ≤ 30 s | Nộp lần lượt 20 file B khác nhau qua Apache, thăm dò GET /api/documents/{id}/check mỗi 0,25 s | P50 1.65 s, **P95 3.56 s**, max 3.80 s; 20/20 HOAN_TAT, 0 LOI | Đạt |
-| NFR-10 | API nộp trả phản hồi ≤ 2 s | Thời gian phản hồi 202 của POST /api/outlines/{id}/submit (cùng 20 lần nộp) | P95 0.052 s, **max 0.063 s** | Đạt |
-| NFR-09 (dài) | Báo cáo ~100 trang hoàn tất trong timeout của Web API; kiểm tra tên chen giữa không bị chặn (< 4 s) | POST /check-document 350000 ký tự qua AiClientHttp (timeout theo độ dài 111.5 s); 5 lần /check-title (timeout 4 s) gửi trong lúc đó | 2333 câu, **45.83 s**; kiểm tra tên chen giữa: 352 ms, 184 ms, 647 ms, 199 ms, 231 ms | Đạt |
-| NFR-11 | Ingest 1 bản ghi = 1 lần encode | encode_calls (/health) trước và sau khi Bộ môn thêm 1 bản ghi kho (chờ DA_INDEX) | 411 -> 412 (**+1**) | Đạt |
-| Bộ nhớ | Container ai < 2048 MiB, không OOM | docker stats trước/sau vòng NFR-09; đỉnh cgroup memory.peak; State.OOMKilled | 983MiB -> 984.4MiB; **đỉnh 1202 MiB**; OOMKilled=false | Đạt |
+| NFR-08 | P95 kiểm tra tên đề tài ≤ 5 s | 20 lời gọi trực tiếp POST /check-title (trong container api, kèm khóa), kho 304 tiêu đề | P50 46 ms, **P95 56 ms**, max 58 ms | Đạt |
+| NFR-09 | P95 nộp -> Hoàn tất ≤ 30 s | Nộp lần lượt 20 file B khác nhau qua Apache, thăm dò GET /api/documents/{id}/check mỗi 0,25 s | P50 1.39 s, **P95 3.02 s**, max 3.28 s; 20/20 HOAN_TAT, 0 LOI | Đạt |
+| NFR-10 | API nộp trả phản hồi ≤ 2 s | Thời gian phản hồi 202 của POST /api/outlines/{id}/submit (cùng 20 lần nộp) | P95 0.046 s, **max 0.047 s** | Đạt |
+| NFR-09 (dài) | Báo cáo ~100 trang hoàn tất trong timeout của Web API; kiểm tra tên chen giữa không bị chặn (< 4 s) | POST /check-document 350000 ký tự qua AiClientHttp (timeout theo độ dài 111.5 s); 5 lần /check-title (timeout 4 s) gửi trong lúc đó | 2333 câu, **44.41 s**; kiểm tra tên chen giữa: 368 ms, 344 ms, 288 ms, 199 ms, 421 ms | Đạt |
+| NFR-11 | Ingest 1 bản ghi = 1 lần encode | encode_calls (/health) trước và sau khi Bộ môn thêm 1 bản ghi kho (chờ DA_INDEX) | 705 -> 706 (**+1**) | Đạt |
+| Bộ nhớ | Container ai < 2048 MiB, không OOM | docker stats trước/sau vòng NFR-09; đỉnh cgroup memory.peak; State.OOMKilled | 956.3MiB -> 914.9MiB; **đỉnh 1322 MiB**; OOMKilled=false | Đạt |
 
 #### Chi tiết NFR-09 / NFR-10 theo từng file
 
@@ -35,28 +35,28 @@ Mỗi file là một phiên bản đề cương mới của cùng một đề t�
 
 | # | File | Phản hồi nộp (s) | Nộp → Hoàn tất (s) | Trạng thái | Tỷ lệ (%) | Số đoạn trùng |
 |---:|---|---:|---:|---|---:|---:|
-| 1 | P01-B.pdf | 0.050 | 1.40 | HOAN_TAT | 50.3 | 7 |
-| 2 | P02-B.docx | 0.037 | 1.65 | HOAN_TAT | 100.0 | 12 |
-| 3 | P03-B.pdf | 0.047 | 3.27 | HOAN_TAT | 49.32 | 16 |
-| 4 | P04-B.docx | 0.041 | 0.86 | HOAN_TAT | 49.33 | 5 |
-| 5 | P05-B.pdf | 0.052 | 3.56 | HOAN_TAT | 44.83 | 13 |
-| 6 | P06-B.docx | 0.036 | 1.65 | HOAN_TAT | 49.74 | 6 |
-| 7 | P07-B.pdf | 0.043 | 1.39 | HOAN_TAT | 57.76 | 9 |
-| 8 | P08-B.pdf | 0.047 | 1.66 | HOAN_TAT | 21.23 | 5 |
-| 9 | P09-B.docx | 0.042 | 1.13 | HOAN_TAT | 11.73 | 3 |
-| 10 | P10-B.pdf | 0.051 | 1.92 | HOAN_TAT | 20.88 | 4 |
-| 11 | P11-B.docx | 0.039 | 1.40 | HOAN_TAT | 25.54 | 6 |
-| 12 | P12-B.pdf | 0.044 | 2.48 | HOAN_TAT | 31.86 | 14 |
-| 13 | P13-B.docx | 0.050 | 1.14 | HOAN_TAT | 30.29 | 4 |
-| 14 | P14-B.pdf | 0.048 | 3.80 | HOAN_TAT | 33.55 | 19 |
-| 15 | P15-B.pdf | 0.043 | 2.74 | HOAN_TAT | 4.78 | 4 |
-| 16 | P16-B.docx | 0.038 | 1.12 | HOAN_TAT | 100.0 | 10 |
-| 17 | P17-B.pdf | 0.041 | 1.39 | HOAN_TAT | 100.0 | 9 |
-| 18 | P18-B.docx | 0.041 | 1.13 | HOAN_TAT | 2.86 | 1 |
-| 19 | P19-B.pdf | 0.063 | 3.55 | HOAN_TAT | 23.96 | 14 |
-| 20 | P20-B.docx | 0.045 | 1.13 | HOAN_TAT | 0.0 | 0 |
+| 1 | P01-B.pdf | 0.045 | 1.40 | HOAN_TAT | 50.3 | 7 |
+| 2 | P02-B.docx | 0.028 | 1.37 | HOAN_TAT | 100.0 | 12 |
+| 3 | P03-B.pdf | 0.039 | 3.00 | HOAN_TAT | 49.32 | 16 |
+| 4 | P04-B.docx | 0.032 | 1.11 | HOAN_TAT | 49.33 | 5 |
+| 5 | P05-B.pdf | 0.041 | 3.01 | HOAN_TAT | 44.83 | 13 |
+| 6 | P06-B.docx | 0.031 | 1.65 | HOAN_TAT | 49.74 | 6 |
+| 7 | P07-B.pdf | 0.042 | 1.39 | HOAN_TAT | 57.76 | 9 |
+| 8 | P08-B.pdf | 0.043 | 1.39 | HOAN_TAT | 21.23 | 5 |
+| 9 | P09-B.docx | 0.038 | 1.38 | HOAN_TAT | 11.73 | 3 |
+| 10 | P10-B.pdf | 0.041 | 1.39 | HOAN_TAT | 20.88 | 4 |
+| 11 | P11-B.docx | 0.041 | 1.39 | HOAN_TAT | 25.54 | 6 |
+| 12 | P12-B.pdf | 0.046 | 2.75 | HOAN_TAT | 31.86 | 14 |
+| 13 | P13-B.docx | 0.034 | 1.11 | HOAN_TAT | 30.29 | 4 |
+| 14 | P14-B.pdf | 0.047 | 3.02 | HOAN_TAT | 33.55 | 19 |
+| 15 | P15-B.pdf | 0.045 | 3.28 | HOAN_TAT | 4.78 | 4 |
+| 16 | P16-B.docx | 0.040 | 1.39 | HOAN_TAT | 100.0 | 10 |
+| 17 | P17-B.pdf | 0.046 | 1.40 | HOAN_TAT | 100.0 | 9 |
+| 18 | P18-B.docx | 0.035 | 1.38 | HOAN_TAT | 2.86 | 1 |
+| 19 | P19-B.pdf | 0.043 | 3.01 | HOAN_TAT | 23.96 | 14 |
+| 20 | P20-B.docx | 0.038 | 1.12 | HOAN_TAT | 0.0 | 0 |
 
-Thời gian NFR-08 từng lời gọi (ms): 50, 48, 38, 44, 46, 40, 45, 51, 50, 40, 59, 40, 43, 51, 49, 50, 40, 21, 22, 24.
+Thời gian NFR-08 từng lời gọi (ms): 46, 38, 49, 46, 58, 43, 50, 53, 51, 39, 56, 49, 46, 56, 40, 29, 41, 42, 44, 51.
 
 #### Nhận xét
 

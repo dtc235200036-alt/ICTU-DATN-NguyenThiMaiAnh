@@ -63,7 +63,7 @@ Bảng dưới liệt kê hình dạng ở mức nhóm route theo từng UC — 
 | thresholds (ngưỡng) | UC0.4 | Bộ môn cấu hình ngưỡng cảnh báo |
 | notifications | UC0.5 | Danh sách thông báo, đánh dấu đã đọc |
 | assignments (phân công GVHD) | UC0.8 | Bộ môn phân công/import phân công GVHD theo đợt; GV xem lớp hướng dẫn, SV xem GVHD của mình |
-| topics (đề tài) | UC1.1–UC1.4 | Đề xuất/giao đề tài, đăng ký đề tài GVHD mở cho lớp, GVHD duyệt, danh sách đề tài |
+| topics (đề tài) | UC1.1–UC1.2 | Tạo/sửa/gửi đề tài và kiểm tra trùng tên (`POST/PUT /api/topics`, `submit`, `check-title` — chỉ GVHD; SV và Bộ môn nhận 403); xem danh sách, chi tiết đề tài theo phạm vi vai trò. Không còn endpoint đăng ký đề tài và duyệt đề tài (đã gỡ, trả 404) |
 | outlines (đề cương) | UC2.1–UC2.3 | Nộp, duyệt/yêu cầu sửa, lịch sử phiên bản |
 | progress (tiến độ) | UC3.1–UC3.4 | Mốc tiến độ, nộp báo cáo, nhận xét, dashboard |
 | defense (bảo vệ) | UC4.1–UC4.5 | Nộp báo cáo cuối, hội đồng, lịch, chấm điểm, chốt kết quả |

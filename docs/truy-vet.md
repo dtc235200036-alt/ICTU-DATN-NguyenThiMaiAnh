@@ -42,16 +42,16 @@ Bảng này giúp GVHD kiểm tra tiến độ theo đúng tiêu chí PI của �
 | FR-TK-03 | UC0.1 | — | TaiKhoan | tai_khoan | MH-01 |
 | FR-TK-04 | UC0.2 | — | TaiKhoan | tai_khoan | — |
 | FR-TK-05 | UC0.3 | TB-TQ-01 | DotDoAn | dot_do_an | — |
-| FR-DT-01 | UC1.1 | TB-DT-01b, TB-DT-06, TB-DT-06a | DeTai, PhanCongHuongDan | de_tai, phan_cong_huong_dan | MH-06 |
-| FR-DT-02 | UC1.1 | TB-DT-02, TB-DT-03, TB-DT-04 | KetQuaKiemTraTrungLap, ChiTietTrungLap | ket_qua_kiem_tra_trung_lap, chi_tiet_trung_lap | MH-06 |
-| FR-DT-03 | UC1.2 | TB-DT-07, TB-DT-10 | DeTai, PhanCongHuongDan | de_tai, phan_cong_huong_dan | MH-05 |
-| FR-DT-04 | UC1.3 | TB-DT-12, TB-DT-13, TB-DT-14, TB-DT-15, TB-DT-16, TB-DT-17 | DeTai | de_tai | MH-07 |
+| FR-DT-01 | UC1.1 | TB-DT-01, TB-DT-02, TB-DT-09 | DeTai, PhanCongHuongDan | de_tai, phan_cong_huong_dan | MH-06 |
+| FR-DT-02 | UC1.1 | TB-DT-03, TB-DT-04, TB-DT-05, TB-DT-06 | KetQuaKiemTraTrungLap, ChiTietTrungLap | ket_qua_kiem_tra_trung_lap, chi_tiet_trung_lap | MH-06 |
+| FR-DT-03 | UC1.2 | TB-DT-11 | DeTai | de_tai | MH-07, MH-02 |
+| FR-DT-04 | UC1.1 | TB-DT-02, TB-DT-07, TB-DT-08, TB-DT-10 | DeTai, PhanCongHuongDan | de_tai, phan_cong_huong_dan | MH-06 |
 | FR-DT-05 | UC0.8 | TB-TQ-01, TB-DT-00a, TB-DT-00c | PhanCongHuongDan | phan_cong_huong_dan | MH-15 |
-| FR-DT-06 | UC1.2 | TB-DT-08, TB-DT-09, TB-DT-10, TB-DT-11 | DeTai | de_tai | — |
-| FR-DT-07 | UC1.4 | TB-DT-18 | DeTai | de_tai | MH-05 |
+| FR-DT-06 | UC1.1 | TB-DT-07, TB-DT-08, TB-DT-09, TB-DT-10 | DeTai | de_tai | — |
+| FR-DT-07 | UC1.2 | TB-DT-12 | DeTai | de_tai | MH-05 |
 | FR-DT-08 | UC0.8 | TB-DT-00a, TB-DT-00b | PhanCongHuongDan | phan_cong_huong_dan | MH-15 |
 | FR-DT-09 | UC0.8 | TB-DT-00b | PhanCongHuongDan, DeTai | phan_cong_huong_dan, de_tai | MH-15 |
-| FR-DT-10 | UC1.1 | TB-DT-01a, TB-DT-06b, TB-DT-06c | DeTai, PhanCongHuongDan | de_tai, phan_cong_huong_dan | MH-06 |
+| FR-DT-10 | UC1.1 | TB-DT-02, TB-DT-06, TB-DT-09 | DeTai, PhanCongHuongDan | de_tai, phan_cong_huong_dan | MH-06 |
 | FR-DT-11 | UC0.8 | TB-DT-00c | PhanCongHuongDan | phan_cong_huong_dan | MH-16, MH-02 |
 | FR-DC-01 | UC2.1 | TB-DC-01 | DeCuong, TaiLieuDoAn | de_cuong, tai_lieu_do_an | MH-08 |
 | FR-DC-02 | UC2.1 | TB-DC-02 | TaiLieuDoAn | tai_lieu_do_an | MH-08 |

@@ -88,7 +88,7 @@ Lược đồ `thesis_core` gồm 20 bảng, khớp 1-1 với 20 lớp thực th
 | giang_vien_id | BIGINT | Không | FK → giang_vien (`fk_phan_cong_giang_vien`) | GVHD — tập SV của một GV trong đợt là "lớp hướng dẫn" của GV đó |
 | thoi_diem | DATETIME | Không | — | Thời điểm gán/đổi GVHD gần nhất |
 
-Khi chuyển dữ liệu (Alembic 0015), mọi đề tài đang hoạt động đã có cả SV và GV sinh ra một dòng phân công tương ứng, và đề tài GV đề xuất mà SV đã đăng ký còn ở `CHO_DUYET` (bước Bộ môn xác nhận của luồng cũ) được chuyển thẳng sang `DA_PHAN_CONG`.
+Khi chuyển dữ liệu (Alembic 0015), mọi đề tài đang hoạt động đã có cả SV và GV sinh ra một dòng phân công tương ứng, và đề tài GV đề xuất mà SV đã đăng ký còn ở `CHO_DUYET` (bước Bộ môn xác nhận của luồng cũ) được chuyển thẳng sang `DA_PHAN_CONG`. Góp ý GVHD mục 1 (quick 261014-u0j) không thêm migration: lược đồ giữ nguyên, chỉ thay đổi hành vi ứng dụng.
 
 #### `de_tai`
 
@@ -96,15 +96,15 @@ Khi chuyển dữ liệu (Alembic 0015), mọi đề tài đang hoạt động �
 |---|---|---|---|---|
 | id | BIGINT | Không | PK | Định danh đề tài |
 | dot_do_an_id | BIGINT | Không | FK → dot_do_an | Đợt đồ án chứa đề tài |
-| giang_vien_id | BIGINT | Có | FK → giang_vien | GV đề xuất hoặc GVHD; đề tài SV gửi được gán ngay GVHD lấy từ `phan_cong_huong_dan` của đợt |
-| sinh_vien_id | BIGINT | Có | FK → sinh_vien | SV đề xuất hoặc đã đăng ký |
+| giang_vien_id | BIGINT | Có | FK → giang_vien | GVHD tạo và giao đề tài (chỉ GVHD được Bộ môn phân công cho SV trong đợt, `phan_cong_huong_dan`) |
+| sinh_vien_id | BIGINT | Có | FK → sinh_vien | SV được GVHD giao đề tài (bắt buộc khi tạo; NULL chỉ với bản nháp mất SV do đổi GVHD hoặc dữ liệu cũ) |
 | sinh_vien_id_dang_hoat_dong | BIGINT | Có (derived) | UNIQUE | Cột sinh — xem §3.2.5, cơ chế (a) |
 | ten_de_tai | VARCHAR(255) | Không | — | Tên đề tài |
 | mo_ta | TEXT | Có | — | Mô tả |
 | linh_vuc | VARCHAR(100) | Có | — | Lĩnh vực |
-| trang_thai | VARCHAR(20) | Không | — | `NHAP`/`CHO_DUYET`/`DA_DUYET`/`TU_CHOI`/`DA_PHAN_CONG` (§3.1.2); `DA_DUYET` hiển thị là "Mở cho lớp đăng ký" |
-| loai_nguoi_de_xuat | VARCHAR(10) | Không | — | `GIANG_VIEN` / `SINH_VIEN` |
-| ly_do_tu_choi | TEXT | Có | — | Lý do GVHD từ chối đề tài (FR-DT-04, UC1.3 – A1); cột bổ sung khi thi công Phase 2 |
+| trang_thai | VARCHAR(20) | Không | — | `NHAP`/`CHO_DUYET`/`DA_DUYET`/`TU_CHOI`/`DA_PHAN_CONG` (§3.1.2); hệ thống chỉ còn tạo `NHAP` và `DA_PHAN_CONG`, ba giá trị còn lại là giá trị cũ của phiên bản trước, giữ để tương thích dữ liệu, không còn phát sinh |
+| loai_nguoi_de_xuat | VARCHAR(10) | Không | — | `GIANG_VIEN` / `SINH_VIEN`; hệ thống luôn ghi `GIANG_VIEN` (giá trị `SINH_VIEN` là của phiên bản trước, giữ để tương thích dữ liệu) |
+| ly_do_tu_choi | TEXT | Có | — | Cột cũ của phiên bản trước (lý do GVHD từ chối đề tài), giữ để tương thích dữ liệu, không còn phát sinh |
 
 #### `de_cuong`
 
@@ -255,7 +255,7 @@ Khi chuyển dữ liệu (Alembic 0015), mọi đề tài đang hoạt động �
 |---|---|---|---|---|
 | id | BIGINT | Không | PK | Định danh thông báo |
 | tai_khoan_id | BIGINT | Không | FK → tai_khoan | Người nhận |
-| loai | VARCHAR(30) | Không | — | Loại sự kiện (phân công GVHD `PHAN_CONG_GVHD`, đề tài chờ GVHD duyệt `DE_TAI_CHO_DUYET`, duyệt/từ chối đề tài, nhận xét mới...) |
+| loai | VARCHAR(30) | Không | — | Loại sự kiện (phân công GVHD `PHAN_CONG_GVHD`, GVHD giao đề tài `DE_TAI_PHAN_CONG`, nhận xét mới...; các loại cũ `DE_TAI_CHO_DUYET`, `DE_TAI_TU_CHOI` không còn phát sinh) |
 | noi_dung | TEXT | Không | — | Nội dung hiển thị |
 | lien_ket | VARCHAR(255) | Có | — | Đường dẫn tới màn hình liên quan |
 | da_doc | BOOLEAN | Không | — | Đã đọc hay chưa (FR-TB-01) |
@@ -266,7 +266,7 @@ Khi chuyển dữ liệu (Alembic 0015), mọi đề tài đang hoạt động �
 | Cột | Kiểu | Null | Khóa | Mô tả |
 |---|---|---|---|---|
 | id | BIGINT | Không | PK | Định danh cấu hình |
-| loai | VARCHAR(30) | Không | UNIQUE | Mỗi loại đúng 1 dòng hiện hành: `NGUONG_TEN_DE_TAI` — tên đề tài có độ tương đồng ngữ nghĩa từ giá trị này trở lên được cảnh báo khi đề xuất/đăng ký (UC0.6); `NGUONG_TAI_LIEU` — đề cương/báo cáo có tỷ lệ trùng với **một** đồ án nguồn (`ty_le_nguon_cao_nhat`) từ giá trị này trở lên là "Vượt ngưỡng cảnh báo" (UC0.7, chụp vào `nguong_ap_dung`; tỷ lệ tổng chỉ để hiển thị); `NGUONG_DOAN_TRUNG` — một câu có độ tương đồng ngữ nghĩa với đồ án đã lưu từ giá trị này trở lên được tính là đoạn trùng (gửi sang Dịch vụ AI dưới tên `nguong_doan`; bổ sung khi thi công Phase 4, D-04). Giá trị mặc định lấy từ hiệu chỉnh (Alembic 0010: 67,8 / 10,4 / 67,7); Bộ môn sửa cả ba trên màn hình UC0.4 (`GET/PUT /api/thresholds`), Web API đọc lại theo từng request nên lần kiểm tra kế tiếp dùng giá trị mới |
+| loai | VARCHAR(30) | Không | UNIQUE | Mỗi loại đúng 1 dòng hiện hành: `NGUONG_TEN_DE_TAI` — tên đề tài có độ tương đồng ngữ nghĩa từ giá trị này trở lên được cảnh báo khi GVHD tạo/giao đề tài (UC0.6); `NGUONG_TAI_LIEU` — đề cương/báo cáo có tỷ lệ trùng với **một** đồ án nguồn (`ty_le_nguon_cao_nhat`) từ giá trị này trở lên là "Vượt ngưỡng cảnh báo" (UC0.7, chụp vào `nguong_ap_dung`; tỷ lệ tổng chỉ để hiển thị); `NGUONG_DOAN_TRUNG` — một câu có độ tương đồng ngữ nghĩa với đồ án đã lưu từ giá trị này trở lên được tính là đoạn trùng (gửi sang Dịch vụ AI dưới tên `nguong_doan`; bổ sung khi thi công Phase 4, D-04). Giá trị mặc định lấy từ hiệu chỉnh (Alembic 0010: 67,8 / 10,4 / 67,7); Bộ môn sửa cả ba trên màn hình UC0.4 (`GET/PUT /api/thresholds`), Web API đọc lại theo từng request nên lần kiểm tra kế tiếp dùng giá trị mới |
 | gia_tri | DECIMAL(5,2) | Không | — | Giá trị ngưỡng % (0–100, FR-AI-05) |
 | tai_khoan_id | BIGINT | Có | FK → tai_khoan | Người (Bộ môn) cập nhật lần gần nhất |
 | thoi_diem_cap_nhat | DATETIME | Không | — | Thời điểm lưu cấu hình |
@@ -309,18 +309,18 @@ sinh_vien_id_dang_hoat_dong BIGINT
 UNIQUE KEY uk_de_tai_sv_hoat_dong (sinh_vien_id_dang_hoat_dong)
 ```
 
-Cột chỉ mang giá trị `sinh_vien_id` khi đề tài đang ở một trong ba trạng thái "đang hoạt động"; ở `NHAP` và `TU_CHOI` cột này là `NULL`. MySQL cho phép **nhiều dòng NULL** cùng tồn tại trong một chỉ mục UNIQUE (NULL không được coi là trùng), nên ràng buộc chỉ thực sự chặn khi cùng một `sinh_vien_id` xuất hiện ở hai đề tài đang hoạt động cùng lúc — đúng ngữ nghĩa cần (FR-DT-06).
+Cột chỉ mang giá trị `sinh_vien_id` khi đề tài đang ở một trong ba trạng thái "đang hoạt động"; ở `NHAP` và `TU_CHOI` (giá trị cũ) cột này là `NULL`. MySQL cho phép **nhiều dòng NULL** cùng tồn tại trong một chỉ mục UNIQUE (NULL không được coi là trùng), nên ràng buộc chỉ thực sự chặn khi cùng một `sinh_vien_id` xuất hiện ở hai đề tài đang hoạt động cùng lúc — đúng ngữ nghĩa cần (FR-DT-06).
 
-**(b) Mỗi đề tài chỉ có tối đa một Sinh viên, kể cả khi hai SV đăng ký gần như đồng thời.** Vì `de_tai.sinh_vien_id` là một cột đơn (không phải bảng N-N), rủi ro race condition không nằm ở "một dòng có 2 SV" mà ở "hai request cùng lúc đều tưởng mình đăng ký thành công" cho cùng một dòng. Tầng ứng dụng (Web API) bắt buộc dùng một trong hai cơ chế, không chỉ kiểm tra rồi ghi (check-then-act):
+**(b) Mỗi đề tài chỉ có tối đa một Sinh viên, kể cả khi hai yêu cầu giao đề tài đến gần như đồng thời.** Vì `de_tai.sinh_vien_id` là một cột đơn (không phải bảng N-N), rủi ro race condition nằm ở "hai request cùng lúc đều tưởng mình giao thành công" cho cùng một sinh viên. Tầng ứng dụng (Web API) không chỉ kiểm tra rồi ghi (check-then-act) mà dựa vào chỉ mục UNIQUE ở (a): INSERT/UPDATE thứ hai vi phạm `uk_de_tai_sv_hoat_dong` và được trả về 409 "Sinh viên này đã có một đề tài đang hoạt động" (đúng luồng ngoại lệ E4 của UC1.1). Gửi bản nháp dùng thêm cơ chế sau:
 
-- **UPDATE có điều kiện, kiểm tra số dòng bị ảnh hưởng:** `UPDATE de_tai SET sinh_vien_id = :sv, trang_thai = 'DA_PHAN_CONG' WHERE id = :dt AND sinh_vien_id IS NULL AND trang_thai = 'DA_DUYET' AND giang_vien_id = :gvhd_cua_sv` (`:gvhd_cua_sv` lấy từ `phan_cong_huong_dan` của đợt — chỉ đề tài GVHD của SV mở cho lớp mới khớp điều kiện); nếu số dòng ảnh hưởng trả về là 0, đăng ký bị từ chối ("đề tài vừa được người khác đăng ký" — đúng luồng ngoại lệ E1 của UC1.2). InnoDB khóa dòng cho transaction đang ghi, transaction thứ hai chờ và luôn thấy `sinh_vien_id` đã khác NULL.
+- **UPDATE có điều kiện, kiểm tra số dòng bị ảnh hưởng:** `UPDATE de_tai SET trang_thai = 'DA_PHAN_CONG' WHERE id = :dt AND trang_thai = 'NHAP' AND sinh_vien_id = :sv AND dot_do_an_id IN (đợt đang mở)` (GVHD đã được kiểm tra thuộc `phan_cong_huong_dan` của đợt trước đó); nếu số dòng ảnh hưởng trả về là 0, việc gửi bị từ chối (bản nháp không còn ở `NHAP` hoặc đợt đã đóng). InnoDB khóa dòng cho transaction đang ghi, transaction thứ hai chờ và thấy trạng thái đã đổi.
 - **Tương đương:** `SELECT ... FOR UPDATE` trên dòng `de_tai` trước khi kiểm tra và ghi trong cùng transaction.
 
 **(c) Các ràng buộc UNIQUE khác đã thể hiện trực tiếp trên lược đồ (Hình 3.5):**
 
 | Ràng buộc | Bảng | Mục đích |
 |---|---|---|
-| UNIQUE(dot_do_an_id, sinh_vien_id) — `uk_phan_cong_sv_dot` | phan_cong_huong_dan | Mỗi SV có tối đa một GVHD trong một đợt (BR-PC-01); khi Bộ môn lưu phân công, Web API khóa (`SELECT ... FOR UPDATE`) các dòng phân công và đề tài đang hoạt động của các SV liên quan để không đua với SV đang gửi/đăng ký đề tài cùng lúc |
+| UNIQUE(dot_do_an_id, sinh_vien_id) — `uk_phan_cong_sv_dot` | phan_cong_huong_dan | Mỗi SV có tối đa một GVHD trong một đợt (BR-PC-01); khi Bộ môn lưu phân công, Web API khóa (`SELECT ... FOR UPDATE`) các dòng phân công và đề tài đang hoạt động của các SV liên quan để không đua với GVHD đang giao đề tài cùng lúc |
 | UNIQUE(de_tai_id, loai, so_phien_ban) | tai_lieu_do_an | Số phiên bản duy nhất trong cùng một loại tài liệu của một đề tài |
 | UNIQUE(tai_lieu_do_an_id) trên luot_duyet_de_cuong | luot_duyet_de_cuong | Mỗi phiên bản đề cương chỉ có một lượt duyệt kết luận |
 | UNIQUE(de_tai_id, moc_tien_do_id) | bao_cao_tien_do | Một báo cáo cho mỗi (đề tài, mốc) |

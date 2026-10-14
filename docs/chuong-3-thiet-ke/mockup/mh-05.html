@@ -25,10 +25,6 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         <span>Đề tài của tôi</span>
       </li>
-      <li class="ant-menu-item ant-menu-item-selected">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
-        <span>Đề xuất / Đăng ký đề tài</span>
-      </li>
       <li class="ant-menu-item">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path><path d="M14 2v6h6"></path></svg>
         <span>Đề cương</span>
@@ -70,7 +66,6 @@
     <main class="ant-layout-content">
       <div class="mockup-content-header">
         <h1 class="ant-page-title">Danh sách đề tài</h1>
-        <a class="ant-btn ant-btn-primary" href="mh-06.html" style="text-decoration:none;">Đề xuất đề tài</a>
       </div>
 
       <div class="ant-card">
@@ -87,9 +82,6 @@
             <select class="ant-select-selector" id="f-trangthai">
               <option>Tất cả</option>
               <option>Nháp</option>
-              <option>Chờ duyệt</option>
-              <option>Mở cho lớp đăng ký</option>
-              <option>Từ chối</option>
               <option>Đã phân công</option>
             </select>
           </div>
@@ -118,7 +110,7 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
           </span>
           <div class="ant-alert-content">
-            <p class="ant-alert-message">Bạn chỉ thấy đề tài của mình và đề tài do GVHD của bạn (ThS. Hà Thị Thanh Vân) mở cho lớp đăng ký. Đăng ký thành công là đề tài chuyển Đã phân công ngay.</p>
+            <p class="ant-alert-message">Bạn chỉ thấy đề tài GVHD (ThS. Hà Thị Thanh Vân) đã giao cho bạn. Sinh viên không tự đề xuất hay đăng ký đề tài — hãy trao đổi trực tiếp với GVHD.</p>
           </div>
         </div>
 
@@ -127,7 +119,6 @@
             <tr>
               <th>Tên đề tài</th>
               <th>Lĩnh vực</th>
-              <th>Người đề xuất</th>
               <th>GVHD</th>
               <th>Sinh viên</th>
               <th>Trạng thái</th>
@@ -136,40 +127,12 @@
           </thead>
           <tbody>
             <tr>
-              <td>Ứng dụng gợi ý học liệu cá nhân hóa</td>
+              <td><a href="mh-07.html">Ứng dụng gợi ý học liệu cá nhân hóa</a></td>
               <td>AI &amp; NLP</td>
               <td>ThS. Hà Thị Thanh Vân</td>
-              <td>ThS. Hà Thị Thanh Vân</td>
-              <td>—</td>
-              <td><span class="ant-tag ant-tag-warning">Mở cho lớp đăng ký</span></td>
-              <td><a class="ant-btn ant-btn-primary" href="#" style="text-decoration:none;">Đăng ký</a></td>
-            </tr>
-            <tr>
-              <td>Hệ thống hỗ trợ tra cứu tài liệu học thuật bằng tìm kiếm ngữ nghĩa</td>
-              <td>AI &amp; NLP</td>
-              <td>ThS. Hà Thị Thanh Vân</td>
-              <td>ThS. Hà Thị Thanh Vân</td>
-              <td>—</td>
-              <td><span class="ant-tag ant-tag-warning">Mở cho lớp đăng ký</span></td>
-              <td><a class="ant-btn ant-btn-primary" href="#" style="text-decoration:none;">Đăng ký</a></td>
-            </tr>
-            <tr>
-              <td>Phân tích cảm xúc bình luận mạng xã hội tiếng Việt</td>
-              <td>AI &amp; NLP</td>
               <td>Đinh Văn Sinh Viên</td>
-              <td>ThS. Hà Thị Thanh Vân</td>
-              <td>Đinh Văn Sinh Viên</td>
-              <td><span class="ant-tag ant-tag-error">Từ chối</span></td>
-              <td><a class="ant-btn ant-btn-default" href="#" style="text-decoration:none;">Xem</a></td>
-            </tr>
-            <tr>
-              <td>Chatbot hỗ trợ tra cứu quy chế đào tạo</td>
-              <td>AI &amp; NLP</td>
-              <td>Đinh Văn Sinh Viên</td>
-              <td>ThS. Hà Thị Thanh Vân</td>
-              <td>Đinh Văn Sinh Viên</td>
-              <td><span class="ant-tag ant-tag-default">Nháp</span></td>
-              <td><a class="ant-btn ant-btn-default" href="#" style="text-decoration:none;">Xem</a></td>
+              <td><span class="ant-tag ant-tag-success">Đã phân công</span></td>
+              <td><a class="ant-btn ant-btn-default" href="mh-07.html" style="text-decoration:none;">Xem</a></td>
             </tr>
           </tbody>
         </table>

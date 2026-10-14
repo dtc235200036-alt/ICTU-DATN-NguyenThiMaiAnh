@@ -97,7 +97,7 @@ và bảo vệ (xem 04-bao-ve.drawio)" style="rounded=1;whiteSpace=wrap;html=1;d
 phân công GVHD cho SV (UC0.8)" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="tq_lane_bm">
           <mxGeometry x="120" y="65" width="220" height="70" as="geometry"/>
         </mxCell>
-        <mxCell id="tq_t02" value="TB-TQ-02: Quản lý đề tài – GVHD duyệt
+        <mxCell id="tq_t02" value="TB-TQ-02: Quản lý đề tài – GVHD giao đề tài
 (xem 01-de-tai.drawio)" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="tq_lane_gv">
           <mxGeometry x="380" y="65" width="220" height="70" as="geometry"/>
         </mxCell>

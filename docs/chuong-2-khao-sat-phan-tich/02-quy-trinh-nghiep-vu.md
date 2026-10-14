@@ -37,13 +37,13 @@ Sơ đồ tổng quan (`bpmn/00-tong-quan.drawio`) thể hiện toàn bộ chu�
 | Mã bước | Lane | Công việc | Dữ liệu / biểu mẫu | Ghi chú |
 |---------|------|-----------|---------------------|---------|
 | TB-TQ-01 | Bộ môn | Bộ môn mở đợt đồ án tốt nghiệp và phân công GVHD cho từng SV của đợt (UC0.8, chi tiết ở TB-DT-00a..TB-DT-00c) | Thông báo mở đợt; bảng phân công GVHD (nhập trên hệ thống hoặc import CSV) | Mỗi SV đúng một GVHD trong đợt |
-| TB-TQ-02 | Giảng viên | Quản lý đề tài — SV đề xuất tới GVHD hoặc đăng ký đề tài GVHD mở cho lớp, GVHD duyệt (xem `bpmn/01-de-tai.drawio`) | — | Chi tiết ở §2.2.2 |
+| TB-TQ-02 | Giảng viên | Quản lý đề tài — SV thống nhất đề tài với GVHD ngoài hệ thống, GVHD tạo và giao đề tài cho SV trong lớp hướng dẫn (xem `bpmn/01-de-tai.drawio`) | — | Chi tiết ở §2.2.2 |
 | TB-TQ-03 | Sinh viên | Quản lý đề cương (xem `bpmn/02-de-cuong.drawio`) | — | Chi tiết ở §2.2.3 |
 | TB-TQ-04 | Giảng viên | Theo dõi tiến độ (xem `bpmn/03-tien-do.drawio`) | — | Chi tiết ở §2.2.4 |
 | TB-TQ-05 | Sinh viên | Nộp báo cáo và bảo vệ (xem `bpmn/04-bao-ve.drawio`) | — | Chi tiết ở §2.2.5 |
 | TB-TQ-06 | Bộ môn | Lưu kho đồ án (xem `bpmn/05-kho-do-an.drawio`) | — | Chi tiết ở §2.2.6 |
 | TB-TQ-07 | Hệ thống | Kiểm tra trùng lặp (dịch vụ AI) — được gọi từ Quản lý đề tài, Quản lý đề cương và Nộp báo cáo/bảo vệ | Tên đề tài hoặc nội dung tài liệu | AISV-01..07 |
-| TB-TQ-08 | Hệ thống | Thông báo in-app — được gọi từ Quản lý đề tài, Quản lý đề cương, Theo dõi tiến độ và Nộp báo cáo/bảo vệ | Sự kiện duyệt/từ chối/nhận xét/lịch bảo vệ | NOTF-01 |
+| TB-TQ-08 | Hệ thống | Thông báo in-app — được gọi từ Quản lý đề tài, Quản lý đề cương, Theo dõi tiến độ và Nộp báo cáo/bảo vệ | Sự kiện giao đề tài/duyệt/từ chối/nhận xét/lịch bảo vệ | NOTF-01 |
 
 ### 2.2.2. Quy trình quản lý đề tài
 
@@ -55,8 +55,8 @@ Sơ đồ tổng quan (`bpmn/00-tong-quan.drawio`) thể hiện toàn bộ chu�
 
 | Mã bước | Lane | Công việc | Dữ liệu / biểu mẫu | Ghi chú |
 |---------|------|-----------|---------------------|---------|
-| AS-DT-01 | Giảng viên | GV gửi danh sách đề tài đề xuất cho Bộ môn qua email/Excel | File Excel/email tự do | GIẢ ĐỊNH — chờ xác nhận |
-| AS-DT-02 | Sinh viên | SV đăng ký đề tài qua phiếu giấy hoặc biểu mẫu trực tuyến rời rạc | Phiếu đăng ký giấy hoặc Google Form | GIẢ ĐỊNH — chờ xác nhận |
+| AS-DT-01 | Giảng viên | GV nêu hướng đề tài, trao đổi với SV rồi gửi danh sách đề tài đề xuất cho Bộ môn qua email/Excel | File Excel/email tự do | GIẢ ĐỊNH — chờ xác nhận |
+| AS-DT-02 | Sinh viên | SV trao đổi trực tiếp với GV và thống nhất đề tài (đúng thực tế GVHD xác nhận), rồi đăng ký qua phiếu giấy hoặc biểu mẫu trực tuyến rời rạc | Phiếu đăng ký giấy hoặc Google Form | GIẢ ĐỊNH — chờ xác nhận |
 | AS-DT-03 | Bộ môn | Bộ môn tổng hợp danh sách đề tài và đăng ký thủ công vào Excel | Bảng tổng hợp Excel | GIẢ ĐỊNH — chờ xác nhận |
 | AS-DT-04 | Bộ môn | Bộ môn họp xét duyệt đề tài | Biên bản họp | GIẢ ĐỊNH — chờ xác nhận |
 | AS-DT-05 | Bộ môn | Bộ môn phân công GVHD thủ công | Bảng phân công | GIẢ ĐỊNH — chờ xác nhận; không kiểm tra tải GV tự động |
@@ -65,11 +65,11 @@ Sơ đồ tổng quan (`bpmn/00-tong-quan.drawio`) thể hiện toàn bộ chu�
 **Điểm cải tiến của TO-BE so với AS-IS:**
 
 - Bộ môn phân công GVHD cho toàn bộ sinh viên ngay đầu đợt (UC0.8: gán từng dòng, hàng loạt hoặc import CSV, thấy ngay số SV mỗi GV đang hướng dẫn), thay vì phân công rải rác sau từng lần họp xét duyệt và không theo dõi được tải giảng viên (KS-DT-04).
-- Đề tài chỉ đi một vòng: SV gửi thẳng tới GVHD của mình và GVHD duyệt/từ chối (UC1.3); đề tài GV giao cho SV hoặc SV đăng ký đề tài GVHD mở cho lớp được phân công ngay — bỏ hai lượt qua Bộ môn (duyệt, rồi xác nhận đăng ký và chọn GVHD) của AS-IS, đồng thời gắn trách nhiệm chất lượng đề tài cho GVHD (KS-DT-05).
-- Kiểm tra trùng tên đề tài tự động bằng AI ngay khi đề xuất, thay vì người duyệt tự phát hiện trùng lặp thủ công khi họp xét duyệt (hoặc không phát hiện được).
-- Chặn tự động một SV có nhiều đề tài đang hoạt động hoặc hai SV cùng đăng ký một đề tài, kể cả khi đăng ký cùng lúc (FR-DT-06), thay vì đối chiếu thủ công trên Excel.
-- Trạng thái đề tài minh bạch theo thời gian thực (Nháp → Chờ duyệt → Mở cho lớp đăng ký/Từ chối → Đã phân công), mọi vai trò tự tra cứu được trong phạm vi của mình (UC1.4) thay vì chờ email công bố; Bộ môn theo dõi toàn bộ ở chế độ chỉ đọc.
-- Thông báo in-app tức thời khi được phân công GVHD, khi có đề tài chờ duyệt, khi đề tài được duyệt/từ chối/giao/đăng ký, thay vì chờ email hoặc bảng tin.
+- Đề tài chỉ đi một vòng: SV thống nhất đề tài với GVHD ngoài hệ thống (đúng thực tế vận hành), rồi GVHD tạo và giao đề tài cho SV trong lớp hướng dẫn — đề tài được phân công ngay (UC1.1), không còn SV tự đề xuất/đăng ký và bước duyệt. Bỏ hai lượt qua Bộ môn (duyệt, rồi xác nhận đăng ký và chọn GVHD) của AS-IS, đồng thời gắn trách nhiệm chất lượng đề tài cho GVHD (KS-DT-05).
+- Kiểm tra trùng tên đề tài tự động bằng AI ngay khi GVHD tạo đề tài, thay vì người duyệt tự phát hiện trùng lặp thủ công khi họp xét duyệt (hoặc không phát hiện được).
+- Chặn tự động một SV có nhiều đề tài đang hoạt động, kể cả khi hai yêu cầu giao đề tài cho cùng một SV đến đồng thời (FR-DT-06), thay vì đối chiếu thủ công trên Excel.
+- Trạng thái đề tài minh bạch theo thời gian thực (Nháp → Đã phân công), mọi vai trò tự tra cứu được trong phạm vi của mình (UC1.4) thay vì chờ email công bố; Bộ môn theo dõi toàn bộ ở chế độ chỉ đọc.
+- Thông báo in-app tức thời khi được phân công GVHD và khi GVHD giao đề tài, thay vì chờ email hoặc bảng tin.
 
 #### Quy trình TO-BE
 
@@ -78,30 +78,20 @@ Sơ đồ tổng quan (`bpmn/00-tong-quan.drawio`) thể hiện toàn bộ chu�
 | Mã bước | Lane | Công việc | Dữ liệu / biểu mẫu | Ghi chú |
 |---------|------|-----------|---------------------|---------|
 | TB-DT-00a | Bộ môn | Đầu đợt, phân công GVHD cho từng SV của đợt — gán từng dòng, gán hàng loạt hoặc import CSV | Danh sách SV/GV; tệp CSV `ma_so_sinh_vien,ma_giang_vien` | UC0.8; mỗi SV đúng một GVHD trong đợt |
-| TB-DT-00b | Hệ thống | Kiểm tra ràng buộc phân công (không đổi/gỡ GVHD khi SV đã có đề tài Đã phân công, không gỡ khi đang Chờ duyệt), lưu các dòng hợp lệ, báo lại dòng lỗi | Bảng phân công hướng dẫn | FR-DT-05, FR-DT-08, FR-DT-09 |
+| TB-DT-00b | Hệ thống | Kiểm tra ràng buộc phân công (không đổi/gỡ GVHD khi SV đã có đề tài Đã phân công), lưu các dòng hợp lệ, báo lại dòng lỗi | Bảng phân công hướng dẫn | FR-DT-05, FR-DT-08, FR-DT-09 |
 | TB-DT-00c | Hệ thống | Gửi thông báo in-app cho SV (GVHD của mình) và GV (số SV được phân công thêm) | Thông báo in-app (NOTF-01) | Kết thúc UC0.8; GV xem lớp tại "Sinh viên của tôi" |
-| TB-DT-01a | Giảng viên | GV tạo đề tài (tên, mô tả, lĩnh vực); chọn một SV trong lớp hướng dẫn của mình hoặc để trống | Biểu mẫu đề xuất đề tài (điện tử) | Chỉ gửi được khi đợt đồ án đang mở (FR-DT-10) |
-| TB-DT-01b | Sinh viên | SV đề xuất đề tài (tên, mô tả, lĩnh vực) gửi tới GVHD của mình | Biểu mẫu đề xuất đề tài (điện tử) | Chỉ gửi được khi đợt đang mở và SV đã có GVHD trong đợt |
-| TB-DT-02 | Hệ thống | Kiểm tra trùng lặp tên đề tài theo ngữ nghĩa (gọi Dịch vụ AI) | Tên đề tài vừa nhập, kho đề tài đã có | So sánh ngữ nghĩa, không phải so khớp chuỗi ký tự |
-| TB-DT-03 | Hệ thống | Gateway: có đề tài tương tự vượt ngưỡng cấu hình? | Ngưỡng do Bộ môn cấu hình (FR-DT-02) | Ngưỡng đặt trong yêu cầu phi chức năng (ANLS-04) |
-| TB-DT-04 | Hệ thống | Hiển thị danh sách đề tài tương tự kèm tỷ lệ % | Top N đề tài tương tự | Chỉ cảnh báo, không chặn gửi |
-| TB-DT-05 | Giảng viên | Người đề xuất (SV hoặc GV) sửa tên đề tài hoặc vẫn gửi | — | Quyết định thuộc về người đề xuất |
-| TB-DT-06 | Hệ thống | Gateway: ai gửi, đã chọn SV hay chưa? | Bản ghi đề tài | Rẽ ba nhánh TB-DT-06a/06b/06c |
-| TB-DT-06a | Hệ thống | SV gửi: chuyển "Chờ duyệt", gắn GVHD của SV, gửi thông báo in-app cho GVHD | Thông báo in-app (NOTF-01) | Kết thúc UC1.1, chuyển sang UC1.3 |
-| TB-DT-06b | Hệ thống | GV giao cho SV trong lớp: chuyển "Đã phân công", gửi thông báo in-app cho SV | Thông báo in-app (NOTF-01) | UC1.1 – A3 |
-| TB-DT-06c | Hệ thống | GV chưa chọn SV: chuyển "Mở cho lớp đăng ký" (chỉ SV cùng lớp hướng dẫn thấy) | Bản ghi đề tài | UC1.1 – A4, chuyển sang UC1.2 |
-| TB-DT-07 | Sinh viên | SV chọn đăng ký một đề tài do GVHD của mình mở cho lớp | Danh sách đề tài "Mở cho lớp đăng ký" của GVHD, chưa có SV | UC1.2 |
-| TB-DT-08 | Hệ thống | Kiểm tra đề tài do GVHD của SV mở trong đợt, còn trống, và SV chưa có đề tài đang hoạt động | Ràng buộc 1 SV – 1 đề tài (FR-DT-06) | Phải xử lý đúng khi 2 SV đăng ký cùng lúc |
-| TB-DT-09 | Hệ thống | Gateway: đăng ký có hợp lệ? | — | — |
-| TB-DT-10 | Hệ thống | Ghi nhận đăng ký, chuyển đề tài sang "Đã phân công" ngay, gửi thông báo in-app cho GVHD | Bản ghi đề tài, thông báo in-app | Nhánh hợp lệ của UC1.2, không có bước duyệt |
-| TB-DT-11 | Hệ thống | Từ chối đăng ký, thông báo lý do | Thông báo lỗi | Nhánh không hợp lệ của UC1.2 |
-| TB-DT-12 | Giảng viên | GVHD xem đề tài "Chờ duyệt" do SV trong lớp hướng dẫn đề xuất, kèm kết quả kiểm tra tên | Danh sách đề tài chờ duyệt của lớp | UC1.3 |
-| TB-DT-13 | Giảng viên | Gateway: GVHD có duyệt đề tài? | — | — |
-| TB-DT-14 | Giảng viên | GVHD duyệt đề tài (không chọn lại GVHD — đã được Bộ môn phân công ở TB-DT-00a) | — | Nhánh duyệt của UC1.3 |
-| TB-DT-15 | Hệ thống | Chuyển trạng thái "Đã phân công", gửi thông báo in-app cho SV | Thông báo in-app (NOTF-01) | Kết thúc UC1.3 nhánh duyệt |
-| TB-DT-16 | Giảng viên | GVHD từ chối kèm lý do (bắt buộc) | Ghi chú lý do từ chối | Nhánh từ chối của UC1.3 |
-| TB-DT-17 | Hệ thống | Chuyển trạng thái "Từ chối", gửi thông báo in-app kèm lý do cho SV; SV được đề xuất lại (quay về TB-DT-01b, vẫn tới GVHD đó) | Thông báo in-app (NOTF-01) | Kết thúc UC1.3 nhánh từ chối |
-| TB-DT-18 | Hệ thống | SV/GV/Bộ môn xem và lọc danh sách đề tài theo trạng thái, đợt, GV — phạm vi theo vai trò | Bộ lọc danh sách đề tài | UC1.4; Bộ môn chỉ xem |
+| TB-DT-01 | Sinh viên | SV trao đổi trực tiếp với GVHD của mình và thống nhất đề tài — diễn ra ngoài hệ thống; SV không tự đề xuất hay đăng ký đề tài trên hệ thống | Trao đổi trực tiếp (không có biểu mẫu trên hệ thống) | Góp ý GVHD mục 1; đề tài đã thống nhất được coi là đề tài GV giao |
+| TB-DT-02 | Giảng viên | GVHD tạo đề tài (tên, mô tả, lĩnh vực) và chọn một SV trong lớp hướng dẫn của mình ("Giao đề tài" từ MH-16, hoặc từ menu rồi chọn SV); lưu nháp được | Biểu mẫu giao đề tài (điện tử, MH-06) | Chỉ GVHD được Bộ môn phân công; chỉ gửi được khi đợt đồ án đang mở (FR-DT-01, FR-DT-10) |
+| TB-DT-03 | Hệ thống | Kiểm tra trùng lặp tên đề tài theo ngữ nghĩa (gọi Dịch vụ AI) | Tên đề tài vừa nhập, kho đề tài đã có | So sánh ngữ nghĩa, không phải so khớp chuỗi ký tự (FR-DT-02) |
+| TB-DT-04 | Hệ thống | Gateway: có đề tài tương tự vượt ngưỡng cấu hình? | Ngưỡng do Bộ môn cấu hình (FR-DT-02) | Ngưỡng đặt trong yêu cầu phi chức năng (ANLS-04) |
+| TB-DT-05 | Hệ thống | Hiển thị danh sách đề tài tương tự kèm tỷ lệ % | Top N đề tài tương tự | Chỉ cảnh báo, không chặn việc giao |
+| TB-DT-06 | Giảng viên | GVHD sửa tên đề tài (quay lại TB-DT-03) hoặc chọn "Vẫn giao đề tài" | — | Quyết định thuộc về GVHD |
+| TB-DT-07 | Hệ thống | Kiểm tra SV thuộc lớp hướng dẫn của GVHD trong đợt, đợt còn mở và SV chưa có đề tài đang hoạt động | Ràng buộc 1 SV – 1 đề tài (FR-DT-06), phân công UC0.8 (FR-DT-04) | Phải xử lý đúng khi hai yêu cầu giao đồng thời cho một SV |
+| TB-DT-08 | Hệ thống | Gateway: giao đề tài có hợp lệ? | — | — |
+| TB-DT-09 | Hệ thống | Lưu đề tài ở trạng thái "Đã phân công" ngay, lưu kết quả kiểm tra tên (UC0.6), index tên đề tài vào kho AI và gửi thông báo in-app cho SV | Bản ghi đề tài, kết quả kiểm tra, thông báo in-app (NOTF-01) | Nhánh hợp lệ của UC1.1, không có bước duyệt |
+| TB-DT-10 | Hệ thống | Từ chối giao đề tài (SV không thuộc lớp, SV đã có đề tài đang hoạt động, đợt đã đóng) và báo lý do cho GVHD | Thông báo lỗi | Nhánh không hợp lệ của UC1.1 (ngoại lệ E1, E4) |
+| TB-DT-11 | Sinh viên | SV nhận thông báo, xem đề tài được giao (MH-02, MH-07) rồi tiếp tục UC2–UC5 | Trang chi tiết đề tài được giao | Kết thúc UC1.1; SV chỉ xem, không sửa |
+| TB-DT-12 | Hệ thống | SV/GV/Bộ môn xem và lọc danh sách đề tài theo trạng thái, đợt, GV — phạm vi theo vai trò | Bộ lọc danh sách đề tài | UC1.2; Bộ môn chỉ xem |
 
 ### 2.2.3. Quy trình quản lý đề cương
 

@@ -35,7 +35,7 @@ BM --> UC0_5
 note bottom of UC0_6
   UC0.6, UC0.7: tác nhân chính là Hệ thống
   (Dịch vụ AI) — đây là các UC được
-  <<include>> từ UC1 (UC0.6) và UC2/UC4
+  <<include>> từ UC1.1 (UC0.6, chỉ GVHD gọi) và UC2/UC4
   (UC0.7), không có tác nhân người dùng
   trực tiếp gọi thẳng trên sơ đồ này.
 end note

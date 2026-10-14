@@ -1,0 +1,34 @@
+@startuml act-uc1-tao-giao-de-tai
+title Hoạt động UC1.1 – GVHD tạo và giao đề tài
+
+|Bộ môn|
+|Sinh viên|
+|Giảng viên|
+|Hệ thống|
+|Bộ môn|
+start
+:Đầu đợt: phân công mỗi SV cho đúng một GVHD (UC0.8);
+|Sinh viên|
+:Trao đổi trực tiếp với GVHD và thống nhất đề tài\n(ngoài hệ thống — SV không tự đề xuất/đăng ký);
+|Giảng viên|
+:GVHD mở "Sinh viên của tôi" → "Giao đề tài",\nnhập tên, mô tả, lĩnh vực, chọn SV trong lớp;
+|Hệ thống|
+:Kiểm tra trùng lặp tên đề tài theo ngữ nghĩa (UC0.6);
+if (Có đề tài tương tự vượt ngưỡng?) then (có)
+  |Giảng viên|
+  :Xem danh sách tương tự kèm tỷ lệ %,\nsửa tên đề tài hoặc "Vẫn giao đề tài";
+else (không)
+endif
+|Hệ thống|
+if (SV thuộc lớp của GVHD,\nchưa có đề tài hoạt động,\nđợt đang mở?) then (hợp lệ)
+  :Lưu đề tài "Đã phân công" ngay,\nlưu kết quả kiểm tra tên, index tên đề tài;
+  :Thông báo in-app cho SV;
+  |Sinh viên|
+  :Xem đề tài được giao (MH-07),\ntiếp tục nộp đề cương (UC2);
+else (không hợp lệ)
+  |Hệ thống|
+  :Từ chối giao đề tài (409), báo lý do cho GVHD;
+endif
+
+stop
+@enduml

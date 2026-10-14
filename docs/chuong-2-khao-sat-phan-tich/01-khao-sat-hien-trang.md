@@ -42,10 +42,10 @@ Theo suy luận thực tế phổ biến, GV đề xuất đề tài rời rạc
 | Mã | Phát hiện | Nguồn xác nhận | Trạng thái |
 |----|-----------|------------------|------------|
 | KS-DT-01 | GV gửi danh sách đề tài đề xuất cho Bộ môn qua email/Excel, không có kho đề tài tập trung | Q-BM-10, Q-GV-01 | GIẢ ĐỊNH — chờ xác nhận |
-| KS-DT-02 | SV đăng ký đề tài qua phiếu giấy hoặc biểu mẫu trực tuyến rời rạc, không đối chiếu tự động với danh sách đề tài đã duyệt | Q-SV-01, Q-BM-02 | GIẢ ĐỊNH — chờ xác nhận |
+| KS-DT-02 | SV trao đổi trực tiếp với GV để thống nhất đề tài (xác nhận của GVHD), rồi đăng ký qua phiếu giấy hoặc biểu mẫu trực tuyến rời rạc, không đối chiếu tự động với danh sách đề tài đã duyệt | Q-SV-01, Q-BM-02 | GIẢ ĐỊNH — chờ xác nhận |
 | KS-DT-03 | Bộ môn tổng hợp và xét duyệt đề tài thủ công trong cuộc họp định kỳ; không có bước kiểm tra trùng tên đề tài tự động | Q-BM-02, Q-BM-12 | GIẢ ĐỊNH — chờ xác nhận |
 | KS-DT-04 | Phân công GVHD dựa trên kinh nghiệm cá nhân của Bộ môn, không theo dõi tải giảng viên (số SV/đề tài đang hướng dẫn) một cách hệ thống | Q-BM-03 | GIẢ ĐỊNH — chờ xác nhận |
-| KS-DT-05 | SV thực tế làm việc với GVHD được chia từ đầu đợt, nhưng đề tài vẫn phải qua Bộ môn hai lượt (duyệt, xác nhận đăng ký/chọn GVHD), gây chậm và chồng chéo trách nhiệm duyệt | Q-BM-02, Q-BM-03, Q-GV-01 | GIẢ ĐỊNH — chờ xác nhận |
+| KS-DT-05 | SV thực tế làm việc với GVHD được chia từ đầu đợt, đã thống nhất đề tài trực tiếp với GVHD nhưng đề tài vẫn phải qua Bộ môn hai lượt (duyệt, xác nhận đăng ký/chọn GVHD), gây chậm và chồng chéo trách nhiệm duyệt | Q-BM-02, Q-BM-03, Q-GV-01 | GIẢ ĐỊNH — chờ xác nhận |
 
 #### 2.1.3.2. Đề cương
 
@@ -95,11 +95,11 @@ Bảy biểu mẫu dưới đây là các biểu mẫu giấy/Excel đang (giả
 
 #### MAU-01 – Phiếu đề xuất đề tài
 
-Mục đích: GV (hoặc SV tự đề xuất) khai báo một đề tài mới để xét duyệt (AS-IS: Bộ môn; TO-BE: GVHD của sinh viên duyệt đề tài SV đề xuất, đề tài GV giao/mở cho lớp không qua duyệt). Người điền: Giảng viên hoặc Sinh viên. Thời điểm: đầu đợt đồ án, khi Bộ môn mở đăng ký.
+Mục đích: GV (hoặc SV tự đề xuất) khai báo một đề tài mới để xét duyệt (AS-IS: Bộ môn; TO-BE: SV thống nhất đề tài với GVHD ngoài hệ thống, GVHD tạo và giao đề tài cho SV trong lớp hướng dẫn, không qua duyệt — UC1.1). Người điền: AS-IS Giảng viên hoặc Sinh viên; TO-BE chỉ Giảng viên hướng dẫn. Thời điểm: đầu đợt đồ án, sau khi Bộ môn phân công GVHD.
 
 | Trường dữ liệu | Kiểu dữ liệu | Bắt buộc | Ràng buộc / ghi chú | Thực thể dự kiến |
 |---|---|---|---|---|
-| Vai trò người đề xuất | Enum (Giảng viên/Sinh viên) | Có | Xác định luồng duyệt tiếp theo | DeTai |
+| Vai trò người đề xuất | Enum (Giảng viên/Sinh viên) | Có | AS-IS xác định luồng duyệt tiếp theo; TO-BE luôn là Giảng viên (cột giữ để tương thích dữ liệu cũ) | DeTai |
 | Tên đề tài | Chuỗi | Có | Tối đa ~200 ký tự; là đầu vào kiểm tra trùng ngữ nghĩa (AISV-03) | DeTai |
 | Mô tả/tóm tắt đề tài | Văn bản dài | Có | Vài đoạn mô tả mục tiêu, phạm vi | DeTai |
 | Lĩnh vực/hướng đề tài | Chuỗi hoặc danh mục | Không | Hỗ trợ lọc, gợi ý sau này | DeTai |
@@ -110,14 +110,14 @@ Nguồn: TL-03 (Phiếu đề xuất/đăng ký đề tài — GIẢ ĐỊNH —
 
 #### MAU-02 – Phiếu đăng ký đề tài
 
-Mục đích: SV đăng ký nhận một đề tài đã được duyệt và còn trống (TO-BE: đề tài do GVHD của SV mở cho lớp đăng ký). Người điền: Sinh viên. Thời điểm: sau khi danh sách đề tài được công bố.
+Mục đích: SV đăng ký nhận một đề tài đã được duyệt và còn trống (AS-IS). TO-BE: biểu mẫu này không còn trên hệ thống — SV thống nhất đề tài với GVHD ngoài hệ thống và GVHD giao đề tài (MAU-01, UC1.1). Người điền: Sinh viên. Thời điểm: sau khi danh sách đề tài được công bố.
 
 | Trường dữ liệu | Kiểu dữ liệu | Bắt buộc | Ràng buộc / ghi chú | Thực thể dự kiến |
 |---|---|---|---|---|
 | Mã số sinh viên | Chuỗi | Có | Khóa tra cứu sinh viên | DeTai |
-| Đề tài đăng ký | Tham chiếu DeTai | Có | Chỉ chọn được đề tài trạng thái "Mở cho lớp đăng ký" do GVHD của SV mở, chưa có SV | DeTai |
+| Đề tài đăng ký | Tham chiếu DeTai | Có | AS-IS: chọn đề tài đã duyệt và còn trống; TO-BE: không áp dụng | DeTai |
 | Ngày đăng ký | Ngày | Có | Tự sinh khi tạo bản ghi | DeTai |
-| Xác nhận của GVHD (nếu có) | Boolean/ghi chú | Không | AS-IS: một số trường hợp GVHD xác nhận trước khi Bộ môn duyệt; TO-BE: không cần — đăng ký thành công là Đã phân công | DeTai |
+| Xác nhận của GVHD (nếu có) | Boolean/ghi chú | Không | AS-IS: một số trường hợp GVHD xác nhận trước khi Bộ môn duyệt; TO-BE: không cần — GVHD giao đề tài là Đã phân công ngay | DeTai |
 
 Nguồn: TL-03 (GIẢ ĐỊNH — chờ xác nhận, xem `tai-lieu-goc/README.md`).
 

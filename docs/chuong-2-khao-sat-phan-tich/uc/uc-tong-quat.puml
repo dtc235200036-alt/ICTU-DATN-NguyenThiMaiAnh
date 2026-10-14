@@ -69,8 +69,8 @@ end note
 note right of UC0_8
   Đầu đợt Bộ môn phân công mỗi SV cho đúng
   một GVHD; GV xem lớp hướng dẫn của mình.
-  UC1: SV đề xuất/đăng ký với GVHD này,
-  GVHD duyệt đề tài (Bộ môn chỉ theo dõi).
+  UC1: GVHD này tạo và giao đề tài cho SV
+  trong lớp (Bộ môn chỉ theo dõi).
 end note
 
 note right of UC2

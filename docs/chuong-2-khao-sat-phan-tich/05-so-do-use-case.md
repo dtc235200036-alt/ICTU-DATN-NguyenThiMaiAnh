@@ -10,15 +10,15 @@ Hệ thống có 3 tác nhân (Sinh viên, Giảng viên, Bộ môn — hội đ
 
 | Tác nhân | Mô tả | Use case chính |
 |---|---|---|
-| Sinh viên | Người dùng đề xuất đề tài tới GVHD được phân công hoặc đăng ký đề tài GVHD mở cho lớp, nộp đề cương/báo cáo tiến độ/báo cáo cuối, xem lịch và kết quả bảo vệ, tra cứu kho đồ án | UC1, UC2, UC3, UC4, UC5 |
-| Giảng viên | Xem lớp hướng dẫn được phân công, giao đề tài hoặc mở đề tài cho lớp đăng ký, duyệt đề tài sinh viên trong lớp đề xuất, duyệt đề cương, nhận xét tiến độ, làm thành viên hội đồng chấm điểm bảo vệ, tra cứu kho đồ án | UC1, UC2, UC3, UC4, UC5, UC0.8 |
+| Sinh viên | Người dùng xem đề tài được GVHD giao (SV thống nhất đề tài với GVHD ngoài hệ thống, không tự đề xuất/đăng ký trên hệ thống), nộp đề cương/báo cáo tiến độ/báo cáo cuối, xem lịch và kết quả bảo vệ, tra cứu kho đồ án | UC1, UC2, UC3, UC4, UC5 |
+| Giảng viên | Xem lớp hướng dẫn được phân công, kiểm tra trùng tên và tạo/giao đề tài cho sinh viên trong lớp, duyệt đề cương, nhận xét tiến độ, làm thành viên hội đồng chấm điểm bảo vệ, tra cứu kho đồ án | UC1, UC2, UC3, UC4, UC5, UC0.8 |
 | Bộ môn | Phân công GVHD cho sinh viên đầu đợt, theo dõi toàn bộ đề tài (chỉ đọc), thiết lập mốc và theo dõi tiến độ toàn khoa, lập hội đồng và chốt kết quả bảo vệ, quản lý kho dữ liệu đồ án, quản lý tài khoản/đợt đồ án/ngưỡng trùng lặp | UC1, UC3, UC4, UC5, UC0.1–UC0.5, UC0.8 |
 
 ### Bảng danh mục use case
 
 | Mã | Tên use case | Tác nhân | Use case con | Tệp đặc tả |
 |---|---|---|---|---|
-| UC1 | Quản lý đề tài | Sinh viên, Giảng viên, Bộ môn | UC1.1 Đề xuất đề tài; UC1.2 Đăng ký đề tài GVHD mở cho lớp; UC1.3 Duyệt đề tài (GVHD); UC1.4 Xem và lọc danh sách đề tài | [06-dac-ta-uc1-quan-ly-de-tai.md](06-dac-ta-uc1-quan-ly-de-tai.md) |
+| UC1 | Quản lý đề tài | Sinh viên, Giảng viên, Bộ môn | UC1.1 Tạo và giao đề tài (GVHD); UC1.2 Xem và lọc danh sách đề tài | [06-dac-ta-uc1-quan-ly-de-tai.md](06-dac-ta-uc1-quan-ly-de-tai.md) |
 | UC2 | Quản lý đề cương | Sinh viên, Giảng viên | UC2.1 Nộp đề cương; UC2.2 Duyệt hoặc yêu cầu sửa đề cương; UC2.3 Xem lịch sử phiên bản và nhận xét | [07-dac-ta-uc2-quan-ly-de-cuong.md](07-dac-ta-uc2-quan-ly-de-cuong.md) |
 | UC3 | Quản lý tiến độ thực hiện | Sinh viên, Giảng viên, Bộ môn | UC3.1 Thiết lập mốc tiến độ; UC3.2 Nộp báo cáo tiến độ; UC3.3 Nhận xét và đánh giá báo cáo tiến độ; UC3.4 Theo dõi tiến độ toàn khoa | [08-dac-ta-uc3-quan-ly-tien-do.md](08-dac-ta-uc3-quan-ly-tien-do.md) |
 | UC4 | Quản lý bảo vệ | Sinh viên, Giảng viên, Bộ môn | UC4.1 Nộp báo cáo cuối; UC4.2 Lập hội đồng và xếp lịch; UC4.3 Chấm điểm và nhận xét; UC4.4 Chốt kết quả bảo vệ; UC4.5 Xem lịch và kết quả bảo vệ | [09-dac-ta-uc4-quan-ly-bao-ve.md](09-dac-ta-uc4-quan-ly-bao-ve.md) |

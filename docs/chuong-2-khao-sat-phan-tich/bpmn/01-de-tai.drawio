@@ -19,14 +19,14 @@
         <mxCell id="astart_gv" value="Bắt đầu" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=standard;fillColor=#ffffff;fontSize=10;" vertex="1" parent="alane_gv">
           <mxGeometry x="40" y="80" width="40" height="40" as="geometry"/>
         </mxCell>
-        <mxCell id="a_dt01" value="AS-DT-01: GV gửi danh sách đề tài
+        <mxCell id="a_dt01" value="AS-DT-01: GV nêu hướng đề tài, trao đổi với SV; gửi danh sách đề tài
 đề xuất cho Bộ môn qua email/Excel" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="alane_gv">
           <mxGeometry x="120" y="65" width="240" height="70" as="geometry"/>
         </mxCell>
         <mxCell id="astart_sv" value="Bắt đầu" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=standard;fillColor=#ffffff;fontSize=10;" vertex="1" parent="alane_sv">
           <mxGeometry x="40" y="80" width="40" height="40" as="geometry"/>
         </mxCell>
-        <mxCell id="a_dt02" value="AS-DT-02: SV đăng ký đề tài qua
+        <mxCell id="a_dt02" value="AS-DT-02: SV trao đổi trực tiếp với GV, thống nhất đề tài rồi đăng ký qua
 phiếu giấy hoặc biểu mẫu trực tuyến rời rạc" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="alane_sv">
           <mxGeometry x="120" y="65" width="260" height="70" as="geometry"/>
         </mxCell>
@@ -77,31 +77,31 @@ GVHD thủ công" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;stro
     </mxGraphModel>
   </diagram>
   <diagram name="TO-BE" id="page-tobe">
-    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="3890" pageHeight="1820" math="0" shadow="0">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="3300" pageHeight="1420" math="0" shadow="0">
       <root>
         <mxCell id="0"/>
         <mxCell id="1" parent="0"/>
         <mxCell id="pool1" value="Quản lý đề tài (TO-BE)" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=14;fontStyle=1;fillColor=#ffffff;" vertex="1" parent="1">
-          <mxGeometry x="40" y="40" width="3790" height="1720" as="geometry"/>
+          <mxGeometry x="40" y="40" width="3200" height="1320" as="geometry"/>
         </mxCell>
         <mxCell id="lane_sv" value="Sinh viên" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=12;collapsible=0;" vertex="1" parent="pool1">
-          <mxGeometry x="0" y="0" width="3760" height="430" as="geometry"/>
+          <mxGeometry x="0" y="0" width="3170" height="330" as="geometry"/>
         </mxCell>
         <mxCell id="lane_gv" value="Giảng viên" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=12;collapsible=0;" vertex="1" parent="pool1">
-          <mxGeometry x="0" y="430" width="3760" height="430" as="geometry"/>
+          <mxGeometry x="0" y="330" width="3170" height="330" as="geometry"/>
         </mxCell>
         <mxCell id="lane_bm" value="Bộ môn" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=12;collapsible=0;" vertex="1" parent="pool1">
-          <mxGeometry x="0" y="860" width="3760" height="430" as="geometry"/>
+          <mxGeometry x="0" y="660" width="3170" height="330" as="geometry"/>
         </mxCell>
         <mxCell id="lane_ht" value="Hệ thống (Web API + Dịch vụ AI)" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=30;fontSize=12;collapsible=0;" vertex="1" parent="pool1">
-          <mxGeometry x="0" y="1290" width="3760" height="430" as="geometry"/>
+          <mxGeometry x="0" y="990" width="3170" height="330" as="geometry"/>
         </mxCell>
         <mxCell id="start_bm" value="Bắt đầu đợt (Bộ môn)" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=standard;fillColor=#ffffff;fontSize=10;" vertex="1" parent="lane_bm">
-          <mxGeometry x="40" y="55" width="40" height="40" as="geometry"/>
+          <mxGeometry x="40" y="145" width="40" height="40" as="geometry"/>
         </mxCell>
         <mxCell id="t_pc" value="TB-DT-00a: Phân công GVHD cho SV
 (từng dòng / hàng loạt / import CSV)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_bm">
-          <mxGeometry x="120" y="40" width="240" height="70" as="geometry"/>
+          <mxGeometry x="120" y="130" width="240" height="70" as="geometry"/>
         </mxCell>
         <mxCell id="t_pc_check" value="TB-DT-00b: Kiểm tra ràng buộc phân công,
 lưu dòng hợp lệ, báo dòng lỗi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;shape=mxgraph.bpmn.service;" vertex="1" parent="lane_ht">
@@ -127,224 +127,117 @@ cho SV và GVHD" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strok
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
         <mxCell id="start_sv" value="Bắt đầu (SV)" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=standard;fillColor=#ffffff;fontSize=10;" vertex="1" parent="lane_sv">
-          <mxGeometry x="40" y="185" width="40" height="40" as="geometry"/>
+          <mxGeometry x="40" y="145" width="40" height="40" as="geometry"/>
         </mxCell>
-        <mxCell id="t_sv01" value="TB-DT-01b: SV đề xuất đề tài
-gửi tới GVHD của mình" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_sv">
-          <mxGeometry x="120" y="170" width="220" height="70" as="geometry"/>
+        <mxCell id="t_sv01" value="TB-DT-01: SV trao đổi trực tiếp với GVHD
+và thống nhất đề tài (ngoài hệ thống)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_sv">
+          <mxGeometry x="120" y="130" width="300" height="70" as="geometry"/>
         </mxCell>
-        <mxCell id="start_gv" value="Bắt đầu (GV)" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=standard;fillColor=#ffffff;fontSize=10;" vertex="1" parent="lane_gv">
-          <mxGeometry x="40" y="185" width="40" height="40" as="geometry"/>
-        </mxCell>
-        <mxCell id="t_gv01" value="TB-DT-01a: GV tạo đề tài; chọn SV
-trong lớp hoặc để trống" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_gv">
-          <mxGeometry x="120" y="170" width="220" height="70" as="geometry"/>
-        </mxCell>
-        <mxCell id="gw_merge" value="G1" style="shape=mxgraph.bpmn.gateway2;whiteSpace=wrap;html=1;fontSize=10;" vertex="1" parent="lane_ht">
-          <mxGeometry x="420" y="180" width="50" height="50" as="geometry"/>
-        </mxCell>
-        <mxCell id="t_check" value="TB-DT-02: Kiểm tra trùng lặp tên đề tài
-(gọi Dịch vụ AI)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;shape=mxgraph.bpmn.service;" vertex="1" parent="lane_ht">
-          <mxGeometry x="500" y="170" width="240" height="70" as="geometry"/>
-        </mxCell>
-        <mxCell id="gw_decision" value="TB-DT-03:
-Có đề tài tương tự
-vượt ngưỡng?" style="shape=mxgraph.bpmn.gateway2;whiteSpace=wrap;html=1;fontSize=10;" vertex="1" parent="lane_ht">
-          <mxGeometry x="790" y="175" width="60" height="60" as="geometry"/>
-        </mxCell>
-        <mxCell id="t_show" value="TB-DT-04: Hiển thị danh sách đề tài
-tương tự kèm tỷ lệ %" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_ht">
-          <mxGeometry x="900" y="170" width="220" height="70" as="geometry"/>
-        </mxCell>
-        <mxCell id="t_sua" value="TB-DT-05: Người đề xuất sửa tên
-hoặc vẫn gửi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_gv">
-          <mxGeometry x="1160" y="170" width="220" height="70" as="geometry"/>
-        </mxCell>
-        <mxCell id="gw_send" value="TB-DT-06:
-Ai gửi,
-đã chọn SV?" style="shape=mxgraph.bpmn.gateway2;whiteSpace=wrap;html=1;fontSize=10;" vertex="1" parent="lane_ht">
-          <mxGeometry x="1400" y="175" width="60" height="60" as="geometry"/>
-        </mxCell>
-        <mxCell id="t_06a" value="TB-DT-06a: SV gửi — chuyển Chờ duyệt,
-gắn GVHD, thông báo GVHD" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;shape=mxgraph.bpmn.service;" vertex="1" parent="lane_ht">
-          <mxGeometry x="1540" y="30" width="260" height="70" as="geometry"/>
-        </mxCell>
-        <mxCell id="t_06b" value="TB-DT-06b: GV giao — chuyển Đã phân công,
-thông báo SV" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;shape=mxgraph.bpmn.service;" vertex="1" parent="lane_ht">
-          <mxGeometry x="1540" y="170" width="260" height="70" as="geometry"/>
-        </mxCell>
-        <mxCell id="t_06c" value="TB-DT-06c: GV chưa chọn SV — chuyển
-Mở cho lớp đăng ký" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_ht">
-          <mxGeometry x="1540" y="310" width="260" height="70" as="geometry"/>
-        </mxCell>
-        <mxCell id="end_06b" value="Kết thúc" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=end;fillColor=#ffffff;fontSize=10;" vertex="1" parent="lane_ht">
-          <mxGeometry x="1830" y="185" width="40" height="40" as="geometry"/>
+        <mxCell id="t_gv02" value="TB-DT-02: GVHD tạo đề tài, chọn SV trong
+lớp hướng dẫn (&quot;Giao đề tài&quot;)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_gv">
+          <mxGeometry x="500" y="130" width="300" height="70" as="geometry"/>
         </mxCell>
         <mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="start_sv" target="t_sv01">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <mxCell id="e6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="start_gv" target="t_gv01">
+        <mxCell id="e6" value="Đã thống nhất" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_sv01" target="t_gv02">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <mxCell id="e7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_sv01" target="gw_merge">
-          <mxGeometry relative="1" as="geometry"/>
+        <mxCell id="t_check" value="TB-DT-03: Kiểm tra trùng lặp tên đề tài
+(gọi Dịch vụ AI)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;shape=mxgraph.bpmn.service;" vertex="1" parent="lane_ht">
+          <mxGeometry x="880" y="150" width="260" height="70" as="geometry"/>
         </mxCell>
-        <mxCell id="e8" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_gv01" target="gw_merge">
-          <mxGeometry relative="1" as="geometry"/>
+        <mxCell id="gw_decision" value="TB-DT-04:
+Có đề tài tương tự
+vượt ngưỡng?" style="shape=mxgraph.bpmn.gateway2;whiteSpace=wrap;html=1;fontSize=10;" vertex="1" parent="lane_ht">
+          <mxGeometry x="1190" y="155" width="60" height="60" as="geometry"/>
         </mxCell>
-        <mxCell id="e9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="gw_merge" target="t_check">
-          <mxGeometry relative="1" as="geometry"/>
+        <mxCell id="t_show" value="TB-DT-05: Hiển thị danh sách đề tài
+tương tự kèm tỷ lệ %" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_ht">
+          <mxGeometry x="1300" y="150" width="260" height="70" as="geometry"/>
         </mxCell>
-        <mxCell id="e10" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_check" target="gw_decision">
-          <mxGeometry relative="1" as="geometry"/>
+        <mxCell id="t_sua" value="TB-DT-06: GVHD sửa tên đề tài
+hoặc vẫn giao đề tài" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_gv">
+          <mxGeometry x="1620" y="130" width="260" height="70" as="geometry"/>
         </mxCell>
-        <mxCell id="e11" value="Có" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="gw_decision" target="t_show">
-          <mxGeometry relative="1" as="geometry"/>
+        <mxCell id="t_check2" value="TB-DT-07: Kiểm tra SV thuộc lớp của GVHD
+và chưa có đề tài đang hoạt động" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;shape=mxgraph.bpmn.service;" vertex="1" parent="lane_ht">
+          <mxGeometry x="1960" y="150" width="280" height="70" as="geometry"/>
         </mxCell>
-        <mxCell id="e12" value="Không" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="gw_decision" target="gw_send">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points"><mxPoint x="860" y="1600"/><mxPoint x="1420" y="1600"/><mxPoint x="1420" y="1535"/></Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="e13" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="t_show" target="t_sua">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points"><mxPoint x="1050" y="675"/></Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="e14" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="t_sua" target="gw_send">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points"><mxPoint x="1310" y="1535"/></Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="e15" value="SV gửi" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="gw_send" target="t_06a">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="e16" value="GV + SV" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="gw_send" target="t_06b">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="e17" value="GV, chưa có SV" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="gw_send" target="t_06c">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="e18" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_06b" target="end_06b">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="t_xem" value="TB-DT-12: GVHD xem đề tài Chờ duyệt
-của SV trong lớp" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_gv">
-          <mxGeometry x="1880" y="40" width="240" height="70" as="geometry"/>
-        </mxCell>
-        <mxCell id="gw3" value="TB-DT-13:
-Duyệt?" style="shape=mxgraph.bpmn.gateway2;whiteSpace=wrap;html=1;fontSize=10;" vertex="1" parent="lane_gv">
-          <mxGeometry x="2200" y="45" width="60" height="60" as="geometry"/>
-        </mxCell>
-        <mxCell id="t_duyet" value="TB-DT-14: GVHD duyệt
-(GVHD đã được phân công)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_gv">
-          <mxGeometry x="2320" y="10" width="240" height="60" as="geometry"/>
-        </mxCell>
-        <mxCell id="t_tuchoi" value="TB-DT-16: Từ chối kèm lý do
-(bắt buộc)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_gv">
-          <mxGeometry x="2320" y="120" width="240" height="60" as="geometry"/>
-        </mxCell>
-        <mxCell id="t_state2" value="TB-DT-15: Chuyển Đã phân công,
-thông báo in-app SV" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;shape=mxgraph.bpmn.service;" vertex="1" parent="lane_ht">
-          <mxGeometry x="2640" y="10" width="260" height="70" as="geometry"/>
-        </mxCell>
-        <mxCell id="t_state3" value="TB-DT-17: Chuyển Từ chối, thông báo SV
-(SV được đề xuất lại)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;shape=mxgraph.bpmn.service;" vertex="1" parent="lane_ht">
-          <mxGeometry x="2940" y="110" width="260" height="70" as="geometry"/>
-        </mxCell>
-        <mxCell id="end_approve" value="Kết thúc" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=end;fillColor=#ffffff;fontSize=10;" vertex="1" parent="lane_ht">
-          <mxGeometry x="2950" y="25" width="40" height="40" as="geometry"/>
-        </mxCell>
-        <mxCell id="end_deny" value="Kết thúc" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=end;fillColor=#ffffff;fontSize=10;" vertex="1" parent="lane_ht">
-          <mxGeometry x="3240" y="125" width="40" height="40" as="geometry"/>
-        </mxCell>
-        <mxCell id="e19" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="t_06a" target="t_xem">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="e20" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_xem" target="gw3">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="e21" value="Duyệt" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="gw3" target="t_duyet">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="e22" value="Từ chối" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="gw3" target="t_tuchoi">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="e23" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="t_duyet" target="t_state2">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="e24" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="t_tuchoi" target="t_state3">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="e25" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_state2" target="end_approve">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="e26" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_state3" target="end_deny">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="t_sv07" value="TB-DT-07: SV chọn đăng ký đề tài
-GVHD của mình mở cho lớp" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_sv">
-          <mxGeometry x="1880" y="310" width="240" height="70" as="geometry"/>
-        </mxCell>
-        <mxCell id="t_check2" value="TB-DT-08: Kiểm tra đề tài của GVHD,
-còn trống, SV chưa có đề tài hoạt động" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;shape=mxgraph.bpmn.service;" vertex="1" parent="lane_ht">
-          <mxGeometry x="2200" y="240" width="280" height="70" as="geometry"/>
-        </mxCell>
-        <mxCell id="gw2" value="TB-DT-09:
+        <mxCell id="gw_ok" value="TB-DT-08:
 Hợp lệ?" style="shape=mxgraph.bpmn.gateway2;whiteSpace=wrap;html=1;fontSize=10;" vertex="1" parent="lane_ht">
-          <mxGeometry x="2520" y="245" width="60" height="60" as="geometry"/>
+          <mxGeometry x="2290" y="155" width="60" height="60" as="geometry"/>
         </mxCell>
-        <mxCell id="t_ok" value="TB-DT-10: Chuyển Đã phân công ngay,
-thông báo GVHD" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;shape=mxgraph.bpmn.service;" vertex="1" parent="lane_ht">
-          <mxGeometry x="2640" y="220" width="260" height="60" as="geometry"/>
+        <mxCell id="t_ok" value="TB-DT-09: Lưu Đã phân công + kết quả kiểm tra
+tên, index tên đề tài, thông báo in-app SV" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;shape=mxgraph.bpmn.service;" vertex="1" parent="lane_ht">
+          <mxGeometry x="2400" y="70" width="300" height="70" as="geometry"/>
         </mxCell>
-        <mxCell id="t_reject" value="TB-DT-11: Từ chối đăng ký,
-thông báo lý do" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_ht">
-          <mxGeometry x="2640" y="320" width="260" height="60" as="geometry"/>
+        <mxCell id="t_rej" value="TB-DT-10: Từ chối giao đề tài,
+thông báo lý do cho GVHD" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_ht">
+          <mxGeometry x="2400" y="220" width="300" height="60" as="geometry"/>
         </mxCell>
-        <mxCell id="end_ok" value="Kết thúc" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=end;fillColor=#ffffff;fontSize=10;" vertex="1" parent="lane_ht">
-          <mxGeometry x="2950" y="230" width="40" height="40" as="geometry"/>
+        <mxCell id="end_rej" value="Kết thúc" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=end;fillColor=#ffffff;fontSize=10;" vertex="1" parent="lane_ht">
+          <mxGeometry x="2740" y="230" width="40" height="40" as="geometry"/>
         </mxCell>
-        <mxCell id="end_reject" value="Kết thúc" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=end;fillColor=#ffffff;fontSize=10;" vertex="1" parent="lane_ht">
-          <mxGeometry x="2950" y="330" width="40" height="40" as="geometry"/>
+        <mxCell id="t_sv11" value="TB-DT-11: SV xem đề tài được giao
+(nhận thông báo) rồi tiếp tục UC2–UC5" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_sv">
+          <mxGeometry x="2760" y="130" width="300" height="70" as="geometry"/>
         </mxCell>
-        <mxCell id="e27" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_06c" target="t_sv07">
-          <mxGeometry relative="1" as="geometry"/>
+        <mxCell id="end_sv" value="Kết thúc" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=end;fillColor=#ffffff;fontSize=10;" vertex="1" parent="lane_sv">
+          <mxGeometry x="3100" y="145" width="40" height="40" as="geometry"/>
         </mxCell>
-        <mxCell id="e28" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_sv07" target="t_check2">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="e29" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_check2" target="gw2">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="e30" value="Hợp lệ" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="gw2" target="t_ok">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="e31" value="Không hợp lệ" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="gw2" target="t_reject">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="e32" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_ok" target="end_ok">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="e33" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_reject" target="end_reject">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="start_uc14" value="Bắt đầu
+        <mxCell id="start_uc12" value="Bắt đầu
 (SV/GV/Bộ môn)" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=standard;fillColor=#ffffff;fontSize=10;" vertex="1" parent="lane_ht">
-          <mxGeometry x="3330" y="190" width="40" height="40" as="geometry"/>
+          <mxGeometry x="2780" y="100" width="40" height="40" as="geometry"/>
         </mxCell>
-        <mxCell id="t_uc14" value="TB-DT-18: Xem/lọc đề tài theo trạng thái,
+        <mxCell id="t_uc12" value="TB-DT-12: Xem/lọc đề tài theo trạng thái,
 đợt, GV (phạm vi theo vai trò)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_ht">
-          <mxGeometry x="3400" y="175" width="260" height="70" as="geometry"/>
+          <mxGeometry x="2850" y="85" width="260" height="70" as="geometry"/>
         </mxCell>
-        <mxCell id="end_uc14" value="Kết thúc" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=end;fillColor=#ffffff;fontSize=10;" vertex="1" parent="lane_ht">
-          <mxGeometry x="3690" y="190" width="40" height="40" as="geometry"/>
-        </mxCell>
-        <mxCell id="e34" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="start_uc14" target="t_uc14">
+        <mxCell id="e7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_gv02" target="t_check">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <mxCell id="e35" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_uc14" target="end_uc14">
+        <mxCell id="e8" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_check" target="gw_decision">
           <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e9" value="Có" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="gw_decision" target="t_show">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e10" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_show" target="t_sua">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_sua" target="t_check2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e12" value="Không" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="gw_decision" target="t_check2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e13" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_check2" target="gw_ok">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e14" value="Hợp lệ" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="gw_ok" target="t_ok">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e15" value="Không hợp lệ" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="gw_ok" target="t_rej">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e16" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_ok" target="t_sv11">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e17" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_sv11" target="end_sv">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e18" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_rej" target="end_rej">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e19" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="start_uc12" target="t_uc12">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e20" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=blockThin;endFill=1;fontSize=11;" edge="1" parent="1" source="t_uc12" target="end_uc12">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="end_uc12" value="Kết thúc" style="shape=mxgraph.bpmn.event;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;outline=end;fillColor=#ffffff;fontSize=10;" vertex="1" parent="lane_ht">
+          <mxGeometry x="3130" y="100" width="40" height="40" as="geometry"/>
         </mxCell>
       </root>
     </mxGraphModel>

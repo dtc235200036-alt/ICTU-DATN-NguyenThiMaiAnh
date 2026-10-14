@@ -7,27 +7,20 @@ actor "Sinh viên" as SV
 actor "Bộ môn" as BM
 
 rectangle "UC1 – Quản lý đề tài" {
-  usecase "UC1.1 – Đề xuất đề tài" as UC1_1
-  usecase "UC1.2 – Đăng ký đề tài GVHD mở cho lớp" as UC1_2
-  usecase "UC1.3 – Duyệt đề tài (GVHD)" as UC1_3
-  usecase "UC1.4 – Xem và lọc danh sách đề tài" as UC1_4
+  usecase "UC1.1 – Tạo và giao đề tài (GVHD)" as UC1_1
+  usecase "UC1.2 – Xem và lọc danh sách đề tài" as UC1_2
   usecase "UC0.6 – Kiểm tra trùng lặp tên đề tài" as UC0_6
 }
 usecase "UC0.8 – Phân công GVHD" as UC0_8
 
 GV --> UC1_1
-SV --> UC1_1
+GV --> UC1_2
 SV --> UC1_2
-GV --> UC1_3
-GV --> UC1_4
-SV --> UC1_4
-BM --> UC1_4
+BM --> UC1_2
 
 UC1_1 ..> UC0_6 : <<include>>
 BM --> UC0_8
 UC1_1 ..> UC0_8 : dựa trên
-UC1_2 ..> UC0_8 : dựa trên
-UC1_3 ..> UC0_8 : dựa trên
 
 note right of UC0_6
   UC0.6 thuộc nhóm UC0 – Chức năng chung,
@@ -35,15 +28,17 @@ note right of UC0_6
   (kế hoạch 01-04).
 end note
 
-note bottom of UC1_2
+note bottom of UC1_1
   Ràng buộc 1 SV - 1 đề tài đang hoạt động
   và 1 đề tài - 1 SV (FR-DT-06) được kiểm
-  tra trong đặc tả UC1.2, không tách UC riêng.
+  tra trong đặc tả UC1.1, không tách UC riêng.
+  SV trao đổi đề tài với GVHD ngoài hệ thống,
+  không tự đề xuất/đăng ký trên hệ thống.
 end note
 
 note right of UC0_8
   Chỉ GVHD của SV (do Bộ môn phân công
-  ở UC0.8) được duyệt/từ chối đề tài SV
-  đề xuất; Bộ môn chỉ xem (UC1.4).
+  ở UC0.8) tạo và giao đề tài cho SV trong
+  lớp; Bộ môn chỉ xem (UC1.2).
 end note
 @enduml

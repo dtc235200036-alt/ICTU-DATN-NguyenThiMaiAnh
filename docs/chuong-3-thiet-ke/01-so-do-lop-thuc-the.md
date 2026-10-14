@@ -13,12 +13,12 @@ Sơ đồ lớp thực thể mô hình hóa toàn bộ dữ liệu nghiệp vụ
 | Lớp | Tên tiếng Việt | Mô tả | Yêu cầu liên quan |
 |-----|----------------|-------|--------------------|
 | TaiKhoan | Tài khoản | Thông tin đăng nhập và phân quyền dùng chung cho cả 3 vai trò; `SinhVien`/`GiangVien` là hồ sơ nghiệp vụ gắn 1-1 với một `TaiKhoan` (tài khoản vai trò Bộ môn không có hồ sơ riêng) | FR-TK-01, FR-TK-03 |
-| SinhVien | Sinh viên | Hồ sơ sinh viên: mã số, họ tên, lớp, khoa; có thể đề xuất hoặc đăng ký một đề tài | FR-TK-04, FR-DT-01 |
-| GiangVien | Giảng viên | Hồ sơ giảng viên: mã số, họ tên, học vị; có thể đề xuất đề tài, được phân công hướng dẫn, làm thành viên hội đồng | FR-TK-04, FR-DT-01 |
+| SinhVien | Sinh viên | Hồ sơ sinh viên: mã số, họ tên, lớp, khoa; được GVHD giao một đề tài (không tự đề xuất hay đăng ký) | FR-TK-04, FR-DT-01 |
+| GiangVien | Giảng viên | Hồ sơ giảng viên: mã số, họ tên, học vị; được phân công hướng dẫn, tạo và giao đề tài cho SV trong lớp, làm thành viên hội đồng | FR-TK-04, FR-DT-01 |
 | DotDoAn | Đợt đồ án | Khung thời gian một khóa mở đợt làm đồ án; chứa các đề tài, các mốc tiến độ và bảng phân công GVHD của đợt đó | FR-TK-05 |
-| PhanCongHuongDan | Phân công hướng dẫn | Một dòng phân công: trong một đợt đồ án, một Sinh viên được Bộ môn gán cho đúng một Giảng viên hướng dẫn (lớp hướng dẫn của GV), kèm thời điểm gán; là căn cứ để SV gửi đề tài tới GVHD, GV giao/mở đề tài cho lớp và GVHD duyệt đề tài | FR-DT-05, FR-DT-08, FR-DT-09, FR-DT-11 |
+| PhanCongHuongDan | Phân công hướng dẫn | Một dòng phân công: trong một đợt đồ án, một Sinh viên được Bộ môn gán cho đúng một Giảng viên hướng dẫn (lớp hướng dẫn của GV), kèm thời điểm gán; là căn cứ để chỉ GVHD của SV mới tạo và giao đề tài cho SV đó | FR-DT-05, FR-DT-08, FR-DT-09, FR-DT-11 |
 | MocTienDo | Mốc tiến độ | Một mốc báo cáo tiến độ cố định áp dụng cho toàn bộ đợt đồ án (mốc 1, mốc 2, mốc cuối...) | FR-TD-01 |
-| DeTai | Đề tài | Đề tài đồ án, gắn với một đợt, người đề xuất là GV hoặc SV, trạng thái theo vòng đời Nháp → Chờ duyệt → Mở cho lớp đăng ký/Từ chối → Đã phân công (§3.1.2); `giang_vien_id` là GV đề xuất hoặc GVHD | FR-DT-01, FR-DT-03, FR-DT-04, FR-DT-06, FR-DT-07, FR-DT-10 |
+| DeTai | Đề tài | Đề tài đồ án, gắn với một đợt, do GVHD tạo và giao cho một SV, trạng thái theo vòng đời Nháp → Đã phân công (§3.1.2); `giang_vien_id` là GVHD | FR-DT-01, FR-DT-03, FR-DT-04, FR-DT-06, FR-DT-07, FR-DT-10 |
 | DeCuong | Đề cương | Hồ sơ đề cương của một đề tài đã phân công; theo dõi trạng thái vòng lặp nộp – duyệt – sửa | FR-DC-01, FR-DC-04 |
 | TaiLieuDoAn | Tài liệu đồ án | Một phiên bản file được tải lên (đề cương, báo cáo tiến độ, báo cáo cuối); mỗi lần nộp lại tạo một bản ghi mới, giữ nguyên bản ghi cũ | FR-DC-01, FR-DC-02, FR-BV-01 |
 | LuotDuyetDeCuong | Lượt duyệt đề cương | Một quyết định duyệt/yêu cầu sửa của GVHD cho một vòng nộp đề cương, kèm nhận xét | FR-DC-04, FR-DC-05 |
@@ -41,15 +41,11 @@ Ghi chú đọc bảng: cột "Yêu cầu liên quan" chỉ liệt kê các FR c
 
 | Từ | Sự kiện / tác nhân | Đến |
 |----|---------------------|-----|
-| (khởi tạo) | GV hoặc SV tạo đề tài mới, lưu nháp (UC1.1) | NHAP |
-| NHAP | SV gửi đề xuất (đợt đang mở, SV đã có GVHD trong đợt — đề tài gắn ngay GVHD đó, UC1.1) | CHO_DUYET |
-| NHAP | GV gửi đề tài đã chọn một SV trong lớp hướng dẫn — "GV giao đề tài" (UC1.1 – A3) | DA_PHAN_CONG |
-| NHAP | GV gửi đề tài chưa chọn SV — "Mở cho lớp đăng ký" (UC1.1 – A4) | DA_DUYET |
-| CHO_DUYET | GVHD của SV duyệt (UC1.3) | DA_PHAN_CONG |
-| CHO_DUYET | GVHD của SV từ chối kèm lý do bắt buộc (UC1.3 – A1) | TU_CHOI |
-| DA_DUYET | SV cùng lớp hướng dẫn đăng ký thành công (UC1.2) | DA_PHAN_CONG |
+| (khởi tạo) | GVHD tạo đề tài cho một SV trong lớp, lưu nháp (UC1.1 – A4) | NHAP |
+| (khởi tạo) | GVHD tạo và giao ngay đề tài cho SV trong lớp hướng dẫn, đợt đang mở (UC1.1) | DA_PHAN_CONG |
+| NHAP | GVHD gửi bản nháp (UC1.1 – A4) | DA_PHAN_CONG |
 
-Hệ thống giữ nguyên 5 mã trạng thái; mã `DA_DUYET` nay mang nghĩa "Mở cho lớp đăng ký" (nhãn hiển thị trên giao diện) và `CHO_DUYET` chỉ còn xuất hiện với đề tài do sinh viên đề xuất. Mọi đường tới `DA_PHAN_CONG` đều đi qua GVHD đã được Bộ môn phân công (`PhanCongHuongDan`), không còn bước Bộ môn duyệt/chọn GVHD. `DA_PHAN_CONG` và `TU_CHOI` là hai trạng thái kết thúc vòng đời đăng ký/duyệt đề tài; sau `TU_CHOI` sinh viên tạo đề tài mới (vẫn gửi tới cùng GVHD).
+Theo góp ý GVHD mục 1, hệ thống chỉ còn hai trạng thái do hệ thống tạo ra là `NHAP` và `DA_PHAN_CONG`. Các mã `CHO_DUYET`, `DA_DUYET`, `TU_CHOI` (và cột `ly_do_tu_choi`) là giá trị/cột cũ của phiên bản trước, giữ trong CSDL để tương thích dữ liệu, hệ thống không còn tạo ra. Mọi đường tới `DA_PHAN_CONG` đều đi qua GVHD đã được Bộ môn phân công (`PhanCongHuongDan`); sinh viên không tự đề xuất, đăng ký hay chờ duyệt. `DA_PHAN_CONG` là trạng thái kết thúc vòng đời đề tài trên hệ thống; các UC sau (đề cương, tiến độ, bảo vệ) bám vào đề tài ở trạng thái này.
 
 ### 3.1.3. Biểu đồ trạng thái Đề cương
 
@@ -57,7 +53,7 @@ Hệ thống giữ nguyên 5 mã trạng thái; mã `DA_DUYET` nay mang nghĩa "
 
 | Từ | Sự kiện / tác nhân | Đến |
 |----|---------------------|-----|
-| (khởi tạo) | Đề tài chuyển Đã phân công (UC1.1 – A3, UC1.2 hoặc UC1.3) | CHUA_NOP |
+| (khởi tạo) | Đề tài chuyển Đã phân công (UC1.1) | CHUA_NOP |
 | CHUA_NOP | SV nộp đề cương — tạo `TaiLieuDoAn` phiên bản 1 (UC2.1) | CHO_DUYET |
 | CHO_DUYET | GVHD duyệt (UC2.2) | DA_DUYET |
 | CHO_DUYET | GVHD yêu cầu sửa kèm nhận xét (UC2.2) | YEU_CAU_SUA |

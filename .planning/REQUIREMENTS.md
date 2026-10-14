@@ -26,10 +26,10 @@
 
 ### Quản lý đề tài (UC1)
 
-- [x] **TOPC-01**: Giảng viên đề xuất đề tài (tên, mô tả, lĩnh vực) vào đợt đồ án đang mở — giao thẳng cho một SV trong lớp hướng dẫn của mình hoặc mở cho lớp đăng ký
-- [x] **TOPC-02**: Sinh viên tự đề xuất đề tài gửi tới GVHD của mình hoặc đăng ký một đề tài do GVHD của mình mở cho lớp và đang còn trống (đăng ký thành công là đã phân công)
-- [x] **TOPC-03**: Bộ môn phân công GVHD cho từng SV đầu mỗi đợt (mỗi SV đúng một GVHD; gán trên màn hình hoặc import CSV); GVHD của SV duyệt/từ chối đề tài SV đề xuất (có lý do); mỗi SV chỉ có 1 đề tài đang hoạt động, mỗi đề tài chỉ có 1 SV
-- [x] **TOPC-04**: Mọi vai trò xem danh sách đề tài trong phạm vi của mình theo trạng thái (nháp → chờ duyệt → mở cho lớp đăng ký/từ chối → đã phân công), lọc theo đợt và GV
+- [x] **TOPC-01**: GVHD tạo và giao đề tài (tên, mô tả, lĩnh vực) cho một SV trong lớp hướng dẫn của mình, trong đợt đồ án đang mở — đề tài Đã phân công ngay
+- [x] **TOPC-02**: Sinh viên xem đề tài GVHD đã giao cho mình; SV không tự đề xuất hay đăng ký đề tài trên hệ thống (trao đổi trực tiếp với GV ngoài hệ thống)
+- [x] **TOPC-03**: Bộ môn phân công GVHD cho từng SV đầu mỗi đợt (mỗi SV đúng một GVHD; gán trên màn hình hoặc import CSV); chỉ GVHD được phân công mới giao đề tài cho SV của mình; mỗi SV chỉ có 1 đề tài đang hoạt động, mỗi đề tài chỉ có 1 SV
+- [x] **TOPC-04**: Mọi vai trò xem danh sách đề tài trong phạm vi của mình theo trạng thái (nháp → đã phân công), lọc theo đợt và GV
 
 ### Quản lý đề cương (UC2)
 
@@ -60,7 +60,7 @@
 
 - [x] **AISV-01**: Dịch vụ AI là service FastAPI riêng, chỉ Web API gọi được (API key nội bộ, không public qua Apache), có endpoint ingest/check-title/check-document
 - [x] **AISV-02**: Văn bản được chuẩn hóa Unicode NFC và tách từ tiếng Việt trước khi embedding; embedding kho được tính sẵn lúc ingest, không tính lại mỗi request
-- [x] **AISV-03**: Khi SV đăng ký/đề xuất đề tài, hệ thống so sánh tên đề tài theo ngữ nghĩa với kho và trả về top các đề tài tương tự kèm tỷ lệ % trong thời gian phản hồi theo NFR
+- [x] **AISV-03**: Khi GVHD tạo/giao đề tài, hệ thống so sánh tên đề tài theo ngữ nghĩa với kho và trả về top các đề tài tương tự kèm tỷ lệ % trong thời gian phản hồi theo NFR
 - [x] **AISV-04**: Khi nộp đề cương/báo cáo, hệ thống trích text DOCX/PDF, loại phần mẫu chung (tiêu đề mẫu, mục lục, tài liệu tham khảo) và phát hiện các đoạn trùng với đồ án khác trong kho
 - [x] **AISV-05**: Kết quả kiểm tra tài liệu hiển thị tỷ lệ tương đồng tổng, danh sách đồ án trùng, và từng đoạn trùng được highlight cạnh đoạn nguồn
 - [x] **AISV-06**: Kiểm tra tài liệu chạy bất đồng bộ; UI hiển thị trạng thái đang kiểm tra / hoàn tất
@@ -68,7 +68,7 @@
 
 ### Thông báo
 
-- [x] **NOTF-01**: Người dùng nhận thông báo in-app khi được phân công GVHD, khi có đề tài chờ GVHD duyệt, khi đề tài/đề cương được duyệt hoặc từ chối, khi có nhận xét mới và khi được phân vào hội đồng / có lịch bảo vệ
+- [x] **NOTF-01**: Người dùng nhận thông báo in-app khi được phân công GVHD, khi được GVHD giao đề tài, khi đề cương được duyệt hoặc yêu cầu sửa, khi có nhận xét mới và khi được phân vào hội đồng / có lịch bảo vệ
 
 ### Triển khai & dữ liệu thử nghiệm (CLO 4)
 

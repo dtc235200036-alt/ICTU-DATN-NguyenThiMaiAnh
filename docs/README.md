@@ -47,7 +47,7 @@ Mỗi mục lớn của quyển báo cáo là **một file Markdown**, để cu�
 | Quy tắc nghiệp vụ | `BR-<nhóm>-NN` | `BR-DT-01`, `BR-PC-01` | Đặt trong đặc tả UC (§2.6); DT = đề tài (UC1), PC = phân công GVHD (UC0.8) |
 | Yêu cầu phi chức năng | `NFR-NN` | `NFR-01` | Đánh số liên tục, không theo module |
 | Use case con | `UCx.y` | `UC1.1` | x = UC chính (1..5), y = UC con; `UC0.y` dành cho chức năng chung (vd. UC0.6 kiểm tra trùng lặp tên) |
-| Bước quy trình BPMN | `<TB|AS>-<module>-NN` | `TB-DT-02`, `AS-DT-01` | TB = TO-BE, AS = AS-IS; NN liên tục trong một trang sơ đồ; hậu tố chữ (`TB-DT-06a`) cho các nhánh của cùng một bước, `TB-DT-00a..00c` là bước phân công GVHD đầu đợt (UC0.8) đặt trước bước 01 |
+| Bước quy trình BPMN | `<TB|AS>-<module>-NN` | `TB-DT-02`, `AS-DT-01` | TB = TO-BE, AS = AS-IS; NN liên tục trong một trang sơ đồ; hậu tố chữ (`TB-DT-00a`) cho các nhánh của cùng một bước, `TB-DT-00a..00c` là bước phân công GVHD đầu đợt (UC0.8) đặt trước bước 01 |
 | Màn hình mockup | `MH-NN` | `MH-06` | NN theo thứ tự danh mục màn hình §3.4.2, không theo vai trò |
 | Biểu mẫu khảo sát | `MAU-NN` | `MAU-01` | Biểu mẫu thu thập được hoặc tự thiết kế trong Phụ lục |
 | Phát hiện khảo sát | `KS-<module>-NN` | `KS-DT-01` | Ghi nhận từ phỏng vấn/tài liệu, dùng khi viết AS-IS |
