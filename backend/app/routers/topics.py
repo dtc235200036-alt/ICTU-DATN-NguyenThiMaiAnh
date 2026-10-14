@@ -21,12 +21,14 @@ from app.services import ai_index
 from app.services import title_check as title_check_service
 from app.services import topics as topics_service
 
-# UC1.1/AUTH-03: đề xuất/sửa/gửi chỉ GV và SV (Bộ môn không đề xuất đề tài);
-# xem chi tiết/danh sách mở cho mọi vai trò đã xác thực, quyền xem/phạm vi
-# thực sự do can_view/list_topics (T-02-23/T-02-29) quyết định ở tầng service.
+# UC1.1/AUTH-03 (góp ý GVHD mục 1): chỉ GVHD tạo/sửa/gửi đề tài và kiểm tra
+# trùng tên (SV, Bộ môn nhận 403); SV không tự đề xuất/đăng ký và không còn
+# route duyệt đề tài. Xem chi tiết/danh sách mở cho mọi vai trò đã xác thực
+# (UC1.2), quyền xem/phạm vi thực sự do can_view/list_topics
+# (T-02-23/T-02-29) quyết định ở tầng service.
 router = APIRouter(prefix="/api/topics", tags=["topics"])
 
-_TrangThaiFilter = Literal["NHAP", "CHO_DUYET", "DA_DUYET", "TU_CHOI", "DA_PHAN_CONG"]
+_TrangThaiFilter = Literal["NHAP", "DA_PHAN_CONG"]
 _PhamViFilter = Literal["tat_ca", "cua_toi"]
 _SapXepFilter = Literal["moi_nhat", "ten"]
 
@@ -63,13 +65,13 @@ def list_topics(
 def create_topic(
     payload: TopicCreate,
     background_tasks: BackgroundTasks,
-    user: CurrentUser = Depends(require_role(VaiTro.SINH_VIEN, VaiTro.GIANG_VIEN)),
+    user: CurrentUser = Depends(require_role(VaiTro.GIANG_VIEN)),
     db: Session = Depends(get_db),
 ) -> TopicOut:
     out = topics_service.create_topic(db, user, payload)
     if payload.gui:
-        # AISV-02 push-on-write: đề tài vừa gửi (CHO_DUYET / mở cho lớp / giao SV) được index sau commit
-        # (một lần encode) — lần kiểm tra tên kế tiếp đã thấy nó.
+        # AISV-02 push-on-write: đề tài vừa giao SV (Đã phân công) được index sau
+        # commit (một lần encode) — lần kiểm tra tên kế tiếp đã thấy nó.
         background_tasks.add_task(ai_index.run_ingest_topic, out.id)
     return out
 
@@ -78,7 +80,7 @@ def create_topic(
 def update_topic(
     topic_id: int,
     payload: TopicUpdate,
-    user: CurrentUser = Depends(require_role(VaiTro.SINH_VIEN, VaiTro.GIANG_VIEN)),
+    user: CurrentUser = Depends(require_role(VaiTro.GIANG_VIEN)),
     db: Session = Depends(get_db),
 ) -> TopicOut:
     return topics_service.update_topic(db, user, topic_id, payload)
@@ -88,11 +90,11 @@ def update_topic(
 def submit_topic(
     topic_id: int,
     background_tasks: BackgroundTasks,
-    user: CurrentUser = Depends(require_role(VaiTro.SINH_VIEN, VaiTro.GIANG_VIEN)),
+    user: CurrentUser = Depends(require_role(VaiTro.GIANG_VIEN)),
     db: Session = Depends(get_db),
 ) -> TopicOut:
     out = topics_service.submit_topic(db, user, topic_id)
-    # AISV-02 push-on-write: bản nháp vừa gửi được index sau commit.
+    # AISV-02 push-on-write: bản nháp vừa giao SV được index sau commit.
     background_tasks.add_task(ai_index.run_ingest_topic, out.id)
     return out
 
@@ -100,11 +102,12 @@ def submit_topic(
 @router.post("/check-title", response_model=TitleCheckResult)
 def check_title(
     payload: TitleCheckRequest,
-    _user: CurrentUser = Depends(require_role(VaiTro.SINH_VIEN, VaiTro.GIANG_VIEN)),
+    _user: CurrentUser = Depends(require_role(VaiTro.GIANG_VIEN)),
     db: Session = Depends(get_db),
 ) -> TitleCheckResult:
-    """UC0.6: kiểm tra tức thời, KHÔNG lưu kết quả (bản lưu chỉ xảy ra khi gửi
-    đề xuất thật sự — xem topics_service.create_topic/submit_topic)."""
+    """UC0.6 (chỉ GVHD, UC1.1): kiểm tra tức thời, KHÔNG lưu kết quả (bản lưu chỉ
+    xảy ra khi GVHD giao đề tài thật sự — xem topics_service.create_topic/
+    submit_topic)."""
     result = title_check_service.kiem_tra_ten(db, payload.ten_de_tai)
     return TitleCheckResult(
         trang_thai=result.trang_thai,
@@ -132,12 +135,3 @@ def get_topic(
 ) -> TopicOut:
     return topics_service.get_topic(db, user, topic_id)
 
-
-@router.post("/{topic_id}/register", response_model=TopicOut)
-def register_topic(
-    topic_id: int,
-    user: CurrentUser = Depends(require_role(VaiTro.SINH_VIEN)),
-    db: Session = Depends(get_db),
-) -> TopicOut:
-    """UC1.2/UC0.8: chỉ SV đăng ký đề tài GVHD của mình mở cho lớp — T-02-31."""
-    return topics_service.register_topic(db, user, topic_id)

@@ -1,10 +1,10 @@
 """UC0.8 — Phân công GVHD: đầu đợt Bộ môn gán mỗi SV cho đúng MỘT GVHD
-(uk_phan_cong_sv_dot); từ đó SV chỉ làm việc với GVHD của mình (đề tài SV đề
-xuất gửi tới GVHD duyệt, đề tài GV mở chỉ lớp của GV thấy/đăng ký được).
+(uk_phan_cong_sv_dot); từ đó chỉ GVHD của SV tạo và giao đề tài cho SV đó
+(góp ý GVHD mục 1: SV không tự đề xuất/đăng ký đề tài).
 
 Đổi/gỡ GVHD của một SV chỉ bị chặn khi SV đã có đề tài Đã phân công trong đợt
-(đề cương/tiến độ/bảo vệ đều bám de_tai.giang_vien_id). Đề tài SV còn Chờ
-duyệt hoặc Nháp đi theo GVHD mới; bản nháp GV cũ định giao cho SV đó được gỡ SV."""
+(đề cương/tiến độ/bảo vệ đều bám de_tai.giang_vien_id). Bản nháp của GV cũ định
+giao cho SV đó được gỡ SV."""
 import csv
 import io
 from collections import Counter
@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 
 from app.core.deps import CurrentUser
 from app.core.timeutil import now_utc
-from app.models.de_tai import CHO_DUYET, DA_PHAN_CONG, GIANG_VIEN, NHAP, SINH_VIEN, DeTai
+from app.models.de_tai import DA_PHAN_CONG, GIANG_VIEN, NHAP, DeTai
 from app.models.dot_do_an import DANG_MO, DotDoAn
 from app.models.phan_cong import PhanCongHuongDan
 from app.models.tai_khoan import GiangVien, SinhVien, TaiKhoan
@@ -269,22 +269,16 @@ def _apply(
         if topic is not None and topic.trang_thai == DA_PHAN_CONG:
             errors.append(f"{label}: đã có đề tài Đã phân công — không đổi được GVHD")
             continue
-        if topic is not None and gv_id is None:
-            errors.append(f"{label}: đang có đề tài chờ GVHD duyệt — không gỡ được GVHD")
-            continue
 
-        if topic is not None and topic.trang_thai == CHO_DUYET:
-            topic.giang_vien_id = gv_id  # đề tài chờ duyệt chuyển sang GVHD mới
-        # Nháp SV đề xuất đi theo GVHD mới; nháp GV cũ định giao cho SV này gỡ SV.
+        # Nháp GV cũ định giao cho SV này gỡ SV (GVHD mới chọn lại khi giao đề tài).
+        # Đề tài Chờ duyệt / nháp SV là trạng thái cũ, hệ thống không còn tạo ra.
         for draft in db.execute(
             select(DeTai)
             .where(DeTai.dot_do_an_id == cohort.id)
             .where(DeTai.sinh_vien_id == sv_id)
             .where(DeTai.trang_thai == NHAP)
         ).scalars():
-            if draft.loai_nguoi_de_xuat == SINH_VIEN:
-                draft.giang_vien_id = gv_id
-            elif draft.loai_nguoi_de_xuat == GIANG_VIEN and draft.giang_vien_id == old_gv:
+            if draft.loai_nguoi_de_xuat == GIANG_VIEN and draft.giang_vien_id == old_gv:
                 draft.sinh_vien_id = None
 
         if gv_id is None:

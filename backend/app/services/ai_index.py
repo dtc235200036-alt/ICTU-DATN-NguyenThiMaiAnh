@@ -2,7 +2,7 @@
 (push-on-write), không bao giờ tính lại cả corpus.
 
 - `run_ingest_topic(de_tai_id)`: chạy trong BackgroundTasks SAU commit khi một
-  đề tài vào CHO_DUYET (tạo với gui=True hoặc gửi bản nháp) — /ingest
+  đề tài được GVHD giao cho SV (tạo với gui=True hoặc gửi bản nháp) — /ingest
   `{id: de_tai.id, type: TOPIC, text: tên đề tài NFC}` = đúng một lần encode
   (NFR-11). Lỗi AI chỉ ghi cảnh báo, không bao giờ chặn nghiệp vụ (UC1.1 E2).
 - `ingest_document(tai_lieu_do_an_id)` (04-06): gọi SAU khi kiểm tra trùng

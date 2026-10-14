@@ -73,7 +73,7 @@ class GvTopicItem(BaseModel):
     sinh_vien: str | None = None
 
 
-LoaiViec = Literal["DUYET_DE_TAI", "DUYET_DE_CUONG", "NHAN_XET_TIEN_DO", "CHAM_DIEM"]
+LoaiViec = Literal["GIAO_DE_TAI", "DUYET_DE_CUONG", "NHAN_XET_TIEN_DO", "CHAM_DIEM"]
 
 
 class GvTaskItem(BaseModel):
@@ -81,7 +81,7 @@ class GvTaskItem(BaseModel):
 
     loai: LoaiViec
     sinh_vien: str | None = None
-    ten_de_tai: str
+    ten_de_tai: str | None = None
     ghi_chu: str
     lien_ket: str
 
@@ -92,7 +92,8 @@ class GvDashboardOut(BaseModel):
     so_sinh_vien_huong_dan: int
     so_sinh_vien_lop: int = 0
     so_de_tai: int
-    so_de_tai_cho_duyet: int
+    # Góp ý GVHD mục 1: SV trong lớp hướng dẫn (đợt đang mở) chưa được giao đề tài.
+    so_sinh_vien_chua_giao_de_tai: int
     de_tai: list[GvTopicItem]
     so_de_cuong_cho_duyet: int = 0
     so_bao_cao_cho_nhan_xet: int = 0
@@ -100,10 +101,13 @@ class GvDashboardOut(BaseModel):
     viec_can_xu_ly: list[GvTaskItem] = []
 
 
-class BmPendingTopicRef(BaseModel):
+class BmAssignedTopicRef(BaseModel):
+    """MH-04 "Đề tài giao gần nhất"."""
+
     id: int
     ten_de_tai: str
-    nguoi_de_xuat: str
+    giang_vien: str
+    sinh_vien: str
 
 
 class BmUpcomingCommittee(BaseModel):
@@ -127,12 +131,12 @@ class BmDashboardOut(BaseModel):
     """MH-04: tổng quan toàn khoa theo đợt (mặc định đợt đang mở mới nhất)."""
 
     dot_do_an: CohortRef | None = None
-    de_tai_cho_duyet: int
+    sv_chua_giao_de_tai: int
     de_tai_da_phan_cong: int
     sv_chua_co_de_tai: int
     sv_chua_phan_cong: int = 0
     tong_sinh_vien: int
-    cho_duyet_moi_nhat: list[BmPendingTopicRef]
+    de_tai_moi_giao: list[BmAssignedTopicRef]
     sv_tre_moc: int = 0
     tien_do_trich: BmProgressExcerpt | None = None
     moc_tien_do: list[MilestoneOut] = []

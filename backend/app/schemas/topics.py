@@ -10,26 +10,26 @@ from app.schemas.common import NFCModel
 
 
 class TopicCreate(NFCModel):
-    """UC1.1: đề xuất đề tài mới — gui=False lưu nháp, gui=True gửi ngay (SV:
-    tới GVHD duyệt; GV: giao cho `sinh_vien_id` trong lớp mình, hoặc để trống
-    = mở cho lớp mình đăng ký). SV gửi `sinh_vien_id` bị bỏ qua."""
+    """UC1.1: GVHD tạo đề tài và giao cho `sinh_vien_id` (bắt buộc, thuộc lớp
+    hướng dẫn của GV trong đợt) — gui=False lưu nháp, gui=True giao ngay (Đã
+    phân công)."""
 
     dot_do_an_id: int
     ten_de_tai: str = Field(min_length=5, max_length=255)
     mo_ta: str | None = Field(default=None, max_length=5000)
     linh_vuc: str | None = Field(default=None, max_length=100)
-    sinh_vien_id: int | None = None
+    sinh_vien_id: int
     gui: bool = False
 
 
 class TopicUpdate(NFCModel):
-    """UC1.1: sửa đề tài đang ở trạng thái Nháp (không đổi trang_thai — dùng /submit)."""
+    """UC1.1: GVHD sửa đề tài Nháp (không đổi trang_thai — dùng /submit)."""
 
     dot_do_an_id: int
     ten_de_tai: str = Field(min_length=5, max_length=255)
     mo_ta: str | None = Field(default=None, max_length=5000)
     linh_vuc: str | None = Field(default=None, max_length=100)
-    sinh_vien_id: int | None = None
+    sinh_vien_id: int
 
 
 class PersonRef(BaseModel):
@@ -48,7 +48,6 @@ class CohortRef(BaseModel):
 class QuyenOut(BaseModel):
     sua: bool
     gui: bool
-    dang_ky: bool = False
 
 
 class TitleCheckRequest(NFCModel):
@@ -85,7 +84,7 @@ class SavedChiTietTrungLap(BaseModel):
 
 
 class SavedTitleCheck(BaseModel):
-    """UC1.1/A2, MH-07: kết quả kiểm tra trùng tên đã lưu tại thời điểm gửi đề xuất."""
+    """UC1.1/A2, MH-07: kết quả kiểm tra trùng tên đã lưu tại thời điểm GVHD giao đề tài."""
 
     trang_thai: str
     ty_le_tong: float | None = None
@@ -119,7 +118,7 @@ class TopicOut(BaseModel):
 
 
 class TopicListItem(BaseModel):
-    """UC1.4/MH-05: một dòng trong danh sách đề tài — chỉ các trường bảng cần."""
+    """UC1.2/MH-05: một dòng trong danh sách đề tài — chỉ các trường bảng cần."""
 
     id: int
     ten_de_tai: str
@@ -129,7 +128,6 @@ class TopicListItem(BaseModel):
     nguoi_de_xuat: PersonRef
     giang_vien_huong_dan: PersonRef | None = None
     sinh_vien: PersonRef | None = None
-    co_the_dang_ky: bool = False
 
 
 @dataclass

@@ -3,12 +3,12 @@ from datetime import date
 import pytest
 
 from app.core.roles import VaiTro
-from app.models.de_tai import CHO_DUYET, DeTai
+from app.models.de_tai import NHAP, DeTai
 from app.models.dot_do_an import DANG_MO, DotDoAn
 from app.models.phan_cong import PhanCongHuongDan
 
-# UC0.8: Bộ môn gán mỗi SV cho đúng một GVHD trong đợt; đổi GVHD kéo theo đề
-# tài còn Chờ duyệt, bị chặn khi SV đã có đề tài Đã phân công; GV xem lớp của
+# UC0.8: Bộ môn gán mỗi SV cho đúng một GVHD trong đợt; đổi GVHD gỡ SV khỏi
+# bản nháp của GV cũ, bị chặn khi SV đã có đề tài Đã phân công; GV xem lớp của
 # mình, SV xem GVHD của mình; chỉ Bộ môn ghi được phân công.
 
 
@@ -96,7 +96,7 @@ def test_assign_list_and_views(client, make_account, auth_headers, db):
     assert client.get("/api/assignments/my-advisor", headers=auth_headers(sv3)).json() == []
 
 
-def test_reassign_moves_pending_topic_and_blocks_assigned(
+def test_reassign_detaches_draft_and_blocks_assigned(
     client, make_account, auth_headers, assign_gvhd, db
 ):
     cohort = _cohort(db)
@@ -106,38 +106,54 @@ def test_reassign_moves_pending_topic_and_blocks_assigned(
     sv = make_account(VaiTro.SINH_VIEN)
     assign_gvhd(sv, gv_old, cohort.id)
 
+    # GV cũ lưu nháp cho SV; Bộ môn chuyển SV sang GV mới -> nháp mất SV.
     created = client.post(
         "/api/topics",
-        json={"dot_do_an_id": cohort.id, "ten_de_tai": "Hệ thống điểm danh bằng QR", "gui": True},
-        headers=auth_headers(sv),
+        json={
+            "dot_do_an_id": cohort.id,
+            "ten_de_tai": "Hệ thống điểm danh bằng QR",
+            "sinh_vien_id": sv.sinh_vien_id,
+            "gui": False,
+        },
+        headers=auth_headers(gv_old),
     )
-    topic_id = created.json()["id"]
-
-    # Chờ duyệt: gỡ GVHD bị chặn, đổi GVHD thì đề tài chuyển sang GVHD mới.
-    remove = _put(client, auth_headers(bomon), cohort.id, [
-        {"sinh_vien_id": sv.sinh_vien_id, "giang_vien_id": None}
-    ])
-    assert remove.status_code == 409
+    assert created.status_code == 201
+    draft_id = created.json()["id"]
     move = _put(client, auth_headers(bomon), cohort.id, [
         {"sinh_vien_id": sv.sinh_vien_id, "giang_vien_id": gv_new.giang_vien_id}
     ])
     assert move.status_code == 200
     db.rollback()
-    topic = db.get(DeTai, topic_id)
-    assert topic.trang_thai == CHO_DUYET and topic.giang_vien_id == gv_new.giang_vien_id
+    draft = db.get(DeTai, draft_id)
+    assert draft.trang_thai == NHAP and draft.sinh_vien_id is None
     assert client.post(
-        f"/api/topic-approvals/{topic_id}/approve", headers=auth_headers(gv_old)
-    ).status_code == 403
+        f"/api/topics/{draft_id}/submit", headers=auth_headers(gv_old)
+    ).status_code == 409
 
-    # Đã phân công: không đổi được GVHD nữa.
-    assert client.post(
-        f"/api/topic-approvals/{topic_id}/approve", headers=auth_headers(gv_new)
-    ).status_code == 200
+    # GV mới giao đề tài cho SV.
+    assigned = client.post(
+        "/api/topics",
+        json={
+            "dot_do_an_id": cohort.id,
+            "ten_de_tai": "Ứng dụng quản lý lớp học trực tuyến",
+            "sinh_vien_id": sv.sinh_vien_id,
+            "gui": True,
+        },
+        headers=auth_headers(gv_new),
+    )
+    assert assigned.status_code == 201
+    assert assigned.json()["trang_thai"] == "DA_PHAN_CONG"
+
+    # Đã phân công: không đổi, cũng không gỡ được GVHD nữa.
     back = _put(client, auth_headers(bomon), cohort.id, [
         {"sinh_vien_id": sv.sinh_vien_id, "giang_vien_id": gv_old.giang_vien_id}
     ])
     assert back.status_code == 409
     assert "Đã phân công" in back.json()["detail"]
+    remove = _put(client, auth_headers(bomon), cohort.id, [
+        {"sinh_vien_id": sv.sinh_vien_id, "giang_vien_id": None}
+    ])
+    assert remove.status_code == 409
 
 
 def test_import_csv_reports_bad_lines(client, make_account, auth_headers, db):

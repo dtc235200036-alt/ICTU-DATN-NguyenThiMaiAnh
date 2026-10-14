@@ -83,7 +83,7 @@ def test_thresholds_rbac_validation_and_next_check(
 
         # Tiêu đề gần giống "Đề tài kiểm thử đề cương NNNN" (Jaccard stub ≈ 83%).
         query = {"ten_de_tai": "Đề tài kiểm thử đề cương"}
-        resp = client.post("/api/topics/check-title", headers=auth_headers(sv), json=query)
+        resp = client.post("/api/topics/check-title", headers=auth_headers(gv_a), json=query)
         assert resp.status_code == 200, resp.text
         assert resp.json()["matches"], resp.text
 
@@ -126,12 +126,12 @@ def test_thresholds_rbac_validation_and_next_check(
         assert nxt["nguong_ap_dung"] == 42.25
 
         # Kiểm tra tên kế tiếp dùng ngưỡng mới (83% < 95.5% -> không còn cảnh báo) ...
-        resp = client.post("/api/topics/check-title", headers=auth_headers(sv), json=query)
+        resp = client.post("/api/topics/check-title", headers=auth_headers(gv_a), json=query)
         assert resp.json()["nguong"] == 95.5 and resp.json()["matches"] == [], resp.text
         # ... và hạ lại thì cảnh báo trở lại.
         resp = client.put("/api/thresholds", headers=bm_h, json={**new, "NGUONG_TEN_DE_TAI": 50})
         assert resp.status_code == 200, resp.text
-        resp = client.post("/api/topics/check-title", headers=auth_headers(sv), json=query)
+        resp = client.post("/api/topics/check-title", headers=auth_headers(gv_a), json=query)
         assert resp.json()["nguong"] == 50.0 and resp.json()["matches"], resp.text
     finally:
         _restore(original)

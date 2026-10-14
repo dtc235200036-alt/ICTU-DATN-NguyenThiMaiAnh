@@ -335,7 +335,7 @@ run_step smoke "Smoke test qua Apache HTTPS" 300 "bash deploy/smoke-test.sh"
 if [ "$MODE" = "full" ]; then
   run_step pytest-backend "Pytest Web API (backend)" 1800 "uv --directory backend run pytest -q"
   run_step pytest-ai "Pytest dịch vụ AI (ai-service)" 1800 "uv --directory ai-service run pytest -q"
-  run_step e2e-uc1 "E2E UC1 — phân công GVHD, đề xuất/đăng ký/GVHD duyệt đề tài" 600 "bash deploy/e2e-uc1.sh"
+  run_step e2e-uc1 "E2E UC1 — phân công GVHD, GVHD tạo và giao đề tài" 600 "bash deploy/e2e-uc1.sh"
   run_step e2e-uc2-5 "E2E UC2–UC5 — đề cương, tiến độ, bảo vệ, lưu kho" 900 "bash deploy/e2e-uc2-5.sh"
   run_step e2e-ai "E2E dịch vụ AI thật (SC1–SC5)" 1200 "bash deploy/e2e-ai.sh"
   if [ "$REPORT" = "1" ]; then
@@ -475,7 +475,7 @@ def ghep(ma, mas, cach, kq_suite):
 
 ok_txt = lambda mas: "; ".join(f"{m}: {status_of.get(m, 'không chạy')}" for m in mas)
 ghep("NFR-04", ["pytest-backend", "smoke", "e2e-uc1", "e2e-uc2-5"],
-     "403 chéo vai trò trên mọi nhóm route (smoke-test), SV/Bộ môn/GV không phải GVHD duyệt đề tài, SV lớp khác xem/đăng ký đề tài (e2e-uc1 bước g, h), SV/GV khác gọi route không thuộc quyền (e2e-uc2-5), pytest RBAC/ownership",
+     "403 chéo vai trò trên mọi nhóm route (smoke-test), SV tạo/sửa/gửi/kiểm tra tên đề tài và Bộ môn tạo đề tài -> 403, route đăng ký/duyệt đề tài đã gỡ -> 404, GV không phải GVHD giao đề tài bị từ chối, SV lớp khác xem đề tài -> 403 (e2e-uc1 bước f, h), SV/GV khác gọi route không thuộc quyền (e2e-uc2-5), pytest RBAC/ownership",
      ok_txt(["pytest-backend", "smoke", "e2e-uc1", "e2e-uc2-5"]))
 ghep("NFR-05", ["pytest-backend"],
      "pytest test_auth::test_locked_account_cannot_login_or_refresh, test_accounts_rbac::test_bomon_lock_blocks_login_and_unlock_restores_it",

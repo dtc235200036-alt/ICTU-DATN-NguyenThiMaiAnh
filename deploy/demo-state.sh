@@ -13,11 +13,12 @@
 #   Phân công GVHD (UC0.8, 0015): cả 5 SV demo được Bộ môn gán cho GVHD GV011
 #                     trong đợt K22 (đặt lại mỗi lần chạy, kể cả --chi-xoa;
 #                     seed mặc định gán 012..015 cho GV012..GV015)
-#   SV  DTC235200139  chưa có đề tài — demo trực tiếp: đề xuất tên diễn đạt lại
-#                     đề tài kho -> cảnh báo AI -> gửi tới GVHD GV011; GV011
-#                     duyệt; nộp đề cương chép nguyên văn -> "Đang kiểm tra"
-#                     -> "Hoàn tất – x%"
-#   SV  DTC235200258  đề tài tự đề xuất, GVHD GV011 đã duyệt; đề cương v1 = tệp B của một cặp
+#   SV  DTC235200139  chưa có đề tài — demo trực tiếp (góp ý GVHD mục 1: SV
+#                     thống nhất đề tài với GV ngoài hệ thống): GV011 tạo đề
+#                     tài với tên diễn đạt lại đề tài kho -> cảnh báo AI ->
+#                     "Vẫn giao đề tài" -> Đã phân công; SV nộp đề cương chép
+#                     nguyên văn -> "Đang kiểm tra" -> "Hoàn tất – x%"
+#   SV  DTC235200258  đề tài do GV011 giao (Đã phân công); đề cương v1 = tệp B của một cặp
 #                     CHEP_NGUYEN_VAN, kiểm tra xong (liệt kê đồ án nguồn trong
 #                     kho), CHỜ GV011 duyệt (MH-09 / MH-14 đoạn tô sáng)
 #   SV  DTC235200325  đề cương đã duyệt (tệp B cặp KHONG_LIEN_QUAN), 2 báo cáo
@@ -106,6 +107,8 @@ json_req() {
 SV_ROWS="$(sql "SELECT tk.ma_dang_nhap, sv.id, tk.id FROM tai_khoan tk JOIN sinh_vien sv ON sv.tai_khoan_id = tk.id WHERE tk.ma_dang_nhap IN (${DEMO_IN}) ORDER BY tk.ma_dang_nhap")"
 [ "$(printf '%s\n' "$SV_ROWS" | grep -c .)" = "5" ] || fail "Không tìm đủ 5 SV demo (${DEMO_SV[*]}) — đã seed DATA-01 chưa?"
 SV_IDS="$(printf '%s\n' "$SV_ROWS" | cut -f2 | csv)"
+declare -A SV_ID_OF
+while IFS=$'\t' read -r ma sv_id _; do SV_ID_OF[$ma]="$sv_id"; done <<<"$SV_ROWS"
 TK_DEMO_IDS="$(sql "SELECT id FROM tai_khoan WHERE ma_dang_nhap IN (${DEMO_ALL_IN})" | csv)"
 [ "$(printf '%s' "$TK_DEMO_IDS" | tr ',' '\n' | grep -c .)" = "9" ] || fail "Không tìm đủ 9 tài khoản demo (5 SV + 4 GV)"
 GV_DEMO_IDS="$(sql "SELECT gv.id FROM giang_vien gv JOIN tai_khoan tk ON tk.id = gv.tai_khoan_id WHERE tk.ma_dang_nhap IN (${DEMO_ALL_IN})" | csv)"
@@ -275,23 +278,19 @@ done
 ok "Mốc tiến độ đợt K22: ${MOC[1]}, ${MOC[2]}, ${MOC[3]} (hạn +3/+17/+45 ngày, tối đa ${DOT_KT})"
 
 declare -A DE_TAI
-# UC1.3 (0015): SV gửi đề tài -> Chờ duyệt, tới GVHD GV011; GV011 duyệt (không
-# gửi thân) -> Đã phân công. Bộ môn không còn bước duyệt/phân công đề tài.
-de_xuat() {  # ma ten linh_vuc
-  json_req POST "${TOKEN[$1]}" /api/topics "{'dot_do_an_id': ${DOT_ID}, 'ten_de_tai': '''$2''', 'linh_vuc': '''$3''', 'gui': True}" 201
+# Góp ý GVHD mục 1: SV thống nhất đề tài với GV ngoài hệ thống; GVHD GV011 tạo
+# và giao thẳng cho SV (kèm sinh_vien_id) -> Đã phân công, SV được thông báo.
+giao_de_tai() {  # ma ten linh_vuc
+  json_req POST "${TOKEN[GV011]}" /api/topics "{'dot_do_an_id': ${DOT_ID}, 'ten_de_tai': '''$2''', 'linh_vuc': '''$3''', 'sinh_vien_id': ${SV_ID_OF[$1]}, 'gui': True}" 201
   DE_TAI[$1]="$(jget "d['id']")"
-  [ "$(jget "d['trang_thai'] + '|' + (d['giang_vien_huong_dan'] or {}).get('ma', '')")" = "CHO_DUYET|GV011" ] \
-    || fail "Đề tài của $1 không Chờ duyệt GVHD GV011: $(head -c 400 "$TMP/body")"
-  local code
-  code="$(call POST "/api/topic-approvals/${DE_TAI[$1]}/approve" "${TOKEN[GV011]}")"
-  [ "$code" = "200" ] || fail "GV011 duyệt đề tài của $1 trả ${code}: $(head -c 400 "$TMP/body")"
-  [ "$(jget "d['trang_thai']")" = "DA_PHAN_CONG" ] || fail "Đề tài của $1 không Đã phân công"
+  [ "$(jget "d['trang_thai'] + '|' + (d['giang_vien_huong_dan'] or {}).get('ma', '') + '|' + (d['sinh_vien'] or {}).get('ma', '')")" = "DA_PHAN_CONG|GV011|$1" ] \
+    || fail "Đề tài giao cho $1 không Đã phân công / GVHD GV011: $(head -c 400 "$TMP/body")"
 }
-de_xuat DTC235200258 "Xây dựng hệ thống quản lý thiết bị phòng máy thực hành cho Khoa Công nghệ thông tin" "Hệ thống thông tin"
-de_xuat DTC235200325 "Phát triển ứng dụng hỗ trợ sinh viên tìm nhà trọ quanh Đại học Thái Nguyên" "Công nghệ phần mềm"
-de_xuat DTC235200340 "Xây dựng hệ thống quản lý câu lạc bộ sinh viên Trường Đại học Công nghệ Thông tin và Truyền thông" "Hệ thống thông tin"
-de_xuat DTC235270078 "Phát triển ứng dụng di động theo dõi lịch tiêm chủng cho trẻ em tại trạm y tế phường Tân Thịnh" "Công nghệ phần mềm"
-ok "4 đề tài tự đề xuất (012..015) đã được GVHD GV011 duyệt (Đã phân công): ${DE_TAI[DTC235200258]}, ${DE_TAI[DTC235200325]}, ${DE_TAI[DTC235200340]}, ${DE_TAI[DTC235270078]}"
+giao_de_tai DTC235200258 "Xây dựng hệ thống quản lý thiết bị phòng máy thực hành cho Khoa Công nghệ thông tin" "Hệ thống thông tin"
+giao_de_tai DTC235200325 "Phát triển ứng dụng hỗ trợ sinh viên tìm nhà trọ quanh Đại học Thái Nguyên" "Công nghệ phần mềm"
+giao_de_tai DTC235200340 "Xây dựng hệ thống quản lý câu lạc bộ sinh viên Trường Đại học Công nghệ Thông tin và Truyền thông" "Hệ thống thông tin"
+giao_de_tai DTC235270078 "Phát triển ứng dụng di động theo dõi lịch tiêm chủng cho trẻ em tại trạm y tế phường Tân Thịnh" "Công nghệ phần mềm"
+ok "4 đề tài do GVHD GV011 giao (012..015, Đã phân công): ${DE_TAI[DTC235200258]}, ${DE_TAI[DTC235200325]}, ${DE_TAI[DTC235200340]}, ${DE_TAI[DTC235270078]}"
 
 # nop PATH_API TOKEN FILE -> id tài liệu; cho_kiem_tra TOKEN DOC_ID -> "ty_le|so_doan"
 nop() {
@@ -392,7 +391,7 @@ ok "Hội đồng demo K22 (id=${HD}, ${HOM_NAY} 08:00, C2-301: GV012 chủ tị
 
 echo
 echo "=== Trạng thái demo (đợt K22 id=${DOT_ID})"
-printf '%-14s %-9s %s\n' "DTC235200139" "—" "chưa có đề tài, GVHD GV011 (demo trực tiếp: đề xuất -> cảnh báo AI -> gửi -> GV011 duyệt -> nộp $(python3 - "$REPO_ROOT" <<'PY'
+printf '%-14s %-9s %s\n' "DTC235200139" "—" "chưa có đề tài, GVHD GV011 (demo trực tiếp: GV011 giao đề tài -> cảnh báo AI -> vẫn giao -> SV nộp $(python3 - "$REPO_ROOT" <<'PY'
 import json, sys
 root = sys.argv[1]
 m = json.load(open(f"{root}/seed-data/manifest.json", encoding="utf-8"))

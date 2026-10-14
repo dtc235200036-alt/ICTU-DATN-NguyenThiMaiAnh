@@ -155,23 +155,19 @@ status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/accounts?vai_tro=SI
 [ "$status" = "403" ] || fail "DTC235200016 xem /api/accounts không trả 403 (nhận $status)"
 status="$(curl -sk -o /dev/null -w '%{http_code}' -X POST "$BASE/api/cohorts" -H "Authorization: Bearer ${TOKEN_SV001}" -H 'Content-Type: application/json' -d '{}')"
 [ "$status" = "403" ] || fail "DTC235200016 tạo đợt đồ án không trả 403 (nhận $status)"
-status="$(curl -sk -o /dev/null -w '%{http_code}' -X POST "$BASE/api/topic-approvals/1/approve" -H "Authorization: Bearer ${TOKEN_SV001}" -H 'Content-Type: application/json' -d '{}')"
-[ "$status" = "403" ] || fail "DTC235200016 duyệt đề tài không trả 403 (nhận $status)"
-echo "OK: DTC235200016 bị 403 trên accounts/cohorts/topic-approvals"
+echo "OK: DTC235200016 bị 403 trên accounts/cohorts"
 
-# UC1.3 (0015): duyệt đề tài là việc của GVHD — router /api/topic-approvals chỉ
-# GV gọi được (GV001 xem danh sách chờ duyệt của lớp mình -> 200), Bộ môn 403.
+# Góp ý GVHD mục 1 (quick 261014-u0j): chỉ GVHD tạo/giao đề tài và kiểm tra
+# trùng tên (SV, Bộ môn 403); route đăng ký đề tài và router duyệt đề tài đã gỡ (404).
+status="$(curl -sk -o /dev/null -w '%{http_code}' -X POST "$BASE/api/topics" -H "Authorization: Bearer ${TOKEN_SV001}" -H 'Content-Type: application/json' -d '{"dot_do_an_id":1,"ten_de_tai":"Smoke - SV tự đề xuất","sinh_vien_id":1,"gui":false}')"
+[ "$status" = "403" ] || fail "DTC235200016 tạo đề tài không trả 403 (nhận $status)"
+status="$(curl -sk -o /dev/null -w '%{http_code}' -X POST "$BASE/api/topics/check-title" -H "Authorization: Bearer ${TOKEN_SV001}" -H 'Content-Type: application/json' -d '{"ten_de_tai":"Smoke - kiểm tra tên"}')"
+[ "$status" = "403" ] || fail "DTC235200016 kiểm tra trùng tên không trả 403 (nhận $status)"
+status="$(curl -sk -o /dev/null -w '%{http_code}' -X POST "$BASE/api/topics/1/register" -H "Authorization: Bearer ${TOKEN_SV001}")"
+[ "$status" = "404" ] || fail "Route đăng ký đề tài đã gỡ nhưng không trả 404 (nhận $status)"
 status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/topic-approvals" -H "Authorization: Bearer ${TOKEN_GV001}")"
-[ "$status" = "200" ] || fail "GV001 xem /api/topic-approvals không trả 200 (nhận $status)"
-status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/topic-approvals" -H "Authorization: Bearer ${TOKEN_BOMON}")"
-[ "$status" = "403" ] || fail "bomon xem /api/topic-approvals không trả 403 (nhận $status)"
-status="$(curl -sk -o /dev/null -w '%{http_code}' -X POST "$BASE/api/topic-approvals/1/approve" -H "Authorization: Bearer ${TOKEN_BOMON}")"
-[ "$status" = "403" ] || fail "bomon duyệt đề tài không trả 403 (nhận $status)"
-echo "OK: GV001 xem danh sách chờ duyệt -> 200; bomon bị 403 trên topic-approvals (xem, duyệt)"
-
-status="$(curl -sk -o /dev/null -w '%{http_code}' -X POST "$BASE/api/topics/1/register" -H "Authorization: Bearer ${TOKEN_GV001}")"
-[ "$status" = "403" ] || fail "GV001 đăng ký đề tài không trả 403 (nhận $status)"
-echo "OK: GV001 bị 403 trên register"
+[ "$status" = "404" ] || fail "Router duyệt đề tài đã gỡ nhưng GV001 không nhận 404 (nhận $status)"
+echo "OK: SV tạo đề tài / kiểm tra trùng tên -> 403; route đăng ký và duyệt đề tài đã gỡ -> 404"
 
 # UC0.8 (0015): phân công GVHD — Bộ môn gán/import, GV xem lớp của mình, SV
 # xem GVHD của mình; seed gán DTC235200016 -> GV001 trong đợt demo.

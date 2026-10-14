@@ -9,7 +9,7 @@
 #   NFR-04 SV gọi route của Bộ môn -> 403 (bổ sung cho smoke/e2e)
 #   NFR-05 Bộ môn khóa tài khoản -> đăng nhập đúng mật khẩu bị từ chối; mở khóa
 #          -> đăng nhập lại được
-#   NFR-08 20 x POST /api/topics/check-title qua Apache (SV), P95 curl <= 5 s
+#   NFR-08 20 x POST /api/topics/check-title qua Apache (GV), P95 curl <= 5 s
 #   NFR-12 20 x tra cứu kho (từ khóa + khóa) và 20 x danh sách đề tài có bộ lọc
 #          qua Apache (Bộ môn), mỗi loại P95 <= 1 s
 #   NFR-13 information_schema: mọi bảng/cột văn bản của thesis_core và
@@ -117,6 +117,7 @@ n_sv="$(sql "SELECT COUNT(*) FROM tai_khoan WHERE ma_dang_nhap = '${SV_MA}' AND 
 [ "$n_sv" = "1" ] || { echo "FAIL: không có tài khoản ${SV_MA}"; exit 1; }
 TOKEN_BOMON="$(login bomon)"
 TOKEN_SV="$(login "${SV_MA}")"
+TOKEN_GV="$(login GV001)"
 SV_TK_ID="$(sql "SELECT id FROM tai_khoan WHERE ma_dang_nhap = '${SV_MA}'")"
 
 # --- NFR-01 ----------------------------------------------------------------------
@@ -199,6 +200,7 @@ if [ "$c_lock" = "200" ] && { [ "$c_login_khoa" = "401" ] || [ "$c_login_khoa" =
 ghi_kq NFR-05 "$d" "Bộ môn khóa ${SV_MA} (POST /api/accounts/{id}/lock), đăng nhập đúng mật khẩu, gọi API bằng token cũ, mở khóa rồi đăng nhập lại — qua Apache" \
   "khóa ${c_lock}; đăng nhập khi bị khóa -> ${c_login_khoa}; token cũ -> ${c_me_khoa}; mở khóa ${c_unlock}; đăng nhập lại -> ${c_login_mo}"
 TOKEN_SV="$(login "${SV_MA}")"
+TOKEN_GV="$(login GV001)"
 
 # --- NFR-08 qua HTTPS --------------------------------------------------------------
 python3 - "${REPO_ROOT}/seed-data/truy-van-ten-de-tai.csv" "$N" > "$TMP/titles.txt" <<'PY'
@@ -212,14 +214,14 @@ bad08=0
 while IFS= read -r ten; do
   python3 -c 'import json,sys; print(json.dumps({"ten_de_tai": sys.argv[1]}, ensure_ascii=False))' "$ten" > "$TMP/body08.json"
   out="$(curl -sk -o "$TMP/r08.json" -w '%{http_code} %{time_total}' -X POST "$BASE/api/topics/check-title" \
-    -H "Authorization: Bearer ${TOKEN_SV}" -H 'Content-Type: application/json' --data-binary "@$TMP/body08.json")"
+    -H "Authorization: Bearer ${TOKEN_GV}" -H 'Content-Type: application/json' --data-binary "@$TMP/body08.json")"
   [ "${out%% *}" = "200" ] || bad08=$((bad08 + 1))
   grep -q '"trang_thai":"HOAN_TAT"' "$TMP/r08.json" || bad08=$((bad08 + 1))
   echo "${out#* }" >> "$TMP/t08"
 done < "$TMP/titles.txt"
 read -r p50 p95 pmax n08 < <(p95_of < "$TMP/t08")
 if [ "$bad08" = "0" ] && [ "$n08" = "$N" ] && python3 -c "import sys; sys.exit(0 if $p95 <= 5 else 1)"; then d=true; else d=false; fi
-ghi_kq NFR-08 "$d" "${n08} lời gọi POST /api/topics/check-title qua Apache HTTPS (Apache -> Web API -> dịch vụ AI) bằng SV, tên từ seed-data/truy-van-ten-de-tai.csv, đo curl time_total" \
+ghi_kq NFR-08 "$d" "${n08} lời gọi POST /api/topics/check-title qua Apache HTTPS (Apache -> Web API -> dịch vụ AI) bằng GV, tên từ seed-data/truy-van-ten-de-tai.csv, đo curl time_total" \
   "qua HTTPS: P50 ${p50} s, P95 ${p95} s, max ${pmax} s; ${bad08} lỗi"
 
 # --- NFR-12 ------------------------------------------------------------------------
@@ -238,7 +240,7 @@ for i in $(seq 0 $((N - 1))); do
   echo "${out#* }" >> "$TMP/t12a"
 done
 DOT_IDS=($(sql "SELECT id FROM dot_do_an ORDER BY id"))
-TT=("CHO_DUYET" "DA_DUYET" "DA_PHAN_CONG" "TU_CHOI")
+TT=("NHAP" "DA_PHAN_CONG")
 for i in $(seq 0 $((N - 1))); do
   q="$(urlenc "${KW[$((i % ${#KW[@]}))]}")"
   case $((i % 4)) in
@@ -302,7 +304,7 @@ TEN14="$(sed -n 1p "$TMP/titles.txt")"
 for form in NFC NFD; do
   python3 -c 'import json,sys,unicodedata; print(json.dumps({"ten_de_tai": unicodedata.normalize(sys.argv[2], sys.argv[1])}, ensure_ascii=False))' "$TEN14" "$form" > "$TMP/b14-$form.json"
   curl -sk -o "$TMP/r14-$form.json" -X POST "$BASE/api/topics/check-title" \
-    -H "Authorization: Bearer ${TOKEN_SV}" -H 'Content-Type: application/json' --data-binary "@$TMP/b14-$form.json"
+    -H "Authorization: Bearer ${TOKEN_GV}" -H 'Content-Type: application/json' --data-binary "@$TMP/b14-$form.json"
 done
 res14="$(python3 - "$TMP/r14-NFC.json" "$TMP/r14-NFD.json" "$TMP/b14-NFC.json" "$TMP/b14-NFD.json" <<'PY'
 import json, sys

@@ -255,19 +255,22 @@ TOKEN_GV="$(bash "${SCRIPT_DIR}/api-login.sh" GV023)"
   -d '{"ten_dot":"Đợt đo hiệu năng AI","khoa":"K96","nam_hoc":"2026-2027","ngay_bat_dau":"2026-01-01"}')" = "201" ] \
   || fail "Không tạo được đợt K96: $(cat "$TMP/body")"
 DOT_DO_AN_ID="$(jget 'd["id"]')"
-# UC0.8 (0015): SV chỉ đề xuất được khi đã có GVHD trong đợt — Bộ môn import
-# phân công DTC235210032 -> GV023 cho đợt K96.
+# UC0.8 (0015): chỉ GVHD được Bộ môn phân công mới giao được đề tài — Bộ môn
+# import phân công DTC235210032 -> GV023 cho đợt K96.
 python3 -c 'import json,sys; print(json.dumps({"dot_do_an_id": int(sys.argv[1]), "noi_dung": "DTC235210032,GV023\n"}))' "$DOT_DO_AN_ID" > "$TMP/assign.json"
 [ "$(call POST /api/assignments/import "$TOKEN_BOMON" -H 'Content-Type: application/json' --data-binary "@$TMP/assign.json")" = "200" ] \
   && [ "$(jget 'd["cap_nhat"] == 1 and not d["loi"]')" = "True" ] \
   || fail "Bộ môn không phân công được DTC235210032 -> GV023 trong đợt K96: $(cat "$TMP/body")"
-python3 -c 'import json,sys; print(json.dumps({"dot_do_an_id": int(sys.argv[1]), "ten_de_tai": "Đo hiệu năng kiểm tra trùng lặp tài liệu của hệ thống quản lý đồ án", "linh_vuc": "Công nghệ phần mềm", "gui": True}, ensure_ascii=False))' "$DOT_DO_AN_ID" > "$TMP/topic.json"
-[ "$(call POST /api/topics "$TOKEN_SV" -H 'Content-Type: application/json' --data-binary "@$TMP/topic.json")" = "201" ] \
-  || fail "DTC235210032 không tạo được đề tài K96: $(cat "$TMP/body")"
+[ "$(call GET "/api/assignments?dot_do_an_id=${DOT_DO_AN_ID}&q=DTC235210032" "$TOKEN_BOMON")" = "200" ] \
+  || fail "Bộ môn không đọc được danh sách phân công K96: $(cat "$TMP/body")"
+SV_ID="$(jget "next((r['sinh_vien']['id'] for r in d['items'] if r['sinh_vien']['ma'] == 'DTC235210032'), '')")"
+[ -n "$SV_ID" ] || fail "Không tìm được sinh_vien.id của DTC235210032 trong đợt K96"
+# Góp ý GVHD mục 1: GVHD GV023 tạo và giao đề tài thẳng cho SV -> Đã phân công.
+python3 -c 'import json,sys; print(json.dumps({"dot_do_an_id": int(sys.argv[1]), "ten_de_tai": "Đo hiệu năng kiểm tra trùng lặp tài liệu của hệ thống quản lý đồ án", "linh_vuc": "Công nghệ phần mềm", "sinh_vien_id": int(sys.argv[2]), "gui": True}, ensure_ascii=False))' "$DOT_DO_AN_ID" "$SV_ID" > "$TMP/topic.json"
+[ "$(call POST /api/topics "$TOKEN_GV" -H 'Content-Type: application/json' --data-binary "@$TMP/topic.json")" = "201" ] \
+  || fail "GVHD GV023 không giao được đề tài K96 cho DTC235210032: $(cat "$TMP/body")"
 TOPIC_ID="$(jget 'd["id"]')"
-# UC1.3 (0015): GVHD GV023 duyệt đề tài SV (không gửi thân) -> Đã phân công.
-[ "$(call POST "/api/topic-approvals/${TOPIC_ID}/approve" "$TOKEN_GV")" = "200" ] \
-  || fail "GVHD GV023 không duyệt được đề tài K96: $(cat "$TMP/body")"
+[ "$(jget 'd["trang_thai"]')" = "DA_PHAN_CONG" ] || fail "Đề tài K96 không ở Đã phân công: $(cat "$TMP/body")"
 ok "Đợt K96 (id=${DOT_DO_AN_ID}), đề tài ${TOPIC_ID} của DTC235210032, GVHD GV023"
 
 mem_before="$(docker stats --no-stream --format '{{.MemUsage}}' "$AI_CID" | awk '{print $1}')"

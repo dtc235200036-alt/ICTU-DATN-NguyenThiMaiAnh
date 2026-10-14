@@ -6,15 +6,15 @@ from app.core.deps import CurrentUser
 from app.core.timeutil import to_vn_date, today_vn
 from app.models.bao_ve import CHU_TICH, DiemBaoVe, HoiDong, LichBaoVe, ThanhVienHoiDong
 from app.models.de_cuong import DC_CHO_DUYET, DC_CHUA_NOP, LOAI_DE_CUONG, DeCuong, TaiLieuDoAn
-from app.models.de_tai import CHO_DUYET, DA_PHAN_CONG, DeTai, SINH_VIEN
+from app.models.de_tai import DA_PHAN_CONG, NHAP, DeTai
 from app.models.dot_do_an import DANG_MO, DotDoAn
 from app.models.phan_cong import PhanCongHuongDan
 from app.models.tai_khoan import GiangVien, SinhVien, TaiKhoan
 from app.models.tien_do import CHUA_DEN_HAN, BaoCaoTienDo, MocTienDo
 from app.models.trung_lap import DANG_KIEM_TRA, HOAN_TAT, KetQuaKiemTraTrungLap
 from app.schemas.dashboard import (
+    BmAssignedTopicRef,
     BmDashboardOut,
-    BmPendingTopicRef,
     BmProgressExcerpt,
     BmUpcomingCommittee,
     GvDashboardOut,
@@ -61,6 +61,7 @@ def get_sv_dashboard(db: Session, user: CurrentUser) -> SvDashboardOut:
             db.execute(
                 select(DeTai)
                 .where(DeTai.sinh_vien_id == sv_id)
+                .where(DeTai.trang_thai != NHAP)  # bản nháp GV đang soạn: SV không thấy
                 .options(selectinload(DeTai.giang_vien))
                 .order_by(DeTai.id.desc())
                 .limit(1)
@@ -180,6 +181,25 @@ def _sv_defense(db: Session, user: CurrentUser) -> SvDefenseOut | None:
     )
 
 
+def _gv_unassigned_students(db: Session, gv_id: int) -> int:
+    """Số SV trong lớp hướng dẫn (đợt đang mở) của GV chưa có đề tài đang hoạt
+    động — việc "Giao đề tài" còn lại. Một truy vấn đếm, không lặp Python."""
+    return db.execute(
+        select(func.count())
+        .select_from(PhanCongHuongDan)
+        .join(DotDoAn, DotDoAn.id == PhanCongHuongDan.dot_do_an_id)
+        .where(PhanCongHuongDan.giang_vien_id == gv_id)
+        .where(DotDoAn.trang_thai == DANG_MO)
+        .where(
+            ~exists(
+                select(DeTai.id).where(
+                    DeTai.sinh_vien_id_dang_hoat_dong == PhanCongHuongDan.sinh_vien_id
+                )
+            )
+        )
+    ).scalar_one()
+
+
 def get_gv_dashboard(db: Session, user: CurrentUser) -> GvDashboardOut:
     gv_id = user.giang_vien_id if user.giang_vien_id is not None else _NO_PROFILE_ID
 
@@ -203,12 +223,7 @@ def get_gv_dashboard(db: Session, user: CurrentUser) -> GvDashboardOut:
         .where(DotDoAn.trang_thai == DANG_MO)
     ).scalar_one()
 
-    so_de_tai_cho_duyet = db.execute(
-        select(func.count())
-        .select_from(DeTai)
-        .where(DeTai.giang_vien_id == gv_id)
-        .where(DeTai.trang_thai == CHO_DUYET)
-    ).scalar_one()
+    so_sinh_vien_chua_giao_de_tai = _gv_unassigned_students(db, gv_id)
 
     rows = (
         db.execute(
@@ -256,7 +271,7 @@ def get_gv_dashboard(db: Session, user: CurrentUser) -> GvDashboardOut:
         so_sinh_vien_huong_dan=so_sinh_vien_huong_dan,
         so_sinh_vien_lop=so_sinh_vien_lop,
         so_de_tai=so_de_tai,
-        so_de_tai_cho_duyet=so_de_tai_cho_duyet,
+        so_sinh_vien_chua_giao_de_tai=so_sinh_vien_chua_giao_de_tai,
         de_tai=de_tai,
         so_de_cuong_cho_duyet=so_de_cuong_cho_duyet,
         so_bao_cao_cho_nhan_xet=so_bao_cao_cho_nhan_xet,
@@ -278,30 +293,24 @@ def _check_note(ket_qua: KetQuaKiemTraTrungLap | None) -> str:
 
 
 def _gv_tasks(db: Session, gv_id: int | None) -> list[GvTaskItem]:
-    """MH-03 "Việc cần xử lý" (≤ 10): đề tài SV gửi chờ duyệt, đề cương chờ duyệt, báo cáo tiến độ chờ
+    """MH-03 "Việc cần xử lý" (≤ 10): SV chưa được giao đề tài (một việc gộp), đề cương chờ duyệt, báo cáo tiến độ chờ
     nhận xét của đề tài mình hướng dẫn, và lịch bảo vệ (chưa chốt) ở hội đồng
     mình ngồi mà mình chưa chấm. Mỗi loại một truy vấn, không N+1."""
     if gv_id is None:
         return []
     tasks: list[GvTaskItem] = []
 
-    # UC1.3 (0015): đề tài SV trong lớp gửi, chờ chính GVHD duyệt.
-    pending_topics = db.execute(
-        select(DeTai.id, DeTai.ten_de_tai, SinhVien.ho_ten)
-        .outerjoin(SinhVien, SinhVien.id == DeTai.sinh_vien_id)
-        .where(DeTai.giang_vien_id == gv_id)
-        .where(DeTai.trang_thai == CHO_DUYET)
-        .order_by(DeTai.id)
-        .limit(_VIEC_MAX)
-    ).all()
-    for de_tai_id, ten, sv_ten in pending_topics:
+    # Góp ý GVHD mục 1: việc gộp "Giao đề tài" đứng đầu danh sách khi lớp còn SV
+    # chưa được giao đề tài (aggregate, không lặp theo từng SV).
+    chua_giao = _gv_unassigned_students(db, gv_id)
+    if chua_giao > 0:
         tasks.append(
             GvTaskItem(
-                loai="DUYET_DE_TAI",
-                sinh_vien=sv_ten,
-                ten_de_tai=ten,
-                ghi_chu="Đề tài sinh viên đề xuất chờ bạn duyệt",
-                lien_ket=f"/duyet-de-tai?de_tai_id={de_tai_id}",
+                loai="GIAO_DE_TAI",
+                sinh_vien=None,
+                ten_de_tai=None,
+                ghi_chu=f"{chua_giao} sinh viên trong lớp hướng dẫn chưa được giao đề tài",
+                lien_ket="/sinh-vien-huong-dan",
             )
         )
 
@@ -415,16 +424,23 @@ def get_bo_mon_dashboard(db: Session, dot_do_an_id: int | None) -> BmDashboardOu
         # IN-10: id đợt không tồn tại -> 404, không trả bảng điều khiển toàn số 0.
         raise HTTPException(status_code=404, detail="Không tìm thấy đợt đồ án")
 
-    de_tai_cho_duyet = 0
+    sv_chua_giao_de_tai = 0
     de_tai_da_phan_cong = 0
-    cho_duyet_moi_nhat: list[BmPendingTopicRef] = []
+    de_tai_moi_giao: list[BmAssignedTopicRef] = []
 
     if cohort is not None:
-        de_tai_cho_duyet = db.execute(
+        # SV đã được phân công GVHD trong đợt nhưng chưa có đề tài đang hoạt động.
+        sv_chua_giao_de_tai = db.execute(
             select(func.count())
-            .select_from(DeTai)
-            .where(DeTai.dot_do_an_id == cohort.id)
-            .where(DeTai.trang_thai == CHO_DUYET)
+            .select_from(PhanCongHuongDan)
+            .where(PhanCongHuongDan.dot_do_an_id == cohort.id)
+            .where(
+                ~exists(
+                    select(DeTai.id).where(
+                        DeTai.sinh_vien_id_dang_hoat_dong == PhanCongHuongDan.sinh_vien_id
+                    )
+                )
+            )
         ).scalar_one()
 
         de_tai_da_phan_cong = db.execute(
@@ -438,7 +454,7 @@ def get_bo_mon_dashboard(db: Session, dot_do_an_id: int | None) -> BmDashboardOu
             db.execute(
                 select(DeTai)
                 .where(DeTai.dot_do_an_id == cohort.id)
-                .where(DeTai.trang_thai == CHO_DUYET)
+                .where(DeTai.trang_thai == DA_PHAN_CONG)
                 .options(selectinload(DeTai.giang_vien), selectinload(DeTai.sinh_vien))
                 .order_by(DeTai.id.desc())
                 .limit(5)
@@ -447,14 +463,13 @@ def get_bo_mon_dashboard(db: Session, dot_do_an_id: int | None) -> BmDashboardOu
             .all()
         )
         for row in rows:
-            if row.loai_nguoi_de_xuat == SINH_VIEN and row.sinh_vien is not None:
-                nguoi_de_xuat = row.sinh_vien.ho_ten or ""
-            elif row.giang_vien is not None:
-                nguoi_de_xuat = row.giang_vien.ho_ten or ""
-            else:
-                nguoi_de_xuat = ""
-            cho_duyet_moi_nhat.append(
-                BmPendingTopicRef(id=row.id, ten_de_tai=row.ten_de_tai, nguoi_de_xuat=nguoi_de_xuat)
+            de_tai_moi_giao.append(
+                BmAssignedTopicRef(
+                    id=row.id,
+                    ten_de_tai=row.ten_de_tai,
+                    giang_vien=(row.giang_vien.ho_ten if row.giang_vien is not None else "") or "",
+                    sinh_vien=(row.sinh_vien.ho_ten if row.sinh_vien is not None else "") or "",
+                )
             )
 
     sv_chua_co_de_tai = db.execute(
@@ -548,10 +563,10 @@ def get_bo_mon_dashboard(db: Session, dot_do_an_id: int | None) -> BmDashboardOu
             if cohort is not None
             else None
         ),
-        de_tai_cho_duyet=de_tai_cho_duyet,
+        sv_chua_giao_de_tai=sv_chua_giao_de_tai,
         de_tai_da_phan_cong=de_tai_da_phan_cong,
         sv_chua_co_de_tai=sv_chua_co_de_tai,
         sv_chua_phan_cong=sv_chua_phan_cong,
         tong_sinh_vien=tong_sinh_vien,
-        cho_duyet_moi_nhat=cho_duyet_moi_nhat,
+        de_tai_moi_giao=de_tai_moi_giao,
     )

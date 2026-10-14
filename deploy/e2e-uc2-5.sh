@@ -165,8 +165,8 @@ setup_assigned_topic() {
   [ -n "$DOT_DO_AN_ID" ] || fail "Không đọc được id đợt K98 vừa tạo"
   ok "Bộ môn tạo đợt kiểm thử K98 (id=${DOT_DO_AN_ID})"
 
-  # UC0.8 (0015): SV chỉ đề xuất được khi đã có GVHD trong đợt — Bộ môn import
-  # phân công DTC235210039 -> GV029 (DTC235210037 "SV khác" để chưa phân công).
+  # UC0.8 (0015): chỉ GVHD được Bộ môn phân công mới giao được đề tài — Bộ môn
+  # import phân công DTC235210039 -> GV029 (DTC235210037 "SV khác" để chưa phân công).
   status="$(call POST /api/assignments/import "${TOKEN_BOMON}" -H 'Content-Type: application/json' \
     -d "{\"dot_do_an_id\":${DOT_DO_AN_ID},\"noi_dung\":\"DTC235210039,GV029\"}")"
   [ "$status" = "200" ] || fail "Bộ môn không import được phân công GVHD (mã ${status}, $(cat "$TMP/body"))"
@@ -174,20 +174,22 @@ setup_assigned_topic() {
     || fail "Import phân công không gán DTC235210039 -> GV029 ($(cat "$TMP/body"))"
   ok "Bộ môn phân công DTC235210039 -> GVHD GV029 trong đợt K98"
 
-  status="$(call POST /api/topics "${TOKEN_SV098}" -H 'Content-Type: application/json' \
-    -d "{\"dot_do_an_id\":${DOT_DO_AN_ID},\"ten_de_tai\":\"E2E UC2-5 - Đề tài tự đề xuất\",\"linh_vuc\":\"Hệ thống thông tin\",\"gui\":true}")"
-  [ "$status" = "201" ] || fail "DTC235210039 không tự đề xuất được đề tài (mã ${status}, $(cat "$TMP/body"))"
-  DE_TAI_ID="$(jget "d['id']")"
-  [ -n "$DE_TAI_ID" ] || fail "Không đọc được id đề tài vừa tự đề xuất"
-  ok "DTC235210039 tự đề xuất đề tài (id=${DE_TAI_ID}) -> Chờ GVHD GV029 duyệt"
+  status="$(call GET "/api/assignments?dot_do_an_id=${DOT_DO_AN_ID}&q=DTC235210039" "${TOKEN_BOMON}")"
+  [ "$status" = "200" ] || fail "Không tra được sinh_vien.id của DTC235210039 (mã ${status})"
+  local sv_id
+  sv_id="$(jget "next((r['sinh_vien']['id'] for r in d['items'] if r['sinh_vien']['ma'] == 'DTC235210039'), '')")"
+  [ -n "$sv_id" ] || fail "Không đọc được sinh_vien.id của DTC235210039 ($(cat "$TMP/body"))"
 
-  # UC1.3 (0015): GVHD GV029 (không phải Bộ môn) duyệt, không gửi thân.
-  status="$(call POST "/api/topic-approvals/${DE_TAI_ID}/approve" "${TOKEN_GV029}")"
-  [ "$status" = "200" ] || fail "GVHD GV029 không duyệt được đề tài (mã ${status}, $(cat "$TMP/body"))"
+  # Góp ý GVHD mục 1: GVHD GV029 tạo và giao đề tài thẳng cho SV -> Đã phân công.
+  status="$(call POST /api/topics "${TOKEN_GV029}" -H 'Content-Type: application/json' \
+    -d "{\"dot_do_an_id\":${DOT_DO_AN_ID},\"ten_de_tai\":\"E2E UC2-5 - Đề tài GVHD giao\",\"linh_vuc\":\"Hệ thống thông tin\",\"sinh_vien_id\":${sv_id},\"gui\":true}")"
+  [ "$status" = "201" ] || fail "GVHD GV029 không giao được đề tài cho DTC235210039 (mã ${status}, $(cat "$TMP/body"))"
+  DE_TAI_ID="$(jget "d['id']")"
+  [ -n "$DE_TAI_ID" ] || fail "Không đọc được id đề tài vừa giao"
   local trang_thai
   trang_thai="$(jget "d.get('trang_thai','')")"
-  [ "$trang_thai" = "DA_PHAN_CONG" ] || fail "Đề tài không chuyển Đã phân công (nhận ${trang_thai})"
-  ok "GVHD GV029 duyệt đề tài -> Đã phân công"
+  [ "$trang_thai" = "DA_PHAN_CONG" ] || fail "Đề tài không ở Đã phân công ngay khi giao (nhận ${trang_thai})"
+  ok "GVHD GV029 giao đề tài (id=${DE_TAI_ID}) cho DTC235210039 -> Đã phân công ngay"
 }
 
 uc2_outline() {
@@ -746,7 +748,7 @@ uc0_notifications() {
   phan_cong="$(jget "sum(1 for i in d['items'] if i['loai'] == 'DE_TAI_PHAN_CONG' and i['lien_ket'] == '/de-tai/${DE_TAI_ID}')")"
   [ "$phan_cong" = "1" ] || fail "DTC235210039 không có đúng một thông báo DE_TAI_PHAN_CONG cho đề tài ${DE_TAI_ID} (nhận ${phan_cong})"
   note_id="$(jget "d['items'][0]['id']")"
-  ok "DTC235210039 có ${unread} thông báo chưa đọc, gồm DE_TAI_PHAN_CONG từ quyết định duyệt đề tài (NOTF-01)"
+  ok "DTC235210039 có ${unread} thông báo chưa đọc, gồm DE_TAI_PHAN_CONG từ việc GVHD giao đề tài (NOTF-01)"
 
   status="$(call POST "/api/notifications/${note_id}/read" "${TOKEN_SV097}")"
   [ "$status" = "404" ] || fail "DTC235210037 đánh dấu thông báo của DTC235210039 không bị 404 (mã ${status})"
