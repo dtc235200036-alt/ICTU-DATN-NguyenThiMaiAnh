@@ -5,7 +5,15 @@ from sqlalchemy.orm import Session, selectinload
 from app.core.deps import CurrentUser
 from app.core.timeutil import to_vn_date, today_vn
 from app.models.bao_ve import CHU_TICH, DiemBaoVe, HoiDong, LichBaoVe, ThanhVienHoiDong
-from app.models.de_cuong import DC_CHO_DUYET, DC_CHUA_NOP, LOAI_DE_CUONG, DeCuong, TaiLieuDoAn
+from app.models.de_cuong import (
+    DC_CHO_BO_MON_DUYET,
+    DC_CHO_DUYET,
+    DC_CHUA_NOP,
+    DC_GVHD_DA_DUYET,
+    LOAI_DE_CUONG,
+    DeCuong,
+    TaiLieuDoAn,
+)
 from app.models.de_tai import DA_PHAN_CONG, NHAP, DeTai
 from app.models.dot_do_an import DANG_MO, DotDoAn
 from app.models.phan_cong import PhanCongHuongDan
@@ -351,6 +359,27 @@ def _gv_tasks(db: Session, gv_id: int | None) -> list[GvTaskItem]:
             )
         )
 
+    to_forward = db.execute(
+        select(DeTai.id, DeTai.ten_de_tai, SinhVien.ho_ten)
+        .join(DeCuong, DeCuong.de_tai_id == DeTai.id)
+        .outerjoin(SinhVien, SinhVien.id == DeTai.sinh_vien_id)
+        .where(DeTai.giang_vien_id == gv_id)
+        .where(DeTai.trang_thai == DA_PHAN_CONG)
+        .where(DeCuong.trang_thai == DC_GVHD_DA_DUYET)
+        .order_by(DeCuong.id)
+        .limit(_VIEC_MAX)
+    ).all()
+    for de_tai_id, ten, sv_ten in to_forward:
+        tasks.append(
+            GvTaskItem(
+                loai="NOP_DE_CUONG_BO_MON",
+                sinh_vien=sv_ten,
+                ten_de_tai=ten,
+                ghi_chu="Đã duyệt — nộp đề cương lên Bộ môn",
+                lien_ket=f"/duyet-de-cuong?de_tai_id={de_tai_id}",
+            )
+        )
+
     reports = db.execute(
         select(BaoCaoTienDo.thoi_diem_nop, MocTienDo.ten_moc, DeTai.id, DeTai.ten_de_tai, SinhVien.ho_ten)
         .join(DeTai, DeTai.id == BaoCaoTienDo.de_tai_id)
@@ -549,7 +578,18 @@ def get_bo_mon_dashboard(db: Session, dot_do_an_id: int | None) -> BmDashboardOu
         ).all()
     ]
 
+    de_cuong_cho_bo_mon_duyet = 0
+    if cohort is not None:
+        de_cuong_cho_bo_mon_duyet = db.execute(
+            select(func.count())
+            .select_from(DeCuong)
+            .join(DeTai, DeTai.id == DeCuong.de_tai_id)
+            .where(DeTai.dot_do_an_id == cohort.id)
+            .where(DeCuong.trang_thai == DC_CHO_BO_MON_DUYET)
+        ).scalar_one()
+
     return BmDashboardOut(
+        de_cuong_cho_bo_mon_duyet=de_cuong_cho_bo_mon_duyet,
         tai_lieu_chua_index=ai_index.count_pending_documents(db),
         sv_tre_moc=sv_tre_moc,
         tien_do_trich=tien_do_trich,

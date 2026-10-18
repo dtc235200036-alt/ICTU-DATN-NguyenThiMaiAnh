@@ -1,6 +1,6 @@
 from typing import Literal
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Query, UploadFile
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
@@ -17,7 +17,7 @@ from app.schemas.topics import (
     TopicOut,
     TopicUpdate,
 )
-from app.services import ai_index
+from app.services import ai_index, documents
 from app.services import title_check as title_check_service
 from app.services import topics as topics_service
 
@@ -39,6 +39,7 @@ def list_topics(
     trang_thai: _TrangThaiFilter | None = Query(default=None),
     giang_vien_id: int | None = Query(default=None),
     linh_vuc: str | None = Query(default=None),
+    dinh_huong_id: int | None = Query(default=None),
     q: str | None = Query(default=None),
     pham_vi: _PhamViFilter = Query(default="tat_ca"),
     sap_xep: _SapXepFilter = Query(default="moi_nhat"),
@@ -52,6 +53,7 @@ def list_topics(
         trang_thai=trang_thai,
         giang_vien_id=giang_vien_id,
         linh_vuc=linh_vuc,
+        dinh_huong_id=dinh_huong_id,
         q=q,
         pham_vi=pham_vi,
         sap_xep=sap_xep,
@@ -135,3 +137,16 @@ def get_topic(
 ) -> TopicOut:
     return topics_service.get_topic(db, user, topic_id)
 
+
+
+@router.post("/{topic_id}/attachment", response_model=TopicOut)
+def attach_topic_file(
+    topic_id: int,
+    file: UploadFile = File(...),
+    user: CurrentUser = Depends(require_role(VaiTro.GIANG_VIEN)),
+    db: Session = Depends(get_db),
+) -> TopicOut:
+    """GVHD đính kèm file mô tả đề tài (DOCX/PDF, cùng kiểm tra định dạng/dung
+    lượng như đề cương); tải về qua /api/documents/{id}/download."""
+    vf = documents.read_and_validate(file)
+    return topics_service.attach_file(db, user, topic_id, vf)

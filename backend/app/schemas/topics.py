@@ -18,6 +18,7 @@ class TopicCreate(NFCModel):
     ten_de_tai: str = Field(min_length=5, max_length=255)
     mo_ta: str | None = Field(default=None, max_length=5000)
     linh_vuc: str | None = Field(default=None, max_length=100)
+    dinh_huong_id: int | None = None
     sinh_vien_id: int
     gui: bool = False
 
@@ -29,6 +30,7 @@ class TopicUpdate(NFCModel):
     ten_de_tai: str = Field(min_length=5, max_length=255)
     mo_ta: str | None = Field(default=None, max_length=5000)
     linh_vuc: str | None = Field(default=None, max_length=100)
+    dinh_huong_id: int | None = None
     sinh_vien_id: int
 
 
@@ -43,6 +45,28 @@ class CohortRef(BaseModel):
     ten_dot: str
     khoa: str
     trang_thai: str
+
+
+class DinhHuongRef(BaseModel):
+    id: int
+    ma: str
+    ten: str
+
+
+class TepDinhKem(BaseModel):
+    """File GVHD đính kèm khi giao đề tài (phiên bản mới nhất)."""
+
+    id: int
+    ten_goc: str
+    kich_thuoc: int
+    dinh_dang: str
+    thoi_diem_nop: datetime
+
+    @field_serializer("thoi_diem_nop")
+    def _serialize_utc(self, value: datetime) -> str:
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
+        return value.isoformat()
 
 
 class QuyenOut(BaseModel):
@@ -107,6 +131,9 @@ class TopicOut(BaseModel):
     ten_de_tai: str
     mo_ta: str | None = None
     linh_vuc: str | None = None
+    dinh_huong: DinhHuongRef | None = None
+    tep_dinh_kem: TepDinhKem | None = None
+    ngay_giao: datetime | None = None
     trang_thai: str
     loai_nguoi_de_xuat: str
     nguoi_de_xuat: PersonRef
@@ -116,6 +143,14 @@ class TopicOut(BaseModel):
     quyen: QuyenOut
     kiem_tra_ten: SavedTitleCheck | None = None
 
+    @field_serializer("ngay_giao")
+    def _serialize_ngay_giao(self, value: datetime | None) -> str | None:
+        if value is None:
+            return None
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
+        return value.isoformat()
+
 
 class TopicListItem(BaseModel):
     """UC1.2/MH-05: một dòng trong danh sách đề tài — chỉ các trường bảng cần."""
@@ -123,6 +158,7 @@ class TopicListItem(BaseModel):
     id: int
     ten_de_tai: str
     linh_vuc: str | None = None
+    dinh_huong: DinhHuongRef | None = None
     trang_thai: str
     dot_do_an: CohortRef
     nguoi_de_xuat: PersonRef
@@ -139,6 +175,7 @@ class TopicListParams:
     trang_thai: str | None = None
     giang_vien_id: int | None = None
     linh_vuc: str | None = None
+    dinh_huong_id: int | None = None
     q: str | None = None
     pham_vi: str = "tat_ca"
     sap_xep: str = "moi_nhat"

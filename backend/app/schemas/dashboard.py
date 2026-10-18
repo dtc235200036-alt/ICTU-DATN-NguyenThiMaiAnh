@@ -73,7 +73,9 @@ class GvTopicItem(BaseModel):
     sinh_vien: str | None = None
 
 
-LoaiViec = Literal["GIAO_DE_TAI", "DUYET_DE_CUONG", "NHAN_XET_TIEN_DO", "CHAM_DIEM"]
+LoaiViec = Literal[
+    "GIAO_DE_TAI", "DUYET_DE_CUONG", "NOP_DE_CUONG_BO_MON", "NHAN_XET_TIEN_DO", "CHAM_DIEM"
+]
 
 
 class GvTaskItem(BaseModel):
@@ -142,6 +144,8 @@ class BmDashboardOut(BaseModel):
     moc_tien_do: list[MilestoneOut] = []
     so_hoi_dong_sap_toi: int = 0
     hoi_dong_sap_toi: list[BmUpcomingCommittee] = []
+    # 0016: đề cương GVHD đã nộp lên, chờ Lãnh đạo bộ môn phê duyệt.
+    de_cuong_cho_bo_mon_duyet: int = 0
     # WR-06 (04-REVIEW): đề cương/báo cáo đã kiểm tra xong nhưng chưa vào chỉ
     # mục AI (ingest lỗi) — toàn khoa, không theo đợt.
     tai_lieu_chua_index: int = 0

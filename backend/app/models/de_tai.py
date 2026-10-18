@@ -44,6 +44,10 @@ class DeTai(Base):
     ten_de_tai: Mapped[str] = mapped_column(String(255), nullable=False)
     mo_ta: Mapped[str | None] = mapped_column(Text)
     linh_vuc: Mapped[str | None] = mapped_column(String(100))
+    # 0016: định hướng (H01, H02, ...) thay cho lĩnh vực; NULL ở đề tài cũ.
+    dinh_huong_id: Mapped[int | None] = mapped_column(
+        BigInteger, ForeignKey("dinh_huong.id", name="fk_de_tai_dinh_huong")
+    )
     trang_thai: Mapped[str] = mapped_column(String(20), nullable=False)
     loai_nguoi_de_xuat: Mapped[str] = mapped_column(String(10), nullable=False)
     ly_do_tu_choi: Mapped[str | None] = mapped_column(Text)
@@ -51,3 +55,4 @@ class DeTai(Base):
     dot_do_an = relationship("DotDoAn")
     giang_vien = relationship("GiangVien")
     sinh_vien = relationship("SinhVien")
+    dinh_huong = relationship("DinhHuong")

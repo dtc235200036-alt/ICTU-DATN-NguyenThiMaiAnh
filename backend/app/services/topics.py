@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.deps import CurrentUser
 from app.core.roles import VaiTro
+from app.models.de_cuong import LOAI_DE_TAI, TaiLieuDoAn
 from app.models.de_tai import (
     DA_PHAN_CONG,
     DeTai,
@@ -12,6 +13,7 @@ from app.models.de_tai import (
     NHAP,
     SINH_VIEN,
 )
+from app.models.dinh_huong import DinhHuong
 from app.models.dot_do_an import DANG_MO, DotDoAn
 from app.models.tai_khoan import GiangVien, SinhVien
 from app.models.thong_bao import DE_TAI_PHAN_CONG
@@ -19,17 +21,20 @@ from app.models.trung_lap import KetQuaKiemTraTrungLap
 from app.schemas.common import Page, nfc
 from app.schemas.topics import (
     CohortRef,
+    DinhHuongRef,
     PersonRef,
     QuyenOut,
     SavedChiTietTrungLap,
     SavedTitleCheck,
+    TepDinhKem,
     TopicCreate,
     TopicListItem,
     TopicListParams,
     TopicOut,
     TopicUpdate,
 )
-from app.services import assignments, notifications, title_check
+from app.services import assignments, documents, notifications, title_check
+from app.services.documents import ValidatedFile
 
 # Góp ý GVHD mục 1 (quick 261014-u0j): chỉ GVHD tạo và giao đề tài cho SV trong
 # lớp hướng dẫn (UC1.1) — SV không tự đề xuất/đăng ký, không còn bước duyệt. Các
@@ -48,6 +53,8 @@ _NOT_DRAFT_DETAIL = "Chỉ sửa được đề tài ở trạng thái Nháp"
 _SUBMIT_NOT_DRAFT_DETAIL = "Đề tài không ở trạng thái Nháp"
 _SV_HAS_ACTIVE_TOPIC_DETAIL = "Sinh viên này đã có một đề tài đang hoạt động"
 _NOT_MY_STUDENT_DETAIL = "Sinh viên không thuộc lớp hướng dẫn của bạn trong đợt này"
+_DINH_HUONG_INVALID_DETAIL = "Định hướng không tồn tại hoặc đã ngừng sử dụng"
+_ATTACH_FORBIDDEN_DETAIL = "Chỉ GVHD của đề tài mới được đính kèm file"
 _NO_STUDENT_ON_DRAFT_DETAIL = (
     "Đề tài nháp chưa chọn sinh viên được giao — hãy sửa và chọn sinh viên trước khi gửi"
 )
@@ -94,11 +101,43 @@ def _get_or_404(db: Session, topic_id: int) -> DeTai:
             joinedload(DeTai.dot_do_an),
             joinedload(DeTai.giang_vien),
             joinedload(DeTai.sinh_vien),
+            joinedload(DeTai.dinh_huong),
         )
     ).scalar_one_or_none()
     if topic is None:
         raise HTTPException(status_code=404, detail=_TOPIC_NOT_FOUND_DETAIL)
     return topic
+
+
+def _check_dinh_huong(db: Session, dinh_huong_id: int | None, current_id: int | None = None) -> None:
+    """Định hướng phải còn hoạt động — trừ khi giữ nguyên định hướng hiện có của
+    đề tài (Bộ môn ngừng một định hướng không làm hỏng đề tài cũ)."""
+    if dinh_huong_id is None or dinh_huong_id == current_id:
+        return
+    item = db.get(DinhHuong, dinh_huong_id)
+    if item is None or not item.hoat_dong:
+        raise HTTPException(status_code=422, detail=_DINH_HUONG_INVALID_DETAIL)
+
+
+def _dinh_huong_ref(topic: DeTai) -> DinhHuongRef | None:
+    item = topic.dinh_huong
+    if item is None:
+        return None
+    return DinhHuongRef(id=item.id, ma=item.ma, ten=item.ten)
+
+
+def latest_attachment(db: Session, topic_id: int) -> TaiLieuDoAn | None:
+    return (
+        db.execute(
+            select(TaiLieuDoAn)
+            .where(TaiLieuDoAn.de_tai_id == topic_id)
+            .where(TaiLieuDoAn.loai == LOAI_DE_TAI)
+            .order_by(TaiLieuDoAn.so_phien_ban.desc())
+            .limit(1)
+        )
+        .scalars()
+        .first()
+    )
 
 
 def _get_open_cohort_or_error(db: Session, dot_do_an_id: int) -> DotDoAn:
@@ -153,10 +192,9 @@ def _person_refs(
     topic: DeTai,
 ) -> tuple[PersonRef, PersonRef | None, PersonRef | None]:
     """Trả (người đề xuất, GVHD, sinh viên) — dùng chung cho get_topic (TopicOut)
-    và list_topics (TopicListItem), tránh N+1 vì các quan hệ đã được eager-load."""
-    if topic.loai_nguoi_de_xuat == SINH_VIEN and topic.sinh_vien is not None:
-        nguoi_de_xuat = _person_ref(topic.sinh_vien, "ma_so_sinh_vien")
-    elif topic.giang_vien is not None:
+    và list_topics (TopicListItem), tránh N+1 vì các quan hệ đã được eager-load.
+    Góp ý GVHD: người đề xuất luôn là GVHD (kể cả đề tài cũ do SV đề xuất)."""
+    if topic.giang_vien is not None:
         nguoi_de_xuat = _person_ref(topic.giang_vien, "ma_giang_vien")
     else:
         nguoi_de_xuat = PersonRef(id=0, ho_ten="")
@@ -178,6 +216,7 @@ def _to_out(db: Session, user: CurrentUser, topic: DeTai) -> TopicOut:
     quyen = QuyenOut(sua=owner and la_nhap, gui=owner and la_nhap)
 
     saved_check = _saved_title_check_out(title_check.latest_title_check(db, topic.id))
+    attachment = latest_attachment(db, topic.id)
 
     return TopicOut(
         id=topic.id,
@@ -190,6 +229,24 @@ def _to_out(db: Session, user: CurrentUser, topic: DeTai) -> TopicOut:
         ten_de_tai=topic.ten_de_tai,
         mo_ta=topic.mo_ta,
         linh_vuc=topic.linh_vuc,
+        dinh_huong=_dinh_huong_ref(topic),
+        tep_dinh_kem=(
+            TepDinhKem(
+                id=attachment.id,
+                ten_goc=attachment.ten_goc,
+                kich_thuoc=attachment.kich_thuoc,
+                dinh_dang=attachment.dinh_dang,
+                thoi_diem_nop=attachment.thoi_diem_nop,
+            )
+            if attachment is not None
+            else None
+        ),
+        # Lần kiểm tra trùng tên được lưu đúng lúc GVHD giao đề tài.
+        ngay_giao=(
+            saved_check.thoi_diem
+            if saved_check is not None and topic.trang_thai == DA_PHAN_CONG
+            else None
+        ),
         trang_thai=topic.trang_thai,
         loai_nguoi_de_xuat=topic.loai_nguoi_de_xuat,
         nguoi_de_xuat=nguoi_de_xuat,
@@ -237,6 +294,7 @@ def create_topic(db: Session, user: CurrentUser, payload: TopicCreate) -> TopicO
     giang_vien_id = user.giang_vien_id
     sinh_vien_id = payload.sinh_vien_id
     _require_my_student(db, user, payload.dot_do_an_id, sinh_vien_id)
+    _check_dinh_huong(db, payload.dinh_huong_id)
 
     # UC1.1/D-10: tính kiểm tra trùng tên TRƯỚC khi mở transaction ghi (lời gọi
     # AI có thể mất vài giây ở Phase 4) — chỉ khi giao ngay (gui=True).
@@ -249,6 +307,7 @@ def create_topic(db: Session, user: CurrentUser, payload: TopicCreate) -> TopicO
         ten_de_tai=payload.ten_de_tai,
         mo_ta=payload.mo_ta,
         linh_vuc=payload.linh_vuc,
+        dinh_huong_id=payload.dinh_huong_id,
         trang_thai=DA_PHAN_CONG if payload.gui else NHAP,
         loai_nguoi_de_xuat=GIANG_VIEN,
     )
@@ -288,6 +347,8 @@ def update_topic(db: Session, user: CurrentUser, topic_id: int, payload: TopicUp
     topic.ten_de_tai = payload.ten_de_tai
     topic.mo_ta = payload.mo_ta
     topic.linh_vuc = payload.linh_vuc
+    _check_dinh_huong(db, payload.dinh_huong_id, topic.dinh_huong_id)
+    topic.dinh_huong_id = payload.dinh_huong_id
     try:
         # WR-01: khóa lại đợt ngay trước khi ghi để đóng cửa sổ TOCTOU giữa
         # _get_open_cohort_or_error ở trên và UPDATE thật sự.
@@ -385,6 +446,7 @@ def _list_item_out(topic: DeTai) -> TopicListItem:
         id=topic.id,
         ten_de_tai=topic.ten_de_tai,
         linh_vuc=topic.linh_vuc,
+        dinh_huong=_dinh_huong_ref(topic),
         trang_thai=topic.trang_thai,
         dot_do_an=CohortRef(
             id=topic.dot_do_an.id,
@@ -415,6 +477,8 @@ def list_topics(db: Session, user: CurrentUser, params: TopicListParams) -> Page
         stmt = stmt.where(DeTai.giang_vien_id == params.giang_vien_id)
     if params.linh_vuc is not None:
         stmt = stmt.where(DeTai.linh_vuc == params.linh_vuc)
+    if params.dinh_huong_id is not None:
+        stmt = stmt.where(DeTai.dinh_huong_id == params.dinh_huong_id)
     if params.q:
         # T-02-32/T-02-33: autoescape=True chống LIKE-injection qua % và _.
         stmt = stmt.where(DeTai.ten_de_tai.contains(nfc(params.q), autoescape=True))
@@ -431,6 +495,7 @@ def list_topics(db: Session, user: CurrentUser, params: TopicListParams) -> Page
             selectinload(DeTai.dot_do_an),
             selectinload(DeTai.giang_vien),
             selectinload(DeTai.sinh_vien),
+            selectinload(DeTai.dinh_huong),
         )
         .offset((params.page - 1) * params.page_size)
         .limit(params.page_size)
@@ -442,3 +507,18 @@ def list_topics(db: Session, user: CurrentUser, params: TopicListParams) -> Page
     return Page[TopicListItem](
         items=items, total=total, page=params.page, page_size=params.page_size
     )
+
+
+def attach_file(db: Session, user: CurrentUser, topic_id: int, vf: ValidatedFile) -> TopicOut:
+    """GVHD đính kèm file mô tả đề tài (mỗi lần tải lên là một phiên bản mới)."""
+    topic = _get_or_404(db, topic_id)
+    if user.giang_vien_id is None or topic.giang_vien_id != user.giang_vien_id:
+        raise HTTPException(status_code=403, detail=_ATTACH_FORBIDDEN_DETAIL)
+    doc = documents.store(db, de_tai_id=topic.id, loai=LOAI_DE_TAI, vf=vf)
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        documents.remove_file_quietly(doc.ten_luu_tru)
+        raise
+    return _to_out(db, user, _get_or_404(db, topic.id))

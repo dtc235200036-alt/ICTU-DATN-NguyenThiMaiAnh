@@ -172,14 +172,15 @@ def test_outline_state_machine_one_way(
     )
     assert resp.status_code == 409
 
-    # duyệt v2 -> Đã duyệt
+    # duyệt v2 -> GVHD đã duyệt (chờ nộp lên Bộ môn, chưa phải trạng thái cuối)
     resp = client.post(
         f"/api/outlines/{topic.id}/review",
         headers=gv_headers,
         json={"tai_lieu_do_an_id": v2_id, "ket_qua": "DA_DUYET"},
     )
     assert resp.status_code == 200, resp.text
-    assert resp.json()["trang_thai"] == "DA_DUYET"
+    assert resp.json()["trang_thai"] == "GVHD_DA_DUYET"
+    assert resp.json()["quyen"]["nop_bo_mon"] is True
 
     # duyệt lần hai -> 409
     resp = client.post(
