@@ -127,17 +127,17 @@ export default function LoginPage() {
               type="error"
               showIcon
               message="Sai thông tin đăng nhập hoặc tài khoản đã bị khóa"
-              description="Kiểm tra lại mã SV/GV hoặc email và mật khẩu. Nếu tài khoản đã bị khóa, liên hệ Bộ môn để được mở lại."
+              description="Kiểm tra lại tài khoản và mật khẩu. Nếu tài khoản đã bị khóa, liên hệ Bộ môn để được mở lại."
             />
           )}
 
           <Form layout="vertical" size="large" onFinish={onFinish} disabled={loading} requiredMark={false}>
             <Form.Item
-              label="Mã SV/GV hoặc email"
+              label="Tài khoản"
               name="dang_nhap"
-              rules={[{ required: true, message: 'Vui lòng nhập mã SV/GV hoặc email' }]}
+              rules={[{ required: true, message: 'Vui lòng nhập tài khoản' }]}
             >
-              <Input autoComplete="username" placeholder="VD: DTC235200036 hoặc GV001" autoFocus />
+              <Input autoComplete="username" placeholder="Nhập tài khoản" autoFocus />
             </Form.Item>
             <Form.Item
               label="Mật khẩu"
@@ -152,11 +152,6 @@ export default function LoginPage() {
               </Button>
             </Form.Item>
           </Form>
-
-          <div className="login-hint">
-            <b>Sinh viên</b> đăng nhập bằng mã sinh viên, <b>giảng viên</b> bằng mã GV hoặc email
-            trường. Quên mật khẩu hoặc tài khoản bị khóa: liên hệ Bộ môn.
-          </div>
         </div>
       </main>
     </div>

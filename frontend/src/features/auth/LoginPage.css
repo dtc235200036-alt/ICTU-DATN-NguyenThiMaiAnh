@@ -155,20 +155,6 @@
   color: rgba(0, 0, 0, 0.55);
 }
 
-.login-hint {
-  margin-top: 24px;
-  padding: 14px 16px;
-  border-radius: 10px;
-  background: #f4f6fb;
-  font-size: 13px;
-  line-height: 1.6;
-  color: rgba(0, 0, 0, 0.6);
-}
-
-.login-hint b {
-  color: rgba(0, 0, 0, 0.8);
-}
-
 @media (max-width: 900px) {
   .login-brand {
     display: none;
