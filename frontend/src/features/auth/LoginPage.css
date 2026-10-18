@@ -1,0 +1,198 @@
+/* Màn đăng nhập: chia đôi — panel thương hiệu (trái) + form (phải); dưới
+   900px chỉ còn form, logo/tên hệ thống thu gọn lên đầu form. */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  background: #f4f6fb;
+  font-family: inherit;
+}
+
+.login-brand {
+  position: relative;
+  flex: 1 1 55%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px 56px;
+  color: #fff;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 85% 15%, rgba(56, 132, 255, 0.35), transparent 45%),
+    radial-gradient(circle at 10% 90%, rgba(0, 194, 255, 0.18), transparent 40%),
+    linear-gradient(160deg, #0a1f44 0%, #0f2f6b 55%, #12408f 100%);
+}
+
+/* Lưới chấm mờ làm nền — thuần CSS, không tải ảnh. */
+.login-brand::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 22px 22px;
+  pointer-events: none;
+}
+
+.login-brand > * {
+  position: relative;
+}
+
+.login-brand__head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.login-logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #fff;
+  padding: 4px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  flex-shrink: 0;
+}
+
+.login-brand__school {
+  font-size: 14px;
+  line-height: 1.4;
+  opacity: 0.85;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.login-brand__body {
+  max-width: 520px;
+}
+
+.login-brand__title {
+  margin: 0 0 16px;
+  font-size: 38px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.login-brand__desc {
+  margin: 0 0 32px;
+  font-size: 16px;
+  line-height: 1.6;
+  opacity: 0.8;
+}
+
+.login-features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.login-features li {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(4px);
+}
+
+.login-features__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.14);
+  flex-shrink: 0;
+}
+
+.login-features__title {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.login-features__text {
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.login-brand__foot {
+  font-size: 13px;
+  opacity: 0.6;
+}
+
+.login-panel {
+  flex: 1 1 45%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  background: #fff;
+}
+
+.login-form {
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-form__mobile-head {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.login-form__title {
+  margin: 0 0 6px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #0a1f44;
+}
+
+.login-form__subtitle {
+  margin: 0 0 28px;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.login-hint {
+  margin-top: 24px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #f4f6fb;
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.login-hint b {
+  color: rgba(0, 0, 0, 0.8);
+}
+
+@media (max-width: 900px) {
+  .login-brand {
+    display: none;
+  }
+
+  .login-panel {
+    background: #f4f6fb;
+  }
+
+  .login-form {
+    background: #fff;
+    padding: 32px 24px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(10, 31, 68, 0.08);
+  }
+
+  .login-form__mobile-head {
+    display: flex;
+  }
+
+  .login-form__mobile-head .login-logo {
+    width: 48px;
+    height: 48px;
+    box-shadow: none;
+    border: 1px solid #e6e9f0;
+  }
+}
