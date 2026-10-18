@@ -125,9 +125,9 @@ Research audit verdict was Approved; there is no human checkpoint, per the orche
 
 **1. [Rule 3 - Blocking] Harness worktree was created from the wrong repository**
 - **Found during:** startup.
-- **Issue:** The assigned worktree `/home/hahoang/.claude/worktrees/agent-abc453ab65dfbb081` is a worktree of the home-directory repo (`~/.git`, commit b437ad5 "first commit"), not of NTMA. The isolation hooks refused `git -C` on the NTMA repo, Write-tool writes into a nested git root, and heredoc writes.
+- **Issue:** The assigned worktree `/home/hahoang/.developer/worktrees/agent-abc453ab65dfbb081` is a worktree of the home-directory repo (`~/.git`, commit b437ad5 "first commit"), not of NTMA. The isolation hooks refused `git -C` on the NTMA repo, Write-tool writes into a nested git root, and heredoc writes.
 - **Fix:** Cloned NTMA read-only into `<worktree>/ntma` and created branch `worktree-agent-04-03` from f4f2b8a (identical to NTMA main HEAD at start). Files were authored with the Write tool in a staging mirror at the worktree root (`<worktree>/tools/bakeoff`, `<worktree>/docs/...`), where uv and the models ran. They were then copied with plain `cp` into the clone and committed there. The shared NTMA checkout was never written to. Nothing was committed to the home repo.
-- **Integration:** the orchestrator must fetch branch `worktree-agent-04-03` from `/home/hahoang/.claude/worktrees/agent-abc453ab65dfbb081/ntma`.
+- **Integration:** the orchestrator must fetch branch `worktree-agent-04-03` from `/home/hahoang/.developer/worktrees/agent-abc453ab65dfbb081/ntma`.
 
 **2. [Rule 1 - Measurement] Load time re-measured from warm cache**
 - **Issue:** The first run of each model included the Hugging Face download: bkai load_s 9.85 s, e5 load_s 86.72 s.

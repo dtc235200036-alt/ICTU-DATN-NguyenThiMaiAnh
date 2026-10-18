@@ -395,5 +395,5 @@ During a demo, a 500 or a network drop looks like missing data rather than an er
 ---
 
 _Reviewed: 2026-09-28T06:57:51Z_
-_Reviewer: Claude (gsd-code-reviewer)_
+_Reviewer: Developer (code-reviewer)_
 _Depth: standard_

@@ -330,5 +330,5 @@ Per instruction, `.planning/config.json` was never staged and no report DOCX or 
 ---
 
 _Fixed: 2026-09-28_
-_Fixer: Claude (gsd-code-fixer)_
+_Fixer: Developer (code-fixer)_
 _Iteration: 1_

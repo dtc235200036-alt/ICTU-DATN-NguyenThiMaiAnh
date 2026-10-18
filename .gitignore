@@ -4,6 +4,7 @@ __pycache__/
 *.pyc
 .env
 .gsd/
+.claude/
 .planning/state.json
 .planning/milestone.lock
 deploy/certs/*.crt

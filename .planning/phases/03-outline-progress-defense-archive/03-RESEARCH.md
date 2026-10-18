@@ -2,7 +2,7 @@
 
 **Researched:** 2026-09-28
 **Domain:** Extending an existing FastAPI (sync SQLAlchemy 2.0 + MySQL 8) / React (Vite + AntD + TanStack Query) monolith-per-service with file upload/extraction, async stub duplicate-check, committee scoring, archive search+import, and in-app notifications.
-**Confidence:** HIGH (existing-code patterns, DB/architecture contracts, FastAPI/Starlette internals — all read/grepped this session) / MEDIUM (exact new route paths, exact stub-algorithm shape — Claude's Discretion per CONTEXT.md) / LOW (none — no unverified external claims used)
+**Confidence:** HIGH (existing-code patterns, DB/architecture contracts, FastAPI/Starlette internals — all read/grepped this session) / MEDIUM (exact new route paths, exact stub-algorithm shape — Developer's Discretion per CONTEXT.md) / LOW (none — no unverified external claims used)
 
 <user_constraints>
 ## User Constraints (from CONTEXT.md)
@@ -34,7 +34,7 @@
 **Scope/priority:**
 - **D-09:** Plans split by UC; if time runs short, keep the demo chain outline → defense → archive first, progress and notifications after (roadmap note).
 
-### Claude's Discretion
+### Developer's Discretion
 Exact routes (within §3.3.6 groups), page layout details within mockups MH-08..MH-14, pagination sizes, CSV import format details, which Phase-3 tables to migrate in which plan (names must match ERD).
 
 ### Deferred Ideas (OUT OF SCOPE)
@@ -225,7 +225,7 @@ class AiClient(Protocol):
 - `ingest(ref_id: int, loai: str, text: str) -> dict` → `{"chunk_count": int, "indexed": true}`
 
 **When to use:** Every duplicate-check/archive-insert call site. Never call `httpx`/a real AI service directly from a router — the canonical_refs note in CONTEXT.md is explicit: "Phase 4 replaces stub in `ai_client.py`; keep `check_document`/`ingest` signatures matching §3.3.5" — so the stub's method signatures ARE the interface contract, not an implementation detail.
-**Stub algorithm (Claude's Discretion, recommend):** reuse the existing Jaccard-on-NFC-casefolded-tokens approach (`_tokenize`/`_jaccard_percent`, already in `ai_client.py`) against a `document_corpus_provider` that reads other `tai_lieu_do_an` rows' extracted text (same shape as `_corpus_provider_factory` for titles) — keeps the stub deterministic and testable, consistent with the Phase 2 precedent (`AiClientStub` scored deterministic Jaccard similarity — see STATE.md decision log).
+**Stub algorithm (Developer's Discretion, recommend):** reuse the existing Jaccard-on-NFC-casefolded-tokens approach (`_tokenize`/`_jaccard_percent`, already in `ai_client.py`) against a `document_corpus_provider` that reads other `tai_lieu_do_an` rows' extracted text (same shape as `_corpus_provider_factory` for titles) — keeps the stub deterministic and testable, consistent with the Phase 2 precedent (`AiClientStub` scored deterministic Jaccard similarity — see STATE.md decision log).
 
 ### Pattern 3: Same-transaction notification creation, reused via one helper
 
@@ -357,7 +357,7 @@ sa.CheckConstraint("trang_thai IN ('CHUA_NOP','CHO_DUYET','YEU_CAU_SUA','DA_DUYE
 | # | Claim | Section | Risk if Wrong |
 |---|-------|---------|---------------|
 | A1 | DOCX/PDF magic-byte signatures (`%PDF-`, ZIP containing `word/document.xml`) | Architecture Patterns → Pattern 1 | Low — extremely well-established, universally documented file-format facts, not project-specific |
-| A2 | Stub `check_document`/`ingest` should reuse the existing Jaccard-on-NFC-tokens approach from `check_title` | Architecture Patterns → Pattern 2 | Low-Medium — CONTEXT.md leaves exact stub algorithm to Claude's Discretion; a different deterministic stub would work equally for demo purposes, this is a style/consistency recommendation, not a hard requirement |
+| A2 | Stub `check_document`/`ingest` should reuse the existing Jaccard-on-NFC-tokens approach from `check_title` | Architecture Patterns → Pattern 2 | Low-Medium — CONTEXT.md leaves exact stub algorithm to Developer's Discretion; a different deterministic stub would work equally for demo purposes, this is a style/consistency recommendation, not a hard requirement |
 | A3 | Recommend **block** (409, not just warn) for GVHD-on-own-committee | Common Pitfalls → Pitfall 7 | Low — D-06 literally says "warn/block" (either satisfies the locked decision); block is the stricter, safer choice consistent with project convention |
 | A4 | Recommend adding `noi_dung_trich_xuat`/`trich_xuat_loi` columns to `tai_lieu_do_an` | Common Pitfalls → Pitfall 3, Open Questions | Medium — this modifies a locked canonical-ref (ERD data dictionary); if the planner instead chooses to re-extract text on-demand at check time (no persisted column), that is also valid and slightly simpler, just re-extracts on every check-retry |
 | A5 | Recommend leaving `do_an_kho.tu_khoa` sourced from `de_tai.linh_vuc` (or left NULL) rather than adding a new keywords field | Common Pitfalls → Pitfall 4, Open Questions | Low-Medium — purely a data-completeness choice, does not block any UC's happy path; Bộ môn can always edit via UC5.3 |
@@ -375,7 +375,7 @@ sa.CheckConstraint("trang_thai IN ('CHUA_NOP','CHO_DUYET','YEU_CAU_SUA','DA_DUYE
    - Recommendation: (b) for auto-insert simplicity — leave NULL, Bộ môn fills in later via UC5.3 — since neither CONTEXT.md nor the UC specs assign an owner for typing keywords in, and inventing a new required input field on an existing form is a bigger scope change than this research should silently assume.
 
 3. **Exact route paths within each §3.3.6 group**
-   - What we know: CONTEXT.md explicitly leaves this to Claude's Discretion; §3.3.6 only names the *groups* (`outlines`, `progress`, `defense`, `archive`, `notifications`).
+   - What we know: CONTEXT.md explicitly leaves this to Developer's Discretion; §3.3.6 only names the *groups* (`outlines`, `progress`, `defense`, `archive`, `notifications`).
    - What's unclear: nothing blocking — this is genuinely open by design.
    - Recommendation: follow the existing `topics.py`/`topic_approval.py` naming style (`/api/outlines/{de_tai_id}/submit`, `/api/outlines/{de_tai_id}/review`, `/api/defense/committees`, `/api/defense/committees/{id}/schedule`, `/api/defense/scores/{lich_bao_ve_id}`, `/api/archive`, `/api/archive/import`, `/api/notifications`, `/api/notifications/{id}/read`).
 

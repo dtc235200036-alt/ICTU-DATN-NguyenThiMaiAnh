@@ -22,13 +22,13 @@ Requirements: ANLS-01..05, DSGN-01..04. Khung thời gian T1–T5 (28/09–01/11
 ### Nguồn khảo sát (ANLS-01, ANLS-02)
 - **D-01:** Khảo sát lấy từ **phỏng vấn thật kết hợp tài liệu**.
   - SV (Mai Anh) phỏng vấn bộ môn, GV và SV.
-  - Claude soạn bộ câu hỏi phỏng vấn và phiếu khảo sát cho từng vai trò, kèm mẫu biên bản.
-  - Sau đó Claude tổng hợp kết quả từ biên bản và quy định của trường.
+  - Developer soạn bộ câu hỏi phỏng vấn và phiếu khảo sát cho từng vai trò, kèm mẫu biên bản.
+  - Sau đó Developer tổng hợp kết quả từ biên bản và quy định của trường.
 - **D-02:** **Hiện chưa có tài liệu gốc nào**: không có quy chế, form mẫu hay đồ án khóa trước. Plan phải có task **thu thập**, gồm:
   - Checklist cần xin: quy chế đồ án, phiếu đăng ký, mẫu đề cương/báo cáo chính thức, phiếu chấm, biên bản hội đồng, ~20 đồ án thật.
   - Chỗ lưu trong repo cho các tài liệu đó.
   - Tài liệu mẫu chính thức là đầu vào cho bộ lọc phần mẫu chung (AISV-04) ở Phase 4.
-  - Plan phải có **checkpoint chờ người thật**: Claude không tự phỏng vấn được. Nếu chưa có dữ liệu thật thì soạn bản nháp đánh dấu rõ "giả định, chờ xác nhận".
+  - Plan phải có **checkpoint chờ người thật**: Developer không tự phỏng vấn được. Nếu chưa có dữ liệu thật thì soạn bản nháp đánh dấu rõ "giả định, chờ xác nhận".
 - **D-03:** BPMN gồm **1 sơ đồ tổng quan và 5 quy trình con** khớp 5 UC (Đề tài, Đề cương, Tiến độ, Bảo vệ, Kho). Mỗi sơ đồ có swimlane SV / GV / Bộ môn.
 - **D-04:** Mô tả **cả AS-IS lẫn TO-BE**.
   - AS-IS: quy trình hiện tại, làm cơ sở khảo sát (PI 1.1).
@@ -51,7 +51,7 @@ Requirements: ANLS-01..05, DSGN-01..04. Khung thời gian T1–T5 (28/09–01/11
 - **D-10:** Có **bảng truy vết** PI → mục tài liệu → requirement ID, để GVHD kiểm tra theo tiêu chí chấm. Vị trí gợi ý: `docs/truy-vet.md`.
 
 ### Mockup giao diện (DSGN-04)
-- **D-11 (sửa 28/09/2026 theo yêu cầu người dùng — KHÔNG dùng Figma):** Mockup là **prototype HTML/CSS tĩnh** do Claude dựng bằng các skill thiết kế UI/UX đã cài (`ui-ux-pro-max`, `design-taste-frontend` — load skill trước khi thiết kế). Nguồn lưu trong repo (vd. `docs/chuong-3-thiet-ke/mockup/*.html` + CSS dùng chung), mỗi màn chụp PNG 1440px bằng headless Chrome (`/usr/bin/google-chrome --headless --screenshot`) để nhúng vào chương 3. Đây là "phần mềm thiết kế tương đương" theo PI 2.3. Không cần Figma MCP hay FIGMA_TOKEN.
+- **D-11 (sửa 28/09/2026 theo yêu cầu người dùng — KHÔNG dùng Figma):** Mockup là **prototype HTML/CSS tĩnh** do Developer dựng bằng các skill thiết kế UI/UX đã cài (`ui-ux-pro-max`, `design-taste-frontend` — load skill trước khi thiết kế). Nguồn lưu trong repo (vd. `docs/chuong-3-thiet-ke/mockup/*.html` + CSS dùng chung), mỗi màn chụp PNG 1440px bằng headless Chrome (`/usr/bin/google-chrome --headless --screenshot`) để nhúng vào chương 3. Đây là "phần mềm thiết kế tương đương" theo PI 2.3. Không cần Figma MCP hay FIGMA_TOKEN.
 - **D-12:** Phong cách là **Ant Design admin** (sidebar + bảng + form), khớp với thư viện sẽ code ở Phase 2–4 để mockup sát sản phẩm thật.
 - **D-13:** Thiết kế **chỉ cho desktop**, khung 1440px.
 - **D-14:** Khoảng **12–15 màn chính**:
@@ -79,7 +79,7 @@ Requirements: ANLS-01..05, DSGN-01..04. Khung thời gian T1–T5 (28/09–01/11
   - Chuẩn hóa Unicode NFC ở mọi điểm nhập liệu.
 - NFR đề xuất cho ANLS-04: kiểm tra tên đề tài ≤ 5 giây, kiểm tra tài liệu ≤ 30 giây.
 
-### Claude's Discretion
+### Developer's Discretion
 - Câu hỏi phỏng vấn và phiếu khảo sát cụ thể; cách trình bày bảng yêu cầu chức năng/phi chức năng.
 - Danh sách thực thể và thuộc tính chi tiết, trạng thái (state machine) của đề tài và đề cương, với điều kiện khớp các quyết định đã chốt.
 - Cách chia UC con, chọn UC nào vẽ activity/sequence (bắt buộc có luồng AI theo D-07).

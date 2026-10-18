@@ -214,5 +214,5 @@ This closes the gap regardless of whether `Content-Length` is present.
 ---
 
 _Reviewed: 2026-09-28_
-_Reviewer: Claude (gsd-code-reviewer)_
+_Reviewer: Developer (code-reviewer)_
 _Depth: standard_

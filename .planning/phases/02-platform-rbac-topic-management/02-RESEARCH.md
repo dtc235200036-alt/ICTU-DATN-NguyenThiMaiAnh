@@ -10,7 +10,7 @@
 ### Locked Decisions
 
 - **D-01:** Monorepo at repo root: `backend/` (FastAPI Web API), `frontend/` (React), `ai-service/` (created in Phase 4; only a stub client lives in backend now), `deploy/` (docker-compose, Apache config, certs script). Docs stay in `docs/`.
-- **D-02:** Python 3.12 managed with `uv` (`backend/pyproject.toml`, `uv.lock`); Node 20 (nvm, already installed) + Vite for the client; pnpm or npm — Claude's discretion.
+- **D-02:** Python 3.12 managed with `uv` (`backend/pyproject.toml`, `uv.lock`); Node 20 (nvm, already installed) + Vite for the client; pnpm or npm — Developer's Discretion.
 - **D-03:** Backend stack per research STACK.md: FastAPI, SQLAlchemy 2.0 **sync** + PyMySQL, Alembic migrations, Pydantic v2, PyJWT, bcrypt. Tests with pytest against a real MySQL (docker) — keep tests few and focused on RBAC/ownership + concurrency invariants (user preference: fewer tests).
 - **D-04:** MySQL 8 in Docker; schema `thesis_core` with `utf8mb4` + `utf8mb4_vietnamese_ci`; tables/columns follow `docs/chuong-3-thiet-ke/02-thiet-ke-csdl.md` (19-table ERD) — Phase 2 migrates only tables needed now (users/accounts, roles, cohorts/đợt, topics/de_tai, topic registration, supervisor assignment, similarity result for title check, thresholds as needed) but names must match the ERD exactly so later phases extend, not rename. — **Reversibility:** costly — renaming tables later touches migrations + all queries
 - **D-05:** 1 SV : 1 active topic and 1 topic : 1 SV enforced by **DB unique constraints + transactional check** (not only app code) so concurrent registrations cannot both succeed (success criterion 4).
@@ -23,7 +23,7 @@
 - **D-12:** Apache config sets `LimitRequestBody` ≥ 20MB and proxy timeouts ≥ 60s now (research pitfall: discover upload/timeout issues early).
 - **D-13:** Idempotent seed script (Faker `vi_VN`, fixed random seed) creating 100 SV, 30 GV, 1 Bộ môn admin account, at least one open cohort/đợt; demo credentials documented in `deploy/README` (dev-only password).
 
-### Claude's Discretion
+### Developer's Discretion
 - Exact route paths (within groups of §3.3.6), component structure, state management details, npm vs pnpm, logging format, error-response shape (consistent JSON).
 - Which Phase-2-only ERD tables to create first, as long as names match the ERD.
 
@@ -130,7 +130,7 @@ uv add "fastapi[standard]" "sqlalchemy==2.0.54" pymysql alembic \
   pyjwt bcrypt pydantic-settings "uvicorn[standard]"
 uv add --dev pytest faker
 
-# frontend/ (npm or pnpm, Claude's discretion)
+# frontend/ (npm or pnpm, Developer's Discretion)
 npm create vite@latest frontend -- --template react-ts
 cd frontend
 npm install antd@^5 @tanstack/react-query@^5 react-router@^7 axios zustand
@@ -202,7 +202,7 @@ npm install antd@^5 @tanstack/react-query@^5 react-router@^7 axios zustand
 │  MySQL 8 — schema `thesis_core` (utf8mb4_vietnamese_ci)              │
 │  tai_khoan, sinh_vien, giang_vien, dot_do_an, de_tai,                │
 │  ket_qua_kiem_tra_trung_lap (TEN_DE_TAI only), cau_hinh_nguong       │
-│  (as needed — Claude's discretion, see D-04)                         │
+│  (as needed — Developer's Discretion, see D-04)                         │
 └───────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -417,10 +417,10 @@ class AiClientStub:
 1. **Which Phase-2-only ERD tables beyond the CONTEXT.md list are actually needed for TOPC-01..04?**
    - What we know: `tai_khoan`, `sinh_vien`, `giang_vien`, `dot_do_an`, `de_tai` are unambiguously required (every UC1.x touches them). `ket_qua_kiem_tra_trung_lap` (TEN_DE_TAI only) and `cau_hinh_nguong` are needed only if the planner wants the stub to actually *persist* a "chưa kiểm tra" row per FR-DT-02/AISV-07, versus just returning it in-memory from the stub without a DB row.
    - What's unclear: Whether persisting a `ket_qua_kiem_tra_trung_lap` row for every title-check call in Phase 2 (with the stub always returning empty matches) adds value now, or whether that table should wait until Phase 4 when it has real data to store.
-   - Recommendation: Create `cau_hinh_nguong` now (cheap, no dependencies, and TOPC-03/UC1.3's "kết quả kiểm tra trùng lặp tên (nếu có)" display in MH-07 reads more naturally from a real table) but defer `ket_qua_kiem_tra_trung_lap`/`chi_tiet_trung_lap` to Phase 4 when the AI service is real — Claude's discretion per CONTEXT.md, planner should decide explicitly rather than default silently.
+   - Recommendation: Create `cau_hinh_nguong` now (cheap, no dependencies, and TOPC-03/UC1.3's "kết quả kiểm tra trùng lặp tên (nếu có)" display in MH-07 reads more naturally from a real table) but defer `ket_qua_kiem_tra_trung_lap`/`chi_tiet_trung_lap` to Phase 4 when the AI service is real — Developer's Discretion per CONTEXT.md, planner should decide explicitly rather than default silently.
 
 2. **Exact access-token / refresh-token lifetimes**
-   - What we know: NFR-03 proposes "8 giờ" for access token as a Claude-authored suggestion pending GVHD confirmation, and the general 2026 JWT guidance found this session recommends much shorter (5-15 min access / 7-30 day refresh).
+   - What we know: NFR-03 proposes "8 giờ" for access token as a Author-proposed suggestion pending GVHD confirmation, and the general 2026 JWT guidance found this session recommends much shorter (5-15 min access / 7-30 day refresh).
    - What's unclear: NFR-03's own footnote states these numbers "cần xác nhận lại với GVHD trước khi thi công" — they are explicitly not yet locked.
    - Recommendation: Implement with configurable env-var lifetimes (not hardcoded), default to NFR-03's proposed 8h access / a reasonable 7-day refresh, and flag for the human checkpoint already anticipated by the source doc itself.
 

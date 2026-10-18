@@ -59,8 +59,8 @@ Deterministic generator (`tools/datagen`, seed 20261116) that produces a 300-top
 ## Worktree note (read before merging)
 
 The harness worktree for this agent was created from the `$HOME` git repo, not from NTMA. The work was therefore done in a **clone of NTMA** at
-`/home/hahoang/.claude/worktrees/agent-aeceab3ebeb205d1f/ntma`, branch `worktree-agent-04-02`, based on `f4f2b8a`.
-Merge with, for example, `git fetch /home/hahoang/.claude/worktrees/agent-aeceab3ebeb205d1f/ntma worktree-agent-04-02 && git merge FETCH_HEAD`.
+`/home/hahoang/.developer/worktrees/agent-aeceab3ebeb205d1f/ntma`, branch `worktree-agent-04-02`, based on `f4f2b8a`.
+Merge with, for example, `git fetch /home/hahoang/.developer/worktrees/agent-aeceab3ebeb205d1f/ntma worktree-agent-04-02 && git merge FETCH_HEAD`.
 No file outside `tools/datagen/**`, `seed-data/**`, `docs/chuong-4-trien-khai/thu-nghiem-ai/01-*` and this SUMMARY was touched.
 
 ## What was built
@@ -157,7 +157,7 @@ B sentences with no provenance that reach J≥0.5 against **any** A document in 
 
 **1. [Rule 3 - Blocking] Isolated worktree pointed at the wrong repository**
 - **Found during:** Setup
-- **Issue:** The spawned worktree came from the `$HOME` repo (only `README.md`/`.claude`), not from NTMA. The Write tool's worktree guard also rejects paths inside a nested git root.
+- **Issue:** The spawned worktree came from the `$HOME` repo (only `README.md`/`.developer`), not from NTMA. The Write tool's worktree guard also rejects paths inside a nested git root.
 - **Fix:** Cloned NTMA (`f4f2b8a`) into `ntma/` inside the worktree, on branch `worktree-agent-04-02`. Sources were authored in the session scratchpad and copied in with `cp`. The main checkout and the running `ntma` compose stack were never touched.
 - **Impact:** The orchestrator must fetch from the clone path given above.
 

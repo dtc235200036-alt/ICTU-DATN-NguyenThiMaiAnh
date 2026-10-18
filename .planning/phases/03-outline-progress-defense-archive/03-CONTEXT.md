@@ -39,7 +39,7 @@ Extend the working Phase 2 system (same backend/frontend/deploy stack) with UC2 
 ### Scope/priority
 - **D-09:** Plans split by UC; if time runs short, keep the demo chain outline → defense → archive first, progress and notifications after (roadmap note).
 
-### Claude's Discretion
+### Developer's Discretion
 - Exact routes (within §3.3.6 groups), page layout details within mockups MH-08..MH-14, pagination sizes, CSV import format details, which Phase-3 tables to migrate in which plan (names must match ERD).
 
 </decisions>

@@ -182,4 +182,4 @@ The two human-verification items (real-browser session/logout confirmation, and 
 ---
 
 _Verified: 2026-09-28_
-_Verifier: Claude (gsd-verifier)_
+_Verifier: Developer (verifier)_

@@ -30,10 +30,10 @@ Bring the finished system (Phases 2–4) up as one demo-ready deployment with th
 - **D-06:** Build pipeline `tools/build-report.sh`: pandoc concatenation in chapter order → `bao-cao/bao-cao-do-an.docx` using a `reference.docx`. The official school template is not yet supplied (`tai-lieu-goc/mau-chinh-thuc/` empty) → create a reasonable `reference.docx` (Times New Roman 13, 1.5 line spacing, A4 margins per common Vietnamese thesis rules, heading numbering) marked as ASSUMED; swap in the official template when supplied. Front matter (bìa, lời cam đoan, lời cảm ơn, mục lục, danh mục hình/bảng) generated or templated.
 
 ### Slides & demo (RPRT-02)
-- **D-07:** Defense slides (~15–20 slides): bối cảnh & mục tiêu, khảo sát/BPMN, UC, kiến trúc SOA, CSDL, AI method + bake-off + calibration results, demo flow, kết quả NFR, kết luận. Produced as a file the user can present/edit (PPTX via python-pptx or pandoc, or the account's Slides artifact type — Claude's discretion; must be exportable to PPTX/PDF).
+- **D-07:** Defense slides (~15–20 slides): bối cảnh & mục tiêu, khảo sát/BPMN, UC, kiến trúc SOA, CSDL, AI method + bake-off + calibration results, demo flow, kết quả NFR, kết luận. Produced as a file the user can present/edit (PPTX via python-pptx or pandoc, or the account's Slides artifact type — Developer's Discretion; must be exportable to PPTX/PDF).
 - **D-08:** Demo script `docs/kich-ban-demo.md`: step-by-step with accounts, data, expected screens, timing (~10–15 min), including the duplicate-title warning and a seeded duplicate document showing highlighted passages; plus a reset script to restore the demo state.
 
-### Claude's Discretion
+### Developer's Discretion
 - Exact script names, report front-matter mechanics, slide tooling, screenshot set, chapter-4 section ordering within the school's 4-chapter structure.
 
 </decisions>

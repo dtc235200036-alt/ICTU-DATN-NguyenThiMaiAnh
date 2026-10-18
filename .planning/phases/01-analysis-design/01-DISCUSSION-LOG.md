@@ -13,9 +13,9 @@
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Phỏng vấn + tài liệu | SV phỏng vấn; Claude soạn câu hỏi/phiếu và tổng hợp | ✓ |
+| Phỏng vấn + tài liệu | SV phỏng vấn; Developer soạn câu hỏi/phiếu và tổng hợp | ✓ |
 | Chỉ từ tài liệu/quy định | Không phỏng vấn | |
-| Claude soạn giả định | SV đối chiếu sau | |
+| Developer soạn giả định | SV đối chiếu sau | |
 
 Tài liệu có sẵn: **Chưa có gì** (các phương án khác: quy chế, form mẫu, đồ án khóa trước).
 
@@ -52,12 +52,12 @@ Cấu trúc: **Bám chương báo cáo** (thay cho: bám mã PI). Bảng truy v�
 
 | Question | Selected | Alternatives |
 |----------|----------|--------------|
-| Ai làm | Claude dựng qua Figma MCP | SV tự vẽ |
+| Ai làm | Developer dựng qua Figma MCP | SV tự vẽ |
 | Phong cách | Ant Design admin | Nhận diện ICTU; wireframe đen trắng |
 | Thiết bị | Desktop only | Desktop + mobile |
 | Phạm vi | ~12–15 màn chính | Đầy đủ ~25+ màn |
 
-## Claude's Discretion
+## Developer's Discretion
 
 Câu hỏi phỏng vấn; chi tiết thực thể/state machine; cách chia UC con; bố cục từng màn; tên file.
 

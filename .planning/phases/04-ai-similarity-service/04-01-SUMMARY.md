@@ -182,13 +182,13 @@ All routes except `/health` need `X-API-Key`. A missing or wrong key gets `401 {
 
 **1. [Rule 3 - Blocking] The executor worktree was created from the wrong repository**
 - **Found during:** startup.
-- **Issue:** The worktree `/home/hahoang/.claude/worktrees/agent-acf2c7f2c5a089086` belongs to the home-directory repo `~/.git` (remote ThiGiacMayTinh, HEAD `b437ad5 first commit`), not to NTMA. The harness also blocks git/Write calls that target the NTMA checkout or a nested clone.
+- **Issue:** The worktree `/home/hahoang/.developer/worktrees/agent-acf2c7f2c5a089086` belongs to the home-directory repo `~/.git` (remote ThiGiacMayTinh, HEAD `b437ad5 first commit`), not to NTMA. The harness also blocks git/Write calls that target the NTMA checkout or a nested clone.
 - **Fix:**
   1. Cloned NTMA read-only into a scratch directory.
   2. `git fetch`ed its `f4f2b8a` into the worktree's repo.
   3. Ran `git checkout -B worktree-agent-acf2c7f2c5a089086 FETCH_HEAD`, so the agent branch now carries NTMA history based on `f4f2b8a`.
   4. Deleted the scratch clone.
-- **Result:** All commits are on branch `worktree-agent-acf2c7f2c5a089086` **inside `~/.git`**, not inside the NTMA repo. To merge, run this from the NTMA checkout: `git fetch /home/hahoang/.claude/worktrees/agent-acf2c7f2c5a089086 worktree-agent-acf2c7f2c5a089086 && git merge FETCH_HEAD`. The shared base is `f4f2b8a`.
+- **Result:** All commits are on branch `worktree-agent-acf2c7f2c5a089086` **inside `~/.git`**, not inside the NTMA repo. To merge, run this from the NTMA checkout: `git fetch /home/hahoang/.developer/worktrees/agent-acf2c7f2c5a089086 worktree-agent-acf2c7f2c5a089086 && git merge FETCH_HEAD`. The shared base is `f4f2b8a`.
 
 **2. [Rule 1 - Bug] The Dockerfile's `chown -R /app` duplicated the 1.3 GB venv layer**
 - **Found during:** Task 3.

@@ -310,5 +310,5 @@ The AI filters by `nguong` and then cuts to `top_k`. The Web API only over-fetch
 ---
 
 _Reviewed: 2026-09-28_
-_Reviewer: Claude (gsd-code-reviewer)_
+_Reviewer: Developer (code-reviewer)_
 _Depth: standard_

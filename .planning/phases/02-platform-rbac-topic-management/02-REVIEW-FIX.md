@@ -69,5 +69,5 @@ None — all 6 in-scope findings (CR-01, WR-01, WR-02, WR-03, WR-04, WR-05) were
 ---
 
 _Fixed: 2026-09-28_
-_Fixer: Claude (gsd-code-fixer)_
+_Fixer: Developer (code-fixer)_
 _Iteration: 1_

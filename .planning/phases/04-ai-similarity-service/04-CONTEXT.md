@@ -32,7 +32,7 @@ Build the separate AI duplicate-check service (`ai-service/`, FastAPI) and swap 
 ### Deployment
 - **D-07:** Add `ai` service to `deploy/docker-compose.yml` on the internal network only; Web API gets `AI_SERVICE_URL`, `AI_API_KEY` env; `AI_STUB_MODE` kept as a fallback switch.
 
-### Claude's Discretion
+### Developer's Discretion
 - Chunk size/overlap, top-k, exact boilerplate patterns, MinHash parameters, bake-off set size (small, timeboxed), UI details for MH-14 highlights and the threshold screen within Ant Design.
 
 </decisions>

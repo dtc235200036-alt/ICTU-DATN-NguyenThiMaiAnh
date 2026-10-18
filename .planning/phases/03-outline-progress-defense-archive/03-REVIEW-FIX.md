@@ -191,5 +191,5 @@ The stamp is read from the database, not passed from the request, because `thoi_
 ---
 
 _Fixed: 2026-09-28_
-_Fixer: Claude (gsd-code-fixer)_
+_Fixer: Developer (code-fixer)_
 _Iteration: 1_

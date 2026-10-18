@@ -17,7 +17,7 @@ Phase 1 design docs are complete drafts (Phase 1 is paused at the human survey c
 
 ### Repo layout & tooling
 - **D-01:** Monorepo at repo root: `backend/` (FastAPI Web API), `frontend/` (React), `ai-service/` (created in Phase 4; only a stub client lives in backend now), `deploy/` (docker-compose, Apache config, certs script). Docs stay in `docs/`. [auto] Q: "Repo layout?" → Selected: "monorepo backend/frontend/ai-service/deploy" (recommended)
-- **D-02:** Python 3.12 managed with `uv` (`backend/pyproject.toml`, `uv.lock`); Node 20 (nvm, already installed) + Vite for the client; pnpm or npm — Claude's discretion.
+- **D-02:** Python 3.12 managed with `uv` (`backend/pyproject.toml`, `uv.lock`); Node 20 (nvm, already installed) + Vite for the client; pnpm or npm — Developer's Discretion.
 - **D-03:** Backend stack per research STACK.md: FastAPI, SQLAlchemy 2.0 **sync** + PyMySQL, Alembic migrations, Pydantic v2, PyJWT, bcrypt. Tests with pytest against a real MySQL (docker) — keep tests few and focused on RBAC/ownership + concurrency invariants (user preference: fewer tests).
 
 ### Database
@@ -40,7 +40,7 @@ Phase 1 design docs are complete drafts (Phase 1 is paused at the human survey c
 ### Seed data (DATA-01)
 - **D-13:** Idempotent seed script (Faker `vi_VN`, fixed random seed) creating 100 SV, 30 GV, 1 Bộ môn admin account, at least one open cohort/đợt; demo credentials documented in `deploy/README` (dev-only password).
 
-### Claude's Discretion
+### Developer's Discretion
 - Exact route paths (within groups of §3.3.6), component structure, state management details, npm vs pnpm, logging format, error-response shape (consistent JSON).
 - Which Phase-2-only ERD tables to create first, as long as names match the ERD.
 

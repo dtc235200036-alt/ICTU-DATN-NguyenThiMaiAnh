@@ -27,7 +27,7 @@
 
 **D-07 (deployment):** Add `ai` service to `deploy/docker-compose.yml` on the internal network only; Web API gets `AI_SERVICE_URL`, `AI_API_KEY` env; `AI_STUB_MODE` kept as a fallback switch.
 
-### Claude's Discretion
+### Developer's Discretion
 
 Chunk size/overlap, top-k, exact boilerplate patterns, MinHash parameters, bake-off set size (small, timeboxed), UI details for MH-14 highlights and the threshold screen within Ant Design.
 
@@ -358,14 +358,14 @@ def embed_symmetric(model, text: str):
 | A1 | A generic (non-template-derived) Vietnamese thesis boilerplate heading list will adequately approximate the real official template well enough for calibration to transfer once the real template arrives | Common Pitfalls (B), Architecture Patterns (Anti-Patterns) | If the real template's structure differs meaningfully (e.g., different section ordering, additional mandatory boilerplate paragraphs), false positives could persist even after this phase's calibration — mitigated by re-running calibration when/if the template is collected, already noted as a follow-up |
 | A2 | Batched CPU encoding of ~100 chunks will fit the 30 s NFR-09 budget on the eventual target hardware | Common Pitfalls (D), Architecture Patterns (Pattern 2) | If it doesn't, the async/BackgroundTasks pattern (already built, Phase 3) absorbs some of the impact since it's not blocking the submit response (NFR-10), but the "Hoàn tất" status could take much longer than 30 s, degrading UX and failing the explicit NFR check at Phase 5 — mitigated by measuring early (recommended as a first task) and the documented ONNX-backend fallback |
 | A3 | D-01's bake-off model choice (bkai vs e5-base) generalizes from a small synthetic pair set to the full 300-topic + 50-document corpus | Standard Stack (model rows) | A model that looks good on a handful of hand-authored pairs could behave differently at corpus scale (more topically-adjacent-but-distinct titles to discriminate against) — mitigated by D-06's held-out validation split, which is designed exactly for this |
-| A4 | The 128-default `num_perm` and a k≈5-8 word shingle size (already Claude's-discretion per CONTEXT.md) will separate the seeded exact-copy/paraphrase pairs from same-field/unrelated pairs without further tuning | Standard Stack (datasketch row), Don't Hand-Roll | Low risk given corpus scale (thousands of vectors, not millions) — MinHash accuracy at `num_perm=128` is a well-documented default; if separation is poor, the fix is a shingle-size adjustment, not a library change |
+| A4 | The 128-default `num_perm` and a k≈5-8 word shingle size (already Developer's-Discretion per CONTEXT.md) will separate the seeded exact-copy/paraphrase pairs from same-field/unrelated pairs without further tuning | Standard Stack (datasketch row), Don't Hand-Roll | Low risk given corpus scale (thousands of vectors, not millions) — MinHash accuracy at `num_perm=128` is a well-documented default; if separation is poor, the fix is a shingle-size adjustment, not a library change |
 
 **If this table is empty:** N/A — see rows above; everything else in this document is either `[VERIFIED]` this session or `[CITED]` from an official/model-card source.
 
 ## Open Questions (RESOLVED)
 
 1. **Will the D-01 bake-off actually have enough labeled pairs to make a statistically meaningful AUC comparison?**
-   - What we know: D-01 calls for "a small labeled set" and the bake-off set size is explicitly Claude's discretion; no real corpus exists to draw pairs from (Pitfall B).
+   - What we know: D-01 calls for "a small labeled set" and the bake-off set size is explicitly Developer's Discretion; no real corpus exists to draw pairs from (Pitfall B).
    - What's unclear: How many synthetic pairs is "enough" to trust a model-selection decision that will govern the rest of the phase.
    - Recommendation: Treat the bake-off as directional, not statistically rigorous — pick the model with the clearer separation AND acceptable latency, document the small-sample caveat explicitly in the chương 4 report, and rely on D-06's larger 50-document/held-out-validation set as the real calibration evidence.
    - RESOLVED: 04-03 treats the bake-off as directional with a pre-registered decision rule and small-sample caveat; 04-04 calibrates on the 50-doc set with a held-out split.

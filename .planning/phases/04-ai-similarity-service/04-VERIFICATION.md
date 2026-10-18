@@ -331,4 +331,4 @@ overrides:
 ---
 
 _Verified: 2026-09-28T10:29:39Z_
-_Verifier: Claude (gsd-verifier)_
+_Verifier: Developer (verifier)_

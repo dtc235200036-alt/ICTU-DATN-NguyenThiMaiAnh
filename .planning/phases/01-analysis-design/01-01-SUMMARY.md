@@ -170,7 +170,7 @@ None - plan executed exactly as written. All three tasks' automated `<verify>` c
 
 ## User Setup Required
 
-None - no external service configuration required. This plan produces templates only; the student (not Claude) conducts the real interviews and requests the real documents in T1, per D-01/D-02.
+None - no external service configuration required. This plan produces templates only; the student (not Developer) conducts the real interviews and requests the real documents in T1, per D-01/D-02.
 
 ## Next Phase Readiness
 
