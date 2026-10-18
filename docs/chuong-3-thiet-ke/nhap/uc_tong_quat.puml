@@ -1,0 +1,63 @@
+@startuml
+title Sơ đồ Use Case tổng quát – Hệ thống quản lý đồ án sinh viên
+left to right direction
+skinparam packageStyle rectangle
+skinparam defaultFontName Arial
+
+actor "Sinh viên" as SV
+actor "Giảng viên\nhướng dẫn" as GV
+
+rectangle "Hệ thống quản lý đồ án sinh viên" {
+  usecase "Đăng nhập" as UC_DN
+  usecase "QL đề tài" as UC_DT
+  usecase "QL đề cương" as UC_DC
+  usecase "QL tiến độ" as UC_TD
+  usecase "QL báo cáo" as UC_BC
+  usecase "Kiểm tra tương đồng" as UC_KT
+  usecase "QL bảo vệ" as UC_BV
+  usecase "QL kho dữ liệu" as UC_KHO
+  usecase "QL tài khoản" as UC_TK
+  usecase "Thống kê và dashboard" as UC_TKE
+  usecase "Thông báo" as UC_TB
+}
+
+actor "Bộ môn / Khoa" as BM
+actor "Quản trị viên" as QTV
+
+' Mọi tác nhân đều dùng: Đăng nhập, Thống kê và dashboard, Thông báo
+SV --> UC_DN
+SV --> UC_DT
+SV --> UC_DC
+SV --> UC_TD
+SV --> UC_BC
+SV --> UC_KT
+SV --> UC_TKE
+SV --> UC_TB
+
+GV --> UC_DN
+GV --> UC_DT
+GV --> UC_DC
+GV --> UC_TD
+GV --> UC_BC
+GV --> UC_KT
+GV --> UC_BV
+GV --> UC_TKE
+GV --> UC_TB
+
+UC_DN <-- BM
+UC_DT <-- BM
+UC_TD <-- BM
+UC_KT <-- BM
+UC_BV <-- BM
+UC_KHO <-- BM
+UC_TKE <-- BM
+UC_TB <-- BM
+
+UC_DN <-- QTV
+UC_KHO <-- QTV
+UC_TK <-- QTV
+
+UC_DT ..> UC_KT : <<include>>
+UC_DC ..> UC_KT : <<include>>
+UC_BC ..> UC_KT : <<include>>
+@enduml

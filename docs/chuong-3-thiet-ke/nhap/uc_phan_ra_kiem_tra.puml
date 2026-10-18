@@ -1,0 +1,43 @@
+@startuml
+title Phân rã UC "Kiểm tra tương đồng" (CN18 – CN26)
+left to right direction
+skinparam packageStyle rectangle
+skinparam defaultFontName Arial
+
+actor "Sinh viên" as SV
+actor "Giảng viên\nhướng dẫn" as GV
+actor "Bộ môn / Khoa" as BM
+SV -[hidden]- GV
+GV -[hidden]- BM
+
+rectangle "Kiểm tra tương đồng" {
+  usecase "Tải file lên để kiểm tra (CN18)" as CN18
+  usecase "Kiểm tra tương đồng tên đề tài (CN19)" as CN19
+  usecase "Kiểm tra trùng lặp nội dung (CN20)" as CN20
+  usecase "Kiểm tra trùng lặp hình ảnh (CN26)" as CN26
+  usecase "Đánh dấu đoạn/câu tương đồng (CN21)" as CN21
+  usecase "Tính và hiển thị tỷ lệ (CN22)" as CN22
+  usecase "Xem lịch sử kiểm tra (CN23)" as CN23
+  usecase "Xuất báo cáo kết quả PDF (CN24)" as CN24
+  usecase "Đánh giá kết quả kiểm tra (CN25)" as CN25
+}
+
+SV --> CN18
+SV --> CN19
+SV --> CN23
+SV --> CN24
+GV --> CN18
+GV --> CN19
+GV --> CN23
+GV --> CN24
+GV --> CN25
+BM --> CN18
+BM --> CN23
+BM --> CN25
+
+CN18 ..> CN20 : <<include>>
+CN18 ..> CN26 : <<include>>
+CN20 ..> CN21 : <<include>>
+CN20 ..> CN22 : <<include>>
+CN26 ..> CN22 : <<include>>
+@enduml

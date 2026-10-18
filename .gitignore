@@ -11,3 +11,24 @@ deploy/certs/*.key
 frontend/dist/
 .pytest_cache/
 *.tsbuildinfo
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+
+# Dữ liệu cá nhân thật (danh sách SV/GV) — chỉ giữ cục bộ, không đẩy lên repo public
+backend/app/seed_data/*.csv
+
+# Bài báo tham khảo có bản quyền — chỉ giữ cục bộ
+docs/tham-khao/*.pdf
+
+# File build LaTeX của quyển báo cáo
+bao-cao/**/*.aux
+bao-cao/**/*.log
+bao-cao/**/*.out
+bao-cao/**/*.toc
+bao-cao/**/*.synctex.gz
+bao-cao/ban_dich/
+
+# File tạm của Word/LibreOffice
+~$*
+.~lock.*#

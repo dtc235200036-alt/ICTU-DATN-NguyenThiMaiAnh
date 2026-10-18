@@ -1,0 +1,136 @@
+@startuml
+title ERD 3 – Công cụ kiểm tra tương đồng
+hide circle
+skinparam linetype ortho
+skinparam defaultFontName Arial
+
+entity nguoi_dung {
+  * id : INT <<PK>>
+  --
+  ..
+}
+
+entity de_tai {
+  * id : INT <<PK>>
+  --
+  * dot_id : INT <<FK>>
+  * huong_id : INT <<FK>>
+  * nguoi_de_xuat_id : INT <<FK>>
+  ..
+}
+
+entity do_an_luu_tru {
+  * id : INT <<PK>>
+  --
+   dang_ky_id : INT <<FK>> <<UQ>>
+   khoa_hoc_id : INT <<FK>>
+  ..
+}
+
+entity tai_lieu {
+  * id : INT <<PK>>
+  --
+   nguoi_nop_id : INT <<FK>>
+   do_an_id : INT <<FK>>
+  ..
+}
+
+entity doan_van {
+  * id : BIGINT <<PK>>
+  --
+  * tai_lieu_id : INT <<FK>>
+  * thu_tu : INT
+  * noi_dung : TEXT
+  * so_tu : INT
+   vecto : BLOB
+}
+
+entity dau_van_tay {
+  * id : BIGINT <<PK>>
+  --
+  * doan_van_id : BIGINT <<FK>>
+  * gia_tri_bam : BIGINT
+}
+
+entity hinh_anh {
+  * id : BIGINT <<PK>>
+  --
+  * tai_lieu_id : INT <<FK>>
+   trang : INT
+  * thu_tu : INT
+  * duong_dan : VARCHAR(500)
+  * ma_bam_hinh : BIGINT
+   rong : INT
+   cao : INT
+}
+
+entity lan_kiem_tra {
+  * id : INT <<PK>>
+  --
+   tai_lieu_id : INT <<FK>>
+  * nguoi_yeu_cau_id : INT <<FK>>
+   nguoi_danh_gia_id : INT <<FK>>
+  * loai : ENUM
+   van_ban_dau_vao : VARCHAR(500)
+  * nguong : DECIMAL(5,2)
+   ty_le_tong : DECIMAL(5,2)
+  * trang_thai : ENUM
+   danh_gia : ENUM
+   duong_dan_bao_cao_pdf : VARCHAR(500)
+  * bat_dau : DATETIME
+   ket_thuc : DATETIME
+}
+
+entity ket_qua_nguon {
+  * id : INT <<PK>>
+  --
+  * lan_kiem_tra_id : INT <<FK>>
+   do_an_id : INT <<FK>>
+   de_tai_id : INT <<FK>>
+  * ty_le : DECIMAL(5,2)
+}
+
+entity doan_trung {
+  * id : INT <<PK>>
+  --
+  * ket_qua_nguon_id : INT <<FK>>
+  * doan_kiem_tra_id : BIGINT <<FK>>
+  * doan_nguon_id : BIGINT <<FK>>
+  * do_tuong_dong : DECIMAL(5,2)
+  * phuong_phap : ENUM
+  * bat_dau_kt : INT
+  * ket_thuc_kt : INT
+  * bat_dau_nguon : INT
+  * ket_thuc_nguon : INT
+}
+
+entity hinh_trung {
+  * id : INT <<PK>>
+  --
+  * ket_qua_nguon_id : INT <<FK>>
+  * hinh_kiem_tra_id : BIGINT <<FK>>
+  * hinh_nguon_id : BIGINT <<FK>>
+  * khoang_cach_hamming : TINYINT
+  * do_tuong_dong : DECIMAL(5,2)
+}
+
+nguoi_dung ||--o{ de_tai
+nguoi_dung |o--o{ tai_lieu
+do_an_luu_tru |o--o{ tai_lieu
+tai_lieu ||--o{ doan_van
+doan_van ||--o{ dau_van_tay
+tai_lieu ||--o{ hinh_anh
+tai_lieu |o--o{ lan_kiem_tra
+nguoi_dung ||--o{ lan_kiem_tra
+nguoi_dung |o--o{ lan_kiem_tra
+lan_kiem_tra ||--o{ ket_qua_nguon
+do_an_luu_tru |o--o{ ket_qua_nguon
+de_tai |o--o{ ket_qua_nguon
+ket_qua_nguon ||--o{ doan_trung
+doan_van ||--o{ doan_trung
+doan_van ||--o{ doan_trung : doan_nguon_id
+ket_qua_nguon ||--o{ hinh_trung
+hinh_anh ||--o{ hinh_trung
+hinh_anh ||--o{ hinh_trung : hinh_nguon_id
+
+@enduml

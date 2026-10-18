@@ -1,0 +1,48 @@
+@startuml
+title Kiến trúc SOA – Hệ thống quản lý đồ án sinh viên
+skinparam defaultFontName Arial
+skinparam componentStyle uml2
+
+actor "SV / GV / BM / QTV" as User
+
+node "Trình duyệt" {
+  [Web client] as Client
+}
+
+node "Máy chủ ứng dụng" {
+  component "Web API\n(nghiệp vụ, phân quyền JWT)" as API
+  interface "REST API" as REST
+  API -up- REST
+}
+
+node "Máy chủ kiểm tra" {
+  component "Dịch vụ kiểm tra tương đồng\n(Python)" as SVC {
+    [Trích văn bản, hình ảnh] as Extract
+    [Lọc ứng viên MinHash/LSH] as LSH
+    [Trùng nguyên văn – winnowing] as Winnow
+    [Trùng ý nghĩa – embedding] as Embed
+    [Trùng hình ảnh – pHash] as PHash
+    [Tính tỷ lệ, xuất PDF] as Score
+  }
+}
+
+queue "Hàng đợi tác vụ\n(Redis)" as Queue
+database "MySQL\n(29 bảng)" as DB
+folder "Kho file\n(Word, PDF, hình)" as Files
+
+User --> Client
+Client --> REST : HTTPS
+API --> DB : SQL
+API --> Files : lưu file nộp
+API --> Queue : tạo tác vụ kiểm tra
+Queue --> SVC : nhận tác vụ
+Extract --> Files : đọc file
+Extract --> LSH
+LSH --> Winnow
+LSH --> Embed
+Extract --> PHash
+Winnow --> Score
+Embed --> Score
+PHash --> Score
+Score --> DB : ghi kết quả
+@enduml

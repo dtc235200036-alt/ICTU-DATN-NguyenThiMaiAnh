@@ -1,0 +1,121 @@
+@startuml
+title Sơ đồ lớp thực thể – Công cụ kiểm tra tương đồng
+skinparam defaultFontName Arial
+skinparam classAttributeIconSize 0
+hide empty methods
+
+enum LoaiKiemTra {
+  TEN_DE_TAI
+  DE_CUONG
+  BAO_CAO
+}
+enum TrangThaiKiemTra {
+  DANG_CHAY
+  XONG
+  LOI
+}
+enum PhuongPhap {
+  NGUYEN_VAN
+  NGU_NGHIA
+}
+
+class NguoiDung {
+  - id : int
+  - hoTen : string
+}
+
+class TaiLieu {
+  - id : int
+  - loai : string
+  - tenFile : string
+  - duongDan : string
+  + trichVanBan() : string
+  + trichHinhAnh() : HinhAnh[]
+}
+
+class DoAnLuuTru {
+  - id : int
+  - tenDeTai : string
+  - hoTenSV : string
+  - hoTenGVHD : string
+  - namBaoVe : int
+  - nguon : string
+}
+
+class DoanVan {
+  - id : long
+  - thuTu : int
+  - noiDung : string
+  - soTu : int
+  - vecto : float[]
+  + taoDauVanTay(doDai : int) : DauVanTay[]
+}
+
+class DauVanTay {
+  - id : long
+  - giaTriBam : long
+}
+
+class HinhAnh {
+  - id : long
+  - trang : int
+  - thuTu : int
+  - duongDan : string
+  - maBamHinh : long
+  + khoangCachHamming(h : HinhAnh) : int
+}
+
+class LanKiemTra {
+  - id : int
+  - loai : LoaiKiemTra
+  - vanBanDauVao : string
+  - nguong : decimal = 25
+  - tyLeTong : decimal
+  - trangThai : TrangThaiKiemTra
+  - danhGia : string
+  - duongDanBaoCaoPdf : string
+  - batDau : datetime
+  - ketThuc : datetime
+  + chay() : void
+  + vuotNguong() : bool
+  + xuatPdf() : string
+}
+
+class KetQuaNguon {
+  - id : int
+  - tyLe : decimal
+}
+
+class DoanTrung {
+  - id : int
+  - doTuongDong : decimal
+  - phuongPhap : PhuongPhap
+  - batDauKT : int
+  - ketThucKT : int
+  - batDauNguon : int
+  - ketThucNguon : int
+}
+
+class HinhTrung {
+  - id : int
+  - khoangCachHamming : int
+  - doTuongDong : decimal
+}
+
+DoAnLuuTru "0..1" -- "0..*" TaiLieu
+TaiLieu "1" *-- "0..*" DoanVan
+TaiLieu "1" *-- "0..*" HinhAnh
+DoanVan "1" *-- "0..*" DauVanTay
+
+NguoiDung "1" -- "0..*" LanKiemTra : yêu cầu >
+TaiLieu "0..1" -- "0..*" LanKiemTra
+LanKiemTra "1" *-- "0..*" KetQuaNguon
+KetQuaNguon "0..*" --> "0..1" DoAnLuuTru : nguồn
+KetQuaNguon "1" *-- "0..*" DoanTrung
+KetQuaNguon "1" *-- "0..*" HinhTrung
+
+DoanTrung "0..*" --> "1" DoanVan : đoạn kiểm tra
+DoanTrung "0..*" --> "1" DoanVan : đoạn nguồn
+HinhTrung "0..*" --> "1" HinhAnh : hình kiểm tra
+HinhTrung "0..*" --> "1" HinhAnh : hình nguồn
+@enduml

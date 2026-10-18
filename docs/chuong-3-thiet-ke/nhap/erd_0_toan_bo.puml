@@ -1,0 +1,351 @@
+@startuml
+title ERD toàn bộ hệ thống (29 bảng)
+hide circle
+skinparam linetype ortho
+skinparam defaultFontName Arial
+
+entity nguoi_dung {
+  * id : INT <<PK>>
+  --
+  * ten_dang_nhap : VARCHAR(50) <<UQ>>
+  * mat_khau_bam : VARCHAR(255)
+  * ho_ten : VARCHAR(100)
+  * email : VARCHAR(100) <<UQ>>
+   so_dien_thoai : VARCHAR(15)
+  * vai_tro : ENUM
+  * trang_thai : ENUM
+  * ngay_tao : DATETIME
+}
+
+entity bo_mon {
+  * id : INT <<PK>>
+  --
+  * ten : VARCHAR(100) <<UQ>>
+}
+
+entity khoa_hoc {
+  * id : INT <<PK>>
+  --
+  * ten : VARCHAR(20) <<UQ>>
+  * nam_bat_dau : SMALLINT
+}
+
+entity lop {
+  * id : INT <<PK>>
+  --
+  * khoa_hoc_id : INT <<FK>>
+  * ten : VARCHAR(50) <<UQ>>
+}
+
+entity huong_de_tai {
+  * id : INT <<PK>>
+  --
+  * ma : VARCHAR(10) <<UQ>>
+  * ten : VARCHAR(100)
+}
+
+entity sinh_vien {
+  * id : INT <<PK>>
+  --
+  * nguoi_dung_id : INT <<FK>> <<UQ>>
+  * lop_id : INT <<FK>>
+  * ma_sv : VARCHAR(20) <<UQ>>
+}
+
+entity giang_vien {
+  * id : INT <<PK>>
+  --
+  * nguoi_dung_id : INT <<FK>> <<UQ>>
+  * bo_mon_id : INT <<FK>>
+  * ma_gv : VARCHAR(20) <<UQ>>
+   hoc_ham_hoc_vi : VARCHAR(50)
+  * so_sv_toi_da : TINYINT
+}
+
+entity dot_do_an {
+  * id : INT <<PK>>
+  --
+  * khoa_hoc_id : INT <<FK>>
+  * ten : VARCHAR(100)
+  * hoc_ky : VARCHAR(20)
+  * han_dang_ky : DATE
+  * han_nop_de_cuong : DATE
+  * han_nop_bao_cao : DATE
+  * trang_thai : ENUM
+}
+
+entity de_tai {
+  * id : INT <<PK>>
+  --
+  * dot_id : INT <<FK>>
+  * huong_id : INT <<FK>>
+  * nguoi_de_xuat_id : INT <<FK>>
+  * ten : VARCHAR(255)
+   mo_ta : TEXT
+  * trang_thai : ENUM
+  * ngay_tao : DATETIME
+}
+
+entity dang_ky_de_tai {
+  * id : INT <<PK>>
+  --
+  * de_tai_id : INT <<FK>>
+  * sinh_vien_id : INT <<FK>>
+  * giang_vien_id : INT <<FK>>
+   nguoi_duyet_id : INT <<FK>>
+  * trang_thai : ENUM
+   ly_do_tu_choi : VARCHAR(500)
+  * ngay_dang_ky : DATETIME
+}
+
+entity do_an_luu_tru {
+  * id : INT <<PK>>
+  --
+   dang_ky_id : INT <<FK>> <<UQ>>
+   khoa_hoc_id : INT <<FK>>
+  * ten_de_tai : VARCHAR(255)
+   ho_ten_sv : VARCHAR(100)
+   ho_ten_gvhd : VARCHAR(100)
+   nam_bao_ve : SMALLINT
+  * nguon : ENUM
+}
+
+entity tai_lieu {
+  * id : INT <<PK>>
+  --
+   nguoi_nop_id : INT <<FK>>
+   do_an_id : INT <<FK>>
+  * loai : ENUM
+  * ten_file : VARCHAR(255)
+  * duong_dan : VARCHAR(500)
+  * kich_thuoc : INT
+  * ngay_tai_len : DATETIME
+}
+
+entity de_cuong {
+  * id : INT <<PK>>
+  --
+  * dang_ky_id : INT <<FK>>
+  * tai_lieu_id : INT <<FK>>
+  * phien_ban : SMALLINT
+  * trang_thai : ENUM
+   nhan_xet : TEXT
+  * ngay_nop : DATETIME
+}
+
+entity bao_cao_tien_do {
+  * id : INT <<PK>>
+  --
+  * dang_ky_id : INT <<FK>>
+   tai_lieu_id : INT <<FK>>
+  * tuan_so : TINYINT
+  * da_lam : TEXT
+  * ket_qua : TEXT
+   kho_khan : TEXT
+  * ke_hoach : TEXT
+   nhan_xet : TEXT
+   danh_gia : ENUM
+  * ngay_nop : DATETIME
+}
+
+entity bao_cao_cuoi {
+  * id : INT <<PK>>
+  --
+  * dang_ky_id : INT <<FK>> <<UQ>>
+  * tai_lieu_id : INT <<FK>>
+   ma_nguon_id : INT <<FK>>
+   nhan_xet_gvhd : TEXT
+  * du_dieu_kien_bao_ve : ENUM
+  * ngay_nop : DATETIME
+}
+
+entity hoi_dong {
+  * id : INT <<PK>>
+  --
+  * dot_id : INT <<FK>>
+  * ten : VARCHAR(100)
+   phong : VARCHAR(50)
+  * ngay_bao_ve : DATE
+}
+
+entity thanh_vien_hoi_dong {
+  * hoi_dong_id : INT <<PK>> <<FK>>
+  * giang_vien_id : INT <<PK>> <<FK>>
+  --
+  * vai_tro : ENUM
+}
+
+entity lich_bao_ve {
+  * id : INT <<PK>>
+  --
+  * hoi_dong_id : INT <<FK>>
+  * dang_ky_id : INT <<FK>> <<UQ>>
+  * gio_bat_dau : TIME
+  * thu_tu : TINYINT
+}
+
+entity diem_bao_ve {
+  * id : INT <<PK>>
+  --
+  * lich_bao_ve_id : INT <<FK>>
+  * giang_vien_id : INT <<FK>>
+  * diem : DECIMAL(4,2)
+   nhan_xet : TEXT
+}
+
+entity doan_van {
+  * id : BIGINT <<PK>>
+  --
+  * tai_lieu_id : INT <<FK>>
+  * thu_tu : INT
+  * noi_dung : TEXT
+  * so_tu : INT
+   vecto : BLOB
+}
+
+entity dau_van_tay {
+  * id : BIGINT <<PK>>
+  --
+  * doan_van_id : BIGINT <<FK>>
+  * gia_tri_bam : BIGINT
+}
+
+entity hinh_anh {
+  * id : BIGINT <<PK>>
+  --
+  * tai_lieu_id : INT <<FK>>
+   trang : INT
+  * thu_tu : INT
+  * duong_dan : VARCHAR(500)
+  * ma_bam_hinh : BIGINT
+   rong : INT
+   cao : INT
+}
+
+entity lan_kiem_tra {
+  * id : INT <<PK>>
+  --
+   tai_lieu_id : INT <<FK>>
+  * nguoi_yeu_cau_id : INT <<FK>>
+   nguoi_danh_gia_id : INT <<FK>>
+  * loai : ENUM
+   van_ban_dau_vao : VARCHAR(500)
+  * nguong : DECIMAL(5,2)
+   ty_le_tong : DECIMAL(5,2)
+  * trang_thai : ENUM
+   danh_gia : ENUM
+   duong_dan_bao_cao_pdf : VARCHAR(500)
+  * bat_dau : DATETIME
+   ket_thuc : DATETIME
+}
+
+entity ket_qua_nguon {
+  * id : INT <<PK>>
+  --
+  * lan_kiem_tra_id : INT <<FK>>
+   do_an_id : INT <<FK>>
+   de_tai_id : INT <<FK>>
+  * ty_le : DECIMAL(5,2)
+}
+
+entity doan_trung {
+  * id : INT <<PK>>
+  --
+  * ket_qua_nguon_id : INT <<FK>>
+  * doan_kiem_tra_id : BIGINT <<FK>>
+  * doan_nguon_id : BIGINT <<FK>>
+  * do_tuong_dong : DECIMAL(5,2)
+  * phuong_phap : ENUM
+  * bat_dau_kt : INT
+  * ket_thuc_kt : INT
+  * bat_dau_nguon : INT
+  * ket_thuc_nguon : INT
+}
+
+entity hinh_trung {
+  * id : INT <<PK>>
+  --
+  * ket_qua_nguon_id : INT <<FK>>
+  * hinh_kiem_tra_id : BIGINT <<FK>>
+  * hinh_nguon_id : BIGINT <<FK>>
+  * khoang_cach_hamming : TINYINT
+  * do_tuong_dong : DECIMAL(5,2)
+}
+
+entity thong_bao {
+  * id : INT <<PK>>
+  --
+  * nguoi_nhan_id : INT <<FK>>
+  * tieu_de : VARCHAR(200)
+   noi_dung : TEXT
+   lien_ket : VARCHAR(500)
+  * da_doc : BOOLEAN
+  * ngay_tao : DATETIME
+}
+
+entity nhat_ky {
+  * id : BIGINT <<PK>>
+  --
+  * nguoi_dung_id : INT <<FK>>
+  * hanh_dong : VARCHAR(50)
+  * doi_tuong : VARCHAR(50)
+   doi_tuong_id : INT
+  * thoi_gian : DATETIME
+}
+
+entity cau_hinh {
+  * khoa : VARCHAR(50) <<PK>>
+  --
+  * gia_tri : VARCHAR(255)
+}
+
+khoa_hoc ||--o{ lop
+nguoi_dung ||--o| sinh_vien
+lop ||--o{ sinh_vien
+nguoi_dung ||--o| giang_vien
+bo_mon ||--o{ giang_vien
+khoa_hoc ||--o{ dot_do_an
+dot_do_an ||--o{ de_tai
+huong_de_tai ||--o{ de_tai
+nguoi_dung ||--o{ de_tai
+de_tai ||--o{ dang_ky_de_tai
+sinh_vien ||--o{ dang_ky_de_tai
+giang_vien ||--o{ dang_ky_de_tai
+nguoi_dung |o--o{ dang_ky_de_tai
+dang_ky_de_tai |o--o| do_an_luu_tru
+khoa_hoc |o--o{ do_an_luu_tru
+nguoi_dung |o--o{ tai_lieu
+do_an_luu_tru |o--o{ tai_lieu
+dang_ky_de_tai ||--o{ de_cuong
+tai_lieu ||--o{ de_cuong
+dang_ky_de_tai ||--o{ bao_cao_tien_do
+tai_lieu |o--o{ bao_cao_tien_do
+dang_ky_de_tai ||--o| bao_cao_cuoi
+tai_lieu ||--o{ bao_cao_cuoi
+tai_lieu |o--o{ bao_cao_cuoi
+dot_do_an ||--o{ hoi_dong
+hoi_dong ||--o{ thanh_vien_hoi_dong
+giang_vien ||--o{ thanh_vien_hoi_dong
+hoi_dong ||--o{ lich_bao_ve
+dang_ky_de_tai ||--o| lich_bao_ve
+lich_bao_ve ||--o{ diem_bao_ve
+giang_vien ||--o{ diem_bao_ve
+tai_lieu ||--o{ doan_van
+doan_van ||--o{ dau_van_tay
+tai_lieu ||--o{ hinh_anh
+tai_lieu |o--o{ lan_kiem_tra
+nguoi_dung ||--o{ lan_kiem_tra
+nguoi_dung |o--o{ lan_kiem_tra
+lan_kiem_tra ||--o{ ket_qua_nguon
+do_an_luu_tru |o--o{ ket_qua_nguon
+de_tai |o--o{ ket_qua_nguon
+ket_qua_nguon ||--o{ doan_trung
+doan_van ||--o{ doan_trung
+doan_van ||--o{ doan_trung : doan_nguon_id
+ket_qua_nguon ||--o{ hinh_trung
+hinh_anh ||--o{ hinh_trung
+hinh_anh ||--o{ hinh_trung : hinh_nguon_id
+nguoi_dung ||--o{ thong_bao
+nguoi_dung ||--o{ nhat_ky
+
+@enduml

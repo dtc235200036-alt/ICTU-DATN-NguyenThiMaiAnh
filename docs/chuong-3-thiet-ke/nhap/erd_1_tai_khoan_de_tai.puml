@@ -1,0 +1,144 @@
+@startuml
+title ERD 1 – Tài khoản, danh mục và đăng ký đề tài
+hide circle
+skinparam linetype ortho
+skinparam defaultFontName Arial
+
+entity nguoi_dung {
+  * id : INT <<PK>>
+  --
+  * ten_dang_nhap : VARCHAR(50) <<UQ>>
+  * mat_khau_bam : VARCHAR(255)
+  * ho_ten : VARCHAR(100)
+  * email : VARCHAR(100) <<UQ>>
+   so_dien_thoai : VARCHAR(15)
+  * vai_tro : ENUM
+  * trang_thai : ENUM
+  * ngay_tao : DATETIME
+}
+
+entity sinh_vien {
+  * id : INT <<PK>>
+  --
+  * nguoi_dung_id : INT <<FK>> <<UQ>>
+  * lop_id : INT <<FK>>
+  * ma_sv : VARCHAR(20) <<UQ>>
+}
+
+entity giang_vien {
+  * id : INT <<PK>>
+  --
+  * nguoi_dung_id : INT <<FK>> <<UQ>>
+  * bo_mon_id : INT <<FK>>
+  * ma_gv : VARCHAR(20) <<UQ>>
+   hoc_ham_hoc_vi : VARCHAR(50)
+  * so_sv_toi_da : TINYINT
+}
+
+entity bo_mon {
+  * id : INT <<PK>>
+  --
+  * ten : VARCHAR(100) <<UQ>>
+}
+
+entity khoa_hoc {
+  * id : INT <<PK>>
+  --
+  * ten : VARCHAR(20) <<UQ>>
+  * nam_bat_dau : SMALLINT
+}
+
+entity lop {
+  * id : INT <<PK>>
+  --
+  * khoa_hoc_id : INT <<FK>>
+  * ten : VARCHAR(50) <<UQ>>
+}
+
+entity huong_de_tai {
+  * id : INT <<PK>>
+  --
+  * ma : VARCHAR(10) <<UQ>>
+  * ten : VARCHAR(100)
+}
+
+entity dot_do_an {
+  * id : INT <<PK>>
+  --
+  * khoa_hoc_id : INT <<FK>>
+  * ten : VARCHAR(100)
+  * hoc_ky : VARCHAR(20)
+  * han_dang_ky : DATE
+  * han_nop_de_cuong : DATE
+  * han_nop_bao_cao : DATE
+  * trang_thai : ENUM
+}
+
+entity de_tai {
+  * id : INT <<PK>>
+  --
+  * dot_id : INT <<FK>>
+  * huong_id : INT <<FK>>
+  * nguoi_de_xuat_id : INT <<FK>>
+  * ten : VARCHAR(255)
+   mo_ta : TEXT
+  * trang_thai : ENUM
+  * ngay_tao : DATETIME
+}
+
+entity dang_ky_de_tai {
+  * id : INT <<PK>>
+  --
+  * de_tai_id : INT <<FK>>
+  * sinh_vien_id : INT <<FK>>
+  * giang_vien_id : INT <<FK>>
+   nguoi_duyet_id : INT <<FK>>
+  * trang_thai : ENUM
+   ly_do_tu_choi : VARCHAR(500)
+  * ngay_dang_ky : DATETIME
+}
+
+entity thong_bao {
+  * id : INT <<PK>>
+  --
+  * nguoi_nhan_id : INT <<FK>>
+  * tieu_de : VARCHAR(200)
+   noi_dung : TEXT
+   lien_ket : VARCHAR(500)
+  * da_doc : BOOLEAN
+  * ngay_tao : DATETIME
+}
+
+entity nhat_ky {
+  * id : BIGINT <<PK>>
+  --
+  * nguoi_dung_id : INT <<FK>>
+  * hanh_dong : VARCHAR(50)
+  * doi_tuong : VARCHAR(50)
+   doi_tuong_id : INT
+  * thoi_gian : DATETIME
+}
+
+entity cau_hinh {
+  * khoa : VARCHAR(50) <<PK>>
+  --
+  * gia_tri : VARCHAR(255)
+}
+
+nguoi_dung ||--o| sinh_vien
+lop ||--o{ sinh_vien
+nguoi_dung ||--o| giang_vien
+bo_mon ||--o{ giang_vien
+khoa_hoc ||--o{ lop
+khoa_hoc ||--o{ dot_do_an
+dot_do_an ||--o{ de_tai
+huong_de_tai ||--o{ de_tai
+nguoi_dung ||--o{ de_tai
+de_tai ||--o{ dang_ky_de_tai
+sinh_vien ||--o{ dang_ky_de_tai
+giang_vien ||--o{ dang_ky_de_tai
+nguoi_dung |o--o{ dang_ky_de_tai
+nguoi_dung ||--o{ thong_bao
+nguoi_dung ||--o{ nhat_ky
+
+@enduml

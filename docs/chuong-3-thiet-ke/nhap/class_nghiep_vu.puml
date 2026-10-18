@@ -1,0 +1,204 @@
+@startuml
+title Sơ đồ lớp thực thể – Phần nghiệp vụ
+skinparam defaultFontName Arial
+skinparam classAttributeIconSize 0
+hide empty methods
+
+enum VaiTro {
+  SV
+  GV
+  BM
+  QTV
+}
+enum TrangThaiDangKy {
+  CHO_GV_DUYET
+  DA_DUYET
+  TU_CHOI
+}
+enum TrangThaiDuyet {
+  CHO_DUYET
+  YEU_CAU_SUA
+  DA_DUYET
+}
+enum KetLuanBaoVe {
+  CHO_XET
+  DU
+  YEU_CAU_SUA
+  KHONG_DU
+}
+enum VaiTroHoiDong {
+  CHU_TICH
+  THU_KY
+  UY_VIEN
+  PHAN_BIEN
+}
+
+class NguoiDung {
+  - id : int
+  - tenDangNhap : string
+  - matKhauBam : string
+  - hoTen : string
+  - email : string
+  - soDienThoai : string
+  - vaiTro : VaiTro
+  - trangThai : string
+  + dangNhap() : bool
+  + doiMatKhau(matKhauMoi : string) : void
+}
+
+class SinhVien {
+  - maSV : string
+  + dangKyDeTai(deTai : DeTai, gv : GiangVien) : DangKyDeTai
+}
+
+class GiangVien {
+  - maGV : string
+  - hocHamHocVi : string
+  - soSVToiDa : int
+  + duyetDangKy(dk : DangKyDeTai, dongY : bool, lyDo : string) : void
+}
+
+class BoMon {
+  - id : int
+  - ten : string
+}
+class KhoaHoc {
+  - id : int
+  - ten : string
+  - namBatDau : int
+}
+class Lop {
+  - id : int
+  - ten : string
+}
+class HuongDeTai {
+  - id : int
+  - ma : string
+  - ten : string
+}
+
+class DotDoAn {
+  - id : int
+  - ten : string
+  - hocKy : string
+  - hanDangKy : date
+  - hanNopDeCuong : date
+  - hanNopBaoCao : date
+  - trangThai : string
+  + conHanDangKy() : bool
+}
+
+class DeTai {
+  - id : int
+  - ten : string
+  - moTa : string
+  - trangThai : string
+}
+
+class DangKyDeTai {
+  - id : int
+  - trangThai : TrangThaiDangKy
+  - lyDoTuChoi : string
+  - ngayDangKy : datetime
+}
+
+class TaiLieu {
+  - id : int
+  - loai : string
+  - tenFile : string
+  - duongDan : string
+  - kichThuoc : int
+  - ngayTaiLen : datetime
+}
+
+class DeCuong {
+  - id : int
+  - phienBan : int
+  - trangThai : TrangThaiDuyet
+  - nhanXet : string
+  - ngayNop : datetime
+}
+
+class BaoCaoTienDo {
+  - id : int
+  - tuanSo : int
+  - daLam : string
+  - ketQua : string
+  - khoKhan : string
+  - keHoach : string
+  - nhanXet : string
+  - danhGia : string
+  - ngayNop : datetime
+}
+
+class BaoCaoCuoi {
+  - id : int
+  - nhanXetGVHD : string
+  - duDieuKienBaoVe : KetLuanBaoVe
+  - ngayNop : datetime
+}
+
+class HoiDong {
+  - id : int
+  - ten : string
+  - phong : string
+  - ngayBaoVe : date
+}
+
+class ThanhVienHoiDong {
+  - vaiTro : VaiTroHoiDong
+}
+
+class LichBaoVe {
+  - id : int
+  - gioBatDau : time
+  - thuTu : int
+}
+
+class DiemBaoVe {
+  - id : int
+  - diem : decimal
+  - nhanXet : string
+}
+
+class ThongBao {
+  - id : int
+  - tieuDe : string
+  - noiDung : string
+  - daDoc : bool
+  - ngayTao : datetime
+}
+
+NguoiDung <|-- SinhVien
+NguoiDung <|-- GiangVien
+
+BoMon "1" -- "0..*" GiangVien
+KhoaHoc "1" -- "0..*" Lop
+Lop "1" -- "0..*" SinhVien
+KhoaHoc "1" -- "0..*" DotDoAn
+
+DotDoAn "1" *-- "0..*" DeTai
+HuongDeTai "1" -- "0..*" DeTai
+NguoiDung "1" -- "0..*" DeTai : đề xuất >
+
+SinhVien "1" -- "0..*" DangKyDeTai
+DeTai "1" -- "0..*" DangKyDeTai
+GiangVien "1" -- "0..*" DangKyDeTai : hướng dẫn >
+
+DangKyDeTai "1" *-- "0..*" DeCuong
+DangKyDeTai "1" *-- "0..*" BaoCaoTienDo
+DangKyDeTai "1" *-- "0..1" BaoCaoCuoi
+DangKyDeTai "1" -- "0..1" LichBaoVe
+
+DeCuong "0..*" --> "1" TaiLieu
+BaoCaoTienDo "0..*" --> "0..1" TaiLieu
+BaoCaoCuoi "0..*" --> "1" TaiLieu
+
+DotDoAn "1" -- "0..*" HoiDong
+HoiDong "1" *-- "1..*" LichBaoVe
+(HoiDong, GiangVien) .. ThanhVienHoiDong
+LichBaoVe "1" *-- "0..*" DiemBaoVe
+GiangVien "1" -- "0..*" DiemBaoVe : chấm >
+
+NguoiDung "1" -- "0..*" ThongBao : nhận >
+@enduml

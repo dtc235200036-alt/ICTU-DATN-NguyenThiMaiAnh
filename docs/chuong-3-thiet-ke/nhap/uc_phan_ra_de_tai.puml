@@ -1,0 +1,32 @@
+@startuml
+title Phân rã UC "QL đề tài" (CN04 – CN09)
+left to right direction
+skinparam packageStyle rectangle
+skinparam defaultFontName Arial
+
+actor "Sinh viên" as SV
+actor "Giảng viên\nhướng dẫn" as GV
+actor "Bộ môn / Khoa" as BM
+
+rectangle "QL đề tài" {
+  usecase "Mở đợt đồ án (CN04)" as CN04
+  usecase "Đề xuất đề tài (CN05)" as CN05
+  usecase "Đăng ký đề tài (CN06)" as CN06
+  usecase "Duyệt đề tài (CN07)" as CN07
+  usecase "Phân công GVHD (CN08)" as CN08
+  usecase "Tra cứu đề tài (CN09)" as CN09
+  usecase "Kiểm tra tương đồng\ntên đề tài (CN19)" as CN19
+}
+
+BM --> CN04
+BM --> CN08
+BM --> CN09
+GV --> CN05
+GV --> CN07
+GV --> CN09
+SV --> CN05
+SV --> CN06
+SV --> CN09
+
+CN05 ..> CN19 : <<include>>
+@enduml
