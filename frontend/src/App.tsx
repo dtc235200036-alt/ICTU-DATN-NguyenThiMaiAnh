@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router'
+import { Route, Routes } from 'react-router'
 import { Result } from 'antd'
 
 import { collectRoutes } from './app/registry'
@@ -14,8 +14,6 @@ export default function App() {
   return (
     <AuthBootstrap>
       <Routes>
-        <Route path="/" element={<Navigate to="/tong-quan" replace />} />
-
         {publicRoutes.map((route) => (
           <Route key={route.path} path={route.path} element={route.element} />
         ))}

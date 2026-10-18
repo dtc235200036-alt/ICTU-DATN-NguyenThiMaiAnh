@@ -38,6 +38,7 @@
 
 .login-brand__head {
   display: flex;
+  color: inherit;
   align-items: center;
   gap: 16px;
 }

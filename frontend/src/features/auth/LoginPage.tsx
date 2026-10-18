@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { Alert, Button, Form, Input } from 'antd'
-import { Navigate, useLocation, useNavigate } from 'react-router'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router'
 
 import { api, getErrorMessage } from '../../api/client'
 import logoIctu from '../../assets/logo-ictu.png'
@@ -80,14 +80,14 @@ export default function LoginPage() {
   return (
     <div className="login-page">
       <section className="login-brand" aria-label="Giới thiệu hệ thống">
-        <div className="login-brand__head">
+        <Link to="/" className="login-brand__head" aria-label="Về trang giới thiệu">
           <img className="login-logo" src={logoIctu} alt="Logo ICTU" />
           <div className="login-brand__school">
             Trường ĐH Công nghệ Thông tin
             <br />
             và Truyền thông — Khoa CNTT
           </div>
-        </div>
+        </Link>
 
         <div className="login-brand__body">
           <h1 className="login-brand__title">Hệ thống quản lý đồ án tốt nghiệp</h1>
