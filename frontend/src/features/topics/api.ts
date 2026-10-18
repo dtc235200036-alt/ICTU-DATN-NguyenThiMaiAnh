@@ -2,6 +2,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { AxiosError } from 'axios'
 
 import { api } from '../../api/client'
+import type { DinhHuongRef } from '../dinh-huong/api'
 
 export interface PersonRef {
   id: number
@@ -61,6 +62,9 @@ export interface TopicOut {
   ten_de_tai: string
   mo_ta: string | null
   linh_vuc: string | null
+  dinh_huong: DinhHuongRef | null
+  tep_dinh_kem: TepDinhKem | null
+  ngay_giao: string | null
   trang_thai: 'NHAP' | 'CHO_DUYET' | 'DA_DUYET' | 'TU_CHOI' | 'DA_PHAN_CONG'
   loai_nguoi_de_xuat: 'GIANG_VIEN' | 'SINH_VIEN'
   nguoi_de_xuat: PersonRef
@@ -71,10 +75,19 @@ export interface TopicOut {
   kiem_tra_ten: SavedTitleCheck | null
 }
 
+export interface TepDinhKem {
+  id: number
+  ten_goc: string
+  kich_thuoc: number
+  dinh_dang: 'DOCX' | 'PDF'
+  thoi_diem_nop: string
+}
+
 export interface TopicListItem {
   id: number
   ten_de_tai: string
   linh_vuc: string | null
+  dinh_huong: DinhHuongRef | null
   trang_thai: TopicOut['trang_thai']
   dot_do_an: CohortRef
   nguoi_de_xuat: PersonRef
@@ -94,6 +107,7 @@ export interface TopicsQueryParams {
   trang_thai?: string
   giang_vien_id?: number
   linh_vuc?: string
+  dinh_huong_id?: number
   q?: string
   pham_vi?: 'tat_ca' | 'cua_toi'
   sap_xep?: 'moi_nhat' | 'ten'
@@ -106,6 +120,7 @@ export interface TopicFormInput {
   ten_de_tai: string
   mo_ta?: string | null
   linh_vuc?: string | null
+  dinh_huong_id?: number | null
   // UC0.8/UC1.1: GVHD giao cho SV trong lớp hướng dẫn của mình (bắt buộc).
   sinh_vien_id: number
 }
@@ -197,5 +212,39 @@ export function useSubmitTopic() {
       void queryClient.invalidateQueries({ queryKey: [TOPIC_KEY, id] })
       void queryClient.invalidateQueries({ queryKey: [TOPIC_KEY] })
     },
+  })
+}
+
+/** GVHD đính kèm file mô tả đề tài (DOCX/PDF). */
+export function useAttachTopicFile() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, file }: { id: number; file: File }) => {
+      const formData = new FormData()
+      formData.append('file', file)
+      const { data } = await api.post<TopicOut>(`/topics/${id}/attachment`, formData)
+      return data
+    },
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({ queryKey: [TOPIC_KEY, variables.id] })
+    },
+  })
+}
+
+export interface TopicEvent {
+  thoi_diem: string
+  noi_dung: string
+  nguoi_thuc_hien: string
+}
+
+/** Lịch sử đề tài: giao đề tài, nộp/duyệt đề cương, Bộ môn phê duyệt, báo cáo. */
+export function useTopicHistory(id: number | undefined) {
+  return useQuery({
+    queryKey: [TOPIC_KEY, id, 'history'],
+    queryFn: async () => {
+      const { data } = await api.get<TopicEvent[]>(`/topics/${id}/history`)
+      return data
+    },
+    enabled: id !== undefined,
   })
 }

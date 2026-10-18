@@ -101,6 +101,16 @@ export default function BmDashboard() {
             </Card>
             <Card
               style={{ minWidth: 220, cursor: 'pointer' }}
+              onClick={() => navigate('/duyet-de-cuong?tab=CHO_BO_MON_DUYET')}
+            >
+              <Statistic
+                title="Đề cương chờ Bộ môn duyệt"
+                value={data.de_cuong_cho_bo_mon_duyet}
+                valueStyle={data.de_cuong_cho_bo_mon_duyet > 0 ? { color: '#d48806' } : undefined}
+              />
+            </Card>
+            <Card
+              style={{ minWidth: 220, cursor: 'pointer' }}
               onClick={() => navigate(progressLink('chi_tre_moc=1'))}
             >
               <Statistic

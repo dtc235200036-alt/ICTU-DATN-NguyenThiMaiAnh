@@ -2,6 +2,8 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { AxiosError } from 'axios'
 
 import { api } from '../../api/client'
+import { downloadFile } from '../../api/download'
+import type { DinhHuongRef } from '../dinh-huong/api'
 import type {
   CheckDetail,
   CheckMatch,
@@ -36,9 +38,44 @@ export interface OutlineVersion {
 export interface QuyenDeCuongOut {
   nop: boolean
   duyet: boolean
+  nop_bo_mon: boolean
+  duyet_bo_mon: boolean
 }
 
-export type OutlineTrangThai = 'CHUA_NOP' | 'CHO_DUYET' | 'YEU_CAU_SUA' | 'DA_DUYET'
+export type OutlineTrangThai =
+  | 'CHUA_NOP'
+  | 'CHO_DUYET'
+  | 'YEU_CAU_SUA'
+  | 'GVHD_DA_DUYET'
+  | 'CHO_BO_MON_DUYET'
+  | 'DA_DUYET'
+
+/** Lọc tab "Từ chối" của Bộ môn (đề cương Bộ môn đã trả lại). */
+export type OutlineFilter = OutlineTrangThai | 'BO_MON_TRA_LAI'
+
+export interface BoMonReviewOut {
+  ket_qua: 'DA_DUYET' | 'TRA_LAI'
+  nhan_xet: string | null
+  thoi_diem: string
+  nguoi_duyet: string
+  tai_lieu_id: number
+  tai_lieu_ky_so: DocumentOut | null
+  nguoi_ky: string | null
+  thoi_diem_ky: string | null
+}
+
+export interface CheckItem {
+  ma: 'TEN_FILE' | 'DINH_HUONG' | 'NOI_DUNG' | string
+  ten: string
+  dat: boolean
+  chi_tiet: string | null
+}
+
+export interface OutlineCounts {
+  tat_ca: number
+  theo_trang_thai: Partial<Record<OutlineTrangThai, number>>
+  bo_mon_tra_lai: number
+}
 
 export interface OutlineDetail {
   de_tai_id: number
@@ -49,6 +86,13 @@ export interface OutlineDetail {
   ngay_nop_dau_tien: string | null
   phien_ban: OutlineVersion[]
   quyen: QuyenDeCuongOut
+  dinh_huong: DinhHuongRef | null
+  lop: string | null
+  nop_bo_mon_luc: string | null
+  ket_qua_bo_mon: 'DA_DUYET' | 'TRA_LAI' | null
+  luot_duyet_bo_mon: BoMonReviewOut[]
+  kiem_tra_nop: CheckItem[]
+  ten_file_mau: string | null
 }
 
 export interface OutlineListItem {
@@ -59,6 +103,9 @@ export interface OutlineListItem {
   trang_thai: OutlineTrangThai
   phien_ban_moi_nhat: DocumentOut | null
   kiem_tra: CheckSummary | null
+  dinh_huong: DinhHuongRef | null
+  nop_bo_mon_luc: string | null
+  ket_qua_bo_mon: 'DA_DUYET' | 'TRA_LAI' | null
 }
 
 export interface PageResult<T> {
@@ -69,8 +116,9 @@ export interface PageResult<T> {
 }
 
 export interface OutlinesQueryParams {
-  trang_thai?: OutlineTrangThai
+  trang_thai?: OutlineFilter
   dot_do_an_id?: number
+  q?: string
   page?: number
   page_size?: number
 }
@@ -116,12 +164,87 @@ export function useOutline(deTaiId: number | undefined) {
   })
 }
 
+export function useOutlineCounts(params: { dot_do_an_id?: number; q?: string }) {
+  return useQuery({
+    queryKey: [OUTLINE_KEY, 'counts', params],
+    queryFn: async () => {
+      const { data } = await api.get<OutlineCounts>('/outlines/counts', { params })
+      return data
+    },
+  })
+}
+
+function useOutlineMutation<V extends { deTaiId: number }>(
+  fn: (variables: V) => Promise<OutlineDetail>,
+) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: fn,
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({ queryKey: [OUTLINE_KEY] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['notifications'] })
+      void variables
+    },
+  })
+}
+
+/** GVHD nộp đề cương đã duyệt lên Bộ môn. */
+export function useForwardOutline() {
+  return useOutlineMutation(async ({ deTaiId }: { deTaiId: number }) => {
+    const { data } = await api.post<OutlineDetail>(`/outlines/${deTaiId}/forward`)
+    return data
+  })
+}
+
+/** Lãnh đạo bộ môn phê duyệt kèm bản PDF đã ký số. */
+export function useBoMonApprove() {
+  return useOutlineMutation(
+    async ({ deTaiId, file, nhanXet }: { deTaiId: number; file: File; nhanXet?: string }) => {
+      const formData = new FormData()
+      formData.append('file', file)
+      if (nhanXet) formData.append('nhan_xet', nhanXet)
+      const { data } = await api.post<OutlineDetail>(
+        `/outlines/${deTaiId}/bo-mon/approve`,
+        formData,
+      )
+      return data
+    },
+  )
+}
+
+export function useBoMonReturn() {
+  return useOutlineMutation(async ({ deTaiId, nhanXet }: { deTaiId: number; nhanXet: string }) => {
+    const { data } = await api.post<OutlineDetail>(`/outlines/${deTaiId}/bo-mon/return`, {
+      nhan_xet: nhanXet,
+    })
+    return data
+  })
+}
+
+/** Thư mục đề cương đã ký số của một đợt (ZIP) — nộp về khoa. */
+export function exportSignedOutlines(dotDoAnId: number) {
+  return downloadFile(
+    `/outlines/export-signed?dot_do_an_id=${dotDoAnId}`,
+    `de-cuong-ky-so-dot-${dotDoAnId}.zip`,
+  )
+}
+
 export function useSubmitOutline() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ deTaiId, file }: { deTaiId: number; file: File }) => {
+    mutationFn: async ({
+      deTaiId,
+      file,
+      ghiChu,
+    }: {
+      deTaiId: number
+      file: File
+      ghiChu?: string
+    }) => {
       const formData = new FormData()
       formData.append('file', file)
+      if (ghiChu) formData.append('ghi_chu', ghiChu)
       // Không tự đặt Content-Type: axios sẽ tự sinh boundary multipart đúng.
       const { data } = await api.post<OutlineDetail>(`/outlines/${deTaiId}/submit`, formData)
       return data

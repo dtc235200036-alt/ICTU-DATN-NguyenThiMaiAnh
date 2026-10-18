@@ -1,3 +1,5 @@
+from typing import Literal
+
 from fastapi import APIRouter, Depends, File, Form, Query, Response, UploadFile
 from sqlalchemy.orm import Session
 
@@ -117,7 +119,11 @@ def dashboard(
     chi_tre_moc: bool = Query(default=False),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
+    q: str | None = Query(default=None, max_length=100),
+    loc_de_cuong: Literal["DA_NOP", "CHO_DUYET", "CHUA_NOP"] | None = Query(default=None),
     user: CurrentUser = Depends(require_role(VaiTro.BO_MON)),
     db: Session = Depends(get_db),
 ) -> ProgressDashboardOut:
-    return progress_service.dashboard(db, dot_do_an_id, chi_tre_moc, page, page_size)
+    return progress_service.dashboard(
+        db, dot_do_an_id, chi_tre_moc, page, page_size, q, loc_de_cuong
+    )

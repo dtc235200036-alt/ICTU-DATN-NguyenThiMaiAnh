@@ -599,9 +599,10 @@ def review_report(
 # ---------------------------------------------------------------------------
 # UC3.4 — Tiến độ toàn khoa (Bộ môn)
 # ---------------------------------------------------------------------------
-def row_out(r: ProgressRow) -> ProgressRowOut:
+def row_out(r: ProgressRow, trang_thai_de_cuong: str = DC_CHUA_NOP) -> ProgressRowOut:
     """Một dòng SV × mốc — dùng chung cho /tien-do-toan-khoa và dashboard Bộ môn."""
     return ProgressRowOut(
+        trang_thai_de_cuong=trang_thai_de_cuong,
         sinh_vien=_sv_ref(r.de_tai.sinh_vien),
         giang_vien=_gv_ref(r.de_tai.giang_vien),
         de_tai=TopicRef(id=r.de_tai.id, ten_de_tai=r.de_tai.ten_de_tai),
@@ -617,8 +618,37 @@ def row_out(r: ProgressRow) -> ProgressRowOut:
     )
 
 
+# Bộ lọc đề cương của Tiến độ toàn khoa: Đã nộp (đã nộp ít nhất một lần), Chờ
+# duyệt (đang ở GVHD hoặc Bộ môn), Chưa nộp.
+_LOC_DE_CUONG = {
+    "DA_NOP": lambda tt: tt != DC_CHUA_NOP,
+    "CHO_DUYET": lambda tt: tt in ("CHO_DUYET", "GVHD_DA_DUYET", "CHO_BO_MON_DUYET"),
+    "CHUA_NOP": lambda tt: tt == DC_CHUA_NOP,
+}
+
+
+def _khop_tu_khoa(r: ProgressRow, q: str) -> bool:
+    t = q.casefold()
+    sv = r.de_tai.sinh_vien
+    gv = r.de_tai.giang_vien
+    fields = [
+        r.de_tai.ten_de_tai,
+        sv.ho_ten if sv else None,
+        sv.ma_so_sinh_vien if sv else None,
+        gv.ho_ten if gv else None,
+        gv.ma_giang_vien if gv else None,
+    ]
+    return any(f and t in f.casefold() for f in fields)
+
+
 def dashboard(
-    db: Session, dot_do_an_id: int | None, chi_tre_moc: bool, page: int, page_size: int
+    db: Session,
+    dot_do_an_id: int | None,
+    chi_tre_moc: bool,
+    page: int,
+    page_size: int,
+    q: str | None = None,
+    loc_de_cuong: str | None = None,
 ) -> ProgressDashboardOut:
     cohort = _cohort_or_default(db, dot_do_an_id)
     if cohort is None:
@@ -627,9 +657,35 @@ def dashboard(
             so_sv_tre_moc=0,
         )
     milestones, rows = compute_cohort_progress(db, cohort.id)
+    outline_states: dict[int, str] = {}
+    if rows:
+        outline_states = {
+            de_tai_id: tt
+            for de_tai_id, tt in db.execute(
+                select(DeCuong.de_tai_id, DeCuong.trang_thai).where(
+                    DeCuong.de_tai_id.in_([r.de_tai.id for r in rows])
+                )
+            ).all()
+        }
+
+    def state(r: ProgressRow) -> str:
+        return outline_states.get(r.de_tai.id, DC_CHUA_NOP)
+
     so_sv_tre_moc = sum(1 for r in rows if r.tre_moc)
+    tong_sv = len(rows)
+    da_nop_de_cuong = sum(1 for r in rows if state(r) != DC_CHUA_NOP)
+    chua_hoan_thanh = sum(
+        1
+        for r in rows
+        if state(r) != DC_DA_DUYET or any(c.bao_cao is None for c in r.cells)
+    )
     if chi_tre_moc:
         rows = [r for r in rows if r.tre_moc]
+    if q:
+        tu_khoa = nfc(q).strip()
+        rows = [r for r in rows if _khop_tu_khoa(r, tu_khoa)]
+    if loc_de_cuong in _LOC_DE_CUONG:
+        rows = [r for r in rows if _LOC_DE_CUONG[loc_de_cuong](state(r))]
     total = len(rows)
     page_rows = rows[(page - 1) * page_size : page * page_size]
     counts = _report_counts(db, [m.id for m in milestones])
@@ -637,9 +693,12 @@ def dashboard(
     return ProgressDashboardOut(
         dot_do_an=_cohort_ref(cohort),
         moc=[_milestone_out(m, counts.get(m.id, 0)) for m in milestones],
-        items=[row_out(r) for r in page_rows],
+        items=[row_out(r, state(r)) for r in page_rows],
         total=total,
         page=page,
         page_size=page_size,
         so_sv_tre_moc=so_sv_tre_moc,
+        tong_sv=tong_sv,
+        da_nop_de_cuong=da_nop_de_cuong,
+        chua_hoan_thanh=chua_hoan_thanh,
     )

@@ -4,8 +4,9 @@ import { Link, useNavigate, useSearchParams } from 'react-router'
 
 import { useLecturers } from '../accounts/api'
 import { useCohorts } from '../cohorts/api'
+import { dinhHuongLabel, useDinhHuong } from '../dinh-huong/api'
 import { useAuthStore } from '../../stores/auth'
-import { LINH_VUC_OPTIONS, TRANG_THAI_DE_TAI, TRANG_THAI_LOC_OPTIONS } from './constants'
+import { TRANG_THAI_DE_TAI, TRANG_THAI_LOC_OPTIONS } from './constants'
 import { useTopics } from './api'
 import type { PersonRef, TopicListItem } from './api'
 
@@ -36,7 +37,7 @@ export default function TopicListPage() {
   const dotDoAnId = searchParams.get('dot_do_an_id') ?? undefined
   const trangThai = searchParams.get('trang_thai') ?? undefined
   const giangVienId = searchParams.get('giang_vien_id') ?? undefined
-  const linhVuc = searchParams.get('linh_vuc') ?? undefined
+  const dinhHuongId = searchParams.get('dinh_huong_id') ?? undefined
   const q = searchParams.get('q') ?? undefined
   const sapXep = searchParams.get('sap_xep') === 'ten' ? 'ten' : 'moi_nhat'
   const page = Number(searchParams.get('page') ?? '1') || 1
@@ -44,12 +45,13 @@ export default function TopicListPage() {
 
   const { data: cohorts } = useCohorts()
   const { data: lecturers } = useLecturers()
+  const { data: dinhHuong } = useDinhHuong()
 
   const { data, isFetching } = useTopics({
     dot_do_an_id: dotDoAnId ? Number(dotDoAnId) : undefined,
     trang_thai: trangThai,
     giang_vien_id: giangVienId ? Number(giangVienId) : undefined,
-    linh_vuc: linhVuc,
+    dinh_huong_id: dinhHuongId ? Number(dinhHuongId) : undefined,
     q,
     pham_vi: phamVi,
     sap_xep: sapXep,
@@ -85,9 +87,9 @@ export default function TopicListPage() {
       render: (_value, record) => <Link to={`/de-tai/${record.id}`}>{record.ten_de_tai}</Link>,
     },
     {
-      title: 'Lĩnh vực',
-      dataIndex: 'linh_vuc',
-      render: (value: string | null) => value ?? '—',
+      title: 'Định hướng',
+      dataIndex: 'dinh_huong',
+      render: (value: TopicListItem['dinh_huong']) => dinhHuongLabel(value),
     },
     {
       title: 'GVHD',
@@ -192,14 +194,16 @@ export default function TopicListPage() {
             />
           </div>
           <div>
-            <div style={{ marginBottom: 4 }}>Lĩnh vực</div>
+            <div style={{ marginBottom: 4 }}>Định hướng</div>
             <Select
               style={{ width: 220 }}
-              value={linhVuc ?? 'all'}
-              onChange={(value) => updateParams({ linh_vuc: value === 'all' ? undefined : value })}
+              value={dinhHuongId ?? 'all'}
+              onChange={(value) =>
+                updateParams({ dinh_huong_id: value === 'all' ? undefined : String(value) })
+              }
               options={[
                 { value: 'all', label: 'Tất cả' },
-                ...LINH_VUC_OPTIONS.map((v) => ({ value: v, label: v })),
+                ...(dinhHuong ?? []).map((d) => ({ value: String(d.id), label: dinhHuongLabel(d) })),
               ]}
             />
           </div>

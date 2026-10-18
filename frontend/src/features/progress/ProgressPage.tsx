@@ -4,24 +4,25 @@ import {
   Alert,
   Button,
   Card,
-  Col,
   Empty,
   Form,
   Input,
-  Row,
+  Modal,
   Select,
   Space,
   Spin,
+  Table,
   Tag,
   Upload,
 } from 'antd'
+import type { ColumnsType } from 'antd/es/table'
 import type { UploadFile } from 'antd/es/upload/interface'
 
 import { getErrorMessage } from '../../api/client'
-import { formatBytes } from '../../utils/format'
+import { formatBytes, formatDateTime } from '../../utils/format'
 import { useMyProgress, useSubmitReport } from './api'
 import type { MilestoneStatus } from './api'
-import { TRANG_THAI_MOC, formatDay } from './constants'
+import { DANH_GIA, TRANG_THAI_MOC, formatDay } from './constants'
 import MilestoneList from './MilestoneList'
 
 const { TextArea } = Input
@@ -52,6 +53,8 @@ export default function ProgressPage() {
   const [file, setFile] = useState<File | null>(null)
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const [fileError, setFileError] = useState<string | null>(null)
+  const [formOpen, setFormOpen] = useState(false)
+  const [viewing, setViewing] = useState<MilestoneStatus | null>(null)
 
   const topic = data?.de_tai ?? null
   const submittable = useMemo(() => (topic ? topic.moc.filter(canSubmitFor) : []), [topic])
@@ -116,6 +119,7 @@ export default function ProgressPage() {
     try {
       await submitMutation.mutateAsync({ mocId, noiDung: text, file: file ?? undefined })
       message.success(`Đã nộp báo cáo ${selected?.ten_moc ?? ''}`)
+      setFormOpen(false)
       setFile(null)
       setFileList([])
     } catch (err) {
@@ -126,89 +130,162 @@ export default function ProgressPage() {
   const disabled = !topic.co_the_nop || mocId === undefined
   const resubmitting = Boolean(selected?.bao_cao)
 
-  return (
-    <Row gutter={[16, 16]}>
-      <Col xs={24} lg={14}>
-        <Card
-          title={`Báo cáo tiến độ - ${topic.ten_de_tai}`}
-          extra={topic.tre_moc ? <Tag color="red">Trễ mốc</Tag> : null}
-        >
-          <MilestoneList
-            moc={topic.moc}
-            selectedId={mocId}
-            onSelect={(m) => {
-              if (canSubmitFor(m)) setMocId(m.id)
-            }}
-          />
-        </Card>
-      </Col>
-      <Col xs={24} lg={10}>
-        <Card title={`Nộp báo cáo tiến độ - ${selected?.ten_moc ?? ''}`}>
-          {topic.ly_do && (
-            <Alert type="info" showIcon message={topic.ly_do} style={{ marginBottom: 16 }} />
+  const openForm = (m?: MilestoneStatus) => {
+    if (m && canSubmitFor(m)) setMocId(m.id)
+    setFormOpen(true)
+  }
+
+  const columns: ColumnsType<MilestoneStatus> = [
+    { title: 'STT', key: 'stt', width: 60, render: (_v, _r, idx) => idx + 1 },
+    { title: 'Tên báo cáo', dataIndex: 'ten_moc' },
+    { title: 'Hạn nộp', dataIndex: 'han_nop', width: 110, render: (v: string | null) => formatDay(v) },
+    {
+      title: 'Thời gian nộp',
+      key: 'thoi_diem_nop',
+      width: 160,
+      render: (_v, m) => (m.bao_cao ? formatDateTime(m.bao_cao.thoi_diem_nop) : '—'),
+    },
+    {
+      title: 'Trạng thái',
+      key: 'trang_thai',
+      width: 150,
+      render: (_v, m) => (
+        <Space size={4} wrap>
+          {m.bao_cao ? <Tag color="blue">Đã nộp</Tag> : null}
+          <Tag color={TRANG_THAI_MOC[m.trang_thai].color}>{TRANG_THAI_MOC[m.trang_thai].label}</Tag>
+        </Space>
+      ),
+    },
+    {
+      title: 'Đánh giá GVHD',
+      key: 'danh_gia',
+      width: 130,
+      render: (_v, m) => {
+        const dg = m.bao_cao?.danh_gia
+        return dg ? <Tag color={DANH_GIA[dg].color}>{DANH_GIA[dg].label}</Tag> : '—'
+      },
+    },
+    {
+      title: 'Thao tác',
+      key: 'thao_tac',
+      width: 150,
+      render: (_v, m) => (
+        <Space size={4}>
+          <Button size="small" disabled={!m.bao_cao} onClick={() => setViewing(m)}>
+            Xem
+          </Button>
+          {topic.co_the_nop && canSubmitFor(m) && (
+            <Button size="small" type="link" onClick={() => openForm(m)}>
+              {m.bao_cao ? 'Nộp lại' : 'Nộp'}
+            </Button>
           )}
-          <Form layout="vertical" disabled={disabled}>
-            <Form.Item label="Mốc">
-              <Select
-                value={mocId}
-                onChange={setMocId}
-                options={submittable.map((m) => ({
-                  value: m.id,
-                  label: `${m.ten_moc} · hạn ${formatDay(m.han_nop)} · ${TRANG_THAI_MOC[m.trang_thai].label}`,
-                }))}
-                placeholder="Chọn mốc cần nộp"
-              />
-            </Form.Item>
-            {resubmitting && (
-              <Alert
-                type="warning"
-                showIcon
-                style={{ marginBottom: 16 }}
-                message="Mốc này đã nộp — nộp lại sẽ ghi đè nội dung (GVHD chưa nhận xét)."
-              />
-            )}
-            <Form.Item label="Nội dung công việc đã thực hiện" required>
-              <TextArea
-                rows={6}
-                maxLength={NOI_DUNG_MAX}
-                showCount
-                value={noiDung}
-                onChange={(e) => setNoiDung(e.target.value)}
-              />
-            </Form.Item>
-            <Form.Item label="Tệp đính kèm (tùy chọn)">
-              {fileError && (
-                <Alert type="error" showIcon message={fileError} style={{ marginBottom: 8 }} />
-              )}
-              <Dragger
-                accept=".docx,.pdf"
-                maxCount={1}
-                multiple={false}
-                fileList={fileList}
-                beforeUpload={handleSelectFile}
-                onRemove={() => {
-                  setFile(null)
-                  setFileList([])
-                }}
-              >
-                <p className="ant-upload-text">Kéo thả file hoặc bấm để chọn (tùy chọn)</p>
-                <p className="ant-upload-hint">DOCX hoặc PDF, tối đa 20 MB</p>
-              </Dragger>
-              {file && (
-                <p style={{ marginTop: 8, fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>
-                  Đã chọn: {file.name} ({formatBytes(file.size)})
-                </p>
-              )}
-            </Form.Item>
-            <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
-              <Button onClick={reset}>Hủy</Button>
-              <Button type="primary" loading={submitMutation.isPending} onClick={handleSubmit}>
-                Nộp báo cáo
-              </Button>
-            </Space>
-          </Form>
-        </Card>
-      </Col>
-    </Row>
+        </Space>
+      ),
+    },
+  ]
+
+  return (
+    <Card
+      title={`Báo cáo tiến độ - ${topic.ten_de_tai}`}
+      extra={
+        <Space>
+          {topic.tre_moc && <Tag color="red">Trễ mốc</Tag>}
+          <Button type="primary" disabled={!topic.co_the_nop} onClick={() => openForm()}>
+            + Tạo báo cáo mới
+          </Button>
+        </Space>
+      }
+    >
+      {topic.ly_do && <Alert type="info" showIcon message={topic.ly_do} style={{ marginBottom: 16 }} />}
+      <Table<MilestoneStatus>
+        rowKey="id"
+        columns={columns}
+        dataSource={topic.moc}
+        pagination={false}
+        locale={{ emptyText: 'Bộ môn chưa thiết lập mốc tiến độ cho đợt này' }}
+      />
+
+      <Modal
+        open={formOpen}
+        title={`Nộp báo cáo tiến độ - ${selected?.ten_moc ?? ''}`}
+        footer={null}
+        width={640}
+        onCancel={() => setFormOpen(false)}
+      >
+      {topic.ly_do && (
+        <Alert type="info" showIcon message={topic.ly_do} style={{ marginBottom: 16 }} />
+      )}
+      <Form layout="vertical" disabled={disabled}>
+        <Form.Item label="Mốc">
+          <Select
+            value={mocId}
+            onChange={setMocId}
+            options={submittable.map((m) => ({
+              value: m.id,
+              label: `${m.ten_moc} · hạn ${formatDay(m.han_nop)} · ${TRANG_THAI_MOC[m.trang_thai].label}`,
+            }))}
+            placeholder="Chọn mốc cần nộp"
+          />
+        </Form.Item>
+        {resubmitting && (
+          <Alert
+            type="warning"
+            showIcon
+            style={{ marginBottom: 16 }}
+            message="Mốc này đã nộp — nộp lại sẽ ghi đè nội dung (GVHD chưa nhận xét)."
+          />
+        )}
+        <Form.Item label="Nội dung công việc đã thực hiện" required>
+          <TextArea
+            rows={6}
+            maxLength={NOI_DUNG_MAX}
+            showCount
+            value={noiDung}
+            onChange={(e) => setNoiDung(e.target.value)}
+          />
+        </Form.Item>
+        <Form.Item label="Tệp đính kèm (tùy chọn)">
+          {fileError && (
+            <Alert type="error" showIcon message={fileError} style={{ marginBottom: 8 }} />
+          )}
+          <Dragger
+            accept=".docx,.pdf"
+            maxCount={1}
+            multiple={false}
+            fileList={fileList}
+            beforeUpload={handleSelectFile}
+            onRemove={() => {
+              setFile(null)
+              setFileList([])
+            }}
+          >
+            <p className="ant-upload-text">Kéo thả file hoặc bấm để chọn (tùy chọn)</p>
+            <p className="ant-upload-hint">DOCX hoặc PDF, tối đa 20 MB</p>
+          </Dragger>
+          {file && (
+            <p style={{ marginTop: 8, fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>
+              Đã chọn: {file.name} ({formatBytes(file.size)})
+            </p>
+          )}
+        </Form.Item>
+        <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
+          <Button onClick={reset}>Hủy</Button>
+          <Button type="primary" loading={submitMutation.isPending} onClick={handleSubmit}>
+            Nộp báo cáo
+          </Button>
+        </Space>
+      </Form>
+      </Modal>
+
+      <Modal
+        open={viewing !== null}
+        title={viewing ? `Báo cáo ${viewing.ten_moc}` : ''}
+        footer={null}
+        width={640}
+        onCancel={() => setViewing(null)}
+      >
+        {viewing && <MilestoneList moc={[viewing]} />}
+      </Modal>
+    </Card>
   )
 }

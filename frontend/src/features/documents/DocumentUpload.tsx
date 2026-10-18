@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import { Alert, Button, Upload } from 'antd'
 import type { UploadFile } from 'antd/es/upload/interface'
 import { AxiosError } from 'axios'
@@ -24,6 +25,11 @@ export interface DocumentUploadProps {
   submitLabel: string
   loading: boolean
   onSubmit: (file: File) => Promise<unknown>
+  /** Cảnh báo (không chặn) cho file đã chọn, vd. tên file sai quy tắc. */
+  fileWarning?: (file: File) => string | null
+  /** Trường nhập thêm hiển thị trước nút nộp (vd. ghi chú). */
+  extra?: ReactNode
+  hint?: string
 }
 
 function hasAllowedExtension(name: string): boolean {
@@ -58,6 +64,9 @@ export default function DocumentUpload({
   submitLabel,
   loading,
   onSubmit,
+  fileWarning,
+  extra,
+  hint,
 }: DocumentUploadProps) {
   const [file, setFile] = useState<File | null>(null)
   const [fileList, setFileList] = useState<UploadFile[]>([])
@@ -132,13 +141,17 @@ export default function DocumentUpload({
         }}
       >
         <p className="ant-upload-text">Kéo thả file vào đây hoặc bấm để chọn file</p>
-        <p className="ant-upload-hint">Chỉ nhận DOCX hoặc PDF, tối đa 20 MB (NFR-06)</p>
+        <p className="ant-upload-hint">{hint ?? 'Chỉ nhận DOCX hoặc PDF, tối đa 20 MB (NFR-06)'}</p>
       </Dragger>
       {file && (
         <p style={{ marginTop: 8, fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>
           Đã chọn: {file.name} ({formatBytes(file.size)})
         </p>
       )}
+      {file && fileWarning?.(file) && (
+        <Alert type="warning" showIcon message={fileWarning(file)} style={{ marginTop: 8 }} />
+      )}
+      {extra}
       <Button
         type="primary"
         block

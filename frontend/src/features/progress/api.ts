@@ -73,6 +73,7 @@ export interface ProgressRow {
   de_tai: { id: number; ten_de_tai: string }
   o: ProgressCell[]
   tre_moc: boolean
+  trang_thai_de_cuong: string
 }
 
 export interface ProgressDashboard {
@@ -83,11 +84,18 @@ export interface ProgressDashboard {
   page: number
   page_size: number
   so_sv_tre_moc: number
+  tong_sv: number
+  da_nop_de_cuong: number
+  chua_hoan_thanh: number
 }
+
+export type LocDeCuong = 'DA_NOP' | 'CHO_DUYET' | 'CHUA_NOP'
 
 export interface DashboardParams {
   dot_do_an_id?: number
   chi_tre_moc?: boolean
+  q?: string
+  loc_de_cuong?: LocDeCuong
   page?: number
   page_size?: number
 }

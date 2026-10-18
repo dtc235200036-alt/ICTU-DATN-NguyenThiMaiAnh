@@ -53,12 +53,12 @@ export default function VersionHistory({ versions, trangThai, docLabel }: Versio
               if (record.luot_duyet) {
                 return (
                   <Tag color={record.luot_duyet.ket_qua === 'DA_DUYET' ? 'success' : 'error'}>
-                    {record.luot_duyet.ket_qua === 'DA_DUYET' ? 'Đã duyệt' : 'Yêu cầu sửa'}
+                    {record.luot_duyet.ket_qua === 'DA_DUYET' ? 'GVHD đã duyệt' : 'Yêu cầu sửa'}
                   </Tag>
                 )
               }
               if (record === newest && trangThai === 'CHO_DUYET') {
-                return <Tag color="processing">Chờ duyệt</Tag>
+                return <Tag color="processing">Chờ GVHD duyệt</Tag>
               }
               return <span style={{ color: 'rgba(0,0,0,0.45)' }}>—</span>
             },
@@ -103,7 +103,7 @@ export default function VersionHistory({ versions, trangThai, docLabel }: Versio
             <div>
               <p style={{ margin: '0 0 4px', fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>
                 {formatDate(version.luot_duyet.thoi_diem)} · v{version.tai_lieu.so_phien_ban} ·{' '}
-                {isApproved ? 'Đã duyệt' : 'Yêu cầu sửa'}
+                {isApproved ? 'GVHD đã duyệt' : 'Yêu cầu sửa'}
               </p>
               <p style={{ margin: 0 }}>
                 {version.luot_duyet.nhan_xet

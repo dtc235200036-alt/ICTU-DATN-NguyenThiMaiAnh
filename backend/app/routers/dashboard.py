@@ -5,7 +5,9 @@ from app.core.db import get_db
 from app.core.deps import CurrentUser, require_role
 from app.core.roles import VaiTro
 from app.schemas.dashboard import BmDashboardOut, GvDashboardOut, SvDashboardOut
+from app.schemas.history import SubmissionRow
 from app.services import dashboard as dashboard_service
+from app.services import student_history
 
 # D-09/T-02-38: mỗi vai trò một route riêng, mỗi route chỉ vai trò đó gọi
 # được — không có route dùng chung nhiều vai trò cho dashboard.
@@ -18,6 +20,15 @@ def sv_dashboard(
     db: Session = Depends(get_db),
 ) -> SvDashboardOut:
     return dashboard_service.get_sv_dashboard(db, user)
+
+
+@router.get("/sinh-vien/lich-su-nop", response_model=list[SubmissionRow])
+def sv_submissions(
+    user: CurrentUser = Depends(require_role(VaiTro.SINH_VIEN)),
+    db: Session = Depends(get_db),
+) -> list[SubmissionRow]:
+    """"Lịch sử nộp" của SV: đề cương, báo cáo tiến độ (kèm hạn), báo cáo cuối."""
+    return student_history.my_submissions(db, user)
 
 
 @router.get("/giang-vien", response_model=GvDashboardOut)

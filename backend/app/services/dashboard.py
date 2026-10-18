@@ -10,6 +10,7 @@ from app.models.de_cuong import (
     DC_CHO_DUYET,
     DC_CHUA_NOP,
     DC_GVHD_DA_DUYET,
+    LOAI_BAO_CAO_CUOI,
     LOAI_DE_CUONG,
     DeCuong,
     TaiLieuDoAn,
@@ -131,6 +132,17 @@ def get_sv_dashboard(db: Session, user: CurrentUser) -> SvDashboardOut:
         tien_do=tien_do,
         moc_tiep_theo=moc_tiep_theo,
         bao_ve=_sv_defense(db, user),
+        lop=(sv.lop if (sv := db.get(SinhVien, sv_id)) is not None else None),
+        bao_cao_cuoi_da_nop=(
+            topic is not None
+            and db.execute(
+                select(TaiLieuDoAn.id)
+                .where(TaiLieuDoAn.de_tai_id == topic.id)
+                .where(TaiLieuDoAn.loai == LOAI_BAO_CAO_CUOI)
+                .limit(1)
+            ).first()
+            is not None
+        ),
     )
 
 

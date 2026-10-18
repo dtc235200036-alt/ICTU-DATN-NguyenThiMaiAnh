@@ -4,7 +4,7 @@ import GvDashboard from './GvDashboard'
 import SvDashboard from './SvDashboard'
 
 const TITLE: Record<string, string> = {
-  SINH_VIEN: 'Tổng quan',
+  SINH_VIEN: 'Trang chủ',
   GIANG_VIEN: 'Tổng quan',
   BO_MON: 'Tổng quan toàn khoa',
 }

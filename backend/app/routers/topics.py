@@ -17,7 +17,8 @@ from app.schemas.topics import (
     TopicOut,
     TopicUpdate,
 )
-from app.services import ai_index, documents
+from app.schemas.history import TopicEvent
+from app.services import ai_index, documents, student_history
 from app.services import title_check as title_check_service
 from app.services import topics as topics_service
 
@@ -150,3 +151,13 @@ def attach_topic_file(
     lượng như đề cương); tải về qua /api/documents/{id}/download."""
     vf = documents.read_and_validate(file)
     return topics_service.attach_file(db, user, topic_id, vf)
+
+
+@router.get("/{topic_id}/history", response_model=list[TopicEvent])
+def topic_history(
+    topic_id: int,
+    user: CurrentUser = Depends(require_role(*ANY_ROLE)),
+    db: Session = Depends(get_db),
+) -> list[TopicEvent]:
+    """Lịch sử đề tài: giao đề tài, nộp/duyệt đề cương, Bộ môn phê duyệt, báo cáo."""
+    return student_history.topic_history(db, user, topic_id)

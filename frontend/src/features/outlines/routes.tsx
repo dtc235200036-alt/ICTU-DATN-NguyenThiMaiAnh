@@ -8,11 +8,11 @@ export const routes: AppRoute[] = [
   {
     path: '/de-cuong',
     roles: ['SINH_VIEN'],
-    breadcrumb: ['Quản lý đề cương', 'Nộp đề cương / báo cáo cuối'],
+    breadcrumb: ['Quản lý đề cương', 'Nộp đề cương'],
     element: <OutlinePage />,
     menu: {
       roles: ['SINH_VIEN'],
-      label: 'Đề cương',
+      label: 'Nộp đề cương',
       order: 40,
     },
   },

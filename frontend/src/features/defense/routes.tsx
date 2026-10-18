@@ -33,11 +33,11 @@ export const routes: AppRoute[] = [
   {
     path: '/bao-ve',
     roles: ['SINH_VIEN'],
-    breadcrumb: ['Bảo vệ', 'Lịch và kết quả bảo vệ'],
+    breadcrumb: ['Lịch bảo vệ'],
     element: <MyDefensePage />,
     menu: {
       roles: ['SINH_VIEN'],
-      label: 'Bảo vệ',
+      label: 'Lịch bảo vệ',
       order: 60,
     },
   },

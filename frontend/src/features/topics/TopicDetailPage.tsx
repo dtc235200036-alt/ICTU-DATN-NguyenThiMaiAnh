@@ -13,7 +13,10 @@ import { AxiosError } from 'axios'
 import { useNavigate, useParams } from 'react-router'
 
 import { getErrorMessage } from '../../api/client'
+import { DownloadError, downloadFile } from '../../api/download'
+import { formatBytes, formatDate } from '../../utils/format'
 import ForbiddenPage from '../auth/ForbiddenPage'
+import { dinhHuongLabel } from '../dinh-huong/api'
 import { TRANG_THAI_DE_TAI } from './constants'
 import { useSubmitTopic, useTopic } from './api'
 import type { SavedChiTietTrungLap } from './api'
@@ -32,7 +35,7 @@ function formatThoiDiem(iso: string): string {
 }
 
 /**
- * MH-07 "Chi tiết đề tài được giao" (§3.4.7 "Xem", UC1.2): Đợt đồ án, Lĩnh vực,
+ * MH-07 "Chi tiết đề tài được giao" (§3.4.7 "Xem", UC1.2): Đợt đồ án, Định hướng,
  * GVHD, Sinh viên, Mô tả, kết quả kiểm tra trùng tên đã lưu (UC0.6), cùng các
  * hành động Sửa / Giao đề tài cho sinh viên khi người xem là GVHD sở hữu và đề
  * tài còn ở Nháp.
@@ -96,7 +99,7 @@ export default function TopicDetailPage() {
         <Descriptions.Item label="Đợt đồ án">
           {topic.dot_do_an.ten_dot} ({topic.dot_do_an.khoa})
         </Descriptions.Item>
-        <Descriptions.Item label="Lĩnh vực">{topic.linh_vuc ?? '—'}</Descriptions.Item>
+        <Descriptions.Item label="Định hướng">{dinhHuongLabel(topic.dinh_huong)}</Descriptions.Item>
         <Descriptions.Item label="Giảng viên hướng dẫn">
           {topic.giang_vien_huong_dan
             ? `${topic.giang_vien_huong_dan.ho_ten}${
@@ -109,7 +112,26 @@ export default function TopicDetailPage() {
             ? `${topic.sinh_vien.ho_ten}${topic.sinh_vien.ma ? ` (${topic.sinh_vien.ma})` : ''}`
             : '—'}
         </Descriptions.Item>
+        <Descriptions.Item label="Ngày giao">{formatDate(topic.ngay_giao)}</Descriptions.Item>
         <Descriptions.Item label="Mô tả">{topic.mo_ta ?? '—'}</Descriptions.Item>
+        <Descriptions.Item label="File đính kèm">
+          {topic.tep_dinh_kem ? (
+            <Button
+              type="link"
+              style={{ padding: 0 }}
+              onClick={() => {
+                const tep = topic.tep_dinh_kem!
+                downloadFile(`/documents/${tep.id}/download`, tep.ten_goc).catch((err: unknown) =>
+                  message.error(err instanceof DownloadError ? err.message : 'Không tải được file'),
+                )
+              }}
+            >
+              ⬇ {topic.tep_dinh_kem.ten_goc} ({formatBytes(topic.tep_dinh_kem.kich_thuoc)})
+            </Button>
+          ) : (
+            '—'
+          )}
+        </Descriptions.Item>
       </Descriptions>
 
       {topic.kiem_tra_ten && (

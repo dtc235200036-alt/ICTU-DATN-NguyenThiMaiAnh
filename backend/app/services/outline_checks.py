@@ -12,7 +12,7 @@ chứng thư tới CA gốc."""
 import re
 import unicodedata
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 from cryptography import x509
 from cryptography.hazmat.primitives.serialization import pkcs7
@@ -157,7 +157,7 @@ def kiem_tra_noi_dung(doc: TaiLieuDoAn | None) -> CheckItem:
 # --- Chữ ký số PDF -----------------------------------------------------------
 
 _BYTE_RANGE_RE = re.compile(rb"/ByteRange\s*\[\s*(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s*\]")
-_M_RE = re.compile(rb"/M\s*\(D:(\d{14})")
+_M_RE = re.compile(rb"/M\s*\(D:(\d{14})(?:([Zz+\-])(\d{2})?'?(\d{2})?)?")
 
 
 @dataclass
@@ -223,16 +223,29 @@ def doc_chu_ky_so(content: bytes) -> ChuKySo | None:
         vung = content[max(0, m.start() - 4096) : m.end() + 4096]
         m_time = _M_RE.search(vung)
         if m_time is not None:
-            try:
-                thoi_diem = datetime.strptime(m_time.group(1).decode(), "%Y%m%d%H%M%S")
-            except ValueError:
-                thoi_diem = None
+            thoi_diem = _thoi_diem_utc(m_time)
         return ChuKySo(
             nguoi_ky=nguoi_ky,
             thoi_diem_ky=thoi_diem,
             phu_toan_bo_file=(c + d == len(content.rstrip(b"\r\n")) or c + d == len(content)),
         )
     return None
+
+
+def _thoi_diem_utc(m: re.Match) -> datetime | None:
+    """`/M (D:YYYYMMDDHHmmSS+07'00')` -> UTC naive (quy ước lưu thời điểm của hệ thống)."""
+    try:
+        local = datetime.strptime(m.group(1).decode(), "%Y%m%d%H%M%S")
+    except ValueError:
+        return None
+    dau = (m.group(2) or b"Z").decode()
+    if dau in ("Z", "z"):
+        return local
+    gio = int(m.group(3) or 0)
+    phut = int(m.group(4) or 0)
+    lech = timedelta(hours=gio, minutes=phut)
+    tz = timezone(lech if dau == "+" else -lech)
+    return local.replace(tzinfo=tz).astimezone(timezone.utc).replace(tzinfo=None)
 
 
 def mo_ta_chu_ky(chu_ky: ChuKySo) -> str:

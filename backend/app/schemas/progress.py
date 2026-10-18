@@ -98,6 +98,7 @@ class ProgressRowOut(BaseModel):
     de_tai: TopicRef
     o: list[ProgressCellOut]
     tre_moc: bool
+    trang_thai_de_cuong: str = "CHUA_NOP"
 
 
 class ProgressDashboardOut(BaseModel):
@@ -108,3 +109,7 @@ class ProgressDashboardOut(BaseModel):
     page: int
     page_size: int
     so_sv_tre_moc: int
+    # Tiến độ toàn khoa: tổng SV có đề tài, đã nộp đề cương, chưa hoàn thành mốc.
+    tong_sv: int = 0
+    da_nop_de_cuong: int = 0
+    chua_hoan_thanh: int = 0

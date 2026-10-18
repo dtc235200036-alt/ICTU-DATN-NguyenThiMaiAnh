@@ -19,6 +19,8 @@ class DocumentOut(BaseModel):
     # WR-05: văn bản trích xuất vượt AI_DOCUMENT_MAX_CHARS — không kiểm tra
     # trùng lặp tự động được, "Kiểm tra lại" không có tác dụng.
     qua_dai_kiem_tra: bool = False
+    # 0016: ghi chú người nộp kèm phiên bản.
+    ghi_chu: str | None = None
 
 
 class CheckSummary(BaseModel):

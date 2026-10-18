@@ -51,6 +51,29 @@ export interface SvDashboardOut {
   tien_do: SvMilestoneStep[]
   moc_tiep_theo: SvNextMilestone | null
   bao_ve: SvDefenseOut | null
+  bao_cao_cuoi_da_nop: boolean
+  lop: string | null
+}
+
+export interface SubmissionRow {
+  loai: 'DE_TAI' | 'DE_CUONG' | 'TIEN_DO' | 'BAO_CAO_CUOI' | string
+  noi_dung: string
+  thoi_diem_nop: string | null
+  han_cuoi: string | null
+  trang_thai: string
+  trang_thai_label: string
+  tai_lieu_id: number | null
+}
+
+/** "Lịch sử nộp" của SV (đề cương, báo cáo tiến độ kèm hạn, báo cáo cuối). */
+export function useMySubmissions() {
+  return useQuery({
+    queryKey: ['dashboard', 'sinh-vien', 'lich-su-nop'],
+    queryFn: async () => {
+      const { data } = await api.get<SubmissionRow[]>('/dashboard/sinh-vien/lich-su-nop')
+      return data
+    },
+  })
 }
 
 export interface GvTopicItem {
@@ -60,7 +83,12 @@ export interface GvTopicItem {
   sinh_vien: string | null
 }
 
-export type LoaiViec = 'GIAO_DE_TAI' | 'DUYET_DE_CUONG' | 'NHAN_XET_TIEN_DO' | 'CHAM_DIEM'
+export type LoaiViec =
+  | 'GIAO_DE_TAI'
+  | 'DUYET_DE_CUONG'
+  | 'NOP_DE_CUONG_BO_MON'
+  | 'NHAN_XET_TIEN_DO'
+  | 'CHAM_DIEM'
 
 export interface GvTaskItem {
   loai: LoaiViec
@@ -126,6 +154,7 @@ export interface BmDashboardOut {
   hoi_dong_sap_toi: BmUpcomingCommittee[]
   /** WR-06: tài liệu đã kiểm tra xong nhưng chưa vào chỉ mục AI */
   tai_lieu_chua_index: number
+  de_cuong_cho_bo_mon_duyet: number
 }
 
 export function useSvDashboard() {

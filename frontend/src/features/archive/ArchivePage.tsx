@@ -157,6 +157,12 @@ export default function ArchivePage() {
 
   const columns: ColumnsType<ArchiveListItem> = [
     {
+      title: 'STT',
+      key: 'stt',
+      width: 60,
+      render: (_v, _r, index) => (page - 1) * pageSize + index + 1,
+    },
+    {
       title: 'Tên đề tài',
       dataIndex: 'ten_de_tai',
       render: (_value, record) => (
@@ -207,6 +213,26 @@ export default function ArchivePage() {
     const diemIdx = columns.findIndex((col) => 'dataIndex' in col && col.dataIndex === 'diem')
     if (diemIdx >= 0) columns.splice(diemIdx, 1)
   }
+  columns.push({
+    title: 'Tải xuống',
+    key: 'tai_xuong',
+    width: 110,
+    render: (_v, record) =>
+      record.co_file ? (
+        <Button
+          size="small"
+          onClick={() =>
+            downloadFile(`/archive/${record.id}/file`, `${record.ten_de_tai}.pdf`).catch((err: unknown) =>
+              message.error(err instanceof DownloadError ? err.message : 'Không tải được file'),
+            )
+          }
+        >
+          Tải xuống
+        </Button>
+      ) : (
+        '—'
+      ),
+  })
 
   if (isBoMon) {
     columns.push({

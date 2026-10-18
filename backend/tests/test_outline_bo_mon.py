@@ -82,7 +82,9 @@ def test_signature_detection(pdf_bytes):
     assert chu_ky is not None
     assert chu_ky.nguoi_ky == "Tran Van A"
     assert chu_ky.phu_toan_bo_file is True
-    assert chu_ky.thoi_diem_ky is not None and chu_ky.thoi_diem_ky.year == 2026
+    # /M (D:20261018093000+07'00') -> 02:30 UTC
+    assert chu_ky.thoi_diem_ky is not None
+    assert (chu_ky.thoi_diem_ky.hour, chu_ky.thoi_diem_ky.minute) == (2, 30)
 
     tampered = signed + b"\n% edited after signing\n"
     assert outline_checks.doc_chu_ky_so(tampered).phu_toan_bo_file is False
@@ -371,3 +373,72 @@ def test_topic_dinh_huong_and_attachment(
     resp = client.get(f"/api/documents/{tep['id']}/download", headers=auth_headers(sv))
     assert resp.status_code == 200
     assert resp.content == attach
+
+
+def test_progress_dashboard_outline_filters(
+    client, make_account, auth_headers, make_assigned_topic, pdf_bytes, db
+):
+    from app.models.de_tai import DA_PHAN_CONG, GIANG_VIEN, DeTai
+
+    sv1, gv, bm, topic1, ten_file = _setup(db, make_account, make_assigned_topic)
+    sv2 = make_account(VaiTro.SINH_VIEN)
+    topic2 = DeTai(
+        dot_do_an_id=topic1.dot_do_an_id,
+        giang_vien_id=gv.giang_vien_id,
+        sinh_vien_id=sv2.sinh_vien_id,
+        ten_de_tai="Đề tài thứ hai chưa nộp đề cương",
+        trang_thai=DA_PHAN_CONG,
+        loai_nguoi_de_xuat=GIANG_VIEN,
+    )
+    db.add(topic2)
+    db.commit()
+    _submit(client, auth_headers(sv1), topic1.id, ten_file, pdf_bytes(["v1"]))
+
+    base = f"/api/progress/dashboard?dot_do_an_id={topic1.dot_do_an_id}"
+    data = client.get(base, headers=auth_headers(bm)).json()
+    assert (data["tong_sv"], data["da_nop_de_cuong"], data["chua_hoan_thanh"]) == (2, 1, 2)
+    states = {r["de_tai"]["id"]: r["trang_thai_de_cuong"] for r in data["items"]}
+    assert states == {topic1.id: "CHO_DUYET", topic2.id: "CHUA_NOP"}
+
+    def ids(query: str) -> list[int]:
+        resp = client.get(base + query, headers=auth_headers(bm))
+        assert resp.status_code == 200, resp.text
+        return [r["de_tai"]["id"] for r in resp.json()["items"]]
+
+    assert ids("&loc_de_cuong=DA_NOP") == [topic1.id]
+    assert ids("&loc_de_cuong=CHO_DUYET") == [topic1.id]
+    assert ids("&loc_de_cuong=CHUA_NOP") == [topic2.id]
+    assert ids("&q=thứ hai") == [topic2.id]
+
+
+def test_topic_history_and_submissions(
+    client, make_account, auth_headers, make_assigned_topic, pdf_bytes, db
+):
+    sv, gv, _bm, topic, ten_file = _setup(db, make_account, make_assigned_topic)
+    other = make_account(VaiTro.SINH_VIEN)
+    body = _submit(client, auth_headers(sv), topic.id, ten_file, pdf_bytes(["v1"]))
+    _gv_approve(client, auth_headers(gv), topic.id, body["phien_ban"][0]["tai_lieu"]["id"])
+
+    resp = client.get(f"/api/topics/{topic.id}/history", headers=auth_headers(other))
+    assert resp.status_code == 403
+    events = client.get(f"/api/topics/{topic.id}/history", headers=auth_headers(sv)).json()
+    noi_dung = [e["noi_dung"] for e in events]
+    assert noi_dung[0].startswith("GVHD duyệt đề cương phiên bản 1")
+    assert "Nộp đề cương phiên bản 1" in noi_dung
+
+    resp = client.get("/api/dashboard/sinh-vien/lich-su-nop", headers=auth_headers(gv))
+    assert resp.status_code == 403
+    rows = client.get("/api/dashboard/sinh-vien/lich-su-nop", headers=auth_headers(sv)).json()
+    outline_rows = [r for r in rows if r["loai"] == "DE_CUONG"]
+    assert outline_rows == [
+        {
+            "loai": "DE_CUONG",
+            "noi_dung": "Nộp đề cương (phiên bản 1)",
+            "thoi_diem_nop": outline_rows[0]["thoi_diem_nop"],
+            "han_cuoi": None,
+            "trang_thai": "GVHD_DA_DUYET",
+            "trang_thai_label": "GVHD đã duyệt",
+            "tai_lieu_id": body["phien_ban"][0]["tai_lieu"]["id"],
+        }
+    ]
+    assert rows[0]["loai"] == "DE_TAI"

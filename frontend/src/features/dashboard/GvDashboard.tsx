@@ -11,6 +11,7 @@ import type { GvTaskItem, GvTopicItem, LoaiViec } from './api'
 const LOAI_VIEC: Record<LoaiViec, { label: string; color: string; action: string }> = {
   GIAO_DE_TAI: { label: 'Giao đề tài', color: 'cyan', action: 'Giao' },
   DUYET_DE_CUONG: { label: 'Duyệt đề cương', color: 'blue', action: 'Duyệt' },
+  NOP_DE_CUONG_BO_MON: { label: 'Nộp đề cương lên Bộ môn', color: 'geekblue', action: 'Nộp' },
   NHAN_XET_TIEN_DO: { label: 'Nhận xét tiến độ', color: 'gold', action: 'Xem' },
   CHAM_DIEM: { label: 'Chấm điểm bảo vệ', color: 'purple', action: 'Chấm điểm' },
 }

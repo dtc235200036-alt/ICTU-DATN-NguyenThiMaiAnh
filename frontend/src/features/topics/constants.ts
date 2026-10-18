@@ -14,13 +14,3 @@ export const TRANG_THAI_LOC_OPTIONS = ['NHAP', 'DA_PHAN_CONG'].map((value) => ({
   value,
   label: TRANG_THAI_DE_TAI[value].label,
 }))
-
-// D-04: lĩnh vực đề tài — danh sách cố định cho MH-06 (Select).
-export const LINH_VUC_OPTIONS = [
-  'Trí tuệ nhân tạo & Xử lý ngôn ngữ tự nhiên',
-  'Hệ thống thông tin',
-  'Mạng máy tính & An toàn thông tin',
-  'Công nghệ phần mềm',
-  'IoT & Hệ thống nhúng',
-  'Khoa học dữ liệu',
-]

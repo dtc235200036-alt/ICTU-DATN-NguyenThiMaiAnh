@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { App as AntApp, Alert, Button, Card, Form, Input, Select, Tag } from 'antd'
+import { App as AntApp, Alert, Button, Card, Form, Input, Select, Tag, Upload } from 'antd'
 import type { InputRef } from 'antd'
 import { useNavigate, useParams, useSearchParams } from 'react-router'
 
@@ -8,9 +8,10 @@ import { useAuthStore } from '../../stores/auth'
 import { useMyStudents } from '../assignments/api'
 import { useCohorts } from '../cohorts/api'
 import ForbiddenPage from '../auth/ForbiddenPage'
-import { LINH_VUC_OPTIONS } from './constants'
+import { dinhHuongLabel, useDinhHuong } from '../dinh-huong/api'
 import TitleCheckAlert from './TitleCheckAlert'
 import {
+  useAttachTopicFile,
   useCheckTitle,
   useCreateTopic,
   useSubmitTopic,
@@ -24,7 +25,7 @@ const { TextArea } = Input
 interface FormValues {
   dot_do_an_id: number
   ten_de_tai: string
-  linh_vuc?: string
+  dinh_huong_id?: number
   mo_ta?: string
   sinh_vien_id: number
 }
@@ -58,6 +59,9 @@ export default function TopicFormPage() {
   const updateMutation = useUpdateTopic()
   const submitMutation = useSubmitTopic()
   const checkTitleMutation = useCheckTitle()
+  const attachMutation = useAttachTopicFile()
+  const { data: dinhHuong, isLoading: dinhHuongLoading } = useDinhHuong(true)
+  const [tepDinhKem, setTepDinhKem] = useState<File | null>(null)
 
   // UC0.6/FR-DT-02: kết quả kiểm tra trùng tên tức thời (chưa lưu — bản lưu
   // chỉ xảy ra khi GVHD thật sự giao đề tài, ở service topics.py).
@@ -70,7 +74,7 @@ export default function TopicFormPage() {
       form.setFieldsValue({
         dot_do_an_id: topic.dot_do_an.id,
         ten_de_tai: topic.ten_de_tai,
-        linh_vuc: topic.linh_vuc ?? undefined,
+        dinh_huong_id: topic.dinh_huong?.id,
         mo_ta: topic.mo_ta ?? undefined,
         sinh_vien_id: topic.sinh_vien?.id,
       })
@@ -119,13 +123,28 @@ export default function TopicFormPage() {
   const buildInput = (values: FormValues): TopicFormInput => ({
     dot_do_an_id: values.dot_do_an_id,
     ten_de_tai: values.ten_de_tai,
-    linh_vuc: values.linh_vuc ?? null,
+    linh_vuc: topic?.linh_vuc ?? null,
+    dinh_huong_id: values.dinh_huong_id ?? null,
     mo_ta: values.mo_ta ?? null,
     sinh_vien_id: values.sinh_vien_id,
   })
 
   const isSaving =
-    createMutation.isPending || updateMutation.isPending || submitMutation.isPending
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    submitMutation.isPending ||
+    attachMutation.isPending
+
+  // File đính kèm gửi sau khi đề tài đã có id (lưu nháp hoặc giao).
+  const uploadAttachment = async (savedId: number | undefined) => {
+    if (tepDinhKem === null || savedId === undefined) return
+    try {
+      await attachMutation.mutateAsync({ id: savedId, file: tepDinhKem })
+      setTepDinhKem(null)
+    } catch (err) {
+      message.warning(`Đề tài đã lưu nhưng chưa đính kèm được file: ${getErrorMessage(err)}`)
+    }
+  }
 
   // Mọi lần đổi tên đề tài làm kết quả cũ (và xác nhận "vẫn giao") hết hiệu lực
   // (UC1.1 A1/A2) — check tiếp theo chạy khi rời ô (onBlur) hoặc lúc gửi.
@@ -182,6 +201,7 @@ export default function TopicFormPage() {
         const created = await createMutation.mutateAsync({ ...buildInput(values), gui: false })
         savedId = created.id
       }
+      await uploadAttachment(savedId)
       message.success('Đã lưu nháp đề tài')
       if (savedId !== undefined) {
         navigate(`/de-tai/${savedId}`)
@@ -191,7 +211,7 @@ export default function TopicFormPage() {
     }
   }
 
-  const doSubmitProposal = async (values: FormValues) => {
+  const doAssign = async (values: FormValues) => {
     try {
       let savedId = topicId
       if (editing && topicId !== undefined) {
@@ -201,6 +221,7 @@ export default function TopicFormPage() {
         const created = await createMutation.mutateAsync({ ...buildInput(values), gui: true })
         savedId = created.id
       }
+      await uploadAttachment(savedId)
       message.success('Đã giao đề tài cho sinh viên')
       if (savedId !== undefined) {
         navigate(`/de-tai/${savedId}`)
@@ -210,7 +231,7 @@ export default function TopicFormPage() {
     }
   }
 
-  const handleSubmitProposal = async () => {
+  const handleAssign = async () => {
     let values: FormValues
     try {
       values = await form.validateFields()
@@ -228,7 +249,7 @@ export default function TopicFormPage() {
       return
     }
 
-    await doSubmitProposal(values)
+    await doAssign(values)
   }
 
   const handleEditTitle = () => {
@@ -312,26 +333,62 @@ export default function TopicFormPage() {
           />
         </Form.Item>
 
-        <Form.Item label="Lĩnh vực" name="linh_vuc">
+        <Form.Item
+          label="Định hướng"
+          name="dinh_huong_id"
+          extra="Mã định hướng là phần đầu tên file đề cương của sinh viên (vd. H01.MSSV.Họ tên.Lớp)."
+          rules={[{ required: true, message: 'Vui lòng chọn định hướng' }]}
+        >
           <Select
-            allowClear
-            placeholder="Chọn lĩnh vực"
-            options={LINH_VUC_OPTIONS.map((v) => ({ value: v, label: v }))}
+            showSearch
+            optionFilterProp="label"
+            loading={dinhHuongLoading}
+            placeholder="Chọn định hướng"
+            options={(dinhHuong ?? []).map((d) => ({ value: d.id, label: dinhHuongLabel(d) }))}
           />
         </Form.Item>
 
         <Form.Item label="Mô tả" name="mo_ta">
-          <TextArea maxLength={5000} showCount rows={5} />
+          <TextArea maxLength={5000} showCount rows={4} />
+        </Form.Item>
+
+        <Form.Item
+          label="File đính kèm"
+          extra={
+            topic?.tep_dinh_kem
+              ? `Đã đính kèm: ${topic.tep_dinh_kem.ten_goc} — chọn file mới để thay.`
+              : 'DOCX hoặc PDF, tối đa 20 MB (không bắt buộc).'
+          }
+        >
+          <Upload
+            accept=".docx,.pdf"
+            maxCount={1}
+            beforeUpload={(file) => {
+              setTepDinhKem(file)
+              return false
+            }}
+            onRemove={() => setTepDinhKem(null)}
+            fileList={
+              tepDinhKem
+                ? [{ uid: '-1', name: tepDinhKem.name, status: 'done', size: tepDinhKem.size }]
+                : []
+            }
+          >
+            <Button>Chọn file</Button>
+          </Upload>
         </Form.Item>
       </Form>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+        <Button onClick={() => navigate(-1)} disabled={isSaving}>
+          Hủy
+        </Button>
         <Button onClick={handleSaveDraft} disabled={noCohortOpen} loading={isSaving}>
           Lưu nháp
         </Button>
         <Button
           type="primary"
-          onClick={handleSubmitProposal}
+          onClick={handleAssign}
           disabled={noCohortOpen}
           loading={isSaving || checkTitleMutation.isPending}
         >

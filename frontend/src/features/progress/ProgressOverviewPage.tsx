@@ -14,6 +14,7 @@ import {
   Space,
   Statistic,
   Table,
+  Tabs,
   Tag,
   Typography,
 } from 'antd'
@@ -22,8 +23,9 @@ import { useSearchParams } from 'react-router'
 
 import { getErrorMessage } from '../../api/client'
 import { useCohorts } from '../cohorts/api'
+import { trangThaiDeCuong } from '../outlines/constants'
 import { useDeleteMilestone, useMilestones, useProgressDashboard, useSaveMilestone } from './api'
-import type { MilestoneOut, ProgressRow } from './api'
+import type { LocDeCuong, MilestoneOut, ProgressRow } from './api'
 import { TRANG_THAI_MOC, formatDay } from './constants'
 
 const { Text } = Typography
@@ -46,11 +48,15 @@ export default function ProgressOverviewPage() {
   const dotParam = searchParams.get('dot_do_an_id')
   const chiTreMoc = searchParams.get('chi_tre_moc') === '1'
   const page = Number(searchParams.get('page') ?? '1') || 1
+  const q = searchParams.get('q') ?? undefined
+  const locDeCuong = (searchParams.get('loc_de_cuong') as LocDeCuong | null) ?? undefined
 
   const { data: cohorts } = useCohorts()
   const { data: dashboard, isFetching } = useProgressDashboard({
     dot_do_an_id: dotParam ? Number(dotParam) : undefined,
     chi_tre_moc: chiTreMoc,
+    q,
+    loc_de_cuong: locDeCuong,
     page,
     page_size: PAGE_SIZE,
   })
@@ -152,12 +158,31 @@ export default function ProgressOverviewPage() {
   const moc = dashboard?.moc ?? []
   const progressColumns: ColumnsType<ProgressRow> = [
     {
+      title: 'STT',
+      key: 'stt',
+      width: 60,
+      render: (_v, _r, index) => (page - 1) * PAGE_SIZE + index + 1,
+    },
+    {
       title: 'Sinh viên',
       key: 'sinh_vien',
       render: (_v, r) =>
         r.sinh_vien ? `${r.sinh_vien.ho_ten}${r.sinh_vien.ma ? ` (${r.sinh_vien.ma})` : ''}` : '—',
     },
     { title: 'Đề tài', key: 'de_tai', render: (_v, r) => r.de_tai.ten_de_tai },
+    {
+      title: 'GVHD',
+      key: 'giang_vien',
+      render: (_v, r) => r.giang_vien?.ho_ten ?? '—',
+    },
+    {
+      title: 'Đề cương',
+      key: 'de_cuong',
+      render: (_v, r) => {
+        const info = trangThaiDeCuong(r.trang_thai_de_cuong)
+        return <Tag color={info.color}>{info.label}</Tag>
+      },
+    },
     ...moc.map((m) => ({
       title: m.ten_moc,
       key: `moc-${m.id}`,
@@ -174,7 +199,7 @@ export default function ProgressOverviewPage() {
     <Space direction="vertical" size={16} style={{ width: '100%' }}>
       <Card>
         <Row gutter={[16, 16]} align="middle">
-          <Col xs={24} md={14}>
+          <Col xs={24} md={10}>
             <Text type="secondary" style={{ display: 'block', marginBottom: 4 }}>
               Đợt đồ án
             </Text>
@@ -191,7 +216,16 @@ export default function ProgressOverviewPage() {
               }))}
             />
           </Col>
-          <Col xs={24} md={10}>
+          <Col xs={12} md={3}>
+            <Statistic title="Tổng SV" value={dashboard?.tong_sv ?? 0} />
+          </Col>
+          <Col xs={12} md={4}>
+            <Statistic title="Đã nộp đề cương" value={dashboard?.da_nop_de_cuong ?? 0} />
+          </Col>
+          <Col xs={12} md={4}>
+            <Statistic title="Chưa hoàn thành" value={dashboard?.chua_hoan_thanh ?? 0} />
+          </Col>
+          <Col xs={12} md={3}>
             <Statistic
               title="SV trễ mốc"
               value={dashboard?.so_sv_tre_moc ?? 0}
@@ -204,7 +238,7 @@ export default function ProgressOverviewPage() {
       <Row gutter={[16, 16]}>
         <Col xs={24} xl={16}>
           <Card
-            title="Tiến độ Sinh viên"
+            title="Tiến độ toàn khoa"
             extra={
               <Checkbox
                 checked={chiTreMoc}
@@ -216,6 +250,25 @@ export default function ProgressOverviewPage() {
               </Checkbox>
             }
           >
+            <Input.Search
+              allowClear
+              defaultValue={q}
+              placeholder="Tìm tên SV, mã SV, đề tài, GVHD..."
+              style={{ maxWidth: 420, marginBottom: 8 }}
+              onSearch={(value) => updateParams({ q: value.trim() || undefined, page: undefined })}
+            />
+            <Tabs
+              activeKey={locDeCuong ?? 'TAT_CA'}
+              onChange={(key) =>
+                updateParams({ loc_de_cuong: key === 'TAT_CA' ? undefined : key, page: undefined })
+              }
+              items={[
+                { key: 'TAT_CA', label: 'Tất cả' },
+                { key: 'DA_NOP', label: 'Đã nộp đề cương' },
+                { key: 'CHO_DUYET', label: 'Chờ duyệt' },
+                { key: 'CHUA_NOP', label: 'Chưa nộp' },
+              ]}
+            />
             <Table<ProgressRow>
               rowKey={(r) => r.de_tai.id}
               columns={progressColumns}

@@ -310,6 +310,7 @@ def to_document_out(doc: TaiLieuDoAn) -> DocumentOut:
         trich_xuat_loi=doc.trich_xuat_loi,
         tom_tat=tom_tat,
         qua_dai_kiem_tra=too_long_for_check(doc.noi_dung_trich_xuat),
+        ghi_chu=doc.ghi_chu,
     )
 
 

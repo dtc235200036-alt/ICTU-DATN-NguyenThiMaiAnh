@@ -64,6 +64,8 @@ class SvDashboardOut(BaseModel):
     tien_do: list[SvMilestoneStep] = []
     moc_tiep_theo: SvNextMilestone | None = None
     bao_ve: SvDefenseOut | None = None
+    bao_cao_cuoi_da_nop: bool = False
+    lop: str | None = None
 
 
 class GvTopicItem(BaseModel):

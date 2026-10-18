@@ -22,6 +22,8 @@ export interface DocumentOut {
   tom_tat: string | null
   /** WR-05: văn bản quá dài để gửi dịch vụ AI — LOI không thử lại được */
   qua_dai_kiem_tra: boolean
+  /** Ghi chú người nộp kèm phiên bản (0016). */
+  ghi_chu?: string | null
 }
 
 export type CheckStatus = 'DANG_KIEM_TRA' | 'HOAN_TAT' | 'LOI'

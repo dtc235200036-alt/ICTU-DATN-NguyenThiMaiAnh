@@ -1,6 +1,7 @@
 import { Navigate } from 'react-router'
 
 import type { AppRoute } from '../../app/registry'
+import MyTopicPage from './MyTopicPage'
 import TopicDetailPage from './TopicDetailPage'
 import TopicFormPage from './TopicFormPage'
 import TopicListPage from './TopicListPage'
@@ -25,15 +26,11 @@ export const routes: AppRoute[] = [
     },
   },
   {
-    path: '/de-tai/cua-toi-sv-menu',
+    path: '/de-tai-cua-toi',
     roles: ['SINH_VIEN'],
-    element: <Navigate to="/de-tai?pham_vi=cua_toi" replace />,
-    menu: {
-      roles: ['SINH_VIEN'],
-      label: 'Đề tài của tôi',
-      order: 20,
-      to: '/de-tai?pham_vi=cua_toi',
-    },
+    breadcrumb: ['Đề tài của tôi'],
+    element: <MyTopicPage />,
+    menu: { roles: ['SINH_VIEN'], label: 'Đề tài của tôi', order: 20 },
   },
   {
     path: '/de-tai/cua-toi-gv-menu',
