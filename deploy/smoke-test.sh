@@ -170,7 +170,8 @@ status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/topic-approvals" -H
 echo "OK: SV tạo đề tài / kiểm tra trùng tên -> 403; route đăng ký và duyệt đề tài đã gỡ -> 404"
 
 # UC0.8 (0015): phân công GVHD — Bộ môn gán/import, GV xem lớp của mình, SV
-# xem GVHD của mình; seed gán DTC235200016 -> GV001 trong đợt demo.
+# xem GVHD của mình. GVHD của DTC235200016 lấy theo dữ liệu đang có (Bộ môn
+# có thể đã phân công lại khác seed), không cố định GV001.
 for who in GV001 SV001; do
   tok_var="TOKEN_${who}"
   status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/assignments?dot_do_an_id=1" -H "Authorization: Bearer ${!tok_var}")"
@@ -188,12 +189,17 @@ status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/assignments/my-advi
 [ "$status" = "403" ] || fail "GV001 xem /api/assignments/my-advisor không trả 403 (nhận $status)"
 status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/assignments/my-students" -H "Authorization: Bearer ${TOKEN_GV001}")"
 [ "$status" = "200" ] || fail "GV001 xem /api/assignments/my-students không trả 200 (nhận $status)"
-advisor_body="$(curl -sk "$BASE/api/assignments/my-advisor" -H "Authorization: Bearer ${TOKEN_SV001}")"
-advisor_ok="$(printf '%s' "$advisor_body" | python3 -c 'import json,sys
+expected_gv="$(curl -sk "$BASE/api/assignments?dot_do_an_id=1&q=DTC235200016" -H "Authorization: Bearer ${TOKEN_BOMON}" \
+  | python3 -c 'import json,sys
 d = json.load(sys.stdin)
-print(1 if any(r["giang_vien"]["ma"] == "GV001" for r in d) else 0)' 2>/dev/null || true)"
-[ "$advisor_ok" = "1" ] || fail "DTC235200016 xem /api/assignments/my-advisor không thấy GVHD GV001 (seed mặc định) (${advisor_body})"
-echo "OK: /api/assignments — gán/import/xem chỉ bomon (GV001, DTC235200016 bị 403); my-students chỉ GV, my-advisor chỉ SV; DTC235200016 có GVHD GV001"
+print(next((r["giang_vien"]["ma"] for r in d["items"] if r["sinh_vien"]["ma"] == "DTC235200016" and r["giang_vien"]), ""))' 2>/dev/null || true)"
+[ -n "$expected_gv" ] || fail "Bộ môn không thấy GVHD của DTC235200016 trong đợt 1 (/api/assignments)"
+advisor_body="$(curl -sk "$BASE/api/assignments/my-advisor" -H "Authorization: Bearer ${TOKEN_SV001}")"
+advisor_ok="$(printf '%s' "$advisor_body" | EXPECTED_GV="$expected_gv" python3 -c 'import json,os,sys
+d = json.load(sys.stdin)
+print(1 if any(r["dot_do_an"]["id"] == 1 and r["giang_vien"]["ma"] == os.environ["EXPECTED_GV"] for r in d) else 0)' 2>/dev/null || true)"
+[ "$advisor_ok" = "1" ] || fail "DTC235200016 xem /api/assignments/my-advisor không khớp GVHD ${expected_gv} mà Bộ môn đã phân công (${advisor_body})"
+echo "OK: /api/assignments — gán/import/xem chỉ bomon (GV001, DTC235200016 bị 403); my-students chỉ GV, my-advisor chỉ SV; my-advisor của DTC235200016 khớp phân công của Bộ môn (${expected_gv})"
 
 status="$(curl -sk -o /dev/null -w '%{http_code}' "$BASE/api/topics" -H "Authorization: Bearer ${TOKEN_SV001}")"
 [ "$status" = "200" ] || fail "DTC235200016 xem /api/topics không trả 200 (nhận $status)"
