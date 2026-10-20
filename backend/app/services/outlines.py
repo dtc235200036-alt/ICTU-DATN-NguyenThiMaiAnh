@@ -71,6 +71,10 @@ _VIEW_FORBIDDEN_DETAIL = "Bạn không có quyền xem đề cương này"
 _REVIEW_FORBIDDEN_DETAIL = "Chỉ GVHD của đề tài mới được duyệt đề cương"
 _STALE_VERSION_DETAIL = "Sinh viên vừa nộp phiên bản mới, vui lòng tải lại"
 _NOT_PENDING_DETAIL = "Đề cương không còn ở trạng thái Chờ duyệt"
+_NOT_RETURNABLE_DETAIL = "Đề cương không còn ở trạng thái Chờ duyệt hoặc GVHD đã duyệt"
+_RENAME_NOT_ALLOWED_DETAIL = (
+    "Chỉ đổi tên được khi đề cương GVHD đã duyệt, tên file sai quy tắc và định hướng đúng"
+)
 _NHAN_XET_REQUIRED_DETAIL = "Vui lòng nhập nhận xét khi yêu cầu sửa"
 _FORWARD_FORBIDDEN_DETAIL = "Chỉ GVHD của đề tài mới được nộp đề cương lên Bộ môn"
 _NOT_GVHD_APPROVED_DETAIL = "Đề cương chưa được GVHD duyệt hoặc đã nộp lên Bộ môn"
@@ -281,9 +285,12 @@ def get_detail(db: Session, user: CurrentUser, de_tai_id: int) -> OutlineDetail:
         duyet=la_gvhd and trang_thai == DC_CHO_DUYET,
         nop_bo_mon=la_gvhd and trang_thai == DC_GVHD_DA_DUYET,
         duyet_bo_mon=user.vai_tro == VaiTro.BO_MON and trang_thai == DC_CHO_BO_MON_DUYET,
+        tra_lai_sv=la_gvhd and trang_thai == DC_GVHD_DA_DUYET,
     )
 
     latest_doc = docs[0] if docs else None
+    checks = kiem_tra_nop(topic, latest_doc) if latest_doc is not None else []
+    quyen.doi_ten_file = quyen.nop_bo_mon and _rename_allowed(topic, checks)
     return OutlineDetail(
         de_tai_id=topic.id,
         ten_de_tai=topic.ten_de_tai,
@@ -298,7 +305,7 @@ def get_detail(db: Session, user: CurrentUser, de_tai_id: int) -> OutlineDetail:
         nop_bo_mon_luc=de_cuong.nop_bo_mon_luc if de_cuong is not None else None,
         ket_qua_bo_mon=de_cuong.ket_qua_bo_mon if de_cuong is not None else None,
         luot_duyet_bo_mon=_bo_mon_reviews(db, de_cuong.id) if de_cuong is not None else [],
-        kiem_tra_nop=kiem_tra_nop(topic, latest_doc) if latest_doc is not None else [],
+        kiem_tra_nop=checks,
         ten_file_mau=outline_checks.ten_file_mau(
             topic.sinh_vien, topic.dinh_huong.ma if topic.dinh_huong is not None else None
         ),
@@ -583,28 +590,39 @@ def _review_yeu_cau_sua(
     if not nhan_xet:
         raise HTTPException(status_code=422, detail=_NHAN_XET_REQUIRED_DETAIL)
 
+    # Trả lại được cả khi GVHD đã duyệt nhưng chưa nộp lên Bộ môn (vd. tên file
+    # sai nên không nộp lên được) — khi đó lượt duyệt của phiên bản được ghi đè.
     stmt = (
         update(DeCuong)
         .where(DeCuong.id == de_cuong.id)
-        .where(DeCuong.trang_thai == DC_CHO_DUYET)
+        .where(DeCuong.trang_thai.in_((DC_CHO_DUYET, DC_GVHD_DA_DUYET)))
         .values(trang_thai=DC_YEU_CAU_SUA)
     )
     result = db.execute(stmt)
     if result.rowcount == 0:
         db.rollback()
-        raise HTTPException(status_code=409, detail=_NOT_PENDING_DETAIL)
+        raise HTTPException(status_code=409, detail=_NOT_RETURNABLE_DETAIL)
 
     try:
-        db.add(
-            LuotDuyetDeCuong(
-                de_cuong_id=de_cuong.id,
-                tai_lieu_do_an_id=latest_version.id,
-                giang_vien_id=user.giang_vien_id,
-                ket_qua=KET_QUA_YEU_CAU_SUA,
-                nhan_xet=nhan_xet,
-                thoi_diem=now_utc(),
+        da_duyet = db.execute(
+            select(LuotDuyetDeCuong).where(LuotDuyetDeCuong.tai_lieu_do_an_id == latest_version.id)
+        ).scalar_one_or_none()
+        if da_duyet is not None:
+            da_duyet.giang_vien_id = user.giang_vien_id
+            da_duyet.ket_qua = KET_QUA_YEU_CAU_SUA
+            da_duyet.nhan_xet = nhan_xet
+            da_duyet.thoi_diem = now_utc()
+        else:
+            db.add(
+                LuotDuyetDeCuong(
+                    de_cuong_id=de_cuong.id,
+                    tai_lieu_do_an_id=latest_version.id,
+                    giang_vien_id=user.giang_vien_id,
+                    ket_qua=KET_QUA_YEU_CAU_SUA,
+                    nhan_xet=nhan_xet,
+                    thoi_diem=now_utc(),
+                )
             )
-        )
         db.flush()
     except IntegrityError:
         db.rollback()
@@ -676,6 +694,54 @@ def forward_to_bo_mon(db: Session, user: CurrentUser, de_tai_id: int) -> Outline
             topic.sinh_vien.tai_khoan_id,
             DE_CUONG_NOP_BO_MON,
             f"GVHD đã nộp đề cương của bạn lên Bộ môn: {topic.ten_de_tai}",
+            lien_ket="/de-cuong",
+        )
+    db.commit()
+    return get_detail(db, user, de_tai_id)
+
+
+def _rename_allowed(topic: DeTai, checks: list[CheckItem]) -> bool:
+    """Đổi tên theo mẫu chỉ khi lỗi DUY NHẤT là tên file — định hướng phải đúng."""
+    dat = {c.ma: c.dat for c in checks}
+    return (
+        topic.sinh_vien is not None
+        and topic.dinh_huong is not None
+        and dat.get("TEN_FILE") is False
+        and dat.get("DINH_HUONG") is True
+    )
+
+
+def rename_to_template(db: Session, user: CurrentUser, de_tai_id: int) -> OutlineDetail:
+    """GVHD đổi tên file phiên bản mới nhất theo mẫu (giữ đuôi file) để nộp
+    được lên Bộ môn; tên cũ được ghi vào nhận xét của lượt duyệt."""
+    topic = _get_topic_or_404(db, de_tai_id)
+    if user.giang_vien_id is None or topic.giang_vien_id != user.giang_vien_id:
+        raise HTTPException(status_code=403, detail=_FORWARD_FORBIDDEN_DETAIL)
+    de_cuong = db.execute(
+        select(DeCuong).where(DeCuong.de_tai_id == de_tai_id).with_for_update()
+    ).scalar_one_or_none()
+    if de_cuong is None or de_cuong.trang_thai != DC_GVHD_DA_DUYET:
+        raise HTTPException(status_code=409, detail=_NOT_GVHD_APPROVED_DETAIL)
+    latest_version = _latest_version_or_none(db, de_cuong.id)
+    if latest_version is None or not _rename_allowed(topic, kiem_tra_nop(topic, latest_version)):
+        db.rollback()
+        raise HTTPException(status_code=409, detail=_RENAME_NOT_ALLOWED_DETAIL)
+
+    ten_cu = latest_version.ten_goc
+    duoi = ten_cu.rsplit(".", 1)[1].lower() if "." in ten_cu else latest_version.dinh_dang.lower()
+    latest_version.ten_goc = outline_checks.ten_file_mau(
+        topic.sinh_vien, topic.dinh_huong.ma if topic.dinh_huong is not None else None, duoi
+    )
+    ghi_nhan = f"GVHD đổi tên file theo mẫu (tên cũ: {ten_cu})"
+    if latest_version.luot_duyet is not None:
+        cu = latest_version.luot_duyet.nhan_xet
+        latest_version.luot_duyet.nhan_xet = f"{cu}\n{ghi_nhan}" if cu else ghi_nhan
+    if topic.sinh_vien is not None:
+        notifications.create(
+            db,
+            topic.sinh_vien.tai_khoan_id,
+            DE_CUONG_DUYET,
+            f"GVHD đã đổi tên file đề cương của bạn thành {latest_version.ten_goc}",
             lien_ket="/de-cuong",
         )
     db.commit()

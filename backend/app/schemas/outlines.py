@@ -53,6 +53,9 @@ class QuyenDeCuongOut(BaseModel):
     # 0016: GVHD nộp lên Bộ môn; Lãnh đạo bộ môn phê duyệt/trả lại.
     nop_bo_mon: bool = False
     duyet_bo_mon: bool = False
+    # GVHD trả lại SV / đổi tên file theo mẫu khi đã duyệt mà chưa nộp lên được.
+    tra_lai_sv: bool = False
+    doi_ten_file: bool = False
 
 
 class OutlineDetail(BaseModel):

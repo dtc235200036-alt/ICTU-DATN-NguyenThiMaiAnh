@@ -26,6 +26,12 @@ from app.services import document_check
 
 _DUOI_HOP_LE = ("pdf", "docx")
 _MA_DINH_HUONG_RE = re.compile(r"^H\d{2}$", re.IGNORECASE)
+# Hậu tố Word/Windows tự thêm vào tên file: "(Repaired)", "(1)", "- Copy",
+# "- Bản sao (2)"... — bỏ trước khi so khớp, các phần còn lại vẫn phải đúng.
+_HAU_TO_RE = re.compile(
+    r"(?:\s*(?:\((?:repaired|đã sửa chữa|đã sửa|\d+)\)|-\s*(?:copy|bản sao)(?:\s*\(\d+\))?))+$",
+    re.IGNORECASE,
+)
 
 
 def _chuan_hoa(value: str | None) -> str:
@@ -59,6 +65,7 @@ def tach_ten_file(ten_goc: str) -> TenFile | None:
     goc, duoi = ten.rsplit(".", 1)
     if duoi.lower() not in _DUOI_HOP_LE:
         return None
+    goc = _HAU_TO_RE.sub("", goc)
     phan = [p.strip() for p in goc.split(".")]
     if len(phan) != 4 or not all(phan):
         return None

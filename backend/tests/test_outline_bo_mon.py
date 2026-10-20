@@ -71,6 +71,14 @@ def test_ten_file_parsing():
     assert outline_checks.tach_ten_file("de-cuong.pdf") is None
     assert outline_checks.tach_ten_file("H1.DTC1.Ten.Lop.pdf") is None
     assert outline_checks.tach_ten_file("H01.DTC1.Ten.Lop.txt") is None
+    # Hậu tố Word/Windows tự thêm được bỏ qua.
+    for ten in (
+        "H01.DTC1.Ten.Lop (Repaired).docx",
+        "H01.DTC1.Ten.Lop - Copy (2).pdf",
+        "H01.DTC1.Ten.Lop (1).PDF",
+    ):
+        tach = outline_checks.tach_ten_file(ten)
+        assert tach is not None and tach.lop == "Lop", ten
 
 
 def test_signature_detection(pdf_bytes):
@@ -236,6 +244,58 @@ def test_forward_blocked_by_wrong_file_name(
     db.rollback()  # bỏ snapshot REPEATABLE READ cũ của phiên test
     de_cuong = db.execute(select(DeCuong).where(DeCuong.de_tai_id == topic.id)).scalar_one()
     assert de_cuong.trang_thai == "GVHD_DA_DUYET"
+
+
+def test_gv_returns_approved_outline_with_wrong_name(
+    client, make_account, auth_headers, make_assigned_topic, pdf_bytes, db
+):
+    sv, gv, _bm, topic, ten_file = _setup(db, make_account, make_assigned_topic)
+    sv_h, gv_h = auth_headers(sv), auth_headers(gv)
+    body = _submit(client, sv_h, topic.id, "de-cuong-cua-em.pdf", pdf_bytes(["v1"]))
+    doc_id = body["phien_ban"][0]["tai_lieu"]["id"]
+    approved = _gv_approve(client, gv_h, topic.id, doc_id)
+    # Tên không đọc được -> định hướng cũng không đọc được: không đổi tên hộ, chỉ trả lại.
+    assert approved["quyen"]["tra_lai_sv"] is True
+    assert approved["quyen"]["doi_ten_file"] is False
+    assert client.post(f"/api/outlines/{topic.id}/rename-file", headers=gv_h).status_code == 409
+
+    resp = client.post(
+        f"/api/outlines/{topic.id}/review",
+        headers=gv_h,
+        json={"tai_lieu_do_an_id": doc_id, "ket_qua": "YEU_CAU_SUA", "nhan_xet": "Đặt lại tên file"},
+    )
+    assert resp.status_code == 200, resp.text
+    returned = resp.json()
+    assert returned["trang_thai"] == "YEU_CAU_SUA"
+    assert returned["phien_ban"][0]["luot_duyet"]["ket_qua"] == "YEU_CAU_SUA"
+
+    resubmitted = _submit(client, sv_h, topic.id, ten_file, pdf_bytes(["v2"]))
+    assert resubmitted["trang_thai"] == "CHO_DUYET"
+    _gv_approve(client, gv_h, topic.id, resubmitted["phien_ban"][0]["tai_lieu"]["id"])
+    assert client.post(f"/api/outlines/{topic.id}/forward", headers=gv_h).status_code == 200
+
+
+def test_gv_renames_file_to_template(
+    client, make_account, auth_headers, make_assigned_topic, pdf_bytes, db
+):
+    sv, gv, _bm, topic, ten_file = _setup(db, make_account, make_assigned_topic)
+    sv_h, gv_h = auth_headers(sv), auth_headers(gv)
+    # Đúng định hướng nhưng sai lớp.
+    sai_lop = ten_file.rsplit(".", 2)[0] + ".LopKhac.pdf"
+    body = _submit(client, sv_h, topic.id, sai_lop, pdf_bytes(["v1"]))
+    approved = _gv_approve(client, gv_h, topic.id, body["phien_ban"][0]["tai_lieu"]["id"])
+    assert approved["quyen"]["doi_ten_file"] is True
+    # SV không được đổi tên hộ.
+    assert client.post(f"/api/outlines/{topic.id}/rename-file", headers=sv_h).status_code == 403
+
+    resp = client.post(f"/api/outlines/{topic.id}/rename-file", headers=gv_h)
+    assert resp.status_code == 200, resp.text
+    renamed = resp.json()
+    assert renamed["phien_ban"][0]["tai_lieu"]["ten_goc"] == ten_file
+    assert all(c["dat"] for c in renamed["kiem_tra_nop"] if c["ma"] != "NOI_DUNG")
+    assert "tên cũ: " + sai_lop in renamed["phien_ban"][0]["luot_duyet"]["nhan_xet"]
+    assert renamed["quyen"]["doi_ten_file"] is False
+    assert client.post(f"/api/outlines/{topic.id}/forward", headers=gv_h).status_code == 200
 
 
 def test_forward_blocked_by_dinh_huong_mismatch(

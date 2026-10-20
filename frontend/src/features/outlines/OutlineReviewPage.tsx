@@ -36,6 +36,7 @@ import {
   useBoMonApprove,
   useBoMonReturn,
   useForwardOutline,
+  useRenameOutlineFile,
   useOutline,
   useOutlineCounts,
   useOutlines,
@@ -430,6 +431,7 @@ function ActionPanel({
   const [signedFile, setSignedFile] = useState<File | null>(null)
   const review = useReviewOutline()
   const forward = useForwardOutline()
+  const rename = useRenameOutlineFile()
   const approve = useBoMonApprove()
   const giveBack = useBoMonReturn()
   const isNewest = detail.phien_ban[0]?.tai_lieu.id === selectedVersion?.tai_lieu.id
@@ -504,6 +506,7 @@ function ActionPanel({
   }
 
   if (!isBoMon && detail.quyen.nop_bo_mon) {
+    const latestId = detail.phien_ban[0]?.tai_lieu.id
     return (
       <div style={{ marginTop: 20 }}>
         {blocking.length > 0 ? (
@@ -511,7 +514,26 @@ function ActionPanel({
             type="warning"
             showIcon
             message="Chưa thể nộp lên Bộ môn"
-            description="Tên file hoặc định hướng chưa đúng. Hãy yêu cầu sinh viên đặt lại tên file và nộp lại."
+            description={
+              detail.quyen.doi_ten_file
+                ? `Chỉ sai tên file. Thầy/cô có thể đổi tên theo mẫu ${detail.ten_file_mau ?? ''} rồi nộp lên, hoặc trả lại để sinh viên tự nộp lại.`
+                : 'Tên file hoặc định hướng chưa đúng. Hãy trả lại để sinh viên đặt lại tên file và nộp lại.'
+            }
+            action={
+              detail.quyen.doi_ten_file ? (
+                <Popconfirm
+                  title="Đổi tên file theo mẫu?"
+                  description={detail.ten_file_mau}
+                  onConfirm={() =>
+                    void run(() => rename.mutateAsync({ deTaiId: detail.de_tai_id }), 'Đã đổi tên file theo mẫu')
+                  }
+                >
+                  <Button size="small" loading={rename.isPending}>
+                    Đổi tên theo mẫu
+                  </Button>
+                </Popconfirm>
+              ) : undefined
+            }
           />
         ) : (
           <Alert type="success" showIcon message="Đề cương đã đạt các mục kiểm tra, sẵn sàng nộp lên Bộ môn" />
@@ -533,6 +555,45 @@ function ActionPanel({
             Nộp file đề cương lên Bộ môn
           </Button>
         </Popconfirm>
+        {detail.quyen.tra_lai_sv && latestId !== undefined && (
+          <div style={{ marginTop: 20 }}>
+            <Typography.Text strong>Trả lại cho sinh viên sửa</Typography.Text>
+            <TextArea
+              rows={2}
+              maxLength={5000}
+              style={{ marginTop: 8 }}
+              placeholder="Nhận xét gửi sinh viên (bắt buộc)"
+              value={nhanXet}
+              onChange={(e) => setNhanXet(e.target.value)}
+            />
+            <Popconfirm
+              title="Rút lại duyệt và trả đề cương cho sinh viên?"
+              disabled={nhanXet.trim().length === 0}
+              onConfirm={() =>
+                void run(
+                  () =>
+                    review.mutateAsync({
+                      deTaiId: detail.de_tai_id,
+                      taiLieuDoAnId: latestId,
+                      ketQua: 'YEU_CAU_SUA',
+                      nhanXet: nhanXet.trim(),
+                    }),
+                  'Đã trả lại — sinh viên sẽ sửa và nộp lại',
+                )
+              }
+            >
+              <Button
+                danger
+                block
+                style={{ marginTop: 8 }}
+                disabled={nhanXet.trim().length === 0}
+                loading={review.isPending}
+              >
+                Trả lại cho sinh viên
+              </Button>
+            </Popconfirm>
+          </div>
+        )}
       </div>
     )
   }

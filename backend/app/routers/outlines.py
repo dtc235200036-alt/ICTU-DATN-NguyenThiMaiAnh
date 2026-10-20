@@ -107,6 +107,16 @@ def forward_outline(
     return outlines_service.forward_to_bo_mon(db, user, de_tai_id)
 
 
+@router.post("/{de_tai_id}/rename-file", response_model=OutlineDetail)
+def rename_outline_file(
+    de_tai_id: int,
+    user: CurrentUser = Depends(require_role(VaiTro.GIANG_VIEN)),
+    db: Session = Depends(get_db),
+) -> OutlineDetail:
+    """GVHD đổi tên file đề cương đã duyệt theo mẫu (chỉ khi chỉ sai tên file)."""
+    return outlines_service.rename_to_template(db, user, de_tai_id)
+
+
 @router.post("/{de_tai_id}/bo-mon/approve", response_model=OutlineDetail)
 def bo_mon_approve_outline(
     de_tai_id: int,

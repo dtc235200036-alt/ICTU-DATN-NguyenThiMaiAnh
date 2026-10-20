@@ -40,6 +40,8 @@ export interface QuyenDeCuongOut {
   duyet: boolean
   nop_bo_mon: boolean
   duyet_bo_mon: boolean
+  tra_lai_sv: boolean
+  doi_ten_file: boolean
 }
 
 export type OutlineTrangThai =
@@ -193,6 +195,14 @@ function useOutlineMutation<V extends { deTaiId: number }>(
 export function useForwardOutline() {
   return useOutlineMutation(async ({ deTaiId }: { deTaiId: number }) => {
     const { data } = await api.post<OutlineDetail>(`/outlines/${deTaiId}/forward`)
+    return data
+  })
+}
+
+/** GVHD đổi tên file đề cương đã duyệt theo mẫu (chỉ khi chỉ sai tên file). */
+export function useRenameOutlineFile() {
+  return useOutlineMutation(async ({ deTaiId }: { deTaiId: number }) => {
+    const { data } = await api.post<OutlineDetail>(`/outlines/${deTaiId}/rename-file`)
     return data
   })
 }
