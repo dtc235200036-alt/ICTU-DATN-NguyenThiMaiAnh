@@ -3,7 +3,7 @@ left to right direction
 skinparam packageStyle rectangle
 
 actor "Sinh viên" as SV
-actor "Giảng viên" as GV
+actor "Giảng viên\n(thành viên hội đồng)" as GV
 actor "Bộ môn" as BM
 
 rectangle "UC4 – Quản lý bảo vệ" {
@@ -20,11 +20,5 @@ BM --> UC4_2
 GV --> UC4_3
 BM --> UC4_4
 SV --> UC4_5
-
 UC4_1 ..> UC0_7 : <<include>>
-
-note right of UC0_7
-  UC0.7 thuộc nhóm UC0 – Chức năng chung,
-  đặc tả đầy đủ ở 11-dac-ta-uc0-chuc-nang-chung.md.
-end note
 @enduml

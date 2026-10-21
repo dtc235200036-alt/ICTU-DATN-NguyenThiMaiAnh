@@ -16,10 +16,11 @@ enum TrangThaiDot {
 
 enum TrangThaiDeTai {
   NHAP
-  CHO_DUYET
-  DA_DUYET (Mở cho lớp đăng ký)
-  TU_CHOI
   DA_PHAN_CONG
+  .. giá trị cũ, không còn phát sinh ..
+  CHO_DUYET
+  DA_DUYET
+  TU_CHOI
 }
 
 enum LoaiNguoiDeXuat {
@@ -31,11 +32,15 @@ enum TrangThaiDeCuong {
   CHUA_NOP
   CHO_DUYET
   YEU_CAU_SUA
+  GVHD_DA_DUYET
+  CHO_BO_MON_DUYET
   DA_DUYET
 }
 
 enum LoaiTaiLieu {
+  DE_TAI
   DE_CUONG
+  DE_CUONG_KY_SO
   BAO_CAO_TIEN_DO
   BAO_CAO_CUOI
   KHO
@@ -44,6 +49,17 @@ enum LoaiTaiLieu {
 enum KetQuaDuyet {
   DA_DUYET
   YEU_CAU_SUA
+}
+
+enum KetQuaDuyetBoMon {
+  DA_DUYET
+  TRA_LAI
+}
+
+enum DanhGiaTienDo {
+  DAT
+  CAN_CAI_THIEN
+  CHUA_DAT
 }
 
 enum VaiTroHoiDong {
@@ -68,17 +84,28 @@ enum LoaiNguon {
   IMPORT
 }
 
+enum TrangThaiIndex {
+  CHUA_INDEX
+  DA_INDEX
+}
+
 enum LoaiThongBao {
   PHAN_CONG_GVHD
-  DE_TAI_CHO_DUYET
-  DUYET_DE_TAI
-  TU_CHOI_DE_TAI
-  DUYET_DE_CUONG
-  YEU_CAU_SUA_DE_CUONG
-  NHAN_XET_MOI
-  PHAN_CONG_HOI_DONG
+  DE_TAI_PHAN_CONG
+  DE_CUONG_MOI
+  DE_CUONG_DUYET
+  DE_CUONG_YEU_CAU_SUA
+  DE_CUONG_NOP_BO_MON
+  DE_CUONG_BO_MON_DUYET
+  DE_CUONG_BO_MON_TRA_LAI
+  TIEN_DO_NHAN_XET
+  HOI_DONG_PHAN_CONG
   LICH_BAO_VE
   KET_QUA_BAO_VE
+  .. giá trị cũ, không còn phát sinh ..
+  DE_TAI_CHO_DUYET
+  DE_TAI_DUYET
+  DE_TAI_TU_CHOI
 }
 
 enum LoaiCauHinhNguong {
@@ -106,9 +133,7 @@ class TaiKhoan <<Entity>> {
 }
 
 ' =====================================================================
-' Lát cắt tracer (kế hoạch 01-02) — SinhVien, GiangVien, DotDoAn, DeTai,
-' KetQuaKiemTraTrungLap, ChiTietTrungLap. Giữ nguyên các lớp, bổ sung kiểu
-' enum cho các thuộc tính trạng thái/phân loại đã có sẵn dạng String.
+' Người dùng, đợt đồ án, định hướng và đề tài
 ' =====================================================================
 class SinhVien <<Entity>> {
   +maSoSinhVien : String
@@ -136,6 +161,13 @@ class DotDoAn <<Entity>> {
 
 class PhanCongHuongDan <<Entity>> {
   +thoiDiem : DateTime
+}
+
+class DinhHuong <<Entity>> {
+  +ma : String
+  +ten : String
+  +moTa : String
+  +hoatDong : Boolean
 }
 
 class DeTai <<Entity>> {
@@ -183,6 +215,8 @@ class MocTienDo <<Entity>> {
 class DeCuong <<Entity>> {
   +trangThai : TrangThaiDeCuong
   +ngayNopDauTien : DateTime
+  +nopBoMonLuc : DateTime
+  +ketQuaBoMon : KetQuaDuyetBoMon
 }
 
 class TaiLieuDoAn <<Entity>> {
@@ -196,6 +230,7 @@ class TaiLieuDoAn <<Entity>> {
   +noiDungTrichXuat : String
   +trichXuatLoi : Boolean
   +daIndexLuc : DateTime
+  +ghiChu : String
 }
 
 class LuotDuyetDeCuong <<Entity>> {
@@ -204,11 +239,19 @@ class LuotDuyetDeCuong <<Entity>> {
   +thoiDiem : DateTime
 }
 
+class LuotDuyetBoMon <<Entity>> {
+  +ketQua : KetQuaDuyetBoMon
+  +nhanXet : String
+  +thoiDiem : DateTime
+  +nguoiKy : String
+  +thoiDiemKy : DateTime
+}
+
 class BaoCaoTienDo <<Entity>> {
   +noiDung : String
   +thoiDiemNop : DateTime
   +nhanXet : String
-  +danhGia : String
+  +danhGia : DanhGiaTienDo
 }
 
 ' =====================================================================
@@ -245,7 +288,7 @@ class DoAnKho <<Entity>> {
   +tuKhoa : String
   +diem : Decimal
   +nguon : LoaiNguon
-  +trangThaiIndex : String
+  +trangThaiIndex : TrangThaiIndex
   +maSoSinhVien : String
   +hoTenSinhVien : String
 }
@@ -273,12 +316,13 @@ TaiKhoan "1" -- "*" ThongBao : "nhận"
 TaiKhoan "1" -- "*" CauHinhNguong : "cập nhật"
 
 ' =====================================================================
-' Associations — tracer (giữ nguyên từ kế hoạch 01-02)
+' Associations — đề tài và kiểm tra trùng lặp
 ' =====================================================================
 DotDoAn "1" -- "*" DeTai : "thuộc đợt"
-GiangVien "0..1" -- "*" DeTai : "đề xuất / hướng dẫn"
-SinhVien "0..1" -- "0..1" DeTai : "đăng ký"
-DeTai "1" -- "*" KetQuaKiemTraTrungLap : "có kết quả kiểm tra"
+GiangVien "0..1" -- "*" DeTai : "tạo và giao (GVHD)"
+SinhVien "0..1" -- "*" DeTai : "được giao\n(tối đa 1 đề tài đang hoạt động)"
+DinhHuong "0..1" -- "*" DeTai : "thuộc định hướng"
+DeTai "0..1" -- "*" KetQuaKiemTraTrungLap : "có kết quả kiểm tra tên"
 KetQuaKiemTraTrungLap "1" -- "*" ChiTietTrungLap : "gồm chi tiết"
 
 ' =====================================================================
@@ -286,7 +330,7 @@ KetQuaKiemTraTrungLap "1" -- "*" ChiTietTrungLap : "gồm chi tiết"
 ' Mỗi (DotDoAn, SinhVien) có tối đa một PhanCongHuongDan.
 ' =====================================================================
 DotDoAn "1" -- "*" PhanCongHuongDan : "phân công trong đợt"
-SinhVien "1" -- "*" PhanCongHuongDan : "được phân công\n(≤ 1 mỗi đợt)"
+SinhVien "1" -- "*" PhanCongHuongDan : "được phân công\n(tối đa 1 mỗi đợt)"
 GiangVien "1" -- "*" PhanCongHuongDan : "hướng dẫn (lớp)"
 
 ' =====================================================================
@@ -294,14 +338,18 @@ GiangVien "1" -- "*" PhanCongHuongDan : "hướng dẫn (lớp)"
 ' =====================================================================
 DotDoAn "1" -- "*" MocTienDo : "định nghĩa mốc"
 DeTai "1" -- "0..1" DeCuong : "có đề cương"
-DeCuong "1" -- "*" TaiLieuDoAn : "gồm các phiên bản (loại = ĐỀ_CƯƠNG)"
+DeCuong "1" -- "*" TaiLieuDoAn : "gồm các phiên bản (DE_CUONG, DE_CUONG_KY_SO)"
 DeCuong "1" -- "*" LuotDuyetDeCuong : "có các lượt duyệt"
 GiangVien "1" -- "*" LuotDuyetDeCuong : "duyệt"
+DeCuong "1" -- "*" LuotDuyetBoMon : "có các lượt phê duyệt của Bộ môn"
+TaiKhoan "1" -- "*" LuotDuyetBoMon : "Bộ môn phê duyệt"
+TaiLieuDoAn "1" -- "*" LuotDuyetBoMon : "phiên bản được nộp lên"
+TaiLieuDoAn "0..1" -- "0..1" LuotDuyetBoMon : "bản PDF đã ký số"
 DeTai "1" -- "*" BaoCaoTienDo : "nộp báo cáo theo mốc"
 MocTienDo "1" -- "*" BaoCaoTienDo : "áp dụng cho"
 BaoCaoTienDo "0..1" -- "0..1" TaiLieuDoAn : "đính kèm"
-DeTai "1" -- "*" TaiLieuDoAn : "có tài liệu (báo cáo cuối, kho...)"
-TaiLieuDoAn "0..1" -- "1" KetQuaKiemTraTrungLap : "được kiểm tra trùng lặp (loại = TÀI_LIỆU)"
+DeTai "1" -- "*" TaiLieuDoAn : "có tài liệu (tệp đề tài, báo cáo cuối...)"
+TaiLieuDoAn "0..1" -- "0..1" KetQuaKiemTraTrungLap : "được kiểm tra trùng lặp (loại = TAI_LIEU)"
 
 ' =====================================================================
 ' Associations — hội đồng & bảo vệ
@@ -309,7 +357,7 @@ TaiLieuDoAn "0..1" -- "1" KetQuaKiemTraTrungLap : "được kiểm tra trùng l�
 HoiDong "1" -- "*" ThanhVienHoiDong : "gồm thành viên"
 ThanhVienHoiDong "*" -- "1" GiangVien : "là"
 HoiDong "1" -- "*" LichBaoVe : "xếp lịch"
-LichBaoVe "1" -- "1" SinhVien : "của"
+LichBaoVe "0..1" -- "1" SinhVien : "của"
 LichBaoVe "0..1" -- "1" DeTai : "bảo vệ đề tài"
 LichBaoVe "1" -- "*" DiemBaoVe : "nhận điểm từ thành viên"
 GiangVien "1" -- "*" DiemBaoVe : "chấm"
@@ -318,8 +366,8 @@ GiangVien "1" -- "*" DiemBaoVe : "chấm"
 ' Associations — kho đồ án
 ' =====================================================================
 DoAnKho "0..1" -- "0..1" DeTai : "gốc (null nếu import khóa cũ)"
-DoAnKho "0..1" -- "1" SinhVien : "của SV"
-DoAnKho "0..1" -- "1" GiangVien : "GVHD"
+DoAnKho "*" -- "0..1" SinhVien : "của SV"
+DoAnKho "*" -- "0..1" GiangVien : "GVHD"
 
 ' =====================================================================
 ' Phụ thuộc lớp -> enum (giữ mọi enum trong cùng một thành phần liên
@@ -335,11 +383,14 @@ DeTai ..> LoaiNguoiDeXuat
 DeCuong ..> TrangThaiDeCuong
 TaiLieuDoAn ..> LoaiTaiLieu
 LuotDuyetDeCuong ..> KetQuaDuyet
+LuotDuyetBoMon ..> KetQuaDuyetBoMon
+BaoCaoTienDo ..> DanhGiaTienDo
 ThanhVienHoiDong ..> VaiTroHoiDong
 KetQuaKiemTraTrungLap ..> LoaiKiemTra
 KetQuaKiemTraTrungLap ..> TrangThaiKiemTra
 ChiTietTrungLap ..> KhongGianNguon
 DoAnKho ..> LoaiNguon
+DoAnKho ..> TrangThaiIndex
 ThongBao ..> LoaiThongBao
 CauHinhNguong ..> LoaiCauHinhNguong
 

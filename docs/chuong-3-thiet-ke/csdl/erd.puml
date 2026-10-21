@@ -17,7 +17,7 @@ entity "tai_khoan" as tai_khoan {
 }
 
 ' =====================================================================
-' Lát cắt tracer (kế hoạch 01-02) — giữ nguyên 6 bảng
+' Người dùng, đợt đồ án, định hướng và đề tài
 ' =====================================================================
 entity "sinh_vien" as sinh_vien {
   *id : BIGINT <<PK>>
@@ -61,6 +61,15 @@ entity "phan_cong_huong_dan" as phan_cong_huong_dan {
   ..UNIQUE uk_phan_cong_sv_dot (dot_do_an_id, sinh_vien_id)..
 }
 
+entity "dinh_huong" as dinh_huong {
+  *id : BIGINT <<PK>>
+  --
+  ma : VARCHAR(10) <<UNIQUE>> <<NOT NULL>>
+  ten : VARCHAR(255) <<NOT NULL>>
+  mo_ta : TEXT
+  hoat_dong : BOOLEAN <<NOT NULL>> = TRUE
+}
+
 entity "de_tai" as de_tai {
   *id : BIGINT <<PK>>
   --
@@ -68,12 +77,11 @@ entity "de_tai" as de_tai {
   giang_vien_id : BIGINT <<FK>>
   sinh_vien_id : BIGINT <<FK>>
   sinh_vien_id_dang_hoat_dong : BIGINT <<derived>> <<UNIQUE>>
-  ..GENERATED ALWAYS AS (CASE WHEN trang_thai
-    IN ('CHO_DUYET','DA_DUYET','DA_PHAN_CONG')
-    THEN sinh_vien_id END) STORED — xem §3.2.5..
+  ..cột sinh STORED: sinh_vien_id khi trang_thai đang hoạt động..
   ten_de_tai : VARCHAR(255)
   mo_ta : TEXT
   linh_vuc : VARCHAR(100)
+  dinh_huong_id : BIGINT <<FK>>
   trang_thai : VARCHAR(20)
   loai_nguoi_de_xuat : VARCHAR(10)
   ly_do_tu_choi : TEXT
@@ -127,7 +135,10 @@ entity "de_cuong" as de_cuong {
   --
   de_tai_id : BIGINT <<FK>> <<UNIQUE>> <<NOT NULL>>
   trang_thai : VARCHAR(20)
+  ..CHECK trang_thai: 6 trạng thái đề cương..
   ngay_nop_dau_tien : DATETIME
+  nop_bo_mon_luc : DATETIME
+  ket_qua_bo_mon : VARCHAR(20)
 }
 
 entity "tai_lieu_do_an" as tai_lieu_do_an {
@@ -145,14 +156,31 @@ entity "tai_lieu_do_an" as tai_lieu_do_an {
   noi_dung_trich_xuat : LONGTEXT
   trich_xuat_loi : BOOLEAN <<NOT NULL>> = FALSE
   da_index_luc : DATETIME
+  ghi_chu : TEXT
+  ..CHECK loai: 6 loại tài liệu..
   ..UNIQUE(de_tai_id, loai, so_phien_ban)..
+}
+
+entity "luot_duyet_bo_mon" as luot_duyet_bo_mon {
+  *id : BIGINT <<PK>>
+  --
+  de_cuong_id : BIGINT <<FK>> <<NOT NULL>>
+  tai_lieu_do_an_id : BIGINT <<FK>> <<NOT NULL>>
+  tai_khoan_id : BIGINT <<FK>> <<NOT NULL>>
+  ket_qua : VARCHAR(20) <<NOT NULL>>
+  ..CHECK ket_qua IN ('DA_DUYET','TRA_LAI')..
+  nhan_xet : TEXT
+  thoi_diem : DATETIME <<NOT NULL>>
+  tai_lieu_ky_so_id : BIGINT <<FK>>
+  nguoi_ky : VARCHAR(255)
+  thoi_diem_ky : DATETIME
 }
 
 entity "luot_duyet_de_cuong" as luot_duyet_de_cuong {
   *id : BIGINT <<PK>>
   --
   de_cuong_id : BIGINT <<FK>> <<NOT NULL>>
-  tai_lieu_do_an_id : BIGINT <<FK>> <<NOT NULL>>
+  tai_lieu_do_an_id : BIGINT <<FK>> <<UNIQUE>> <<NOT NULL>>
   giang_vien_id : BIGINT <<FK>> <<NOT NULL>>
   ket_qua : VARCHAR(20)
   nhan_xet : TEXT
@@ -262,19 +290,20 @@ tai_khoan ||--o{ thong_bao : "1 tài khoản nhận nhiều thông báo"
 tai_khoan ||--o{ cau_hinh_nguong : "1 tài khoản cập nhật nhiều cấu hình"
 
 ' =====================================================================
-' Quan hệ — tracer (giữ nguyên)
+' Quan hệ — đề tài và kiểm tra trùng lặp
 ' =====================================================================
 dot_do_an ||--o{ de_tai : "1 đợt có nhiều đề tài"
-giang_vien |o--o{ de_tai : "GV đề xuất/hướng dẫn 0..*"
-sinh_vien |o--o| de_tai : "SV đăng ký 0..1"
-de_tai ||--o{ ket_qua_kiem_tra_trung_lap : "1 đề tài có nhiều kết quả kiểm tra"
+giang_vien |o--o{ de_tai : "GVHD tạo và giao"
+sinh_vien |o--o{ de_tai : "SV được giao (tối đa 1 đang hoạt động)"
+dinh_huong |o--o{ de_tai : "fk_de_tai_dinh_huong"
+de_tai |o--o{ ket_qua_kiem_tra_trung_lap : "kết quả kiểm tra tên"
 ket_qua_kiem_tra_trung_lap ||--o{ chi_tiet_trung_lap : "1 kết quả có nhiều chi tiết"
 
 ' =====================================================================
 ' Quan hệ — phân công GVHD theo đợt (UC0.8, Alembic 0015)
 ' =====================================================================
 dot_do_an ||--o{ phan_cong_huong_dan : "fk_phan_cong_dot_do_an"
-sinh_vien ||--o{ phan_cong_huong_dan : "fk_phan_cong_sinh_vien (≤ 1 mỗi đợt)"
+sinh_vien ||--o{ phan_cong_huong_dan : "fk_phan_cong_sinh_vien (tối đa 1 mỗi đợt)"
 giang_vien ||--o{ phan_cong_huong_dan : "fk_phan_cong_giang_vien (lớp hướng dẫn)"
 
 ' =====================================================================
@@ -282,11 +311,15 @@ giang_vien ||--o{ phan_cong_huong_dan : "fk_phan_cong_giang_vien (lớp hướng
 ' =====================================================================
 dot_do_an ||--o{ moc_tien_do : "1 đợt định nghĩa nhiều mốc"
 de_tai ||--o| de_cuong : "1 đề tài có 0..1 đề cương"
-de_cuong ||--o{ tai_lieu_do_an : "1 đề cương có nhiều phiên bản"
-de_tai ||--o{ tai_lieu_do_an : "1 đề tài có nhiều tài liệu (báo cáo, kho...)"
+de_cuong |o--o{ tai_lieu_do_an : "1 đề cương có nhiều phiên bản"
+de_tai ||--o{ tai_lieu_do_an : "1 đề tài có nhiều tài liệu"
 de_cuong ||--o{ luot_duyet_de_cuong : "1 đề cương có nhiều lượt duyệt"
 tai_lieu_do_an ||--o| luot_duyet_de_cuong : "1 phiên bản có 0..1 lượt duyệt"
 giang_vien ||--o{ luot_duyet_de_cuong : "1 GV duyệt nhiều lượt"
+de_cuong ||--o{ luot_duyet_bo_mon : "1 đề cương có nhiều lượt Bộ môn duyệt"
+tai_lieu_do_an ||--o{ luot_duyet_bo_mon : "phiên bản được nộp lên"
+tai_lieu_do_an |o--o| luot_duyet_bo_mon : "tai_lieu_ky_so_id (PDF ký số)"
+tai_khoan ||--o{ luot_duyet_bo_mon : "tài khoản Bộ môn thực hiện"
 de_tai ||--o{ bao_cao_tien_do : "1 đề tài nộp nhiều báo cáo"
 moc_tien_do ||--o{ bao_cao_tien_do : "1 mốc áp dụng nhiều báo cáo"
 tai_lieu_do_an |o--o| bao_cao_tien_do : "tệp đính kèm tùy chọn (PROG-01)"

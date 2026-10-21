@@ -2,16 +2,1117 @@
 
 \begin{document}
 
-\section{Môi trường triển khai}
-Sinh viên mô tả phần cứng, phần mềm, thư viện, công cụ và cấu hình môi trường triển khai.
+\textit{Chương này trình bày quá trình triển khai hệ thống: môi trường và cách cài đặt, cách các thành phần theo kiến trúc ở chương 3 được thi công, kết quả thi công các chức năng, cách cài đặt các yêu cầu phi chức năng và bảo vệ hệ thống, dữ liệu thử nghiệm, kết quả kiểm thử, đánh giá và tài liệu hướng dẫn sử dụng cho từng vai trò.}
 
-\section{Kết quả thực hiện}
-Sinh viên trình bày các chức năng hoặc kết quả đã hoàn thành, kèm hình ảnh, bảng biểu hoặc số liệu minh họa nếu cần.
+%=====================================================================
+\section{Môi trường và cài đặt hệ thống}\label{sec:c4-moi-truong}
+%=====================================================================
 
-\section{Kiểm thử và đánh giá}
-Sinh viên trình bày kịch bản kiểm thử, dữ liệu kiểm thử, tiêu chí đánh giá và kết quả đạt được.
+\subsection{Phần cứng và hệ điều hành}
 
-\section{Nhận xét}
-Sinh viên nêu ưu điểm, hạn chế và các vấn đề còn tồn tại của đề tài.
+Hệ thống được phát triển, kiểm thử và đo đạc trên máy cá nhân của sinh viên, sau đó triển khai thử nghiệm trên một máy chủ ảo Linux. Cả hai môi trường chạy cùng một bộ cấu hình Docker Compose, chỉ khác giá trị biến môi trường (tên máy chủ, cổng, mật khẩu). Bảng~\ref{tab:c4-moi-truong} tóm tắt hai môi trường.
+
+{\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{|p{3.1cm}|p{5.75cm}|p{5.75cm}|}
+\caption{Môi trường phát triển và môi trường triển khai}\label{tab:c4-moi-truong}\\
+\hline
+\textbf{Thành phần} & \textbf{Máy phát triển và kiểm thử} & \textbf{Máy chủ triển khai thử nghiệm} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Thành phần} & \textbf{Máy phát triển và kiểm thử} & \textbf{Máy chủ triển khai thử nghiệm} \\
+\hline
+\endhead
+CPU & AMD Ryzen 7 7735HS, 16 luồng & 6 vCPU Intel Xeon Platinum 8272CL 2,60 GHz \\
+\hline
+Bộ nhớ & 26 GB & 16 GB \\
+\hline
+Hệ điều hành & Ubuntu 26.04 LTS (nhân Linux 7.0) & Ubuntu 22.04.5 LTS (nhân Linux 5.15) \\
+\hline
+Docker & Docker Engine 29.1.3, Compose 5.5.1 & Docker Engine 29.6.1, Compose 5.3.1 \\
+\hline
+Cổng Apache & Cổng tùy chọn khi chạy song song nhiều bản cài & 8088 (HTTP) và 8443 (HTTPS), vì máy chủ dùng chung với các dự án khác đã chiếm 80/443 \\
+\hline
+Mục đích & Phát triển, kiểm thử tự động, thử nghiệm AI, đo yêu cầu phi chức năng, chụp ảnh màn hình & Chạy thử nghiệm với người dùng, đo thời gian phản hồi chỉ đọc \\
+\hline
+\end{longtable}
+}
+
+Yêu cầu tối thiểu để cài đặt là một máy Linux có Docker Engine và Docker Compose v2, các tiện ích \texttt{openssl}, \texttt{curl}, \texttt{python3}, tối thiểu 10~GB dung lượng trống và kết nối Internet trong lúc cài đặt (để tải image nền và trọng số mô hình). Sau khi cài, hệ thống chạy được mà không cần Internet. Về bộ nhớ, ba container chính được đặt trần: dịch vụ AI 2~GiB, Web API 1~GiB, MySQL dùng bộ đệm InnoDB 256~MB; vì vậy máy chủ nên có từ 4~GB RAM trở lên.
+
+\subsection{Công nghệ và thư viện sử dụng}
+
+Bảng~\ref{tab:c4-thu-vien} liệt kê phiên bản các công nghệ chính, lấy từ tệp khóa phụ thuộc (\path{uv.lock}, \path{package-lock.json}) của mã nguồn. Phiên bản được khóa cố định để mọi lần cài đặt cho cùng một kết quả.
+
+{\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{|p{2.5cm}|p{5.3cm}|p{6.8cm}|}
+\caption{Công nghệ và thư viện chính}\label{tab:c4-thu-vien}\\
+\hline
+\textbf{Thành phần} & \textbf{Công nghệ (phiên bản)} & \textbf{Vai trò} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Thành phần} & \textbf{Công nghệ (phiên bản)} & \textbf{Vai trò} \\
+\hline
+\endhead
+Web API & Python 3.12, FastAPI 0.141, Uvicorn 0.54, Pydantic 2.13 & Khung API, máy chủ ASGI, kiểm tra dữ liệu vào ra \\
+\hline
+ & SQLAlchemy 2.0.54, Alembic 1.20, PyMySQL 1.2 & ORM, migration schema, driver MySQL \\
+\hline
+ & PyJWT 2.15, bcrypt 5.0 & Ký JWT, băm mật khẩu \\
+\hline
+ & python-docx 1.2, PyMuPDF 1.28, cryptography 50.0 & Trích xuất văn bản DOCX/PDF, đọc chữ ký số PKCS\#7 \\
+\hline
+Dịch vụ AI & sentence-transformers 6.1, transformers 5.17, PyTorch 2.14 (CPU) & Nạp mô hình và mã hóa câu thành vector \\
+\hline
+ & underthesea 9.5 & Tách từ tiếng Việt trước khi mã hóa~\cite{underthesea} \\
+\hline
+ & faiss-cpu 1.15, datasketch 2.0 & Chỉ mục tìm kiếm vector~\cite{faiss2021}, chữ ký MinHash~\cite{datasketch} \\
+\hline
+ & \path{bkai-foundation-models/vietnamese-bi-encoder} & Mô hình embedding tiếng Việt~\cite{bkaibiencoder} \\
+\hline
+Client Web & React 18.3, TypeScript 5.9, Vite 7.3 & Thư viện giao diện, ngôn ngữ, công cụ build \\
+\hline
+ & Ant Design 5.29, TanStack Query 5.104, React Router 7.18, Zustand 5, axios 1.20 & Bộ thành phần giao diện, quản lý dữ liệu từ máy chủ, định tuyến, trạng thái phiên, gọi HTTP \\
+\hline
+CSDL & MySQL 8.4 & Hai schema \texttt{thesis\_core} và \texttt{thesis\_ai}, bảng mã \texttt{utf8mb4\_vietnamese\_ci} \\
+\hline
+Triển khai & Apache HTTP Server 2.4, Docker Compose & Reverse proxy, HTTPS, phục vụ client tĩnh; đóng gói và chạy các container \\
+\hline
+Kiểm thử & pytest 8, Chrome headless (giao thức CDP), Bash, curl & Kiểm thử đơn vị và tích hợp, kiểm thử giao diện, kịch bản end-to-end \\
+\hline
+\end{longtable}
+}
+
+\subsection{Cấu trúc mã nguồn}
+
+Mã nguồn được quản lý bằng Git trong một kho duy nhất, mỗi thành phần triển khai nằm ở một thư mục riêng và có tệp khai báo phụ thuộc riêng:
+
+\begin{Verbatim}[fontsize=\small]
+ntma/
+|-- backend/        Web API: app/{core, models, schemas, routers, services},
+|                   alembic/versions (16 migration), tests (pytest)
+|-- ai-service/     Dich vu AI: app/{nlp, pipeline, index, embedding, minhash},
+|                   alembic (schema thesis_ai), calibration, tests
+|-- frontend/       Client Web: src/{features, layouts, api, stores, components}
+|-- deploy/         docker-compose.yml, apache/, mysql/, certs/,
+|                   install.sh, verify-all.sh, cac kich ban kiem thu .sh
+|-- seed-data/      Du lieu thu nghiem tong hop: kho 300 de tai, 50 tep
+|-- tools/          datagen (sinh du lieu), bakeoff (so sanh mo hinh),
+|                   demo (chup man hinh tu dong), render-diagrams.sh
+`-- docs/           Tai lieu phan tich, thiet ke, ket qua thu nghiem
+\end{Verbatim}
+
+Web API tổ chức theo tầng: \path{routers/} khai báo endpoint và vai trò được phép; \path{services/} chứa nghiệp vụ; \path{models/} là các lớp thực thể SQLAlchemy; \path{schemas/} là các model Pydantic của hợp đồng API; \path{core/} chứa cấu hình, bảo mật, phân quyền và giới hạn kích thước yêu cầu. Router được nạp tự động theo danh sách module, nên thêm một nhóm chức năng mới không phải sửa tệp khởi tạo ứng dụng. Client Web tổ chức theo chức năng: mỗi thư mục con của \path{src/features/} (15 thư mục, ví dụ \path{topics}, \path{outlines}, \path{defense}) gồm trang giao diện, hàm gọi API và khai báo route kèm vai trò được phép.
+
+\subsection{Cài đặt bằng Docker Compose}
+
+Mỗi thành phần được đóng gói thành một image Docker, và toàn bộ hệ thống được mô tả trong một tệp \path{deploy/docker-compose.yml}~\cite{dockercompose}. Hình~\ref{fig:c4-docker-compose} là sơ đồ cài đặt thực tế. Sơ đồ này hiện thực hai vùng của sơ đồ triển khai mức thiết kế (Hình~\ref{fig:c3-trien-khai}) bằng Docker: vùng công khai chỉ có container Apache, công bố cổng 80 và 443; vùng nội bộ là mạng Docker \texttt{ntma-internal}, trong đó Web API, dịch vụ AI và MySQL chạy trong các container riêng và gọi nhau qua tên service. Web API, dịch vụ AI không công bố cổng ra máy chủ; MySQL chỉ mở cổng trên địa chỉ loopback để quản trị viên thao tác từ chính máy chủ.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_4/so-do-docker-compose.png}
+    \caption{Sơ đồ cài đặt hệ thống bằng Docker Compose}
+    \label{fig:c4-docker-compose}
+\end{figure}
+
+Hệ thống gồm sáu service:
+{\sloppy
+\begin{itemize}
+    \item \textit{apache:} image được build hai giai đoạn. Giai đoạn đầu dùng Node.js 20 chạy \texttt{npm ci} và \texttt{vite build} để tạo bản build tĩnh của client; giai đoạn sau dùng \texttt{httpd:2.4}, bật các module \texttt{ssl}, \texttt{proxy}, \texttt{proxy\_http}, \texttt{headers}, chép bản build vào \texttt{DocumentRoot} cùng tệp cấu hình \path{ntma.conf}. Đây là service duy nhất công bố cổng ra máy chủ (80 và 443) và có địa chỉ IP tĩnh trong mạng nội bộ.
+    \item \textit{api:} Web API chạy bằng Uvicorn ở cổng 8001, dưới người dùng không đặc quyền. Khi khởi động, container chạy \texttt{alembic upgrade head} rồi chạy seed (tạo tài khoản Bộ môn, nạp danh sách sinh viên, giảng viên, mở đợt đồ án hiện hành và phân công giảng viên hướng dẫn mặc định); cả hai bước đều chạy lại an toàn.
+    \item \textit{ai:} dịch vụ AI ở cổng 8002, hệ thống tệp chỉ đọc, chạy ngoại tuyến (\texttt{HF\_HUB\_OFFLINE=1}) với trọng số mô hình nằm sẵn trong volume \texttt{ai-models}.
+    \item \textit{mysql:} MySQL 8.4 với bảng mã mặc định \texttt{utf8mb4} và collation \texttt{utf8mb4\_vietnamese\_ci}; chỉ công bố cổng 3307 trên \texttt{127.0.0.1} để quản trị viên thao tác từ chính máy chủ.
+    \item \textit{ai-db-init} và \textit{ai-migrate:} hai service chạy một lần rồi dừng. Service đầu tạo schema \texttt{thesis\_ai} và hai tài khoản CSDL của dịch vụ AI; service sau chạy migration Alembic cho schema đó. Dịch vụ AI chỉ khởi động khi hai bước này kết thúc thành công.
+\end{itemize}\par}
+
+Dữ liệu cần giữ qua các lần cập nhật nằm trong ba volume: \texttt{mysql-data} (CSDL), \texttt{uploads-data} (tệp đề cương, báo cáo đã nộp, nằm ngoài \texttt{DocumentRoot} của Apache) và \texttt{ai-models} (trọng số mô hình). Thứ tự khởi động được ràng buộc bằng \texttt{depends\_on} kèm điều kiện \texttt{service\_healthy}: MySQL sẵn sàng, rồi đến khởi tạo schema AI, dịch vụ AI, Web API, cuối cùng là Apache.
+
+Toàn bộ quá trình cài đặt được gói trong một lệnh:
+
+\begin{Verbatim}[fontsize=\small]
+git clone <kho ma nguon> ntma && cd ntma
+bash deploy/install.sh               # cai moi hoac nang cap, chay lai an toan
+bash deploy/verify-all.sh --quick    # kiem tra nhanh sau cai dat
+\end{Verbatim}
+
+Tập lệnh \path{install.sh} thực hiện tuần tự bảy bước và đo thời gian từng bước (Bảng~\ref{tab:c4-cai-dat}). Với máy chủ thật, quản trị viên thêm tùy chọn \texttt{-{}-server-name} (tên miền hoặc địa chỉ IP, dùng để sinh chứng chỉ) và \texttt{-{}-random-seed-password} (sinh mật khẩu khởi tạo ngẫu nhiên thay cho mật khẩu mặc định của môi trường phát triển).
+
+{\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{|p{1cm}|p{5cm}|p{8.6cm}|}
+\caption{Các bước của tập lệnh cài đặt \texttt{install.sh}}\label{tab:c4-cai-dat}\\
+\hline
+\textbf{Bước} & \textbf{Nội dung} & \textbf{Chi tiết} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Bước} & \textbf{Nội dung} & \textbf{Chi tiết} \\
+\hline
+\endhead
+0 & Kiểm tra điều kiện & Phiên bản Docker, Compose, các tiện ích, dung lượng trống, cổng HTTP/HTTPS còn trống \\
+\hline
+1 & Sinh cấu hình và chứng chỉ & Sinh tệp biến môi trường với các bí mật ngẫu nhiên (khóa ký JWT, khóa nội bộ của dịch vụ AI, mật khẩu CSDL), quyền đọc chỉ cho chủ sở hữu; sinh chứng chỉ TLS tự ký nếu chưa có chứng chỉ \\
+\hline
+2 & Build image AI, tải mô hình & Tải trước trọng số mô hình (khoảng 518~MiB) vào volume \texttt{ai-models}; đây là bước duy nhất cần Internet \\
+\hline
+3 & Khởi động & \texttt{docker compose up -d -{}-build -{}-wait}, chờ mọi service ở trạng thái healthy \\
+\hline
+4 & Kiểm tra migration & Revision Alembic của \texttt{thesis\_core} là bản mới nhất; \texttt{/health} của dịch vụ AI trả \texttt{ok} \\
+\hline
+5 & Kiểm tra tài khoản & Số tài khoản sinh viên, giảng viên, Bộ môn sau seed \\
+\hline
+6 & Nạp kho cho dịch vụ AI & Nhập 300 đề tài kho qua đúng chức năng import CSV của Bộ môn, nạp 25 đồ án nguồn có báo cáo cuối, đẩy toàn bộ vào chỉ mục của dịch vụ AI \\
+\hline
+7 & Tóm tắt & In địa chỉ truy cập, tài khoản và nơi lưu mật khẩu \\
+\hline
+\end{longtable}
+}
+
+Thời gian cài đặt được đo trên hai lần cài từ đầu, mỗi lần với volume CSDL, tệp tải lên và mô hình hoàn toàn mới (Bảng~\ref{tab:c4-thoi-gian-cai-dat}). Lần thứ nhất chạy \path{install.sh} trên máy phát triển cũ, Docker đã có sẵn bộ đệm build của dự án. Lần thứ hai chạy trên máy phát triển hiện tại, không có bộ đệm build nên phải tải image nền, cài toàn bộ thư viện Python, Node.js; lần này chạy lần lượt các lệnh của bước 1, 2, 3 và 6 trên một bản sao mã nguồn với tên project Compose và cổng riêng, để không ảnh hưởng tới bản đang chạy.
+
+{\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{|p{5.6cm}|p{4.5cm}|p{4.5cm}|}
+\caption{Thời gian cài đặt từ đầu}\label{tab:c4-thoi-gian-cai-dat}\\
+\hline
+ & \textbf{Lần 1 (28/09/2026)} & \textbf{Lần 2 (21/10/2026)} \\
+\hline
+\endfirsthead
+\hline
+ & \textbf{Lần 1 (28/09/2026)} & \textbf{Lần 2 (21/10/2026)} \\
+\hline
+\endhead
+Máy & Intel Core i5-12500H, 15,3~GB RAM & AMD Ryzen 7 7735HS, 26~GB RAM \\
+\hline
+Bộ đệm build Docker & Có & Không \\
+\hline
+Bước 0--1: kiểm tra, sinh cấu hình & 1~s & tính chung với bước 2 \\
+\hline
+Bước 2: build image AI, tải mô hình 518~MiB & 69~s (tải mô hình 66~s) & 333~s \\
+\hline
+Bước 3: build các image còn lại, khởi động & 78~s & 91~s \\
+\hline
+Bước 6: nạp kho 300 đề tài, 25 đồ án nguồn & 68~s & 121~s \\
+\hline
+\textbf{Tổng} & \textbf{216~s} & \textbf{545~s} \\
+\hline
+\end{longtable}
+}
+
+Cả hai lần đều kết thúc thành công, không cần thao tác tay. Trong cả hai trường hợp, thời gian cài đặt dưới 10 phút; phần lớn thời gian là tải và cài thư viện, mô hình, nên phụ thuộc chủ yếu vào tốc độ mạng.
+
+\subsection{Cơ sở dữ liệu MySQL}
+
+Một máy chủ MySQL chứa hai schema tách biệt theo nguyên tắc mỗi dịch vụ sở hữu dữ liệu của mình:
+\begin{itemize}
+    \item \texttt{thesis\_core}: dữ liệu nghiệp vụ do Web API sở hữu (tài khoản, đợt đồ án, phân công, đề tài, đề cương, tiến độ, hội đồng, kho đồ án, kết quả kiểm tra, cấu hình ngưỡng, thông báo). Schema được tạo và nâng cấp bằng 16 migration Alembic~\cite{alembic}, migration gần nhất (\texttt{0016}) bổ sung danh mục định hướng đề tài và luồng duyệt đề cương hai cấp.
+    \item \texttt{thesis\_ai}: dữ liệu của dịch vụ AI (văn bản nguồn đã chuẩn hóa, các đoạn câu, vector embedding và chữ ký MinHash). Schema có hai migration riêng, chạy bởi service \texttt{ai-migrate}.
+\end{itemize}
+
+Mỗi schema có tài khoản CSDL riêng. Web API dùng một tài khoản chỉ được cấp quyền trên \texttt{thesis\_core} và schema kiểm thử \texttt{thesis\_core\_test}. Dịch vụ AI dùng hai tài khoản: \texttt{thesis\_ai\_migrate} có quyền DDL, chỉ dùng lúc migration; \texttt{thesis\_ai} chỉ có quyền đọc ghi dữ liệu trên \texttt{thesis\_ai} khi phục vụ, và bị từ chối nếu truy cập \texttt{thesis\_core}. Mọi bảng, cột văn bản dùng \texttt{utf8mb4\_vietnamese\_ci}~\cite{mysqlutf8mb4}, nên tìm kiếm và sắp xếp tiếng Việt đúng thứ tự từ điển, không phân biệt hoa thường. Không có thao tác sửa schema bằng tay trên máy chủ: mọi thay đổi đi qua migration, và bước 4 của \path{install.sh} từ chối tiếp tục nếu schema chưa ở revision mới nhất.
+
+%=====================================================================
+\section{Thi công các thành phần theo kiến trúc}
+%=====================================================================
+
+Kiến trúc hướng dịch vụ ở chương 3 gồm ba thành phần: Web API, client Web và dịch vụ AI. Mục này trình bày cách mỗi thành phần được thi công và cách chúng giao tiếp khi chạy thật.
+
+\subsection{Web API}
+
+Web API là ứng dụng FastAPI~\cite{fastapi} sở hữu toàn bộ nghiệp vụ của năm UC chính và nhóm chức năng chung. Ứng dụng có 16 nhóm router với tiền tố \texttt{/api}, mỗi nhóm ứng với một module nghiệp vụ (Bảng~\ref{tab:c4-router}). Tài liệu OpenAPI được sinh tự động từ khai báo kiểu và có tại đường dẫn \path{/api/docs}.
+
+{\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{|p{3.5cm}|p{7.4cm}|p{3.7cm}|}
+\caption{Các nhóm API của Web API}\label{tab:c4-router}\\
+\hline
+\textbf{Tiền tố} & \textbf{Chức năng chính} & \textbf{Vai trò gọi được} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tiền tố} & \textbf{Chức năng chính} & \textbf{Vai trò gọi được} \\
+\hline
+\endhead
+\path{/api/auth} & Đăng nhập, làm mới phiên, đăng xuất, thông tin người dùng & Mọi người dùng \\
+\hline
+\path{/api/accounts} & Quản lý tài khoản, khóa và mở khóa & Bộ môn \\
+\hline
+\path{/api/cohorts} & Quản lý đợt đồ án, mở và đóng đợt & Bộ môn \\
+\hline
+\path{/api/assignments} & Phân công GVHD, import phân công; lớp hướng dẫn của GV; GVHD của SV & Bộ môn, GV, SV \\
+\hline
+\path{/api/dinh-huong} & Danh mục định hướng đề tài (H01, H02,\ldots) & Bộ môn sửa; mọi vai trò xem \\
+\hline
+\path{/api/topics} & Tạo, sửa, giao đề tài; kiểm tra trùng tên; lịch sử & GV tạo và giao; mọi vai trò xem trong phạm vi \\
+\hline
+\path{/api/outlines} & Nộp đề cương, GVHD duyệt, nộp lên Bộ môn, đổi tên tệp, Bộ môn phê duyệt hoặc trả lại, xuất thư mục đề cương đã ký & SV, GV, Bộ môn theo từng bước \\
+\hline
+\path{/api/documents} & Kết quả kiểm tra trùng lặp, kiểm tra lại, tải tệp & Mọi vai trò trong phạm vi \\
+\hline
+\path{/api/progress} & Mốc tiến độ, nộp và nhận xét báo cáo tiến độ, tổng hợp toàn khoa & SV, GV, Bộ môn \\
+\hline
+\path{/api/defense} & Báo cáo cuối, hội đồng, lịch bảo vệ, chấm điểm, chốt kết quả & SV, GV, Bộ môn \\
+\hline
+\path{/api/archive} & Tra cứu, thêm, sửa, import CSV kho đồ án, đánh chỉ mục lại & Mọi vai trò xem; Bộ môn ghi \\
+\hline
+\path{/api/thresholds} & Cấu hình ngưỡng cảnh báo trùng lặp & Bộ môn \\
+\hline
+\path{/api/dashboard} & Tổng quan theo vai trò, lịch sử nộp của SV & Theo vai trò \\
+\hline
+\path{/api/notifications} & Danh sách thông báo, đánh dấu đã đọc & Mọi người dùng \\
+\hline
+\path{/api/lecturers} & Danh sách giảng viên (chọn thành viên hội đồng) & Bộ môn \\
+\hline
+\path{/api/health} & Kiểm tra tình trạng & Không cần đăng nhập \\
+\hline
+\end{longtable}
+}
+
+Mỗi yêu cầu đi qua ba lớp: dependency xác thực JWT và kiểm tra vai trò (\texttt{require\_role}), hàm nghiệp vụ trong \path{services/} kiểm tra quyền sở hữu dữ liệu và trạng thái hiện tại, rồi lớp ORM. Các chuyển trạng thái quan trọng (nộp đề cương, duyệt, nộp lên Bộ môn) dùng câu lệnh \texttt{UPDATE} có điều kiện trên trạng thái cũ hoặc khóa dòng \texttt{SELECT ... FOR UPDATE}. Nhờ vậy, khi hai người thao tác đồng thời trên cùng một đề cương, chỉ một thao tác thành công, thao tác còn lại nhận mã 409.
+
+Tệp tải lên được kiểm tra ngay khi nhận, trước khi ghi đĩa (mục~\ref{sec:c4-bao-ve}), lưu dưới tên do máy chủ sinh và được trích xuất văn bản (python-docx cho DOCX, PyMuPDF cho PDF) để gửi sang dịch vụ AI. Web API là thành phần duy nhất gọi dịch vụ AI, thông qua một lớp \textit{AI client} có hai cài đặt: \texttt{AiClientHttp} gọi dịch vụ thật và một bản giả lập dùng khi phát triển giao diện. Thời gian chờ của lời gọi kiểm tra tên là 4 giây; với kiểm tra tài liệu, thời gian chờ tăng theo độ dài văn bản và có trần, để báo cáo dài không bị cắt ngang.
+
+\subsection{Client Web}
+
+Client Web là ứng dụng React một trang~\cite{react} viết bằng TypeScript~\cite{typescript}, build bằng Vite~\cite{vite} thành tệp tĩnh và được Apache phục vụ trực tiếp. Giao diện dùng bộ thành phần Ant Design~\cite{antd} với ngôn ngữ tiếng Việt. Một số điểm thi công chính:
+\begin{itemize}
+    \item \textit{Định tuyến theo vai trò:} mỗi route khai báo danh sách vai trò được phép. Thành phần \texttt{RequireAuth} chuyển người chưa đăng nhập về trang đăng nhập và hiển thị trang 403 khi vai trò không phù hợp. Menu bên trái được sinh từ cùng danh sách route, nên mỗi vai trò chỉ thấy chức năng của mình. Việc chặn ở client chỉ để trải nghiệm tốt hơn; quyết định cho phép luôn nằm ở Web API.
+    \item \textit{Dữ liệu từ máy chủ:} mọi lời gọi API đi qua TanStack Query~\cite{tanstackquery}, có bộ nhớ đệm và tự làm mới sau mỗi thao tác ghi. Trạng thái ``Đang kiểm tra'' của kiểm tra trùng lặp được thăm dò định kỳ cho tới khi có kết quả.
+    \item \textit{Phiên đăng nhập:} access token chỉ giữ trong bộ nhớ (Zustand), không lưu vào \texttt{localStorage}; refresh token nằm trong cookie \texttt{HttpOnly}. Khi access token hết hạn, client tự gọi làm mới phiên một lần rồi gửi lại yêu cầu.
+    \item \textit{Trang công khai:} đường dẫn gốc \texttt{/} là trang giới thiệu hệ thống cho người chưa đăng nhập; các trang nghiệp vụ nằm sau đăng nhập.
+\end{itemize}
+
+\subsection{Dịch vụ AI}
+
+Dịch vụ AI là một ứng dụng FastAPI riêng, sở hữu schema \texttt{thesis\_ai}, cung cấp năm endpoint: \texttt{/ingest} (nạp hoặc cập nhật một nguồn: tên đề tài, bản ghi kho, tài liệu), \texttt{/check-title}, \texttt{/check-document}, \texttt{/reindex} và \texttt{/health}. Mọi endpoint trừ \texttt{/health} yêu cầu header \texttt{X-API-Key} khớp khóa nội bộ, so sánh bằng hàm so sánh thời gian hằng.
+
+Khi khởi động, dịch vụ nạp mô hình \texttt{vietnamese-bi-encoder}~\cite{bkaibiencoder} từ volume (không tải từ Internet), đọc các vector đã lưu trong \texttt{thesis\_ai} và dựng hai chỉ mục FAISS trong bộ nhớ: một cho tên đề tài, một cho các câu của tài liệu. Chỉ mục dùng tích vô hướng trên vector đã chuẩn hóa (tương đương cosine) và cho phép thêm, xóa theo định danh, nên nạp một nguồn mới chỉ mã hóa đúng nguồn đó mà không tính lại cả kho. Mô hình chạy trên CPU với 4 luồng; việc mã hóa được chia thành lô con 32 câu và chỉ giữ khóa mô hình trong từng lô con, nên một lời gọi kiểm tra tên đến giữa lúc đang kiểm tra một báo cáo dài chỉ phải chờ tối đa một lô con.
+
+\subsection{Giao tiếp giữa các thành phần}
+
+Hình~\ref{fig:c4-docker-compose} cho thấy đường đi của một yêu cầu. Trình duyệt chỉ nói chuyện với Apache qua HTTPS. Apache trả tệp tĩnh của client và chuyển các yêu cầu \texttt{/api/} sang Web API qua \texttt{mod\_proxy}~\cite{apachemodproxy}. Web API gọi dịch vụ AI qua mạng nội bộ bằng REST JSON, chỉ gửi văn bản đã trích xuất, không gửi tệp nhị phân và không chuyển tiếp JWT của người dùng.
+
+Kiểm tra trùng lặp tài liệu chạy bất đồng bộ. Khi sinh viên nộp, Web API lưu tệp, trích xuất văn bản, tạo bản ghi kết quả ở trạng thái \textit{Đang kiểm tra} rồi trả mã 202 ngay; việc gọi dịch vụ AI chạy trong \texttt{BackgroundTasks} của FastAPI sau khi phản hồi đã gửi đi. Client thăm dò trạng thái cho tới khi nhận \textit{Hoàn tất} hoặc \textit{Lỗi}. Nếu dịch vụ AI tạm ngừng, kết quả chuyển sang \textit{Lỗi} kèm nút \textit{Kiểm tra lại}, còn việc nộp vẫn thành công. Sau khi ghi một đề tài, bản ghi kho hoặc tài liệu, Web API đẩy dữ liệu đó sang \texttt{/ingest} để kho so sánh luôn cập nhật; nguồn nào chưa nạp được sẽ được đẩy lại bằng lệnh bảo trì đánh chỉ mục lại.
+
+%=====================================================================
+\section{Kết quả thi công các chức năng}
+%=====================================================================
+
+Mục này trình bày kết quả thi công năm UC chính và nhóm chức năng chung trên client Web. Bảng~\ref{tab:c4-tong-hop-uc} tổng hợp các chức năng đã hoàn thành theo từng UC; các hình sau đó là ảnh chụp giao diện thật của hệ thống.
+
+Toàn bộ ảnh được chụp tự động bằng Chrome headless ở khung 1440$\times$900 điểm ảnh, qua Apache HTTPS, trên một bản cài đặt riêng trên máy phát triển với dữ liệu hư cấu: họ tên sinh viên, giảng viên được sinh ngẫu nhiên, địa chỉ email dùng tên miền thử nghiệm, nội dung đề tài và tài liệu lấy từ bộ dữ liệu tổng hợp ở mục~\ref{sec:c4-du-lieu}. Ảnh không chứa dữ liệu của người thật. Kịch bản chụp và tệp kết quả được lưu trong \path{docs/chuong-4-trien-khai/} để có thể chụp lại.
+
+{\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{|p{2.3cm}|p{7.3cm}|p{2.5cm}|p{2.1cm}|}
+\caption{Tổng hợp kết quả thi công theo UC}\label{tab:c4-tong-hop-uc}\\
+\hline
+\textbf{UC} & \textbf{Chức năng đã thi công} & \textbf{Vai trò} & \textbf{Hình} \\
+\hline
+\endfirsthead
+\hline
+\textbf{UC} & \textbf{Chức năng đã thi công} & \textbf{Vai trò} & \textbf{Hình} \\
+\hline
+\endhead
+UC0 -- Chức năng chung & UC0.1 đăng nhập, đăng xuất, làm mới phiên; UC0.2 quản lý tài khoản, khóa và mở khóa; UC0.3 quản lý đợt đồ án; UC0.4 cấu hình ngưỡng; UC0.5 thông báo; UC0.6, UC0.7 kiểm tra trùng tên đề tài và trùng lặp tài liệu (mục~\ref{sec:c4-phi-chuc-nang}); UC0.8 phân công GVHD; UC0.9 danh mục định hướng. Thêm: trang giới thiệu, tổng quan theo vai trò, trang 403 & Mọi vai trò & \ref{fig:c4-gioi-thieu}--\ref{fig:c4-403} \\
+\hline
+UC1 -- Quản lý đề tài & UC1.1 GVHD tạo và giao đề tài cho sinh viên trong lớp hướng dẫn, kèm cảnh báo trùng tên theo ngữ nghĩa; UC1.2 xem, lọc danh sách đề tài; sinh viên xem đề tài được giao và lịch sử & GV, SV, Bộ môn & \ref{fig:c4-sv-cua-toi}--\ref{fig:c4-sv-de-tai} \\
+\hline
+UC2 -- Quản lý đề cương & UC2.1 sinh viên nộp đề cương (DOCX/PDF), kiểm tra tệp, tên tệp, định hướng và trùng lặp tự động; UC2.2 GVHD duyệt hoặc yêu cầu sửa; UC2.3 GVHD nộp lên Bộ môn, đổi tên tệp theo mẫu; UC2.4 Bộ môn phê duyệt bằng PDF ký số hoặc trả lại, xuất ZIP; UC2.5 lịch sử phiên bản và nhận xét & SV, GV, Bộ môn & \ref{fig:c4-sv-nop-de-cuong}--\ref{fig:c4-sv-da-phe-duyet} \\
+\hline
+UC3 -- Quản lý tiến độ thực hiện & UC3.1 Bộ môn thiết lập mốc; UC3.2 sinh viên nộp báo cáo theo mốc; UC3.3 GVHD nhận xét, đánh giá; UC3.4 Bộ môn theo dõi toàn khoa; lịch sử nộp của sinh viên & SV, GV, Bộ môn & \ref{fig:c4-sv-tien-do}--\ref{fig:c4-lich-su-nop} \\
+\hline
+UC4 -- Quản lý bảo vệ & UC4.1 nộp báo cáo cuối kèm kiểm tra trùng lặp; UC4.2 lập hội đồng, xếp lịch; UC4.3 thành viên hội đồng chấm điểm; UC4.4 Bộ môn chốt kết quả; UC4.5 sinh viên xem lịch và kết quả & SV, GV, Bộ môn & \ref{fig:c4-bao-cao-cuoi}--\ref{fig:c4-ket-qua-bao-ve} \\
+\hline
+UC5 -- Quản lý kho dữ liệu đồ án & UC5.1 tra cứu theo từ khóa, khóa, GVHD, xem chi tiết, tải báo cáo; UC5.2 tự lưu kho khi chốt bảo vệ; UC5.3 thêm, sửa, xóa bản ghi; UC5.4 import CSV các khóa cũ; trạng thái chỉ mục AI & Mọi vai trò xem; Bộ môn ghi & \ref{fig:c4-kho-tim-kiem}--\ref{fig:c4-kho-import} \\
+\hline
+\end{longtable}
+}
+
+\subsection{UC0. Chức năng chung}
+
+Người chưa đăng nhập vào địa chỉ của hệ thống sẽ thấy trang giới thiệu (Hình~\ref{fig:c4-gioi-thieu}), tóm tắt quy trình và các vai trò, kèm nút chuyển sang trang đăng nhập (Hình~\ref{fig:c4-dang-nhap}). Người dùng đăng nhập bằng mã sinh viên, mã giảng viên hoặc email do Bộ môn cấp.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c0-trang-gioi-thieu.png}
+    \caption{Trang giới thiệu công khai}
+    \label{fig:c4-gioi-thieu}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c0-dang-nhap.png}
+    \caption{Màn hình đăng nhập}
+    \label{fig:c4-dang-nhap}
+\end{figure}
+
+Sau khi đăng nhập, mỗi vai trò có một trang tổng quan riêng. Sinh viên thấy đề tài, GVHD, thông báo mới và tóm tắt tiến độ theo các bước nộp đề cương, báo cáo tiến độ, báo cáo cuối và bảo vệ (Hình~\ref{fig:c4-sv-trang-chu}). Biểu tượng chuông ở thanh trên cùng hiển thị số thông báo chưa đọc; mỗi thông báo có liên kết tới đúng màn hình cần xử lý (Hình~\ref{fig:c4-thong-bao}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c0-sv-trang-chu.png}
+    \caption{Trang chủ của sinh viên}
+    \label{fig:c4-sv-trang-chu}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c0-thong-bao.png}
+    \caption{Danh sách thông báo chưa đọc}
+    \label{fig:c4-thong-bao}
+\end{figure}
+
+Trang tổng quan của giảng viên tập trung vào \textit{việc cần xử lý}: sinh viên chưa được giao đề tài, đề cương chờ duyệt, đề cương đã duyệt chờ nộp lên Bộ môn, báo cáo tiến độ chờ nhận xét, mỗi việc có nút đi thẳng tới thao tác tương ứng (Hình~\ref{fig:c4-gv-tong-quan}). Trang tổng quan của Bộ môn cho số liệu toàn khoa theo đợt: sinh viên chưa có GVHD, chưa có đề tài, đề cương chờ Bộ môn duyệt, sinh viên trễ mốc, hội đồng sắp tới (Hình~\ref{fig:c4-bm-tong-quan}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c0-gv-tong-quan.png}
+    \caption{Tổng quan của giảng viên: việc cần xử lý}
+    \label{fig:c4-gv-tong-quan}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c0-bm-tong-quan.png}
+    \caption{Tổng quan toàn khoa của Bộ môn}
+    \label{fig:c4-bm-tong-quan}
+\end{figure}
+
+Bộ môn quản lý danh mục dùng chung của hệ thống: tài khoản sinh viên, giảng viên (thêm, sửa, khóa, mở khóa; Hình~\ref{fig:c4-tai-khoan}), đợt đồ án (Hình~\ref{fig:c4-dot-do-an}), phân công GVHD theo đợt, có thể sửa từng dòng, chọn nhiều dòng hoặc import CSV (Hình~\ref{fig:c4-phan-cong}), và danh mục định hướng đề tài H01, H02,\ldots (Hình~\ref{fig:c4-dinh-huong}). Mã định hướng là phần đầu tên tệp đề cương và được kiểm tra tự động khi GVHD nộp đề cương lên Bộ môn.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c0-bm-tai-khoan.png}
+    \caption{Quản lý tài khoản}
+    \label{fig:c4-tai-khoan}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c0-bm-dot-do-an.png}
+    \caption{Quản lý đợt đồ án}
+    \label{fig:c4-dot-do-an}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c0-bm-phan-cong-gvhd.png}
+    \caption{Phân công giảng viên hướng dẫn theo đợt}
+    \label{fig:c4-phan-cong}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c0-bm-dinh-huong.png}
+    \caption{Danh mục định hướng đề tài}
+    \label{fig:c4-dinh-huong}
+\end{figure}
+
+Màn hình cấu hình ngưỡng (Hình~\ref{fig:c4-nguong}) cho Bộ môn chỉnh ba ngưỡng cảnh báo: ngưỡng tên đề tài, ngưỡng cảnh báo tài liệu (tỷ lệ trùng với một đồ án) và ngưỡng đoạn trùng. Mỗi ngưỡng hiển thị giá trị đề xuất từ bước hiệu chỉnh (mục~\ref{sec:c4-kiem-thu}) và nút khôi phục giá trị đề xuất. Ngưỡng mới chỉ áp dụng cho các lần kiểm tra sau; kết quả cũ giữ nguyên ngưỡng tại thời điểm kiểm tra. Khi người dùng mở một chức năng không thuộc vai trò của mình, client hiển thị trang 403 (Hình~\ref{fig:c4-403}); nếu gọi thẳng API, Web API cũng trả mã 403.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c0-bm-nguong.png}
+    \caption{Cấu hình ngưỡng cảnh báo trùng lặp}
+    \label{fig:c4-nguong}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c0-trang-403.png}
+    \caption{Trang 403 khi sinh viên mở chức năng của Bộ môn}
+    \label{fig:c4-403}
+\end{figure}
+
+\subsection{UC1. Quản lý đề tài}
+
+Theo quy trình đã điều chỉnh sau khảo sát, sinh viên thống nhất đề tài với GVHD ngoài hệ thống, sau đó GVHD tạo và giao đề tài trên hệ thống. Màn hình \textit{Sinh viên của tôi} liệt kê lớp hướng dẫn mà Bộ môn đã phân công cùng đề tài hiện tại của từng sinh viên, sinh viên chưa có đề tài có nút \textit{Giao đề tài} (Hình~\ref{fig:c4-sv-cua-toi}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c1-gv-sinh-vien-cua-toi.png}
+    \caption{Lớp hướng dẫn của giảng viên}
+    \label{fig:c4-sv-cua-toi}
+\end{figure}
+
+Khi GVHD nhập tên đề tài và rời ô nhập, client gọi API kiểm tra trùng tên. Hình~\ref{fig:c4-canh-bao-ten} là trường hợp tên mới là cách diễn đạt khác của một đề tài trong kho: hệ thống liệt kê đề tài tương tự kèm nguồn (kho đồ án hoặc đề tài hiện hành), khóa, GVHD và tỷ lệ tương đồng (81,92\%, trên ngưỡng 67,8\%). Cảnh báo chỉ mang tính gợi ý: GVHD có thể sửa tên hoặc chọn \textit{Vẫn giao đề tài}; kết quả kiểm tra được lưu cùng đề tài khi giao.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c1-gv-canh-bao-trung-ten.png}
+    \caption{Cảnh báo trùng tên đề tài khi GVHD giao đề tài}
+    \label{fig:c4-canh-bao-ten}
+\end{figure}
+
+Danh sách đề tài (Hình~\ref{fig:c4-ds-de-tai}) lọc được theo đợt, trạng thái, GVHD, định hướng và tìm theo tên; mỗi vai trò chỉ thấy đề tài trong phạm vi của mình. Sinh viên xem đề tài được giao và lịch sử các thao tác trên đề tài (Hình~\ref{fig:c4-sv-de-tai}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c1-bm-danh-sach-de-tai.png}
+    \caption{Danh sách đề tài của đợt}
+    \label{fig:c4-ds-de-tai}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c1-sv-de-tai-cua-toi.png}
+    \caption{Sinh viên xem đề tài được giao và lịch sử đề tài}
+    \label{fig:c4-sv-de-tai}
+\end{figure}
+
+\subsection{UC2. Quản lý đề cương}
+
+Đề cương đi qua quy trình duyệt hai cấp: sinh viên nộp, GVHD duyệt, GVHD nộp lên Bộ môn, Lãnh đạo bộ môn phê duyệt bằng bản PDF có chữ ký số. Thanh tiến trình năm bước ở đầu trang \textit{Nộp đề cương} cho sinh viên biết đề cương đang ở bước nào. Trang này cũng nhắc quy tắc đặt tên tệp \textit{[Mã định hướng].[MSSV].[Họ tên].[Lớp].pdf} với tên mẫu đã điền sẵn thông tin của sinh viên. Sau khi nộp, phiên bản mới xuất hiện trong lịch sử với trạng thái \textit{Đang kiểm tra}, rồi chuyển sang \textit{Hoàn tất} kèm tỷ lệ trùng (Hình~\ref{fig:c4-sv-nop-de-cuong}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth,height=0.6\textheight,keepaspectratio]{chuong_4/c2-sv-nop-de-cuong.png}
+    \caption{Sinh viên nộp đề cương và xem kết quả kiểm tra}
+    \label{fig:c4-sv-nop-de-cuong}
+\end{figure}
+
+GVHD xem danh sách đề cương của sinh viên mình hướng dẫn theo các tab trạng thái: chờ duyệt, chờ nộp Bộ môn, đã nộp Bộ môn, đã duyệt, yêu cầu sửa (Hình~\ref{fig:c4-gv-ds-de-cuong}). Màn hình duyệt (Hình~\ref{fig:c4-gv-vuot-nguong}) đặt thông tin đề cương, danh sách kiểm tra trước khi nộp lên khoa, nội dung tệp và khung kết quả kiểm tra trùng lặp trên cùng một trang. Trong ví dụ, đề cương có 48\% nội dung trùng với một đồ án trong kho, vượt ngưỡng 10,4\%; tên tệp cũng không theo mẫu và đề tài chưa gắn định hướng.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c2-gv-danh-sach-de-cuong.png}
+    \caption{Danh sách đề cương của GVHD theo trạng thái}
+    \label{fig:c4-gv-ds-de-cuong}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth,height=0.6\textheight,keepaspectratio]{chuong_4/c2-gv-duyet-vuot-nguong.png}
+    \caption{GVHD xem đề cương có tỷ lệ trùng vượt ngưỡng}
+    \label{fig:c4-gv-vuot-nguong}
+\end{figure}
+
+Nút \textit{Xem chi tiết} mở trang kết quả chi tiết (Hình~\ref{fig:c4-chi-tiet-trung-lap}): bên trái là danh sách đồ án trùng kèm tỷ lệ; bên phải là từng đoạn trùng, đặt đoạn trong tài liệu nộp cạnh đoạn nguồn, cụm từ trùng được tô sáng, mỗi đoạn có nhãn mức trùng và loại trùng (nguyên văn hoặc ngữ nghĩa). Đầu trang ghi rõ số câu đã so sánh và số dòng phần mẫu chung đã loại khỏi phép so sánh.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c2-chi-tiet-trung-lap.png}
+    \caption{Chi tiết kết quả kiểm tra trùng lặp: đoạn nộp cạnh đoạn nguồn}
+    \label{fig:c4-chi-tiet-trung-lap}
+\end{figure}
+
+Khi GVHD duyệt, đề cương chuyển sang \textit{GVHD đã duyệt}. Trước khi nộp lên Bộ môn, hệ thống tự kiểm tra ba mục: tên tệp đúng quy tắc (so với mã sinh viên, họ tên, lớp trong hồ sơ; bỏ qua các hậu tố do Word hoặc hệ điều hành tự thêm như ``(Repaired)'', ``(1)'', ``- Copy''), mã định hướng trong tên tệp khớp định hướng của đề tài, và kết quả kiểm tra trùng lặp. Hai mục đầu là điều kiện bắt buộc; mục trùng lặp chỉ để Bộ môn tham khảo. Khi đạt cả ba mục, GVHD thấy thông báo sẵn sàng và nút \textit{Nộp lên Bộ môn} (Hình~\ref{fig:c4-gv-san-sang}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth,height=0.6\textheight,keepaspectratio]{chuong_4/c2-gv-san-sang-nop.png}
+    \caption{Đề cương đạt các mục kiểm tra, sẵn sàng nộp lên Bộ môn}
+    \label{fig:c4-gv-san-sang}
+\end{figure}
+
+Khi tên tệp sai (Hình~\ref{fig:c4-gv-sai-ten}: họ tên trong tên tệp viết không dấu), nút nộp bị khóa và hệ thống nêu lý do kèm tên đúng mẫu. Nếu lỗi duy nhất là tên tệp và định hướng đã đúng, GVHD có thể bấm \textit{Đổi tên theo mẫu}; tên cũ được ghi vào nhận xét của lượt duyệt và sinh viên nhận thông báo. Trường hợp khác, GVHD trả lại để sinh viên sửa và nộp lại.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth,height=0.6\textheight,keepaspectratio]{chuong_4/c2-gv-sai-ten-file.png}
+    \caption{Tên tệp sai quy tắc: chưa thể nộp lên Bộ môn}
+    \label{fig:c4-gv-sai-ten}
+\end{figure}
+
+Ở cấp Bộ môn, Lãnh đạo bộ môn xem lại các mục kiểm tra, tải tệp đề cương, ký số bằng công cụ ký của mình (USB token, VNPT-CA, Adobe,\ldots) rồi tải bản PDF đã ký lên khung \textit{Phê duyệt và nộp về khoa} (Hình~\ref{fig:c4-bm-cho-duyet}). Web API chỉ nhận tệp PDF có chữ ký số PKCS\#7 nhúng trong tệp và vùng ký phủ toàn bộ tệp; tệp không có chữ ký hoặc bị sửa sau khi ký bị từ chối với mã 422. Bộ môn cũng có thể trả lại kèm nhận xét bắt buộc; khi đó đề cương về trạng thái \textit{Yêu cầu sửa}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth,height=0.6\textheight,keepaspectratio]{chuong_4/c2-bm-cho-phe-duyet.png}
+    \caption{Bộ môn phê duyệt đề cương bằng bản PDF đã ký số}
+    \label{fig:c4-bm-cho-duyet}
+\end{figure}
+
+Sau khi phê duyệt, trang chi tiết hiển thị người ký, thời điểm ký đọc từ chữ ký trong tệp và liên kết tải bản đã ký (Hình~\ref{fig:c4-bm-da-duyet}); sinh viên thấy cùng thông tin trên trang của mình (Hình~\ref{fig:c4-sv-da-phe-duyet}). Bộ môn tải được toàn bộ đề cương đã ký số của một đợt dưới dạng một tệp ZIP để nộp về khoa.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth,height=0.6\textheight,keepaspectratio]{chuong_4/c2-bm-da-phe-duyet.png}
+    \caption{Đề cương đã được Bộ môn phê duyệt, kèm thông tin chữ ký số}
+    \label{fig:c4-bm-da-duyet}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth,height=0.55\textheight,keepaspectratio]{chuong_4/c2-sv-da-phe-duyet.png}
+    \caption{Sinh viên xem đề cương đã được Bộ môn phê duyệt}
+    \label{fig:c4-sv-da-phe-duyet}
+\end{figure}
+
+\subsection{UC3. Quản lý tiến độ thực hiện}
+
+Bộ môn thiết lập các mốc tiến độ của đợt (tên mốc, hạn nộp). Sinh viên nộp báo cáo theo từng mốc; hệ thống ghi nhận nộp đúng hạn hay trễ hạn và hiển thị đánh giá của GVHD (Hình~\ref{fig:c4-sv-tien-do}). GVHD chọn sinh viên trong lớp hướng dẫn, xem các báo cáo đã nộp và gửi nhận xét kèm đánh giá \textit{Đạt}, \textit{Cần cải thiện} hoặc \textit{Chưa đạt} (Hình~\ref{fig:c4-gv-nhan-xet}). Trang \textit{Lịch sử nộp} gom mọi lần nộp của sinh viên (đề tài, đề cương, báo cáo tiến độ, báo cáo cuối) theo thời gian (Hình~\ref{fig:c4-lich-su-nop}). Bộ môn theo dõi tiến độ toàn khoa trên trang tổng quan (Hình~\ref{fig:c4-bm-tong-quan}) và trang \textit{Tiến độ toàn khoa}, lọc được sinh viên trễ mốc.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c3-sv-bao-cao-tien-do.png}
+    \caption{Sinh viên nộp báo cáo tiến độ theo mốc}
+    \label{fig:c4-sv-tien-do}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c3-gv-nhan-xet-tien-do.png}
+    \caption{GVHD nhận xét báo cáo tiến độ}
+    \label{fig:c4-gv-nhan-xet}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c3-sv-lich-su-nop.png}
+    \caption{Lịch sử nộp của sinh viên}
+    \label{fig:c4-lich-su-nop}
+\end{figure}
+
+\subsection{UC4. Quản lý bảo vệ}
+
+Sinh viên có đề cương đã được phê duyệt nộp báo cáo cuối; báo cáo cuối cũng được kiểm tra trùng lặp như đề cương (Hình~\ref{fig:c4-bao-cao-cuoi}). Khi đã được xếp lịch bảo vệ, sinh viên không nộp lại được báo cáo cuối. Bộ môn lập hội đồng (3 đến 5 thành viên, đúng một chủ tịch), chọn ngày, giờ, phòng và thêm sinh viên vào lịch; giờ bảo vệ của từng sinh viên được tính lần lượt theo thứ tự (Hình~\ref{fig:c4-hoi-dong}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth,height=0.5\textheight,keepaspectratio]{chuong_4/c4-sv-bao-cao-cuoi.png}
+    \caption{Sinh viên nộp báo cáo cuối}
+    \label{fig:c4-bao-cao-cuoi}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c4-bm-hoi-dong.png}
+    \caption{Lập hội đồng và lịch bảo vệ}
+    \label{fig:c4-hoi-dong}
+\end{figure}
+
+Mỗi thành viên hội đồng chấm điểm và nhận xét cho từng sinh viên trong hội đồng của mình, kèm tóm tắt kiểm tra trùng lặp của báo cáo cuối (Hình~\ref{fig:c4-cham-diem}). Khi đủ điểm của các thành viên, Bộ môn chốt kết quả; điểm bảo vệ là trung bình cộng điểm của các thành viên, sau khi chốt không sửa được và đồ án tự động được lưu vào kho (Hình~\ref{fig:c4-chot-diem}). Sinh viên xem lịch, thành phần hội đồng và điểm sau khi chốt (Hình~\ref{fig:c4-ket-qua-bao-ve}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c4-gv-cham-diem.png}
+    \caption{Thành viên hội đồng chấm điểm}
+    \label{fig:c4-cham-diem}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c4-bm-chot-diem.png}
+    \caption{Bộ môn chốt kết quả bảo vệ}
+    \label{fig:c4-chot-diem}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c4-sv-ket-qua-bao-ve.png}
+    \caption{Sinh viên xem lịch và kết quả bảo vệ}
+    \label{fig:c4-ket-qua-bao-ve}
+\end{figure}
+
+\subsection{UC5. Quản lý kho dữ liệu đồ án}
+
+Kho đồ án lưu các đồ án đã bảo vệ của khoa, gồm đồ án tự lưu khi chốt bảo vệ và đồ án các khóa cũ do Bộ môn nhập. Mọi vai trò tra cứu được theo khóa, GVHD và từ khóa (Hình~\ref{fig:c4-kho-tim-kiem}); bảng kết quả có cột trạng thái chỉ mục AI cho biết bản ghi đã được đưa vào kho so sánh hay chưa. Bộ môn xem chi tiết, sửa, xóa bản ghi, tải báo cáo cuối (Hình~\ref{fig:c4-kho-chi-tiet}) và import đồ án các khóa cũ từ tệp CSV (Hình~\ref{fig:c4-kho-import}). Mỗi dòng import thành công được đẩy sang dịch vụ AI, nên tên đề tài cũ tham gia ngay vào các lần kiểm tra trùng tên sau đó.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c5-kho-tim-kiem.png}
+    \caption{Tra cứu kho đồ án}
+    \label{fig:c4-kho-tim-kiem}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c5-kho-chi-tiet.png}
+    \caption{Chi tiết một bản ghi kho}
+    \label{fig:c4-kho-chi-tiet}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{chuong_4/c5-kho-import.png}
+    \caption{Import đồ án các khóa cũ từ tệp CSV}
+    \label{fig:c4-kho-import}
+\end{figure}
+
+%=====================================================================
+\section{Thi công các yêu cầu phi chức năng}\label{sec:c4-phi-chuc-nang}
+%=====================================================================
+
+Ba yêu cầu phi chức năng gắn trực tiếp với mục tiêu của đề tài là kiểm tra trùng tên đề tài bằng AI, kiểm tra trùng lặp nội dung tài liệu bằng AI và phân quyền theo vai trò. Các yêu cầu về bảo mật, triển khai được trình bày ở mục~\ref{sec:c4-bao-ve}; kết quả đo các chỉ tiêu ở mục~\ref{sec:c4-kiem-thu}.
+
+\subsection{Kiểm tra trùng tên đề tài bằng AI}
+
+Kiểm tra trùng tên chạy đồng bộ, ngay khi GVHD nhập xong tên đề tài, theo các bước:
+\begin{enumerate}
+    \item Client gọi \texttt{POST /api/topics/check-title}. Web API chuẩn hóa tên về dạng Unicode NFC, đọc ngưỡng tên đề tài hiện hành của Bộ môn và gửi tên cùng ngưỡng sang \texttt{/check-title} của dịch vụ AI, thời gian chờ 4 giây.
+    \item Dịch vụ AI mã hóa tên thành một vector 768 chiều, tìm 15 vector gần nhất (gấp ba số kết quả cần trả) trong chỉ mục tên đề tài. Chỉ mục này chứa cả đề tài của đợt hiện hành và tên đồ án trong kho. Điểm tương đồng là cosine, quy về thang 0--100\%.
+    \item Kết quả được gộp theo nguồn (một đồ án đã vào kho có thể xuất hiện hai lần: dạng đề tài và dạng bản ghi kho), giữ điểm cao nhất của mỗi nguồn, lọc theo ngưỡng và trả tối đa 5 nguồn có điểm cao nhất.
+    \item Web API bỏ các nguồn đã bị xóa và chính đề tài đang sửa, bổ sung tên, khóa, GVHD của từng nguồn rồi trả cho client.
+\end{enumerate}
+
+Kết quả chỉ là cảnh báo. Khi dịch vụ AI không phản hồi hoặc chưa có cấu hình ngưỡng, Web API trả trạng thái \textit{Lỗi} với danh sách rỗng, GVHD vẫn giao được đề tài. Khi GVHD giao đề tài, kết quả kiểm tra tại thời điểm đó (kể cả ngưỡng đã dùng) được lưu kèm đề tài để Bộ môn xem lại về sau. Tên đề tài vừa giao được đẩy ngay vào chỉ mục, nên lần kiểm tra kế tiếp đã so sánh được với nó.
+
+\subsection{Kiểm tra trùng lặp tài liệu bằng AI}
+
+Kiểm tra tài liệu được thực hiện cho đề cương và báo cáo cuối. Theo yêu cầu, kết quả phải chỉ ra ba thông tin: tỷ lệ trùng của tài liệu, các đồ án bị trùng kèm tỷ lệ với từng đồ án, và các đoạn trùng cụ thể. Dịch vụ AI xử lý văn bản đã trích xuất như sau:
+\begin{enumerate}
+    \item \textit{Loại phần mẫu chung.} Bìa, lời cam đoan, mục lục, danh mục hình và bảng, tài liệu tham khảo, phụ lục, tiêu đề chương mục, chú thích hình và bảng, số trang là phần mọi đồ án đều giống nhau nên bị loại khỏi phép so sánh. Để quy tắc này không thành chỗ giấu nội dung, các mục mẫu chỉ được bỏ ở phần đầu và phần cuối tài liệu, mỗi mục có trần độ dài, và kết quả luôn ghi số dòng, tỷ lệ nội dung đã loại.
+    \item \textit{Tách câu và mã hóa.} Phần còn lại được nối thành một dòng chảy (để đoạn văn bị PDF ngắt dòng được nối lại) rồi tách thành câu, có xử lý các chữ viết tắt thường gặp như TS., ThS., v.v.; câu ngắn hơn 6 âm tiết bị bỏ qua, câu dài hơn 120 âm tiết được cắt nhỏ. Nhờ vậy cùng một nội dung ở dạng DOCX và PDF cho cùng các câu. Mọi câu được mã hóa trong một lần gọi mô hình, chia lô con 32 câu.
+    \item \textit{Tìm câu nguồn gần nhất theo hai tín hiệu.} Với mỗi câu, dịch vụ tìm câu gần nghĩa nhất trong chỉ mục tài liệu (tín hiệu ngữ nghĩa, cosine) và câu có độ trùng chữ cao nhất theo chữ ký MinHash (tín hiệu nguyên văn, ước lượng hệ số Jaccard trên tập 4 âm tiết liên tiếp, 128 hàm băm)~\cite{datasketch}. Các phiên bản trước của chính đề tài đó không tham gia so sánh, để sinh viên nộp lại không bị tính là tự trùng.
+    \item \textit{Gắn cờ.} Câu bị gắn cờ \textit{nguyên văn} khi điểm Jaccard đạt ngưỡng nguyên văn (88,7\%); nếu không, câu bị gắn cờ \textit{ngữ nghĩa} khi cosine đạt ngưỡng đoạn trùng (67,7\%) và thuộc một chuỗi ít nhất 2 câu liên tiếp cùng trùng một nguồn. Điều kiện chuỗi loại bỏ các câu đơn lẻ trùng ý ngẫu nhiên, vốn hay gặp ở văn phong mô tả hệ thống.
+    \item \textit{Tổng hợp.} Tỷ lệ trùng tổng là số ký tự của các câu bị gắn cờ chia cho tổng số ký tự đã so sánh. Tỷ lệ trùng với từng đồ án tính tương tự, chỉ đếm câu gắn cờ của đồ án đó. Các câu bị gắn cờ liên tiếp cùng nguồn được ghép thành một đoạn trùng (tối đa 6 câu), kèm vị trí, đoạn nguồn, điểm từng tín hiệu và loại trùng chiếm ưu thế.
+\end{enumerate}
+
+Web API lưu kết quả cùng ngưỡng đang áp dụng, rồi đánh dấu \textit{vượt ngưỡng} khi tỷ lệ trùng với \textit{một} đồ án nguồn cao nhất đạt ngưỡng cảnh báo tài liệu (10,4\%). Ngưỡng được so với tỷ lệ theo từng nguồn chứ không với tỷ lệ tổng, vì một tài liệu trích dẫn rải rác nhiều nguồn, mỗi nguồn một ít, khác với tài liệu chép phần lớn một đồ án. Chỉ sau khi kết quả đã ở trạng thái \textit{Hoàn tất}, tài liệu mới được đẩy vào chỉ mục để các lần nộp sau so được với nó; nhờ thứ tự này, tài liệu không bao giờ tự trùng với chính nó.
+
+Việc kiểm tra không bao giờ để bản ghi kẹt ở trạng thái \textit{Đang kiểm tra}: mọi lỗi trong tác vụ nền đều chuyển bản ghi sang \textit{Lỗi}; bản ghi quá 300 giây chưa xong cũng bị chuyển sang \textit{Lỗi} ở lần đọc kế tiếp. Văn bản dài hơn 800\,000 ký tự (khoảng 230 trang) không được gửi sang dịch vụ AI; việc nộp vẫn thành công, kết quả ghi rõ lý do. Nút \textit{Kiểm tra lại} chỉ xuất hiện khi kết quả ở trạng thái \textit{Lỗi}.
+
+\subsection{Phân quyền}
+
+Hệ thống có ba vai trò: Sinh viên, Giảng viên (gồm cả vai trò GVHD và thành viên hội đồng) và Bộ môn. Phân quyền được thực hiện ở ba lớp, trong đó lớp quyết định là Web API:
+\begin{itemize}
+    \item \textit{Vai trò.} Mọi route dưới \texttt{/api} khai báo vai trò được phép qua dependency \texttt{require\_role}; gọi sai vai trò nhận mã 403. Chỉ tám route được để công khai: đăng nhập, làm mới phiên, đăng xuất, kiểm tra tình trạng và tài liệu OpenAPI. Một kiểm thử tự động duyệt toàn bộ route của ứng dụng và báo lỗi nếu có route mới quên khai báo vai trò.
+    \item \textit{Phiên đăng nhập.} Mỗi yêu cầu đọc lại tài khoản từ CSDL: tài khoản bị khóa, vai trò trong token không khớp CSDL hoặc token phát ra trước lần đăng xuất gần nhất (số phiên bản token đã tăng) đều bị từ chối với mã 401. Vì vậy khóa tài khoản và đăng xuất có hiệu lực ngay, không phải chờ token hết hạn.
+    \item \textit{Phạm vi dữ liệu.} Các hàm nghiệp vụ kiểm tra quyền trên từng đối tượng: sinh viên chỉ thấy đề tài, đề cương, báo cáo, kết quả của mình; giảng viên chỉ thấy sinh viên mình hướng dẫn, và báo cáo cuối của sinh viên thuộc hội đồng mình tham gia; Bộ môn thấy toàn khoa. Với thông báo, đối tượng không thuộc người gọi và đối tượng không tồn tại cùng trả mã 404, để không lộ việc định danh đó có tồn tại hay không.
+\end{itemize}
+
+Bảng~\ref{tab:c4-phan-quyen} tóm tắt quyền chính của từng vai trò; chi tiết theo UC đã được trình bày ở chương 2.
+
+{\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{|p{5.1cm}|p{2.8cm}|p{3.15cm}|p{3.15cm}|}
+\caption{Quyền chính của từng vai trò}\label{tab:c4-phan-quyen}\\
+\hline
+\textbf{Nhóm chức năng} & \textbf{Sinh viên} & \textbf{Giảng viên} & \textbf{Bộ môn} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Nhóm chức năng} & \textbf{Sinh viên} & \textbf{Giảng viên} & \textbf{Bộ môn} \\
+\hline
+\endhead
+Tài khoản, đợt, phân công GVHD, định hướng, ngưỡng & Xem GVHD của mình & Xem lớp hướng dẫn & Toàn quyền \\
+\hline
+Đề tài & Xem đề tài của mình & Tạo, giao cho SV mình hướng dẫn & Xem toàn khoa \\
+\hline
+Đề cương & Nộp, nộp lại & Duyệt, yêu cầu sửa, nộp lên Bộ môn, đổi tên tệp & Phê duyệt bằng PDF ký số, trả lại, xuất ZIP \\
+\hline
+Tiến độ & Nộp báo cáo theo mốc & Nhận xét SV mình hướng dẫn & Thiết lập mốc, theo dõi toàn khoa \\
+\hline
+Bảo vệ & Nộp báo cáo cuối, xem lịch, điểm & Chấm điểm trong hội đồng của mình & Lập hội đồng, xếp lịch, chốt điểm \\
+\hline
+Kho đồ án & Tra cứu, xem & Tra cứu, xem & Thêm, sửa, xóa, import, đánh chỉ mục lại \\
+\hline
+Kết quả kiểm tra trùng lặp & Của mình & Của SV mình hướng dẫn hoặc trong hội đồng & Toàn khoa \\
+\hline
+\end{longtable}
+}
+
+%=====================================================================
+\section{Bảo vệ hệ thống}\label{sec:c4-bao-ve}
+%=====================================================================
+
+\subsection{Apache và HTTPS}
+
+Apache là điểm vào duy nhất từ bên ngoài. Cổng 80 chỉ có một chỉ thị \texttt{Redirect permanent} chuyển mọi yêu cầu sang HTTPS. Cổng 443 chỉ chấp nhận TLS 1.2 và TLS 1.3. Chứng chỉ được đặt trong thư mục \path{deploy/certs/}: khi chưa có, \path{install.sh} sinh chứng chỉ tự ký RSA 2048 bit, hạn 825 ngày, cho đúng tên miền hoặc địa chỉ IP của máy chủ; khi Khoa có chứng chỉ do tổ chức cấp chứng chỉ phát hành, quản trị viên chỉ cần thay hai tệp \path{server.crt} và \path{server.key}, tập lệnh cài đặt không ghi đè chứng chỉ đã có.
+
+Cấu hình bảo mật của Apache gồm:
+\begin{itemize}
+    \item Ẩn phiên bản máy chủ (\texttt{ServerTokens Prod}, \texttt{ServerSignature Off}), tắt phương thức \texttt{TRACE}, không liệt kê thư mục (\texttt{Options -Indexes}).
+    \item Giới hạn thân yêu cầu 25~MB (\texttt{LimitRequestBody}), chặn tệp quá lớn trước khi tới Web API; thời gian chờ proxy 120 giây.
+    \item Các header bảo mật: \texttt{X-Content-Type-Options: nosniff}, \texttt{X-Frame-Options: DENY}, \texttt{Referrer-Policy: same-origin} và chính sách nội dung (CSP) chỉ cho phép tải script, kết nối từ chính máy chủ, cấm nhúng trang vào khung của trang khác.
+    \item Chỉ có một đường proxy \texttt{/api/} sang Web API. Không có đường nào tới dịch vụ AI hay MySQL; thư mục tệp tải lên nằm ngoài \texttt{DocumentRoot}, tệp chỉ tải được qua API có kiểm tra quyền.
+\end{itemize}
+
+\subsection{Xác thực và phiên đăng nhập}
+
+Mật khẩu được băm bằng bcrypt với hệ số chi phí 12. Khi đăng nhập sai tài khoản không tồn tại, Web API vẫn chạy một phép băm giả để thời gian phản hồi không tiết lộ tài khoản nào có thật. Sau 5 lần đăng nhập sai trong 15 phút từ cùng một địa chỉ IP với cùng một tên đăng nhập, các lần thử tiếp theo nhận mã 429.
+
+Phiên đăng nhập dùng hai JWT ký bằng khóa bí mật ngẫu nhiên 64 ký tự sinh lúc cài đặt: access token hạn 30 phút, gửi trong header \texttt{Authorization}, chỉ giữ trong bộ nhớ của trang; refresh token hạn 8 giờ, nằm trong cookie \texttt{HttpOnly}, \texttt{Secure}, \texttt{SameSite=Strict}, chỉ gửi kèm các yêu cầu tới \texttt{/api/auth}. Mã độc chạy trong trang (nếu có) không đọc được refresh token, còn trang khác không gửi được yêu cầu kèm cookie này. Đăng xuất tăng số phiên bản token của tài khoản, làm mọi token cũ mất hiệu lực.
+
+\subsection{Tệp tải lên}
+
+Tệp đề cương, báo cáo bị kiểm tra theo nội dung chứ không theo phần mở rộng: tệp PDF phải bắt đầu bằng \texttt{\%PDF-}; tệp DOCX phải là tệp ZIP hợp lệ có \path{word/document.xml}. Kích thước tối đa là 20~MB ở Web API (thêm lớp chặn 25~MB ở Apache). Để chống tệp nén ``bom'', tổng dung lượng giải nén của DOCX không quá 25~MB và riêng \path{document.xml} không quá 15~MB. Tệp được lưu dưới tên \path{<loai>/<uuid>.<ext>} do máy chủ sinh; tên gốc chỉ được lưu trong CSDL, nên không thể dùng tên tệp để ghi đè hay leo thư mục.
+
+Với bản đề cương có chữ ký số, Web API đọc cấu trúc chữ ký PDF: tìm từ điển chữ ký (\texttt{/ByteRange}, \texttt{/Contents}), đọc chứng thư và tên người ký từ khối PKCS\#7, thời điểm ký, và kiểm tra vùng được ký phủ toàn bộ tệp (tệp bị nối thêm nội dung sau khi ký sẽ bị từ chối). Phiên bản hiện tại \textit{chưa} xác minh giá trị mật mã của chữ ký và chưa kiểm tra chuỗi chứng thư tới tổ chức cấp chứng thư gốc; hạn chế này được nêu lại ở phần kết luận chương.
+
+\subsection{Bảo vệ dịch vụ AI và CSDL}
+
+Dịch vụ AI và MySQL chỉ nằm trong mạng Docker nội bộ, không công bố cổng ra máy chủ (MySQL chỉ mở trên \texttt{127.0.0.1} cho quản trị viên). Dịch vụ AI yêu cầu khóa nội bộ trong header \texttt{X-API-Key} và chạy với hệ thống tệp chỉ đọc, không cần Internet khi chạy. Mỗi dịch vụ có tài khoản CSDL riêng chỉ có quyền trên schema của mình, nên nếu dịch vụ AI bị chiếm quyền, kẻ tấn công cũng không đọc được dữ liệu nghiệp vụ trong \texttt{thesis\_core}.
+
+Các bí mật (khóa ký JWT, khóa nội bộ của dịch vụ AI, mật khẩu CSDL, mật khẩu khởi tạo) được sinh ngẫu nhiên lúc cài đặt và chỉ nằm trong một tệp biến môi trường có quyền đọc chỉ cho chủ sở hữu, không có trong mã nguồn. Danh sách sinh viên, giảng viên thật cũng không nằm trong kho mã nguồn; tập lệnh cài đặt đọc chúng từ tệp CSV đặt sẵn trên máy chủ.
+
+%=====================================================================
+\section{Dữ liệu thử nghiệm}\label{sec:c4-du-lieu}
+%=====================================================================
+
+Dữ liệu thử nghiệm được chuẩn bị theo các chỉ tiêu NFR-17 đến NFR-19 ở chương 2 (ít nhất 100 sinh viên, 30 giảng viên, 200 đề tài, 80 truy vấn tên đề tài có nhãn, 50 tệp gồm 25 cặp) và được nạp hoàn toàn bằng tập lệnh, chạy lại nhiều lần không sinh bản ghi trùng (Bảng~\ref{tab:c4-du-lieu}). Số tài khoản vượt chỉ tiêu vì hệ thống nạp danh sách sinh viên, giảng viên thật dùng cho triển khai thay vì một danh sách mẫu.
+
+{\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{|p{3.5cm}|p{2.5cm}|p{8.6cm}|}
+\caption{Dữ liệu thử nghiệm}\label{tab:c4-du-lieu}\\
+\hline
+\textbf{Loại dữ liệu} & \textbf{Số lượng} & \textbf{Nguồn và cách nạp} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Loại dữ liệu} & \textbf{Số lượng} & \textbf{Nguồn và cách nạp} \\
+\hline
+\endhead
+Tài khoản sinh viên & 580 & Danh sách sinh viên dạng CSV (mã, họ tên, lớp), nạp khi Web API khởi động; mật khẩu khởi tạo chung do tập lệnh cài đặt sinh \\
+\hline
+Tài khoản giảng viên & 70 & Danh sách giảng viên dạng CSV (mã, họ tên, học vị, email, bộ môn) \\
+\hline
+Tài khoản Bộ môn & 1 & Tạo khi seed \\
+\hline
+Đề tài trong kho & 300 & Khóa K18 đến K22, mỗi khóa 60 đề tài, thuộc 8 cụm chủ đề; nạp qua đúng chức năng import CSV của Bộ môn rồi đẩy vào chỉ mục AI \\
+\hline
+Truy vấn tên đề tài có nhãn & 80 & 40 truy vấn diễn đạt lại một đề tài trong kho (kỳ vọng cảnh báo), 40 truy vấn cùng lĩnh vực nhưng khác đối tượng (kỳ vọng không cảnh báo); khoảng 30\% giữ riêng để kiểm chứng \\
+\hline
+Tệp tài liệu & 50 & 25 cặp A/B (25 DOCX, 25 PDF): A là đồ án nguồn trong kho, B là bài nộp. Phổ cặp: 7 chép nguyên văn, 7 diễn đạt lại, 6 cùng lĩnh vực khác đề tài, 5 không liên quan; 17 cặp dùng hiệu chỉnh ngưỡng, 8 cặp giữ riêng để kiểm chứng \\
+\hline
+Trạng thái demo & 5 SV, 4 GV & Tập lệnh \path{demo-state.sh} dựng sẵn các tình huống của quy trình để trình diễn: chưa có đề tài; đề cương vượt ngưỡng chờ duyệt; đề cương đã duyệt, đã nộp tiến độ; đã nộp báo cáo cuối, hội đồng chưa chấm đủ; đã chốt điểm và vào kho \\
+\hline
+\end{longtable}
+}
+
+Kho đề tài, truy vấn và 50 tệp tài liệu là dữ liệu tổng hợp, do bộ sinh \path{tools/datagen} tạo từ bộ từ vựng tự soạn với hạt giống cố định, nên sinh lại cho kết quả giống hệt từng byte và không chứa văn bản của đồ án thật. Cấu trúc tài liệu mô phỏng khuôn mẫu chung của đồ án CNTT tiếng Việt (bìa, mục lục, chương, tài liệu tham khảo), để thử được cả bước loại phần mẫu chung. Danh sách sinh viên, giảng viên là danh sách thật nên không đưa vào kho mã nguồn công khai. Bản cài đặt dùng để chụp ảnh trong chương này thay hai tệp đó bằng danh sách hư cấu cùng cấu trúc và số lượng, giữ nguyên các mã mà tập lệnh kiểm thử sử dụng.
+
+Bên cạnh dữ liệu tổng hợp, kho đồ án trên máy chủ triển khai được nạp các đồ án thật đã thu thập của khoa: 106 trong 128 đồ án đã vào kho và được đánh chỉ mục trong dịch vụ AI; 22 đồ án còn lại chưa nạp được, phần lớn vì chỉ có tệp nguồn LaTeX, không có bản DOCX hoặc PDF để trích xuất văn bản. Các số liệu về chất lượng kiểm tra trùng lặp ở mục~\ref{sec:c4-kiem-thu} vẫn tính trên dữ liệu tổng hợp, vì dữ liệu thật chưa được gán nhãn trùng hay không trùng.
+
+%=====================================================================
+\section{Kiểm thử và đánh giá}\label{sec:c4-kiem-thu}
+%=====================================================================
+
+Hệ thống được kiểm thử ở ba mức: kiểm thử tự động toàn hệ thống bằng tập lệnh, thử nghiệm riêng cho mô hình AI, và đo các chỉ tiêu phi chức năng đã đặt ra ở chương 2. Mọi số liệu dưới đây được sinh tự động bởi tập lệnh và lưu kèm nhật ký trong \path{docs/chuong-4-trien-khai/}.
+
+\subsection{Kiểm thử tự động}
+
+Tập lệnh \texttt{deploy/verify-all.sh -{}-report} chạy tuần tự 14 bước trên stack đang chạy (qua Apache HTTPS, với dịch vụ AI và mô hình thật), ghi kết quả từng bước vào một tệp JSON. Các bước ghi dữ liệu dùng đợt và tài khoản kiểm thử riêng và tự dọn sau khi chạy; bước cuối kiểm tra trạng thái demo trước và sau giống hệt nhau. Bảng~\ref{tab:c4-verify-all} so sánh hai lần chạy: lần 14/10/2026 trước khi có luồng duyệt đề cương hai cấp, và lần 21/10/2026 trên mã nguồn hiện tại, chạy trên stack riêng với danh sách người dùng hư cấu.
+
+{\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{|p{0.6cm}|p{4.8cm}|p{2.1cm}|p{2.1cm}|p{4.1cm}|}
+\caption{Kết quả kiểm thử tự động toàn hệ thống}\label{tab:c4-verify-all}\\
+\hline
+\textbf{\#} & \textbf{Bước} & \textbf{14/10/2026} & \textbf{21/10/2026} & \textbf{Ghi chú lần 21/10} \\
+\hline
+\endfirsthead
+\hline
+\textbf{\#} & \textbf{Bước} & \textbf{14/10/2026} & \textbf{21/10/2026} & \textbf{Ghi chú lần 21/10} \\
+\hline
+\endhead
+1 & Tình trạng các container, mô hình chạy ngoại tuyến & Đạt & Không đạt & Do môi trường đo (xem dưới) \\
+\hline
+2 & Dữ liệu thử nghiệm đủ số lượng & Đạt & Đạt & \\
+\hline
+3 & Smoke test qua HTTPS & Đạt (26) & Đạt (26) & \\
+\hline
+4 & Kiểm thử đơn vị, tích hợp Web API (pytest) & 54 ca đạt & 67 ca đạt & Thêm ca cho luồng Bộ môn phê duyệt \\
+\hline
+5 & Kiểm thử dịch vụ AI (pytest) & 8 ca đạt & 8 ca đạt & \\
+\hline
+6 & E2E UC1: phân công GVHD, giao đề tài & Đạt (15) & Đạt (15) & \\
+\hline
+7 & E2E UC2--UC5: đề cương, tiến độ, bảo vệ, lưu kho & Đạt (67) & Không đạt (11) & Kịch bản chưa cập nhật luồng hai cấp \\
+\hline
+8 & E2E dịch vụ AI thật & Đạt (31) & Đạt (31) & \\
+\hline
+9 & Đo hiệu năng, bảo mật dịch vụ AI & Đạt & Đạt & \\
+\hline
+10 & Đo các yêu cầu hệ thống qua HTTPS & Đạt (14) & Đạt (14) & \\
+\hline
+11 & Đối chiếu ERD với schema & Đạt & Không đạt & ERD chưa cập nhật bảng mới \\
+\hline
+12 & Không còn dữ liệu kiểm thử & Đạt & Đạt & \\
+\hline
+13 & Hiển thị màn hình chính ở 1440 px & Đạt (25) & Không đạt & Kịch bản chưa cập nhật nhãn đăng nhập \\
+\hline
+14 & Trạng thái demo không đổi & Đạt & Đạt & \\
+\hline
+\end{longtable}
+}
+
+\noindent Số trong ngoặc là số kiểm tra đã qua. Lần 14/10 đạt cả 14 bước trong 336 giây. Lần 21/10 có 10/14 bước đạt trong 430 giây; bốn bước không đạt đã được phân tích nguyên nhân:
+\begin{itemize}
+    \item \textit{Bước 1} gọi cố định \path{https://localhost/api/health} ở cổng 443, trong khi stack riêng dùng cổng 18443. Tám kiểm tra trước đó đều qua; gọi lại đúng cổng nhận \texttt{\{"status":"ok","db":"ok"\}}. Đây là lỗi của môi trường đo.
+    \item \textit{Bước 7} vẫn chờ đề cương chuyển thẳng sang \textit{Đã duyệt} sau khi GVHD duyệt, trong khi luồng mới cho trạng thái \textit{GVHD đã duyệt} và còn chờ Bộ môn. Mười một kiểm tra trước điểm đó đều qua, nhưng các kiểm tra về tiến độ, bảo vệ, lưu kho phía sau không được chạy lại. Luồng hai cấp được kiểm thử ở mức API bằng các ca pytest mới của bước 4.
+    \item \textit{Bước 11} so sánh schema với tệp ERD trong mã nguồn; tệp này chưa có bảng định hướng, bảng lượt duyệt của Bộ môn và bốn cột mới. Chạy lại với ERD đã cập nhật cho chương 3 thì schema khớp hoàn toàn.
+    \item \textit{Bước 13} dùng kịch bản chụp màn hình cũ, vẫn tìm nhãn ``Mã SV/GV hoặc email'' trên trang đăng nhập (nay là ``Tài khoản''), nên dừng ngay ở bước đầu. Thay vào đó, NFR-16 được đo bằng kịch bản mới mở 35 màn hình của cả ba vai trò ở 1440 px: 35/35 màn hình hiển thị đủ, độ rộng nội dung lớn nhất đúng 1440 px.
+\end{itemize}
+
+Như vậy cả bốn bước không đạt đều do tập lệnh kiểm thử hoặc tài liệu chưa theo kịp thay đổi của luồng duyệt đề cương, không phát hiện lỗi của chức năng. Tuy vậy, các kịch bản E2E và kịch bản chụp màn hình cần được cập nhật trước lần kiểm thử chấp nhận tiếp theo.
+
+\subsection{Thử nghiệm mô hình AI}
+
+\textbf{Chọn mô hình embedding.} Hai mô hình ứng viên được so sánh trên 80 cặp văn bản gán nhãn tay (30 cặp tên đề tài, 30 cặp câu, 20 cặp đoạn), mỗi nhóm gồm cặp diễn đạt lại (trùng), cặp cùng lĩnh vực khác nội dung và cặp không liên quan (không trùng). Quy tắc chọn được viết ra trước khi chạy: chỉ chọn \texttt{multilingual-e5-base} khi AUC của nó vượt \texttt{vietnamese-bi-encoder} ít nhất 0,05 trên \textit{cả} tập câu và tập đoạn; ngược lại chọn \texttt{vietnamese-bi-encoder} vì nhỏ hơn, phù hợp máy chủ dùng chung bộ nhớ. Kết quả ở Bảng~\ref{tab:c4-so-sanh-mo-hinh}: trên tập câu hai mô hình bằng nhau, nên \texttt{vietnamese-bi-encoder} được chọn. Ngoài quy tắc, mô hình này còn trải điểm rộng hơn hẳn (chênh lệch cosine trung bình giữa cặp trùng và cặp không trùng 0,24--0,47, so với 0,06--0,09 của e5), giúp ngưỡng ít nhạy với sai số hiệu chỉnh.
+
+{\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{|p{6.4cm}|p{4cm}|p{4cm}|}
+\caption{So sánh hai mô hình embedding}\label{tab:c4-so-sanh-mo-hinh}\\
+\hline
+\textbf{Chỉ số} & \textbf{vietnamese-bi-encoder} & \textbf{multilingual-e5-base} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Chỉ số} & \textbf{vietnamese-bi-encoder} & \textbf{multilingual-e5-base} \\
+\hline
+\endhead
+AUC tên đề tài & 0,8472 & 0,8750 \\
+\hline
+AUC câu & 1,0000 & 1,0000 \\
+\hline
+AUC đoạn & 0,9479 & 1,0000 \\
+\hline
+Chênh lệch cosine trùng / không trùng (tên, câu, đoạn) & 0,24 / 0,47 / 0,36 & 0,06 / 0,09 / 0,09 \\
+\hline
+Thời gian mã hóa 300 câu (CPU) & 4,84 s & 6,30 s \\
+\hline
+Bộ nhớ đỉnh của tiến trình & 1\,047,7 MB & 1\,572,9 MB \\
+\hline
+Kích thước trọng số & khoảng 515 MiB & khoảng 1,06 GiB \\
+\hline
+\end{longtable}
+}
+
+\textbf{Hiệu chỉnh ngưỡng.} Các ngưỡng được chọn trên tập hiệu chỉnh (17 cặp tài liệu, 56 truy vấn tên đề tài), sau đó kiểm chứng trên tập giữ riêng (8 cặp tài liệu, 24 truy vấn) không dùng khi hiệu chỉnh. Ngưỡng tên, đoạn và nguyên văn được chọn theo chỉ số Youden J trên đường ROC; ngưỡng tài liệu lấy trung điểm vì hai lớp tách biệt hoàn toàn (Bảng~\ref{tab:c4-nguong}). Ngưỡng tên, ngưỡng đoạn và ngưỡng tài liệu là giá trị đề xuất trên màn hình cấu hình của Bộ môn; ngưỡng nguyên văn là tham số kỹ thuật của dịch vụ AI, không sửa trên giao diện.
+
+{\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{|p{4.3cm}|p{1.7cm}|p{3.1cm}|p{1.6cm}|p{3cm}|}
+\caption{Ngưỡng sau hiệu chỉnh}\label{tab:c4-nguong}\\
+\hline
+\textbf{Ngưỡng} & \textbf{Giá trị} & \textbf{Phương pháp} & \textbf{AUC} & \textbf{TPR / FPR} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Ngưỡng} & \textbf{Giá trị} & \textbf{Phương pháp} & \textbf{AUC} & \textbf{TPR / FPR} \\
+\hline
+\endhead
+Tên đề tài (cosine) & 67,8\% & Youden J & 0,9758 & 0,893 / 0,036 \\
+\hline
+Đoạn trùng ngữ nghĩa (cosine từng câu) & 67,7\% & Youden J & 0,7983 & 0,829 / 0,351 \\
+\hline
+Nguyên văn (Jaccard MinHash từng câu) & 88,7\% & Youden J & 0,9992 & 1,000 / 0,002 \\
+\hline
+Tài liệu (tỷ lệ theo một đồ án) & 10,4\% & Trung điểm & 1,0000 & 1,000 / 0,000 \\
+\hline
+\end{longtable}
+}
+
+\textbf{Kiểm chứng.} Bảng~\ref{tab:c4-kiem-chung} cho độ chính xác ở ba mức. Ở mức tài liệu, mọi cặp chép nguyên văn, diễn đạt lại và không liên quan đều được xử lý đúng trên cả hai tập. Cặp duy nhất sai là P19 (cùng lĩnh vực, tập kiểm chứng): bài nộp trùng ngữ nghĩa 22,81\% với một đồ án khác cùng chủ đề y tế trong kho nên bị cảnh báo, dù không phải đồ án nguồn của cặp. Ở mức câu, câu chép nguyên văn được phát hiện đầy đủ, nhưng câu diễn đạt lại chỉ được phát hiện 40--56\%; tài liệu diễn đạt lại vẫn bị cảnh báo đúng vì đủ nhiều câu trùng tập trung vào một nguồn. Ba cổng chất lượng đặt trước đều đạt: mọi cặp chép nguyên văn bị cảnh báo, mọi cặp không liên quan dưới ngưỡng, độ chính xác cặp trên tập kiểm chứng 0,875 (yêu cầu $\geq 0{,}85$).
+
+{\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{|p{6.8cm}|p{3.8cm}|p{3.8cm}|}
+\caption{Độ chính xác kiểm tra trùng lặp trên tập hiệu chỉnh và tập kiểm chứng}\label{tab:c4-kiem-chung}\\
+\hline
+\textbf{Chỉ số} & \textbf{Tập hiệu chỉnh} & \textbf{Tập kiểm chứng} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Chỉ số} & \textbf{Tập hiệu chỉnh} & \textbf{Tập kiểm chứng} \\
+\hline
+\endhead
+\multicolumn{3}{|l|}{\textit{Mức tài liệu (cặp A/B, cảnh báo đúng kỳ vọng)}} \\
+\hline
+Chép nguyên văn & 5/5 & 2/2 \\
+\hline
+Diễn đạt lại & 5/5 & 2/2 \\
+\hline
+Cùng lĩnh vực, khác đề tài & 4/4 & 1/2 \\
+\hline
+Không liên quan & 3/3 & 2/2 \\
+\hline
+\textbf{Tất cả} & \textbf{17/17 (1,000)} & \textbf{7/8 (0,875)} \\
+\hline
+\multicolumn{3}{|l|}{\textit{Mức câu (tỷ lệ câu bị gắn cờ)}} \\
+\hline
+Câu chép nguyên văn & 183/183 (1,000) & 110/110 (1,000) \\
+\hline
+Câu diễn đạt lại & 125/222 (0,563) & 22/55 (0,400) \\
+\hline
+Câu tự viết bị gắn cờ nhầm & 44/1064 (0,041) & 57/616 (0,092) \\
+\hline
+\multicolumn{3}{|l|}{\textit{Mức tên đề tài (truy vấn có nhãn)}} \\
+\hline
+Độ chính xác chung & 52/56 (0,929) & 22/24 (0,917) \\
+\hline
+Diễn đạt lại được cảnh báo & 25/28 (0,893) & 11/12 (0,917) \\
+\hline
+Cùng lĩnh vực không bị cảnh báo & 27/28 (0,964) & 11/12 (0,917) \\
+\hline
+\end{longtable}
+}
+
+\textbf{Vai trò của bước loại phần mẫu chung.} Khi tắt bước này, tỷ lệ trùng tổng của 11 bài nộp cùng lĩnh vực hoặc không liên quan tăng trung bình 15,14 điểm phần trăm (thấp nhất 2,52, cao nhất 23,17), do bìa, lời cam đoan, mục lục, tài liệu tham khảo của mọi đồ án giống nhau. Nếu không loại, những bài hoàn toàn không sao chép này sẽ hiển thị tỷ lệ trùng tổng khoảng 10--26\%. Tỷ lệ theo từng đồ án của các bài này vẫn dưới 0,4\% nên không bị cảnh báo; tác dụng chính của bước này là giữ cho con số tỷ lệ tổng mà người dùng nhìn thấy có ý nghĩa.
+
+\subsection{Đánh giá theo yêu cầu phi chức năng}
+
+Bảng~\ref{tab:c4-nfr} đối chiếu kết quả lần chạy ngày 21/10/2026 với 19 yêu cầu phi chức năng ở chương 2. Các phép đo thời gian chạy trên máy phát triển với dữ liệu thử nghiệm đầy đủ (308 vector tên đề tài, 2\,991 vector câu tài liệu), trong lúc máy còn chạy các việc khác.
+
+{\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{|p{1.5cm}|p{4.2cm}|p{6.9cm}|p{1.6cm}|}
+\caption{Kết quả đánh giá yêu cầu phi chức năng (21/10/2026)}\label{tab:c4-nfr}\\
+\hline
+\textbf{Mã} & \textbf{Chỉ tiêu} & \textbf{Kết quả đo} & \textbf{Đánh giá} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Mã} & \textbf{Chỉ tiêu} & \textbf{Kết quả đo} & \textbf{Đánh giá} \\
+\hline
+\endhead
+NFR-01 & Mật khẩu băm bcrypt, chi phí $\geq 12$, không ghi log & 651/651 tài khoản có tiền tố \texttt{\$2b\$12\$}; mật khẩu khởi tạo xuất hiện 0 lần trong log của Web API và Apache & Đạt \\
+\hline
+NFR-02 & Access token 30 phút, refresh token 8 giờ trong cookie \texttt{HttpOnly}, đăng xuất thu hồi token & Khóa ký 64 ký tự từ biến môi trường; token hết hạn 401, còn hạn 200; sau đăng xuất, làm mới phiên trả 401 & Đạt \\
+\hline
+NFR-03 & 5 lần sai trong 15 phút thì chặn, mã 429 & Lần đăng nhập sai thứ 6 nhận 429 (smoke test) & Đạt \\
+\hline
+NFR-04 & Kiểm tra tệp theo nội dung, tối đa 20 MB & Pytest và smoke test: tệp đổi phần mở rộng, tệp quá cỡ bị từ chối; tên lưu do máy chủ sinh & Đạt \\
+\hline
+NFR-05 & Dịch vụ AI không có đường công khai, yêu cầu khóa nội bộ & Máy chủ không kết nối được cổng 8002; thiếu khóa, sai khóa, đúng khóa: 401, 401, 200; Apache không có đường tới dịch vụ AI; tài khoản CSDL của AI bị từ chối trên \texttt{thesis\_core} & Đạt \\
+\hline
+NFR-06 & HTTP chuyển 301 sang HTTPS; chỉ TLS 1.2, 1.3 & Mã 301, \texttt{Location} là địa chỉ \texttt{https}; bắt tay TLS 1.2 và 1.3 thành công. Việc từ chối TLS 1.0, 1.1 chỉ kiểm tra qua cấu hình (máy đo không có công cụ thử hai phiên bản này) & Đạt \\
+\hline
+NFR-07 & Mọi API khai báo vai trò; sai vai trò 403; dữ liệu ngoài phạm vi bị từ chối & Kiểm thử duyệt mọi route đạt; pytest, smoke test, E2E UC1 đạt; gọi chéo vai trò nhận 403. Phần E2E UC2--UC5 không chạy hết (bước 7) & Đạt một phần \\
+\hline
+NFR-08 & Tài khoản bị khóa mất quyền ngay & Khóa: đăng nhập 401, token cũ 401; mở khóa: đăng nhập lại 200 & Đạt \\
+\hline
+NFR-09 & P95 kiểm tra tên $\leq 5$ s & Gọi trực tiếp: P50 0,055 s, P95 0,063 s; qua HTTPS: P95 0,113 s. Máy chủ thật: lớn nhất 2,025 s (Bảng~\ref{tab:c4-may-chu}) & Đạt \\
+\hline
+NFR-10 & P95 kiểm tra một đề cương $\leq 30$ s & 20 tệp: P50 1,98 s, P95 4,94 s, lớn nhất 6,01 s; 20/20 \textit{Hoàn tất}. Báo cáo dài 350\,000 ký tự: 65,57 s, trong thời gian chờ 111,5 s & Đạt \\
+\hline
+NFR-11 & API nộp tệp $\leq 2$ s & P95 0,077 s, lớn nhất 0,091 s & Đạt \\
+\hline
+NFR-12 & P95 danh sách đề tài, tra cứu kho $\leq 1$ s & Tra cứu kho P95 0,025 s; danh sách đề tài P95 0,018 s. Máy chủ thật: lớn nhất 0,034 s và 0,266 s & Đạt \\
+\hline
+NFR-13 & Đánh chỉ mục một bản ghi chỉ mã hóa bản ghi đó & Số lần gọi mô hình tăng đúng 1 & Đạt \\
+\hline
+NFR-14 & \texttt{utf8mb4\_\allowbreak vietnamese\_ci}, migration, chuẩn hóa NFC & 73 cột văn bản trong 27 bảng của hai schema (kể cả hai bảng phiên bản migration), 0 sai collation; \texttt{thesis\_core} ở revision 0016 mới nhất; cùng tên nhập dạng NFC và NFD cho cùng kết quả (81,92\%) & Đạt \\
+\hline
+NFR-15 & Client tĩnh, proxy \texttt{/api}, \texttt{ProxyTimeout} 120 s & \texttt{/} trả bản build Vite, \texttt{/api/health} qua proxy trả \texttt{ok}, \texttt{ProxyTimeout} 120 s & Đạt \\
+\hline
+NFR-16 & Chrome và Edge trên máy tính & Chrome ở 1440 px: kịch bản mới 35/35 màn hình, độ rộng lớn nhất 1440 px; kịch bản cũ không chạy được (bước 13). Chưa kiểm thử tự động trên Edge & Đạt trên Chrome \\
+\hline
+NFR-17 & Ít nhất 100 SV, 30 GV & 580 SV, 70 GV & Đạt \\
+\hline
+NFR-18 & Ít nhất 200 đề tài đã đánh chỉ mục; 80 truy vấn có nhãn & 300 đề tài thuộc 5 khóa, cả 300 đã vào chỉ mục, 0 bản ghi thiếu embedding; 80 truy vấn (40 diễn đạt lại, 40 cùng lĩnh vực) & Đạt \\
+\hline
+NFR-19 & 50 tệp, 25 cặp, đủ 4 loại & 50 tệp, 25 cặp, 4 loại 7/7/6/5, có tỷ lệ kỳ vọng và bảng kiểm chứng & Đạt \\
+\hline
+\end{longtable}
+}
+
+Bộ nhớ của container dịch vụ AI đạt đỉnh 1\,364 MiB trong vòng đo NFR-10, dưới trần 2\,048 MiB, không bị hệ điều hành dừng vì thiếu bộ nhớ. Trong lúc dịch vụ đang kiểm tra báo cáo dài 350\,000 ký tự, năm lời gọi kiểm tra tên chen vào vẫn trả trong 128--986 ms, nhờ cơ chế mã hóa theo lô con. So với lần đo 14/10 (P95 của NFR-10 là 3,02 s, báo cáo dài 44,41 s, trên máy cũ khi không chạy việc khác), thời gian lần này dài hơn nhưng vẫn cách xa chỉ tiêu.
+
+\textbf{Đo trên máy chủ triển khai.} Trên máy chủ thật (6 vCPU Xeon Platinum 8272CL, 16 GB RAM), chỉ chạy các phép đo không ghi dữ liệu, vì kho trên máy chủ đang được nạp dữ liệu đồ án thật (Bảng~\ref{tab:c4-may-chu}). Mỗi phép đo gọi 20 lần qua Apache HTTPS từ chính máy chủ. Lần đo này chỉ ghi giá trị trung vị và lớn nhất; với 20 mẫu, giá trị lớn nhất là chặn trên của P95, nên cả ba chỉ tiêu đều đạt. Riêng kiểm tra tên có một lời gọi mất 2,025 s trong khi trung vị là 0,136 s; vì không ghi thời gian từng lời gọi nên chưa xác định được nguyên nhân của giá trị này. Các phép đo có ghi dữ liệu (NFR-08, NFR-10, NFR-11) chưa được chạy trên máy chủ.
+
+{\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{|p{4.8cm}|p{2.1cm}|p{1.9cm}|p{1.9cm}|p{3cm}|}
+\caption{Thời gian phản hồi trên máy chủ triển khai (21/10/2026)}\label{tab:c4-may-chu}\\
+\hline
+\textbf{Phép đo} & \textbf{Mã HTTP} & \textbf{Trung vị} & \textbf{Lớn nhất} & \textbf{Chỉ tiêu P95} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Phép đo} & \textbf{Mã HTTP} & \textbf{Trung vị} & \textbf{Lớn nhất} & \textbf{Chỉ tiêu P95} \\
+\hline
+\endhead
+Kiểm tra trùng tên đề tài & 20 $\times$ 200 & 0,136 s & 2,025 s & $\leq 5$ s (NFR-09) \\
+\hline
+Tra cứu kho theo từ khóa & 20 $\times$ 200 & 0,029 s & 0,034 s & $\leq 1$ s (NFR-12) \\
+\hline
+Danh sách đề tài & 20 $\times$ 200 & 0,034 s & 0,266 s & $\leq 1$ s (NFR-12) \\
+\hline
+\end{longtable}
+}
+
+Lúc đo, các container trên máy chủ dùng: Web API 409 MiB (trần 1 GiB), dịch vụ AI 525 MiB (trần 2 GiB), MySQL 531 MiB, Apache 28 MiB.
+
+%=====================================================================
+\section{Tài liệu hướng dẫn sử dụng}\label{sec:c4-huong-dan}
+%=====================================================================
+
+Mục này tóm tắt các thao tác chính theo từng vai trò. Mọi người dùng truy cập hệ thống bằng trình duyệt Chrome hoặc Edge trên máy tính, đăng nhập bằng mã sinh viên, mã giảng viên hoặc email cùng mật khẩu do Bộ môn cấp (Hình~\ref{fig:c4-dang-nhap}). Biểu tượng chuông ở thanh trên cùng báo các việc mới; bấm vào một thông báo sẽ mở đúng màn hình cần xử lý.
+
+\subsection{Hướng dẫn cho sinh viên}
+
+\begin{enumerate}
+    \item \textit{Xem GVHD và đề tài.} Trang chủ hiển thị GVHD được Bộ môn phân công và tiến độ chung. Sau khi GVHD giao đề tài trên hệ thống, đề tài xuất hiện ở menu \textit{Đề tài của tôi} (Hình~\ref{fig:c4-sv-de-tai}).
+    \item \textit{Nộp đề cương.} Vào \textit{Nộp đề cương}, đặt tên tệp theo mẫu hiển thị trên trang (\textit{[Mã định hướng].[MSSV].[Họ tên].[Lớp].pdf}), chọn tệp PDF hoặc DOCX (tối đa 20~MB) rồi bấm \textit{Nộp đề cương}. Kết quả kiểm tra trùng lặp hiện sau vài giây (Hình~\ref{fig:c4-sv-nop-de-cuong}). Nếu GVHD hoặc Bộ môn yêu cầu sửa, đọc nhận xét trong lịch sử, sửa và nộp lại; mỗi lần nộp tạo một phiên bản mới.
+    \item \textit{Theo dõi phê duyệt.} Thanh tiến trình cho biết đề cương đang chờ GVHD, chờ Bộ môn hay đã được phê duyệt; khi đã phê duyệt, tải được bản PDF có chữ ký số (Hình~\ref{fig:c4-sv-da-phe-duyet}).
+    \item \textit{Nộp báo cáo tiến độ.} Vào \textit{Báo cáo tiến độ}, chọn mốc, tải tệp báo cáo lên trước hạn; nhận xét và đánh giá của GVHD hiện ngay dưới mốc (Hình~\ref{fig:c4-sv-tien-do}).
+    \item \textit{Nộp báo cáo cuối và xem kết quả bảo vệ.} Vào \textit{Lịch bảo vệ}, nộp báo cáo cuối trước khi được xếp lịch. Lịch, phòng, hội đồng và điểm (sau khi Bộ môn chốt) hiển thị trên cùng trang (Hình~\ref{fig:c4-ket-qua-bao-ve}).
+    \item \textit{Tra cứu kho đồ án.} Vào \textit{Kho đồ án} để tìm đồ án các khóa trước theo từ khóa, khóa, GVHD.
+\end{enumerate}
+
+\subsection{Hướng dẫn cho giảng viên}
+
+\begin{enumerate}
+    \item \textit{Xem việc cần làm.} Trang \textit{Tổng quan} liệt kê các việc đang chờ, mỗi việc có nút đi tới màn hình xử lý (Hình~\ref{fig:c4-gv-tong-quan}).
+    \item \textit{Giao đề tài.} Vào \textit{Sinh viên của tôi}, bấm \textit{Giao đề tài} ở dòng sinh viên (hoặc dùng menu \textit{Giao đề tài}), nhập tên đề tài, mô tả, chọn định hướng và tệp đính kèm nếu có. Khi có cảnh báo trùng tên (Hình~\ref{fig:c4-canh-bao-ten}), xem các đề tài tương tự rồi sửa tên hoặc chọn \textit{Vẫn giao đề tài}.
+    \item \textit{Duyệt đề cương.} Vào \textit{Duyệt đề cương}, chọn đề cương ở tab \textit{Chờ duyệt}. Đọc nội dung, xem kết quả kiểm tra trùng lặp (bấm \textit{Xem chi tiết} để so sánh từng đoạn), rồi chọn \textit{Duyệt} hoặc \textit{Yêu cầu sửa} kèm nhận xét.
+    \item \textit{Nộp đề cương lên Bộ môn.} Ở tab \textit{Chờ nộp Bộ môn}, kiểm tra danh sách kiểm tra trước khi nộp. Khi tất cả đạt, bấm \textit{Nộp lên Bộ môn} (Hình~\ref{fig:c4-gv-san-sang}). Nếu chỉ sai tên tệp, bấm \textit{Đổi tên theo mẫu}; nếu sai định hướng, trả lại cho sinh viên.
+    \item \textit{Nhận xét tiến độ.} Vào \textit{Nhận xét tiến độ}, chọn sinh viên và báo cáo, ghi nhận xét và chọn mức đánh giá (Hình~\ref{fig:c4-gv-nhan-xet}).
+    \item \textit{Chấm điểm bảo vệ.} Vào \textit{Hội đồng bảo vệ}, chọn hội đồng mình tham gia, nhập điểm (thang 10) và nhận xét cho từng sinh viên (Hình~\ref{fig:c4-cham-diem}); điểm sửa được cho tới khi Bộ môn chốt.
+\end{enumerate}
+
+\subsection{Hướng dẫn cho Bộ môn}
+
+\begin{enumerate}
+    \item \textit{Chuẩn bị đợt.} Tạo đợt đồ án ở \textit{Quản lý đợt đồ án} (Hình~\ref{fig:c4-dot-do-an}), kiểm tra danh mục định hướng (Hình~\ref{fig:c4-dinh-huong}), phân công GVHD cho sinh viên của đợt, từng dòng hoặc import CSV (Hình~\ref{fig:c4-phan-cong}), và thiết lập các mốc tiến độ.
+    \item \textit{Quản lý tài khoản.} Thêm, sửa, khóa, mở khóa tài khoản và đặt lại mật khẩu ở menu \textit{Quản lý tài khoản} (Hình~\ref{fig:c4-tai-khoan}).
+    \item \textit{Phê duyệt đề cương.} Vào \textit{Duyệt đề cương}, chọn đề cương ở trạng thái \textit{Chờ Bộ môn duyệt}, tải tệp, ký số bằng công cụ ký của mình rồi tải bản PDF đã ký lên và bấm \textit{Phê duyệt} (Hình~\ref{fig:c4-bm-cho-duyet}); hoặc \textit{Trả lại} kèm nhận xét. Cuối đợt, dùng chức năng xuất để tải toàn bộ đề cương đã ký dưới dạng một tệp ZIP.
+    \item \textit{Theo dõi tiến độ.} Trang \textit{Tổng quan} và \textit{Tiến độ toàn khoa} cho biết sinh viên chưa có đề tài, chưa nộp, trễ mốc.
+    \item \textit{Tổ chức bảo vệ.} Vào \textit{Hội đồng \& lịch bảo vệ}, tạo hội đồng (3 đến 5 thành viên, một chủ tịch), chọn ngày, giờ, phòng, thêm sinh viên vào lịch (Hình~\ref{fig:c4-hoi-dong}). Khi các thành viên đã chấm đủ, bấm \textit{Chốt kết quả}; đồ án tự động vào kho.
+    \item \textit{Quản lý kho và ngưỡng.} Import đồ án các khóa cũ từ CSV ở \textit{Kho đồ án} (Hình~\ref{fig:c4-kho-import}); điều chỉnh ngưỡng cảnh báo ở \textit{Ngưỡng trùng lặp} khi cần, có thể khôi phục giá trị đề xuất bất kỳ lúc nào (Hình~\ref{fig:c4-nguong}).
+\end{enumerate}
+
+\subsection{Hướng dẫn cho quản trị viên}
+
+Việc cài đặt mới và nâng cấp đều dùng cùng một lệnh \texttt{bash deploy/install.sh} (mục~\ref{sec:c4-moi-truong}); tập lệnh giữ nguyên dữ liệu, cấu hình và chứng chỉ đã có. Các thao tác bảo trì thường gặp được tóm tắt trong Bảng~\ref{tab:c4-bao-tri}; mọi lệnh chạy ở thư mục gốc mã nguồn trên máy chủ.
+
+{\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{|p{4.2cm}|p{10.4cm}|}
+\caption{Các thao tác bảo trì}\label{tab:c4-bao-tri}\\
+\hline
+\textbf{Việc} & \textbf{Cách làm} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Việc} & \textbf{Cách làm} \\
+\hline
+\endhead
+Kiểm tra nhanh sau cài đặt hoặc nâng cấp & \texttt{bash deploy/verify-all.sh -{}-quick} (tình trạng container, dữ liệu, smoke test) \\
+\hline
+Xem trạng thái, nhật ký & \texttt{docker compose -f deploy/docker-compose.yml ps} và \texttt{... logs api} \\
+\hline
+Thay chứng chỉ TLS & Chép \path{server.crt}, \path{server.key} vào \path{deploy/certs/} rồi khởi động lại service \texttt{apache} \\
+\hline
+Sao lưu tệp tải lên & Nén volume \texttt{uploads-data} bằng một container tạm (lệnh trong \path{deploy/README.md}) \\
+\hline
+Đưa lại dữ liệu vào chỉ mục AI & \texttt{docker compose ... exec api python -m app.services.ai\_index backfill}, dùng khi dịch vụ AI từng tạm ngừng; dashboard Bộ môn hiển thị số tài liệu chưa vào chỉ mục \\
+\hline
+Nạp lại kho dữ liệu thử nghiệm & \texttt{bash deploy/seed-ai.sh}, chạy lại an toàn \\
+\hline
+\end{longtable}
+}
+
+%=====================================================================
+\section{Kết luận chương}
+%=====================================================================
+
+Chương này đã trình bày việc triển khai hệ thống quản lý đồ án tốt nghiệp: môi trường và cách cài đặt bằng Docker Compose, thi công ba thành phần theo kiến trúc hướng dịch vụ, kết quả thi công năm UC chính và nhóm chức năng chung, thi công các yêu cầu phi chức năng về kiểm tra trùng lặp bằng AI và phân quyền, các biện pháp bảo vệ hệ thống, dữ liệu thử nghiệm, kết quả kiểm thử và hướng dẫn sử dụng.
+
+\textbf{Ưu điểm.}
+\begin{itemize}
+    \item Hệ thống bao phủ trọn quy trình đồ án của Bộ môn, từ phân công GVHD, giao đề tài, duyệt đề cương hai cấp có chữ ký số, theo dõi tiến độ, tổ chức bảo vệ tới lưu kho, thay cho việc trao đổi qua email, tệp Excel và giấy tờ.
+    \item Kiểm tra trùng lặp bằng AI chạy hoàn toàn trên máy chủ của Khoa, không gửi nội dung đồ án ra dịch vụ bên ngoài. Mô hình được chọn và ngưỡng được hiệu chỉnh bằng số liệu, theo quy tắc viết trước khi đo, có tập kiểm chứng riêng; kết quả chỉ rõ đồ án nguồn và từng đoạn trùng để giảng viên tự đánh giá.
+    \item Các chỉ tiêu thời gian đạt với khoảng dư lớn: kiểm tra tên P95 dưới 0,12 giây, kiểm tra đề cương P95 dưới 5 giây so với chỉ tiêu 30 giây, nộp tệp dưới 0,1 giây nhờ kiểm tra chạy nền.
+    \item Cài đặt và nâng cấp bằng một lệnh, dưới 10 phút; 14 bước kiểm thử tự động giúp kiểm tra lại toàn hệ thống sau mỗi thay đổi.
+    \item Bảo mật nhiều lớp: HTTPS, phân quyền phía máy chủ trên mọi API, phiên đăng nhập thu hồi được ngay, kiểm tra tệp theo nội dung, dịch vụ AI và CSDL tách khỏi mạng ngoài, mỗi dịch vụ một tài khoản CSDL riêng.
+\end{itemize}
+
+\textbf{Hạn chế.}
+\begin{itemize}
+    \item \textit{Chữ ký số mới được kiểm tra về cấu trúc.} Hệ thống kiểm tra tệp PDF có chữ ký PKCS\#7, đọc được người ký, thời điểm ký và vùng ký phủ toàn bộ tệp, nhưng chưa xác minh giá trị mật mã của chữ ký và chưa kiểm tra chuỗi chứng thư tới tổ chức cấp chứng thư gốc. Một tệp có cấu trúc chữ ký hợp lệ nhưng chữ ký giả vẫn có thể được chấp nhận; trách nhiệm xác thực vẫn thuộc người phê duyệt.
+    \item \textit{Chất lượng AI được đo trên dữ liệu tổng hợp.} Kho đề tài và các cặp tài liệu do bộ sinh dữ liệu tạo ra; danh sách phần mẫu chung là giả định vì chưa có mẫu đề cương, báo cáo chính thức của Khoa. Ngưỡng cần được hiệu chỉnh lại khi có dữ liệu đồ án thật.
+    \item \textit{Phát hiện diễn đạt lại ở mức câu còn yếu}: chỉ 40--56\% câu diễn đạt lại được gắn cờ. Hệ thống vẫn cảnh báo đúng các tài liệu diễn đạt lại nhờ tổng hợp theo nguồn, nhưng một bài chỉ diễn đạt lại vài đoạn ngắn có thể không bị phát hiện. Ngược lại, khi kho có nhiều đồ án cùng chủ đề, có thể có cảnh báo sai như cặp P19.
+    \item \textit{Báo cáo dài kiểm tra lâu}: thời gian tăng tuyến tính theo độ dài, khoảng 65 giây cho 350\,000 ký tự trên máy phát triển; văn bản trên 800\,000 ký tự không được kiểm tra tự động.
+    \item \textit{Người dùng chưa tự đổi được mật khẩu}: mật khẩu khởi tạo do Bộ môn cấp và chỉ Bộ môn đặt lại được. Hệ thống chưa có sao lưu CSDL tự động; tài liệu OpenAPI vẫn truy cập được mà không cần đăng nhập (chỉ lộ danh sách API, không lộ dữ liệu).
+    \item \textit{Triển khai trên một máy chủ}, không có dự phòng; giao diện chỉ thiết kế cho máy tính ở độ rộng 1440 px, chưa có giao diện di động. Bảng \textit{Tiến độ toàn khoa} còn bị ép hẹp cột tên đề tài.
+    \item \textit{Kiểm thử chưa theo kịp thay đổi}: kịch bản E2E cho UC2--UC5 và kịch bản chụp màn hình chưa được cập nhật theo luồng duyệt đề cương hai cấp; trên máy chủ thật mới chỉ chạy các phép đo không ghi dữ liệu.
+\end{itemize}
+
+Các hạn chế trên là cơ sở cho hướng phát triển được trình bày trong phần kết luận của khóa luận.
 
 \end{document}

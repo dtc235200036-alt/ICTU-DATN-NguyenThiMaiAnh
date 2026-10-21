@@ -17,7 +17,7 @@ Các nguyên tắc áp dụng cho toàn bộ `thesis_core`:
 
 ### 3.2.2. Lược đồ thesis_core
 
-Lược đồ `thesis_core` gồm 20 bảng, khớp 1-1 với 20 lớp thực thể ở §3.1 (không có bảng liên kết N-N nào không map tới lớp — `thanh_vien_hoi_dong` và `diem_bao_ve` là các lớp liên kết đã được mô hình hóa tường minh thành lớp ở §3.1, không phải bảng kỹ thuật ẩn). Hình 3.5 ở trên thể hiện đầy đủ khóa chính, khóa ngoại, kiểu dữ liệu MySQL 8 và ràng buộc NOT NULL/UNIQUE của cả 20 bảng. Bảng thứ 20, `phan_cong_huong_dan`, được bổ sung ở Alembic 0015 khi điều chỉnh nghiệp vụ phân công GVHD đầu đợt (UC0.8).
+Lược đồ `thesis_core` gồm 22 bảng, khớp 1-1 với 22 lớp thực thể ở §3.1 (không có bảng liên kết N-N nào không map tới lớp — `thanh_vien_hoi_dong` và `diem_bao_ve` là các lớp liên kết đã được mô hình hóa tường minh thành lớp ở §3.1, không phải bảng kỹ thuật ẩn). Hình 3.5 ở trên thể hiện đầy đủ khóa chính, khóa ngoại, kiểu dữ liệu MySQL 8 và ràng buộc NOT NULL/UNIQUE của cả 22 bảng. Bảng `phan_cong_huong_dan` được bổ sung ở Alembic 0015 khi điều chỉnh nghiệp vụ phân công GVHD đầu đợt (UC0.8); hai bảng `dinh_huong` và `luot_duyet_bo_mon` được bổ sung ở Alembic 0016 cho danh mục định hướng (UC0.9) và luồng duyệt đề cương hai cấp (UC2.3, UC2.4).
 
 ### 3.2.3. Từ điển dữ liệu
 
@@ -280,11 +280,13 @@ Khi chuyển dữ liệu (Alembic 0015), mọi đề tài đang hoạt động �
 | GiangVien | giang_vien | — |
 | DotDoAn | dot_do_an | — |
 | PhanCongHuongDan | phan_cong_huong_dan | Bổ sung ở Alembic 0015 (UC0.8) |
+| DinhHuong | dinh_huong | Bổ sung ở Alembic 0016 (UC0.9) |
 | MocTienDo | moc_tien_do | — |
 | DeTai | de_tai | — |
 | DeCuong | de_cuong | — |
 | TaiLieuDoAn | tai_lieu_do_an | — |
 | LuotDuyetDeCuong | luot_duyet_de_cuong | — |
+| LuotDuyetBoMon | luot_duyet_bo_mon | Bổ sung ở Alembic 0016 (UC2.4) |
 | BaoCaoTienDo | bao_cao_tien_do | — |
 | HoiDong | hoi_dong | — |
 | ThanhVienHoiDong | thanh_vien_hoi_dong | — |

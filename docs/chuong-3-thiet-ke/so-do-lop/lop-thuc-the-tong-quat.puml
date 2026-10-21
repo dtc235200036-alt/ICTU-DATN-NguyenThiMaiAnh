@@ -1,0 +1,77 @@
+@startuml lop-thuc-the-tong-quat
+' Sơ đồ lớp thực thể tổng quát: 22 lớp và quan hệ, ẩn thuộc tính.
+' Thuộc tính chi tiết nằm ở ba sơ đồ theo nhóm (lop-thuc-the-*.puml)
+' và sơ đồ đầy đủ lop-thuc-the.puml.
+hide empty members
+hide circle
+skinparam nodesep 30
+skinparam ranksep 60
+skinparam class {
+  BackgroundColor #FDFDFD
+  BorderColor #555555
+}
+
+class TaiKhoan
+class SinhVien
+class GiangVien
+class DotDoAn
+class PhanCongHuongDan
+class ThongBao
+class CauHinhNguong
+
+class DinhHuong
+class DeTai
+class DeCuong
+class TaiLieuDoAn
+class LuotDuyetDeCuong
+class LuotDuyetBoMon
+class MocTienDo
+class BaoCaoTienDo
+
+class HoiDong
+class ThanhVienHoiDong
+class LichBaoVe
+class DiemBaoVe
+class DoAnKho
+class KetQuaKiemTraTrungLap
+class ChiTietTrungLap
+
+TaiKhoan "1" -- "0..1" SinhVien
+TaiKhoan "1" -- "0..1" GiangVien
+TaiKhoan "1" -- "*" ThongBao
+TaiKhoan "0..1" -- "*" CauHinhNguong
+
+DotDoAn "1" -- "*" PhanCongHuongDan
+SinhVien "1" -- "*" PhanCongHuongDan
+GiangVien "1" -- "*" PhanCongHuongDan
+DotDoAn "1" -- "*" DeTai
+DotDoAn "1" -- "*" MocTienDo
+DinhHuong "0..1" -- "*" DeTai
+GiangVien "0..1" -- "*" DeTai
+SinhVien "0..1" -- "*" DeTai
+
+DeTai "1" -- "0..1" DeCuong
+DeTai "1" -- "*" TaiLieuDoAn
+DeCuong "0..1" -- "*" TaiLieuDoAn
+DeCuong "1" -- "*" LuotDuyetDeCuong
+TaiLieuDoAn "1" -- "0..1" LuotDuyetDeCuong
+GiangVien "1" -- "*" LuotDuyetDeCuong
+DeCuong "1" -- "*" LuotDuyetBoMon
+TaiKhoan "1" -- "*" LuotDuyetBoMon
+DeTai "1" -- "*" BaoCaoTienDo
+MocTienDo "1" -- "*" BaoCaoTienDo
+
+HoiDong "1" -- "*" ThanhVienHoiDong
+GiangVien "1" -- "*" ThanhVienHoiDong
+HoiDong "1" -- "*" LichBaoVe
+DeTai "1" -- "0..1" LichBaoVe
+SinhVien "1" -- "0..1" LichBaoVe
+LichBaoVe "1" -- "*" DiemBaoVe
+GiangVien "1" -- "*" DiemBaoVe
+
+DeTai "0..1" -- "0..1" DoAnKho
+DeTai "0..1" -- "*" KetQuaKiemTraTrungLap
+TaiLieuDoAn "0..1" -- "0..1" KetQuaKiemTraTrungLap
+KetQuaKiemTraTrungLap "1" -- "*" ChiTietTrungLap
+
+@enduml

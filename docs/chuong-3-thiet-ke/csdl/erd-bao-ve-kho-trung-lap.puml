@@ -1,0 +1,124 @@
+@startuml erd-bao-ve-kho-trung-lap
+' Nhóm 3 của thesis_core: hội đồng và bảo vệ, kho đồ án, kết quả kiểm tra
+' trùng lặp. Trích từ erd.puml; bảng viền nét đứt thuộc nhóm khác.
+' Quy ước: dấu * trước tên cột = NOT NULL.
+hide circle
+left to right direction
+skinparam linetype ortho
+skinparam nodesep 40
+skinparam ranksep 50
+
+entity "de_tai" as de_tai #FFFFFF;line.dashed {
+  *id : BIGINT <<PK>>
+}
+entity "sinh_vien" as sinh_vien #FFFFFF;line.dashed {
+  *id : BIGINT <<PK>>
+}
+entity "giang_vien" as giang_vien #FFFFFF;line.dashed {
+  *id : BIGINT <<PK>>
+}
+entity "tai_lieu_do_an" as tai_lieu_do_an #FFFFFF;line.dashed {
+  *id : BIGINT <<PK>>
+}
+
+entity "hoi_dong" as hoi_dong {
+  *id : BIGINT <<PK>>
+  --
+  *ten_hoi_dong : VARCHAR(150)
+  *ngay_bao_ve : DATE
+  *gio_bao_ve : TIME
+  *phong : VARCHAR(50)
+}
+
+entity "thanh_vien_hoi_dong" as thanh_vien_hoi_dong {
+  *id : BIGINT <<PK>>
+  --
+  *hoi_dong_id : BIGINT <<FK>>
+  *giang_vien_id : BIGINT <<FK>>
+  *vai_tro : VARCHAR(20) <<CHECK>>
+  ..UQ(hoi_dong_id, giang_vien_id)..
+}
+
+entity "lich_bao_ve" as lich_bao_ve {
+  *id : BIGINT <<PK>>
+  --
+  *hoi_dong_id : BIGINT <<FK>>
+  *de_tai_id : BIGINT <<FK>>
+  *sinh_vien_id : BIGINT <<FK, UQ>>
+  thu_tu : INT
+  diem_trung_binh : DECIMAL(4,2)
+  *da_chot : BOOLEAN
+}
+
+entity "diem_bao_ve" as diem_bao_ve {
+  *id : BIGINT <<PK>>
+  --
+  *lich_bao_ve_id : BIGINT <<FK>>
+  *giang_vien_id : BIGINT <<FK>>
+  *diem : DECIMAL(4,2) <<CHECK>>
+  nhan_xet : TEXT
+  ..UQ(lich_bao_ve_id, giang_vien_id)..
+}
+
+entity "do_an_kho" as do_an_kho {
+  *id : BIGINT <<PK>>
+  --
+  de_tai_id : BIGINT <<FK, UQ>>
+  sinh_vien_id : BIGINT <<FK>>
+  giang_vien_id : BIGINT <<FK>>
+  khoa : VARCHAR(20)
+  *ten_de_tai : VARCHAR(255)
+  tu_khoa : VARCHAR(255)
+  diem : DECIMAL(4,2) <<CHECK>>
+  *nguon : VARCHAR(20) <<CHECK>>
+  *trang_thai_index : VARCHAR(20) <<CHECK>>
+  ma_so_sinh_vien : VARCHAR(20)
+  ho_ten_sinh_vien : VARCHAR(150)
+}
+
+entity "ket_qua_kiem_tra_trung_lap" as ket_qua_kiem_tra_trung_lap {
+  *id : BIGINT <<PK>>
+  --
+  de_tai_id : BIGINT <<FK>>
+  tai_lieu_do_an_id : BIGINT <<FK, UQ>>
+  *loai_kiem_tra : VARCHAR(20) <<CHECK>>
+  *trang_thai : VARCHAR(20) <<CHECK>>
+  ty_le_tong : DECIMAL(5,2)
+  ty_le_nguon_cao_nhat : DECIMAL(5,2)
+  so_doan : INT
+  so_doan_loai_tru : INT
+  ty_le_loai_tru : DECIMAL(5,2)
+  *nguong_ap_dung : DECIMAL(5,2)
+  doi_tuong_duoc_kiem_tra : VARCHAR(255)
+  *thoi_diem : DATETIME
+}
+
+entity "chi_tiet_trung_lap" as chi_tiet_trung_lap {
+  *id : BIGINT <<PK>>
+  --
+  *ket_qua_id : BIGINT <<FK>>
+  *doi_tuong_trung : VARCHAR(255)
+  *ty_le : DECIMAL(5,2)
+  doan_nguon : TEXT
+  doan_trung : TEXT
+  vi_tri : VARCHAR(50)
+  loai_nguon : VARCHAR(20) <<CHECK>>
+  nguon_id : BIGINT
+  ty_le_nguon : DECIMAL(5,2)
+}
+
+hoi_dong ||--o{ thanh_vien_hoi_dong
+giang_vien ||--o{ thanh_vien_hoi_dong
+hoi_dong ||--o{ lich_bao_ve
+de_tai ||--o| lich_bao_ve
+sinh_vien ||--o| lich_bao_ve
+lich_bao_ve ||--o{ diem_bao_ve
+giang_vien ||--o{ diem_bao_ve
+de_tai |o--o| do_an_kho
+sinh_vien |o--o{ do_an_kho
+giang_vien |o--o{ do_an_kho
+de_tai |o--o{ ket_qua_kiem_tra_trung_lap
+tai_lieu_do_an |o--o| ket_qua_kiem_tra_trung_lap
+ket_qua_kiem_tra_trung_lap ||--o{ chi_tiet_trung_lap
+
+@enduml

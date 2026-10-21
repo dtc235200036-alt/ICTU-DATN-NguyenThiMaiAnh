@@ -5,6 +5,7 @@ skinparam packageStyle rectangle
 actor "Sinh viên" as SV
 actor "Giảng viên" as GV
 actor "Bộ môn" as BM
+actor "Dịch vụ AI" as AI
 
 rectangle "UC5 – Quản lý kho dữ liệu đồ án" {
   usecase "UC5.1 – Tra cứu và xem chi tiết đồ án" as UC5_1
@@ -18,17 +19,6 @@ GV --> UC5_1
 BM --> UC5_1
 BM --> UC5_3
 BM --> UC5_4
-
-note bottom of UC5_2
-  UC5.2 do Hệ thống tự động thực hiện,
-  kích hoạt từ UC4.4 (Chốt kết quả bảo vệ),
-  không có tác nhân người dùng trực tiếp.
-end note
-
-note right of UC5_4
-  UC5.4 (import thủ công) và UC5.2 (tự động
-  khi chốt kết quả) đều đẩy văn bản đồ án
-  sang dịch vụ AI để index (UC0.7 dùng chung
-  pipeline trích xuất/chuẩn hóa văn bản).
-end note
+UC5_2 --> AI
+UC5_4 --> AI
 @enduml

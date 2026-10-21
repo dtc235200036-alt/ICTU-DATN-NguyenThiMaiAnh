@@ -1,0 +1,46 @@
+@startuml docker-compose
+' Sơ đồ cài đặt thực tế: các container của deploy/docker-compose.yml (project ntma).
+skinparam linetype ortho
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 12
+skinparam shadowing false
+left to right direction
+
+actor "Người dùng\n(trình duyệt)" as User
+
+node "Máy chủ Linux — Docker Engine + Compose v2" as Host {
+  frame "Mạng nội bộ ntma-internal (172.28.238.0/24)" as Net {
+    node "apache\n(httpd 2.4 + bản build React)\nIP tĩnh 172.28.238.10" as Apache
+    node "api\n(FastAPI, uvicorn :8001)\nmem_limit 1 GiB" as Api
+    node "ai\n(FastAPI, uvicorn :8002)\nread_only, mem_limit 2 GiB\nHF_HUB_OFFLINE=1" as Ai
+    database "mysql 8.4\nthesis_core | thesis_ai\nutf8mb4_vietnamese_ci" as Db
+    node "ai-db-init\n(one-shot: tạo schema\nvà tài khoản thesis_ai)" as AiInit
+    node "ai-migrate\n(one-shot: Alembic\ncho thesis_ai)" as AiMig
+  }
+  storage "volume mysql-data" as VDb
+  storage "volume uploads-data" as VUp
+  storage "volume ai-models" as VModel
+  folder "deploy/certs\n(server.crt, server.key)" as Certs
+}
+
+User --> Apache : "HTTP :80 → 301\nHTTPS :443"
+Apache --> Api : "ProxyPass /api/"
+Api --> Ai : "REST nội bộ\nX-API-Key"
+Api --> Db : "thesis_core"
+Ai --> Db : "thesis_ai"
+AiInit --> Db
+AiMig --> Db
+Db -- VDb
+Api -- VUp
+Ai -- VModel
+Apache -- Certs
+
+note bottom of Db
+  Chỉ publish 127.0.0.1:3307
+  (quản trị trên máy chủ)
+end note
+note bottom of Ai
+  Không publish cổng,
+  không có route Apache
+end note
+@enduml

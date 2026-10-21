@@ -1,52 +1,212 @@
-@book{sommerville2016software,
-  author    = {Ian Sommerville},
-  title     = {Software Engineering},
-  edition   = {10},
-  publisher = {Pearson},
-  year      = {2016}
+% Tài liệu tham khảo của khóa luận. Trích dẫn bằng \cite{khoa} trong các chương.
+
+% ---------- Chương 1: kiến trúc và nền tảng ----------
+@phdthesis{fielding2000rest,
+  author = {Roy Thomas Fielding},
+  title  = {Architectural Styles and the Design of Network-based Software Architectures},
+  school = {University of California, Irvine},
+  year   = {2000}
 }
 
-@book{pressman2020software,
-  author    = {Roger S. Pressman and Bruce R. Maxim},
-  title     = {Software Engineering: A Practitioner's Approach},
-  edition   = {9},
-  publisher = {McGraw-Hill Education},
-  address   = {New York, NY},
+@techreport{rfc7519,
+  author      = {Michael B. Jones and John Bradley and Nat Sakimura},
+  title       = {{JSON Web Token (JWT)}},
+  type        = {RFC},
+  number      = {7519},
+  institution = {Internet Engineering Task Force},
+  year        = {2015},
+  url         = {https://www.rfc-editor.org/rfc/rfc7519}
+}
+
+@online{fastapi,
+  title   = {{FastAPI} Documentation},
+  author  = {{Sebastián Ramírez}},
+  url     = {https://fastapi.tiangolo.com/},
+  urldate = {2026-09}
+}
+
+@online{pydantic,
+  title   = {{Pydantic} Documentation},
+  author  = {{Pydantic Services}},
+  url     = {https://docs.pydantic.dev/},
+  urldate = {2026-09}
+}
+
+@online{sqlalchemy,
+  title   = {{SQLAlchemy} 2.0 Documentation},
+  author  = {{SQLAlchemy Authors}},
+  url     = {https://docs.sqlalchemy.org/en/20/},
+  urldate = {2026-09}
+}
+
+@online{alembic,
+  title   = {{Alembic} Documentation},
+  author  = {{SQLAlchemy Authors}},
+  url     = {https://alembic.sqlalchemy.org/},
+  urldate = {2026-09}
+}
+
+@online{pyjwt,
+  title   = {{PyJWT} Documentation},
+  author  = {{José Padilla}},
+  url     = {https://pyjwt.readthedocs.io/},
+  urldate = {2026-09}
+}
+
+@online{mysqlutf8mb4,
+  title   = {{MySQL} 8.0 Reference Manual: The utf8mb4 Character Set},
+  author  = {{Oracle Corporation}},
+  url     = {https://dev.mysql.com/doc/refman/8.0/en/charset-unicode-utf8mb4.html},
+  urldate = {2026-09}
+}
+
+@online{unicodetr15,
+  title   = {Unicode Standard Annex \#15: Unicode Normalization Forms},
+  author  = {{The Unicode Consortium}},
+  url     = {https://unicode.org/reports/tr15/},
+  urldate = {2026-09}
+}
+
+@online{react,
+  title   = {{React} Documentation},
+  author  = {{Meta Open Source}},
+  url     = {https://react.dev/},
+  urldate = {2026-09}
+}
+
+@online{typescript,
+  title   = {{TypeScript} Documentation},
+  author  = {{Microsoft}},
+  url     = {https://www.typescriptlang.org/docs/},
+  urldate = {2026-09}
+}
+
+@online{vite,
+  title   = {{Vite} Documentation},
+  author  = {{VoidZero Inc. and Vite Contributors}},
+  url     = {https://vite.dev/},
+  urldate = {2026-09}
+}
+
+@online{antd,
+  title   = {{Ant Design} Documentation},
+  author  = {{Ant Group}},
+  url     = {https://ant.design/},
+  urldate = {2026-09}
+}
+
+@online{tanstackquery,
+  title   = {{TanStack Query} Documentation},
+  author  = {{TanStack}},
+  url     = {https://tanstack.com/query/latest},
+  urldate = {2026-09}
+}
+
+@online{apachemodproxy,
+  title   = {{Apache HTTP Server}: mod\_proxy},
+  author  = {{The Apache Software Foundation}},
+  url     = {https://httpd.apache.org/docs/current/mod/mod_proxy.html},
+  urldate = {2026-09}
+}
+
+@online{dockercompose,
+  title   = {{Docker Compose} Overview},
+  author  = {{Docker Inc.}},
+  url     = {https://docs.docker.com/compose/},
+  urldate = {2026-09}
+}
+
+% ---------- Chương 1: xử lý ngôn ngữ và phát hiện trùng lặp ----------
+@online{underthesea,
+  title   = {underthesea: Vietnamese {NLP} Toolkit},
+  author  = {{Underthesea NLP}},
+  url     = {https://github.com/undertheseanlp/underthesea},
+  urldate = {2026-09}
+}
+
+@inproceedings{phobert2020,
+  author    = {Dat Quoc Nguyen and Anh Tuan Nguyen},
+  title     = {{PhoBERT}: Pre-trained language models for {V}ietnamese},
+  booktitle = {Findings of the Association for Computational Linguistics: EMNLP 2020},
+  pages     = {1037--1042},
   year      = {2020}
 }
 
-@article{boehm1988spiral,
-  author  = {Barry W. Boehm},
-  title   = {A Spiral Model of Software Development and Enhancement},
-  journal = {Computer},
-  volume  = {21},
-  number  = {5},
-  pages   = {61--72},
-  year    = {1988},
-  doi     = {10.1109/2.59}
+@inproceedings{sbert2019,
+  author    = {Nils Reimers and Iryna Gurevych},
+  title     = {{Sentence-BERT}: Sentence Embeddings using {S}iamese {BERT}-Networks},
+  booktitle = {Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP)},
+  pages     = {3982--3992},
+  year      = {2019}
 }
 
-@inproceedings{vaswani2017attention,
-  author    = {Ashish Vaswani and Noam Shazeer and Niki Parmar and Jakob Uszkoreit and Llion Jones and Aidan N. Gomez and Lukasz Kaiser and Illia Polosukhin},
-  title     = {Attention Is All You Need},
-  booktitle = {Advances in Neural Information Processing Systems},
-  volume    = {30},
-  pages     = {5998--6008},
-  year      = {2017}
+@online{bkaibiencoder,
+  title   = {vietnamese-bi-encoder (model card)},
+  author  = {{BKAI Foundation Models}},
+  url     = {https://huggingface.co/bkai-foundation-models/vietnamese-bi-encoder},
+  urldate = {2026-09}
 }
 
-@inproceedings{sutskever2014sequence,
-  author    = {Ilya Sutskever and Oriol Vinyals and Quoc V. Le},
-  title     = {Sequence to Sequence Learning with Neural Networks},
-  booktitle = {Advances in Neural Information Processing Systems},
-  volume    = {27},
-  pages     = {3104--3112},
-  year      = {2014}
+@misc{e5_2022,
+  author        = {Liang Wang and Nan Yang and Xiaolong Huang and Binxing Jiao and Linjun Yang and Daxin Jiang and Rangan Majumder and Furu Wei},
+  title         = {Text Embeddings by Weakly-Supervised Contrastive Pre-training},
+  year          = {2022},
+  eprint        = {2212.03533},
+  eprinttype    = {arXiv}
 }
 
-@manual{iso29148requirements,
-  title        = {ISO/IEC/IEEE International Standard -- Systems and Software Engineering -- Life Cycle Processes -- Requirements Engineering},
-  organization = {ISO/IEC/IEEE},
-  number       = {29148:2018},
-  year         = {2018}
+@article{faiss2021,
+  author  = {Jeff Johnson and Matthijs Douze and Hervé Jégou},
+  title   = {Billion-scale similarity search with {GPUs}},
+  journal = {IEEE Transactions on Big Data},
+  volume  = {7},
+  number  = {3},
+  pages   = {535--547},
+  year    = {2021}
+}
+
+@inproceedings{broder1997,
+  author    = {Andrei Z. Broder},
+  title     = {On the resemblance and containment of documents},
+  booktitle = {Proceedings of Compression and Complexity of Sequences (SEQUENCES'97)},
+  pages     = {21--29},
+  publisher = {IEEE},
+  year      = {1997},
+  doi       = {10.1109/SEQUEN.1997.666900}
+}
+
+@online{datasketch,
+  title   = {datasketch: Probabilistic Data Structures for Processing and Searching Very Large Datasets},
+  author  = {{Eric Zhu}},
+  url     = {https://ekzhu.com/datasketch/},
+  urldate = {2026-09}
+}
+
+% ---------- Chương 1: công cụ mô hình hóa ----------
+@manual{bpmn2,
+  title        = {Business Process Model and Notation ({BPMN}), Version 2.0},
+  organization = {Object Management Group},
+  year         = {2011},
+  url          = {https://www.omg.org/spec/BPMN/2.0/}
+}
+
+@manual{uml251,
+  title        = {{OMG} Unified Modeling Language ({UML}), Version 2.5.1},
+  organization = {Object Management Group},
+  year         = {2017},
+  url          = {https://www.omg.org/spec/UML/}
+}
+
+@online{plantuml,
+  title   = {{PlantUML} Documentation},
+  author  = {{PlantUML}},
+  url     = {https://plantuml.com/},
+  urldate = {2026-09}
+}
+
+@online{drawio,
+  title   = {draw.io Documentation},
+  author  = {{JGraph Ltd}},
+  url     = {https://www.drawio.com/},
+  urldate = {2026-09}
 }

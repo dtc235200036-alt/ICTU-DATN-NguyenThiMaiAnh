@@ -1,0 +1,80 @@
+@startuml lop-thuc-the-de-cuong-tien-do
+' Nhóm 2: đề cương, tài liệu, duyệt hai cấp và tiến độ.
+' Trích từ lop-thuc-the.puml, bỏ hộp enum; lớp viền nét đứt thuộc nhóm khác (ẩn thuộc tính).
+hide circle
+skinparam nodesep 25
+skinparam ranksep 45
+
+class DeTai <<Entity>> #FFFFFF;line.dashed
+class GiangVien <<Entity>> #FFFFFF;line.dashed
+class TaiKhoan <<Entity>> #FFFFFF;line.dashed
+class DotDoAn <<Entity>> #FFFFFF;line.dashed
+hide DeTai members
+hide GiangVien members
+hide TaiKhoan members
+hide DotDoAn members
+
+class DeCuong <<Entity>> {
+  +trangThai : TrangThaiDeCuong
+  +ngayNopDauTien : DateTime
+  +nopBoMonLuc : DateTime
+  +ketQuaBoMon : KetQuaDuyetBoMon
+}
+
+class TaiLieuDoAn <<Entity>> {
+  +loai : LoaiTaiLieu
+  +soPhienBan : Integer
+  +tenGoc : String
+  +tenLuuTru : String
+  +kichThuoc : Long
+  +dinhDang : String
+  +thoiDiemNop : DateTime
+  +noiDungTrichXuat : String
+  +trichXuatLoi : Boolean
+  +daIndexLuc : DateTime
+  +ghiChu : String
+}
+
+class LuotDuyetDeCuong <<Entity>> {
+  +ketQua : KetQuaDuyet
+  +nhanXet : String
+  +thoiDiem : DateTime
+}
+
+class LuotDuyetBoMon <<Entity>> {
+  +ketQua : KetQuaDuyetBoMon
+  +nhanXet : String
+  +thoiDiem : DateTime
+  +nguoiKy : String
+  +thoiDiemKy : DateTime
+}
+
+class MocTienDo <<Entity>> {
+  +tenMoc : String
+  +thuTu : Integer
+  +hanNop : Date
+}
+
+class BaoCaoTienDo <<Entity>> {
+  +noiDung : String
+  +thoiDiemNop : DateTime
+  +nhanXet : String
+  +danhGia : DanhGiaTienDo
+}
+
+DeTai "1" -- "0..1" DeCuong : "có đề cương"
+DeTai "1" -- "*" TaiLieuDoAn : "có tài liệu"
+DeCuong "0..1" -- "*" TaiLieuDoAn : "gồm các phiên bản"
+DeCuong "1" -- "*" LuotDuyetDeCuong : "GVHD duyệt"
+TaiLieuDoAn "1" -- "0..1" LuotDuyetDeCuong : "phiên bản được duyệt"
+GiangVien "1" -- "*" LuotDuyetDeCuong : "thực hiện"
+DeCuong "1" -- "*" LuotDuyetBoMon : "Bộ môn phê duyệt"
+TaiLieuDoAn "1" -- "*" LuotDuyetBoMon : "phiên bản nộp lên"
+TaiLieuDoAn "0..1" -- "0..1" LuotDuyetBoMon : "bản PDF ký số"
+TaiKhoan "1" -- "*" LuotDuyetBoMon : "thực hiện"
+DotDoAn "1" -- "*" MocTienDo : "định nghĩa mốc"
+DeTai "1" -- "*" BaoCaoTienDo : "nộp theo mốc"
+MocTienDo "1" -- "*" BaoCaoTienDo : "áp dụng cho"
+BaoCaoTienDo "0..1" -- "0..1" TaiLieuDoAn : "đính kèm"
+
+@enduml

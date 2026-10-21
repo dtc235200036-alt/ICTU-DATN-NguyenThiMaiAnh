@@ -3,7 +3,7 @@ left to right direction
 skinparam packageStyle rectangle
 
 actor "Sinh viên" as SV
-actor "Giảng viên" as GV
+actor "Giảng viên\nhướng dẫn" as GV
 actor "Bộ môn" as BM
 
 rectangle "UC3 – Quản lý tiến độ thực hiện" {
@@ -17,6 +17,4 @@ BM --> UC3_1
 SV --> UC3_2
 GV --> UC3_3
 BM --> UC3_4
-
-UC3_1 ..> UC3_2 : <<precede>>
 @enduml

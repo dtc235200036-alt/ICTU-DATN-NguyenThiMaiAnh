@@ -1,0 +1,303 @@
+# Nhật ký bash deploy/verify-all.sh --report
+# commit: ?
+# bắt đầu (UTC): 2026-10-21T13:50:07Z; tổng thời gian: 430 s
+# máy: 16 CPU, 25 GiB RAM, Linux 7.0.0-38-generic
+
+================================================================
+[1] Tình trạng stack (mysql/api/ai healthy, apache, one-shot exit 0, AI offline)
+lệnh: bash deploy/verify-all.sh --buoc stack
+kết quả: FAIL (0.5 s)
+----------------------------------------------------------------
+OK: mysql running, healthy
+OK: api running, healthy
+OK: ai running, healthy
+OK: apache running
+OK: ai-db-init đã chạy xong (exit 0)
+OK: ai-migrate đã chạy xong (exit 0)
+OK: service ai chạy với HF_HUB_OFFLINE=1 (mô hình tải trước lúc cài đặt)
+OK: service ai không publish cổng ra host
+FAIL: https://<SERVER_NAME>/api/health: 
+
+================================================================
+[2] Dữ liệu thử nghiệm DATA-01/02/03
+lệnh: DU_LIEU_JSON='$TMP/du-lieu.json' bash deploy/verify-all.sh --buoc du-lieu
+kết quả: OK (0.8 s)
+----------------------------------------------------------------
+OK: DATA-01 — 580 sinh viên, 70 giảng viên, 1 Bộ môn (kỳ vọng 580 / 70 / >= 1)
+OK: DATA-02 — 300 đề tài kho IMPORT K18–K22 (5 khóa), 300 DA_INDEX; /health index_size_tieu_de=308, thieu_embedding=0
+OK: DATA-03 — 50 tệp trong seed-data/tai-lieu, 25 cặp thuộc 4 loại trùng, 25 đồ án nguồn có báo cáo cuối, index_size_tai_lieu=2991
+
+================================================================
+[3] Smoke test qua Apache HTTPS
+lệnh: bash deploy/smoke-test.sh
+kết quả: OK (4.7 s)
+----------------------------------------------------------------
+OK: http://<SERVER_NAME>:18080/ trả 301
+OK: GET /api/health trả status ok, db ok
+OK: GET / chứa id="root"
+OK: GET /tong-quan trả SPA fallback
+OK: header CSP và X-Content-Type-Options có mặt
+OK: đăng nhập bomon thành công
+OK: đăng nhập sai mật khẩu trả 401 với thông báo chung
+OK: body 21MB không bị từ chối (status 405)
+OK: body 30MB bị từ chối 413
+OK: Set-Cookie refresh_token có đủ HttpOnly, Secure, SameSite=Strict, Path=/api/auth
+OK: POST /api/auth/refresh trả access_token
+OK: GET /api/auth/me trả 200 có token, 401 không token
+OK: logout trả 204 và xóa cookie refresh (refresh sau đó trả 401)
+OK: lần đăng nhập sai thứ 6 trả 429
+OK: mỗi vai trò xem được dashboard của chính mình
+OK: dashboard có sv_chua_phan_cong (bo-mon), so_sinh_vien_lop (giang-vien), giang_vien_huong_dan (sinh-vien)
+OK: dashboard của vai trò khác bị từ chối 403
+OK: DTC235200016 bị 403 trên accounts/cohorts
+OK: SV tạo đề tài / kiểm tra trùng tên -> 403; route đăng ký và duyệt đề tài đã gỡ -> 404
+OK: /api/assignments — gán/import/xem chỉ bomon (GV001, DTC235200016 bị 403); my-students chỉ GV, my-advisor chỉ SV; my-advisor của DTC235200016 khớp phân công của Bộ môn (GV001)
+OK: DTC235200016 xem /api/topics -> 200
+OK: DTC235200016 bị 403 trên defense/committees, archive (thêm, import), progress (mốc, dashboard), outlines review
+OK: GV001 bị 403 trên outlines submit, defense finalize, progress reports
+OK: bomon bị 403 trên outlines review, defense score
+OK: cả ba vai trò đọc được notifications, notifications/unread-count, archive -> 200
+OK: /api/thresholds — DTC235200016 và GV001 bị 403 (GET/PUT), bomon GET 200
+SMOKE TEST: tất cả kiểm tra đã qua.
+
+================================================================
+[4] Pytest Web API (backend)
+lệnh: uv --directory backend run pytest -q
+kết quả: OK (37.8 s)
+----------------------------------------------------------------
+Using CPython 3.12.14
+Creating virtual environment at: .venv
+   Building ntma-backend @ file://<ban-sao>/backend
+      Built ntma-backend @ file://<ban-sao>/backend
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 45 packages in 3.66s
+...................................................................      [100%]
+=============================== warnings summary ===============================
+.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  <ban-sao>/backend/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+67 passed, 1 warning in 26.04s
+
+================================================================
+[5] Pytest dịch vụ AI (ai-service)
+lệnh: uv --directory ai-service run pytest -q
+kết quả: OK (173.2 s)
+----------------------------------------------------------------
+Using CPython 3.12.14
+Creating virtual environment at: .venv
+   Building ntma-ai-service @ file://<ban-sao>/ai-service
+      Built ntma-ai-service @ file://<ban-sao>/ai-service
+Downloading numpy (15.9MiB)
+Downloading networkx (2.0MiB)
+Downloading scikit-learn (8.7MiB)
+Downloading underthesea-core (1.5MiB)
+Downloading scipy (33.7MiB)
+Downloading underthesea (6.9MiB)
+Downloading faiss-cpu (18.0MiB)
+ Downloaded underthesea-core
+Downloading torch (187.2MiB)
+ Downloaded networkx
+ Downloaded underthesea
+ Downloaded scikit-learn
+ Downloaded numpy
+ Downloaded faiss-cpu
+ Downloaded scipy
+ Downloaded torch
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 76 packages in 57.12s
+........                                                                 [100%]
+=============================== warnings summary ===============================
+.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  <ban-sao>/ai-service/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+8 passed, 1 warning in 2.70s
+
+================================================================
+[6] E2E UC1 — phân công GVHD, GVHD tạo và giao đề tài
+lệnh: bash deploy/e2e-uc1.sh
+kết quả: OK (7.0 s)
+----------------------------------------------------------------
+OK: Bộ môn tạo đợt kiểm thử K99 (id=7)
+OK: GV030 giao đề tài cho SV chưa được Bộ môn phân công -> 409 (không thuộc lớp hướng dẫn)
+OK: Bộ môn gán DTC235210040, DTC235210045 -> GV030 (PUT) và import DTC235210023 -> GV024 (dòng mã lạ báo lỗi)
+OK: danh sách phân công đợt K99 lọc theo GV030 có đúng 2 SV, đợt có 3 SV đã phân công, tải GV030 = 2
+OK: SV thấy GVHD của mình (my-advisor), GV030 thấy lớp hướng dẫn 2 SV (my-students)
+OK: GV030 kiểm tra trùng tên -> 200; SV kiểm tra trùng tên -> 403
+OK: GV030 giao đề tài cho DTC235210040 -> Đã phân công ngay, có kiểm tra tên; SV nhận thông báo
+OK: DTC235210040 thấy đúng đề tài được giao; SV lớp khác xem -> 403 và không có trong danh sách
+OK: GV030 lưu nháp cho DTC235210045 (SV không thấy) rồi gửi -> Đã phân công, SV xem được
+OK: SV tạo/sửa/gửi đề tài và Bộ môn tạo đề tài -> 403; route đăng ký và duyệt đề tài đã gỡ -> 404
+OK: GV024 giao đề tài -> 409, xem đề tài GV030 -> 403; giao thêm cho SV đã có đề tài -> 409; thiếu sinh_vien_id -> 422
+OK: đổi GVHD của SV đã có đề tài Đã phân công -> 409, vẫn là GV030
+OK: Bộ môn đổi GVHD của SV chưa có đề tài (GV024 -> GV030); GV030 giao đề tài -> Đã phân công ngay
+OK: lọc danh sách theo đợt/trạng thái/GVHD trả đúng 3 đề tài đã phân công
+OK: e2e UC1 hoàn tất — dữ liệu đợt K99 (đề tài, phân công GVHD) sẽ được dọn khi script kết thúc (trap)
+
+================================================================
+[7] E2E UC2–UC5 — đề cương, tiến độ, bảo vệ, lưu kho
+lệnh: bash deploy/e2e-uc2-5.sh
+kết quả: FAIL (10.1 s)
+----------------------------------------------------------------
+OK: Bộ môn tạo đợt kiểm thử K98 (id=8)
+OK: Bộ môn phân công DTC235210039 -> GVHD GV029 trong đợt K98
+OK: GVHD GV029 giao đề tài (id=46) cho DTC235210039 -> Đã phân công ngay
+OK: DTC235210039 nộp đề cương v1 -> 202 (tai_lieu_do_an_id=47)
+OK: Kiểm tra trùng lặp tài liệu v1 hoàn tất (HOAN_TAT)
+OK: GV029 thấy đề tài trong danh sách đề cương (Chờ duyệt)
+OK: GV029 thấy tóm tắt trích xuất (D-03) + kiểm tra Hoàn tất trên màn duyệt
+OK: GV029 yêu cầu sửa đề cương kèm nhận xét -> Yêu cầu sửa
+OK: DTC235210039 có thông báo Yêu cầu sửa đề cương (NOTF-01)
+OK: DTC235210039 nộp đề cương v2 (PDF) -> 202 (tai_lieu_do_an_id=48)
+OK: Kiểm tra trùng lặp tài liệu v2 hoàn tất (HOAN_TAT)
+FAIL: Đề cương không chuyển Đã duyệt (nhận GVHD_DA_DUYET)
+
+================================================================
+[8] E2E dịch vụ AI thật (SC1–SC5)
+lệnh: bash deploy/e2e-ai.sh
+kết quả: OK (35.9 s)
+----------------------------------------------------------------
+OK: Kho đã seed: 300 đề tài kho DA_INDEX
+OK: Host không kết nối được tới 127.0.0.1:8002 (không publish cổng AI)
+OK: Trong mạng nội bộ: thiếu khóa 401, sai khóa 401, đúng khóa 200
+OK: Apache không có route tới dịch vụ AI (POST /check-title -> HTTP 200, không phải AI)
+OK: Tài khoản DB thesis_ai chỉ có DML trên thesis_ai (thesis_core, CREATE, DROP bị từ chối — WR-03)
+OK: TV001 (diễn đạt lại, 0.093991s, NFC=NFD): top-1 Kho đồ án 81.92% — Ứng dụng SQL Server trong quản lý kế toán tại công ty CP Hoàng Long (K21, GVHD Nguyễn Thu Chi)
+OK: TV002 (diễn đạt lại, 0.080654s, NFC=NFD): top-1 Kho đồ án 69.83% — Nghiên cứu và phát triển hệ thống hỗ trợ bán thuốc và theo dõi hạn dùng tại trung tâm y tế huyện Sông Công (K22, GVHD Mai Xuân Quân)
+OK: TV003 (diễn đạt lại, 0.076095s, NFC=NFD): top-1 Kho đồ án 72.89% — Xây dựng và triển khai nền tảng quản lý khóa học trực tuyến tại trường trung học cơ sở Trần Phú (K20, GVHD Triệu Phương Uyên)
+OK: TV004 (cùng lĩnh vực, 0.067818s, NFC=NFD): không có kết quả Kho đồ án vượt ngưỡng
+OK: Bộ môn nâng Ngưỡng tên đề tài lên 99.99 -> lần kiểm tra kế tiếp: nguong 99.99, không còn cảnh báo Kho
+OK: Khôi phục 67.8% -> cảnh báo Kho trở lại (81.92%)
+OK: đã khôi phục ba ngưỡng gốc (NGUONG_DOAN_TRUNG	67.70	NULL	2026-10-21 13:31:37 | NGUONG_TAI_LIEU	10.40	NULL	2026-10-21 13:31:37 | NGUONG_TEN_DE_TAI	67.80	NULL	2026-10-21 13:31:37)
+OK: Bộ môn tạo đợt kiểm thử K97 (id=9)
+OK: Bộ môn phân công DTC235210032, DTC235210074 -> GVHD GV023 trong đợt K97
+OK: Bản ghi kho K97 (id=303) DA_INDEX, encode_calls 403 -> 404 (+1, không tính lại corpus)
+OK: GVHD GV023 kiểm tra tên diễn đạt lại -> thấy ngay bản ghi kho mới (90.12%)
+OK: GVHD GV023 giao đề tài K97 (id=47) cho DTC235210032 -> DA_PHAN_CONG, index nền (encode_calls +2 = kiểm tra tên + ingest)
+OK: GVHD GV023 kiểm tra tên diễn đạt lại -> thấy ngay đề tài hiện hành vừa giao (93.51%)
+OK: GVHD GV023 giao 2 đề tài K97 (47, 48) -> DA_PHAN_CONG
+OK: nộp P01-B.pdf cho đề tài 47 -> 202 trong 0.038158s
+OK: Nộp P01-B: kiểm tra + index chỉ mã hóa 1 lần (encode_calls 410 -> 411, CR-02)
+OK: P01-B (chép nguyên văn) HOAN_TAT sau 2s: 50.3% >= 10.4%, 7 đoạn (7 nguyên văn), đồ án trùng 'Phát triển mô hình thống kê điểm số của người học tại trường THCS Chu Văn An sử dụng Metabase (K21)' 50.3%, so sánh 61 câu, loại 112 dòng (42.29%); đoạn nộp cạnh đoạn nguồn, không đoạn khuôn mẫu
+OK: GV023 thấy cùng tỷ lệ, đồ án trùng và đoạn trùng trên màn duyệt đề cương + chi tiết
+OK: nộp P21-B.pdf cho đề tài 48 -> 202 trong 0.047520s
+OK: P21-B (không liên quan) HOAN_TAT: tổng/theo nguồn 3.75 1.51% < 10.40%, không cảnh báo
+OK: nộp P21-B.pdf cho đề tài 48 -> 202 trong 0.043794s
+OK: đã khôi phục ba ngưỡng gốc (NGUONG_DOAN_TRUNG	67.70	NULL	2026-10-21 13:31:37 | NGUONG_TAI_LIEU	10.40	NULL	2026-10-21 13:31:37 | NGUONG_TEN_DE_TAI	67.80	NULL	2026-10-21 13:31:37)
+OK: P21-B nộp lại với ngưỡng tạm 2.63%: ngưỡng 2.63%: tổng 3.75% >= ngưỡng, theo nguồn cao nhất 1.51% < ngưỡng, vuot_nguong False -> Dưới ngưỡng cảnh báo (CR-01)
+OK: nộp P01-B.pdf cho đề tài 47 -> 202 trong 0.037157s
+OK: Nộp lại cùng file (v2) HOAN_TAT: 50.3%, không nhãn của chính đề tài, nguồn vẫn 'Phát triển mô hình thống kê điểm số của người học tại trường THCS Chu Văn An sử dụng Metabase (K21)'
+OK: e2e dịch vụ AI hoàn tất (bắt đầu 2026-10-21T13:54:03 UTC)
+
+================================================================
+[9] Đo NFR-07..NFR-11 dịch vụ AI (kho đầy đủ)
+lệnh: bash deploy/ai-nfr.sh --json '$TMP/ai-nfr.json' --report docs/chuong-4-trien-khai/thu-nghiem-ai/04-hieu-nang-va-bao-mat.md
+kết quả: OK (142.3 s)
+----------------------------------------------------------------
+OK: Môi trường: 16 CPU, 26546 MiB RAM, kho 308 tiêu đề / 2991 câu tài liệu
+OK: NFR-07: host không tới được 8002; thiếu/sai/đúng khóa = 401 401 200; Apache không route (POST /check-title -> 200 SPA); thesis_ai DB user DENIED trên thesis_core
+OK: Tài liệu dài: {"chars": 350000, "timeout_s": 111.5, "doc_s": 65.57, "so_doan": 2333, "title_ms": [986, 759, 803, 128, 130]}
+OK: Đợt K96 (id=10), đề tài 49 của DTC235210032, GVHD GV023
+   1. P01-B.pdf: nộp 0.058s, HOAN_TAT sau 2.32s (HOAN_TAT, 50.3%)
+   2. P02-B.docx: nộp 0.028s, HOAN_TAT sau 1.66s (HOAN_TAT, 100.0%)
+   3. P03-B.pdf: nộp 0.046s, HOAN_TAT sau 4.40s (HOAN_TAT, 49.32%)
+   4. P04-B.docx: nộp 0.033s, HOAN_TAT sau 1.41s (HOAN_TAT, 49.33%)
+   5. P05-B.pdf: nộp 0.049s, HOAN_TAT sau 4.11s (HOAN_TAT, 44.83%)
+   6. P06-B.docx: nộp 0.031s, HOAN_TAT sau 1.95s (HOAN_TAT, 49.74%)
+   7. P07-B.pdf: nộp 0.066s, HOAN_TAT sau 1.98s (HOAN_TAT, 57.76%)
+   8. P08-B.pdf: nộp 0.038s, HOAN_TAT sau 1.66s (HOAN_TAT, 30.93%)
+   9. P09-B.docx: nộp 0.035s, HOAN_TAT sau 1.66s (HOAN_TAT, 7.74%)
+  10. P10-B.pdf: nộp 0.038s, HOAN_TAT sau 1.96s (HOAN_TAT, 20.88%)
+  11. P11-B.docx: nộp 0.043s, HOAN_TAT sau 2.31s (HOAN_TAT, 21.07%)
+  12. P12-B.pdf: nộp 0.070s, HOAN_TAT sau 4.94s (HOAN_TAT, 31.21%)
+  13. P13-B.docx: nộp 0.091s, HOAN_TAT sau 2.07s (HOAN_TAT, 30.29%)
+  14. P14-B.pdf: nộp 0.077s, HOAN_TAT sau 6.01s (HOAN_TAT, 33.55%)
+  15. P15-B.pdf: nộp 0.044s, HOAN_TAT sau 4.12s (HOAN_TAT, 100.0%)
+  16. P16-B.docx: nộp 0.034s, HOAN_TAT sau 1.67s (HOAN_TAT, 100.0%)
+  17. P17-B.pdf: nộp 0.044s, HOAN_TAT sau 1.69s (HOAN_TAT, 100.0%)
+  18. P18-B.docx: nộp 0.041s, HOAN_TAT sau 1.67s (HOAN_TAT, 100.0%)
+  19. P19-B.pdf: nộp 0.048s, HOAN_TAT sau 4.15s (HOAN_TAT, 23.96%)
+  20. P20-B.docx: nộp 0.044s, HOAN_TAT sau 1.71s (HOAN_TAT, 100.0%)
+
+NFR      Kết quả                                                                Đạt?
+NFR-07   Host không kết nối được; mã 401 401 200; không có route (Apache trả 20 Đạt
+NFR-08   P50 55 ms, P95 63 ms, max 83 ms                                        Đạt
+NFR-09   P50 1.98 s, P95 4.94 s, max 6.01 s; 20/20 HOAN_TAT, 0 LOI              Đạt
+NFR-10   P95 0.077 s, max 0.091 s                                               Đạt
+NFR-09 (dài) 2333 câu, 65.57 s; kiểm tra tên chen giữa: 986 ms, 759 ms, 803 ms, 128 Đạt
+NFR-11   463 -> 464 (+1)                                                        Đạt
+Bộ nhớ   716.2MiB -> 809.1MiB; đỉnh 1364 MiB; OOMKilled=false                   Đạt
+
+Đã ghi docs/chuong-4-trien-khai/thu-nghiem-ai/04-hieu-nang-va-bao-mat.md
+Đã ghi $TMP/ai-nfr.json
+OK: đo NFR-07..NFR-11 hoàn tất (bắt đầu 2026-10-21T13:54:39 UTC)
+
+================================================================
+[10] Đo NFR hệ thống qua HTTPS (NFR-01..05, 08, 12..15, 17..19)
+lệnh: bash deploy/nfr-he-thong.sh --json '$TMP/nfr-he-thong.json'
+kết quả: OK (13.1 s)
+----------------------------------------------------------------
+OK: NFR-01 — HTTP 301, Location https://<SERVER_NAME>:18443/… (https)
+OK: NFR-02 — 651 tài khoản, tiền tố $2b$12$ (bcrypt cost 12), 0 tài khoản không đạt; mật khẩu seed xuất hiện 0 lần trong log
+OK: NFR-03 — JWT_SECRET 64 ký tự từ môi trường; token hết hạn -> 401, token còn hạn -> 200, không token -> 401
+OK: NFR-04 — mã 403 / 403 / 403
+OK: NFR-05 — khóa 200; đăng nhập khi bị khóa -> 401; token cũ -> 401; mở khóa 200; đăng nhập lại -> 200
+OK: NFR-08 — qua HTTPS: P50 0.090 s, P95 0.113 s, max 0.139 s; 0 lỗi
+OK: NFR-12 — tra cứu kho P95 0.025 s (max 0.030); danh sách đề tài P95 0.018 s (max 0.019); 0 lỗi
+OK: NFR-13 — 73 cột văn bản / 27 bảng, 0 cột và 0 bảng sai collation; thesis_core 0016 (mới nhất 0016), thesis_ai 0002 (mới nhất 0002)
+OK: NFR-14 — 1 kết quả giống hệt nhau ở hai dạng (trạng thái HOAN_TAT, tỷ lệ cao nhất 81.92 %)
+OK: NFR-15 — ProxyTimeout 120 s; DocumentRoot htdocs (bản build Vite); / trả SPA (id="root"), /assets/index-BkQGHvGG.js -> 200 text/javascript; /api/health qua proxy: status ok
+OK: NFR-17 — 580 sinh viên, 70 giảng viên
+OK: NFR-18 — 300 đề tài thuộc 5 khóa, 300 DA_INDEX; chỉ mục tiêu đề 308 vector, thiếu embedding 0
+OK: NFR-19 — 50 tệp (25 DOCX, 25 PDF), 25 cặp A/B, 4 loại: CHEP_NGUYEN_VAN 7, CUNG_LINH_VUC 6, DIEN_DAT_LAI 7, KHONG_LIEN_QUAN 5; bảng kiểm chứng P01–P25 ở thu-nghiem-ai/03-hieu-chinh-nguong.md; 25 đồ án nguồn có báo cáo cuối đã nạp
+Đã ghi $TMP/nfr-he-thong.json
+OK: đo NFR hệ thống hoàn tất (bắt đầu 2026-10-21 13:57:01 UTC)
+
+================================================================
+[11] Đối chiếu ERD với schema thesis_core
+lệnh: python3 tools/check-erd-db.py
+kết quả: FAIL (0.3 s)
+----------------------------------------------------------------
+de_cuong.ket_qua_bo_mon: cột có trong DB nhưng thiếu trong erd.puml
+de_cuong.nop_bo_mon_luc: cột có trong DB nhưng thiếu trong erd.puml
+de_tai.dinh_huong_id: cột có trong DB nhưng thiếu trong erd.puml
+dinh_huong: bảng có trong DB nhưng không phải entity trong erd.puml
+luot_duyet_bo_mon: bảng có trong DB nhưng không phải entity trong erd.puml
+tai_lieu_do_an.ghi_chu: cột có trong DB nhưng thiếu trong erd.puml
+
+================================================================
+[12] Không còn dữ liệu kiểm thử (K95–K99, tài khoản khóa)
+lệnh: bash deploy/verify-all.sh --buoc con-sot
+kết quả: OK (0.5 s)
+----------------------------------------------------------------
+OK: không còn đợt đồ án kiểm thử K95–K99
+OK: không còn bản ghi kho khóa kiểm thử K95–K99
+OK: không có tài khoản nào bị khóa
+
+================================================================
+[13] NFR-16 — màn hình chính ở 1440 px qua Chrome headless (chỉ đọc)
+lệnh: NFR16_JSON='$TMP/nfr16.json' bash deploy/verify-all.sh --buoc nfr-16
+kết quả: FAIL (0.8 s)
+----------------------------------------------------------------
+Traceback (most recent call last):
+  File "<ban-sao>/tools/demo/chay-kich-ban.py", line 50, in <module>
+    from cdp import LoiTrinhDuyet, TrinhDuyet  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<ban-sao>/tools/demo/cdp.py", line 32, in <module>
+    import websockets
+ModuleNotFoundError: No module named 'websockets'
+FAIL: kịch bản ảnh (chỉ đọc) lỗi
+
+================================================================
+[14] Kiểm tra trạng thái demo không đổi (hàng của tài khoản demo trước/sau)
+lệnh: TRUOC='$TMP/demo-truoc.tsv' bash deploy/verify-all.sh --buoc trang-thai-demo
+kết quả: OK (0.7 s)
+----------------------------------------------------------------
+OK: hàng demo trước = sau: de_tai 4, tai_lieu_do_an 6, de_cuong 4, ket_qua_kiem_tra 10, bao_cao_tien_do 2, hoi_dong 1, lich_bao_ve 2, diem_bao_ve 5, do_an_kho 1, thong_bao 18, phan_cong_huong_dan 5

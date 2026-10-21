@@ -1,0 +1,121 @@
+@startuml erd-nguoi-dung-de-tai
+' Nhóm 1 của thesis_core: tài khoản, người dùng, đợt đồ án, phân công,
+' định hướng, đề tài, thông báo, cấu hình ngưỡng. Trích từ erd.puml.
+' Quy ước: dấu * trước tên cột = NOT NULL.
+hide circle
+left to right direction
+skinparam linetype ortho
+skinparam nodesep 40
+skinparam ranksep 50
+
+entity "tai_khoan" as tai_khoan {
+  *id : BIGINT <<PK>>
+  --
+  *ma_dang_nhap : VARCHAR(50) <<UQ>>
+  *email : VARCHAR(150) <<UQ>>
+  *mat_khau_bam : VARCHAR(255)
+  *vai_tro : ENUM(SINH_VIEN, GIANG_VIEN, BO_MON)
+  *bi_khoa : BOOLEAN
+  *phien_ban_token : BIGINT
+}
+
+entity "sinh_vien" as sinh_vien {
+  *id : BIGINT <<PK>>
+  --
+  *tai_khoan_id : BIGINT <<FK, UQ>>
+  ma_so_sinh_vien : VARCHAR(20) <<UQ>>
+  ho_ten : VARCHAR(150)
+  email : VARCHAR(150)
+  lop : VARCHAR(50)
+  khoa : VARCHAR(100)
+}
+
+entity "giang_vien" as giang_vien {
+  *id : BIGINT <<PK>>
+  --
+  *tai_khoan_id : BIGINT <<FK, UQ>>
+  ma_giang_vien : VARCHAR(20) <<UQ>>
+  ho_ten : VARCHAR(150)
+  email : VARCHAR(150)
+  hoc_vi : VARCHAR(50)
+}
+
+entity "dot_do_an" as dot_do_an {
+  *id : BIGINT <<PK>>
+  --
+  *ten_dot : VARCHAR(100)
+  *khoa : VARCHAR(20)
+  nam_hoc : VARCHAR(20)
+  *ngay_bat_dau : DATE
+  ngay_ket_thuc : DATE
+  *trang_thai : VARCHAR(20) <<CHECK>>
+}
+
+entity "phan_cong_huong_dan" as phan_cong_huong_dan {
+  *id : BIGINT <<PK>>
+  --
+  *dot_do_an_id : BIGINT <<FK>>
+  *sinh_vien_id : BIGINT <<FK>>
+  *giang_vien_id : BIGINT <<FK>>
+  *thoi_diem : DATETIME
+  ..UQ(dot_do_an_id, sinh_vien_id)..
+}
+
+entity "dinh_huong" as dinh_huong {
+  *id : BIGINT <<PK>>
+  --
+  *ma : VARCHAR(10) <<UQ>>
+  *ten : VARCHAR(255)
+  mo_ta : TEXT
+  *hoat_dong : BOOLEAN
+}
+
+entity "de_tai" as de_tai {
+  *id : BIGINT <<PK>>
+  --
+  *dot_do_an_id : BIGINT <<FK>>
+  giang_vien_id : BIGINT <<FK>>
+  sinh_vien_id : BIGINT <<FK>>
+  sinh_vien_id_dang_hoat_dong : BIGINT <<UQ, cột sinh>>
+  *ten_de_tai : VARCHAR(255)
+  mo_ta : TEXT
+  linh_vuc : VARCHAR(100)
+  dinh_huong_id : BIGINT <<FK>>
+  *trang_thai : VARCHAR(20) <<CHECK>>
+  *loai_nguoi_de_xuat : VARCHAR(10) <<CHECK>>
+  ly_do_tu_choi : TEXT
+}
+
+entity "thong_bao" as thong_bao {
+  *id : BIGINT <<PK>>
+  --
+  *tai_khoan_id : BIGINT <<FK>>
+  *loai : VARCHAR(30)
+  *noi_dung : TEXT
+  lien_ket : VARCHAR(255)
+  *da_doc : BOOLEAN
+  *thoi_diem : DATETIME
+}
+
+entity "cau_hinh_nguong" as cau_hinh_nguong {
+  *id : BIGINT <<PK>>
+  --
+  *loai : VARCHAR(30) <<UQ>>
+  *gia_tri : DECIMAL(5,2) <<CHECK>>
+  tai_khoan_id : BIGINT <<FK>>
+  *thoi_diem_cap_nhat : DATETIME
+}
+
+tai_khoan ||--o| sinh_vien
+tai_khoan ||--o| giang_vien
+tai_khoan ||--o{ thong_bao
+tai_khoan |o--o{ cau_hinh_nguong
+dot_do_an ||--o{ phan_cong_huong_dan
+sinh_vien ||--o{ phan_cong_huong_dan
+giang_vien ||--o{ phan_cong_huong_dan
+dot_do_an ||--o{ de_tai
+dinh_huong |o--o{ de_tai
+giang_vien |o--o{ de_tai
+sinh_vien |o--o{ de_tai
+
+@enduml

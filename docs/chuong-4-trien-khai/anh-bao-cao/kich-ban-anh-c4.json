@@ -1,0 +1,1026 @@
+{
+ "ten": "Ảnh chương 4 (stack cô lập, dữ liệu hư cấu)",
+ "ghi_chu": "",
+ "buoc": [
+  {
+   "id": "c0-trang-gioi-thieu",
+   "mo_ta": "c0-trang-gioi-thieu",
+   "vai_tro": null,
+   "hanh_dong": [
+    {
+     "mo": "/"
+    },
+    {
+     "cho_chu": "Đăng nhập hệ thống"
+    },
+    {
+     "cho": 1.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c0-trang-gioi-thieu.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c0-dang-nhap",
+   "mo_ta": "c0-dang-nhap",
+   "vai_tro": null,
+   "hanh_dong": [
+    {
+     "mo": "/dang-nhap"
+    },
+    {
+     "cho_chu": "Tài khoản"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c0-dang-nhap.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c0-sv-trang-chu",
+   "mo_ta": "c0-sv-trang-chu",
+   "vai_tro": "DTC235200325",
+   "hanh_dong": [
+    {
+     "mo": "/trang-chu"
+    },
+    {
+     "cho_chu": "Thông báo mới"
+    },
+    {
+     "cho_chu": "Tóm tắt tiến độ"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c0-sv-trang-chu.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c0-thong-bao",
+   "mo_ta": "c0-thong-bao",
+   "vai_tro": "DTC235200325",
+   "hanh_dong": [
+    {
+     "mo": "/trang-chu"
+    },
+    {
+     "cho_chu": "Thông báo mới"
+    },
+    {
+     "bam": "[data-testid=notification-bell]"
+    },
+    {
+     "cho_chu": "Đánh dấu tất cả đã đọc"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c0-thong-bao.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c0-trang-403",
+   "mo_ta": "c0-trang-403",
+   "vai_tro": "DTC235200325",
+   "hanh_dong": [
+    {
+     "mo": "/tai-khoan"
+    },
+    {
+     "cho_chu": "Bạn không có quyền truy cập trang này"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c0-trang-403.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c1-sv-de-tai-cua-toi",
+   "mo_ta": "c1-sv-de-tai-cua-toi",
+   "vai_tro": "DTC235200325",
+   "hanh_dong": [
+    {
+     "mo": "/de-tai-cua-toi"
+    },
+    {
+     "cho_chu": "Lịch sử đề tài"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c1-sv-de-tai-cua-toi.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c3-sv-bao-cao-tien-do",
+   "mo_ta": "c3-sv-bao-cao-tien-do",
+   "vai_tro": "DTC235200325",
+   "hanh_dong": [
+    {
+     "mo": "/tien-do"
+    },
+    {
+     "cho_chu": "Mốc 2 – Cài đặt các chức năng chính"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c3-sv-bao-cao-tien-do.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c3-sv-lich-su-nop",
+   "mo_ta": "c3-sv-lich-su-nop",
+   "vai_tro": "DTC235200325",
+   "hanh_dong": [
+    {
+     "mo": "/lich-su-nop"
+    },
+    {
+     "cho_chu": "Nộp đề cương (phiên bản 1)"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c3-sv-lich-su-nop.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c5-kho-tim-kiem",
+   "mo_ta": "c5-kho-tim-kiem",
+   "vai_tro": "DTC235200325",
+   "hanh_dong": [
+    {
+     "mo": "/kho-do-an"
+    },
+    {
+     "cho_chu": "Kho đồ án"
+    },
+    {
+     "go": {
+      "o": "Tên đề tài hoặc từ khóa",
+      "chu": "tiêm chủng",
+      "enter": true
+     }
+    },
+    {
+     "cho_chu": "Phát triển ứng dụng di động theo dõi lịch tiêm chủng"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c5-kho-tim-kiem.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c2-sv-nop-de-cuong",
+   "mo_ta": "c2-sv-nop-de-cuong",
+   "vai_tro": "DTC235200258",
+   "hanh_dong": [
+    {
+     "mo": "/de-cuong"
+    },
+    {
+     "cho_chu": "Lịch sử phiên bản"
+    },
+    {
+     "cho_chu": "Hoàn tất"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": {
+      "tep": "c2-sv-nop-de-cuong.png",
+      "toan_trang": true
+     }
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c2-sv-da-phe-duyet",
+   "mo_ta": "c2-sv-da-phe-duyet",
+   "vai_tro": "DTC225290291",
+   "hanh_dong": [
+    {
+     "mo": "/de-cuong"
+    },
+    {
+     "cho_chu": "Bộ môn đã phê duyệt"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": {
+      "tep": "c2-sv-da-phe-duyet.png",
+      "toan_trang": true
+     }
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c4-sv-bao-cao-cuoi",
+   "mo_ta": "c4-sv-bao-cao-cuoi",
+   "vai_tro": "DTC235200340",
+   "hanh_dong": [
+    {
+     "mo": "/de-cuong"
+    },
+    {
+     "bam": "Báo cáo cuối"
+    },
+    {
+     "cho_chu": "Hoàn tất"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": {
+      "tep": "c4-sv-bao-cao-cuoi.png",
+      "toan_trang": true
+     }
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c4-sv-ket-qua-bao-ve",
+   "mo_ta": "c4-sv-ket-qua-bao-ve",
+   "vai_tro": "DTC235270078",
+   "hanh_dong": [
+    {
+     "mo": "/bao-ve"
+    },
+    {
+     "cho_chu": "8.50"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c4-sv-ket-qua-bao-ve.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c0-gv-tong-quan",
+   "mo_ta": "c0-gv-tong-quan",
+   "vai_tro": "GV011",
+   "hanh_dong": [
+    {
+     "mo": "/tong-quan"
+    },
+    {
+     "cho_chu": "Việc cần xử lý"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c0-gv-tong-quan.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c1-gv-sinh-vien-cua-toi",
+   "mo_ta": "c1-gv-sinh-vien-cua-toi",
+   "vai_tro": "GV011",
+   "hanh_dong": [
+    {
+     "mo": "/sinh-vien-huong-dan"
+    },
+    {
+     "cho_chu": "Sinh viên của tôi — Đợt đồ án tốt nghiệp K22"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c1-gv-sinh-vien-cua-toi.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c2-gv-danh-sach-de-cuong",
+   "mo_ta": "c2-gv-danh-sach-de-cuong",
+   "vai_tro": "GV011",
+   "hanh_dong": [
+    {
+     "mo": "/duyet-de-cuong"
+    },
+    {
+     "cho_chu": "Danh sách đề cương sinh viên hướng dẫn"
+    },
+    {
+     "bam": "Tất cả (8)"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c2-gv-danh-sach-de-cuong.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c2-gv-duyet-vuot-nguong",
+   "mo_ta": "c2-gv-duyet-vuot-nguong",
+   "vai_tro": "GV011",
+   "hanh_dong": [
+    {
+     "mo": "/duyet-de-cuong?de_tai_id=30"
+    },
+    {
+     "cho_chu": "Kiểm tra trước khi nộp lên khoa"
+    },
+    {
+     "cho_chu": "Vượt ngưỡng cảnh báo"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": {
+      "tep": "c2-gv-duyet-vuot-nguong.png",
+      "toan_trang": true
+     }
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c2-chi-tiet-trung-lap",
+   "mo_ta": "c2-chi-tiet-trung-lap",
+   "vai_tro": "GV011",
+   "hanh_dong": [
+    {
+     "mo": "/kiem-tra-trung-lap/30"
+    },
+    {
+     "cho_chu": "Chi tiết kết quả kiểm tra trùng lặp"
+    },
+    {
+     "cho_chu": "Trùng nguyên văn"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "cuon": 0
+    },
+    {
+     "chup": "c2-chi-tiet-trung-lap.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c2-gv-san-sang-nop",
+   "mo_ta": "c2-gv-san-sang-nop",
+   "vai_tro": "GV011",
+   "hanh_dong": [
+    {
+     "mo": "/duyet-de-cuong?de_tai_id=34"
+    },
+    {
+     "cho_chu": "Kiểm tra trước khi nộp lên khoa"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": {
+      "tep": "c2-gv-san-sang-nop.png",
+      "toan_trang": true
+     }
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c2-gv-sai-ten-file",
+   "mo_ta": "c2-gv-sai-ten-file",
+   "vai_tro": "GV011",
+   "hanh_dong": [
+    {
+     "mo": "/duyet-de-cuong?de_tai_id=35"
+    },
+    {
+     "cho_chu": "Chưa thể nộp lên Bộ môn"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": {
+      "tep": "c2-gv-sai-ten-file.png",
+      "toan_trang": true
+     }
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c3-gv-nhan-xet-tien-do",
+   "mo_ta": "c3-gv-nhan-xet-tien-do",
+   "vai_tro": "GV011",
+   "hanh_dong": [
+    {
+     "mo": "/nhan-xet-tien-do"
+    },
+    {
+     "bam": "Lý Khánh Hoa (DTC235200325)"
+    },
+    {
+     "cho_chu": "Mốc 2 – Cài đặt các chức năng chính"
+    },
+    {
+     "go": {
+      "o": "Nhận xét",
+      "chu": "Đã có chức năng tìm phòng theo bản đồ; cần bổ sung kiểm thử cho chức năng đăng tin."
+     }
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c3-gv-nhan-xet-tien-do.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c1-gv-canh-bao-trung-ten",
+   "mo_ta": "c1-gv-canh-bao-trung-ten",
+   "vai_tro": "GV011",
+   "hanh_dong": [
+    {
+     "mo": "/sinh-vien-huong-dan"
+    },
+    {
+     "cho_chu": "DTC235200139"
+    },
+    {
+     "bam": {
+      "chu": "Giao đề tài",
+      "hang": "DTC235200139"
+     }
+    },
+    {
+     "cho_chu": "Thông tin đề tài"
+    },
+    {
+     "go": {
+      "o": "Tên đề tài",
+      "chu": "Sử dụng SQL Server để hạch toán thu chi doanh nghiệp cho công ty cổ phần Hoàng Long"
+     }
+    },
+    {
+     "cho_chu": "tương tự trong kho",
+     "toi_da_giay": 15
+    },
+    {
+     "cho_chu": "Ứng dụng SQL Server trong quản lý kế toán tại công ty CP Hoàng Long"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c1-gv-canh-bao-trung-ten.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c0-bm-tong-quan",
+   "mo_ta": "c0-bm-tong-quan",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/tong-quan"
+    },
+    {
+     "cho_chu": "Tổng quan toàn khoa"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c0-bm-tong-quan.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c0-bm-tai-khoan",
+   "mo_ta": "c0-bm-tai-khoan",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/tai-khoan"
+    },
+    {
+     "cho_chu": "Quản lý tài khoản"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c0-bm-tai-khoan.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c0-bm-dot-do-an",
+   "mo_ta": "c0-bm-dot-do-an",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/dot-do-an"
+    },
+    {
+     "cho_chu": "Quản lý đợt đồ án"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c0-bm-dot-do-an.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c0-bm-phan-cong-gvhd",
+   "mo_ta": "c0-bm-phan-cong-gvhd",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/phan-cong-gvhd"
+    },
+    {
+     "cho_chu": "Phân công giảng viên hướng dẫn"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c0-bm-phan-cong-gvhd.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c0-bm-dinh-huong",
+   "mo_ta": "c0-bm-dinh-huong",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/dinh-huong"
+    },
+    {
+     "cho_chu": "Hệ thống AI và ứng dụng"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c0-bm-dinh-huong.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c0-bm-nguong",
+   "mo_ta": "c0-bm-nguong",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/cau-hinh-nguong"
+    },
+    {
+     "cho_chu": "Ngưỡng tên đề tài"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": {
+      "tep": "c0-bm-nguong.png",
+      "toan_trang": true
+     }
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c1-bm-danh-sach-de-tai",
+   "mo_ta": "c1-bm-danh-sach-de-tai",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/de-tai"
+    },
+    {
+     "cho_chu": "Danh sách đề tài"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c1-bm-danh-sach-de-tai.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c2-bm-danh-sach-de-cuong",
+   "mo_ta": "c2-bm-danh-sach-de-cuong",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/duyet-de-cuong"
+    },
+    {
+     "cho_chu": "Danh sách đề cương chờ duyệt"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c2-bm-danh-sach-de-cuong.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c2-bm-cho-phe-duyet",
+   "mo_ta": "c2-bm-cho-phe-duyet",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/duyet-de-cuong?de_tai_id=36"
+    },
+    {
+     "cho_chu": "Kéo thả bản PDF đã ký số hoặc bấm để chọn"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": {
+      "tep": "c2-bm-cho-phe-duyet.png",
+      "toan_trang": true
+     }
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c2-bm-da-phe-duyet",
+   "mo_ta": "c2-bm-da-phe-duyet",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/duyet-de-cuong?de_tai_id=37"
+    },
+    {
+     "cho_chu": "Kiểm tra trước khi nộp lên khoa"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": {
+      "tep": "c2-bm-da-phe-duyet.png",
+      "toan_trang": true
+     }
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c3-bm-tien-do-toan-khoa",
+   "mo_ta": "c3-bm-tien-do-toan-khoa",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/tien-do-toan-khoa"
+    },
+    {
+     "cho_chu": "Tiến độ toàn khoa"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c3-bm-tien-do-toan-khoa.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c5-kho-chi-tiet",
+   "mo_ta": "c5-kho-chi-tiet",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/kho-do-an"
+    },
+    {
+     "bam": "Phát triển ứng dụng di động theo dõi lịch tiêm chủng cho trẻ em tại trạm y tế phường Tân Thịnh"
+    },
+    {
+     "cho_chu": "Chi tiết bản ghi kho"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c5-kho-chi-tiet.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c5-kho-import",
+   "mo_ta": "c5-kho-import",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/kho-do-an"
+    },
+    {
+     "bam": "Import khóa cũ"
+    },
+    {
+     "cho_chu": "ma_so_sinh_vien"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c5-kho-import.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c4-bm-hoi-dong",
+   "mo_ta": "c4-bm-hoi-dong",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/hoi-dong"
+    },
+    {
+     "bam": "Hội đồng demo K22"
+    },
+    {
+     "cho_chu": "Thành viên hội đồng"
+    },
+    {
+     "cho_chu": "2/3 đã chấm"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c4-bm-hoi-dong.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ]
+  },
+  {
+   "id": "c4-gv-cham-diem",
+   "mo_ta": "c4-gv-cham-diem",
+   "vai_tro": "GV014",
+   "hanh_dong": [
+    {
+     "mo": "/cham-diem"
+    },
+    {
+     "bam": "Vũ Bảo Trang"
+    },
+    {
+     "cho_chu": "Chấm điểm - Vũ Bảo Trang"
+    },
+    {
+     "go": {
+      "o": "Điểm (0-10)",
+      "chu": "8.5"
+     }
+    },
+    {
+     "go": {
+      "o": "Nhận xét",
+      "chu": "Hệ thống chạy ổn định, cần bổ sung phân quyền chi tiết cho ban chủ nhiệm câu lạc bộ."
+     }
+    },
+    {
+     "bam": "Lưu điểm"
+    },
+    {
+     "cho_chu": "8.5",
+     "toi_da_giay": 10
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c4-gv-cham-diem.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ],
+   "ghi_du_lieu": true
+  },
+  {
+   "id": "c4-bm-chot-diem",
+   "mo_ta": "c4-bm-chot-diem",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/hoi-dong"
+    },
+    {
+     "bam": "Hội đồng demo K22"
+    },
+    {
+     "cho_chu": "3/3 đã chấm"
+    },
+    {
+     "bam": {
+      "chu": "Chốt kết quả",
+      "hang": "DTC235200340"
+     }
+    },
+    {
+     "cho_chu": "Chốt kết quả bảo vệ?"
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "c4-bm-chot-diem.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403
+   ],
+   "ghi_du_lieu": true
+  }
+ ]
+}

@@ -1,0 +1,89 @@
+@startuml lop-thuc-the-nguoi-dung-de-tai
+' Nhóm 1: người dùng, đợt đồ án, phân công GVHD, định hướng và đề tài.
+' Trích từ lop-thuc-the.puml (cùng thuộc tính, cùng bội số); bỏ hộp enum,
+' giá trị liệt kê trình bày ở bảng kiểu liệt kê của mục 3.1.
+hide circle
+left to right direction
+skinparam nodesep 25
+skinparam ranksep 45
+
+class TaiKhoan <<Entity>> {
+  +maDangNhap : String
+  +email : String
+  +matKhauBam : String
+  +vaiTro : VaiTro
+  +biKhoa : Boolean
+  +phienBanToken : Long
+}
+
+class SinhVien <<Entity>> {
+  +maSoSinhVien : String
+  +hoTen : String
+  +email : String
+  +lop : String
+  +khoa : String
+}
+
+class GiangVien <<Entity>> {
+  +maGiangVien : String
+  +hoTen : String
+  +email : String
+  +hocVi : String
+}
+
+class DotDoAn <<Entity>> {
+  +tenDot : String
+  +khoa : String
+  +namHoc : String
+  +ngayBatDau : Date
+  +ngayKetThuc : Date
+  +trangThai : TrangThaiDot
+}
+
+class PhanCongHuongDan <<Entity>> {
+  +thoiDiem : DateTime
+}
+
+class DinhHuong <<Entity>> {
+  +ma : String
+  +ten : String
+  +moTa : String
+  +hoatDong : Boolean
+}
+
+class DeTai <<Entity>> {
+  +tenDeTai : String
+  +moTa : String
+  +linhVuc : String
+  +trangThai : TrangThaiDeTai
+  +loaiNguoiDeXuat : String
+  +lyDoTuChoi : String
+}
+
+class ThongBao <<Entity>> {
+  +loai : LoaiThongBao
+  +noiDung : String
+  +lienKet : String
+  +daDoc : Boolean
+  +thoiDiem : DateTime
+}
+
+class CauHinhNguong <<Entity>> {
+  +loai : LoaiCauHinhNguong
+  +giaTri : Decimal
+  +thoiDiemCapNhat : DateTime
+}
+
+TaiKhoan "1" -- "0..1" SinhVien : "là tài khoản của"
+TaiKhoan "1" -- "0..1" GiangVien : "là tài khoản của"
+TaiKhoan "1" -- "*" ThongBao : "nhận"
+TaiKhoan "0..1" -- "*" CauHinhNguong : "cập nhật"
+DotDoAn "1" -- "*" PhanCongHuongDan : "trong đợt"
+SinhVien "1" -- "*" PhanCongHuongDan : "được phân công\n(tối đa 1 mỗi đợt)"
+GiangVien "1" -- "*" PhanCongHuongDan : "hướng dẫn"
+DotDoAn "1" -- "*" DeTai : "thuộc đợt"
+DinhHuong "0..1" -- "*" DeTai : "thuộc định hướng"
+GiangVien "0..1" -- "*" DeTai : "tạo và giao"
+SinhVien "0..1" -- "*" DeTai : "được giao\n(tối đa 1 đang hoạt động)"
+
+@enduml

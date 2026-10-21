@@ -2,34 +2,1192 @@
 
 \begin{document}
 
+% Một dòng có nhãn, thụt lề treo, dùng trong ô bảng (bước của luồng sự kiện, ngoại lệ)
+\newcommand{\bu}[1]{\par\noindent\hangindent=2em\hangafter=1\makebox[2em][l]{#1}\ignorespaces}
+
+% Bảng đặc tả use case: #1 = khóa nhãn, #2 = mã và tên UC
+\newenvironment{ucspec}[2]{%
+  \par\ifdim\dimexpr\pagegoal-\pagetotal\relax<7cm\relax\newpage\fi % còn dưới 7 cm thì sang trang mới
+  \renewcommand{\arraystretch}{1.2}%
+  \begin{longtable}{|p{3.2cm}|p{11.8cm}|}
+  \caption{Đặc tả #2}\label{tab:c2-#1}\\
+  \hline
+  \endfirsthead
+  \hline
+  \multicolumn{2}{|l|}{\textit{Đặc tả #2 (tiếp theo)}}\\
+  \hline
+  \endhead
+}{%
+  \end{longtable}%
+}
+
+\textit{Chương này trình bày kết quả khảo sát quy trình quản lý đồ án tại Khoa Công nghệ thông tin, mô hình hóa quy trình hiện tại và quy trình đề xuất bằng BPMN, sau đó đặc tả yêu cầu chức năng, yêu cầu phi chức năng, sơ đồ use case và đặc tả từng use case của hệ thống.}
+
 \section{Khảo sát hiện trạng}
-Sinh viên mô tả hiện trạng, quy trình nghiệp vụ hoặc bài toán thực tế liên quan đến đề tài.
 
-\section{Phân tích yêu cầu}
-Sinh viên trình bày yêu cầu chức năng, yêu cầu phi chức năng và các ràng buộc của hệ thống hoặc giải pháp.
+\subsection{Mục tiêu và phương pháp khảo sát}
 
-\section{Phương pháp thực hiện}
-Sinh viên mô tả phương pháp, quy trình, công cụ và dữ liệu sử dụng trong quá trình thực hiện đề tài.
+Khảo sát nhằm làm rõ cách Khoa đang quản lý đồ án/khóa luận tốt nghiệp ở năm khâu: giao đề tài, duyệt đề cương, theo dõi tiến độ, nộp báo cáo và bảo vệ, lưu trữ đồ án. Kết quả khảo sát là đầu vào cho sơ đồ quy trình hiện tại (AS-IS) ở mục~\ref{sec:c2-bpmn}, bảng yêu cầu ở mục~\ref{sec:c2-fr} và~\ref{sec:c2-nfr}, và một phần thiết kế dữ liệu ở chương~3.
 
-\section{Kế hoạch thực hiện}
-Sinh viên trình bày các giai đoạn công việc, mốc thời gian và sản phẩm dự kiến của từng giai đoạn.
-Ví dụ, kế hoạch thực hiện có thể được trình bày như Bảng~\ref{tab:ke-hoach}.
+Đồ án sử dụng ba nguồn thông tin:
+\begin{itemize}
+    \item \textit{Phiếu khảo sát trực tuyến dành cho sinh viên.} Phiếu gồm 13 câu hỏi trắc nghiệm (một lựa chọn hoặc nhiều lựa chọn), thực hiện bằng Google Forms ngày 01/10/2026. Sau khi loại các phiếu gửi trùng của cùng một người (giữ phiếu gửi sau cùng), còn 18 phiếu hợp lệ.
+    \item \textit{Tài liệu và biểu mẫu thực tế của Khoa.} Gồm mẫu đề cương đồ án/khóa luận tốt nghiệp (đề cương của chính đề tài này là một bản điền mẫu), quy tắc đặt tên tệp đề cương và cách Bộ môn tập hợp thư mục đề cương đã ký số để nộp về Khoa.
+    \item \textit{Trao đổi với giảng viên hướng dẫn.} Các góp ý của GVHD trong quá trình thực hiện đề tài làm rõ thứ tự thực tế của quy trình: Bộ môn phân công GVHD ngay đầu đợt, sinh viên thống nhất đề tài trực tiếp với GVHD, đề cương được GVHD duyệt trước rồi mới được Lãnh đạo Bộ môn ký số.
+\end{itemize}
 
-\begin{table}[H]
+Khảo sát có một hạn chế cần nêu rõ: phiếu khảo sát chỉ phát cho sinh viên. Góc nhìn của giảng viên và Bộ môn được tổng hợp từ tài liệu và từ trao đổi với GVHD, chưa có buổi phỏng vấn riêng với đại diện Bộ môn hay giảng viên khác. Vì vậy, các mô tả về công việc nội bộ của Bộ môn (tổng hợp danh sách, lập hội đồng, tính điểm) ở mục~\ref{sec:c2-hien-trang} là mô tả ở mức quy trình, không đi vào số liệu.
+
+\subsection{Kết quả phiếu khảo sát sinh viên}
+
+Trong 18 sinh viên trả lời, 17 sinh viên năm thứ tư và 1 sinh viên năm thứ ba; 10 sinh viên đang thực hiện đồ án và 8 sinh viên chưa thực hiện. Như vậy phần lớn người trả lời đang ở đúng giai đoạn mà hệ thống hướng tới. Bảng~\ref{tab:c2-ks-hien-trang} tổng hợp các câu hỏi về hiện trạng và nhu cầu, mỗi câu chỉ chọn một đáp án; tỷ lệ tính trên 18 phiếu.
+
+{\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{|p{12.3cm}|>{\raggedleft\arraybackslash}p{0.7cm}|>{\raggedleft\arraybackslash}p{1.3cm}|}
+\caption{Kết quả các câu hỏi một lựa chọn của phiếu khảo sát (n = 18)}\label{tab:c2-ks-hien-trang}\\
+\hline
+\textbf{Câu hỏi và đáp án} & \textbf{SL} & \textbf{Tỷ lệ} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Câu hỏi và đáp án} & \textbf{SL} & \textbf{Tỷ lệ} \\
+\hline
+\endhead
+\multicolumn{3}{|p{15.25cm}|}{\textit{Bạn đăng ký đề tài đồ án hiện nay bằng hình thức nào?}} \\
+\hline
+Đăng ký trực tiếp với giảng viên & 8 & 44,4\% \\
+\hline
+Chưa đăng ký đề tài & 8 & 44,4\% \\
+\hline
+Google Forms/biểu mẫu trực tuyến & 1 & 5,6\% \\
+\hline
+Hệ thống/phần mềm của Nhà trường & 1 & 5,6\% \\
+\hline
+\multicolumn{3}{|p{15.25cm}|}{\textit{Bạn có gặp khó khăn khi tìm kiếm và lựa chọn đề tài phù hợp không?}} \\
+\hline
+Rất khó khăn & 1 & 5,6\% \\
+\hline
+Khó khăn & 4 & 22,2\% \\
+\hline
+Bình thường & 5 & 27,8\% \\
+\hline
+Không khó khăn & 4 & 22,2\% \\
+\hline
+Chưa đăng ký nên chưa biết & 4 & 22,2\% \\
+\hline
+\multicolumn{3}{|p{15.25cm}|}{\textit{Bạn có thường tìm đồ án của các khóa trước để tham khảo không?}} \\
+\hline
+Thường xuyên & 3 & 16,7\% \\
+\hline
+Thỉnh thoảng & 11 & 61,1\% \\
+\hline
+Hiếm khi & 3 & 16,7\% \\
+\hline
+Chưa bao giờ & 1 & 5,6\% \\
+\hline
+\multicolumn{3}{|p{15.25cm}|}{\textit{Bạn có gặp khó khăn khi theo dõi trạng thái đề tài/đề cương (chờ duyệt, đã duyệt, cần chỉnh sửa\ldots) không?}} \\
+\hline
+Có & 10 & 55,6\% \\
+\hline
+Không & 5 & 27,8\% \\
+\hline
+Chưa biết & 3 & 16,7\% \\
+\hline
+\multicolumn{3}{|p{15.25cm}|}{\textit{Bạn có lo ngại đề tài hoặc nội dung đồ án bị trùng với các đồ án trước đó không?}} \\
+\hline
+Rất lo ngại & 3 & 16,7\% \\
+\hline
+Có lo ngại & 13 & 72,2\% \\
+\hline
+Không lo ngại & 2 & 11,1\% \\
+\hline
+\multicolumn{3}{|p{15.25cm}|}{\textit{Mức độ cần thiết của chức năng AI kiểm tra độ tương đồng với các đồ án trong Khoa?}} \\
+\hline
+Cần thiết & 16 & 88,9\% \\
+\hline
+Không cần thiết & 2 & 11,1\% \\
+\hline
+\multicolumn{3}{|p{15.25cm}|}{\textit{Mức tương đồng bao nhiêu thì hệ thống nên cảnh báo để kiểm tra lại?}} \\
+\hline
+20\%--40\% & 2 & 11,1\% \\
+\hline
+40\%--60\% & 9 & 50,0\% \\
+\hline
+Trên 60\% & 5 & 27,8\% \\
+\hline
+Không biết/khó đánh giá & 2 & 11,1\% \\
+\hline
+\multicolumn{3}{|p{15.25cm}|}{\textit{Hệ thống có nên lưu lại các đồ án đã thực hiện để các khóa sau tra cứu không?}} \\
+\hline
+Có & 15 & 83,3\% \\
+\hline
+Không & 3 & 16,7\% \\
+\hline
+\end{longtable}
+}
+
+Ba câu hỏi còn lại cho phép chọn nhiều đáp án. Hình~\ref{fig:c2-ks-chuc-nang} cho thấy số sinh viên chọn từng chức năng mong muốn; Bảng~\ref{tab:c2-ks-nhieu-lua-chon} tổng hợp thông tin sinh viên muốn nhận khi bị phát hiện trùng lặp và hình thức hiển thị tiến độ mong muốn.
+
+\begin{figure}[H]
 \centering
-\caption{Ví dụ bảng kế hoạch thực hiện}
-\label{tab:ke-hoach}
-\begin{tabular}{|c|p{5cm}|p{5cm}|}
+\begin{tikzpicture}
+\begin{axis}[
+    xbar, width=0.56\textwidth, height=8.2cm,
+    xmin=0, xmax=18, xtick={0,3,...,18},
+    xlabel={Số sinh viên chọn (trên 18 phiếu)},
+    symbolic y coords={Xem lịch bảo vệ,AI kiểm tra độ tương đồng,Tìm đồ án các khóa trước,Thông báo thời hạn,Theo dõi trạng thái đề tài,Trao đổi với giảng viên,Theo dõi tiến độ đồ án,Nộp đề cương/báo cáo trực tuyến,Đăng ký đề tài trực tuyến},
+    ytick=data, y tick label style={font=\small},
+    nodes near coords, nodes near coords style={font=\small},
+    bar width=9pt, enlarge y limits=0.07,
+    xmajorgrids, grid style={gray!30},
+]
+\addplot[fill=blue!45, draw=blue!70!black] coordinates {
+    (13,Xem lịch bảo vệ) (13,AI kiểm tra độ tương đồng) (13,Tìm đồ án các khóa trước)
+    (13,Thông báo thời hạn) (13,Theo dõi trạng thái đề tài) (14,Trao đổi với giảng viên)
+    (14,Theo dõi tiến độ đồ án) (15,Nộp đề cương/báo cáo trực tuyến) (15,Đăng ký đề tài trực tuyến)
+};
+\end{axis}
+\end{tikzpicture}
+\caption{Chức năng sinh viên mong muốn hệ thống quản lý đồ án có}
+\label{fig:c2-ks-chuc-nang}
+\end{figure}
+
+{\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{|p{12.3cm}|>{\raggedleft\arraybackslash}p{0.7cm}|>{\raggedleft\arraybackslash}p{1.3cm}|}
+\caption{Kết quả các câu hỏi nhiều lựa chọn của phiếu khảo sát (n = 18)}\label{tab:c2-ks-nhieu-lua-chon}\\
 \hline
-\textbf{STT} & \textbf{Công việc} & \textbf{Kết quả dự kiến} \\
+\textbf{Câu hỏi và đáp án} & \textbf{SL} & \textbf{Tỷ lệ} \\
 \hline
-1 & Khảo sát và thu thập yêu cầu & Danh sách yêu cầu \\
+\endfirsthead
 \hline
-2 & Phân tích và thiết kế & Tài liệu thiết kế \\
+\textbf{Câu hỏi và đáp án} & \textbf{SL} & \textbf{Tỷ lệ} \\
 \hline
-3 & Triển khai và kiểm thử & Sản phẩm và kết quả kiểm thử \\
+\endhead
+\multicolumn{3}{|p{15.25cm}|}{\textit{Khi phát hiện nội dung tương đồng cao, bạn muốn hệ thống cung cấp thông tin nào?}} \\
 \hline
-\end{tabular}
-\end{table}
+Phần trăm tương đồng & 14 & 77,8\% \\
+\hline
+Phần nội dung tương đồng & 13 & 72,2\% \\
+\hline
+Tài liệu/đồ án được dùng để so sánh & 13 & 72,2\% \\
+\hline
+Tên đề tài tương đồng & 10 & 55,6\% \\
+\hline
+Gợi ý chỉnh sửa để giảm mức tương đồng & 9 & 50,0\% \\
+\hline
+\multicolumn{3}{|p{15.25cm}|}{\textit{Bạn muốn hệ thống hiển thị tiến độ đồ án dưới hình thức nào?}} \\
+\hline
+Kết hợp nhiều hình thức & 13 & 72,2\% \\
+\hline
+Thanh tiến độ (\%) & 11 & 61,1\% \\
+\hline
+Timeline theo từng giai đoạn & 10 & 55,6\% \\
+\hline
+Danh sách các công việc & 10 & 55,6\% \\
+\hline
+Lịch (calendar) & 8 & 44,4\% \\
+\hline
+\end{longtable}
+}
+
+Từ kết quả khảo sát rút ra năm nhận xét chính:
+\begin{itemize}
+    \item \textit{Việc chọn đề tài diễn ra trực tiếp giữa sinh viên và giảng viên.} Trong 10 sinh viên đã có đề tài, 8 sinh viên đăng ký trực tiếp với giảng viên; chỉ 2 sinh viên dùng biểu mẫu trực tuyến hoặc phần mềm của Nhà trường. Điều này khớp với góp ý của GVHD: đề tài được thống nhất giữa sinh viên và GVHD, hệ thống chỉ cần ghi nhận kết quả thống nhất đó.
+    \item \textit{Trạng thái hồ sơ chưa minh bạch.} 55,6\% sinh viên gặp khó khăn khi theo dõi trạng thái đề tài/đề cương; 72,2\% muốn hệ thống hiển thị trạng thái đề tài và gửi thông báo thời hạn.
+    \item \textit{Nhu cầu kiểm tra trùng lặp trong phạm vi Khoa là rõ ràng.} 88,9\% sinh viên lo ngại hoặc rất lo ngại bị trùng với đồ án trước; cùng tỷ lệ đó đánh giá chức năng AI kiểm tra độ tương đồng là cần thiết. Khi bị phát hiện trùng, sinh viên muốn biết tỷ lệ phần trăm (77,8\%), đoạn nội dung trùng (72,2\%) và tài liệu nguồn (72,2\%).
+    \item \textit{Ngưỡng cảnh báo mong muốn tập trung ở mức trung bình.} Một nửa số sinh viên chọn khoảng 40\%--60\%. Đây là căn cứ để ngưỡng cảnh báo trùng lặp được Bộ môn cấu hình thay vì cố định trong mã nguồn; giá trị cụ thể được hiệu chỉnh trên bộ dữ liệu thử nghiệm ở chương~4.
+    \item \textit{Kho đồ án các khóa trước có giá trị sử dụng.} 77,8\% sinh viên ít nhất thỉnh thoảng tìm đồ án khóa trước để tham khảo và 83,3\% muốn hệ thống lưu lại các đồ án đã hoàn thành.
+\end{itemize}
+
+Một số mong muốn không được đưa nguyên vào hệ thống. \textit{Đăng ký đề tài trực tuyến} (83,3\%) được thay bằng chức năng GVHD giao đề tài cho sinh viên sau khi hai bên đã thống nhất, vì việc thống nhất đề tài vẫn diễn ra trực tiếp. \textit{Trao đổi với giảng viên} (77,8\%) được đáp ứng ở mức nhận xét gắn với từng phiên bản đề cương và từng báo cáo tiến độ, không xây dựng chức năng nhắn tin. \textit{Thông báo thời hạn} được đáp ứng bằng thông báo trong hệ thống khi có thay đổi và bằng việc đánh dấu trạng thái mốc (đúng hạn, nộp trễ, trễ mốc), chưa có nhắc lịch tự động trước hạn.
+
+\subsection{Hiện trạng quy trình quản lý đồ án}\label{sec:c2-hien-trang}
+
+Tổng hợp các nguồn trên, quy trình quản lý đồ án hiện tại của Khoa được mô tả theo năm khâu dưới đây. Sơ đồ BPMN tương ứng được trình bày ở mục~\ref{sec:c2-bpmn}.
+
+\textbf{Phân công GVHD và thống nhất đề tài.} Đầu mỗi đợt, Bộ môn lập danh sách phân công sinh viên cho từng giảng viên hướng dẫn trên bảng tính và gửi qua email hoặc nhóm lớp. Sinh viên liên hệ GVHD, trao đổi hướng nghiên cứu và thống nhất tên đề tài cùng định hướng (mã H01, H02\ldots). Danh sách đề tài sau đó được gửi lại cho Bộ môn bằng email, bảng tính hoặc biểu mẫu trực tuyến để tổng hợp. Việc rà soát đề tài trùng với các khóa trước dựa vào trí nhớ của giảng viên và việc đọc thủ công, không có công cụ so sánh.
+
+\textbf{Đề cương.} Sinh viên viết đề cương theo mẫu của Khoa và gửi GVHD qua email hoặc Zalo. GVHD đọc, góp ý; sinh viên sửa và gửi lại cho đến khi đạt. Mỗi lần gửi là một tệp rời trong hộp thư hoặc tin nhắn, nên khó xác định bản nào là bản mới nhất và nhận xét nào ứng với bản nào. Đề cương đã được GVHD đồng ý được chuyển cho Bộ môn. Bộ môn kiểm tra tệp có đặt tên đúng quy tắc và đúng định hướng hay không; tệp sai bị trả lại. Đề cương hợp lệ được Lãnh đạo Bộ môn ký số, sau đó Bộ môn tập hợp thành một thư mục đề cương đã ký để nộp về Khoa.
+
+\textbf{Theo dõi tiến độ.} Không có mốc báo cáo chung cho cả đợt; mỗi GVHD tự quy định tần suất gặp và nội dung báo cáo. Trao đổi diễn ra trực tiếp hoặc qua tin nhắn nên không được lưu lại. Muốn biết tình hình chung, Bộ môn phải hỏi từng giảng viên.
+
+\textbf{Nộp báo cáo và bảo vệ.} Sinh viên nộp báo cáo cuối bản in và bản mềm; việc kiểm tra đạo văn dùng phần mềm Turnitin theo quy định của Nhà trường. Khoa ra quyết định thành lập hội đồng, xếp lịch và thông báo qua bảng tin hoặc email. Các thành viên hội đồng chấm điểm trên phiếu giấy, thư ký tổng hợp và tính điểm thủ công.
+
+\textbf{Lưu trữ đồ án.} Bản in được lưu tại thư viện hoặc văn phòng Khoa, bản mềm nằm rải rác trên các ổ lưu trữ dùng chung. Khi cần tham khảo, sinh viên và giảng viên phải hỏi Bộ môn, thư viện hoặc sinh viên khóa trước; không có cách tìm theo khóa, giảng viên hay từ khóa.
+
+\subsection{Các biểu mẫu và dữ liệu nghiệp vụ}
+
+Quy trình trên sử dụng một số biểu mẫu và dữ liệu cần được số hóa. Bảng~\ref{tab:c2-bieu-mau} liệt kê các biểu mẫu chính, người lập và dữ liệu hệ thống cần lưu từ mỗi biểu mẫu.
+
+{\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{|p{3.4cm}|p{2.5cm}|p{8.4cm}|}
+\caption{Các biểu mẫu và dữ liệu nghiệp vụ trong quy trình quản lý đồ án}\label{tab:c2-bieu-mau}\\
+\hline
+\textbf{Biểu mẫu} & \textbf{Người lập} & \textbf{Dữ liệu cần lưu trên hệ thống} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Biểu mẫu} & \textbf{Người lập} & \textbf{Dữ liệu cần lưu trên hệ thống} \\
+\hline
+\endhead
+Danh sách phân công GVHD & Bộ môn & Đợt đồ án, mã số sinh viên, mã giảng viên hướng dẫn; số sinh viên mỗi giảng viên đang hướng dẫn \\
+\hline
+Danh sách đề tài & GVHD & Tên đề tài, mô tả, định hướng, sinh viên thực hiện, GVHD, đợt; tệp mô tả đề tài (nếu có) \\
+\hline
+Đề cương đồ án/khóa luận tốt nghiệp & Sinh viên, GVHD & Tệp đề cương theo từng phiên bản, nhận xét của GVHD và Bộ môn ở mỗi lần duyệt, tệp đề cương đã ký số, người ký và thời điểm ký \\
+\hline
+Báo cáo tiến độ và nhận xét & Sinh viên, GVHD & Mốc báo cáo và hạn nộp, nội dung báo cáo, tệp đính kèm, thời điểm nộp, nhận xét và mức đánh giá của GVHD \\
+\hline
+Quyết định thành lập hội đồng, lịch bảo vệ & Bộ môn & Tên hội đồng, thành viên và vai trò (chủ tịch, thư ký, ủy viên), ngày, giờ, phòng, danh sách sinh viên và thứ tự bảo vệ \\
+\hline
+Phiếu chấm điểm bảo vệ & Thành viên hội đồng & Điểm (thang 10) và nhận xét của từng thành viên cho từng sinh viên; điểm tổng hợp sau khi chốt \\
+\hline
+Hồ sơ lưu trữ đồ án & Bộ môn & Khóa, tên đề tài, sinh viên, GVHD, từ khóa, điểm, tệp báo cáo cuối \\
+\hline
+\end{longtable}
+}
+
+Trong các biểu mẫu trên, đề cương là biểu mẫu có cấu trúc cố định do Khoa ban hành. Bảng~\ref{tab:c2-mau-de-cuong} tóm tắt chín mục của mẫu đề cương; hệ thống không phân tích từng mục mà lưu nguyên tệp, đồng thời dùng phần nội dung (mục tiêu, yêu cầu sản phẩm) làm đầu vào cho kiểm tra trùng lặp.
+
+{\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{|c|p{4.6cm}|p{9.2cm}|}
+\caption{Cấu trúc mẫu đề cương đồ án/khóa luận tốt nghiệp của Khoa}\label{tab:c2-mau-de-cuong}\\
+\hline
+\textbf{Mục} & \textbf{Nội dung} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Mục} & \textbf{Nội dung} & \textbf{Ghi chú} \\
+\hline
+\endhead
+1 & Thông tin sinh viên & Họ tên, mã số sinh viên, lớp \\
+\hline
+2 & Thông tin giảng viên hướng dẫn & Họ tên, đơn vị công tác \\
+\hline
+3 & Tên đề tài & Trùng với đề tài GVHD đã giao \\
+\hline
+4 & Thời gian thực hiện & Theo đợt đồ án \\
+\hline
+5 & Mục tiêu & Các mục tiêu của đề tài \\
+\hline
+6 & Yêu cầu về chuẩn năng lực & Bảng CLO và PI cố định theo định hướng đề tài \\
+\hline
+7 & Yêu cầu về sản phẩm & Mô tả tóm tắt và yêu cầu chi tiết theo từng PI \\
+\hline
+8 & Yêu cầu về quyển báo cáo & Bốn chương theo mẫu của Trường \\
+\hline
+9 & Tiến độ thực hiện & Kế hoạch theo tuần, kết quả dự kiến của từng tuần \\
+\hline
+\end{longtable}
+}
+
+Tệp đề cương phải được đặt tên theo quy tắc \texttt{\textless{}Mã định hướng\textgreater{}.\textless{}MSSV\textgreater{}.\textless{}Họ tên\textgreater{}.\textless{}Lớp\textgreater{}.\textless{}pdf|docx\textgreater{}} để Bộ môn tập hợp và tra cứu được. Bảng~\ref{tab:c2-ten-tep} mô tả từng thành phần. Hệ thống bỏ qua các hậu tố do phần mềm tự thêm như ``(Repaired)'', ``(1)'' hoặc ``- Copy'' khi kiểm tra, nhưng các thành phần còn lại phải khớp với dữ liệu của sinh viên và đề tài.
+
+{\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{|p{3.4cm}|p{5.3cm}|p{5.6cm}|}
+\caption{Quy tắc đặt tên tệp đề cương}\label{tab:c2-ten-tep}\\
+\hline
+\textbf{Thành phần} & \textbf{Quy tắc} & \textbf{Ví dụ} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Thành phần} & \textbf{Quy tắc} & \textbf{Ví dụ} \\
+\hline
+\endhead
+Mã định hướng & Chữ H và hai chữ số; phải trùng định hướng của đề tài & H01 \\
+\hline
+MSSV & Mã số sinh viên & DTC235200036 \\
+\hline
+Họ tên & Họ tên đầy đủ, có dấu & Nguyễn Thị Mai Anh \\
+\hline
+Lớp & Lớp hành chính của sinh viên & CN CNTTK22A \\
+\hline
+Phần mở rộng & \texttt{pdf} hoặc \texttt{docx} & pdf \\
+\hline
+\end{longtable}
+}
+
+\subsection{Đánh giá hiện trạng}
+
+Bảng~\ref{tab:c2-van-de} tổng hợp các vấn đề của quy trình hiện tại, căn cứ của từng vấn đề và hướng giải quyết trong hệ thống.
+
+{\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{|c|p{4.2cm}|p{4.2cm}|p{4.95cm}|}
+\caption{Các vấn đề của quy trình hiện tại và hướng giải quyết}\label{tab:c2-van-de}\\
+\hline
+\textbf{Mã} & \textbf{Vấn đề} & \textbf{Căn cứ} & \textbf{Hướng giải quyết} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Mã} & \textbf{Vấn đề} & \textbf{Căn cứ} & \textbf{Hướng giải quyết} \\
+\hline
+\endhead
+VĐ1 & Đề tài trùng với các khóa trước khó phát hiện khi chỉ đọc thủ công & 88,9\% sinh viên lo ngại bị trùng; không có công cụ so sánh & Kiểm tra trùng tên đề tài theo ngữ nghĩa ngay khi GVHD tạo đề tài \\
+\hline
+VĐ2 & Nội dung đề cương, báo cáo chép từ đồ án khác trong Khoa khó phát hiện & Turnitin không bao quát kho đồ án riêng của Khoa & Kiểm tra trùng lặp tài liệu, chỉ ra tỷ lệ, đồ án nguồn và từng đoạn trùng \\
+\hline
+VĐ3 & Đề cương gửi qua email/Zalo, không quản lý phiên bản; tệp sai tên, sai định hướng bị phát hiện muộn & Trao đổi với GVHD; quy tắc tên tệp & Lưu từng phiên bản kèm nhận xét; tự kiểm tra tên tệp và định hướng trước khi nộp lên Bộ môn \\
+\hline
+VĐ4 & Trạng thái đề tài, đề cương không minh bạch & 55,6\% sinh viên khó theo dõi trạng thái & Trạng thái hiển thị theo thời gian thực cho cả ba vai trò; thông báo trong hệ thống khi có thay đổi \\
+\hline
+VĐ5 & Tiến độ phân tán theo từng GVHD, Bộ môn không có số liệu chung & Không có mốc chung; trao đổi không lưu lại & Mốc tiến độ chung cho đợt; tự đánh dấu nộp trễ, trễ mốc; bảng theo dõi toàn khoa \\
+\hline
+VĐ6 & Tổng hợp điểm bảo vệ thủ công từ phiếu giấy dễ sai sót & Quy trình chấm hiện tại & Thành viên hội đồng chấm trên hệ thống; hệ thống tính điểm trung bình và khóa điểm khi chốt \\
+\hline
+VĐ7 & Đồ án các khóa trước phân tán, khó tra cứu & 83,3\% sinh viên muốn có kho đồ án & Kho đồ án tra cứu theo khóa, GVHD, từ khóa; đồng thời là nguồn so sánh trùng lặp \\
+\hline
+\end{longtable}
+}
+
+\section{Mô hình hóa quy trình nghiệp vụ}\label{sec:c2-bpmn}
+
+Mỗi quy trình được vẽ thành hai sơ đồ BPMN~\cite{bpmn2}: sơ đồ AS-IS mô tả cách làm hiện tại và sơ đồ TO-BE mô tả cách làm khi có hệ thống. Các sơ đồ dùng làn (lane) theo chiều dọc, mỗi làn ứng với một vai trò; luồng công việc đi từ trên xuống. Quy ước ký hiệu như sau:
+\begin{itemize}
+    \item Hình chữ nhật bo góc nền xanh dương là công việc do người dùng thực hiện; nền xanh lá là công việc hệ thống tự thực hiện; viền nét đứt nền vàng là công việc thực hiện ngoài hệ thống.
+    \item Hình chữ nhật có dấu ``+'' ở cạnh dưới là quy trình con, được vẽ chi tiết ở một sơ đồ riêng.
+    \item Hình thoi có dấu ``×'' là cổng rẽ nhánh loại trừ (chỉ đi một nhánh); hình thoi có dấu ``+'' là cổng song song.
+    \item Đường tròn mảnh là sự kiện bắt đầu, đường tròn đậm là sự kiện kết thúc; đường tròn có đồng hồ là sự kiện thời gian; sự kiện kết thúc có tia chớp là kết thúc do lỗi.
+    \item Mũi tên nét liền là luồng tuần tự; đường nét chấm là liên kết dữ liệu tới dịch vụ AI.
+\end{itemize}
+
+Ở sơ đồ TO-BE, làn ``Hệ thống'' gộp Web API và dịch vụ AI, vì người dùng không phân biệt hai thành phần này; sự tách biệt giữa chúng được trình bày ở thiết kế kiến trúc tại chương~3.
+
+\subsection{Quy trình tổng quan}
+
+Hình~\ref{fig:c2-bpmn-tq-asis} là quy trình tổng quan hiện tại. Bộ môn thông báo đợt và phân công GVHD; GVHD thống nhất đề tài với sinh viên; sinh viên lần lượt viết và duyệt đề cương, thực hiện và báo cáo tiến độ, nộp báo cáo và bảo vệ; cuối cùng Bộ môn lưu trữ đồ án. Mỗi bước được trình bày chi tiết ở các mục tiếp theo.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth]{chuong_2/bpmn-00-tong-quan-as-is.png}
+    \caption{Sơ đồ BPMN quy trình tổng quan hiện tại (AS-IS)}
+    \label{fig:c2-bpmn-tq-asis}
+\end{figure}
+
+Quy trình đề xuất ở Hình~\ref{fig:c2-bpmn-tq-tobe} giữ nguyên thứ tự các khâu và vai trò của từng bên, nhưng mọi khâu được thực hiện trên hệ thống. Bộ môn mở đợt và phân công GVHD trên hệ thống; năm quy trình con ứng với năm nhóm chức năng chính (UC1--UC5). Dịch vụ AI tham gia ở ba điểm: kiểm tra tên đề tài khi GVHD tạo đề tài, kiểm tra nội dung khi sinh viên nộp đề cương và báo cáo cuối, và đánh chỉ mục đồ án khi được lưu vào kho để làm nguồn so sánh cho các khóa sau.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_2/bpmn-00-tong-quan-to-be.png}
+    \caption{Sơ đồ BPMN quy trình tổng quan trên hệ thống (TO-BE)}
+    \label{fig:c2-bpmn-tq-tobe}
+\end{figure}
+
+\subsection{Quy trình quản lý đề tài}
+
+Ở quy trình hiện tại (Hình~\ref{fig:c2-bpmn-dt-asis}), đề tài được thống nhất giữa sinh viên và GVHD, nhưng sau đó vẫn đi qua email hoặc bảng tính để Bộ môn tổng hợp, rà soát trùng lặp bằng cách đọc và công bố danh sách. Bước rà soát phụ thuộc vào trí nhớ của người đọc và chỉ so được với số ít đề tài mà người đọc biết.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth]{chuong_2/bpmn-01-de-tai-as-is.png}
+    \caption{Sơ đồ BPMN quy trình quản lý đề tài hiện tại (AS-IS)}
+    \label{fig:c2-bpmn-dt-asis}
+\end{figure}
+
+Quy trình đề xuất (Hình~\ref{fig:c2-bpmn-dt-tobe}) bắt đầu khi Bộ môn phân công GVHD trên hệ thống, theo từng dòng, hàng loạt hoặc bằng tệp CSV; hệ thống kiểm tra ràng buộc và thông báo cho sinh viên và giảng viên. Sinh viên vẫn trao đổi và thống nhất đề tài trực tiếp với GVHD. Sau đó GVHD tạo đề tài trên hệ thống (tên, mô tả, định hướng) và chọn sinh viên trong lớp hướng dẫn của mình. Hệ thống gọi dịch vụ AI so sánh tên đề tài theo ngữ nghĩa với kho; nếu có đề tài tương tự vượt ngưỡng, GVHD xem danh sách kèm tỷ lệ phần trăm và quyết định sửa tên hoặc vẫn giao. Khi giao, hệ thống kiểm tra sinh viên thuộc lớp hướng dẫn, đợt đang mở và sinh viên chưa có đề tài; nếu hợp lệ, đề tài được lưu ở trạng thái \textit{Đã phân công}, kết quả kiểm tra được lưu kèm, tên đề tài được đưa vào chỉ mục và sinh viên nhận thông báo. Đề tài không còn phải đi một vòng qua Bộ môn để duyệt, vì trách nhiệm về đề tài thuộc về GVHD; Bộ môn theo dõi toàn bộ đề tài ở chế độ chỉ đọc.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_2/bpmn-01-de-tai-to-be.png}
+    \caption{Sơ đồ BPMN quy trình quản lý đề tài trên hệ thống (TO-BE)}
+    \label{fig:c2-bpmn-dt-tobe}
+\end{figure}
+
+\subsection{Quy trình quản lý đề cương}
+
+Quy trình đề cương hiện tại (Hình~\ref{fig:c2-bpmn-dc-asis}) có hai cấp duyệt: GVHD duyệt nội dung, sau đó Bộ môn kiểm tra tên tệp và định hướng, Lãnh đạo Bộ môn ký số và Bộ môn tập hợp thư mục nộp về Khoa. Mọi trao đổi đều qua email hoặc tin nhắn, nên một đề cương sai tên tệp chỉ bị phát hiện ở cấp Bộ môn và phải quay lại từ đầu.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth]{chuong_2/bpmn-02-de-cuong-as-is.png}
+    \caption{Sơ đồ BPMN quy trình quản lý đề cương hiện tại (AS-IS)}
+    \label{fig:c2-bpmn-dc-asis}
+\end{figure}
+
+Quy trình đề xuất (Hình~\ref{fig:c2-bpmn-dc-tobe}) giữ nguyên hai cấp duyệt và bước ký số, đồng thời đưa các bước kiểm tra lên sớm nhất có thể:
+\begin{enumerate}
+    \item Sinh viên nộp đề cương dạng DOCX hoặc PDF. Hệ thống kiểm tra định dạng theo nội dung tệp và dung lượng, lưu thành một phiên bản mới, báo cho GVHD, rồi chạy kiểm tra trùng lặp ở chế độ nền.
+    \item GVHD xem đề cương cùng ba kết quả kiểm tra tự động: tên tệp, định hướng và trùng lặp nội dung. Nếu nội dung hoặc định hướng chưa đạt, GVHD yêu cầu sửa kèm nhận xét; sinh viên sửa và nộp phiên bản mới.
+    \item Nếu đạt, GVHD duyệt. Trường hợp chỉ có tên tệp sai quy tắc (định hướng vẫn đúng), GVHD đổi tên tệp theo mẫu ngay trên hệ thống thay vì trả lại cho sinh viên. Sau đó GVHD nộp đề cương lên Bộ môn; hệ thống chỉ cho nộp khi kiểm tra tên tệp và định hướng đều đạt.
+    \item Bộ môn xem đề cương và kết quả kiểm tra. Nếu không phê duyệt, Bộ môn trả lại kèm nhận xét và đề cương quay về bước sinh viên sửa. Nếu phê duyệt, Lãnh đạo Bộ môn ký số tệp PDF bằng công cụ ký số của mình và tải lên.
+    \item Hệ thống kiểm tra tệp PDF có chữ ký số và chữ ký phủ toàn bộ tệp (tệp không bị sửa sau khi ký). Nếu đạt, đề cương chuyển sang \textit{Đã duyệt}, bản ký số được lưu kèm người ký và thời điểm ký, sinh viên và GVHD nhận thông báo. Bộ môn có thể xuất toàn bộ đề cương đã ký số của một đợt thành tệp nén để nộp về Khoa.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth,height=0.86\textheight,keepaspectratio]{chuong_2/bpmn-02-de-cuong-to-be.png}
+    \caption{Sơ đồ BPMN quy trình quản lý đề cương trên hệ thống (TO-BE)}
+    \label{fig:c2-bpmn-dc-tobe}
+\end{figure}
+
+\subsection{Quy trình theo dõi tiến độ}
+
+Hiện nay (Hình~\ref{fig:c2-bpmn-td-asis}), sinh viên báo cáo khi gặp GVHD hoặc qua tin nhắn, GVHD nhận xét trực tiếp và vòng lặp này kéo dài đến hết thời gian thực hiện. Bộ môn chỉ nắm được tình hình khi hỏi từng giảng viên.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth]{chuong_2/bpmn-03-tien-do-as-is.png}
+    \caption{Sơ đồ BPMN quy trình theo dõi tiến độ hiện tại (AS-IS)}
+    \label{fig:c2-bpmn-td-asis}
+\end{figure}
+
+Trong quy trình đề xuất (Hình~\ref{fig:c2-bpmn-td-tobe}), Bộ môn thiết lập các mốc tiến độ (tên mốc, hạn nộp) cho cả đợt. Từ đây hai nhánh chạy song song. Ở nhánh thứ nhất, sinh viên nộp báo cáo theo từng mốc, GVHD nhận xét và đánh giá theo ba mức \textit{Đạt}, \textit{Cần cải thiện}, \textit{Chưa đạt}, hệ thống lưu nhận xét và thông báo cho sinh viên. Ở nhánh thứ hai, khi đến hạn mốc, hệ thống tự xác định trạng thái của từng sinh viên ở mốc đó (đúng hạn, nộp trễ hoặc trễ mốc nếu chưa nộp); Bộ môn theo dõi tiến độ toàn khoa và lọc ra các sinh viên trễ mốc mà không cần hỏi từng giảng viên.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_2/bpmn-03-tien-do-to-be.png}
+    \caption{Sơ đồ BPMN quy trình quản lý tiến độ trên hệ thống (TO-BE)}
+    \label{fig:c2-bpmn-td-tobe}
+\end{figure}
+
+\subsection{Quy trình nộp báo cáo cuối và bảo vệ}
+
+Quy trình hiện tại (Hình~\ref{fig:c2-bpmn-bv-asis}) gồm nộp báo cáo bản in và bản mềm, ra quyết định hội đồng và xếp lịch, chấm điểm trên phiếu giấy và tổng hợp điểm thủ công.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth]{chuong_2/bpmn-04-bao-ve-as-is.png}
+    \caption{Sơ đồ BPMN quy trình nộp báo cáo và bảo vệ hiện tại (AS-IS)}
+    \label{fig:c2-bpmn-bv-asis}
+\end{figure}
+
+Trong quy trình đề xuất (Hình~\ref{fig:c2-bpmn-bv-tobe}), sinh viên nộp báo cáo cuối trên hệ thống; hệ thống lưu phiên bản và kiểm tra trùng lặp ở chế độ nền. Bộ môn lập hội đồng gồm 3 đến 5 giảng viên (đúng một chủ tịch, tối đa một thư ký) với ngày, giờ, phòng, rồi xếp sinh viên vào hội đồng; hệ thống thông báo cho thành viên hội đồng và sinh viên. Từ ngày bảo vệ, mỗi thành viên xem báo cáo và kết quả kiểm tra trùng lặp, nhập điểm và nhận xét; hệ thống lưu điểm và tính điểm trung bình cộng. Khi đủ điểm của mọi thành viên, Bộ môn chốt kết quả; hệ thống khóa điểm, thông báo cho sinh viên, tạo bản ghi kho và đánh chỉ mục báo cáo. Sinh viên xem lịch bảo vệ và xem điểm sau khi kết quả đã được chốt.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_2/bpmn-04-bao-ve-to-be.png}
+    \caption{Sơ đồ BPMN quy trình nộp báo cáo cuối và bảo vệ trên hệ thống (TO-BE)}
+    \label{fig:c2-bpmn-bv-tobe}
+\end{figure}
+
+\subsection{Quy trình lưu trữ kho đồ án}
+
+Hiện nay (Hình~\ref{fig:c2-bpmn-kho-asis}) đồ án được lưu bản in tại thư viện, văn phòng Khoa và bản mềm rải rác; người cần tham khảo phải hỏi để được đọc bản in hoặc xin bản mềm.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{chuong_2/bpmn-05-kho-do-an-as-is.png}
+    \caption{Sơ đồ BPMN quy trình lưu trữ đồ án hiện tại (AS-IS)}
+    \label{fig:c2-bpmn-kho-asis}
+\end{figure}
+
+Quy trình đề xuất (Hình~\ref{fig:c2-bpmn-kho-tobe}) có ba điểm bắt đầu. Khi kết quả bảo vệ được chốt, hệ thống tự tạo bản ghi kho từ đề tài, sinh viên, GVHD, điểm và báo cáo cuối. Bộ môn cũng có thể thêm, sửa, xóa bản ghi hoặc nhập đồ án các khóa cũ từ tệp CSV. Với mọi bản ghi mới hoặc được sửa, hệ thống gửi tên đề tài và báo cáo cuối sang dịch vụ AI để đánh chỉ mục; nếu dịch vụ AI lỗi, bản ghi vẫn được lưu với trạng thái \textit{Chưa index} để Bộ môn đánh chỉ mục lại sau. Người dùng ở cả ba vai trò tra cứu kho theo khóa, từ khóa, GVHD và xem chi tiết bản ghi.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_2/bpmn-05-kho-do-an-to-be.png}
+    \caption{Sơ đồ BPMN quy trình quản lý kho đồ án trên hệ thống (TO-BE)}
+    \label{fig:c2-bpmn-kho-tobe}
+\end{figure}
+
+\section{Yêu cầu chức năng}\label{sec:c2-fr}
+
+Từ quy trình TO-BE, yêu cầu chức năng được chia thành tám nhóm: tài khoản và danh mục (TK), phân công và đề tài (DT), đề cương (DC), tiến độ (TD), bảo vệ (BV), kho đồ án (KHO), thông báo (TB) và kiểm tra trùng lặp (AI). Mỗi yêu cầu có mã \texttt{FR-<nhóm>-<số>}, tác nhân thực hiện và use case tương ứng ở mục~\ref{sec:c2-uc}. Bảng~\ref{tab:c2-fr} liệt kê toàn bộ yêu cầu.
+
+{\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{|p{2.35cm}|p{8.05cm}|>{\raggedright\arraybackslash}p{2.3cm}|>{\raggedright\arraybackslash}p{1.5cm}|}
+\caption{Yêu cầu chức năng của hệ thống}\label{tab:c2-fr}\\
+\hline
+\textbf{Mã} & \textbf{Chức năng và mô tả} & \textbf{Tác nhân} & \textbf{UC} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Mã} & \textbf{Chức năng và mô tả} & \textbf{Tác nhân} & \textbf{UC} \\
+\hline
+\endhead
+\multicolumn{4}{|l|}{\textbf{Nhóm TK -- Tài khoản, đợt đồ án và danh mục}} \\
+\hline
+FR-TK-01 & \textit{Đăng nhập.} Người dùng đăng nhập bằng mã đăng nhập (mã số sinh viên, mã giảng viên) hoặc email cùng mật khẩu; đăng nhập thành công nhận access token và refresh token. & SV, GV, Bộ môn & UC0.1 \\
+\hline
+FR-TK-02 & \textit{Giữ phiên và đăng xuất.} Phiên được duy trì khi tải lại trang nhờ refresh token; người dùng đăng xuất được từ mọi trang và mọi token cũ của tài khoản mất hiệu lực. & SV, GV, Bộ môn & UC0.1 \\
+\hline
+FR-TK-03 & \textit{Phân quyền theo vai trò.} Hệ thống có ba vai trò Sinh viên, Giảng viên, Bộ môn; mọi API kiểm tra vai trò và quyền sở hữu dữ liệu ở phía máy chủ, không chỉ ẩn nút trên giao diện. & Hệ thống & UC0.1 \\
+\hline
+FR-TK-04 & \textit{Quản lý tài khoản.} Bộ môn tìm kiếm, tạo, sửa, khóa và mở khóa tài khoản sinh viên, giảng viên; tài khoản bị khóa mất quyền truy cập ngay. & Bộ môn & UC0.2 \\
+\hline
+FR-TK-05 & \textit{Quản lý đợt đồ án.} Bộ môn tạo đợt (tên, khóa, năm học, ngày bắt đầu, ngày kết thúc), sửa, mở và đóng đợt; chỉ giao được đề tài trong đợt đang mở. & Bộ môn & UC0.3 \\
+\hline
+FR-TK-06 & \textit{Quản lý định hướng đề tài.} Bộ môn thêm, sửa định hướng (mã dạng Hxx, tên, mô tả) và ngừng hoặc tiếp tục sử dụng một định hướng; định hướng ngừng sử dụng không được chọn cho đề tài mới. & Bộ môn & UC0.9 \\
+\hline
+\multicolumn{4}{|l|}{\textbf{Nhóm DT -- Phân công GVHD và đề tài}} \\
+\hline
+FR-DT-01 & \textit{Phân công GVHD.} Bộ môn gán mỗi sinh viên của đợt cho đúng một GVHD, theo từng dòng hoặc hàng loạt; xem thống kê đã và chưa phân công, số sinh viên của từng giảng viên; lọc theo từ khóa, GVHD, tình trạng phân công. & Bộ môn & UC0.8 \\
+\hline
+FR-DT-02 & \textit{Nhập phân công từ tệp CSV.} Mỗi dòng gồm mã số sinh viên và mã giảng viên; dòng hợp lệ được lưu, dòng lỗi được báo lại kèm số dòng và lý do. & Bộ môn & UC0.8 \\
+\hline
+FR-DT-03 & \textit{Ràng buộc đổi, gỡ GVHD.} Không cho đổi hoặc gỡ GVHD của sinh viên đã có đề tài \textit{Đã phân công} trong đợt; khi đổi GVHD, bản nháp đề tài giảng viên cũ soạn cho sinh viên được gỡ sinh viên. & Hệ thống & UC0.8 \\
+\hline
+FR-DT-04 & \textit{Xem lớp hướng dẫn.} Giảng viên xem danh sách sinh viên được phân công theo từng đợt kèm đề tài hiện tại; sinh viên xem GVHD của mình. & GV, SV & UC0.8 \\
+\hline
+FR-DT-05 & \textit{Tạo và giao đề tài.} GVHD nhập tên, mô tả, lĩnh vực, định hướng và chọn một sinh viên trong lớp hướng dẫn; lưu nháp hoặc giao ngay. Khi giao, đề tài chuyển \textit{Đã phân công} và sinh viên nhận thông báo; sinh viên không tự đề xuất hay đăng ký đề tài. & GV & UC1.1 \\
+\hline
+FR-DT-06 & \textit{Đính kèm tệp mô tả đề tài.} GVHD đính kèm tệp DOCX hoặc PDF mô tả chi tiết đề tài. & GV & UC1.1 \\
+\hline
+FR-DT-07 & \textit{Cảnh báo đề tài tương tự.} Khi GVHD tạo hoặc giao đề tài, hệ thống hiển thị tối đa 5 đề tài tương tự kèm tỷ lệ phần trăm, đánh dấu đề tài vượt ngưỡng; chỉ cảnh báo, không chặn việc giao. & Hệ thống & UC1.1, UC0.6 \\
+\hline
+FR-DT-08 & \textit{Chỉ GVHD được giao đề tài.} Chỉ GVHD được phân công cho sinh viên trong đợt mới tạo, sửa, giao đề tài cho sinh viên đó; vai trò khác hoặc giảng viên khác bị từ chối. & Hệ thống & UC1.1 \\
+\hline
+FR-DT-09 & \textit{Một sinh viên một đề tài.} Mỗi sinh viên có tối đa một đề tài đang hoạt động, kể cả khi hai yêu cầu giao đề tài cho cùng sinh viên đến đồng thời. & Hệ thống & UC1.1 \\
+\hline
+FR-DT-10 & \textit{Xem và lọc danh sách đề tài.} Lọc theo đợt, trạng thái, giảng viên, lĩnh vực, định hướng và từ khóa; sinh viên chỉ thấy đề tài của mình, giảng viên thấy đề tài mình hướng dẫn, Bộ môn thấy toàn bộ ở chế độ chỉ đọc; xem chi tiết và lịch sử đề tài. & SV, GV, Bộ môn & UC1.2 \\
+\hline
+\multicolumn{4}{|l|}{\textbf{Nhóm DC -- Đề cương}} \\
+\hline
+FR-DC-01 & \textit{Nộp đề cương.} Sinh viên có đề tài \textit{Đã phân công} nộp đề cương dạng DOCX hoặc PDF; mỗi lần nộp tạo một phiên bản mới; chỉ nộp được khi đề cương chưa nộp hoặc đang ở trạng thái yêu cầu sửa. & SV & UC2.1 \\
+\hline
+FR-DC-02 & \textit{Kiểm tra tệp nộp.} Hệ thống từ chối tệp có nội dung không phải DOCX/PDF hoặc lớn hơn 20 MB trước khi lưu. & Hệ thống & UC2.1 \\
+\hline
+FR-DC-03 & \textit{Kiểm tra tự động.} Hệ thống kiểm tra tên tệp theo quy tắc, định hướng trong tên tệp khớp định hướng của đề tài, và trùng lặp nội dung (chạy nền); kết quả hiển thị cho GVHD và Bộ môn. & Hệ thống & UC2.2, UC0.7 \\
+\hline
+FR-DC-04 & \textit{GVHD duyệt hoặc yêu cầu sửa.} Yêu cầu sửa bắt buộc có nhận xét; GVHD có thể trả lại đề cương đã duyệt khi chưa nộp lên Bộ môn. & GV & UC2.2 \\
+\hline
+FR-DC-05 & \textit{Nộp đề cương lên Bộ môn.} GVHD nộp đề cương đã duyệt lên Bộ môn; chỉ nộp được khi kiểm tra tên tệp và định hướng đều đạt. & GV & UC2.3 \\
+\hline
+FR-DC-06 & \textit{Đổi tên tệp theo mẫu.} Khi tên tệp là lỗi duy nhất và định hướng đúng, GVHD đổi tên tệp về đúng mẫu; tên cũ được ghi lại trong nhận xét. & GV & UC2.3 \\
+\hline
+FR-DC-07 & \textit{Phê duyệt bằng chữ ký số.} Bộ môn tải lên tệp PDF đã ký số; hệ thống chỉ chấp nhận PDF có chữ ký số phủ toàn bộ tệp, lưu người ký, thời điểm ký và chuyển đề cương sang \textit{Đã duyệt}. & Bộ môn & UC2.4 \\
+\hline
+FR-DC-08 & \textit{Bộ môn trả lại.} Bộ môn trả lại đề cương kèm nhận xét bắt buộc; đề cương quay về trạng thái yêu cầu sửa. & Bộ môn & UC2.4 \\
+\hline
+FR-DC-09 & \textit{Xuất đề cương đã ký số.} Bộ môn tải về toàn bộ đề cương đã ký số của một đợt trong một tệp ZIP để nộp về Khoa. & Bộ môn & UC2.4 \\
+\hline
+FR-DC-10 & \textit{Lịch sử phiên bản và nhận xét.} Xem mọi phiên bản đã nộp, nhận xét của từng lần duyệt, kết quả kiểm tra và bản ký số, trong phạm vi của vai trò. & SV, GV, Bộ môn & UC2.5 \\
+\hline
+\multicolumn{4}{|l|}{\textbf{Nhóm TD -- Tiến độ}} \\
+\hline
+FR-TD-01 & \textit{Thiết lập mốc tiến độ.} Bộ môn thêm, sửa, xóa mốc của đợt (tên mốc, hạn nộp nằm trong thời gian của đợt); không xóa được mốc đã có báo cáo. & Bộ môn & UC3.1 \\
+\hline
+FR-TD-02 & \textit{Nộp báo cáo tiến độ.} Sinh viên có đề cương \textit{Đã duyệt} nộp báo cáo theo mốc (nội dung 1--10.000 ký tự, tệp đính kèm tùy chọn); nộp lại thì ghi đè cho đến khi GVHD nhận xét. & SV & UC3.2 \\
+\hline
+FR-TD-03 & \textit{Nhận xét và đánh giá.} GVHD nhận xét và đánh giá báo cáo theo ba mức \textit{Đạt}, \textit{Cần cải thiện}, \textit{Chưa đạt}; sinh viên nhận thông báo. & GV & UC3.3 \\
+\hline
+FR-TD-04 & \textit{Trạng thái mốc.} Hệ thống tự xác định trạng thái của mỗi sinh viên ở mỗi mốc: đúng hạn, nộp trễ, trễ mốc (quá hạn chưa nộp), chưa đến hạn. & Hệ thống & UC3.2, UC3.4 \\
+\hline
+FR-TD-05 & \textit{Theo dõi tiến độ toàn khoa.} Bộ môn xem tổng hợp tiến độ của mọi sinh viên trong đợt theo từng mốc và lọc sinh viên trễ mốc. & Bộ môn & UC3.4 \\
+\hline
+\multicolumn{4}{|l|}{\textbf{Nhóm BV -- Báo cáo cuối và bảo vệ}} \\
+\hline
+FR-BV-01 & \textit{Nộp báo cáo cuối.} Sinh viên có đề cương \textit{Đã duyệt} nộp báo cáo cuối DOCX/PDF, kích hoạt kiểm tra trùng lặp; được nộp lại cho đến khi được xếp lịch bảo vệ. & SV & UC4.1 \\
+\hline
+FR-BV-02 & \textit{Lập hội đồng.} Bộ môn tạo hội đồng (tên, ngày, giờ bắt đầu, phòng) gồm 3--5 giảng viên, đúng một chủ tịch, tối đa một thư ký; không sửa thành viên hay lịch khi hội đồng đã có điểm, không xóa khi đã có sinh viên. & Bộ môn & UC4.2 \\
+\hline
+FR-BV-03 & \textit{Xếp lịch bảo vệ.} Bộ môn xếp sinh viên đủ điều kiện (đề cương đã duyệt, đã nộp báo cáo cuối) vào hội đồng; giờ bảo vệ tính theo thứ tự, mỗi lượt 30 phút; mỗi sinh viên thuộc một hội đồng; GVHD không ngồi hội đồng của sinh viên mình hướng dẫn. & Bộ môn & UC4.2 \\
+\hline
+FR-BV-04 & \textit{Chấm điểm và nhận xét.} Thành viên hội đồng xem báo cáo, kết quả trùng lặp và chấm điểm 0--10 kèm nhận xét, từ ngày bảo vệ trở đi; người không thuộc hội đồng bị từ chối. & GV & UC4.3 \\
+\hline
+FR-BV-05 & \textit{Tính điểm và chốt kết quả.} Khi mọi thành viên đã chấm, Bộ môn chốt kết quả; điểm bảo vệ là trung bình cộng điểm các thành viên; sau khi chốt không sửa được điểm. & Bộ môn, Hệ thống & UC4.4 \\
+\hline
+FR-BV-06 & \textit{Xem lịch và kết quả.} Sinh viên xem hội đồng, ngày, giờ, phòng bảo vệ; điểm chỉ hiển thị sau khi kết quả được chốt. & SV & UC4.5 \\
+\hline
+\multicolumn{4}{|l|}{\textbf{Nhóm KHO -- Kho đồ án}} \\
+\hline
+FR-KHO-01 & \textit{Tự động lưu vào kho.} Khi kết quả bảo vệ được chốt, hệ thống tạo bản ghi kho gồm khóa, đề tài, sinh viên, GVHD, điểm và báo cáo cuối. & Hệ thống & UC5.2 \\
+\hline
+FR-KHO-02 & \textit{Tra cứu và xem chi tiết.} Mọi vai trò tra cứu theo khóa, GVHD, từ khóa, xem chi tiết và tải báo cáo cuối nếu có; sinh viên chỉ thấy điểm của chính mình. & SV, GV, Bộ môn & UC5.1 \\
+\hline
+FR-KHO-03 & \textit{Quản lý bản ghi kho.} Bộ môn thêm, sửa, xóa bản ghi kho. & Bộ môn & UC5.3 \\
+\hline
+FR-KHO-04 & \textit{Nhập đồ án khóa cũ.} Bộ môn nhập hàng loạt từ tệp CSV (bắt buộc khóa và tên đề tài; tùy chọn mã số và họ tên sinh viên, mã giảng viên, từ khóa, điểm); dòng lỗi được báo kèm lý do. & Bộ môn & UC5.4 \\
+\hline
+FR-KHO-05 & \textit{Đánh chỉ mục.} Mọi bản ghi mới hoặc được sửa được gửi sang dịch vụ AI để đánh chỉ mục; nếu lỗi, bản ghi được đánh dấu \textit{Chưa index} và Bộ môn đánh chỉ mục lại được. & Hệ thống, Bộ môn & UC5.2--UC5.4 \\
+\hline
+\multicolumn{4}{|l|}{\textbf{Nhóm TB -- Thông báo}} \\
+\hline
+FR-TB-01 & \textit{Sinh thông báo.} Hệ thống gửi thông báo trong ứng dụng khi: phân công hoặc đổi GVHD; giao đề tài; có đề cương mới; đề cương được duyệt, yêu cầu sửa, nộp lên Bộ môn, được Bộ môn phê duyệt hoặc trả lại; có nhận xét tiến độ; được phân vào hội đồng; có lịch bảo vệ; có kết quả bảo vệ. & Hệ thống & UC0.5 \\
+\hline
+FR-TB-02 & \textit{Xem thông báo.} Người dùng xem số thông báo chưa đọc, danh sách thông báo và đánh dấu đã đọc từng thông báo hoặc tất cả. & SV, GV, Bộ môn & UC0.5 \\
+\hline
+\multicolumn{4}{|l|}{\textbf{Nhóm AI -- Kiểm tra trùng lặp}} \\
+\hline
+FR-AI-01 & \textit{Kiểm tra trùng tên đề tài.} So sánh ngữ nghĩa tên đề tài với kho, trả về 5 đề tài gần nhất kèm tỷ lệ tương đồng. & Hệ thống & UC0.6 \\
+\hline
+FR-AI-02 & \textit{Kiểm tra trùng lặp tài liệu.} Trích văn bản từ DOCX/PDF, loại phần mẫu chung (tiêu đề mẫu, mục lục, tài liệu tham khảo), so khớp từng đoạn với các tài liệu trong kho. & Hệ thống & UC0.7 \\
+\hline
+FR-AI-03 & \textit{Hiển thị kết quả.} Hiển thị tỷ lệ tương đồng tổng, danh sách đồ án nguồn và từng đoạn trùng đặt cạnh đoạn nguồn. & Hệ thống & UC0.7 \\
+\hline
+FR-AI-04 & \textit{Kiểm tra bất đồng bộ.} Kiểm tra tài liệu chạy nền với ba trạng thái \textit{Đang kiểm tra}, \textit{Hoàn tất}, \textit{Lỗi}; giảng viên và Bộ môn yêu cầu kiểm tra lại được. & Hệ thống, GV, Bộ môn & UC0.7 \\
+\hline
+FR-AI-05 & \textit{Cấu hình ngưỡng.} Bộ môn cấu hình ba ngưỡng: tên đề tài, tài liệu và đoạn trùng; ngưỡng mới áp dụng cho các lần kiểm tra sau khi lưu. & Bộ môn & UC0.4 \\
+\hline
+\end{longtable}
+}
+
+\section{Yêu cầu phi chức năng}\label{sec:c2-nfr}
+
+Yêu cầu phi chức năng được chia thành sáu nhóm: bảo mật, phân quyền, thời gian phản hồi của kiểm tra trùng lặp, hiệu năng, dữ liệu và triển khai, dữ liệu thử nghiệm. Mỗi yêu cầu có một ngưỡng đo được và một cách kiểm chứng cụ thể (Bảng~\ref{tab:c2-nfr}); kết quả đo thực tế được trình bày ở chương~4.
+
+{\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{|p{1.65cm}|>{\raggedright\arraybackslash}p{2.1cm}|p{6.3cm}|p{4.15cm}|}
+\caption{Yêu cầu phi chức năng của hệ thống}\label{tab:c2-nfr}\\
+\hline
+\textbf{Mã} & \textbf{Nhóm} & \textbf{Yêu cầu và ngưỡng} & \textbf{Cách kiểm chứng} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Mã} & \textbf{Nhóm} & \textbf{Yêu cầu và ngưỡng} & \textbf{Cách kiểm chứng} \\
+\hline
+\endhead
+NFR-01 & Bảo mật & Mật khẩu được băm bằng bcrypt với hệ số chi phí ít nhất 12; không lưu và không ghi nhật ký mật khẩu dạng rõ; mật khẩu dài 8--128 ký tự. & Đọc cột mật khẩu trong CSDL có dạng \texttt{\$2b\$12\$\ldots}; cấu hình từ chối hệ số nhỏ hơn 12 ngoài môi trường kiểm thử. \\
+\hline
+NFR-02 & Bảo mật & Access token JWT hết hạn sau 30 phút; refresh token hết hạn sau 8 giờ, lưu trong cookie \texttt{HttpOnly}; khóa ký dài ít nhất 32 ký tự, đọc từ biến môi trường; đăng xuất thu hồi mọi token cũ. & Gọi API bằng token hết hạn hoặc token cũ sau khi đăng xuất, kỳ vọng mã 401. \\
+\hline
+NFR-03 & Bảo mật & Sau 5 lần đăng nhập sai trong 15 phút (theo địa chỉ IP và tên đăng nhập), hệ thống tạm chặn và trả mã 429; thông báo lỗi không tiết lộ tài khoản có tồn tại hay không. & Đăng nhập sai liên tiếp 6 lần, kỳ vọng lần thứ 6 nhận mã 429. \\
+\hline
+NFR-04 & Bảo mật & Tệp tải lên chỉ được chấp nhận khi nội dung (magic bytes) là DOCX hoặc PDF, bất kể phần mở rộng; tối đa 20 MB ở Web API, Apache giới hạn thân yêu cầu 25 MiB; tên tệp lưu trên máy chủ do máy chủ sinh. & Đổi phần mở rộng của một tệp không hợp lệ thành \texttt{.docx} rồi tải lên, kỳ vọng bị từ chối; tải tệp lớn hơn 20 MB, kỳ vọng bị từ chối. \\
+\hline
+NFR-05 & Bảo mật & Dịch vụ AI không có đường dẫn công khai qua Apache; chỉ nhận yêu cầu có khóa nội bộ trong header \texttt{X-API-Key}. & Kiểm tra cấu hình Apache không có \texttt{ProxyPass} tới dịch vụ AI; gọi dịch vụ AI không kèm khóa, kỳ vọng mã 401. \\
+\hline
+NFR-06 & Bảo mật & Toàn bộ truy cập qua HTTPS: yêu cầu HTTP được chuyển hướng 301 sang HTTPS; chỉ cho phép TLS 1.2 và TLS 1.3. & \texttt{curl -I} tới địa chỉ HTTP, kỳ vọng mã 301 sang địa chỉ HTTPS. \\
+\hline
+NFR-07 & Phân quyền & Mọi API (trừ đăng nhập và kiểm tra trạng thái dịch vụ) yêu cầu token hợp lệ và khai báo vai trò được phép; gọi sai vai trò trả mã 403; truy cập dữ liệu không thuộc phạm vi của người dùng bị từ chối. & Kiểm thử tự động duyệt mọi route của Web API; gọi API trực tiếp bằng token đúng nhưng sai vai trò hoặc sai chủ sở hữu. \\
+\hline
+NFR-08 & Phân quyền & Tài khoản bị khóa không đăng nhập được và mất quyền ngay với token đang có. & Khóa một tài khoản đang đăng nhập rồi gọi API bằng token cũ, kỳ vọng mã 401. \\
+\hline
+NFR-09 & Thời gian kiểm tra trùng lặp & Kiểm tra trùng tên đề tài có thời gian phản hồi P95 không quá 5 giây với kho từ 300 đề tài; Web API chờ tối đa 4 giây, quá thời gian thì vẫn cho giao đề tài. & Gửi 20 truy vấn kiểm tra tên đề tài, đo P95 trên máy chủ. \\
+\hline
+NFR-10 & Thời gian kiểm tra trùng lặp & Kiểm tra trùng lặp một đề cương hoàn tất trong không quá 30 giây (P95) với kho đã nạp đủ dữ liệu thử nghiệm; thời gian chờ tối đa tăng theo độ dài tài liệu (24 giây cộng 0,25 giây cho mỗi 1.000 ký tự, tối đa 240 giây); văn bản tối đa 800.000 ký tự. & Đo từ thời điểm nộp tới khi trạng thái chuyển \textit{Hoàn tất}, tính P95. \\
+\hline
+NFR-11 & Hiệu năng & API nộp đề cương và báo cáo cuối trả kết quả trong không quá 2 giây, không chờ kiểm tra trùng lặp. & Đo thời gian phản hồi của API nộp tệp, độc lập với thời gian dịch vụ AI xử lý. \\
+\hline
+NFR-12 & Hiệu năng & API danh sách đề tài và tra cứu kho có thời gian phản hồi P95 không quá 1 giây với dữ liệu thử nghiệm đầy đủ. & Gọi mỗi API 20 lần, đo P95 trên máy chủ. \\
+\hline
+NFR-13 & Hiệu năng & Đánh chỉ mục một bản ghi mới chỉ tính embedding cho bản ghi đó, không tính lại cho toàn bộ kho. & Đếm số lần gọi mô hình khi đánh chỉ mục một bản ghi vào kho đã có $N$ bản ghi. \\
+\hline
+NFR-14 & Dữ liệu và triển khai & CSDL MySQL 8 dùng bảng mã \texttt{utf8mb4}, đối chiếu \texttt{utf8mb4\_vietnamese\_ci}; schema được quản lý bằng migration Alembic; mọi dữ liệu văn bản đầu vào được chuẩn hóa Unicode NFC trước khi lưu và trước khi so sánh. & \texttt{SHOW CREATE TABLE} các bảng có cột văn bản; nhập cùng một chuỗi ở dạng NFC và NFD, kỳ vọng kết quả lưu và so sánh giống nhau. \\
+\hline
+NFR-15 & Dữ liệu và triển khai & Client React được phục vụ dưới dạng tệp tĩnh qua Apache; Apache chuyển tiếp \path{/api} tới Web API với \texttt{ProxyTimeout} 120 giây; các tác vụ dài (kiểm tra tài liệu, đánh chỉ mục) chạy nền. & Kiểm tra cấu hình Apache; tải lên tệp 20 MB qua Apache không bị cắt ngang. \\
+\hline
+NFR-16 & Dữ liệu và triển khai & Giao diện hoạt động trên trình duyệt Chrome và Edge phiên bản hiện hành trên máy tính. & Mở các màn hình chính trên hai trình duyệt, kiểm tra không có phần tử bị lỗi hiển thị. \\
+\hline
+NFR-17 & Dữ liệu thử nghiệm & Có ít nhất 100 tài khoản sinh viên và 30 tài khoản giảng viên. & Đếm số tài khoản theo vai trò sau khi nạp dữ liệu. \\
+\hline
+NFR-18 & Dữ liệu thử nghiệm & Có ít nhất 200 đề tài thuộc nhiều khóa (bộ dữ liệu thử nghiệm dùng 300 đề tài), toàn bộ đã được đánh chỉ mục trong dịch vụ AI; có 80 truy vấn tên đề tài đã gán nhãn để đánh giá. & So sánh số đề tài trong CSDL với số vector trong chỉ mục của dịch vụ AI. \\
+\hline
+NFR-19 & Dữ liệu thử nghiệm & Có 50 tệp đề cương/báo cáo thử nghiệm, gồm 25 cặp có quan hệ chủ đích thuộc bốn loại: chép nguyên văn, diễn đạt lại, cùng lĩnh vực khác đề tài, không liên quan; mỗi cặp có tỷ lệ kỳ vọng. & Đối chiếu tỷ lệ kỳ vọng với kết quả dịch vụ AI trả về cho từng cặp. \\
+\hline
+\end{longtable}
+}
+
+\section{Sơ đồ use case tổng quát}\label{sec:c2-uc}
+
+Hệ thống có ba tác nhân người dùng và một tác nhân hệ thống ngoài (Bảng~\ref{tab:c2-tac-nhan}). Sinh viên, Giảng viên và Bộ môn cùng kế thừa tác nhân trừu tượng \textit{Người dùng}, đại diện cho các chức năng chung như đăng nhập và xem thông báo. Hội đồng bảo vệ không phải tác nhân riêng: thành viên hội đồng dùng tài khoản Giảng viên và được hệ thống xác định quyền theo danh sách thành viên của từng hội đồng.
+
+{\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{|p{2.6cm}|p{12.4cm}|}
+\caption{Các tác nhân của hệ thống}\label{tab:c2-tac-nhan}\\
+\hline
+\textbf{Tác nhân} & \textbf{Mô tả} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tác nhân} & \textbf{Mô tả} \\
+\hline
+\endhead
+Sinh viên & Xem GVHD và đề tài được giao; nộp đề cương, báo cáo tiến độ, báo cáo cuối; xem kết quả kiểm tra trùng lặp, nhận xét, lịch và kết quả bảo vệ; tra cứu kho đồ án. \\
+\hline
+Giảng viên & Với vai trò GVHD: xem lớp hướng dẫn, tạo và giao đề tài, duyệt đề cương và nộp lên Bộ môn, nhận xét tiến độ. Với vai trò thành viên hội đồng: chấm điểm và nhận xét. Tra cứu kho đồ án. \\
+\hline
+Bộ môn & Quản lý tài khoản, đợt đồ án, định hướng, ngưỡng trùng lặp; phân công GVHD; phê duyệt đề cương bằng chữ ký số; thiết lập mốc và theo dõi tiến độ toàn khoa; lập hội đồng, xếp lịch và chốt kết quả bảo vệ; quản lý kho đồ án. \\
+\hline
+Dịch vụ AI & Hệ thống ngoài so sánh tên đề tài và nội dung tài liệu với kho, đánh chỉ mục các đồ án mới. \\
+\hline
+\end{longtable}
+}
+
+Hình~\ref{fig:c2-uc-tong-quat} là sơ đồ use case tổng quát với năm use case chính UC1--UC5 và nhóm chức năng chung UC0. Hai use case UC0.6 và UC0.7 là điểm tích hợp với dịch vụ AI, được UC1, UC2 và UC4 bao hàm (\textit{include}). Bảng~\ref{tab:c2-ds-uc} liệt kê các use case con; mỗi use case con được đặc tả ở mục~\ref{sec:c2-dac-ta}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_2/uc-tong-quat.png}
+    \caption{Sơ đồ use case tổng quát}
+    \label{fig:c2-uc-tong-quat}
+\end{figure}
+
+{\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.2cm}|p{8.6cm}|>{\raggedright\arraybackslash}p{2.6cm}|}
+\caption{Danh sách use case}\label{tab:c2-ds-uc}\\
+\hline
+\textbf{Use case chính} & \textbf{Use case con} & \textbf{Tác nhân} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Use case chính} & \textbf{Use case con} & \textbf{Tác nhân} \\
+\hline
+\endhead
+UC0 -- Chức năng chung & UC0.1 Đăng nhập và đăng xuất; UC0.2 Quản lý tài khoản; UC0.3 Quản lý đợt đồ án; UC0.4 Cấu hình ngưỡng trùng lặp; UC0.5 Xem thông báo; UC0.6 Kiểm tra trùng lặp tên đề tài; UC0.7 Kiểm tra trùng lặp tài liệu; UC0.8 Phân công GVHD; UC0.9 Quản lý định hướng đề tài & SV, GV, Bộ môn, Dịch vụ AI \\
+\hline
+UC1 -- Quản lý đề tài & UC1.1 Tạo và giao đề tài; UC1.2 Xem và lọc danh sách đề tài & SV, GV, Bộ môn \\
+\hline
+UC2 -- Quản lý đề cương & UC2.1 Nộp đề cương; UC2.2 Duyệt hoặc yêu cầu sửa đề cương; UC2.3 Nộp đề cương lên Bộ môn; UC2.4 Phê duyệt (ký số) hoặc trả lại đề cương; UC2.5 Xem lịch sử phiên bản và nhận xét & SV, GV, Bộ môn \\
+\hline
+UC3 -- Quản lý tiến độ thực hiện & UC3.1 Thiết lập mốc tiến độ; UC3.2 Nộp báo cáo tiến độ; UC3.3 Nhận xét và đánh giá báo cáo tiến độ; UC3.4 Theo dõi tiến độ toàn khoa & SV, GV, Bộ môn \\
+\hline
+UC4 -- Quản lý bảo vệ & UC4.1 Nộp báo cáo cuối; UC4.2 Lập hội đồng và xếp lịch; UC4.3 Chấm điểm và nhận xét; UC4.4 Chốt kết quả bảo vệ; UC4.5 Xem lịch và kết quả bảo vệ & SV, GV, Bộ môn \\
+\hline
+UC5 -- Quản lý kho dữ liệu đồ án & UC5.1 Tra cứu và xem chi tiết đồ án; UC5.2 Lưu đồ án vào kho; UC5.3 Quản lý bản ghi kho; UC5.4 Nhập đồ án các khóa cũ & SV, GV, Bộ môn, Dịch vụ AI \\
+\hline
+\end{longtable}
+}
+
+\section{Đặc tả use case}\label{sec:c2-dac-ta}
+
+Mỗi use case con được đặc tả bằng một bảng gồm tác nhân, mô tả, tiền điều kiện, hậu điều kiện, luồng sự kiện chính, luồng thay thế (ký hiệu A) và ngoại lệ (ký hiệu E). Các thông báo lỗi do máy chủ trả về kèm mã trạng thái HTTP: 403 khi không có quyền, 409 khi vi phạm ràng buộc nghiệp vụ, 422 khi dữ liệu không hợp lệ.
+
+\subsection{Nhóm chức năng chung -- UC0}
+
+UC0 gồm chín use case con dùng chung cho các nhóm còn lại (Hình~\ref{fig:c2-uc0}). UC0.3 và UC0.8 là tiền đề của mọi quy trình: Bộ môn mở đợt, phân công GVHD, sau đó GVHD mới giao được đề tài. UC0.6 và UC0.7 không được người dùng gọi độc lập mà được bao hàm trong UC1.1, UC2.1 và UC4.1.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{chuong_2/uc0-chuc-nang-chung.png}
+    \caption{Sơ đồ use case nhóm chức năng chung (UC0)}
+    \label{fig:c2-uc0}
+\end{figure}
+
+\begin{ucspec}{uc0-1}{UC0.1 -- Đăng nhập và đăng xuất}
+Tác nhân & Sinh viên, Giảng viên, Bộ môn \\ \hline
+Mô tả & Người dùng đăng nhập để sử dụng các chức năng theo vai trò và đăng xuất để kết thúc phiên làm việc. \\ \hline
+Tiền điều kiện & Người dùng đã có tài khoản và tài khoản không bị khóa. \\ \hline
+Hậu điều kiện & Đăng nhập: người dùng có access token và refresh token hợp lệ, được chuyển tới trang tổng quan của vai trò. Đăng xuất: mọi token của tài khoản mất hiệu lực. \\ \hline
+Luồng chính & \bu{1.}Người dùng nhập mã đăng nhập (mã số sinh viên, mã giảng viên) hoặc email và mật khẩu. \bu{2.}Hệ thống tìm tài khoản và so khớp mật khẩu với giá trị băm bcrypt. \bu{3.}Hệ thống phát hành access token (30 phút) và đặt refresh token (8 giờ) vào cookie \texttt{HttpOnly}. \bu{4.}Hệ thống hiển thị trang tổng quan theo vai trò. \bu{5.}Người dùng chọn \textit{Đăng xuất}; hệ thống tăng phiên bản token của tài khoản và xóa cookie. \\ \hline
+Luồng thay thế & \bu{A1.}Access token hết hạn hoặc người dùng tải lại trang: client dùng refresh token để lấy access token mới, người dùng không phải đăng nhập lại. \\ \hline
+Ngoại lệ & \bu{E1.}Sai thông tin đăng nhập hoặc tài khoản bị khóa: hệ thống báo chung ``sai thông tin đăng nhập'', không cho biết tài khoản có tồn tại hay không. \bu{E2.}Đăng nhập sai 5 lần trong 15 phút: hệ thống tạm chặn và yêu cầu thử lại sau. \bu{E3.}Refresh token hết hạn hoặc đã bị thu hồi: hệ thống chuyển người dùng về màn hình đăng nhập. \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc0-2}{UC0.2 -- Quản lý tài khoản}
+Tác nhân & Bộ môn \\ \hline
+Mô tả & Bộ môn tra cứu, tạo, sửa, khóa và mở khóa tài khoản sinh viên, giảng viên. \\ \hline
+Tiền điều kiện & Bộ môn đã đăng nhập. \\ \hline
+Hậu điều kiện & Tài khoản được tạo, cập nhật hoặc thay đổi trạng thái khóa. \\ \hline
+Luồng chính & \bu{1.}Bộ môn mở trang \textit{Tài khoản}; hệ thống hiển thị danh sách, lọc được theo vai trò, trạng thái khóa và từ khóa. \bu{2.}Bộ môn chọn \textit{Thêm} và nhập mã, họ tên, email, mật khẩu ban đầu; lớp và khóa với sinh viên, học vị với giảng viên. \bu{3.}Hệ thống kiểm tra dữ liệu, băm mật khẩu và lưu tài khoản. \\ \hline
+Luồng thay thế & \bu{A1.}Bộ môn sửa thông tin hoặc đặt lại mật khẩu của một tài khoản. \bu{A2.}Bộ môn khóa tài khoản: tài khoản mất quyền truy cập ngay ở yêu cầu tiếp theo, kể cả khi đang có token còn hạn. Mở khóa để khôi phục quyền. \\ \hline
+Ngoại lệ & \bu{E1.}Mã hoặc email đã tồn tại: hệ thống từ chối và báo trùng. \bu{E2.}Mật khẩu ngắn hơn 8 ký tự hoặc mã sai định dạng: hệ thống từ chối và chỉ ra trường sai. \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc0-3}{UC0.3 -- Quản lý đợt đồ án}
+Tác nhân & Bộ môn \\ \hline
+Mô tả & Bộ môn tạo đợt đồ án cho một khóa, sửa thông tin, mở và đóng đợt. Đợt là phạm vi của phân công GVHD, đề tài và mốc tiến độ. \\ \hline
+Tiền điều kiện & Bộ môn đã đăng nhập. \\ \hline
+Hậu điều kiện & Đợt mới ở trạng thái \textit{Đang mở}, hoặc đợt được cập nhật, đóng hay mở lại. \\ \hline
+Luồng chính & \bu{1.}Bộ môn chọn \textit{Thêm đợt}, nhập tên đợt, khóa, năm học, ngày bắt đầu và ngày kết thúc. \bu{2.}Hệ thống kiểm tra dữ liệu và lưu đợt ở trạng thái \textit{Đang mở}. \bu{3.}Bộ môn tiếp tục phân công GVHD (UC0.8) và thiết lập mốc tiến độ (UC3.1) cho đợt. \\ \hline
+Luồng thay thế & \bu{A1.}Bộ môn sửa thông tin của đợt. \bu{A2.}Bộ môn đóng đợt khi kết thúc, hoặc mở lại khi cần. \\ \hline
+Ngoại lệ & \bu{E1.}Ngày kết thúc trước ngày bắt đầu: hệ thống từ chối lưu. \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc0-4}{UC0.4 -- Cấu hình ngưỡng trùng lặp}
+Tác nhân & Bộ môn \\ \hline
+Mô tả & Bộ môn cấu hình ba ngưỡng: ngưỡng tên đề tài (cảnh báo đề tài tương tự), ngưỡng tài liệu (cảnh báo tỷ lệ trùng tổng của một tài liệu) và ngưỡng đoạn trùng (mức tương đồng để một cặp đoạn được tính là trùng). \\ \hline
+Tiền điều kiện & Bộ môn đã đăng nhập. \\ \hline
+Hậu điều kiện & Ngưỡng mới được lưu và áp dụng cho các lần kiểm tra sau; kết quả kiểm tra đã có không thay đổi. \\ \hline
+Luồng chính & \bu{1.}Bộ môn mở trang \textit{Cấu hình ngưỡng}; hệ thống hiển thị giá trị hiện tại của ba ngưỡng. \bu{2.}Bộ môn nhập giá trị mới, từ 0 đến 100\%, tối đa hai chữ số thập phân. \bu{3.}Hệ thống kiểm tra và lưu cấu hình. \\ \hline
+Luồng thay thế & Không có. \\ \hline
+Ngoại lệ & \bu{E1.}Giá trị nằm ngoài khoảng 0--100 hoặc có quá hai chữ số thập phân: hệ thống từ chối lưu. \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc0-5}{UC0.5 -- Xem thông báo}
+Tác nhân & Sinh viên, Giảng viên, Bộ môn \\ \hline
+Mô tả & Người dùng xem các thông báo hệ thống sinh ra khi có sự kiện liên quan đến mình (danh sách sự kiện tại FR-TB-01). \\ \hline
+Tiền điều kiện & Người dùng đã đăng nhập. \\ \hline
+Hậu điều kiện & Thông báo đã xem được đánh dấu đã đọc. \\ \hline
+Luồng chính & \bu{1.}Hệ thống hiển thị số thông báo chưa đọc trên biểu tượng chuông ở thanh đầu trang. \bu{2.}Người dùng mở danh sách thông báo, sắp xếp mới nhất trước. \bu{3.}Người dùng chọn một thông báo; hệ thống đánh dấu thông báo đó là đã đọc. \\ \hline
+Luồng thay thế & \bu{A1.}Người dùng chọn \textit{Đánh dấu tất cả đã đọc}. \\ \hline
+Ngoại lệ & Không có. \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc0-6}{UC0.6 -- Kiểm tra trùng lặp tên đề tài}
+Tác nhân & Giảng viên hướng dẫn (khởi phát), Dịch vụ AI \\ \hline
+Mô tả & So sánh ngữ nghĩa tên đề tài với các đề tài và đồ án đã được đánh chỉ mục, trả về 5 đề tài gần nhất kèm tỷ lệ tương đồng. Được bao hàm trong UC1.1. \\ \hline
+Tiền điều kiện & GVHD đang tạo hoặc giao một đề tài. \\ \hline
+Hậu điều kiện & Danh sách đề tài tương tự (có thể rỗng) được hiển thị; khi đề tài được giao, kết quả được lưu cùng đề tài. \\ \hline
+Luồng chính & \bu{1.}Web API gửi tên đề tài tới dịch vụ AI kèm khóa nội bộ. \bu{2.}Dịch vụ AI chuẩn hóa Unicode, tách từ tiếng Việt và tính vector embedding của tên đề tài. \bu{3.}Dịch vụ AI tìm các vector gần nhất trong chỉ mục tên đề tài, trả về 5 đề tài kèm tỷ lệ tương đồng. \bu{4.}Web API đánh dấu các đề tài vượt ngưỡng tên đề tài (UC0.4) và trả kết quả cho giao diện. \\ \hline
+Luồng thay thế & \bu{A1.}Không có đề tài nào vượt ngưỡng: giao diện hiển thị danh sách tham khảo, không có cảnh báo. \\ \hline
+Ngoại lệ & \bu{E1.}Dịch vụ AI không phản hồi trong 4 giây hoặc gặp lỗi: kết quả được ghi nhận là \textit{chưa kiểm tra}, việc giao đề tài không bị chặn. \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc0-7}{UC0.7 -- Kiểm tra trùng lặp tài liệu}
+Tác nhân & Sinh viên (khởi phát khi nộp), Giảng viên và Bộ môn (kiểm tra lại), Dịch vụ AI \\ \hline
+Mô tả & So khớp nội dung đề cương hoặc báo cáo cuối với các tài liệu trong kho, trả về tỷ lệ trùng tổng, danh sách đồ án nguồn và từng cặp đoạn trùng. Chạy nền, được bao hàm trong UC2.1 và UC4.1. \\ \hline
+Tiền điều kiện & Một phiên bản đề cương hoặc báo cáo cuối vừa được lưu. \\ \hline
+Hậu điều kiện & Kết quả kiểm tra được lưu với trạng thái \textit{Hoàn tất} hoặc \textit{Lỗi}. \\ \hline
+Luồng chính & \bu{1.}Web API tạo bản ghi kiểm tra ở trạng thái \textit{Đang kiểm tra} và trả kết quả nộp cho người dùng ngay. \bu{2.}Web API trích văn bản từ tệp DOCX/PDF và gửi sang dịch vụ AI. \bu{3.}Dịch vụ AI chuẩn hóa văn bản, loại phần mẫu chung (tiêu đề mẫu, mục lục, tài liệu tham khảo) và chia thành các đoạn. \bu{4.}Dịch vụ AI tìm ứng viên bằng MinHash/LSH và embedding, chấm điểm từng cặp đoạn, giữ các cặp vượt ngưỡng đoạn trùng. \bu{5.}Dịch vụ AI trả tỷ lệ trùng tổng, danh sách đồ án nguồn và các cặp đoạn trùng; Web API lưu kết quả và chuyển trạng thái sang \textit{Hoàn tất}. \bu{6.}Người xem mở kết quả: từng đoạn trùng đặt cạnh đoạn nguồn; tỷ lệ vượt ngưỡng tài liệu được tô cảnh báo. \\ \hline
+Luồng thay thế & \bu{A1.}Không có đoạn nào vượt ngưỡng: kết quả \textit{Hoàn tất} với tỷ lệ 0\% và danh sách nguồn rỗng. \bu{A2.}Giảng viên hoặc Bộ môn yêu cầu kiểm tra lại một tài liệu; hệ thống chạy lại từ bước 1. \\ \hline
+Ngoại lệ & \bu{E1.}Dịch vụ AI lỗi hoặc vượt thời gian chờ (24 giây cộng 0,25 giây cho mỗi 1.000 ký tự, tối đa 240 giây): trạng thái chuyển \textit{Lỗi}; quy trình duyệt không bị chặn. \bu{E2.}Không trích được văn bản từ tệp: trạng thái chuyển \textit{Lỗi}. \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc0-8}{UC0.8 -- Phân công GVHD}
+Tác nhân & Bộ môn (thực hiện); Giảng viên, Sinh viên (xem kết quả) \\ \hline
+Mô tả & Đầu mỗi đợt, Bộ môn phân công mỗi sinh viên cho đúng một GVHD. Tập sinh viên của một giảng viên trong đợt gọi là lớp hướng dẫn. \\ \hline
+Tiền điều kiện & Bộ môn đã đăng nhập; đợt đồ án đã được tạo; tài khoản sinh viên và giảng viên đã có. \\ \hline
+Hậu điều kiện & Mỗi sinh viên được gán có đúng một dòng phân công trong đợt; sinh viên và giảng viên liên quan nhận thông báo. \\ \hline
+Luồng chính & \bu{1.}Bộ môn mở trang \textit{Phân công GVHD} và chọn đợt. \bu{2.}Hệ thống hiển thị thống kê (tổng số, đã phân công, chưa phân công), số sinh viên của từng giảng viên và bảng sinh viên kèm GVHD, đề tài hiện tại; Bộ môn lọc theo từ khóa, GVHD, tình trạng. \bu{3.}Bộ môn chọn GVHD cho từng sinh viên, hoặc chọn nhiều sinh viên rồi gán hàng loạt cho một giảng viên, sau đó lưu. \bu{4.}Hệ thống kiểm tra ràng buộc cho từng sinh viên và lưu toàn bộ thay đổi trong một giao dịch. \bu{5.}Hệ thống gửi thông báo cho từng sinh viên được gán và cho mỗi giảng viên nhận thêm sinh viên. \\ \hline
+Luồng thay thế & \bu{A1.}Nhập tệp CSV mỗi dòng gồm mã số sinh viên và mã giảng viên: hệ thống lưu các dòng hợp lệ, trả về danh sách dòng lỗi kèm số dòng và lý do. \bu{A2.}Đổi GVHD: bản nháp đề tài giảng viên cũ soạn cho sinh viên được gỡ sinh viên. \bu{A3.}Gỡ phân công: hệ thống xóa dòng phân công và thông báo cho sinh viên. \bu{A4.}Giảng viên mở \textit{Sinh viên của tôi} để xem lớp hướng dẫn theo đợt và chọn \textit{Giao đề tài} ở sinh viên chưa có đề tài (sang UC1.1); sinh viên xem GVHD trên trang tổng quan. \\ \hline
+Ngoại lệ & \bu{E1.}Sinh viên đã có đề tài \textit{Đã phân công} trong đợt: hệ thống không cho đổi hoặc gỡ GVHD; lần lưu bị từ chối kèm danh sách sinh viên vi phạm. \bu{E2.}Giảng viên không tồn tại hoặc tài khoản bị khóa: hệ thống từ chối dòng đó. \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc0-9}{UC0.9 -- Quản lý định hướng đề tài}
+Tác nhân & Bộ môn \\ \hline
+Mô tả & Bộ môn quản lý danh mục định hướng đề tài (H01, H02\ldots). Định hướng gắn với mỗi đề tài và là thành phần đầu tiên của tên tệp đề cương. \\ \hline
+Tiền điều kiện & Bộ môn đã đăng nhập. \\ \hline
+Hậu điều kiện & Danh mục định hướng được cập nhật. Định hướng ngừng sử dụng vẫn giữ ở các đề tài cũ nhưng không được chọn cho đề tài mới. \\ \hline
+Luồng chính & \bu{1.}Bộ môn mở trang \textit{Định hướng đề tài}; hệ thống hiển thị danh mục. \bu{2.}Bộ môn chọn \textit{Thêm}, nhập mã (chữ H và hai chữ số), tên và mô tả. \bu{3.}Hệ thống kiểm tra mã chưa tồn tại và lưu định hướng ở trạng thái đang sử dụng. \\ \hline
+Luồng thay thế & \bu{A1.}Bộ môn sửa tên, mô tả của một định hướng. \bu{A2.}Bộ môn ngừng sử dụng hoặc sử dụng lại một định hướng. Hệ thống không cho xóa định hướng để giữ toàn vẹn dữ liệu đề tài. \\ \hline
+Ngoại lệ & \bu{E1.}Mã sai định dạng hoặc đã tồn tại: hệ thống từ chối lưu. \\ \hline
+\end{ucspec}
+
+\subsection{Quản lý đề tài -- UC1}
+
+Sinh viên không tự đề xuất hay đăng ký đề tài trên hệ thống: sinh viên trao đổi trực tiếp với GVHD, và khi hai bên đã thống nhất, GVHD tạo đề tài và giao cho sinh viên. Đề tài chuyển ngay sang \textit{Đã phân công}, không qua bước duyệt của Bộ môn; Bộ môn theo dõi toàn bộ đề tài ở chế độ chỉ đọc. Mỗi đề tài gắn với đúng một sinh viên và mỗi sinh viên có tối đa một đề tài đang hoạt động. Hình~\ref{fig:c2-uc1} là sơ đồ use case của nhóm này.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_2/uc1-quan-ly-de-tai.png}
+    \caption{Sơ đồ use case quản lý đề tài (UC1)}
+    \label{fig:c2-uc1}
+\end{figure}
+
+\begin{ucspec}{uc1-1}{UC1.1 -- Tạo và giao đề tài}
+Tác nhân & Giảng viên hướng dẫn \\ \hline
+Mô tả & Sau khi thống nhất đề tài với sinh viên ngoài hệ thống, GVHD tạo đề tài và giao cho sinh viên trong lớp hướng dẫn. Bao hàm UC0.6; được mở rộng bởi use case \textit{Đính kèm tệp mô tả đề tài}. \\ \hline
+Tiền điều kiện & GVHD đã đăng nhập; đợt đồ án đang mở; sinh viên thuộc lớp hướng dẫn của GVHD trong đợt và chưa có đề tài đang hoạt động. \\ \hline
+Hậu điều kiện & Đề tài ở trạng thái \textit{Đã phân công}, gắn với sinh viên, GVHD và định hướng; kết quả kiểm tra trùng tên được lưu; tên đề tài được đưa vào chỉ mục; sinh viên nhận thông báo. \\ \hline
+Luồng chính & \bu{1.}GVHD mở \textit{Sinh viên của tôi}, chọn \textit{Giao đề tài} ở dòng sinh viên chưa có đề tài; hệ thống mở biểu mẫu điền sẵn đợt và sinh viên.
+\bu{2.}GVHD nhập tên đề tài, mô tả, lĩnh vực và chọn định hướng.
+\bu{3.}Hệ thống kiểm tra trùng tên đề tài (UC0.6), hiển thị các đề tài tương tự kèm tỷ lệ và đánh dấu đề tài vượt ngưỡng.
+\bu{4.}GVHD chọn \textit{Giao đề tài}.
+\bu{5.}Hệ thống kiểm tra đợt đang mở, sinh viên thuộc lớp hướng dẫn, sinh viên chưa có đề tài đang hoạt động và định hướng đang được sử dụng.
+\bu{6.}Hệ thống lưu đề tài ở trạng thái \textit{Đã phân công} cùng kết quả kiểm tra, đưa tên đề tài vào chỉ mục và gửi thông báo cho sinh viên. \\ \hline
+Luồng thay thế & \bu{A1.}Có đề tài tương tự vượt ngưỡng: GVHD sửa tên và quay lại bước 3, hoặc vẫn giao; kết quả cảnh báo được lưu cùng đề tài.
+\bu{A2.}GVHD chọn \textit{Lưu nháp}: đề tài ở trạng thái \textit{Nháp}, sinh viên chưa nhìn thấy. GVHD sửa bản nháp và gửi sau; khi gửi, hệ thống thực hiện lại bước 5--6.
+\bu{A3.}GVHD mở chức năng từ menu \textit{Giao đề tài} và tự chọn đợt, sinh viên.
+\bu{A4.}Mở rộng \textit{Đính kèm tệp mô tả đề tài}: GVHD đính kèm tệp DOCX hoặc PDF ở trang chi tiết đề tài. \\ \hline
+Ngoại lệ & \bu{E1.}Đợt đã đóng: hệ thống từ chối giao đề tài.
+\bu{E2.}Sinh viên không thuộc lớp hướng dẫn của GVHD, hoặc đã có đề tài đang hoạt động (kể cả khi hai yêu cầu đến đồng thời): hệ thống từ chối và nêu lý do.
+\bu{E3.}Định hướng không tồn tại hoặc đã ngừng sử dụng: hệ thống từ chối.
+\bu{E4.}Bản nháp mất sinh viên do Bộ môn đã đổi GVHD: hệ thống yêu cầu chọn lại sinh viên trước khi gửi.
+\bu{E5.}Sinh viên hoặc Bộ môn gọi chức năng tạo, sửa, giao đề tài: hệ thống trả mã 403. \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc1-2}{UC1.2 -- Xem và lọc danh sách đề tài}
+Tác nhân & Sinh viên, Giảng viên, Bộ môn \\ \hline
+Mô tả & Người dùng xem danh sách đề tài trong phạm vi của vai trò, lọc và xem chi tiết. Sinh viên chỉ thấy đề tài được giao cho mình (không thấy bản nháp); giảng viên thấy đề tài mình hướng dẫn; Bộ môn thấy toàn bộ ở chế độ chỉ đọc. \\ \hline
+Tiền điều kiện & Người dùng đã đăng nhập. \\ \hline
+Hậu điều kiện & Danh sách hoặc chi tiết đề tài được hiển thị. \\ \hline
+Luồng chính & \bu{1.}Người dùng mở trang \textit{Đề tài}.
+\bu{2.}Người dùng chọn bộ lọc: đợt, trạng thái, giảng viên, lĩnh vực, định hướng, từ khóa và cách sắp xếp.
+\bu{3.}Hệ thống trả danh sách đề tài thỏa điều kiện trong phạm vi của vai trò, có phân trang.
+\bu{4.}Người dùng chọn một đề tài; hệ thống hiển thị đợt, định hướng, GVHD, sinh viên, mô tả, tệp đính kèm, kết quả kiểm tra trùng tên đã lưu và lịch sử thay đổi. \\ \hline
+Luồng thay thế & \bu{A1.}Sinh viên mở đề tài được giao trực tiếp từ trang tổng quan. \\ \hline
+Ngoại lệ & \bu{E1.}Người dùng mở chi tiết một đề tài ngoài phạm vi của mình (qua đường dẫn trực tiếp): hệ thống trả mã 403. \\ \hline
+\end{ucspec}
+
+\subsection{Quản lý đề cương -- UC2}
+
+Đề cương đi qua sáu trạng thái: \textit{Chưa nộp}, \textit{Chờ duyệt}, \textit{Yêu cầu sửa}, \textit{GVHD đã duyệt}, \textit{Chờ Bộ môn duyệt} và \textit{Đã duyệt}. GVHD duyệt nội dung (UC2.2) và nộp lên Bộ môn (UC2.3); Bộ môn phê duyệt bằng tệp PDF đã ký số (UC2.4). Cả GVHD và Bộ môn đều có thể đưa đề cương về \textit{Yêu cầu sửa}; sơ đồ trạng thái chi tiết được trình bày ở chương~3. Khi phê duyệt, hệ thống xác định tệp có chữ ký số, đọc người ký, thời điểm ký và kiểm tra chữ ký phủ toàn bộ tệp; hệ thống không xác thực chuỗi chứng thư tới tổ chức chứng thực gốc, vì việc này thuộc về công cụ ký số của Lãnh đạo Bộ môn. Hình~\ref{fig:c2-uc2} là sơ đồ use case của nhóm này.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_2/uc2-quan-ly-de-cuong.png}
+    \caption{Sơ đồ use case quản lý đề cương (UC2)}
+    \label{fig:c2-uc2}
+\end{figure}
+
+\begin{ucspec}{uc2-1}{UC2.1 -- Nộp đề cương}
+Tác nhân & Sinh viên \\ \hline
+Mô tả & Sinh viên nộp đề cương; mỗi lần nộp tạo một phiên bản mới, các phiên bản trước được giữ nguyên. Bao hàm UC0.7. \\ \hline
+Tiền điều kiện & Sinh viên đã đăng nhập; đề tài ở trạng thái \textit{Đã phân công}; đề cương ở trạng thái \textit{Chưa nộp} hoặc \textit{Yêu cầu sửa}. \\ \hline
+Hậu điều kiện & Phiên bản mới được lưu; đề cương ở trạng thái \textit{Chờ duyệt}; GVHD nhận thông báo; kiểm tra trùng lặp chạy nền. \\ \hline
+Luồng chính & \bu{1.}Sinh viên mở trang \textit{Đề cương}; hệ thống hiển thị trạng thái, tên tệp đúng quy tắc cần đặt và lịch sử phiên bản.
+\bu{2.}Sinh viên chọn tệp DOCX hoặc PDF và nộp.
+\bu{3.}Hệ thống kiểm tra định dạng theo nội dung tệp và dung lượng tối đa 20 MB.
+\bu{4.}Hệ thống lưu phiên bản mới, chuyển đề cương sang \textit{Chờ duyệt} và thông báo cho GVHD.
+\bu{5.}Hệ thống khởi chạy kiểm tra trùng lặp tài liệu (UC0.7) ở chế độ nền; sinh viên theo dõi trạng thái kiểm tra trên trang. \\ \hline
+Luồng thay thế & \bu{A1.}Nộp lại sau khi được yêu cầu sửa: thực hiện như luồng chính; nhận xét của lần duyệt trước vẫn hiển thị cạnh phiên bản cũ. \\ \hline
+Ngoại lệ & \bu{E1.}Tệp không phải DOCX/PDF hoặc lớn hơn 20 MB: hệ thống từ chối, không tạo phiên bản.
+\bu{E2.}Đề cương đang chờ duyệt hoặc đã được duyệt: hệ thống không cho nộp phiên bản mới.
+\bu{E3.}Hai lần nộp đến đồng thời: chỉ một lần được ghi nhận, lần còn lại được yêu cầu thử lại. \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc2-2}{UC2.2 -- Duyệt hoặc yêu cầu sửa đề cương}
+Tác nhân & Giảng viên hướng dẫn \\ \hline
+Mô tả & GVHD xem đề cương cùng các kết quả kiểm tra tự động, sau đó duyệt hoặc yêu cầu sinh viên sửa. \\ \hline
+Tiền điều kiện & GVHD đã đăng nhập; đề cương của sinh viên mình hướng dẫn ở trạng thái \textit{Chờ duyệt}. \\ \hline
+Hậu điều kiện & Duyệt: đề cương ở trạng thái \textit{GVHD đã duyệt}. Yêu cầu sửa: đề cương ở trạng thái \textit{Yêu cầu sửa} kèm nhận xét. Sinh viên nhận thông báo trong cả hai trường hợp. \\ \hline
+Luồng chính & \bu{1.}GVHD mở danh sách đề cương và chọn một đề cương \textit{Chờ duyệt}.
+\bu{2.}Hệ thống hiển thị tệp đề cương và ba kết quả kiểm tra: tên tệp, định hướng, trùng lặp nội dung (tỷ lệ, đồ án nguồn, đoạn trùng).
+\bu{3.}GVHD chọn \textit{Duyệt}, có thể kèm nhận xét.
+\bu{4.}Hệ thống chuyển đề cương sang \textit{GVHD đã duyệt}, lưu nhận xét và thông báo cho sinh viên. \\ \hline
+Luồng thay thế & \bu{A1.}GVHD chọn \textit{Yêu cầu sửa} và nhập nhận xét: hệ thống chuyển đề cương sang \textit{Yêu cầu sửa} và thông báo cho sinh viên; sinh viên nộp lại theo UC2.1.
+\bu{A2.}Đề cương đã được GVHD duyệt nhưng chưa nộp lên Bộ môn: GVHD vẫn có thể trả lại như A1. \\ \hline
+Ngoại lệ & \bu{E1.}Sinh viên vừa nộp phiên bản mới trong lúc GVHD đang xem: hệ thống từ chối thao tác và yêu cầu tải lại để duyệt đúng phiên bản mới nhất.
+\bu{E2.}Yêu cầu sửa không có nhận xét: hệ thống từ chối.
+\bu{E3.}Người thao tác không phải GVHD của đề tài: hệ thống trả mã 403. \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc2-3}{UC2.3 -- Nộp đề cương lên Bộ môn}
+Tác nhân & Giảng viên hướng dẫn \\ \hline
+Mô tả & GVHD nộp đề cương đã duyệt lên Bộ môn. Được mở rộng bởi use case \textit{Đổi tên tệp theo mẫu}. \\ \hline
+Tiền điều kiện & Đề cương ở trạng thái \textit{GVHD đã duyệt}. \\ \hline
+Hậu điều kiện & Đề cương ở trạng thái \textit{Chờ Bộ môn duyệt}; Bộ môn và sinh viên nhận thông báo. \\ \hline
+Luồng chính & \bu{1.}GVHD mở đề cương đã duyệt; hệ thống hiển thị danh sách kiểm tra trước khi nộp: tên tệp, định hướng (bắt buộc đạt) và trùng lặp nội dung (để tham khảo).
+\bu{2.}GVHD chọn \textit{Nộp lên Bộ môn}.
+\bu{3.}Hệ thống kiểm tra lại tên tệp và định hướng đều đạt.
+\bu{4.}Hệ thống chuyển đề cương sang \textit{Chờ Bộ môn duyệt} và gửi thông báo. \\ \hline
+Luồng thay thế & \bu{A1.}Mở rộng \textit{Đổi tên tệp theo mẫu}: khi tên tệp là lỗi duy nhất và định hướng đúng, GVHD chọn \textit{Đổi tên theo mẫu}; hệ thống đổi tên tệp thành tên đúng quy tắc, ghi tên cũ vào nhận xét, sau đó GVHD tiếp tục từ bước 2. \\ \hline
+Ngoại lệ & \bu{E1.}Kiểm tra tên tệp hoặc định hướng chưa đạt: hệ thống từ chối nộp; GVHD đổi tên theo A1 hoặc trả lại cho sinh viên (UC2.2, A2).
+\bu{E2.}Định hướng trong tên tệp không khớp định hướng của đề tài: không được đổi tên theo mẫu, đề cương phải trả lại cho sinh viên.
+\bu{E3.}Đề cương chưa được GVHD duyệt hoặc đã được nộp: hệ thống từ chối. \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc2-4}{UC2.4 -- Phê duyệt (ký số) hoặc trả lại đề cương}
+Tác nhân & Bộ môn \\ \hline
+Mô tả & Bộ môn xem đề cương GVHD đã nộp, phê duyệt bằng tệp PDF đã được Lãnh đạo Bộ môn ký số, hoặc trả lại. Được mở rộng bởi use case \textit{Xuất thư mục đề cương đã ký số}. \\ \hline
+Tiền điều kiện & Bộ môn đã đăng nhập; đề cương ở trạng thái \textit{Chờ Bộ môn duyệt}. \\ \hline
+Hậu điều kiện & Phê duyệt: đề cương ở trạng thái \textit{Đã duyệt}, bản ký số được lưu kèm người ký và thời điểm ký. Trả lại: đề cương ở trạng thái \textit{Yêu cầu sửa} kèm nhận xét. Sinh viên và GVHD nhận thông báo. \\ \hline
+Luồng chính & \bu{1.}Bộ môn mở danh sách đề cương \textit{Chờ Bộ môn duyệt} và chọn một đề cương.
+\bu{2.}Hệ thống hiển thị tệp đề cương, nhận xét của GVHD và kết quả kiểm tra.
+\bu{3.}Bộ môn tải tệp về; Lãnh đạo Bộ môn ký số tệp PDF bằng công cụ ký số của mình (ngoài hệ thống).
+\bu{4.}Bộ môn tải lên tệp PDF đã ký và chọn \textit{Phê duyệt}.
+\bu{5.}Hệ thống kiểm tra tệp là PDF, có chữ ký số PKCS\#7 nhúng trong tệp và chữ ký phủ toàn bộ tệp; đọc người ký và thời điểm ký.
+\bu{6.}Hệ thống lưu bản ký số, chuyển đề cương sang \textit{Đã duyệt} và thông báo cho sinh viên, GVHD. \\ \hline
+Luồng thay thế & \bu{A1.}Bộ môn chọn \textit{Trả lại} và nhập nhận xét: hệ thống chuyển đề cương sang \textit{Yêu cầu sửa} và thông báo cho sinh viên, GVHD.
+\bu{A2.}Mở rộng \textit{Xuất thư mục đề cương đã ký số}: Bộ môn chọn đợt và xuất; hệ thống trả về một tệp ZIP chứa các bản ký số của đợt để nộp về Khoa. \\ \hline
+Ngoại lệ & \bu{E1.}Tệp tải lên không phải PDF: hệ thống từ chối.
+\bu{E2.}PDF chưa có chữ ký số: hệ thống từ chối và yêu cầu ký số rồi tải lại.
+\bu{E3.}Chữ ký không phủ toàn bộ tệp (tệp bị sửa sau khi ký): hệ thống từ chối và yêu cầu ký lại.
+\bu{E4.}Trả lại không có nhận xét: hệ thống từ chối. \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc2-5}{UC2.5 -- Xem lịch sử phiên bản và nhận xét}
+Tác nhân & Sinh viên, Giảng viên, Bộ môn \\ \hline
+Mô tả & Người dùng xem toàn bộ các phiên bản đề cương, nhận xét của từng lần duyệt, kết quả kiểm tra của từng phiên bản và bản ký số. \\ \hline
+Tiền điều kiện & Người dùng đã đăng nhập; đề cương có ít nhất một phiên bản. \\ \hline
+Hậu điều kiện & Lịch sử đề cương được hiển thị. \\ \hline
+Luồng chính & \bu{1.}Người dùng mở chi tiết đề cương.
+\bu{2.}Hệ thống hiển thị các phiên bản theo thời gian: thời điểm nộp, tệp, trạng thái kiểm tra trùng lặp, nhận xét và người nhận xét (GVHD hoặc Bộ môn).
+\bu{3.}Người dùng tải một phiên bản hoặc mở kết quả kiểm tra của phiên bản đó. \\ \hline
+Luồng thay thế & \bu{A1.}Đề cương đã được phê duyệt: hệ thống hiển thị thêm bản ký số kèm người ký và thời điểm ký. \\ \hline
+Ngoại lệ & \bu{E1.}Người dùng ngoài phạm vi (sinh viên khác, giảng viên không phải GVHD của đề tài): hệ thống trả mã 403. \\ \hline
+\end{ucspec}
+
+\subsection{Quản lý tiến độ thực hiện -- UC3}
+
+Tiến độ được theo dõi theo các mốc chung của đợt. Trạng thái của mỗi sinh viên ở mỗi mốc được hệ thống tự xác định từ hạn nộp và thời điểm nộp: \textit{Đúng hạn}, \textit{Nộp trễ}, \textit{Trễ mốc} (đã quá hạn mà chưa nộp) và \textit{Chưa đến hạn}. Hình~\ref{fig:c2-uc3} là sơ đồ use case của nhóm này.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{chuong_2/uc3-quan-ly-tien-do.png}
+    \caption{Sơ đồ use case quản lý tiến độ thực hiện (UC3)}
+    \label{fig:c2-uc3}
+\end{figure}
+
+\begin{ucspec}{uc3-1}{UC3.1 -- Thiết lập mốc tiến độ}
+Tác nhân & Bộ môn \\ \hline
+Mô tả & Bộ môn thiết lập các mốc tiến độ (tên mốc, hạn nộp) áp dụng cho mọi sinh viên của một đợt. \\ \hline
+Tiền điều kiện & Bộ môn đã đăng nhập; đợt đồ án đang mở. \\ \hline
+Hậu điều kiện & Danh sách mốc của đợt được tạo hoặc cập nhật. \\ \hline
+Luồng chính & \bu{1.}Bộ môn mở trang \textit{Mốc tiến độ} và chọn đợt.
+\bu{2.}Bộ môn thêm mốc mới gồm tên mốc và hạn nộp.
+\bu{3.}Hệ thống kiểm tra hạn nộp nằm trong thời gian của đợt và lưu mốc. \\ \hline
+Luồng thay thế & \bu{A1.}Bộ môn sửa tên hoặc hạn nộp của một mốc; trạng thái các báo cáo được tính lại theo hạn mới.
+\bu{A2.}Bộ môn xóa một mốc chưa có báo cáo nào. \\ \hline
+Ngoại lệ & \bu{E1.}Hạn nộp nằm ngoài thời gian của đợt: hệ thống từ chối lưu.
+\bu{E2.}Xóa mốc đã có báo cáo: hệ thống từ chối và gợi ý sửa hạn thay vì xóa.
+\bu{E3.}Đợt đã đóng: hệ thống không cho thay đổi mốc. \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc3-2}{UC3.2 -- Nộp báo cáo tiến độ}
+Tác nhân & Sinh viên \\ \hline
+Mô tả & Sinh viên nộp báo cáo tiến độ theo từng mốc, gồm nội dung mô tả công việc và tệp đính kèm tùy chọn. \\ \hline
+Tiền điều kiện & Sinh viên đã đăng nhập; đề cương ở trạng thái \textit{Đã duyệt}; đợt có ít nhất một mốc. \\ \hline
+Hậu điều kiện & Báo cáo của mốc được lưu kèm thời điểm nộp; trạng thái mốc được xác định. \\ \hline
+Luồng chính & \bu{1.}Sinh viên mở trang \textit{Tiến độ}; hệ thống hiển thị các mốc của đợt cùng hạn nộp, trạng thái và nhận xét (nếu có).
+\bu{2.}Sinh viên chọn một mốc, nhập nội dung (1--10.000 ký tự) và đính kèm tệp nếu cần.
+\bu{3.}Hệ thống lưu báo cáo và xác định trạng thái \textit{Đúng hạn} hoặc \textit{Nộp trễ} theo hạn của mốc. \\ \hline
+Luồng thay thế & \bu{A1.}Sinh viên nộp lại báo cáo cho cùng mốc khi GVHD chưa nhận xét: hệ thống ghi đè nội dung cũ (tiến độ không cần giữ lịch sử soạn thảo như đề cương). \\ \hline
+Ngoại lệ & \bu{E1.}Đề cương chưa được duyệt: hệ thống chưa cho nộp báo cáo tiến độ.
+\bu{E2.}GVHD đã nhận xét báo cáo của mốc: hệ thống không cho nộp lại.
+\bu{E3.}Nội dung rỗng hoặc vượt 10.000 ký tự, hoặc tệp đính kèm không hợp lệ: hệ thống từ chối. \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc3-3}{UC3.3 -- Nhận xét và đánh giá báo cáo tiến độ}
+Tác nhân & Giảng viên hướng dẫn \\ \hline
+Mô tả & GVHD xem tiến độ của các sinh viên mình hướng dẫn, nhận xét và đánh giá từng báo cáo. \\ \hline
+Tiền điều kiện & GVHD đã đăng nhập; sinh viên mình hướng dẫn đã nộp báo cáo cho một mốc. \\ \hline
+Hậu điều kiện & Báo cáo có nhận xét và mức đánh giá; sinh viên nhận thông báo. \\ \hline
+Luồng chính & \bu{1.}GVHD mở trang \textit{Tiến độ sinh viên}; hệ thống hiển thị danh sách sinh viên mình hướng dẫn kèm trạng thái từng mốc.
+\bu{2.}GVHD chọn một sinh viên và một mốc, đọc nội dung báo cáo và tệp đính kèm.
+\bu{3.}GVHD nhập nhận xét và chọn mức đánh giá \textit{Đạt}, \textit{Cần cải thiện} hoặc \textit{Chưa đạt}.
+\bu{4.}Hệ thống lưu nhận xét và gửi thông báo cho sinh viên. \\ \hline
+Luồng thay thế & Không có. \\ \hline
+Ngoại lệ & \bu{E1.}Giảng viên không phải GVHD của sinh viên: hệ thống trả mã 403. \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc3-4}{UC3.4 -- Theo dõi tiến độ toàn khoa}
+Tác nhân & Bộ môn \\ \hline
+Mô tả & Bộ môn xem tổng hợp tiến độ của mọi sinh viên trong đợt theo từng mốc; hệ thống tự đánh dấu sinh viên trễ mốc. \\ \hline
+Tiền điều kiện & Bộ môn đã đăng nhập; đợt có ít nhất một mốc. \\ \hline
+Hậu điều kiện & Bảng tổng hợp tiến độ được hiển thị. \\ \hline
+Luồng chính & \bu{1.}Bộ môn mở trang \textit{Theo dõi tiến độ} và chọn đợt.
+\bu{2.}Hệ thống hiển thị số liệu tổng hợp theo mốc và bảng sinh viên với trạng thái từng mốc.
+\bu{3.}Khi một mốc đến hạn mà sinh viên chưa nộp, hệ thống tự hiển thị trạng thái \textit{Trễ mốc}, Bộ môn không phải thao tác thủ công. \\ \hline
+Luồng thay thế & \bu{A1.}Bộ môn lọc theo trạng thái (ví dụ chỉ sinh viên trễ mốc), theo GVHD hoặc từ khóa để xử lý ưu tiên. \\ \hline
+Ngoại lệ & Không có (use case chỉ đọc dữ liệu). \\ \hline
+\end{ucspec}
+
+\subsection{Quản lý bảo vệ -- UC4}
+
+Nhóm UC4 bao phủ từ khi sinh viên nộp báo cáo cuối đến khi có kết quả bảo vệ. Thành viên hội đồng là giảng viên; quyền xem báo cáo và chấm điểm được xác định theo danh sách thành viên của từng hội đồng. Hình~\ref{fig:c2-uc4} là sơ đồ use case của nhóm này.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{chuong_2/uc4-quan-ly-bao-ve.png}
+    \caption{Sơ đồ use case quản lý bảo vệ (UC4)}
+    \label{fig:c2-uc4}
+\end{figure}
+
+\begin{ucspec}{uc4-1}{UC4.1 -- Nộp báo cáo cuối}
+Tác nhân & Sinh viên \\ \hline
+Mô tả & Sinh viên nộp báo cáo cuối dạng DOCX hoặc PDF. Bao hàm UC0.7. \\ \hline
+Tiền điều kiện & Sinh viên đã đăng nhập; đề cương ở trạng thái \textit{Đã duyệt}; sinh viên chưa được xếp lịch bảo vệ. \\ \hline
+Hậu điều kiện & Báo cáo cuối được lưu thành phiên bản mới; kiểm tra trùng lặp chạy nền. \\ \hline
+Luồng chính & \bu{1.}Sinh viên mở trang \textit{Báo cáo cuối}, chọn tệp DOCX hoặc PDF và nộp.
+\bu{2.}Hệ thống kiểm tra định dạng và dung lượng như UC2.1.
+\bu{3.}Hệ thống lưu phiên bản và khởi chạy kiểm tra trùng lặp tài liệu (UC0.7) ở chế độ nền.
+\bu{4.}Sinh viên theo dõi trạng thái và xem kết quả kiểm tra khi hoàn tất. \\ \hline
+Luồng thay thế & \bu{A1.}Sinh viên nộp lại báo cáo khi chưa được xếp lịch: hệ thống tạo phiên bản mới; phiên bản mới nhất được dùng để chấm và lưu kho. \\ \hline
+Ngoại lệ & \bu{E1.}Đề cương chưa được duyệt: hệ thống từ chối.
+\bu{E2.}Sinh viên đã được xếp lịch bảo vệ: hệ thống không cho nộp lại.
+\bu{E3.}Tệp sai định dạng hoặc quá dung lượng: hệ thống từ chối. \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc4-2}{UC4.2 -- Lập hội đồng và xếp lịch}
+Tác nhân & Bộ môn \\ \hline
+Mô tả & Bộ môn lập hội đồng bảo vệ và xếp sinh viên vào hội đồng. \\ \hline
+Tiền điều kiện & Bộ môn đã đăng nhập; có sinh viên đủ điều kiện bảo vệ (đề cương đã duyệt, đã nộp báo cáo cuối). \\ \hline
+Hậu điều kiện & Hội đồng được tạo với thành viên, ngày, giờ, phòng và danh sách sinh viên theo thứ tự; thành viên hội đồng và sinh viên nhận thông báo. \\ \hline
+Luồng chính & \bu{1.}Bộ môn chọn \textit{Thêm hội đồng}, nhập tên, ngày bảo vệ, giờ bắt đầu, phòng.
+\bu{2.}Bộ môn chọn 3--5 giảng viên và vai trò của từng người: đúng một chủ tịch, tối đa một thư ký, còn lại là ủy viên.
+\bu{3.}Hệ thống kiểm tra thành viên, lưu hội đồng và thông báo cho các thành viên.
+\bu{4.}Bộ môn chọn sinh viên từ danh sách đủ điều kiện để thêm vào hội đồng.
+\bu{5.}Hệ thống kiểm tra sinh viên chưa thuộc hội đồng khác và GVHD của sinh viên không phải thành viên hội đồng; xếp thứ tự và tính giờ bảo vệ (mỗi lượt 30 phút); thông báo lịch cho sinh viên. \\ \hline
+Luồng thay thế & \bu{A1.}Bộ môn sửa thông tin hoặc thành viên của hội đồng khi hội đồng chưa có điểm.
+\bu{A2.}Bộ môn gỡ sinh viên khỏi hội đồng khi lịch của sinh viên chưa có điểm.
+\bu{A3.}Bộ môn xóa hội đồng chưa có sinh viên. \\ \hline
+Ngoại lệ & \bu{E1.}Số thành viên ngoài khoảng 3--5, thiếu chủ tịch, nhiều hơn một thư ký, một giảng viên xuất hiện hai lần, hoặc giảng viên bị khóa: hệ thống từ chối.
+\bu{E2.}GVHD của sinh viên là thành viên hội đồng: hệ thống không cho xếp sinh viên vào hội đồng đó.
+\bu{E3.}Sinh viên chưa đủ điều kiện hoặc đã thuộc hội đồng khác: hệ thống từ chối.
+\bu{E4.}Sửa hội đồng đã có điểm, hoặc xóa hội đồng còn sinh viên: hệ thống từ chối. \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc4-3}{UC4.3 -- Chấm điểm và nhận xét}
+Tác nhân & Giảng viên (thành viên hội đồng) \\ \hline
+Mô tả & Thành viên hội đồng xem báo cáo cuối, kết quả kiểm tra trùng lặp của sinh viên thuộc hội đồng mình và nhập điểm kèm nhận xét. \\ \hline
+Tiền điều kiện & Giảng viên đã đăng nhập và là thành viên của hội đồng; đã đến ngày bảo vệ. \\ \hline
+Hậu điều kiện & Điểm và nhận xét của thành viên cho sinh viên được lưu. \\ \hline
+Luồng chính & \bu{1.}Giảng viên mở trang \textit{Hội đồng của tôi}; hệ thống chỉ hiển thị các hội đồng mà giảng viên là thành viên và danh sách sinh viên theo thứ tự bảo vệ.
+\bu{2.}Giảng viên chọn một sinh viên, xem báo cáo cuối và kết quả kiểm tra trùng lặp.
+\bu{3.}Giảng viên nhập điểm (thang 10) và nhận xét (tối đa 5.000 ký tự).
+\bu{4.}Hệ thống lưu điểm và hiển thị tiến độ chấm của hội đồng. \\ \hline
+Luồng thay thế & \bu{A1.}Giảng viên sửa điểm của mình khi kết quả chưa được chốt. \\ \hline
+Ngoại lệ & \bu{E1.}Giảng viên không thuộc hội đồng của sinh viên (kể cả truy cập qua đường dẫn trực tiếp): hệ thống trả mã 403.
+\bu{E2.}Chưa đến ngày bảo vệ: hệ thống từ chối và hiển thị ngày bảo vệ.
+\bu{E3.}Kết quả đã được chốt: hệ thống không cho sửa điểm.
+\bu{E4.}Điểm ngoài khoảng 0--10: hệ thống từ chối. \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc4-4}{UC4.4 -- Chốt kết quả bảo vệ}
+Tác nhân & Bộ môn \\ \hline
+Mô tả & Bộ môn chốt kết quả bảo vệ của một sinh viên sau khi mọi thành viên hội đồng đã chấm. Điểm bảo vệ là trung bình cộng điểm các thành viên. \\ \hline
+Tiền điều kiện & Bộ môn đã đăng nhập; mọi thành viên hội đồng đã chấm điểm cho sinh viên. \\ \hline
+Hậu điều kiện & Kết quả được chốt và khóa; sinh viên nhận thông báo; đồ án được lưu vào kho (UC5.2). \\ \hline
+Luồng chính & \bu{1.}Bộ môn mở hội đồng và chọn một sinh viên đã đủ điểm.
+\bu{2.}Hệ thống hiển thị điểm từng thành viên và điểm trung bình cộng.
+\bu{3.}Bộ môn xác nhận \textit{Chốt kết quả}.
+\bu{4.}Hệ thống lưu điểm bảo vệ, khóa điểm và thông báo cho sinh viên.
+\bu{5.}Hệ thống tạo bản ghi kho và đánh chỉ mục ở chế độ nền (UC5.2). \\ \hline
+Luồng thay thế & Không có. \\ \hline
+Ngoại lệ & \bu{E1.}Chưa đủ thành viên chấm điểm: hệ thống từ chối và cho biết số thành viên đã chấm trên tổng số.
+\bu{E2.}Kết quả đã được chốt trước đó: hệ thống từ chối.
+\bu{E3.}Đề tài đã có trong kho: hệ thống báo trùng, không tạo bản ghi kho thứ hai. \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc4-5}{UC4.5 -- Xem lịch và kết quả bảo vệ}
+Tác nhân & Sinh viên \\ \hline
+Mô tả & Sinh viên xem lịch bảo vệ của mình và kết quả bảo vệ sau khi đã được chốt. \\ \hline
+Tiền điều kiện & Sinh viên đã đăng nhập. \\ \hline
+Hậu điều kiện & Lịch và (nếu đã chốt) kết quả bảo vệ được hiển thị. \\ \hline
+Luồng chính & \bu{1.}Sinh viên mở trang \textit{Bảo vệ}.
+\bu{2.}Hệ thống hiển thị hội đồng, thành viên, ngày, giờ, phòng bảo vệ nếu sinh viên đã được xếp lịch.
+\bu{3.}Sau khi Bộ môn chốt kết quả, hệ thống hiển thị điểm bảo vệ. \\ \hline
+Luồng thay thế & \bu{A1.}Sinh viên chưa được xếp lịch: hệ thống hiển thị tình trạng báo cáo cuối và thông báo chưa có lịch. \\ \hline
+Ngoại lệ & Không có (use case chỉ đọc dữ liệu). Điểm của từng thành viên và điểm trung bình không hiển thị cho sinh viên trước khi chốt. \\ \hline
+\end{ucspec}
+
+\subsection{Quản lý kho dữ liệu đồ án -- UC5}
+
+Kho đồ án vừa là nơi tra cứu đồ án các khóa trước, vừa là nguồn so sánh của dịch vụ AI. Bản ghi kho được tạo tự động khi chốt kết quả bảo vệ hoặc do Bộ môn nhập; mọi bản ghi mới hoặc được sửa đều được gửi sang dịch vụ AI để đánh chỉ mục. Hình~\ref{fig:c2-uc5} là sơ đồ use case của nhóm này.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{chuong_2/uc5-quan-ly-kho-do-an.png}
+    \caption{Sơ đồ use case quản lý kho dữ liệu đồ án (UC5)}
+    \label{fig:c2-uc5}
+\end{figure}
+
+\begin{ucspec}{uc5-1}{UC5.1 -- Tra cứu và xem chi tiết đồ án}
+Tác nhân & Sinh viên, Giảng viên, Bộ môn \\ \hline
+Mô tả & Người dùng tra cứu đồ án trong kho và xem chi tiết một bản ghi. \\ \hline
+Tiền điều kiện & Người dùng đã đăng nhập. \\ \hline
+Hậu điều kiện & Kết quả tra cứu hoặc chi tiết bản ghi được hiển thị. \\ \hline
+Luồng chính & \bu{1.}Người dùng mở trang \textit{Kho đồ án}.
+\bu{2.}Người dùng nhập từ khóa và chọn khóa, GVHD.
+\bu{3.}Hệ thống trả danh sách đồ án thỏa điều kiện, có phân trang.
+\bu{4.}Người dùng chọn một bản ghi; hệ thống hiển thị khóa, tên đề tài, sinh viên, GVHD, từ khóa, điểm, trạng thái đánh chỉ mục và cho tải báo cáo cuối nếu có. \\ \hline
+Luồng thay thế & \bu{A1.}Sinh viên xem bản ghi của người khác: điểm được ẩn; sinh viên chỉ thấy điểm của chính mình. \\ \hline
+Ngoại lệ & \bu{E1.}Không có kết quả phù hợp: hệ thống hiển thị danh sách rỗng. \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc5-2}{UC5.2 -- Lưu đồ án vào kho}
+Tác nhân & Hệ thống, Dịch vụ AI \\ \hline
+Mô tả & Khi kết quả bảo vệ được chốt (UC4.4), hệ thống tự tạo bản ghi kho và gửi sang dịch vụ AI để đánh chỉ mục. \\ \hline
+Tiền điều kiện & Kết quả bảo vệ của sinh viên vừa được chốt. \\ \hline
+Hậu điều kiện & Bản ghi kho tồn tại và tra cứu được; nếu đánh chỉ mục thành công, bản ghi trở thành nguồn so sánh trùng lặp cho các đồ án sau. \\ \hline
+Luồng chính & \bu{1.}Hệ thống tạo bản ghi kho với khóa, tên đề tài, sinh viên, GVHD, điểm và tệp báo cáo cuối mới nhất.
+\bu{2.}Hệ thống gửi tên đề tài và văn bản báo cáo cuối sang dịch vụ AI ở chế độ nền.
+\bu{3.}Dịch vụ AI tính embedding, cập nhật chỉ mục tên đề tài và chỉ mục đoạn văn; hệ thống đánh dấu bản ghi \textit{Đã index}. \\ \hline
+Luồng thay thế & Không có (hoàn toàn tự động). \\ \hline
+Ngoại lệ & \bu{E1.}Dịch vụ AI không phản hồi hoặc lỗi: bản ghi kho vẫn được giữ, đánh dấu \textit{Chưa index} để Bộ môn đánh chỉ mục lại (UC5.3). \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc5-3}{UC5.3 -- Quản lý bản ghi kho}
+Tác nhân & Bộ môn \\ \hline
+Mô tả & Bộ môn thêm, sửa, xóa bản ghi kho và đánh chỉ mục lại bản ghi chưa được đánh chỉ mục. \\ \hline
+Tiền điều kiện & Bộ môn đã đăng nhập. \\ \hline
+Hậu điều kiện & Bản ghi được thêm, cập nhật hoặc xóa; bản ghi mới hoặc được sửa được gửi sang dịch vụ AI. \\ \hline
+Luồng chính & \bu{1.}Bộ môn mở trang \textit{Kho đồ án} và chọn \textit{Thêm bản ghi}.
+\bu{2.}Bộ môn nhập khóa, tên đề tài và các thông tin tùy chọn: mã số và họ tên sinh viên, GVHD, từ khóa, điểm.
+\bu{3.}Hệ thống kiểm tra, lưu bản ghi và gửi sang dịch vụ AI để đánh chỉ mục. \\ \hline
+Luồng thay thế & \bu{A1.}Bộ môn sửa một bản ghi; hệ thống lưu và đánh chỉ mục lại.
+\bu{A2.}Bộ môn xóa một bản ghi sau khi xác nhận; kết quả kiểm tra trùng lặp đã lưu trước đó không bị xóa theo.
+\bu{A3.}Bộ môn chọn \textit{Đánh chỉ mục lại} ở bản ghi \textit{Chưa index}. \\ \hline
+Ngoại lệ & \bu{E1.}Thiếu khóa hoặc tên đề tài, điểm ngoài khoảng 0--10: hệ thống từ chối lưu. \\ \hline
+\end{ucspec}
+
+\begin{ucspec}{uc5-4}{UC5.4 -- Nhập đồ án các khóa cũ}
+Tác nhân & Bộ môn, Dịch vụ AI \\ \hline
+Mô tả & Bộ môn nhập hàng loạt đồ án của các khóa trước từ tệp CSV; mỗi bản ghi được gửi sang dịch vụ AI để đánh chỉ mục như UC5.2. \\ \hline
+Tiền điều kiện & Bộ môn đã đăng nhập; có tệp CSV theo mẫu với các cột \texttt{khoa}, \texttt{ten\_de\_tai} (bắt buộc) và \texttt{ma\_so\_sinh\_vien}, \texttt{ho\_ten\_sinh\_vien}, \texttt{ma\_giang\_vien}, \texttt{tu\_khoa}, \texttt{diem} (tùy chọn). \\ \hline
+Hậu điều kiện & Các bản ghi hợp lệ được tạo và đưa vào hàng đợi đánh chỉ mục. \\ \hline
+Luồng chính & \bu{1.}Bộ môn chọn \textit{Nhập CSV} trên trang kho và tải tệp lên.
+\bu{2.}Hệ thống kiểm tra tệp (tối đa 2 MB, 2.000 dòng) và các cột bắt buộc.
+\bu{3.}Hệ thống kiểm tra từng dòng, tạo bản ghi cho các dòng hợp lệ.
+\bu{4.}Hệ thống trả về số dòng thành công và danh sách dòng lỗi kèm lý do, sau đó đánh chỉ mục các bản ghi mới ở chế độ nền. \\ \hline
+Luồng thay thế & Không có. \\ \hline
+Ngoại lệ & \bu{E1.}Tệp quá lớn, quá nhiều dòng hoặc thiếu cột bắt buộc: hệ thống từ chối cả tệp.
+\bu{E2.}Một số dòng thiếu dữ liệu bắt buộc hoặc điểm không hợp lệ: hệ thống bỏ qua các dòng đó, vẫn nhập các dòng hợp lệ và liệt kê dòng lỗi. \\ \hline
+\end{ucspec}
+
+\section*{Kết luận chương 2}
+
+Chương 2 đã khảo sát quy trình quản lý đồ án tại Khoa qua phiếu khảo sát 18 sinh viên, tài liệu và biểu mẫu thực tế, và trao đổi với GVHD. Từ đó chương mô hình hóa sáu quy trình AS-IS và TO-BE bằng BPMN, xác định 49 yêu cầu chức năng thuộc tám nhóm và 19 yêu cầu phi chức năng có ngưỡng đo được, xây dựng sơ đồ use case với năm use case chính cùng nhóm chức năng chung, và đặc tả 29 use case con. Đây là cơ sở để chương~3 thiết kế dữ liệu, kiến trúc và giao diện của hệ thống.
 
 \end{document}

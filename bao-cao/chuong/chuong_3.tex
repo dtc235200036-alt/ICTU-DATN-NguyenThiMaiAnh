@@ -2,24 +2,1204 @@
 
 \begin{document}
 
-\section{Thiết kế tổng thể}
-Sinh viên trình bày kiến trúc tổng thể, các thành phần chính và mối quan hệ giữa các thành phần.
+\textit{Chương này trình bày thiết kế hệ thống dựa trên các yêu cầu đã phân tích ở chương 2. Các mục lần lượt trình bày sơ đồ lớp thực thể, thiết kế cơ sở dữ liệu, kiến trúc hướng dịch vụ mô tả bằng các sơ đồ UML và thiết kế giao diện cho ba vai trò.}
 
-\section{Thiết kế dữ liệu}
-Sinh viên mô tả dữ liệu đầu vào, dữ liệu đầu ra, mô hình cơ sở dữ liệu hoặc cấu trúc lưu trữ.
+Các sơ đồ trong chương dùng ký pháp UML 2.5.1~\cite{uml251} và được vẽ bằng PlantUML~\cite{plantuml} (mục 1.8). Thiết kế được đối chiếu với mã nguồn ở phiên bản cuối: schema \texttt{thesis\_core} sau 16 migration Alembic và schema \texttt{thesis\_ai} sau 2 migration. Mục~\ref{sec:c3-lop} trình bày mô hình miền gồm 22 lớp thực thể. Mục~\ref{sec:c3-csdl} ánh xạ các lớp này thành bảng và nêu các ràng buộc toàn vẹn. Mục~\ref{sec:c3-kien-truc} mô tả kiến trúc ba thành phần bằng sơ đồ thành phần, triển khai, tuần tự và trạng thái. Mục~\ref{sec:c3-giao-dien} trình bày 16 màn hình thiết kế.
 
-\section{Thiết kế chức năng}
-Sinh viên trình bày các chức năng chính, luồng xử lý và các biểu đồ minh họa nếu có.
+%=====================================================================
+\section{Sơ đồ lớp thực thể}\label{sec:c3-lop}
+%=====================================================================
 
-\section{Thiết kế giao diện hoặc mô hình thực nghiệm}
-Sinh viên trình bày bản thiết kế giao diện, mô hình thí nghiệm, kịch bản sử dụng hoặc quy trình vận hành.
-Ví dụ, vị trí chèn hình minh họa được thể hiện trong Hình~\ref{fig:vi-du-hinh}.
+\subsection{Tổng quan mô hình miền}
+
+Mô hình miền gồm 22 lớp thực thể. Mỗi lớp ánh xạ sang đúng một bảng của schema \texttt{thesis\_core} (mục~\ref{sec:c3-csdl}). Tên lớp viết tiếng Việt không dấu theo kiểu PascalCase; tên thuộc tính viết theo kiểu snake\_case và trùng với tên cột, để việc đối chiếu sơ đồ lớp, sơ đồ thực thể liên kết và mã nguồn được thuận tiện. Các lớp được chia nhóm theo phân hệ nghiệp vụ của chương 2 (Bảng~\ref{tab:c3-nhom-lop}).
+
+{\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{|p{3.6cm}|p{6.9cm}|p{4.2cm}|}
+\caption{Các nhóm lớp thực thể}\label{tab:c3-nhom-lop}\\
+\hline
+\textbf{Nhóm} & \textbf{Lớp thực thể} & \textbf{Use case liên quan} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Nhóm} & \textbf{Lớp thực thể} & \textbf{Use case liên quan} \\
+\hline
+\endhead
+Người dùng và tổ chức đợt & TaiKhoan, SinhVien, GiangVien, DotDoAn, PhanCongHuongDan, DinhHuong, CauHinhNguong, ThongBao & UC0.1--UC0.5, UC0.8, UC0.9 \\
+\hline
+Đề tài & DeTai & UC1.1, UC1.2 \\
+\hline
+Đề cương & DeCuong, TaiLieuDoAn, LuotDuyetDeCuong, LuotDuyetBoMon & UC2.1--UC2.5 \\
+\hline
+Tiến độ & MocTienDo, BaoCaoTienDo & UC3.1--UC3.4 \\
+\hline
+Bảo vệ & HoiDong, ThanhVienHoiDong, LichBaoVe, DiemBaoVe & UC4.1--UC4.5 \\
+\hline
+Kho đồ án và kiểm tra trùng lặp & DoAnKho, KetQuaKiemTraTrungLap, ChiTietTrungLap & UC5.1--UC5.4, UC0.6, UC0.7 \\
+\hline
+\end{longtable}
+}
+
+Hình~\ref{fig:c3-lop-tong-quat} thể hiện toàn bộ 22 lớp cùng bội số của các liên kết, không kèm thuộc tính. Thuộc tính của từng lớp được thể hiện trong ba sơ đồ nhóm ở các mục tiếp theo. Trong sơ đồ nhóm, lớp thuộc nhóm khác được vẽ bằng khung nét đứt, không có thuộc tính, chỉ để chỉ ra liên kết.
 
 \begin{figure}[H]
-\centering
-\includegraphics[width=0.35\textwidth]{logo_ictu.jpg}
-\caption{Ví dụ chèn ảnh trong báo cáo}
-\label{fig:vi-du-hinh}
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/lop_tong_quat.png}
+    \caption{Sơ đồ lớp thực thể tổng quát}
+    \label{fig:c3-lop-tong-quat}
 \end{figure}
+
+Mô hình có bốn đặc điểm chính:
+\begin{itemize}
+    \item \textit{Tách tài khoản khỏi hồ sơ.} TaiKhoan giữ thông tin đăng nhập và vai trò; SinhVien và GiangVien giữ hồ sơ (mã số, lớp, học vị). Mỗi tài khoản có tối đa một hồ sơ. Tài khoản Bộ môn không có hồ sơ riêng.
+    \item \textit{Đề tài là trung tâm.} Đề cương, tài liệu nộp, báo cáo tiến độ, lịch bảo vệ, bản ghi kho và kết quả kiểm tra tên đều gắn với một DeTai.
+    \item \textit{Một lớp cho mọi tệp nộp.} TaiLieuDoAn biểu diễn một phiên bản tệp của bất kỳ loại nào: đề cương, đề cương đã ký số, báo cáo tiến độ, báo cáo cuối, tệp kho và tệp đính kèm đề tài. Nhờ đó việc lưu trữ, trích xuất văn bản và kiểm tra trùng lặp dùng chung một cách xử lý.
+    \item \textit{Lớp liên kết tường minh.} Quan hệ nhiều--nhiều được mô hình hóa thành lớp riêng có thuộc tính: PhanCongHuongDan (sinh viên và giảng viên trong một đợt), ThanhVienHoiDong (giảng viên trong hội đồng, kèm vai trò) và DiemBaoVe (giảng viên chấm một lịch bảo vệ).
+\end{itemize}
+
+\subsection{Nhóm người dùng, đợt đồ án và đề tài}
+
+Hình~\ref{fig:c3-lop-nguoi-dung-de-tai} trình bày các lớp quản lý người dùng, tổ chức đợt đồ án và đề tài.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/lop_nguoi_dung_de_tai.png}
+    \caption{Sơ đồ lớp nhóm người dùng, đợt đồ án và đề tài}
+    \label{fig:c3-lop-nguoi-dung-de-tai}
+\end{figure}
+
+Các lớp trong nhóm:
+\begin{itemize}
+    \item \textit{DotDoAn} là một đợt đồ án của một khóa (ví dụ K22A), có ngày bắt đầu, ngày kết thúc và trạng thái đang mở hoặc đã đóng. Chỉ đợt đang mở mới nhận thao tác giao đề tài.
+    \item \textit{PhanCongHuongDan} ghi nhận việc Bộ môn gán sinh viên cho giảng viên hướng dẫn (GVHD) ở đầu đợt (UC0.8). Mỗi sinh viên có đúng một GVHD trong một đợt. Tập sinh viên được gán cho một giảng viên tạo thành \textit{lớp hướng dẫn} của giảng viên đó.
+    \item \textit{DinhHuong} là danh mục định hướng đề tài do Bộ môn quản lý (UC0.9), mặc định gồm H01 (Phát triển ứng dụng) và H02 (Hệ thống AI và ứng dụng). Lớp này thay cho trường lĩnh vực nhập tự do. Mã định hướng là phần đầu của tên tệp đề cương theo mẫu \textless{}Mã định hướng\textgreater{}.\textless{}MSSV\textgreater{}.\textless{}Họ tên\textgreater{}.\textless{}Lớp\textgreater{}, nên hệ thống kiểm tra được tên tệp có khớp với định hướng của đề tài hay không.
+    \item \textit{DeTai} do GVHD tạo cho một sinh viên trong lớp hướng dẫn của mình. Đề tài thuộc một đợt, có một định hướng, và ở một trong hai trạng thái: bản nháp hoặc đã phân công. Thuộc tính \path{sinh_vien_id_dang_hoat_dong} là thuộc tính dẫn xuất, dùng để bảo đảm mỗi sinh viên có tối đa một đề tài đang hoạt động (mục~\ref{subsec:c3-rang-buoc}).
+    \item \textit{CauHinhNguong} lưu ba ngưỡng cảnh báo trùng lặp do Bộ môn cấu hình (UC0.4): ngưỡng tên đề tài, ngưỡng tài liệu và ngưỡng từng đoạn.
+    \item \textit{ThongBao} là thông báo trong ứng dụng gửi tới một tài khoản, có loại, nội dung, liên kết tới màn hình liên quan và cờ đã đọc.
+\end{itemize}
+
+\subsection{Nhóm đề cương và tiến độ}
+
+Hình~\ref{fig:c3-lop-de-cuong-tien-do} trình bày các lớp của quy trình nộp, duyệt đề cương và báo cáo tiến độ.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{chuong_3/lop_de_cuong_tien_do.png}
+    \caption{Sơ đồ lớp nhóm đề cương và tiến độ}
+    \label{fig:c3-lop-de-cuong-tien-do}
+\end{figure}
+
+Các lớp trong nhóm:
+\begin{itemize}
+    \item \textit{DeCuong} là đề cương của một đề tài. Mỗi đề tài có tối đa một đề cương. Đề cương giữ trạng thái của quy trình duyệt hai cấp (mục~\ref{subsec:c3-trang-thai}) và kết quả gần nhất của Bộ môn.
+    \item \textit{TaiLieuDoAn} là một phiên bản tệp. Mỗi lần sinh viên nộp đề cương tạo một phiên bản mới, phiên bản cũ được giữ nguyên để xem lại lịch sử (UC2.5). Lớp lưu tên tệp gốc, tên lưu trữ, định dạng, văn bản đã trích xuất và thời điểm tài liệu được đưa vào chỉ mục của dịch vụ AI.
+    \item \textit{LuotDuyetDeCuong} là kết luận của GVHD cho một phiên bản đề cương: đã duyệt hoặc yêu cầu sửa, kèm nhận xét (UC2.2). Mỗi phiên bản có tối đa một lượt duyệt của GVHD.
+    \item \textit{LuotDuyetBoMon} là kết luận của Lãnh đạo bộ môn cho phiên bản GVHD đã nộp lên: phê duyệt hoặc trả lại (UC2.4). Khi phê duyệt, lượt duyệt tham chiếu tới bản PDF đã ký số (một TaiLieuDoAn loại \path{DE_CUONG_KY_SO}) cùng tên người ký và thời điểm ký đọc được từ chữ ký số.
+    \item \textit{MocTienDo} là một mốc báo cáo của đợt, có thứ tự và hạn nộp (UC3.1).
+    \item \textit{BaoCaoTienDo} là báo cáo của một đề tài tại một mốc, kèm nhận xét và đánh giá của GVHD (đạt, cần cải thiện, chưa đạt).
+\end{itemize}
+
+\subsection{Nhóm bảo vệ, kho đồ án và kiểm tra trùng lặp}
+
+Hình~\ref{fig:c3-lop-bao-ve-kho} trình bày các lớp của phân hệ bảo vệ, kho đồ án và kết quả kiểm tra trùng lặp.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/lop_bao_ve_kho_trung_lap.png}
+    \caption{Sơ đồ lớp nhóm bảo vệ, kho đồ án và kiểm tra trùng lặp}
+    \label{fig:c3-lop-bao-ve-kho}
+\end{figure}
+
+Các lớp trong nhóm:
+\begin{itemize}
+    \item \textit{HoiDong} là một hội đồng bảo vệ với ngày, giờ và phòng. \textit{ThanhVienHoiDong} gán giảng viên vào hội đồng với một vai trò: chủ tịch, thư ký hoặc ủy viên.
+    \item \textit{LichBaoVe} xếp một sinh viên và đề tài vào một hội đồng theo thứ tự. Lớp giữ điểm trung bình và cờ đã chốt. \textit{DiemBaoVe} là điểm và nhận xét của một thành viên cho một lịch bảo vệ.
+    \item \textit{DoAnKho} là một bản ghi trong kho đồ án. Bản ghi được tạo tự động khi Bộ môn chốt kết quả bảo vệ (nguồn hệ thống) hoặc nhập từ dữ liệu các khóa cũ (nguồn import). Bản ghi nhập từ khóa cũ có thể không gắn với tài khoản, nên lớp lưu thêm mã số và họ tên sinh viên dạng văn bản.
+    \item \textit{KetQuaKiemTraTrungLap} là kết quả một lần kiểm tra trùng lặp, cho tên đề tài hoặc cho một phiên bản tài liệu. Lớp lưu trạng thái, tỷ lệ tổng, tỷ lệ trùng với một nguồn cao nhất, phạm vi được kiểm tra và ngưỡng áp dụng tại thời điểm kiểm tra.
+    \item \textit{ChiTietTrungLap} là một dòng chi tiết của kết quả: đề tài hoặc đồ án trùng, tỷ lệ, đoạn trong tài liệu nộp, đoạn nguồn và vị trí.
+\end{itemize}
+
+\subsection{Các kiểu liệt kê}
+
+Các thuộc tính có tập giá trị cố định được khai báo thành kiểu liệt kê. Bảng~\ref{tab:c3-liet-ke} liệt kê các kiểu này. Một số kiểu giữ lại giá trị cũ của luồng nghiệp vụ trước khi điều chỉnh, để dữ liệu đã có vẫn hợp lệ; hệ thống không còn tạo ra các giá trị đó.
+
+{\renewcommand{\arraystretch}{1.2}
+\small
+\begin{longtable}{|p{4.0cm}|>{\raggedright\arraybackslash}p{6.0cm}|>{\raggedright\arraybackslash}p{4.7cm}|}
+\caption{Các kiểu liệt kê của mô hình miền}\label{tab:c3-liet-ke}\\
+\hline
+\textbf{Kiểu liệt kê} & \textbf{Giá trị} & \textbf{Lớp, thuộc tính} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Kiểu liệt kê} & \textbf{Giá trị} & \textbf{Lớp, thuộc tính} \\
+\hline
+\endhead
+VaiTro & \path{SINH_VIEN}, \path{GIANG_VIEN}, \path{BO_MON} & TaiKhoan, vai\_tro \\
+\hline
+TrangThaiDot & \path{DANG_MO}, \path{DA_DONG} & DotDoAn, trang\_thai \\
+\hline
+TrangThaiDeTai & \path{NHAP}, \path{DA_PHAN_CONG}; giá trị cũ: \path{CHO_DUYET}, \path{DA_DUYET}, \path{TU_CHOI} & DeTai, trang\_thai \\
+\hline
+LoaiNguoiDeXuat & \path{GIANG_VIEN}, \path{SINH_VIEN} (đề tài mới luôn là \path{GIANG_VIEN}) & DeTai, loai\_nguoi\_de\_xuat \\
+\hline
+TrangThaiDeCuong & \path{CHUA_NOP}, \path{CHO_DUYET}, \path{YEU_CAU_SUA}, \path{GVHD_DA_DUYET}, \path{CHO_BO_MON_DUYET}, \path{DA_DUYET} & DeCuong, trang\_thai \\
+\hline
+LoaiTaiLieu & \path{DE_TAI}, \path{DE_CUONG}, \path{DE_CUONG_KY_SO}, \path{BAO_CAO_TIEN_DO}, \path{BAO_CAO_CUOI}, \path{KHO} & TaiLieuDoAn, loai \\
+\hline
+KetQuaDuyet & \path{DA_DUYET}, \path{YEU_CAU_SUA} & LuotDuyetDeCuong, ket\_qua \\
+\hline
+KetQuaDuyetBoMon & \path{DA_DUYET}, \path{TRA_LAI} & LuotDuyetBoMon, ket\_qua \\
+\hline
+DanhGiaTienDo & \path{DAT}, \path{CAN_CAI_THIEN}, \path{CHUA_DAT} & BaoCaoTienDo, danh\_gia \\
+\hline
+VaiTroHoiDong & \path{CHU_TICH}, \path{THU_KY}, \path{UY_VIEN} & ThanhVienHoiDong, vai\_tro \\
+\hline
+LoaiKiemTra & \path{TEN_DE_TAI}, \path{TAI_LIEU} & KetQuaKiemTraTrungLap, loai\_kiem\_tra \\
+\hline
+TrangThaiKiemTra & \path{DANG_KIEM_TRA}, \path{HOAN_TAT}, \path{LOI} & KetQuaKiemTraTrungLap, trang\_thai \\
+\hline
+KhongGianNguon & \path{TOPIC}, \path{ARCHIVE}, \path{DOCUMENT} & ChiTietTrungLap, loai\_nguon \\
+\hline
+LoaiNguon & \path{HE_THONG}, \path{IMPORT} & DoAnKho, nguon \\
+\hline
+TrangThaiIndex & \path{CHUA_INDEX}, \path{DA_INDEX} & DoAnKho, trang\_thai\_index \\
+\hline
+LoaiCauHinhNguong & \path{NGUONG_TEN_DE_TAI}, \path{NGUONG_TAI_LIEU}, \path{NGUONG_DOAN_TRUNG} & CauHinhNguong, loai \\
+\hline
+LoaiThongBao & \path{PHAN_CONG_GVHD}, \path{DE_TAI_PHAN_CONG}, \path{DE_CUONG_MOI}, \path{DE_CUONG_DUYET}, \path{DE_CUONG_YEU_CAU_SUA}, \path{DE_CUONG_NOP_BO_MON}, \path{DE_CUONG_BO_MON_DUYET}, \path{DE_CUONG_BO_MON_TRA_LAI}, \path{TIEN_DO_NHAN_XET}, \path{HOI_DONG_PHAN_CONG}, \path{LICH_BAO_VE}, \path{KET_QUA_BAO_VE}; giá trị cũ: \path{DE_TAI_CHO_DUYET}, \path{DE_TAI_DUYET}, \path{DE_TAI_TU_CHOI} & ThongBao, loai \\
+\hline
+\end{longtable}
+}
+
+%=====================================================================
+\section{Thiết kế cơ sở dữ liệu}\label{sec:c3-csdl}
+%=====================================================================
+
+\subsection{Nguyên tắc thiết kế}
+
+Hệ thống dùng MySQL 8 với hai schema trên cùng một máy chủ CSDL:
+\begin{itemize}
+    \item \texttt{thesis\_core} thuộc sở hữu của Web API, chứa toàn bộ dữ liệu nghiệp vụ ứng với 22 lớp thực thể ở mục~\ref{sec:c3-lop}.
+    \item \texttt{thesis\_ai} thuộc sở hữu của dịch vụ AI, chứa văn bản đã tách đoạn và vector embedding (mục~\ref{subsec:c3-thesis-ai}).
+\end{itemize}
+
+Không có khóa ngoại hay câu truy vấn nào đi qua hai schema. Web API không đọc, ghi trực tiếp \texttt{thesis\_ai}; dịch vụ AI không đọc, ghi trực tiếp \texttt{thesis\_core}. Dữ liệu chỉ trao đổi qua API nội bộ của dịch vụ AI. Ranh giới này là điều kiện để hai dịch vụ được triển khai và thay đổi độc lập, đúng nguyên tắc sở hữu dữ liệu riêng của SOA (mục 1.1).
+
+Các nguyên tắc áp dụng cho cả hai schema:
+\begin{itemize}
+    \item \textit{Bảng mã tiếng Việt.} Mọi bảng và cột văn bản dùng \path{utf8mb4} với collation \path{utf8mb4_vietnamese_ci}~\cite{mysqlutf8mb4}, nên lưu trữ, so sánh và sắp xếp tiếng Việt có dấu đều đúng.
+    \item \textit{Chuẩn hóa NFC.} Mọi văn bản được chuẩn hóa về dạng NFC~\cite{unicodetr15} tại điểm nhập liệu trước khi ghi: dữ liệu biểu mẫu, văn bản trích xuất từ tệp DOCX/PDF và dữ liệu nhập hàng loạt.
+    \item \textit{Khóa chính thay thế.} Mọi bảng có khóa chính \texttt{id} kiểu \texttt{BIGINT} tự tăng. Khóa tự nhiên như mã số sinh viên, mã giảng viên được bảo vệ bằng ràng buộc UNIQUE.
+    \item \textit{Giá trị liệt kê bằng VARCHAR và CHECK.} Các kiểu liệt kê ở Bảng~\ref{tab:c3-liet-ke} được lưu bằng cột \texttt{VARCHAR} kèm ràng buộc \texttt{CHECK} có tên, thay cho kiểu \texttt{ENUM} của MySQL. Khi thêm giá trị mới, migration chỉ cần thay ràng buộc \texttt{CHECK}, như migration 0016 đã làm khi mở rộng trạng thái đề cương. Ngoại lệ duy nhất là cột \path{vai_tro} của bảng \path{tai_khoan}, dùng kiểu \texttt{ENUM} từ migration đầu tiên vì tập ba vai trò cố định.
+    \item \textit{Ràng buộc có tên.} Khóa chính, khóa ngoại, UNIQUE và CHECK được đặt tên theo quy ước \texttt{pk\_}, \texttt{fk\_}, \texttt{uq\_}/\texttt{uk\_}, \texttt{ck\_}, nên thông báo lỗi vi phạm chỉ rõ ràng buộc nào và migration có thể xóa, tạo lại đúng ràng buộc.
+    \item \textit{Quản lý schema bằng migration.} Mỗi schema có bộ migration Alembic~\cite{alembic} riêng. Không sửa cấu trúc bảng trực tiếp trên máy chủ.
+\end{itemize}
+
+\subsection{Ánh xạ lớp thực thể sang bảng}
+
+Mỗi lớp thực thể ánh xạ sang đúng một bảng; thuộc tính ánh xạ sang cột cùng tên; liên kết ánh xạ sang khóa ngoại ở phía bội số nhiều. Bảng~\ref{tab:c3-anh-xa} trình bày ánh xạ đầy đủ.
+
+{\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{|p{5.1cm}|p{5.1cm}|p{4.5cm}|}
+\caption{Ánh xạ lớp thực thể sang bảng của schema \texttt{thesis\_core}}\label{tab:c3-anh-xa}\\
+\hline
+\textbf{Lớp thực thể} & \textbf{Bảng} & \textbf{Ghi chú} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Lớp thực thể} & \textbf{Bảng} & \textbf{Ghi chú} \\
+\hline
+\endhead
+TaiKhoan & \path{tai_khoan} & \\
+\hline
+SinhVien & \path{sinh_vien} & \\
+\hline
+GiangVien & \path{giang_vien} & \\
+\hline
+DotDoAn & \path{dot_do_an} & \\
+\hline
+PhanCongHuongDan & \path{phan_cong_huong_dan} & Bổ sung ở migration 0015 \\
+\hline
+DinhHuong & \path{dinh_huong} & Bổ sung ở migration 0016 \\
+\hline
+MocTienDo & \path{moc_tien_do} & \\
+\hline
+DeTai & \path{de_tai} & Cột \path{dinh_huong_id} thêm ở migration 0016 \\
+\hline
+DeCuong & \path{de_cuong} & Hai cột về Bộ môn thêm ở migration 0016 \\
+\hline
+TaiLieuDoAn & \path{tai_lieu_do_an} & \\
+\hline
+LuotDuyetDeCuong & \path{luot_duyet_de_cuong} & \\
+\hline
+LuotDuyetBoMon & \path{luot_duyet_bo_mon} & Bổ sung ở migration 0016 \\
+\hline
+BaoCaoTienDo & \path{bao_cao_tien_do} & \\
+\hline
+HoiDong & \path{hoi_dong} & \\
+\hline
+ThanhVienHoiDong & \path{thanh_vien_hoi_dong} & Lớp liên kết \\
+\hline
+LichBaoVe & \path{lich_bao_ve} & \\
+\hline
+DiemBaoVe & \path{diem_bao_ve} & Lớp liên kết \\
+\hline
+DoAnKho & \path{do_an_kho} & \\
+\hline
+KetQuaKiemTraTrungLap & \path{ket_qua_kiem_tra_trung_lap} & \\
+\hline
+ChiTietTrungLap & \path{chi_tiet_trung_lap} & \\
+\hline
+ThongBao & \path{thong_bao} & \\
+\hline
+CauHinhNguong & \path{cau_hinh_nguong} & \\
+\hline
+\end{longtable}
+}
+
+\subsection{Sơ đồ thực thể liên kết của schema \texttt{thesis\_core}}
+
+Sơ đồ thực thể liên kết (ERD) của \texttt{thesis\_core} được chia thành ba hình theo cùng cách chia nhóm của sơ đồ lớp. Ký pháp dùng trong các hình:
+\begin{itemize}
+    \item Dấu \texttt{*} trước tên cột: cột \texttt{NOT NULL}.
+    \item \texttt{<<PK>>}, \texttt{<<FK>>}, \texttt{<<UQ>>}, \texttt{<<CHECK>>}: khóa chính, khóa ngoại, ràng buộc UNIQUE và ràng buộc CHECK. Ràng buộc UNIQUE trên nhiều cột ghi ở cuối bảng.
+    \item Đường nối dùng ký pháp chân chim: một gạch là ``đúng một'', vòng tròn là ``có thể không có'', chân chim là ``nhiều''.
+    \item Bảng vẽ nét đứt thuộc nhóm khác, chỉ thể hiện khóa chính để chỉ ra khóa ngoại trỏ tới.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/erd_nguoi_dung_de_tai.png}
+    \caption{ERD nhóm người dùng, đợt đồ án và đề tài}
+    \label{fig:c3-erd-nguoi-dung-de-tai}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/erd_de_cuong_tien_do.png}
+    \caption{ERD nhóm đề cương và tiến độ}
+    \label{fig:c3-erd-de-cuong-tien-do}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{chuong_3/erd_bao_ve_kho_trung_lap.png}
+    \caption{ERD nhóm bảo vệ, kho đồ án và kiểm tra trùng lặp}
+    \label{fig:c3-erd-bao-ve-kho}
+\end{figure}
+
+\subsection{Chi tiết các bảng chính}
+
+Mục này mô tả chi tiết bảy bảng của luồng nghiệp vụ chính: đề tài, đề cương, tài liệu, hai bảng lượt duyệt và hai bảng kết quả kiểm tra trùng lặp. Các bảng còn lại được tóm tắt ở Bảng~\ref{tab:c3-bang-khac}. Cột ``Ràng buộc'' dùng các ký hiệu PK (khóa chính), FK (khóa ngoại), NN (\texttt{NOT NULL}), UQ (\texttt{UNIQUE}) và CHECK.
+
+{\renewcommand{\arraystretch}{1.15}
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{4.1cm}|>{\raggedright\arraybackslash}p{2.9cm}|>{\raggedright\arraybackslash}p{1.9cm}|p{5.3cm}|}
+\caption{Bảng \texttt{de\_tai}}\label{tab:c3-bang-de-tai}\\
+\hline
+\textbf{Cột} & \textbf{Kiểu} & \textbf{Ràng buộc} & \textbf{Ý nghĩa} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Cột} & \textbf{Kiểu} & \textbf{Ràng buộc} & \textbf{Ý nghĩa} \\
+\hline
+\endhead
+\path{id} & \texttt{BIGINT} & PK & Khóa chính tự tăng \\
+\hline
+\path{dot_do_an_id} & \texttt{BIGINT} & FK, NN & Đợt đồ án chứa đề tài \\
+\hline
+\path{giang_vien_id} & \texttt{BIGINT} & FK & GVHD tạo và hướng dẫn đề tài \\
+\hline
+\path{sinh_vien_id} & \texttt{BIGINT} & FK & Sinh viên được giao đề tài \\
+\hline
+\path{sinh_vien_id_dang_hoat_dong} & \texttt{BIGINT} & Cột sinh, UQ & Bằng \path{sinh_vien_id} khi đề tài đang hoạt động, ngược lại là \texttt{NULL} \\
+\hline
+\path{ten_de_tai} & \texttt{VARCHAR(255)} & NN & Tên đề tài \\
+\hline
+\path{mo_ta} & \texttt{TEXT} & & Mô tả nội dung đề tài \\
+\hline
+\path{dinh_huong_id} & \texttt{BIGINT} & FK & Định hướng đề tài; rỗng ở đề tài tạo trước khi có danh mục định hướng \\
+\hline
+\path{linh_vuc} & \texttt{VARCHAR(100)} & & Trường cũ, giữ để tương thích dữ liệu \\
+\hline
+\path{trang_thai} & \texttt{VARCHAR(20)} & NN, CHECK & Trạng thái đề tài (Bảng~\ref{tab:c3-liet-ke}) \\
+\hline
+\path{loai_nguoi_de_xuat} & \texttt{VARCHAR(10)} & NN, CHECK & Người tạo đề tài; đề tài mới luôn là \path{GIANG_VIEN} \\
+\hline
+\path{ly_do_tu_choi} & \texttt{TEXT} & & Trường của luồng duyệt cũ, không còn được ghi \\
+\hline
+\end{longtable}
+}
+
+Bảng \path{de_tai} có thêm chỉ mục (\path{dot_do_an_id}, \path{trang_thai}) phục vụ việc lọc danh sách đề tài theo đợt và trạng thái (UC1.2).
+
+{\renewcommand{\arraystretch}{1.15}
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{4.1cm}|>{\raggedright\arraybackslash}p{2.9cm}|>{\raggedright\arraybackslash}p{1.9cm}|p{5.3cm}|}
+\caption{Bảng \texttt{de\_cuong}}\label{tab:c3-bang-de-cuong}\\
+\hline
+\textbf{Cột} & \textbf{Kiểu} & \textbf{Ràng buộc} & \textbf{Ý nghĩa} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Cột} & \textbf{Kiểu} & \textbf{Ràng buộc} & \textbf{Ý nghĩa} \\
+\hline
+\endhead
+\path{id} & \texttt{BIGINT} & PK & Khóa chính tự tăng \\
+\hline
+\path{de_tai_id} & \texttt{BIGINT} & FK, NN, UQ & Đề tài sở hữu đề cương; mỗi đề tài có tối đa một đề cương \\
+\hline
+\path{trang_thai} & \texttt{VARCHAR(20)} & NN, CHECK & Một trong sáu trạng thái đề cương \\
+\hline
+\path{ngay_nop_dau_tien} & \texttt{DATETIME} & & Thời điểm nộp phiên bản đầu tiên \\
+\hline
+\path{nop_bo_mon_luc} & \texttt{DATETIME} & & Lần GVHD nộp đề cương lên Bộ môn gần nhất \\
+\hline
+\path{ket_qua_bo_mon} & \texttt{VARCHAR(20)} & & Kết quả gần nhất của Bộ môn (\path{DA_DUYET} hoặc \path{TRA_LAI}); được xóa khi sinh viên nộp phiên bản mới \\
+\hline
+\end{longtable}
+}
+
+{\renewcommand{\arraystretch}{1.15}
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{4.1cm}|>{\raggedright\arraybackslash}p{2.9cm}|>{\raggedright\arraybackslash}p{1.9cm}|p{5.3cm}|}
+\caption{Bảng \texttt{tai\_lieu\_do\_an}}\label{tab:c3-bang-tai-lieu}\\
+\hline
+\textbf{Cột} & \textbf{Kiểu} & \textbf{Ràng buộc} & \textbf{Ý nghĩa} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Cột} & \textbf{Kiểu} & \textbf{Ràng buộc} & \textbf{Ý nghĩa} \\
+\hline
+\endhead
+\path{id} & \texttt{BIGINT} & PK & Khóa chính tự tăng \\
+\hline
+\path{de_tai_id} & \texttt{BIGINT} & FK, NN & Đề tài của tài liệu \\
+\hline
+\path{de_cuong_id} & \texttt{BIGINT} & FK & Đề cương, với tài liệu thuộc quy trình đề cương \\
+\hline
+\path{loai} & \texttt{VARCHAR(20)} & NN, CHECK & Loại tài liệu, một trong sáu loại \\
+\hline
+\path{so_phien_ban} & \texttt{INT} & NN & Số phiên bản trong cùng loại của một đề tài \\
+\hline
+\path{ten_goc} & \texttt{VARCHAR(255)} & NN & Tên tệp người dùng tải lên \\
+\hline
+\path{ten_luu_tru} & \texttt{VARCHAR(255)} & NN, UQ & Tên tệp do hệ thống sinh trong kho tệp \\
+\hline
+\path{kich_thuoc} & \texttt{BIGINT} & NN & Kích thước tệp (byte) \\
+\hline
+\path{dinh_dang} & \texttt{VARCHAR(10)} & NN, CHECK & \texttt{DOCX} hoặc \texttt{PDF}, xác định theo nội dung nhị phân của tệp \\
+\hline
+\path{thoi_diem_nop} & \texttt{DATETIME} & NN & Thời điểm nộp \\
+\hline
+\path{noi_dung_trich_xuat} & \texttt{LONGTEXT} & & Văn bản trích xuất đã chuẩn hóa NFC, đầu vào của kiểm tra trùng lặp \\
+\hline
+\path{trich_xuat_loi} & \texttt{BOOLEAN} & NN & Cờ trích xuất văn bản thất bại \\
+\hline
+\path{da_index_luc} & \texttt{DATETIME} & & Thời điểm tài liệu vào chỉ mục của dịch vụ AI; \texttt{NULL} là chưa vào \\
+\hline
+\path{ghi_chu} & \texttt{TEXT} & & Ghi chú của người nộp \\
+\hline
+\end{longtable}
+}
+
+{\renewcommand{\arraystretch}{1.15}
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{4.1cm}|>{\raggedright\arraybackslash}p{2.9cm}|>{\raggedright\arraybackslash}p{1.9cm}|p{5.3cm}|}
+\caption{Bảng \texttt{luot\_duyet\_de\_cuong}}\label{tab:c3-bang-luot-duyet}\\
+\hline
+\textbf{Cột} & \textbf{Kiểu} & \textbf{Ràng buộc} & \textbf{Ý nghĩa} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Cột} & \textbf{Kiểu} & \textbf{Ràng buộc} & \textbf{Ý nghĩa} \\
+\hline
+\endhead
+\path{id} & \texttt{BIGINT} & PK & Khóa chính tự tăng \\
+\hline
+\path{de_cuong_id} & \texttt{BIGINT} & FK, NN & Đề cương được duyệt \\
+\hline
+\path{tai_lieu_do_an_id} & \texttt{BIGINT} & FK, NN, UQ & Phiên bản được duyệt; mỗi phiên bản có tối đa một lượt duyệt của GVHD \\
+\hline
+\path{giang_vien_id} & \texttt{BIGINT} & FK, NN & GVHD thực hiện \\
+\hline
+\path{ket_qua} & \texttt{VARCHAR(20)} & NN, CHECK & \path{DA_DUYET} hoặc \path{YEU_CAU_SUA} \\
+\hline
+\path{nhan_xet} & \texttt{TEXT} & & Nhận xét của GVHD \\
+\hline
+\path{thoi_diem} & \texttt{DATETIME} & NN & Thời điểm duyệt \\
+\hline
+\end{longtable}
+}
+
+{\renewcommand{\arraystretch}{1.15}
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{4.1cm}|>{\raggedright\arraybackslash}p{2.9cm}|>{\raggedright\arraybackslash}p{1.9cm}|p{5.3cm}|}
+\caption{Bảng \texttt{luot\_duyet\_bo\_mon}}\label{tab:c3-bang-luot-duyet-bo-mon}\\
+\hline
+\textbf{Cột} & \textbf{Kiểu} & \textbf{Ràng buộc} & \textbf{Ý nghĩa} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Cột} & \textbf{Kiểu} & \textbf{Ràng buộc} & \textbf{Ý nghĩa} \\
+\hline
+\endhead
+\path{id} & \texttt{BIGINT} & PK & Khóa chính tự tăng \\
+\hline
+\path{de_cuong_id} & \texttt{BIGINT} & FK, NN & Đề cương được xét \\
+\hline
+\path{tai_lieu_do_an_id} & \texttt{BIGINT} & FK, NN & Phiên bản GVHD đã nộp lên \\
+\hline
+\path{tai_khoan_id} & \texttt{BIGINT} & FK, NN & Tài khoản Bộ môn thực hiện \\
+\hline
+\path{ket_qua} & \texttt{VARCHAR(20)} & NN, CHECK & \path{DA_DUYET} hoặc \path{TRA_LAI} \\
+\hline
+\path{nhan_xet} & \texttt{TEXT} & & Nhận xét; bắt buộc khi trả lại \\
+\hline
+\path{thoi_diem} & \texttt{DATETIME} & NN & Thời điểm phê duyệt hoặc trả lại \\
+\hline
+\path{tai_lieu_ky_so_id} & \texttt{BIGINT} & FK & Bản PDF đã ký số (tài liệu loại \path{DE_CUONG_KY_SO}) \\
+\hline
+\path{nguoi_ky} & \texttt{VARCHAR(255)} & & Tên người ký đọc từ chữ ký số \\
+\hline
+\path{thoi_diem_ky} & \texttt{DATETIME} & & Thời điểm ký đọc từ chữ ký số \\
+\hline
+\end{longtable}
+}
+
+{\renewcommand{\arraystretch}{1.15}
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{4.1cm}|>{\raggedright\arraybackslash}p{2.9cm}|>{\raggedright\arraybackslash}p{1.9cm}|p{5.3cm}|}
+\caption{Bảng \texttt{ket\_qua\_kiem\_tra\_trung\_lap}}\label{tab:c3-bang-ket-qua}\\
+\hline
+\textbf{Cột} & \textbf{Kiểu} & \textbf{Ràng buộc} & \textbf{Ý nghĩa} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Cột} & \textbf{Kiểu} & \textbf{Ràng buộc} & \textbf{Ý nghĩa} \\
+\hline
+\endhead
+\path{id} & \texttt{BIGINT} & PK & Khóa chính tự tăng \\
+\hline
+\path{de_tai_id} & \texttt{BIGINT} & FK & Đề tài liên quan \\
+\hline
+\path{tai_lieu_do_an_id} & \texttt{BIGINT} & FK, UQ & Phiên bản tài liệu được kiểm tra; rỗng với kiểm tra tên \\
+\hline
+\path{loai_kiem_tra} & \texttt{VARCHAR(20)} & NN, CHECK & \path{TEN_DE_TAI} hoặc \path{TAI_LIEU} \\
+\hline
+\path{trang_thai} & \texttt{VARCHAR(20)} & NN, CHECK & \path{DANG_KIEM_TRA}, \path{HOAN_TAT} hoặc \path{LOI} \\
+\hline
+\path{ty_le_tong} & \texttt{DECIMAL(5,2)} & & Tỷ lệ ký tự bị gắn cờ trùng trên toàn văn bản (\%) \\
+\hline
+\path{ty_le_nguon_cao_nhat} & \texttt{DECIMAL(5,2)} & & Tỷ lệ trùng với một nguồn cao nhất; giá trị được so với ngưỡng tài liệu \\
+\hline
+\path{so_doan} & \texttt{INT} & & Số câu được so sánh \\
+\hline
+\path{so_doan_loai_tru} & \texttt{INT} & & Số dòng bị loại như phần mẫu chung \\
+\hline
+\path{ty_le_loai_tru} & \texttt{DECIMAL(5,2)} & & Tỷ lệ ký tự bị loại như phần mẫu chung (\%) \\
+\hline
+\path{nguong_ap_dung} & \texttt{DECIMAL(5,2)} & NN & Ngưỡng tại thời điểm kiểm tra \\
+\hline
+\path{doi_tuong_duoc_kiem_tra} & \texttt{VARCHAR(255)} & & Tên đề tài, hoặc loại, phiên bản và tên tệp \\
+\hline
+\path{thoi_diem} & \texttt{DATETIME} & NN & Thời điểm tạo hoặc cập nhật kết quả \\
+\hline
+\end{longtable}
+}
+
+Ngưỡng áp dụng được lưu cùng kết quả, nên khi Bộ môn đổi ngưỡng, kết quả cũ vẫn hiển thị đúng nhãn vượt hay dưới ngưỡng tại thời điểm kiểm tra.
+
+{\renewcommand{\arraystretch}{1.15}
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{4.1cm}|>{\raggedright\arraybackslash}p{2.9cm}|>{\raggedright\arraybackslash}p{1.9cm}|p{5.3cm}|}
+\caption{Bảng \texttt{chi\_tiet\_trung\_lap}}\label{tab:c3-bang-chi-tiet}\\
+\hline
+\textbf{Cột} & \textbf{Kiểu} & \textbf{Ràng buộc} & \textbf{Ý nghĩa} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Cột} & \textbf{Kiểu} & \textbf{Ràng buộc} & \textbf{Ý nghĩa} \\
+\hline
+\endhead
+\path{id} & \texttt{BIGINT} & PK & Khóa chính tự tăng \\
+\hline
+\path{ket_qua_id} & \texttt{BIGINT} & FK, NN & Kết quả kiểm tra chứa dòng này \\
+\hline
+\path{doi_tuong_trung} & \texttt{VARCHAR(255)} & NN & Tên đề tài hoặc đồ án trùng \\
+\hline
+\path{ty_le} & \texttt{DECIMAL(5,2)} & NN & Tỷ lệ tương đồng của dòng (\%) \\
+\hline
+\path{doan_nguon} & \texttt{TEXT} & & Đoạn văn của nguồn \\
+\hline
+\path{doan_trung} & \texttt{TEXT} & & Đoạn văn tương ứng trong tài liệu nộp \\
+\hline
+\path{vi_tri} & \texttt{VARCHAR(50)} & & Vị trí đoạn trong tài liệu nộp, kèm loại tín hiệu (nguyên văn hoặc ngữ nghĩa) \\
+\hline
+\path{loai_nguon} & \texttt{VARCHAR(20)} & & Không gian định danh của nguồn: \path{TOPIC}, \path{ARCHIVE} hoặc \path{DOCUMENT} \\
+\hline
+\path{nguon_id} & \texttt{BIGINT} & & Định danh nguồn trong không gian đó; không có khóa ngoại vì nguồn có thể thuộc ba bảng khác nhau \\
+\hline
+\path{ty_le_nguon} & \texttt{DECIMAL(5,2)} & & Tỷ lệ trùng của cả nguồn chứa đoạn \\
+\hline
+\end{longtable}
+}
+
+{\renewcommand{\arraystretch}{1.15}
+\small
+\begin{longtable}{|p{3.7cm}|>{\raggedright\arraybackslash}p{6.2cm}|>{\raggedright\arraybackslash}p{4.8cm}|}
+\caption{Tóm tắt các bảng còn lại của schema \texttt{thesis\_core}}\label{tab:c3-bang-khac}\\
+\hline
+\textbf{Bảng} & \textbf{Cột chính} & \textbf{Ràng buộc, chỉ mục} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Bảng} & \textbf{Cột chính} & \textbf{Ràng buộc, chỉ mục} \\
+\hline
+\endhead
+\path{tai_khoan} & \path{ma_dang_nhap}, \path{email}, \path{mat_khau_bam} (bcrypt), \path{vai_tro}, \path{bi_khoa}, \path{phien_ban_token} (tăng khi đăng xuất, làm mọi token phát trước đó hết hiệu lực) & UQ \path{ma_dang_nhap}, UQ \path{email} \\
+\hline
+\path{sinh_vien} & \path{tai_khoan_id}, \path{ma_so_sinh_vien}, \path{ho_ten}, \path{email}, \path{lop}, \path{khoa} & UQ \path{tai_khoan_id}, UQ \path{ma_so_sinh_vien} \\
+\hline
+\path{giang_vien} & \path{tai_khoan_id}, \path{ma_giang_vien}, \path{ho_ten}, \path{email}, \path{hoc_vi} & UQ \path{tai_khoan_id}, UQ \path{ma_giang_vien} \\
+\hline
+\path{dot_do_an} & \path{ten_dot}, \path{khoa}, \path{nam_hoc}, \path{ngay_bat_dau}, \path{ngay_ket_thuc}, \path{trang_thai} & CHECK \path{trang_thai}; chỉ mục \path{trang_thai} \\
+\hline
+\path{phan_cong_huong_dan} & \path{dot_do_an_id}, \path{sinh_vien_id}, \path{giang_vien_id}, \path{thoi_diem} & UQ (\path{dot_do_an_id}, \path{sinh_vien_id}) \\
+\hline
+\path{dinh_huong} & \path{ma} (H01, H02\ldots), \path{ten}, \path{mo_ta}, \path{hoat_dong} (ẩn định hướng ngừng dùng mà không xóa) & UQ \path{ma} \\
+\hline
+\path{moc_tien_do} & \path{dot_do_an_id}, \path{ten_moc}, \path{thu_tu}, \path{han_nop} & Chỉ mục (\path{dot_do_an_id}, \path{thu_tu}) \\
+\hline
+\path{bao_cao_tien_do} & \path{de_tai_id}, \path{moc_tien_do_id}, \path{noi_dung}, \path{thoi_diem_nop}, \path{nhan_xet}, \path{danh_gia}, \path{tai_lieu_do_an_id} (tệp đính kèm) & UQ (\path{de_tai_id}, \path{moc_tien_do_id}); CHECK \path{danh_gia} \\
+\hline
+\path{hoi_dong} & \path{ten_hoi_dong}, \path{ngay_bao_ve}, \path{gio_bao_ve}, \path{phong} & \\
+\hline
+\path{thanh_vien_hoi_dong} & \path{hoi_dong_id}, \path{giang_vien_id}, \path{vai_tro} & UQ (\path{hoi_dong_id}, \path{giang_vien_id}); CHECK \path{vai_tro} \\
+\hline
+\path{lich_bao_ve} & \path{hoi_dong_id}, \path{de_tai_id}, \path{sinh_vien_id}, \path{thu_tu}, \path{diem_trung_binh}, \path{da_chot} & UQ \path{sinh_vien_id} \\
+\hline
+\path{diem_bao_ve} & \path{lich_bao_ve_id}, \path{giang_vien_id}, \path{diem}, \path{nhan_xet} & UQ (\path{lich_bao_ve_id}, \path{giang_vien_id}); CHECK điểm từ 0 đến 10 \\
+\hline
+\path{do_an_kho} & \path{de_tai_id}, \path{sinh_vien_id}, \path{giang_vien_id}, \path{khoa}, \path{ten_de_tai}, \path{tu_khoa}, \path{diem}, \path{nguon}, \path{trang_thai_index}, \path{ma_so_sinh_vien}, \path{ho_ten_sinh_vien} & UQ \path{de_tai_id}; CHECK \path{nguon}, \path{trang_thai_index}, \path{diem}; chỉ mục \path{khoa}, \path{giang_vien_id} \\
+\hline
+\path{thong_bao} & \path{tai_khoan_id}, \path{loai}, \path{noi_dung}, \path{lien_ket}, \path{da_doc}, \path{thoi_diem} & Chỉ mục (\path{tai_khoan_id}, \path{da_doc}, \path{thoi_diem}) \\
+\hline
+\path{cau_hinh_nguong} & \path{loai}, \path{gia_tri}, \path{tai_khoan_id} (người cập nhật), \path{thoi_diem_cap_nhat} & UQ \path{loai}; CHECK giá trị từ 0 đến 100 \\
+\hline
+\end{longtable}
+}
+
+\subsection{Ràng buộc toàn vẹn và xử lý đồng thời}\label{subsec:c3-rang-buoc}
+
+Các quy tắc nghiệp vụ quan trọng được biểu diễn bằng ràng buộc của CSDL thay vì chỉ kiểm tra ở tầng ứng dụng. Cách làm này vẫn đúng khi hai yêu cầu đến gần như đồng thời, vì kiểu kiểm tra rồi mới ghi ở tầng ứng dụng có thể để lọt cả hai yêu cầu.
+
+\textbf{Mỗi sinh viên có tối đa một đề tài đang hoạt động.} Bảng \path{de_tai} có một cột sinh do MySQL tự tính:
+
+\begin{Verbatim}[fontsize=\small]
+sinh_vien_id_dang_hoat_dong BIGINT GENERATED ALWAYS AS (
+    CASE WHEN trang_thai IN ('CHO_DUYET', 'DA_DUYET', 'DA_PHAN_CONG')
+         THEN sinh_vien_id END) STORED,
+UNIQUE KEY uk_de_tai_sv_hoat_dong (sinh_vien_id_dang_hoat_dong)
+\end{Verbatim}
+
+Cột chỉ mang giá trị khi đề tài ở trạng thái đang hoạt động; ở bản nháp, cột là \texttt{NULL}. MySQL cho phép nhiều giá trị \texttt{NULL} trong một chỉ mục UNIQUE, nên ràng buộc chỉ chặn khi cùng một sinh viên xuất hiện ở hai đề tài đang hoạt động. Khi hai yêu cầu giao đề tài cho cùng một sinh viên đến cùng lúc, câu lệnh ghi thứ hai vi phạm ràng buộc và Web API trả mã 409 với thông báo sinh viên đã có đề tài đang hoạt động. Hai mã trạng thái cũ \path{CHO_DUYET} và \path{DA_DUYET} vẫn nằm trong biểu thức để dữ liệu cũ được bảo vệ như nhau.
+
+\textbf{Chuyển trạng thái có điều kiện.} Các thao tác đổi trạng thái được viết thành câu \texttt{UPDATE} có điều kiện trên trạng thái hiện tại, rồi kiểm tra số dòng bị ảnh hưởng. Ví dụ, gửi bản nháp chỉ cập nhật đề tài khi đề tài còn ở \path{NHAP} và đợt còn mở; nếu số dòng ảnh hưởng là 0, thao tác bị từ chối. Với những thao tác cần đọc nhiều bảng trước khi ghi, Web API khóa dòng bằng \texttt{SELECT \ldots{} FOR UPDATE} trong cùng transaction: nộp đề cương khóa dòng đề tài để hai lần nộp đầu tiên đồng thời không cùng tạo đề cương; lưu phân công khóa các dòng phân công và đề tài đang hoạt động của các sinh viên liên quan.
+
+\textbf{Chốt điểm bảo vệ.} Bộ môn chỉ chốt được kết quả khi số dòng \path{diem_bao_ve} của lịch bằng số thành viên hội đồng. Sau khi chốt, Web API từ chối mọi thao tác sửa điểm của lịch đó. Quy tắc này được kiểm tra trong transaction ở tầng ứng dụng, vì không có cách biểu diễn gọn bằng ràng buộc của CSDL.
+
+Bảng~\ref{tab:c3-rang-buoc} tóm tắt các ràng buộc UNIQUE còn lại và quy tắc nghiệp vụ mà mỗi ràng buộc bảo đảm.
+
+{\renewcommand{\arraystretch}{1.15}
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{5.4cm}|>{\raggedright\arraybackslash}p{3.6cm}|p{5.7cm}|}
+\caption{Các ràng buộc UNIQUE và quy tắc nghiệp vụ tương ứng}\label{tab:c3-rang-buoc}\\
+\hline
+\textbf{Ràng buộc} & \textbf{Bảng} & \textbf{Quy tắc bảo đảm} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Ràng buộc} & \textbf{Bảng} & \textbf{Quy tắc bảo đảm} \\
+\hline
+\endhead
+(\path{dot_do_an_id}, \path{sinh_vien_id}) & \path{phan_cong_huong_dan} & Mỗi sinh viên có một GVHD trong một đợt \\
+\hline
+\path{de_tai_id} & \path{de_cuong} & Mỗi đề tài có tối đa một đề cương \\
+\hline
+(\path{de_tai_id}, \path{loai}, \path{so_phien_ban}) & \path{tai_lieu_do_an} & Số phiên bản không trùng trong cùng loại tài liệu của một đề tài \\
+\hline
+\path{ten_luu_tru} & \path{tai_lieu_do_an} & Hai tài liệu không dùng chung một tệp lưu trữ \\
+\hline
+\path{tai_lieu_do_an_id} & \path{luot_duyet_de_cuong} & Mỗi phiên bản đề cương có tối đa một kết luận của GVHD \\
+\hline
+\path{tai_lieu_do_an_id} & \path{ket_qua_kiem_tra_trung_lap} & Mỗi phiên bản tài liệu có tối đa một kết quả kiểm tra, nên kết quả về muộn của phiên bản cũ không ghi đè kết quả của phiên bản mới \\
+\hline
+(\path{de_tai_id}, \path{moc_tien_do_id}) & \path{bao_cao_tien_do} & Một báo cáo cho mỗi đề tài tại mỗi mốc \\
+\hline
+(\path{hoi_dong_id}, \path{giang_vien_id}) & \path{thanh_vien_hoi_dong} & Một giảng viên giữ một vai trò trong một hội đồng \\
+\hline
+\path{sinh_vien_id} & \path{lich_bao_ve} & Mỗi sinh viên được xếp một lịch bảo vệ \\
+\hline
+(\path{lich_bao_ve_id}, \path{giang_vien_id}) & \path{diem_bao_ve} & Mỗi thành viên chấm một lần cho một sinh viên \\
+\hline
+\path{de_tai_id} & \path{do_an_kho} & Mỗi đề tài được lưu vào kho một lần \\
+\hline
+\path{loai} & \path{cau_hinh_nguong} & Mỗi loại ngưỡng có đúng một giá trị hiện hành \\
+\hline
+\path{ma} & \path{dinh_huong} & Mã định hướng không trùng \\
+\hline
+\end{longtable}
+}
+
+\subsection{Schema \texttt{thesis\_ai} của dịch vụ AI}\label{subsec:c3-thesis-ai}
+
+Schema \texttt{thesis\_ai} thuộc riêng dịch vụ AI và gồm ba bảng (Hình~\ref{fig:c3-erd-thesis-ai}, Bảng~\ref{tab:c3-thesis-ai}). Dịch vụ AI dùng hai tài khoản CSDL: một tài khoản có quyền DDL chỉ dùng khi chạy migration, một tài khoản chỉ đọc ghi dữ liệu dùng khi phục vụ.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/erd_thesis_ai.png}
+    \caption{ERD schema \texttt{thesis\_ai}}
+    \label{fig:c3-erd-thesis-ai}
+\end{figure}
+
+{\renewcommand{\arraystretch}{1.15}
+\small
+\begin{longtable}{|p{2.6cm}|>{\raggedright\arraybackslash}p{4.6cm}|p{7.5cm}|}
+\caption{Các bảng của schema \texttt{thesis\_ai}}\label{tab:c3-thesis-ai}\\
+\hline
+\textbf{Bảng} & \textbf{Cột chính} & \textbf{Ý nghĩa} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Bảng} & \textbf{Cột chính} & \textbf{Ý nghĩa} \\
+\hline
+\endhead
+\path{chunk} & \path{loai_nguon}, \path{ma_nguon}, \path{thu_tu}, \path{noi_dung}, \path{bam_noi_dung} & Một đơn vị văn bản đã tách. Tên đề tài (\path{TOPIC}) và tên đồ án kho (\path{ARCHIVE}) là một đơn vị; tài liệu (\path{DOCUMENT}) gồm nhiều đơn vị mức câu sau khi lọc phần mẫu chung. \path{ma_nguon} là định danh logic bên \texttt{thesis\_core}, không phải khóa ngoại. \path{bam_noi_dung} là mã băm SHA-256, giúp bỏ qua việc mã hóa lại nội dung không đổi \\
+\hline
+\path{embedding} & \path{chunk_id}, \path{ten_model}, \path{so_chieu}, \path{vector} & Vector của một đơn vị theo một mô hình. \path{vector} là mảng \texttt{float32} lưu dạng \texttt{BLOB}. \path{ten_model} gồm tên kho mô hình và mã commit trọng số, nên đổi mô hình không làm lẫn vector cũ và mới. UQ (\path{chunk_id}, \path{ten_model}); xóa đơn vị thì vector bị xóa theo (\texttt{ON DELETE CASCADE}) \\
+\hline
+\path{index_metadata} & \path{ten_model}, \path{so_vector}, \path{cap_nhat_luc} & Số vector của mỗi mô hình và thời điểm cập nhật, dùng để phát hiện lệch giữa CSDL và chỉ mục trong bộ nhớ \\
+\hline
+\end{longtable}
+}
+
+Ba quy tắc chi phối dữ liệu của \texttt{thesis\_ai}:
+\begin{itemize}
+    \item \textit{Ba không gian định danh.} Cặp (\path{loai_nguon}, \path{ma_nguon}) mới xác định một nguồn: cùng số 12 có thể là đề tài 12, bản ghi kho 12 hoặc tài liệu 12. Web API luôn ánh xạ ngược theo loại nguồn mà dịch vụ AI trả về.
+    \item \textit{Ghi thay thế.} Gọi \texttt{/ingest} lại cho một nguồn sẽ xóa toàn bộ đơn vị cũ của nguồn đó rồi ghi đơn vị mới trong một transaction. Văn bản rỗng gỡ nguồn khỏi chỉ mục.
+    \item \textit{Dựng lại chỉ mục khi khởi động.} Chỉ mục FAISS~\cite{faiss2021} và ma trận MinHash~\cite{broder1997} nằm trong bộ nhớ, được dựng lại từ \path{chunk} và \path{embedding} khi dịch vụ khởi động, không phải mã hóa lại. Chữ ký MinHash không được lưu mà tính lại từ nội dung.
+\end{itemize}
+
+%=====================================================================
+\section{Kiến trúc hướng dịch vụ (SOA)}\label{sec:c3-kien-truc}
+%=====================================================================
+
+\subsection{Tổng quan kiến trúc}
+
+Hệ thống gồm ba thành phần triển khai độc lập:
+\begin{itemize}
+    \item \textit{Client Web}: ứng dụng React một trang, build thành tệp tĩnh và được Apache phục vụ.
+    \item \textit{Web API}: ứng dụng FastAPI sở hữu toàn bộ nghiệp vụ và schema \texttt{thesis\_core}. Đây là thành phần duy nhất client gọi tới.
+    \item \textit{Dịch vụ AI}: ứng dụng FastAPI riêng, sở hữu schema \texttt{thesis\_ai}, chịu trách nhiệm kiểm tra trùng lặp tên đề tài và tài liệu.
+\end{itemize}
+
+Kiến trúc tuân theo bốn nguyên tắc:
+\begin{itemize}
+    \item \textit{Một cửa vào công khai.} Trình duyệt chỉ giao tiếp với Apache qua HTTPS. Web API và dịch vụ AI không mở cổng ra ngoài.
+    \item \textit{Sở hữu dữ liệu riêng.} Mỗi dịch vụ chỉ truy cập schema của mình (mục~\ref{sec:c3-csdl}).
+    \item \textit{Hợp đồng tường minh.} Web API cung cấp REST API có tài liệu OpenAPI sinh tự động; dịch vụ AI cung cấp API nội bộ với các model Pydantic~\cite{pydantic} kiểm tra dữ liệu vào ra.
+    \item \textit{Lỗi của dịch vụ AI không chặn nghiệp vụ.} Khi dịch vụ AI lỗi hoặc quá thời gian chờ, việc giao đề tài và nộp tài liệu vẫn thành công; kết quả kiểm tra được ghi là lỗi và có thể kiểm tra lại.
+\end{itemize}
+
+\subsection{Sơ đồ thành phần}
+
+Hình~\ref{fig:c3-thanh-phan} là sơ đồ thành phần của hệ thống.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/so_do_thanh_phan.png}
+    \caption{Sơ đồ thành phần của hệ thống}
+    \label{fig:c3-thanh-phan}
+\end{figure}
+
+Web API được chia thành các module theo phân hệ nghiệp vụ:
+\begin{itemize}
+    \item \textit{Xác thực và phân quyền}: phát hành và kiểm tra JWT~\cite{rfc7519}, kiểm tra vai trò của từng endpoint. Mọi yêu cầu nghiệp vụ đi qua module này trước.
+    \item \textit{Quản trị}: tài khoản, đợt đồ án, danh mục định hướng, phân công GVHD và cấu hình ngưỡng.
+    \item \textit{Đề tài, Đề cương, Tiến độ, Bảo vệ, Kho đồ án}: nghiệp vụ của năm phân hệ ở chương 2. Module Đề cương hiện thực quy trình duyệt hai cấp.
+    \item \textit{Thông báo và tổng quan}: thông báo trong ứng dụng và số liệu cho trang tổng quan của từng vai trò.
+    \item \textit{Lưu trữ tệp}: kiểm tra định dạng theo nội dung nhị phân, lưu tệp ngoài thư mục web, trích xuất văn bản từ DOCX/PDF và chuẩn hóa NFC.
+    \item \textit{AI client}: lớp duy nhất gọi dịch vụ AI. Lớp này gắn khóa API, đặt thời gian chờ theo từng loại lời gọi và chuyển mọi lỗi kết nối, hết thời gian chờ hay sai hợp đồng thành một kiểu lỗi chung để module nghiệp vụ xử lý.
+\end{itemize}
+
+Dịch vụ AI gồm bốn thành phần nối tiếp: API nội bộ; khâu tiền xử lý (chuẩn hóa NFC, lọc phần mẫu chung như mục lục và tài liệu tham khảo, tách câu, tách từ tiếng Việt bằng underthesea~\cite{underthesea}); mô hình embedding \path{vietnamese-bi-encoder}~\cite{bkaibiencoder}; chỉ mục FAISS cho so khớp ngữ nghĩa và MinHash cho so khớp nguyên văn. Chi tiết các kỹ thuật này đã trình bày ở mục 1.6 và 1.7.
+
+\subsection{Sơ đồ triển khai}
+
+Hình~\ref{fig:c3-trien-khai} là sơ đồ triển khai ở mức thiết kế. Máy chủ ứng dụng chia thành hai vùng:
+\begin{itemize}
+    \item \textit{Vùng công khai} chỉ có máy chủ Web Apache. Apache kết thúc TLS ở cổng 443, chuyển cổng 80 sang 443, phục vụ bản build tĩnh của client và chuyển tiếp các yêu cầu \path{/api/} tới Web API bằng \texttt{mod\_proxy}~\cite{apachemodproxy}.
+    \item \textit{Vùng nội bộ} gồm Web API, dịch vụ AI, MySQL và kho tệp tải lên. Các thành phần này không công bố cổng ra ngoài. Không có đường dẫn nào của Apache trỏ tới dịch vụ AI, nên dịch vụ AI chỉ nhận được yêu cầu từ Web API.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{chuong_3/so_do_trien_khai.png}
+    \caption{Sơ đồ triển khai mức thiết kế}
+    \label{fig:c3-trien-khai}
+\end{figure}
+
+Kho tệp tải lên nằm ngoài thư mục gốc của Apache. Người dùng chỉ tải được tệp qua endpoint của Web API, sau khi Web API kiểm tra quyền xem tài liệu đó. Thiết kế này được hiện thực bằng Docker Compose~\cite{dockercompose}: mỗi thành phần là một container, vùng nội bộ là một mạng Docker riêng, và chỉ container Apache công bố cổng 80 và 443 (chi tiết ở chương 4).
+
+\subsection{Giao tiếp giữa các thành phần}
+
+Bảng~\ref{tab:c3-giao-tiep} tóm tắt các kênh giao tiếp, giao thức và cách xác thực trên từng kênh.
+
+{\renewcommand{\arraystretch}{1.15}
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{2.8cm}|>{\raggedright\arraybackslash}p{2.6cm}|>{\raggedright\arraybackslash}p{4.2cm}|>{\raggedright\arraybackslash}p{4.6cm}|}
+\caption{Các kênh giao tiếp giữa các thành phần}\label{tab:c3-giao-tiep}\\
+\hline
+\textbf{Từ} & \textbf{Đến} & \textbf{Giao thức, xác thực} & \textbf{Nội dung} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Từ} & \textbf{Đến} & \textbf{Giao thức, xác thực} & \textbf{Nội dung} \\
+\hline
+\endhead
+Trình duyệt & Apache & HTTPS, TLS 1.2 trở lên & Tải client tĩnh; gửi yêu cầu \path{/api/*} \\
+\hline
+Client Web (qua Apache) & Web API & REST/JSON qua HTTP nội bộ; JWT trong header \texttt{Authorization} & Toàn bộ nghiệp vụ của ba vai trò \\
+\hline
+Web API & Dịch vụ AI & REST/JSON nội bộ; khóa trong header \texttt{X-API-Key} & Kiểm tra tên, kiểm tra tài liệu, đẩy dữ liệu vào chỉ mục \\
+\hline
+Web API & \texttt{thesis\_core} & SQL qua SQLAlchemy~\cite{sqlalchemy}; tài khoản CSDL riêng & Dữ liệu nghiệp vụ \\
+\hline
+Dịch vụ AI & \texttt{thesis\_ai} & SQL; tài khoản phục vụ không có quyền DDL & Đơn vị văn bản, vector \\
+\hline
+Web API & Kho tệp & Hệ thống tệp & Ghi tệp nộp, đọc tệp khi tải về hoặc trích xuất \\
+\hline
+\end{longtable}
+}
+
+Dữ liệu cần cho kiểm tra trùng lặp được đẩy sang dịch vụ AI tại thời điểm ghi (\textit{push-on-write}): sau khi giao đề tài, sau khi kiểm tra một tài liệu hoàn tất, và khi thêm bản ghi kho, Web API gọi \texttt{/ingest} trong tác vụ nền. Dịch vụ AI không đọc ngược \texttt{thesis\_core}. Nếu lần ingest thất bại, cột \path{da_index_luc} (với tài liệu) hoặc \path{trang_thai_index} (với bản ghi kho) cho biết nguồn chưa vào chỉ mục, và Web API thử lại ở các lần sau.
+
+\subsection{Hợp đồng API của dịch vụ AI}
+
+Dịch vụ AI cung cấp năm endpoint (Bảng~\ref{tab:c3-api-ai}). Bốn endpoint nghiệp vụ yêu cầu khóa \texttt{X-API-Key} dài tối thiểu 32 ký tự và được so sánh bằng hàm so sánh thời gian hằng; endpoint \texttt{/health} chỉ trả trạng thái để kiểm tra sống, không cần khóa.
+
+{\renewcommand{\arraystretch}{1.15}
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{2.6cm}|>{\raggedright\arraybackslash}p{3.9cm}|>{\raggedright\arraybackslash}p{4.1cm}|>{\raggedright\arraybackslash}p{3.6cm}|}
+\caption{Các endpoint của dịch vụ AI}\label{tab:c3-api-ai}\\
+\hline
+\textbf{Endpoint} & \textbf{Đầu vào} & \textbf{Đầu ra} & \textbf{Bên gọi, thời điểm} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Endpoint} & \textbf{Đầu vào} & \textbf{Đầu ra} & \textbf{Bên gọi, thời điểm} \\
+\hline
+\endhead
+\texttt{POST} \path{/check-title} & \path{text}, \path{top_k}, \path{nguong} & Danh sách \path{matches} gồm \path{ref_id}, \path{loai} (\path{TOPIC} hoặc \path{ARCHIVE}), \path{ty_le} & Web API, đồng bộ khi GVHD nhập hoặc giao đề tài; thời gian chờ 4 giây \\
+\hline
+\texttt{POST} \path{/check-document} & \path{ref_id}, \path{text}, \path{top_k}, \path{nguong_doan}, \path{nguong_nguyen_van}, \path{loai_tru} & \path{ty_le_tong}, \path{do_an_trung}, \path{chi_tiet} (đoạn nguồn, đoạn trùng, vị trí, tín hiệu), \path{so_doan}, \path{so_doan_loai_tru}, \path{ty_le_loai_tru} & Tác vụ nền sau khi nộp tài liệu; thời gian chờ tăng theo độ dài văn bản, tối đa 240 giây \\
+\hline
+\texttt{POST} \path{/ingest} & \path{id}, \path{type} (\path{TOPIC}, \path{ARCHIVE} hoặc \path{DOCUMENT}), \path{text} & \path{chunk_count} & Tác vụ nền sau khi giao đề tài, sau khi kiểm tra tài liệu hoàn tất, khi thêm bản ghi kho \\
+\hline
+\texttt{POST} \path{/reindex} & Danh sách mục ingest (tùy chọn) & \path{indexed_count} & Nạp kho hàng loạt; mã hóa bổ sung vector còn thiếu sau khi đổi mô hình \\
+\hline
+\texttt{GET} \path{/health} & Không có & Trạng thái, tên mô hình, kích thước chỉ mục, số đơn vị thiếu vector & Kiểm tra sống khi khởi động và giám sát \\
+\hline
+\end{longtable}
+}
+
+Trường \path{loai_tru} của \texttt{/check-document} chứa định danh các phiên bản khác của cùng đề tài. Dịch vụ AI không biết khái niệm đề tài, nên Web API gửi tường minh danh sách này để một phiên bản mới không bị coi là trùng với phiên bản trước của chính nó.
+
+\subsection{Sơ đồ tuần tự kiểm tra trùng lặp}
+
+Kiểm tra trùng lặp có hai luồng với đặc điểm khác nhau. Tên đề tài ngắn, kết quả cần có ngay khi GVHD giao đề tài, nên được kiểm tra đồng bộ. Tài liệu dài, thời gian kiểm tra có thể tới hàng chục giây, nên được kiểm tra bất đồng bộ.
+
+\textbf{Kiểm tra tên đề tài khi giao đề tài} (Hình~\ref{fig:c3-tuan-tu-ten}). Trong lúc GVHD nhập tên trên MH-06, client gọi \texttt{POST} \path{/api/topics/check-title} để hiển thị cảnh báo ngay; kết quả này không được lưu. Khi GVHD bấm giao đề tài:
+\begin{enumerate}
+    \item Client gửi \texttt{POST} \path{/api/topics} với cờ \texttt{gui = true}.
+    \item Web API kiểm tra vai trò, đợt đang mở và sinh viên thuộc lớp hướng dẫn, chuẩn hóa NFC tên đề tài rồi đọc ngưỡng tên đề tài.
+    \item Web API gọi \texttt{/check-title}. Nếu dịch vụ AI không phản hồi trong 4 giây hoặc trả lỗi, kết quả được ghi là \path{LOI} và việc giao vẫn tiếp tục.
+    \item Web API ghi đề tài ở trạng thái \path{DA_PHAN_CONG}, kết quả kiểm tra, các dòng chi tiết và thông báo cho sinh viên trong một transaction, rồi trả mã 201.
+    \item Sau khi trả lời client, tác vụ nền gọi \texttt{/ingest} để đưa tên đề tài mới vào chỉ mục.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{chuong_3/tuan_tu_kiem_tra_ten.png}
+    \caption{Sơ đồ tuần tự kiểm tra trùng lặp tên đề tài khi giao đề tài}
+    \label{fig:c3-tuan-tu-ten}
+\end{figure}
+
+\textbf{Kiểm tra tài liệu khi nộp đề cương hoặc báo cáo cuối} (Hình~\ref{fig:c3-tuan-tu-tai-lieu}):
+\begin{enumerate}
+    \item Sinh viên nộp tệp. Web API kiểm tra định dạng theo nội dung nhị phân và dung lượng tối đa 20~MB, lưu tệp và trích xuất văn bản.
+    \item Web API ghi phiên bản tài liệu và một kết quả kiểm tra ở trạng thái \path{DANG_KIEM_TRA} trong cùng transaction, rồi trả mã 202 ngay.
+    \item Tác vụ nền gọi \texttt{/check-document} với ngưỡng từng đoạn và danh sách loại trừ.
+    \item Nếu thành công, tác vụ nền cập nhật kết quả sang \path{HOAN_TAT}, ghi các dòng chi tiết, rồi gọi \texttt{/ingest} để tài liệu trở thành nguồn so sánh cho các lần kiểm tra sau. Nếu lỗi hoặc hết thời gian chờ, kết quả chuyển sang \path{LOI}.
+    \item Client hỏi lại trạng thái bằng \texttt{GET} \texttt{/api/documents/\{id\}/check} cho tới khi kết quả không còn ở \path{DANG_KIEM_TRA}, rồi hiển thị tỷ lệ và các đoạn trùng.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/tuan_tu_kiem_tra_tai_lieu.png}
+    \caption{Sơ đồ tuần tự kiểm tra trùng lặp tài liệu khi nộp}
+    \label{fig:c3-tuan-tu-tai-lieu}
+\end{figure}
+
+\subsection{Sơ đồ trạng thái}\label{subsec:c3-trang-thai}
+
+Ba đối tượng có vòng đời quan trọng nhất là đề tài, đề cương và kết quả kiểm tra trùng lặp.
+
+\textbf{Đề tài} (Hình~\ref{fig:c3-trang-thai-de-tai}). GVHD có thể lưu nháp hoặc giao ngay. Bản nháp chỉ GVHD thấy; khi GVHD gửi, đề tài chuyển sang đã phân công và sinh viên nhận thông báo. Đề tài không còn bước duyệt riêng, vì sinh viên đã thống nhất đề tài với GVHD trước khi GVHD giao trên hệ thống.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{chuong_3/trang_thai_de_tai.png}
+    \caption{Sơ đồ trạng thái đề tài}
+    \label{fig:c3-trang-thai-de-tai}
+\end{figure}
+
+\textbf{Đề cương} (Hình~\ref{fig:c3-trang-thai-de-cuong}). Đề cương đi qua hai cấp duyệt: GVHD duyệt nội dung, sau đó Lãnh đạo bộ môn phê duyệt bản đã ký số để nộp về khoa. Bảng~\ref{tab:c3-chuyen-de-cuong} liệt kê các bước chuyển trạng thái.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/trang_thai_de_cuong.png}
+    \caption{Sơ đồ trạng thái đề cương}
+    \label{fig:c3-trang-thai-de-cuong}
+\end{figure}
+
+{\renewcommand{\arraystretch}{1.15}
+\small
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.0cm}|>{\raggedright\arraybackslash}p{3.2cm}|>{\raggedright\arraybackslash}p{2.4cm}|p{5.6cm}|}
+\caption{Các bước chuyển trạng thái đề cương}\label{tab:c3-chuyen-de-cuong}\\
+\hline
+\textbf{Từ} & \textbf{Đến} & \textbf{Người thực hiện} & \textbf{Điều kiện, tác động} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Từ} & \textbf{Đến} & \textbf{Người thực hiện} & \textbf{Điều kiện, tác động} \\
+\hline
+\endhead
+\path{CHUA_NOP} & \path{CHO_DUYET} & Sinh viên & Nộp phiên bản đầu tiên (UC2.1); kích hoạt kiểm tra trùng lặp; GVHD nhận thông báo \\
+\hline
+\path{CHO_DUYET} & \path{GVHD_DA_DUYET} & GVHD & Duyệt phiên bản mới nhất (UC2.2), ghi lượt duyệt \\
+\hline
+\path{CHO_DUYET} & \path{YEU_CAU_SUA} & GVHD & Yêu cầu sửa kèm nhận xét \\
+\hline
+\path{GVHD_DA_DUYET} & \path{YEU_CAU_SUA} & GVHD & Trả lại đề cương đã duyệt; lượt duyệt của phiên bản bị ghi đè \\
+\hline
+\path{GVHD_DA_DUYET} & \path{CHO_BO_MON_DUYET} & GVHD & Nộp lên Bộ môn (UC2.3) khi tên tệp đúng mẫu và mã định hướng khớp đề tài. Nếu lỗi duy nhất là tên tệp, GVHD có thể đổi tên theo mẫu rồi nộp \\
+\hline
+\path{CHO_BO_MON_DUYET} & \path{DA_DUYET} & Bộ môn & Phê duyệt (UC2.4): tải lên bản PDF có chữ ký số phủ toàn bộ nội dung tệp; bản này được lưu với loại \path{DE_CUONG_KY_SO} \\
+\hline
+\path{CHO_BO_MON_DUYET} & \path{YEU_CAU_SUA} & Bộ môn & Trả lại (UC2.4) kèm nhận xét bắt buộc \\
+\hline
+\path{YEU_CAU_SUA} & \path{CHO_DUYET} & Sinh viên & Nộp phiên bản mới; phiên bản cũ được giữ \\
+\hline
+\end{longtable}
+}
+
+\path{DA_DUYET} là trạng thái cuối. Báo cáo tiến độ và bảo vệ chỉ mở cho đề tài có đề cương ở trạng thái này. Khi kiểm tra chữ ký số, hệ thống xác nhận tệp có chữ ký và vùng ký phủ toàn bộ tệp, rồi đọc tên người ký và thời điểm ký; hệ thống không xác minh chuỗi chứng thư của tổ chức cấp chứng thư. Bộ môn có thể tải về toàn bộ đề cương đã ký số của một đợt dưới dạng một tệp nén để nộp về khoa (phần mở rộng của UC2.4).
+
+\textbf{Kết quả kiểm tra trùng lặp} (Hình~\ref{fig:c3-trang-thai-kiem-tra}). Kết quả kiểm tra tài liệu bắt đầu ở \path{DANG_KIEM_TRA} và kết thúc ở \path{HOAN_TAT} hoặc \path{LOI}. Thiết kế giữ bất biến: bản ghi không ở mãi trạng thái đang kiểm tra. Tác vụ nền luôn kết thúc bằng một trong hai trạng thái cuối. Nếu tiến trình Web API khởi động lại giữa chừng, lần đọc kết quả kế tiếp sẽ chuyển bản ghi đã quá 300 giây sang \path{LOI}. Từ \path{LOI}, GVHD hoặc Bộ môn có thể yêu cầu kiểm tra lại. Kết quả kiểm tra tên được tạo thẳng ở \path{HOAN_TAT} hoặc \path{LOI} vì chạy đồng bộ.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{chuong_3/trang_thai_kiem_tra.png}
+    \caption{Sơ đồ trạng thái kết quả kiểm tra trùng lặp}
+    \label{fig:c3-trang-thai-kiem-tra}
+\end{figure}
+
+\subsection{Các quyết định thiết kế chính}
+
+Bảng~\ref{tab:c3-quyet-dinh} tóm tắt các quyết định kiến trúc quan trọng cùng lý do và đánh đổi.
+
+{\renewcommand{\arraystretch}{1.15}
+\small
+\begin{longtable}{|p{4.0cm}|p{5.6cm}|p{5.1cm}|}
+\caption{Các quyết định thiết kế chính}\label{tab:c3-quyet-dinh}\\
+\hline
+\textbf{Quyết định} & \textbf{Lý do} & \textbf{Đánh đổi} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Quyết định} & \textbf{Lý do} & \textbf{Đánh đổi} \\
+\hline
+\endhead
+Tách dịch vụ AI thành tiến trình và schema riêng & Mô hình embedding nặng, nhu cầu tài nguyên khác Web API; lỗi của phần AI không làm dừng nghiệp vụ; đáp ứng yêu cầu kiến trúc SOA của đề cương & Thêm một điểm lỗi mạng; dữ liệu phải được đồng bộ qua API \\
+\hline
+Đẩy dữ liệu sang dịch vụ AI khi ghi & Giữ ranh giới sở hữu dữ liệu, không có truy vấn chéo schema & Chỉ mục có thể trễ so với \texttt{thesis\_core}; cần cột đánh dấu đã index và cơ chế thử lại \\
+\hline
+Kiểm tra tài liệu bất đồng bộ & Không giữ kết nối HTTP trong hàng chục giây; sinh viên nộp xong nhận phản hồi ngay & Client phải hỏi lại trạng thái; cần bất biến để bản ghi không kẹt ở trạng thái đang kiểm tra \\
+\hline
+Kiểm tra tên đồng bộ, không chặn việc giao & Tên ngắn, kết quả cần hiển thị ngay khi giao đề tài & Khi dịch vụ AI lỗi, đề tài vẫn được giao với kết quả lỗi \\
+\hline
+Một bảng tài liệu có số phiên bản cho mọi loại tệp & Dùng chung lưu trữ, trích xuất và kiểm tra trùng lặp; giữ đủ lịch sử nộp & Một số cột chỉ có nghĩa với một vài loại tài liệu \\
+\hline
+Mỗi phiên bản tài liệu có tối đa một kết quả kiểm tra & Kết quả về muộn của phiên bản cũ không thể ghi đè kết quả của phiên bản mới & Kiểm tra lại cập nhật bản ghi cũ thay vì tạo bản ghi mới \\
+\hline
+Giữ mã trạng thái cũ trong ràng buộc CHECK & Dữ liệu tạo trước khi điều chỉnh quy trình vẫn hợp lệ & Tập giá trị cho phép rộng hơn tập giá trị thực sự phát sinh \\
+\hline
+\end{longtable}
+}
+
+%=====================================================================
+\section{Thiết kế giao diện}\label{sec:c3-giao-dien}
+%=====================================================================
+
+\subsection{Quy ước thiết kế}
+
+Giao diện được thiết kế trước khi thi công dưới dạng prototype HTML/CSS tĩnh (mục 1.8.4). Mỗi màn hình là một trang HTML dùng tên class theo quy ước component của Ant Design~\cite{antd}, nên khi thi công bằng React, mỗi vùng của prototype ứng với một component có sẵn. Ảnh trong mục này được chụp tự động từ prototype bằng trình duyệt Chrome chạy không giao diện, ở độ rộng 1440 điểm ảnh. Dữ liệu trong các màn hình đều là dữ liệu hư cấu.
+
+Các quy ước chung:
+\begin{itemize}
+    \item \textit{Phong cách quản trị của Ant Design}: menu dọc nền tối bên trái, thanh tiêu đề có đường dẫn điều hướng (breadcrumb), chuông thông báo và tên người dùng. Nội dung chính là bảng và biểu mẫu đặt trong thẻ (Card).
+    \item \textit{Thiết kế cho máy tính}: khung rộng 1440 điểm ảnh, vì người dùng chính là giảng viên và Bộ môn làm việc trên máy tính.
+    \item \textit{Trạng thái bằng thẻ màu kèm chữ}: mỗi trạng thái nghiệp vụ hiển thị bằng Tag có màu và nhãn chữ, nên vẫn đọc được khi in trắng đen.
+    \item \textit{Trạng thái thay thế}: các trạng thái khác của cùng màn hình (đang kiểm tra, lỗi, hộp thoại) được minh họa trong khối riêng bên dưới màn hình chính.
+\end{itemize}
+
+\subsection{Bố cục và menu theo vai trò}
+
+Ba vai trò dùng chung bố cục, chỉ khác menu (Bảng~\ref{tab:c3-menu}). Mỗi mục menu dẫn tới một nhóm màn hình; người dùng không thấy mục menu của vai trò khác. Phía máy chủ, Web API vẫn kiểm tra vai trò ở từng endpoint, nên việc ẩn menu chỉ là lớp hỗ trợ sử dụng, không phải cơ chế bảo mật.
+
+{\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{|p{2.8cm}|p{11.9cm}|}
+\caption{Menu theo vai trò}\label{tab:c3-menu}\\
+\hline
+\textbf{Vai trò} & \textbf{Các mục menu} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Vai trò} & \textbf{Các mục menu} \\
+\hline
+\endhead
+Sinh viên & Tổng quan; Đề tài của tôi; Đề cương; Báo cáo tiến độ; Bảo vệ; Kho đồ án \\
+\hline
+Giảng viên & Tổng quan; Sinh viên của tôi; Đề tài hướng dẫn; Giao đề tài; Duyệt đề cương; Nhận xét tiến độ; Hội đồng bảo vệ; Kho đồ án \\
+\hline
+Bộ môn & Tổng quan toàn khoa; Quản lý đợt đồ án; Phân công GVHD; Đề tài toàn khoa; Duyệt đề cương; Tiến độ toàn khoa; Hội đồng và lịch bảo vệ; Kho đồ án; Cấu hình ngưỡng trùng lặp \\
+\hline
+\end{longtable}
+}
+
+\subsection{Danh mục màn hình}
+
+Bộ thiết kế gồm 16 màn hình chính (Bảng~\ref{tab:c3-man-hinh}), phủ đủ năm phân hệ và nhóm chức năng chung. Các màn hình quản lý danh mục đơn giản như tài khoản, đợt đồ án, định hướng và mốc tiến độ dùng lại mẫu bảng và biểu mẫu của các màn hình này, nên không thiết kế riêng.
+
+{\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{|p{1.6cm}|p{6.5cm}|p{3.5cm}|p{2.6cm}|}
+\caption{Danh mục màn hình thiết kế}\label{tab:c3-man-hinh}\\
+\hline
+\textbf{Mã} & \textbf{Tên màn hình} & \textbf{Vai trò} & \textbf{Use case} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Mã} & \textbf{Tên màn hình} & \textbf{Vai trò} & \textbf{Use case} \\
+\hline
+\endhead
+MH-01 & Đăng nhập & Cả ba vai trò & UC0.1 \\
+\hline
+MH-02 & Tổng quan của sinh viên & Sinh viên & UC0.5, UC4.5 \\
+\hline
+MH-03 & Tổng quan của giảng viên & Giảng viên & UC1.1, UC0.8 \\
+\hline
+MH-04 & Tổng quan toàn khoa, kèm tiến độ & Bộ môn & UC3.1, UC3.4 \\
+\hline
+MH-05 & Danh sách đề tài & Cả ba vai trò & UC1.2 \\
+\hline
+MH-06 & Giao đề tài, có cảnh báo trùng tên & Giảng viên & UC1.1, UC0.6 \\
+\hline
+MH-07 & Chi tiết đề tài & Cả ba vai trò & UC1.2 \\
+\hline
+MH-08 & Nộp đề cương và báo cáo cuối & Sinh viên & UC2.1, UC2.5, UC4.1 \\
+\hline
+MH-09 & Duyệt đề cương hai cấp & Giảng viên, Bộ môn & UC2.2--UC2.4 \\
+\hline
+MH-10 & Báo cáo tiến độ và nhận xét & Sinh viên, Giảng viên & UC3.2, UC3.3 \\
+\hline
+MH-11 & Lập hội đồng và xếp lịch & Bộ môn & UC4.2, UC4.4 \\
+\hline
+MH-12 & Chấm điểm bảo vệ & Giảng viên & UC4.3 \\
+\hline
+MH-13 & Kho đồ án & Cả ba vai trò & UC5.1, UC5.3, UC5.4 \\
+\hline
+MH-14 & Chi tiết kết quả kiểm tra trùng lặp & Giảng viên, Bộ môn & UC0.7 \\
+\hline
+MH-15 & Phân công GVHD & Bộ môn & UC0.8 \\
+\hline
+MH-16 & Sinh viên của tôi & Giảng viên & UC0.8, UC1.1 \\
+\hline
+\end{longtable}
+}
+
+Các mục tiếp theo trình bày từng màn hình theo thứ tự của quy trình đồ án.
+
+\subsection{Đăng nhập và trang tổng quan}
+
+\textbf{MH-01 -- Đăng nhập} (Hình~\ref{fig:c3-mh-01}). Màn hình không có menu và thanh tiêu đề. Người dùng nhập mã sinh viên, mã giảng viên hoặc email cùng mật khẩu. Khi sai thông tin hoặc tài khoản bị khóa, màn hình hiển thị một thông báo chung, không cho biết trường nào sai, để tránh dò tài khoản.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/mh_01.png}
+    \caption{MH-01 -- Đăng nhập}
+    \label{fig:c3-mh-01}
+\end{figure}
+
+\textbf{MH-02 -- Tổng quan của sinh viên} (Hình~\ref{fig:c3-mh-02}). Bốn thẻ cho sinh viên thấy ngay tình trạng của mình: đề tài và GVHD, đề cương (phiên bản, trạng thái duyệt, tỷ lệ trùng lặp gần nhất), tiến độ theo các mốc, lịch và kết quả bảo vệ. Ảnh minh họa mở sẵn danh sách thông báo chưa đọc của chuông thông báo.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/mh_02.png}
+    \caption{MH-02 -- Tổng quan của sinh viên}
+    \label{fig:c3-mh-02}
+\end{figure}
+
+\textbf{MH-03 -- Tổng quan của giảng viên} (Hình~\ref{fig:c3-mh-03}). Bốn chỉ số cho biết sĩ số lớp hướng dẫn và khối lượng việc đang chờ: sinh viên chưa được giao đề tài, đề cương chờ duyệt, báo cáo tiến độ chờ nhận xét. Bảng ``Việc cần xử lý'' dẫn thẳng tới màn hình thao tác tương ứng (MH-16, MH-09, MH-10, MH-12).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/mh_03.png}
+    \caption{MH-03 -- Tổng quan của giảng viên}
+    \label{fig:c3-mh-03}
+\end{figure}
+
+\textbf{MH-04 -- Tổng quan toàn khoa} (Hình~\ref{fig:c3-mh-04}). Bộ môn chọn đợt đồ án, xem số sinh viên chưa được phân công GVHD, số sinh viên chưa có đề tài, số sinh viên trễ mốc và các hội đồng sắp tới. Bảng tiến độ có một cột cho mỗi mốc; mỗi ô là một Tag: đúng hạn, trễ mốc hoặc chưa đến hạn. Sinh viên quá hạn mà chưa nộp được đánh dấu trễ mốc tự động (UC3.4).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/mh_04.png}
+    \caption{MH-04 -- Tổng quan toàn khoa}
+    \label{fig:c3-mh-04}
+\end{figure}
+
+\subsection{Phân công và giao đề tài}
+
+\textbf{MH-15 -- Phân công GVHD} (Hình~\ref{fig:c3-mh-15}). Đầu đợt, Bộ môn gán mỗi sinh viên cho một GVHD. Màn hình có các chỉ số tổng hợp, bộ lọc theo tình trạng phân công và thanh gán hàng loạt cho các dòng đã chọn. Thay đổi chỉ được gửi khi bấm ``Lưu phân công''; nếu một dòng vi phạm ràng buộc, cả lần lưu bị từ chối kèm danh sách lỗi. Sinh viên đã có đề tài thì không đổi được GVHD. Khối bên dưới minh họa hộp thoại nhập phân công từ tệp CSV với báo cáo các dòng lỗi.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/mh_15.png}
+    \caption{MH-15 -- Phân công GVHD}
+    \label{fig:c3-mh-15}
+\end{figure}
+
+\textbf{MH-16 -- Sinh viên của tôi} (Hình~\ref{fig:c3-mh-16}). Giảng viên xem lớp hướng dẫn trong từng đợt đang mở cùng tình trạng đề tài của mỗi sinh viên. Nút ``Giao đề tài'' ở dòng sinh viên chưa có đề tài mở MH-06 với đợt và sinh viên được chọn sẵn.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/mh_16.png}
+    \caption{MH-16 -- Sinh viên của tôi}
+    \label{fig:c3-mh-16}
+\end{figure}
+
+\textbf{MH-06 -- Giao đề tài} (Hình~\ref{fig:c3-mh-06}). GVHD nhập tên, chọn sinh viên trong lớp hướng dẫn, chọn định hướng (bắt buộc) và nhập mô tả. Ngay khi nhập tên, khối cảnh báo liệt kê các đề tài tương tự trong kho kèm khóa, GVHD và tỷ lệ tương đồng. Cảnh báo không chặn việc giao: GVHD có thể sửa tên hoặc vẫn giao. GVHD cũng có thể lưu nháp để giao sau.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/mh_06.png}
+    \caption{MH-06 -- Giao đề tài có cảnh báo trùng tên}
+    \label{fig:c3-mh-06}
+\end{figure}
+
+\textbf{MH-05 -- Danh sách đề tài} (Hình~\ref{fig:c3-mh-05}). Danh sách lọc được theo đợt, trạng thái, GVHD, định hướng và từ khóa. Phạm vi hiển thị phụ thuộc vai trò: sinh viên chỉ thấy đề tài được giao cho mình, giảng viên thấy đề tài mình hướng dẫn, Bộ môn thấy toàn bộ ở chế độ chỉ xem.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/mh_05.png}
+    \caption{MH-05 -- Danh sách đề tài}
+    \label{fig:c3-mh-05}
+\end{figure}
+
+\textbf{MH-07 -- Chi tiết đề tài} (Hình~\ref{fig:c3-mh-07}). Màn hình hiển thị thông tin đề tài, định hướng, GVHD, sinh viên và kết quả kiểm tra tên đã lưu lúc giao. Kết quả kiểm tra có ba dạng: không trùng, có đề tài tương tự, hoặc chưa kiểm tra được khi dịch vụ AI không phản hồi. Người không có quyền xem đề tài nhận mã lỗi 403.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/mh_07.png}
+    \caption{MH-07 -- Chi tiết đề tài}
+    \label{fig:c3-mh-07}
+\end{figure}
+
+\subsection{Đề cương và kết quả kiểm tra trùng lặp}
+
+\textbf{MH-08 -- Nộp đề cương và báo cáo cuối} (Hình~\ref{fig:c3-mh-08}). Hai thẻ ``Đề cương'' và ``Báo cáo cuối'' dùng chung bố cục: vùng kéo thả tệp chỉ nhận DOCX hoặc PDF tối đa 20~MB, bảng lịch sử phiên bản và dòng thời gian nhận xét của GVHD. Cột kết quả kiểm tra hiển thị biểu tượng đang kiểm tra với phiên bản vừa nộp, hoặc tỷ lệ trùng dẫn tới MH-14. Khối bên dưới minh họa thông báo lỗi khi tệp không đúng định dạng thật, kể cả khi phần mở rộng đúng.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/mh_08.png}
+    \caption{MH-08 -- Nộp đề cương và báo cáo cuối}
+    \label{fig:c3-mh-08}
+\end{figure}
+
+\textbf{MH-09 -- Duyệt đề cương} (Hình~\ref{fig:c3-mh-09}). Màn hình phục vụ cả hai cấp duyệt. Phần trên dành cho GVHD: nội dung tóm tắt của phiên bản mới nhất, bảng kiểm tra trước khi nộp lên khoa (tên tệp đúng mẫu, mã định hướng khớp đề tài, trích xuất được nội dung), ô nhận xét và hai nút yêu cầu sửa hoặc duyệt. Bên phải là kết quả kiểm tra trùng lặp với tỷ lệ tổng, ngưỡng áp dụng và các đồ án trùng nhiều nhất. Khối giữa minh họa trạng thái khi kết quả chưa có: GVHD vẫn duyệt được. Khối cuối minh họa hai trạng thái sau: GVHD nộp đề cương đã duyệt lên Bộ môn, và Lãnh đạo bộ môn tải lên bản PDF đã ký số để phê duyệt hoặc trả lại kèm nhận xét.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/mh_09.png}
+    \caption{MH-09 -- Duyệt đề cương hai cấp}
+    \label{fig:c3-mh-09}
+\end{figure}
+
+\textbf{MH-14 -- Chi tiết kết quả kiểm tra trùng lặp} (Hình~\ref{fig:c3-mh-14}). Màn hình trình bày kết quả theo kiểu báo cáo của các công cụ kiểm tra đạo văn. Thanh tóm tắt gồm tỷ lệ tổng, tỷ lệ trùng với một đồ án cao nhất, ngưỡng và nhãn vượt hoặc dưới ngưỡng. Cột trái liệt kê các đồ án trùng và đóng vai trò bộ lọc. Hai cột bên phải đặt đoạn trong tài liệu nộp cạnh đoạn nguồn. Mỗi đoạn có nhãn chữ ghi mức độ (cao, trung bình, thấp) và tỷ lệ, không chỉ dựa vào màu.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/mh_14.png}
+    \caption{MH-14 -- Chi tiết kết quả kiểm tra trùng lặp}
+    \label{fig:c3-mh-14}
+\end{figure}
+
+\subsection{Tiến độ và bảo vệ}
+
+\textbf{MH-10 -- Báo cáo tiến độ và nhận xét} (Hình~\ref{fig:c3-mh-10}). Bên trái là dòng thời gian các mốc đã nộp với Tag đúng hạn, nộp trễ hoặc chưa đến hạn. Bên phải là biểu mẫu nhận xét và đánh giá của GVHD cho mốc đang chọn. Hộp thoại mở sẵn minh họa phía sinh viên nộp báo cáo của mốc đang mở; báo cáo nộp trễ vẫn được nhận nhưng bị đánh dấu.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/mh_10.png}
+    \caption{MH-10 -- Báo cáo tiến độ và nhận xét}
+    \label{fig:c3-mh-10}
+\end{figure}
+
+\textbf{MH-11 -- Lập hội đồng và xếp lịch} (Hình~\ref{fig:c3-mh-11}). Bên trái là biểu mẫu hội đồng: tên, ngày, giờ, phòng và danh sách thành viên kèm vai trò. Bên phải là bảng sinh viên bảo vệ với số thành viên đã chấm và điểm trung bình. Nút ``Chốt kết quả'' bị vô hiệu hóa cho tới khi mọi thành viên đã chấm; khi chốt, hệ thống tính điểm trung bình, khóa điểm và lưu đồ án vào kho.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/mh_11.png}
+    \caption{MH-11 -- Lập hội đồng và xếp lịch}
+    \label{fig:c3-mh-11}
+\end{figure}
+
+\textbf{MH-12 -- Chấm điểm bảo vệ} (Hình~\ref{fig:c3-mh-12}). Giảng viên chỉ chọn được hội đồng mà mình là thành viên. Khu chấm điểm có liên kết tải báo cáo cuối, tóm tắt kết quả kiểm tra trùng lặp dẫn tới MH-14, ô nhập điểm từ 0 đến 10 và ô nhận xét. Mỗi thành viên chỉ lưu điểm của riêng mình.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/mh_12.png}
+    \caption{MH-12 -- Chấm điểm bảo vệ}
+    \label{fig:c3-mh-12}
+\end{figure}
+
+\subsection{Kho đồ án}
+
+\textbf{MH-13 -- Kho đồ án} (Hình~\ref{fig:c3-mh-13}). Mọi vai trò tra cứu được kho theo khóa, GVHD và từ khóa. Cột ``Chỉ mục AI'' cho biết bản ghi đã được đưa vào chỉ mục của dịch vụ AI hay chưa. Ảnh minh họa dùng vai trò Bộ môn để thấy hai nút quản trị: nhập dữ liệu các khóa cũ và thêm bản ghi. Khối bên dưới minh họa ngăn kéo (Drawer) xem chi tiết một bản ghi với các nút sửa, xóa.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chuong_3/mh_13.png}
+    \caption{MH-13 -- Kho đồ án}
+    \label{fig:c3-mh-13}
+\end{figure}
+
+%=====================================================================
+\section{Kết luận chương}
+%=====================================================================
+
+Chương 3 đã trình bày thiết kế hệ thống ở bốn khía cạnh. Mô hình miền gồm 22 lớp thực thể, chia theo năm phân hệ và nhóm chức năng chung, trong đó đề tài là trung tâm và mọi tệp nộp dùng chung một lớp tài liệu có phiên bản. Cơ sở dữ liệu gồm hai schema tách biệt: \texttt{thesis\_core} với 22 bảng do Web API sở hữu và \texttt{thesis\_ai} với ba bảng do dịch vụ AI sở hữu. Các quy tắc nghiệp vụ quan trọng như mỗi sinh viên có một đề tài đang hoạt động, mỗi phiên bản tài liệu có một kết quả kiểm tra được bảo đảm bằng ràng buộc của CSDL. Kiến trúc hướng dịch vụ gồm client Web, Web API và dịch vụ AI, với một cửa vào công khai qua Apache, dữ liệu được đẩy sang dịch vụ AI khi ghi, kiểm tra tên đồng bộ và kiểm tra tài liệu bất đồng bộ. Các sơ đồ trạng thái mô tả quy trình duyệt đề cương hai cấp và vòng đời của kết quả kiểm tra. Mười sáu màn hình thiết kế theo quy ước Ant Design phủ đủ các use case chính của ba vai trò. Chương 4 trình bày việc thi công hệ thống theo thiết kế này.
 
 \end{document}

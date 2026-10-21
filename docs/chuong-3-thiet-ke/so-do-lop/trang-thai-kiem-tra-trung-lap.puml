@@ -1,31 +1,36 @@
 @startuml trang-thai-kiem-tra-trung-lap
 hide empty description
 
-[*] --> DANG_KIEM_TRA : Web API tạo bản ghi kiểm tra,\ntrả 202 (UC0.7 — nộp đề cương/báo cáo)
+[*] --> DANG_KIEM_TRA : SV nộp đề cương/báo cáo cuối,\nWeb API tạo bản ghi, trả 202 (UC0.7)
 
-DANG_KIEM_TRA --> HOAN_TAT : Dịch vụ AI trả kết quả thành công
-DANG_KIEM_TRA --> LOI : Timeout hoặc lỗi dịch vụ AI\n(NFR-09, UC0.7 — E1/E2)
+DANG_KIEM_TRA --> HOAN_TAT : Dịch vụ AI trả\nkết quả thành công
+DANG_KIEM_TRA --> LOI : Lỗi hoặc hết thời gian chờ
 
-LOI --> DANG_KIEM_TRA : GVHD/Bộ môn yêu cầu kiểm tra lại
+LOI --> DANG_KIEM_TRA : GVHD/Bộ môn yêu cầu\nkiểm tra lại
 
 HOAN_TAT --> [*]
 LOI --> [*]
 
 note right of DANG_KIEM_TRA
-  Bất biến bắt buộc: một bản ghi không bao giờ ở
-  mãi trạng thái Đang kiểm tra — timeout hoặc lỗi
-  luôn chuyển sang Lỗi (cho phép kiểm tra lại),
-  không có đường nào giữ nguyên Đang kiểm tra.
+  Bất biến: bản ghi không bao giờ ở mãi
+  trạng thái Đang kiểm tra. Tác vụ nền luôn
+  kết thúc ở Hoàn tất hoặc Lỗi; nếu tiến
+  trình bị khởi động lại, lần đọc kết quả kế
+  tiếp chuyển bản ghi quá hạn sang Lỗi.
 end note
 
-note left of HOAN_TAT
-  Mỗi lần nộp một phiên bản TaiLieuDoAn mới tạo
-  MỘT bản ghi KetQuaKiemTraTrungLap MỚI gắn với
-  phiên bản đó (1 TaiLieuDoAn – 1 KetQuaKiemTraTrungLap).
-  Vì vậy kết quả của phiên bản cũ hơn không bao giờ
-  bị ghi đè bởi kết quả trả về muộn của phiên bản
-  mới hơn — chúng là hai bản ghi độc lập, UI chỉ
-  hiển thị bản ghi của phiên bản mới nhất.
+note bottom of HOAN_TAT
+  Mỗi phiên bản TaiLieuDoAn có đúng một
+  KetQuaKiemTraTrungLap, nên kết quả trả
+  về muộn của phiên bản cũ không ghi đè
+  kết quả của phiên bản mới hơn.
+end note
+
+note bottom of LOI
+  Kiểm tra tên đề tài (UC0.6) chạy đồng bộ
+  khi GVHD giao đề tài: bản ghi được tạo
+  thẳng ở Hoàn tất, hoặc ở Lỗi khi Dịch vụ
+  AI không phản hồi.
 end note
 
 @enduml

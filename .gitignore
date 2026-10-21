@@ -21,6 +21,7 @@ backend/app/seed_data/*.csv
 
 # Bài báo tham khảo có bản quyền — chỉ giữ cục bộ
 docs/tham-khao/*.pdf
+docs/*.pdf
 
 # File build LaTeX của quyển báo cáo
 bao-cao/**/*.aux

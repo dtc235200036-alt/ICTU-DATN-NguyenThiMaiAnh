@@ -3,25 +3,29 @@ left to right direction
 skinparam packageStyle rectangle
 
 actor "Sinh viên" as SV
-actor "Giảng viên" as GV
+actor "Giảng viên\nhướng dẫn" as GV
+actor "Bộ môn" as BM
 
 rectangle "UC2 – Quản lý đề cương" {
   usecase "UC2.1 – Nộp đề cương" as UC2_1
   usecase "UC2.2 – Duyệt hoặc yêu cầu sửa đề cương" as UC2_2
-  usecase "UC2.3 – Xem lịch sử phiên bản và nhận xét" as UC2_3
+  usecase "UC2.3 – Nộp đề cương lên Bộ môn" as UC2_3
+  usecase "Đổi tên tệp theo mẫu" as UC2_3X
+  usecase "UC2.4 – Phê duyệt (ký số) hoặc trả lại đề cương" as UC2_4
+  usecase "Xuất thư mục đề cương đã ký số" as UC2_4X
+  usecase "UC2.5 – Xem lịch sử phiên bản và nhận xét" as UC2_5
   usecase "UC0.7 – Kiểm tra trùng lặp tài liệu" as UC0_7
 }
 
 SV --> UC2_1
 GV --> UC2_2
-SV --> UC2_3
 GV --> UC2_3
+BM --> UC2_4
+SV --> UC2_5
+GV --> UC2_5
+BM --> UC2_5
 
 UC2_1 ..> UC0_7 : <<include>>
-
-note right of UC0_7
-  UC0.7 thuộc nhóm UC0 – Chức năng chung,
-  đặc tả đầy đủ ở 11-dac-ta-uc0-chuc-nang-chung.md
-  (kế hoạch 01-04, Task 3).
-end note
+UC2_3X ..> UC2_3 : <<extend>>
+UC2_4X ..> UC2_4 : <<extend>>
 @enduml

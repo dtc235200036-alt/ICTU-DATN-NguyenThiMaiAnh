@@ -18,11 +18,13 @@
 % Dùng để set margin
 % \usepackage[top=3cm,inner=3.5cm,outer=2cm,bottom=3cm,headheight=120pt]{geometry}		
 % \usepackage[top=2.5cm,bottom=2.5cm,left=3cm, right=2cm, headheight=2pt]{geometry}	
-\usepackage[top=2cm,bottom=2cm,left=3cm, right=2cm, headheight=15pt]{geometry}	
+\usepackage[top=2cm,bottom=2cm,left=3cm, right=2cm, headheight=16pt]{geometry}	
 
 
 \usepackage{tikz}
 \usetikzlibrary{calc}
+\usepackage{pgfplots}			% Biểu đồ kết quả khảo sát (chương 2)
+\pgfplotsset{compat=1.18}
 
 \usepackage{graphicx}			% Dùng để chèn hình ảnh
 \graphicspath{{tai_nguyen/}}		% Folder chứa tài nguyên dùng chung
@@ -58,6 +60,9 @@ sorting=none,
 citestyle = numeric
 ]{biblatex}
 \addbibresource{tham_khao/tai_lieu.bib}
+\addbibresource{tham_khao/chuong_2.bib}   % Tài liệu riêng của từng chương, tránh sửa chồng một file
+\addbibresource{tham_khao/chuong_3.bib}
+\addbibresource{tham_khao/chuong_4.bib}
 \renewcommand*{\bibfont}{\normalfont\fontsize{13}{13}\selectfont}
 
 \usepackage{pdfpages} 
@@ -97,6 +102,9 @@ citestyle = numeric
     pdfborder={0 0 0},
     linkcolor=black
 ]{hyperref}                     % Hiển thị màu liên kết cho mục lục, bảng, hình
+\renewcommand{\UrlBreaks}{\do\.\do\/\do\-\do\_\do\=\do\:\do\#}  % Cho phép ngắt dòng trong \path, \url
+\setlength{\emergencystretch}{2em}  % Giãn chữ thêm để giảm dòng tràn lề khi căn đều
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}  % Dùng khi chuyển từ pandoc
 
 
 \usepackage{setspace}
@@ -139,8 +147,8 @@ citestyle = numeric
 	frame=single,				% Khung
 }
 
-\title{Ứng dụng quản lý sức khỏe cá nhân tích hợp AI nhắc lịch và tư vấn cơ bản}
-\author{Trần Thị Thu Giang}
+\title{Phát triển hệ thống quản lý đồ án sinh viên Khoa Công nghệ thông tin -- Trường Đại học Công nghệ Thông tin và Truyền thông}
+\author{Nguyễn Thị Mai Anh}
 
 % Header và footer 
 \pagestyle{fancy}
@@ -276,9 +284,6 @@ citestyle = numeric
 \subfile{chuong/ket_luan}
 
 \clearpage
-% Giữ lại một số tài liệu mẫu để phần tài liệu tham khảo hiển thị trong template.
-% Sinh viên thay hoặc xóa các mục này trong tham_khao/tai_lieu.bib.
-\nocite{sommerville2016software,pressman2020software,boehm1988spiral,vaswani2017attention,sutskever2014sequence,iso29148requirements}
 \printbibliography[heading=bibintoc,title={TÀI LIỆU THAM KHẢO}]
 
 \clearpage

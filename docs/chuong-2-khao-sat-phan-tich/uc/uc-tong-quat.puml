@@ -5,6 +5,12 @@ skinparam packageStyle rectangle
 actor "Sinh viên" as SV
 actor "Giảng viên" as GV
 actor "Bộ môn" as BM
+actor "Người dùng" as ND
+actor "Dịch vụ AI" as AI
+
+SV --|> ND
+GV --|> ND
+BM --|> ND
 
 rectangle "Hệ thống quản lý đồ án – Khoa CNTT" {
   usecase "UC1 – Quản lý đề tài" as UC1 #lightblue
@@ -12,70 +18,21 @@ rectangle "Hệ thống quản lý đồ án – Khoa CNTT" {
   usecase "UC3 – Quản lý tiến độ thực hiện" as UC3 #lightblue
   usecase "UC4 – Quản lý bảo vệ" as UC4 #lightblue
   usecase "UC5 – Quản lý kho dữ liệu đồ án" as UC5 #lightblue
-
-  usecase "UC0.1 – Đăng nhập và đăng xuất" as UC0_1
-  usecase "UC0.2 – Quản lý tài khoản SV/GV" as UC0_2
-  usecase "UC0.3 – Quản lý đợt đồ án" as UC0_3
-  usecase "UC0.4 – Cấu hình ngưỡng cảnh báo trùng lặp" as UC0_4
-  usecase "UC0.5 – Xem thông báo" as UC0_5
+  usecase "UC0 – Chức năng chung" as UC0
   usecase "UC0.6 – Kiểm tra trùng lặp tên đề tài" as UC0_6
   usecase "UC0.7 – Kiểm tra trùng lặp tài liệu" as UC0_7
-  usecase "UC0.8 – Phân công GVHD" as UC0_8
 }
 
-SV --> UC1
-GV --> UC1
-BM --> UC1
-
-SV --> UC2
-GV --> UC2
-
-BM --> UC3
-SV --> UC3
-GV --> UC3
-
-BM --> UC4
-GV --> UC4
-SV --> UC4
-
-SV --> UC5
-GV --> UC5
-BM --> UC5
-
-SV --> UC0_1
-GV --> UC0_1
-BM --> UC0_1
-
-BM --> UC0_2
-BM --> UC0_3
-BM --> UC0_4
-BM --> UC0_8
-GV --> UC0_8
-
-SV --> UC0_5
-GV --> UC0_5
-BM --> UC0_5
+ND --> UC1
+ND --> UC2
+ND --> UC3
+ND --> UC4
+ND --> UC5
+ND --> UC0
 
 UC1 ..> UC0_6 : <<include>>
 UC2 ..> UC0_7 : <<include>>
 UC4 ..> UC0_7 : <<include>>
-UC1 ..> UC0_8 : dựa trên\nphân công GVHD
-
-note bottom of UC0_2
-  UC0.2..UC0.8 thuộc nhóm chức năng chung,
-  đặc tả chi tiết ở 11-dac-ta-uc0-chuc-nang-chung.md.
-end note
-
-note right of UC0_8
-  Đầu đợt Bộ môn phân công mỗi SV cho đúng
-  một GVHD; GV xem lớp hướng dẫn của mình.
-  UC1: GVHD này tạo và giao đề tài cho SV
-  trong lớp (Bộ môn chỉ theo dõi).
-end note
-
-note right of UC2
-  Bộ môn chỉ xem/báo cáo (không duyệt) đề cương —
-  quyền duyệt thuộc về Giảng viên hướng dẫn, nên
-  không có liên kết Bộ môn -> UC2 trên sơ đồ này.
-end note
+UC0_6 --> AI
+UC0_7 --> AI
 @enduml

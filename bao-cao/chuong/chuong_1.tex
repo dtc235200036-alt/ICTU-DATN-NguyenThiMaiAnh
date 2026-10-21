@@ -2,26 +2,251 @@
 
 \begin{document}
 
-\textit{Chương này trình bày những công nghệ chính sử dụng trong đồ án.}
+\textit{Chương này trình bày những công nghệ chính sử dụng trong đồ án. Mỗi mục giới thiệu khái niệm nền tảng của một nhóm công nghệ, sau đó nêu cách công nghệ đó được áp dụng trong hệ thống.}
 
-\section{Tổng quan đề tài}
-Sinh viên trình bày tổng quan về đề tài, bối cảnh ứng dụng và vấn đề cần giải quyết.
+Hệ thống quản lý đồ án được xây dựng theo kiến trúc hướng dịch vụ, gồm ba thành phần triển khai độc lập: client Web viết bằng React, Web API viết bằng FastAPI và dịch vụ AI kiểm tra trùng lặp (một ứng dụng FastAPI riêng). Cả ba đứng sau máy chủ Apache và dùng chung một máy chủ cơ sở dữ liệu MySQL. Các mục 1.1 đến 1.5 trình bày nền tảng của kiến trúc và các thành phần; mục 1.6 và 1.7 trình bày nền tảng của tính năng kiểm tra trùng lặp; mục 1.8 trình bày các công cụ dùng để phân tích và thiết kế.
 
-\section{Cơ sở lý thuyết}
-Sinh viên trình bày các khái niệm, mô hình, thuật toán, phương pháp hoặc công nghệ nền tảng liên quan đến đề tài.
-Ví dụ, khi trình bày tài liệu nền tảng, sinh viên có thể trích dẫn như sau: quy trình phát triển phần mềm được trình bày trong tài liệu của Sommerville~\cite{sommerville2016software}.
+\section{Kiến trúc hướng dịch vụ và RESTful API}
 
-Ví dụ danh sách gạch đầu dòng:
+\subsection{Kiến trúc hướng dịch vụ (SOA)}
+
+Kiến trúc hướng dịch vụ (Service-Oriented Architecture -- SOA) chia hệ thống thành nhiều \textit{dịch vụ} độc lập. Mỗi dịch vụ đóng gói một nhóm chức năng nghiệp vụ, sở hữu dữ liệu của riêng mình và chỉ giao tiếp với dịch vụ khác qua một giao diện đã công bố, thường là API trên giao thức HTTP. So với một ứng dụng đơn khối (monolith) chỉ chia thư mục theo module, SOA có ba đặc trưng:
 \begin{itemize}
-    \item Công nghệ hoặc nền tảng thứ nhất sử dụng trong đồ án.
-    \item Công nghệ hoặc nền tảng thứ hai sử dụng trong đồ án.
-    \item Công nghệ hoặc nền tảng thứ ba sử dụng trong đồ án.
+    \item \textit{Triển khai độc lập:} mỗi dịch vụ được xây dựng, kiểm thử, đóng gói và triển khai riêng.
+    \item \textit{Sở hữu dữ liệu riêng:} mỗi dịch vụ có cơ sở dữ liệu hoặc schema riêng; dịch vụ khác chỉ lấy được dữ liệu đó qua API của dịch vụ sở hữu.
+    \item \textit{Giao tiếp qua hợp đồng tường minh:} định dạng dữ liệu, phương thức và mã lỗi được định nghĩa trước, nên một dịch vụ có thể thay đổi cách cài đặt bên trong mà không ảnh hưởng tới dịch vụ gọi nó.
 \end{itemize}
 
-\section{Các công trình hoặc hệ thống liên quan}
-Sinh viên tóm tắt các nghiên cứu, sản phẩm hoặc hệ thống tương tự. Nên nêu ưu điểm, hạn chế và bài học kế thừa.
+Việc tách dịch vụ cho phép mở rộng và thay thế công nghệ của từng thành phần, đồng thời tạo ranh giới bảo mật rõ ràng. Đánh đổi là độ phức tạp vận hành cao hơn: có nhiều tiến trình và nhiều điểm lỗi mạng hơn, và hệ thống cần cơ chế xử lý khi một dịch vụ tạm thời không phản hồi.
 
-\section{Định hướng giải quyết}
-Sinh viên nêu hướng tiếp cận dự kiến, các giả định ban đầu và lý do lựa chọn phương án thực hiện.
+\subsection{RESTful API}
+
+REST (Representational State Transfer) là phong cách kiến trúc cho API trên nền HTTP, được Fielding trình bày trong luận án tiến sĩ năm 2000~\cite{fielding2000rest}. Một API RESTful tuân theo các ràng buộc chính:
+\begin{itemize}
+    \item \textit{Hướng tài nguyên:} mỗi thực thể nghiệp vụ (đề tài, đề cương, tài khoản\ldots) là một tài nguyên có định danh URI riêng.
+    \item \textit{Dùng đúng ngữ nghĩa phương thức HTTP:} \texttt{GET} để đọc, \texttt{POST} để tạo, \texttt{PUT}/\texttt{PATCH} để cập nhật, \texttt{DELETE} để xóa; mã trạng thái (200, 201, 400, 401, 403, 404\ldots) phản ánh đúng kết quả xử lý.
+    \item \textit{Không trạng thái (stateless):} máy chủ không lưu phiên làm việc giữa các yêu cầu; mỗi yêu cầu tự mang đủ thông tin cần thiết, kể cả thông tin xác thực.
+    \item \textit{Định dạng dữ liệu thống nhất:} thường là JSON.
+\end{itemize}
+
+\subsection{Xác thực bằng JSON Web Token}
+
+JSON Web Token (JWT) là định dạng token nhỏ gọn, tự chứa, được chuẩn hóa trong RFC 7519~\cite{rfc7519}. Token gồm ba phần ngăn bởi dấu chấm: \path{header.payload.signature}. Phần \texttt{header} khai báo thuật toán ký; phần \texttt{payload} chứa các \textit{claim} như định danh người dùng, vai trò, thời điểm phát hành (\texttt{iat}) và thời điểm hết hạn (\texttt{exp}); phần \texttt{signature} là chữ ký trên hai phần trước, giúp máy chủ xác minh token không bị sửa đổi mà không cần tra cứu kho phiên. Vì vậy JWT phù hợp với nguyên tắc không trạng thái của REST: mỗi yêu cầu đính kèm token trong header \texttt{Authorization: Bearer <token>}, máy chủ xác minh chữ ký rồi đọc claim để biết ai đang gọi và với vai trò gì.
+
+\subsection{Kiểm soát truy cập theo vai trò}
+
+Kiểm soát truy cập theo vai trò (Role-Based Access Control -- RBAC) gán quyền cho \textit{vai trò} thay vì cho từng người dùng; người dùng được gán vai trò và thừa hưởng toàn bộ quyền của vai trò đó. Khi số vai trò ít và cố định, mô hình này giúp việc quản trị quyền đơn giản: thêm người dùng mới chỉ là gán một vai trò có sẵn. Trong REST API dùng JWT, vai trò thường được nhúng thành một claim của token; mỗi endpoint khai báo vai trò được phép gọi, và một lớp kiểm tra trung gian so khớp claim với danh sách đó trước khi yêu cầu đi vào xử lý nghiệp vụ.
+
+\subsection{Áp dụng trong đồ án}
+
+Hệ thống gồm ba thành phần triển khai độc lập theo đúng nghĩa SOA:
+\begin{itemize}
+    \item \textit{Client Web:} ứng dụng React một trang, chỉ gọi Web API.
+    \item \textit{Web API:} ứng dụng FastAPI sở hữu schema \texttt{thesis\_core} và toàn bộ nghiệp vụ của năm UC chính.
+    \item \textit{Dịch vụ AI:} ứng dụng FastAPI riêng sở hữu schema \texttt{thesis\_ai}, chỉ chạy trong mạng nội bộ và không có đường dẫn công khai qua Apache.
+\end{itemize}
+
+Hai schema không có khóa ngoại nối sang nhau. Dịch vụ AI không đọc trực tiếp \texttt{thesis\_core}; Web API chủ động đẩy dữ liệu sang qua endpoint \texttt{/ingest} mỗi khi đề tài hoặc tài liệu được ghi. Hợp đồng của dịch vụ AI gồm các endpoint \texttt{/ingest}, \texttt{/check-title}, \texttt{/check-document}, \texttt{/reindex} và \texttt{/health}.
+
+Người dùng đăng nhập nhận access token và refresh token do Web API phát hành, ký bằng thư viện PyJWT~\cite{pyjwt}. Access token chứa các claim \texttt{sub} (mã tài khoản), \texttt{vai\_tro}, \texttt{typ} (loại token), \texttt{tv} (phiên bản token) và \texttt{exp}. Claim \texttt{tv} phải khớp với phiên bản token đang lưu của tài khoản; khi người dùng đăng xuất, phiên bản này tăng lên và mọi token cũ mất hiệu lực ngay, dù chưa hết hạn. Lời gọi từ Web API sang dịch vụ AI không chuyển tiếp JWT của người dùng mà dùng một khóa nội bộ trong header \texttt{X-API-Key}, vì dịch vụ AI không có khái niệm người dùng hay vai trò.
+
+RBAC được cài đặt với ba vai trò cố định: \texttt{SINH\_VIEN}, \texttt{GIANG\_VIEN} và \texttt{BO\_MON}. Mỗi route khai báo vai trò được phép qua dependency \texttt{require\_role} của FastAPI, ví dụ chỉ vai trò Bộ môn được cấu hình ngưỡng cảnh báo trùng lặp. Với ba vai trò gắn với một quy trình cố định, một dependency nhỏ tự viết là đủ, không cần đến một framework quản lý người dùng tổng quát.
+
+\section{Python, FastAPI, Pydantic, SQLAlchemy và Alembic}
+
+\subsection{Python}
+
+Python là ngôn ngữ lập trình thông dịch, đa mục đích, có hệ sinh thái thư viện lớn cho phát triển web, xử lý dữ liệu và học máy. Dùng cùng một ngôn ngữ cho Web API và dịch vụ AI giúp giảm chi phí chuyển ngữ cảnh khi phát triển, đồng thời tận dụng trực tiếp các thư viện xử lý ngôn ngữ tự nhiên vốn tập trung ở Python (\texttt{sentence-transformers}, \texttt{underthesea}, \texttt{faiss}).
+
+\subsection{FastAPI}
+
+FastAPI là framework xây dựng API bằng Python trên chuẩn ASGI, hỗ trợ cả hàm xử lý đồng bộ (\texttt{def}) lẫn bất đồng bộ (\texttt{async def})~\cite{fastapi}. Ba đặc điểm khiến FastAPI phù hợp với cả hai dịch vụ của hệ thống:
+\begin{itemize}
+    \item \textit{Khai báo bằng type hint:} tham số, dữ liệu yêu cầu và phản hồi được khai báo bằng kiểu dữ liệu Python; FastAPI tự sinh phần kiểm tra hợp lệ, chuyển đổi kiểu và tài liệu OpenAPI từ chính các khai báo đó.
+    \item \textit{Tích hợp Pydantic:} dữ liệu sai định dạng bị chặn ngay ở tầng framework, trước khi chạm tới logic nghiệp vụ.
+    \item \textit{Dependency Injection (\texttt{Depends}):} các bước dùng chung như xác thực, kiểm tra vai trò hay mở phiên CSDL được khai báo thành hàm độc lập và tái sử dụng giữa các route.
+\end{itemize}
+
+Với hàm xử lý đồng bộ, FastAPI tự chạy hàm trong một thread pool, nhờ đó vẫn phục vụ được nhiều yêu cầu đồng thời mà mã nghiệp vụ không phải viết theo kiểu \texttt{async}/\texttt{await}.
+
+\subsection{Pydantic}
+
+Pydantic là thư viện kiểm tra và chuyển đổi dữ liệu dựa trên type hint~\cite{pydantic}. Một model Pydantic khai báo hình dạng dữ liệu mong đợi (tên trường, kiểu, ràng buộc độ dài hay giá trị); khi dữ liệu đầu vào không khớp, thư viện trả về lỗi có cấu trúc chỉ rõ trường sai và lý do. Trong FastAPI, các model này đồng thời là đối tượng truyền dữ liệu (DTO) của hợp đồng API, tách biệt với model cơ sở dữ liệu.
+
+\subsection{SQLAlchemy 2.0}
+
+SQLAlchemy là thư viện truy cập cơ sở dữ liệu quan hệ cho Python, gồm tầng Core (xây dựng câu lệnh SQL bằng API Python) và tầng ORM (ánh xạ bảng thành lớp, dòng dữ liệu thành đối tượng)~\cite{sqlalchemy}. Từ phiên bản 2.0, model được khai báo bằng type hint (\texttt{Mapped[...]}, \texttt{mapped\_column(...)}), nên một lớp thực thể vừa là định nghĩa schema vừa là kiểu dữ liệu mà công cụ kiểm tra kiểu tĩnh hiểu được.
+
+\subsection{Alembic}
+
+Alembic là công cụ quản lý di trú (migration) schema cho SQLAlchemy~\cite{alembic}. Mỗi thay đổi cấu trúc CSDL được ghi thành một phiên bản (revision) với hai bước \texttt{upgrade()} và \texttt{downgrade()}. Nhờ đó lịch sử schema được lưu vết đầy đủ, có thể áp dụng tuần tự lên một CSDL trống để tái tạo đúng trạng thái hiện tại, và có thể lùi lại khi cần.
+
+\subsection{Áp dụng trong đồ án}
+
+Web API dùng FastAPI với các route đồng bộ và driver MySQL đồng bộ \texttt{pymysql}. Lựa chọn này ít khái niệm hơn so với cặp \texttt{async def} và driver bất đồng bộ, phù hợp với thời gian 10 tuần, mà vẫn phục vụ được nhiều yêu cầu nhờ thread pool. Cấu hình ứng dụng đọc từ biến môi trường bằng \texttt{pydantic-settings}; các bí mật như khóa ký JWT hay chuỗi kết nối CSDL không có giá trị mặc định trong mã nguồn. DTO của từng nhóm chức năng nằm tách riêng khỏi model CSDL.
+
+Tầng dữ liệu dùng SQLAlchemy 2.0 (cố định phiên bản 2.0.54 để tránh rủi ro từ nhánh mới) theo phong cách \texttt{Mapped[]}/\texttt{mapped\_column()}, và Alembic lưu từng bước thay đổi schema. Chuỗi migration này vừa dùng để dựng lại CSDL demo từ đầu và đồng bộ schema giữa máy phát triển với máy chủ, vừa ghi lại quá trình CSDL được mở rộng qua từng giai đoạn thi công.
+
+\section{Hệ quản trị cơ sở dữ liệu MySQL 8}
+
+\subsection{MySQL và mô hình quan hệ}
+
+MySQL là hệ quản trị cơ sở dữ liệu quan hệ mã nguồn mở, lưu dữ liệu thành các bảng liên kết với nhau qua khóa chính và khóa ngoại. Với công cụ lưu trữ InnoDB, MySQL hỗ trợ giao dịch ACID: một thao tác nghiệp vụ gồm nhiều câu lệnh ghi (chẳng hạn vừa cập nhật trạng thái đề cương vừa tạo thông báo) hoặc thành công trọn vẹn, hoặc không ghi gì, kể cả khi có lỗi hay truy cập đồng thời. MySQL 8 bổ sung các tính năng SQL như biểu thức bảng chung (\texttt{WITH}) và hàm cửa sổ (\texttt{ROW\_NUMBER()}, \texttt{RANK()}), đồng thời dùng bảng mã \texttt{utf8mb4} làm mặc định.
+
+\subsection{Bảng mã utf8mb4 và collation tiếng Việt}
+
+Bảng mã \texttt{utf8} trong các phiên bản MySQL cũ (nay gọi là \texttt{utf8mb3}) chỉ dùng tối đa 3 byte cho một ký tự nên không biểu diễn được toàn bộ Unicode. Bảng mã \texttt{utf8mb4} dùng tối đa 4 byte và hỗ trợ đầy đủ Unicode~\cite{mysqlutf8mb4}, vì vậy là lựa chọn cần thiết khi lưu văn bản tiếng Việt. \textit{Collation} là quy tắc so sánh và sắp xếp chuỗi gắn với một bảng mã, quyết định chẳng hạn ``a'' và ``á'' có được coi là bằng nhau hay không, và chữ hoa có được coi như chữ thường hay không (hậu tố \texttt{\_ci}). Collation \texttt{utf8mb4\_vietnamese\_ci} sắp xếp theo thứ tự bảng chữ cái và dấu thanh tiếng Việt, nên danh sách tên sinh viên hay tên đề tài hiện đúng thứ tự người dùng mong đợi.
+
+\subsection{Chuẩn hóa Unicode NFC và NFD}
+
+Cùng một ký tự tiếng Việt có dấu có thể được biểu diễn bằng hai chuỗi byte khác nhau~\cite{unicodetr15}. Dạng NFC (tổ hợp sẵn) dùng một điểm mã duy nhất cho ký tự đã có dấu, ví dụ ``á''; dạng NFD (phân rã) dùng chữ cái cơ sở cộng với dấu kết hợp đứng sau, ví dụ ``a'' cộng dấu sắc. Hai dạng hiển thị giống hệt nhau nhưng không bằng nhau khi so sánh từng byte, khi băm hay khi tính embedding. Bộ gõ, hệ điều hành và phần mềm soạn thảo khác nhau có thể sinh ra dạng khác nhau cho cùng một chữ. Nếu không đưa dữ liệu về cùng một dạng trước khi lưu, hai văn bản giống hệt nhau về hiển thị có thể bị coi là khác nhau, gây sai cả khi tra cứu thông thường lẫn khi so sánh ngữ nghĩa.
+
+\subsection{Áp dụng trong đồ án}
+
+MySQL là hệ quản trị CSDL bắt buộc theo đề cương (PI 3.1). Hệ thống dùng MySQL 8.4, khởi động với hai tham số \path{--character-set-server=utf8mb4} và \path{--collation-server=utf8mb4_vietnamese_ci}; thiết lập này áp dụng cho cả hai schema \texttt{thesis\_core} và \texttt{thesis\_ai}. Hệ thống chuẩn hóa văn bản về dạng NFC tại mọi điểm nhập liệu trước khi ghi: dữ liệu biểu mẫu từ client, văn bản trích từ tệp DOCX/PDF khi nộp đề cương hay báo cáo, và dữ liệu nhập hàng loạt vào kho đồ án. Nhờ đó, kết quả tra cứu và kết quả so sánh của dịch vụ AI không phụ thuộc vào nguồn gốc văn bản.
+
+\section{React, TypeScript, Vite, Ant Design và TanStack Query}
+
+\subsection{React}
+
+React là thư viện JavaScript xây dựng giao diện theo mô hình component~\cite{react}: giao diện được chia thành các thành phần độc lập, mỗi thành phần nhận dữ liệu đầu vào (\texttt{props}), tự quản lý trạng thái (\texttt{state}) và tự hiển thị lại khi dữ liệu thay đổi. React dùng Virtual DOM để tính phần khác biệt tối thiểu cần cập nhật trên trang thay vì vẽ lại toàn bộ. Cơ chế Hooks (\texttt{useState}, \texttt{useEffect}\ldots) cho phép component dạng hàm quản lý trạng thái và vòng đời; đây là phong cách viết React hiện nay.
+
+\subsection{TypeScript}
+
+TypeScript bổ sung hệ thống kiểu tĩnh cho JavaScript~\cite{typescript}: kiểu của biến, tham số và giá trị trả về được kiểm tra khi biên dịch, trước khi mã chạy. Trong một hệ thống mà client giao tiếp với API, lợi ích chính là phát hiện sớm việc đọc nhầm tên trường hay truyền sai kiểu, giữ cho kiểu dữ liệu phía client khớp với schema của Web API.
+
+\subsection{Vite}
+
+Vite là công cụ dựng và đóng gói ứng dụng JavaScript/TypeScript~\cite{vite}. Khi phát triển, Vite phục vụ mã nguồn dưới dạng ES Module gốc của trình duyệt, nên máy chủ phát triển khởi động nhanh và cập nhật giao diện gần như tức thì khi sửa mã. Khi build, Vite đóng gói, rút gọn và chia nhỏ mã thành các tệp HTML, CSS, JS tĩnh có thể phục vụ trực tiếp từ một máy chủ web.
+
+\subsection{Ant Design}
+
+Ant Design là thư viện component giao diện cho React, hướng tới các ứng dụng quản trị~\cite{antd}. Thư viện cung cấp sẵn các thành phần phức tạp thường gặp trong màn hình quản lý dữ liệu như bảng có sắp xếp, lọc và phân trang (\texttt{Table}), biểu mẫu có kiểm tra hợp lệ (\texttt{Form}), hộp thoại, thông báo và menu, với giao diện và hành vi nhất quán. Điều này giảm đáng kể công sức tự thiết kế và xây dựng các thành phần đó.
+
+\subsection{TanStack Query}
+
+TanStack Query là thư viện quản lý \textit{server state}, tức dữ liệu có nguồn gốc từ máy chủ, tách khỏi trạng thái thuần phía client như trạng thái đóng mở một hộp thoại~\cite{tanstackquery}. Thư viện tự lưu đệm kết quả gọi API, làm mới dữ liệu khi cần, gộp các yêu cầu trùng, quản lý trạng thái đang tải hay lỗi, và vô hiệu hóa dữ liệu đệm liên quan sau một thao tác ghi. Cách này thay cho việc tự viết \texttt{useEffect} kết hợp \texttt{fetch}, vốn dễ gây gọi API trùng lặp hoặc dữ liệu không đồng bộ giữa các màn hình.
+
+\subsection{Áp dụng trong đồ án}
+
+Client Web là ứng dụng một trang (SPA) viết bằng React 18 và TypeScript, dựng bằng Vite. Bản build tĩnh được Apache phục vụ trực tiếp; chỉ các yêu cầu \texttt{/api/*} mới được chuyển tới Web API. Giao diện của cả ba vai trò dùng Ant Design 5 cho bảng danh sách, biểu mẫu nộp đề cương và báo cáo, lịch hội đồng. Dữ liệu từ Web API được quản lý bằng TanStack Query và gọi qua thư viện \texttt{axios}, với interceptor tự gắn JWT vào mọi yêu cầu và xử lý tập trung lỗi \texttt{401}. Trạng thái phiên đăng nhập phía client dùng thư viện Zustand; điều hướng giữa các màn hình theo vai trò dùng React Router.
+
+Trước khi thi công bằng React, các màn hình chính được dựng thành prototype HTML/CSS tĩnh, dùng tên class theo quy ước component của Ant Design (mục 1.8.4 và 3.4).
+
+\section{Apache HTTP Server, HTTPS/TLS và Docker Compose}
+
+\subsection{Reverse proxy và Apache HTTP Server}
+
+Apache HTTP Server là máy chủ web mã nguồn mở, có thể hoạt động như một \textit{reverse proxy}: nhận yêu cầu từ trình duyệt, chuyển tiếp tới tiến trình ứng dụng phía sau rồi trả kết quả về như thể chính Apache xử lý. Mô-đun \texttt{mod\_proxy} cấu hình việc này qua hai chỉ thị \texttt{ProxyPass} và \texttt{ProxyPassReverse}~\cite{apachemodproxy}. Đặt reverse proxy trước ứng dụng có ba lợi ích: tập trung việc mã hóa TLS tại một điểm, phục vụ cả nội dung tĩnh lẫn định tuyến nội dung động về đúng tiến trình, và bổ sung header bảo mật hay giới hạn truy cập ở tầng hạ tầng mà không cần sửa mã ứng dụng.
+
+\subsection{HTTPS/TLS}
+
+HTTPS là HTTP chạy trên nền TLS (Transport Layer Security), giao thức mã hóa kênh truyền giữa trình duyệt và máy chủ. Qua chứng chỉ số, trình duyệt còn xác minh được mình đang giao tiếp đúng máy chủ, không bị bên thứ ba giả mạo hay nghe lén. Cấu hình TLS nên loại bỏ các phiên bản cũ đã có lỗ hổng (SSLv3, TLS 1.0, TLS 1.1) và chỉ chấp nhận TLS 1.2 trở lên. Bên cạnh mã hóa kênh truyền, một số header HTTP giúp trình duyệt tự phòng vệ: \texttt{Content-Security-Policy} giới hạn nguồn được phép nạp script, style, ảnh để giảm rủi ro XSS; \texttt{X-Content-Type-Options: nosniff} ngăn trình duyệt đoán sai kiểu nội dung; \texttt{X-Frame-Options: DENY} ngăn trang bị nhúng vào trang khác (chống clickjacking).
+
+\subsection{Container hóa và Docker Compose}
+
+Container hóa đóng gói ứng dụng cùng toàn bộ phụ thuộc (runtime, thư viện, cấu hình) thành một image chạy nhất quán trên mọi máy có Docker, khắc phục tình trạng ứng dụng chạy được ở máy này nhưng lỗi ở máy khác. Docker Compose định nghĩa và điều phối nhiều container liên quan bằng một tệp cấu hình \texttt{docker-compose.yml}~\cite{dockercompose}: mỗi service khai báo image hoặc cách build, biến môi trường, cổng, volume lưu dữ liệu và mạng nội bộ. Toàn bộ hệ thống có thể khởi động hoặc dừng bằng một lệnh, và tệp cấu hình chỉ rõ thành phần nào được mở ra ngoài, thành phần nào chỉ tồn tại trong mạng nội bộ.
+
+\subsection{Áp dụng trong đồ án}
+
+Hệ thống được triển khai sau Apache với HTTPS theo yêu cầu của đề cương (PI 4.1):
+\begin{itemize}
+    \item Cổng 80 chỉ dùng để chuyển hướng vĩnh viễn sang HTTPS.
+    \item Cổng 443 bật TLS và chỉ chấp nhận TLS 1.2 và TLS 1.3.
+    \item Bản build của client được phục vụ trực tiếp; chỉ thị \path{FallbackResource} trả về \path{index.html} cho mọi đường dẫn không khớp tệp tĩnh, để React Router tự điều hướng.
+    \item \texttt{ProxyPass /api/} chuyển yêu cầu tới Web API trong mạng nội bộ. Không có đường dẫn nào của Apache trỏ tới dịch vụ AI.
+    \item Các header \path{Content-Security-Policy}, \path{X-Content-Type-Options}, \path{X-Frame-Options} và \path{Referrer-Policy} được đặt ở tầng Apache.
+    \item Giới hạn kích thước yêu cầu 25~MB (\texttt{LimitRequestBody}) và thời gian chờ 120 giây (\texttt{ProxyTimeout}) đủ cho việc tải lên tệp đề cương, báo cáo.
+\end{itemize}
+
+Toàn bộ hệ thống được đóng gói bằng Docker Compose với bốn service chạy thường trực: \texttt{mysql} (MySQL 8.4), \texttt{api} (Web API), \texttt{ai} (dịch vụ AI) và \texttt{apache}. Ngoài ra có hai service chạy một lần lúc khởi động để tạo và di trú schema \texttt{thesis\_ai}. Chỉ \texttt{apache} mở cổng 80 và 443 ra ngoài; \texttt{api} và \texttt{ai} chỉ mở cổng trong mạng nội bộ. Container \texttt{apache} được gán địa chỉ IP tĩnh trong mạng nội bộ, và Web API chỉ tin các header \texttt{X-Forwarded-For}, \texttt{X-Forwarded-Proto} đến từ đúng địa chỉ đó (biến \texttt{FORWARDED\_ALLOW\_IPS}). Như vậy ranh giới tin cậy của kiến trúc được bảo đảm bằng cấu hình mạng, không chỉ dựa vào logic ứng dụng.
+
+\section{Xử lý ngôn ngữ tiếng Việt: tách từ và embedding câu}
+
+\subsection{Bài toán tách từ tiếng Việt}
+
+Trong tiếng Anh, khoảng trắng gần như trùng với ranh giới từ. Trong tiếng Việt, khoảng trắng chỉ phân tách âm tiết, trong khi nhiều từ gồm nhiều âm tiết: cụm ``công nghệ thông tin'' là một từ ghép chứ không phải bốn từ đơn. \textit{Tách từ} (word segmentation) là bước xác định ranh giới từ trong câu, thường biểu diễn bằng cách nối các âm tiết của cùng một từ bằng dấu gạch dưới (``công\_nghệ\_thông\_tin''). Bước này quan trọng vì nhiều mô hình ngôn ngữ tiếng Việt được huấn luyện trước trên văn bản đã tách từ; đưa văn bản chưa tách từ vào các mô hình đó vẫn chạy được nhưng chất lượng biểu diễn giảm mà không báo lỗi. Thư viện mã nguồn mở \texttt{underthesea} cung cấp chức năng tách từ cùng nhiều tác vụ xử lý tiếng Việt khác~\cite{underthesea}.
+
+\subsection{Embedding câu}
+
+\textit{Embedding} là một vector số thực có số chiều cố định biểu diễn ý nghĩa của một đơn vị văn bản, sao cho hai văn bản có ý nghĩa gần nhau được ánh xạ thành hai vector gần nhau. \textit{Embedding câu} áp dụng ý tưởng này ở mức câu hoặc đoạn: mỗi câu được mô hình biến thành một vector duy nhất, và độ tương đồng ngữ nghĩa giữa hai câu được tính bằng một phép toán trên hai vector. Thước đo phổ biến là \textit{độ tương đồng cosine}, tức cosin của góc giữa hai vector; giá trị càng gần 1 thì hai câu càng gần nghĩa. Cách biểu diễn này phát hiện được các câu \textit{diễn đạt lại} (paraphrase), dùng từ khác nhau nhưng cùng ý, điều mà so khớp chuỗi ký tự không làm được.
+
+\subsection{Kiến trúc bi-encoder và PhoBERT}
+
+Có hai cách dùng mô hình Transformer để đo độ tương đồng giữa hai câu. \textit{Cross-encoder} đưa đồng thời cả hai câu vào mô hình và cho ra trực tiếp một điểm số; cách này chính xác nhưng phải chạy lại mô hình cho từng cặp, không khả thi khi so một câu mới với hàng nghìn câu trong kho. \textit{Bi-encoder}, tiêu biểu là Sentence-BERT~\cite{sbert2019}, chạy mỗi câu qua mô hình một cách độc lập để lấy embedding, rồi so sánh các embedding bằng cosine. Nhờ vậy embedding của toàn bộ kho được tính trước một lần, và việc so một câu mới với cả kho chỉ còn là các phép toán vector.
+
+PhoBERT là mô hình ngôn ngữ tiền huấn luyện theo kiến trúc RoBERTa, huấn luyện trên lượng lớn văn bản tiếng Việt đã tách từ~\cite{phobert2020}. PhoBERT thường được dùng làm nền để tinh chỉnh thành các mô hình bi-encoder tiếng Việt, ví dụ mô hình \path{vietnamese-bi-encoder} của nhóm BKAI~\cite{bkaibiencoder}.
+
+\subsection{Mô hình embedding đa ngôn ngữ E5}
+
+Họ mô hình E5 được huấn luyện tương phản trên dữ liệu văn bản ghép cặp quy mô lớn của nhiều ngôn ngữ, trong đó có tiếng Việt~\cite{e5_2022}. Khác với hướng dùng PhoBERT, mô hình \path{multilingual-e5-base} làm việc trực tiếp trên văn bản chưa tách từ, giúp đơn giản hóa bước tiền xử lý. Khi dùng E5, văn bản đầu vào phải có tiền tố \texttt{"query: "} hoặc \texttt{"passage: "}; bỏ tiền tố này làm giảm rõ rệt chất lượng điểm tương đồng.
+
+\subsection{Áp dụng trong đồ án}
+
+Dịch vụ AI dùng các kỹ thuật trên để so sánh ngữ nghĩa tên đề tài và nội dung đề cương, báo cáo. Văn bản được chuẩn hóa NFC, tách từ bằng \texttt{underthesea}, rồi đưa qua mô hình bi-encoder để lấy embedding. Embedding được chuẩn hóa L2, nên tích vô hướng giữa hai embedding bằng độ tương đồng cosine; giá trị này được quy đổi thành tỷ lệ tương đồng hiển thị cho người dùng.
+
+Mô hình được chọn qua một vòng so sánh trực tiếp giữa \path{vietnamese-bi-encoder} và \path{multilingual-e5-base} trên tập cặp câu có nhãn, với quy tắc chọn được viết ra trước khi chạy (trình bày ở chương 4). Kết quả là hệ thống dùng \path{vietnamese-bi-encoder}. Mô hình chạy cục bộ trên CPU trong container của dịch vụ AI, không gọi dịch vụ trả phí bên ngoài. Embedding của kho dữ liệu được tính một lần khi dữ liệu được đẩy vào qua \texttt{/ingest}, không tính lại mỗi lần kiểm tra.
+
+\section{Tìm kiếm vector và phát hiện trùng lặp văn bản}
+
+\subsection{Tìm kiếm vector và FAISS}
+
+Khi mỗi văn bản đã được biểu diễn bằng embedding, bài toán ``tìm các văn bản trong kho giống với văn bản mới'' trở thành bài toán \textit{tìm lân cận gần nhất} trong không gian vector: tìm $k$ vector trong kho có độ tương đồng cao nhất với vector truy vấn. FAISS là thư viện mã nguồn mở chuyên cho bài toán này~\cite{faiss2021}. Chỉ mục đơn giản nhất là \textit{flat index}, ví dụ \texttt{IndexFlatIP} tính tích vô hướng (bằng cosine khi vector đã chuẩn hóa L2); chỉ mục này tìm kiếm chính xác bằng cách so vector truy vấn với toàn bộ kho, nên thời gian tăng tuyến tính theo kích thước kho. Ở quy mô hàng triệu vector, các chỉ mục xấp xỉ như IVF (phân cụm trước rồi chỉ tìm trong các cụm gần) hay HNSW (đồ thị phân lớp) đánh đổi một phần độ chính xác lấy tốc độ. Ở quy mô vài nghìn đến vài chục nghìn vector, tìm kiếm chính xác vẫn đủ nhanh, và chỉ mục xấp xỉ chỉ làm tăng độ phức tạp cấu hình.
+
+\subsection{Phát hiện sao chép nguyên văn: shingling và MinHash}
+
+Embedding ngữ nghĩa phát hiện tốt việc diễn đạt lại, nhưng để tránh báo nhầm các câu chỉ tình cờ cùng chủ đề thì ngưỡng ngữ nghĩa phải đặt đủ cao, và khi đó các đoạn sao chép gần nguyên văn có thể bị đánh giá thấp. Bài toán này cần một tín hiệu ở mức từ ngữ. Kỹ thuật kinh điển là \textit{shingling} kết hợp \textit{MinHash}:
+\begin{itemize}
+    \item \textit{$k$-shingle:} chia văn bản thành các cụm $k$ từ liên tiếp, chồng lấn nhau; văn bản trở thành một tập hợp các cụm từ. Hai đoạn càng giống nhau về từ ngữ thì hai tập càng có nhiều phần tử chung.
+    \item \textit{Độ tương đồng Jaccard:} với hai tập $A$ và $B$, $J(A,B) = |A \cap B| / |A \cup B|$; áp dụng lên hai tập shingle để đo mức giống nhau về từ ngữ.
+    \item \textit{MinHash:} kỹ thuật băm cho phép ước lượng độ tương đồng Jaccard chỉ từ một chữ ký có kích thước cố định và nhỏ, thay vì lưu và so sánh toàn bộ tập hợp~\cite{broder1997}. Thư viện \texttt{datasketch} cung cấp sẵn MinHash và LSH (Locality-Sensitive Hashing)~\cite{datasketch}.
+\end{itemize}
+
+\subsection{Kết hợp hai tín hiệu và hiệu chỉnh ngưỡng}
+
+Kết hợp tín hiệu ngữ nghĩa (cosine trên embedding, bắt được diễn đạt lại) với tín hiệu từ vựng (Jaccard qua MinHash, bắt được sao chép gần nguyên văn) cho kết quả đầy đủ hơn dùng riêng một tín hiệu. Một đoạn được gắn cờ nghi trùng khi một trong hai điểm vượt ngưỡng tương ứng, và hệ thống ghi lại tín hiệu nào đã kích hoạt để người xét duyệt biết lý do. Vì không có ngưỡng ``đúng'' về mặt lý thuyết cho một tổ hợp mô hình, ngôn ngữ và miền dữ liệu cụ thể, \textit{hiệu chỉnh ngưỡng} là bước thực nghiệm bắt buộc: chạy hệ thống trên tập dữ liệu đã biết nhãn (sao chép nguyên văn, diễn đạt lại, cùng lĩnh vực nhưng khác đề tài, không liên quan), quan sát khoảng cách điểm giữa nhóm trùng và nhóm không trùng, rồi chọn ngưỡng ở vùng phân tách tốt nhất.
+
+\subsection{Quan hệ với Turnitin}
+
+Turnitin là phần mềm kiểm tra đạo văn thương mại mà nhiều trường đại học, trong đó có ICTU, dùng làm công cụ kiểm tra chính thức, với phạm vi so sánh rộng gồm tài liệu học thuật, xuất bản phẩm và trang web. Tính năng kiểm tra trùng lặp của đồ án có phạm vi hẹp hơn và mục đích khác: chỉ so sánh trong kho đồ án của Khoa Công nghệ thông tin, chạy cục bộ, và cảnh báo sớm ngay khi giảng viên giao đề tài hoặc sinh viên nộp đề cương, báo cáo. Tính năng này bổ sung cho quy trình hiện có bằng cách phát hiện sớm sự trùng lặp với các khóa trước trong cùng khoa, và không thay thế vai trò kiểm tra chính thức của Turnitin.
+
+\subsection{Áp dụng trong đồ án}
+
+Dịch vụ AI dùng FAISS với chỉ mục chính xác \texttt{IndexFlatIP}, phù hợp với quy mô kho dữ liệu của khoa. Đề tài và đồ án trong kho được so sánh theo tên; đề cương và báo cáo được so sánh theo từng câu, sau khi loại bỏ phần khung chung của báo cáo (tiêu đề chương chuẩn, mục lục, tài liệu tham khảo, lời cam đoan, lời cảm ơn). Các phần khung này giống nhau ở mọi báo cáo, nếu giữ lại sẽ gây báo nhầm hàng loạt.
+
+Mỗi câu được chấm hai điểm: Jaccard qua MinHash (4-shingle, 128 hàm băm) và cosine trên embedding. Câu bị gắn cờ \textit{nguyên văn} khi điểm Jaccard vượt ngưỡng nguyên văn; nếu không, câu bị gắn cờ \textit{ngữ nghĩa} khi cosine vượt ngưỡng nội dung. Cờ ngữ nghĩa chỉ được giữ khi câu nằm trong một chuỗi câu liên tiếp cùng trùng với một nguồn, để loại các câu chung chung tình cờ giống nhau. Tỷ lệ tương đồng của tài liệu là tỷ lệ số ký tự bị gắn cờ trên tổng số ký tự. Kết quả kèm danh sách đồ án trùng và từng đoạn trùng, đáp ứng yêu cầu ``chỉ rõ đoạn trùng, đồ án trùng và tỷ lệ tương đồng'' của PI 3.4. Các ngưỡng không cố định trong mã nguồn: Bộ môn chỉnh được trên giao diện, giá trị mặc định lấy từ thực nghiệm hiệu chỉnh trên tập dữ liệu thử nghiệm có các cặp trùng tạo chủ đích (chương 4).
+
+\section{Công cụ mô hình hóa và thiết kế}
+
+\subsection{BPMN}
+
+BPMN (Business Process Model and Notation) là chuẩn ký hiệu đồ họa của Object Management Group để mô hình hóa quy trình nghiệp vụ~\cite{bpmn2}. Một sơ đồ BPMN gồm các bước công việc (task), sự kiện bắt đầu và kết thúc (event), điểm rẽ nhánh (gateway), và các làn (pool/lane) phân định tác nhân chịu trách nhiệm từng bước. Khi khảo sát để cải tiến quy trình, người ta thường vẽ hai phiên bản: AS-IS (quy trình đang vận hành) và TO-BE (quy trình khi có hệ thống hỗ trợ), đặt cạnh nhau để thấy rõ hệ thống mới thay đổi bước nào.
+
+\subsection{UML và PlantUML}
+
+UML (Unified Modeling Language) là họ ký hiệu chuẩn hóa, cũng do Object Management Group duy trì, để mô hình hóa các khía cạnh của hệ thống phần mềm~\cite{uml251}. Đồ án dùng sơ đồ use case (kèm đặc tả từng use case), sơ đồ hoạt động, sơ đồ lớp, sơ đồ thành phần, sơ đồ triển khai và sơ đồ tuần tự. PlantUML là công cụ mã nguồn mở dựng sơ đồ UML từ một đoạn văn bản mô tả~\cite{plantuml}. Cách tiếp cận ``sơ đồ dưới dạng mã'' này cho phép lưu sơ đồ trong hệ thống quản lý phiên bản, dễ so sánh thay đổi và dựng lại chính xác khi cần sửa.
+
+\subsection{draw.io}
+
+draw.io (diagrams.net) là công cụ vẽ sơ đồ kéo thả, hỗ trợ sẵn bộ ký hiệu BPMN, lưu tệp \texttt{.drawio} dạng XML và xuất được ảnh PNG, SVG~\cite{drawio}. Với sơ đồ quy trình nghiệp vụ, nơi cách bố trí làn và luồng rẽ nhánh ảnh hưởng nhiều tới việc đọc hiểu, draw.io phù hợp hơn PlantUML vì cho phép tinh chỉnh vị trí thủ công.
+
+\subsection{Prototype HTML thay cho Figma}
+
+Figma là công cụ thiết kế giao diện phổ biến để dựng mockup trước khi lập trình. Trong đồ án, mockup các màn hình chính được dựng bằng các trang HTML/CSS tĩnh, dùng chung một stylesheet mô phỏng ngôn ngữ thiết kế và tên class của Ant Design. Cách này đạt mục tiêu của một bản mockup (thể hiện bố cục, thành phần giao diện và luồng thao tác để trao đổi trước khi lập trình), đồng thời tên class trong mockup trùng với tên component dùng khi thi công bằng React, giảm sai lệch giữa thiết kế và sản phẩm.
+
+\subsection{Áp dụng trong đồ án}
+
+Mỗi công cụ được dùng cho loại sơ đồ phù hợp nhất:
+\begin{itemize}
+    \item draw.io cho các sơ đồ BPMN AS-IS và TO-BE: một sơ đồ tổng quan và năm quy trình con (đề tài, đề cương, tiến độ, bảo vệ, kho đồ án), trình bày ở chương 2.
+    \item PlantUML cho sơ đồ use case và sơ đồ hoạt động (chương 2), sơ đồ lớp thực thể, sơ đồ trạng thái, sơ đồ thực thể liên kết (ERD), sơ đồ thành phần, triển khai và tuần tự (chương 3).
+    \item Mười sáu trang HTML/CSS tĩnh theo quy ước Ant Design cho các màn hình chính của ba vai trò (chương 3).
+\end{itemize}
+
+Các sơ đồ và mockup được dựng thành ảnh bằng script tự động, giúp phát hiện sớm lỗi cú pháp hoặc nội dung bị tràn trước khi đưa vào báo cáo.
+
+\section{Kết luận chương}
+
+Chương 1 đã trình bày các công nghệ chính của đồ án. SOA, RESTful API, JWT và RBAC là nền tảng để tách hệ thống thành ba thành phần với ranh giới rõ ràng. Python, FastAPI, Pydantic, SQLAlchemy và Alembic dùng để xây dựng Web API và dịch vụ AI. MySQL 8 với bảng mã \texttt{utf8mb4}, collation tiếng Việt và chuẩn hóa NFC bảo đảm lưu trữ và so sánh đúng văn bản tiếng Việt. React, TypeScript, Vite, Ant Design và TanStack Query là nền tảng của client Web. Apache, HTTPS/TLS và Docker Compose là hạ tầng triển khai đáp ứng yêu cầu bảo mật. Nhóm công nghệ của tính năng kiểm tra trùng lặp gồm tách từ tiếng Việt, embedding câu theo kiến trúc bi-encoder, tìm kiếm vector bằng FAISS, phát hiện sao chép nguyên văn bằng MinHash và hiệu chỉnh ngưỡng bằng thực nghiệm. Các nội dung này là cơ sở cho phần khảo sát và phân tích ở chương 2, thiết kế ở chương 3 và triển khai ở chương 4.
 
 \end{document}

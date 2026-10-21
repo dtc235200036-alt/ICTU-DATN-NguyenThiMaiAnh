@@ -1,39 +1,32 @@
 @startuml seq-check-title
 autonumber
+hide footbox
+skinparam responseMessageBelowArrow true
+skinparam maxMessageSize 140
 
-actor "Giảng viên (GVHD)" as User
+actor "GVHD" as User
 participant "Client React" as Client
-participant "Apache" as Apache
 participant "Web API" as WebAPI
 participant "Dịch vụ AI" as AIService
 database "thesis_core" as DBCore
 
-User -> Client : Nhập tên đề tài khi giao đề tài cho SV (UC1.1, MH-06)
-Client -> Apache : POST /api/de-tai (JWT)
-Apache -> WebAPI : proxy_pass /api/*
+User -> Client : Nhập đề tài, chọn SV, bấm "Giao đề tài" (MH-06)
+Client -> WebAPI : POST /api/topics {gui: true} (JWT, qua Apache)
+WebAPI -> WebAPI : Kiểm tra vai trò, đợt mở, SV thuộc lớp hướng dẫn; NFC
+WebAPI -> DBCore : Đọc NGUONG_TEN_DE_TAI
+WebAPI -> AIService : POST /check-title (X-API-Key) {text, top_k, nguong}
 
-WebAPI -> WebAPI : Kiểm tra vai trò = Giảng viên (NFR-04;\nSV/Bộ môn nhận 403)\nChuẩn hóa NFC tên đề tài (NFR-14)
-
-WebAPI -> AIService : POST /check-title\nheader X-API-Key\nbody {text, top_k}
-
-alt Dịch vụ AI phản hồi trong NFR-08 (<= 5 giây)
-  AIService -> AIService : Chuẩn hóa NFC, tách từ,\ntính embedding tên đề tài
-  AIService -> AIService : So sánh FAISS (chỉ mục\ntên đề tài, tính sẵn lúc ingest)
-  AIService --> WebAPI : 200 {matches: [{de_tai_id, ten, ty_le}], ...}
-  WebAPI -> DBCore : INSERT ket_qua_kiem_tra_trung_lap\n(loai=TEN_DE_TAI, trang_thai=HOAN_TAT)
-else Timeout hoặc lỗi (UC0.6 — E1/E2)
-  AIService --> WebAPI : (không phản hồi / lỗi / 401 thiếu API key)
-  WebAPI -> DBCore : INSERT ket_qua_kiem_tra_trung_lap\n(trang_thai=LOI, ghi "chưa kiểm tra")
-  note right of WebAPI
-    Không chặn việc giao đề tài — UC1.1 tiếp tục
-    bình thường, kết quả được lưu với trạng thái
-    "chưa kiểm tra".
-  end note
+alt Phản hồi trong thời gian chờ
+  AIService -> AIService : Mã hóa tên, tìm FAISS trên phân vùng tên đề tài
+  AIService --> WebAPI : 200 {matches: [{ref_id, loai, ty_le}]}
+else Hết thời gian chờ hoặc lỗi
+  AIService --> WebAPI : Không phản hồi / lỗi
+  WebAPI -> WebAPI : Kết quả LOI, không chặn việc giao
 end
 
-WebAPI -> DBCore : INSERT de_tai (trang_thai=DA_PHAN_CONG,\nsinh_vien_id thuộc lớp của GVHD)
-WebAPI --> Apache : 201 {de_tai, canh_bao: [...]}
-Apache --> Client : 201
-Client --> User : Hiển thị danh sách đề tài tương tự\nkèm tỷ lệ % (nếu có, MH-06)
+WebAPI -> DBCore : INSERT de_tai (DA_PHAN_CONG), ket_qua, chi_tiet, thong_bao; COMMIT
+WebAPI --> Client : 201 {đề tài, kết quả kiểm tra tên}
+Client --> User : Hiển thị đề tài tương tự kèm tỷ lệ
+WebAPI ->> AIService : Tác vụ nền: POST /ingest {id, TOPIC, text}
 
 @enduml

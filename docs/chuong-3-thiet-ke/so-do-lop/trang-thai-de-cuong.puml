@@ -3,22 +3,40 @@ hide empty description
 
 [*] --> CHUA_NOP : Đề tài chuyển Đã phân công (UC1.1)
 
-CHUA_NOP --> CHO_DUYET : SV nộp đề cương\n(tạo TaiLieuDoAn phiên bản 1 — UC2.1)
+CHUA_NOP --> CHO_DUYET : SV nộp đề cương\n(TaiLieuDoAn phiên bản 1 — UC2.1)
 
-CHO_DUYET --> DA_DUYET : GVHD duyệt (UC2.2)
-CHO_DUYET --> YEU_CAU_SUA : GVHD yêu cầu sửa kèm nhận xét\n(UC2.2)
+CHO_DUYET --> GVHD_DA_DUYET : GVHD duyệt (UC2.2)
+CHO_DUYET --> YEU_CAU_SUA : GVHD yêu cầu sửa\nkèm nhận xét (UC2.2)
 
-YEU_CAU_SUA --> CHO_DUYET : SV nộp lại\n(tạo TaiLieuDoAn phiên bản mới — UC2.2)
+GVHD_DA_DUYET --> YEU_CAU_SUA : GVHD trả lại đề cương\nđã duyệt (ghi đè lượt duyệt)
+GVHD_DA_DUYET --> CHO_BO_MON_DUYET : GVHD nộp lên Bộ môn (UC2.3)\n(tên tệp và định hướng hợp lệ)
+
+CHO_BO_MON_DUYET --> DA_DUYET : Bộ môn phê duyệt,\ntải lên PDF đã ký số (UC2.4)
+CHO_BO_MON_DUYET --> YEU_CAU_SUA : Bộ môn trả lại\nkèm nhận xét (UC2.4)
+
+YEU_CAU_SUA --> CHO_DUYET : SV nộp lại\n(TaiLieuDoAn phiên bản mới)
 
 DA_DUYET --> [*]
 
 note right of CHO_DUYET
-  Mỗi lần nộp (lần đầu hoặc nộp lại sau Yêu cầu
-  sửa) tạo một TaiLieuDoAn (loại = ĐỀ_CƯƠNG) phiên
-  bản mới; các phiên bản trước được giữ nguyên
-  (FR-DC-01, FR-DC-05). Mỗi lần nộp kích hoạt lại
-  UC0.7 (Kiểm tra trùng lặp tài liệu) cho phiên
-  bản vừa nộp.
+  Mỗi lần nộp tạo một TaiLieuDoAn (loại DE_CUONG)
+  phiên bản mới, phiên bản cũ được giữ nguyên.
+  Mỗi lần nộp kích hoạt kiểm tra trùng lặp tài
+  liệu (UC0.7) cho phiên bản vừa nộp.
+end note
+
+note right of GVHD_DA_DUYET
+  Ở trạng thái này GVHD có thể đổi tên tệp phiên
+  bản mới nhất theo mẫu
+  <Mã định hướng>.<MSSV>.<Họ tên>.<Lớp>
+  khi lỗi duy nhất là tên tệp.
+end note
+
+note right of DA_DUYET
+  Trạng thái cuối. Tệp ký số lưu với loại
+  DE_CUONG_KY_SO; hệ thống kiểm tra tệp có chữ ký
+  số phủ toàn bộ nội dung. Tiến độ và bảo vệ chỉ
+  mở khi đề cương ở trạng thái này.
 end note
 
 @enduml

@@ -1,0 +1,88 @@
+@startuml lop-thuc-the-bao-ve-kho-trung-lap
+' Nhóm 3: hội đồng và bảo vệ, kho đồ án, kết quả kiểm tra trùng lặp.
+' Trích từ lop-thuc-the.puml, bỏ hộp enum; lớp viền nét đứt thuộc nhóm khác (ẩn thuộc tính).
+hide circle
+skinparam nodesep 25
+skinparam ranksep 45
+
+class DeTai <<Entity>> #FFFFFF;line.dashed
+class SinhVien <<Entity>> #FFFFFF;line.dashed
+class GiangVien <<Entity>> #FFFFFF;line.dashed
+class TaiLieuDoAn <<Entity>> #FFFFFF;line.dashed
+hide DeTai members
+hide SinhVien members
+hide GiangVien members
+hide TaiLieuDoAn members
+
+class HoiDong <<Entity>> {
+  +tenHoiDong : String
+  +ngayBaoVe : Date
+  +gioBaoVe : Time
+  +phong : String
+}
+
+class ThanhVienHoiDong <<Entity>> {
+  +vaiTro : VaiTroHoiDong
+}
+
+class LichBaoVe <<Entity>> {
+  +thuTu : Integer
+  +diemTrungBinh : Decimal
+  +daChot : Boolean
+}
+
+class DiemBaoVe <<Entity>> {
+  +diem : Decimal
+  +nhanXet : String
+}
+
+class DoAnKho <<Entity>> {
+  +khoa : String
+  +tenDeTai : String
+  +tuKhoa : String
+  +diem : Decimal
+  +nguon : LoaiNguon
+  +trangThaiIndex : TrangThaiIndex
+  +maSoSinhVien : String
+  +hoTenSinhVien : String
+}
+
+class KetQuaKiemTraTrungLap <<Entity>> {
+  +loaiKiemTra : LoaiKiemTra
+  +trangThai : TrangThaiKiemTra
+  +tyLeTong : Decimal
+  +tyLeNguonCaoNhat : Decimal
+  +soDoan : Integer
+  +soDoanLoaiTru : Integer
+  +tyLeLoaiTru : Decimal
+  +nguongApDung : Decimal
+  +doiTuongDuocKiemTra : String
+  +thoiDiem : DateTime
+}
+
+class ChiTietTrungLap <<Entity>> {
+  +doiTuongTrung : String
+  +tyLe : Decimal
+  +doanNguon : String
+  +doanTrung : String
+  +viTri : String
+  +loaiNguon : KhongGianNguon
+  +nguonId : Long
+  +tyLeNguon : Decimal
+}
+
+HoiDong "1" -- "*" ThanhVienHoiDong : "gồm"
+GiangVien "1" -- "*" ThanhVienHoiDong : "là"
+HoiDong "1" -- "*" LichBaoVe : "xếp lịch"
+DeTai "1" -- "0..1" LichBaoVe : "bảo vệ"
+SinhVien "1" -- "0..1" LichBaoVe : "của"
+LichBaoVe "1" -- "*" DiemBaoVe : "nhận điểm"
+GiangVien "1" -- "*" DiemBaoVe : "chấm"
+DeTai "0..1" -- "0..1" DoAnKho : "lưu kho"
+SinhVien "0..1" -- "*" DoAnKho : "của SV"
+GiangVien "0..1" -- "*" DoAnKho : "GVHD"
+DeTai "0..1" -- "*" KetQuaKiemTraTrungLap : "kiểm tra tên"
+TaiLieuDoAn "0..1" -- "0..1" KetQuaKiemTraTrungLap : "kiểm tra tài liệu"
+KetQuaKiemTraTrungLap "1" -- "*" ChiTietTrungLap : "gồm"
+
+@enduml

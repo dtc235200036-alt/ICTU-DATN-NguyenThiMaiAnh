@@ -1,0 +1,114 @@
+@startuml erd-de-cuong-tien-do
+' Nhóm 2 của thesis_core: đề cương, tài liệu, duyệt hai cấp và tiến độ.
+' Trích từ erd.puml; bảng viền nét đứt thuộc nhóm khác.
+' Quy ước: dấu * trước tên cột = NOT NULL.
+hide circle
+skinparam linetype ortho
+skinparam nodesep 40
+skinparam ranksep 50
+
+entity "de_tai" as de_tai #FFFFFF;line.dashed {
+  *id : BIGINT <<PK>>
+}
+entity "dot_do_an" as dot_do_an #FFFFFF;line.dashed {
+  *id : BIGINT <<PK>>
+}
+entity "giang_vien" as giang_vien #FFFFFF;line.dashed {
+  *id : BIGINT <<PK>>
+}
+entity "tai_khoan" as tai_khoan #FFFFFF;line.dashed {
+  *id : BIGINT <<PK>>
+}
+
+entity "de_cuong" as de_cuong {
+  *id : BIGINT <<PK>>
+  --
+  *de_tai_id : BIGINT <<FK, UQ>>
+  *trang_thai : VARCHAR(20) <<CHECK>>
+  ngay_nop_dau_tien : DATETIME
+  nop_bo_mon_luc : DATETIME
+  ket_qua_bo_mon : VARCHAR(20)
+}
+
+entity "tai_lieu_do_an" as tai_lieu_do_an {
+  *id : BIGINT <<PK>>
+  --
+  *de_tai_id : BIGINT <<FK>>
+  de_cuong_id : BIGINT <<FK>>
+  *loai : VARCHAR(20) <<CHECK>>
+  *so_phien_ban : INT
+  *ten_goc : VARCHAR(255)
+  *ten_luu_tru : VARCHAR(255) <<UQ>>
+  *kich_thuoc : BIGINT
+  *dinh_dang : VARCHAR(10) <<CHECK>>
+  *thoi_diem_nop : DATETIME
+  noi_dung_trich_xuat : LONGTEXT
+  *trich_xuat_loi : BOOLEAN
+  da_index_luc : DATETIME
+  ghi_chu : TEXT
+  ..UQ(de_tai_id, loai, so_phien_ban)..
+}
+
+entity "luot_duyet_de_cuong" as luot_duyet_de_cuong {
+  *id : BIGINT <<PK>>
+  --
+  *de_cuong_id : BIGINT <<FK>>
+  *tai_lieu_do_an_id : BIGINT <<FK, UQ>>
+  *giang_vien_id : BIGINT <<FK>>
+  *ket_qua : VARCHAR(20) <<CHECK>>
+  nhan_xet : TEXT
+  *thoi_diem : DATETIME
+}
+
+entity "luot_duyet_bo_mon" as luot_duyet_bo_mon {
+  *id : BIGINT <<PK>>
+  --
+  *de_cuong_id : BIGINT <<FK>>
+  *tai_lieu_do_an_id : BIGINT <<FK>>
+  *tai_khoan_id : BIGINT <<FK>>
+  *ket_qua : VARCHAR(20) <<CHECK>>
+  nhan_xet : TEXT
+  *thoi_diem : DATETIME
+  tai_lieu_ky_so_id : BIGINT <<FK>>
+  nguoi_ky : VARCHAR(255)
+  thoi_diem_ky : DATETIME
+}
+
+entity "moc_tien_do" as moc_tien_do {
+  *id : BIGINT <<PK>>
+  --
+  *dot_do_an_id : BIGINT <<FK>>
+  *ten_moc : VARCHAR(100)
+  *thu_tu : INT
+  han_nop : DATE
+}
+
+entity "bao_cao_tien_do" as bao_cao_tien_do {
+  *id : BIGINT <<PK>>
+  --
+  *de_tai_id : BIGINT <<FK>>
+  *moc_tien_do_id : BIGINT <<FK>>
+  noi_dung : TEXT
+  *thoi_diem_nop : DATETIME
+  nhan_xet : TEXT
+  danh_gia : VARCHAR(20) <<CHECK>>
+  tai_lieu_do_an_id : BIGINT <<FK>>
+  ..UQ(de_tai_id, moc_tien_do_id)..
+}
+
+de_tai ||--o| de_cuong
+de_tai ||--o{ tai_lieu_do_an
+de_cuong |o--o{ tai_lieu_do_an
+de_cuong ||--o{ luot_duyet_de_cuong
+tai_lieu_do_an ||--o| luot_duyet_de_cuong
+giang_vien ||--o{ luot_duyet_de_cuong
+de_cuong ||--o{ luot_duyet_bo_mon
+tai_lieu_do_an ||--o{ luot_duyet_bo_mon
+tai_lieu_do_an |o--o| luot_duyet_bo_mon
+tai_khoan ||--o{ luot_duyet_bo_mon
+dot_do_an ||--o{ moc_tien_do
+de_tai ||--o{ bao_cao_tien_do
+moc_tien_do ||--o{ bao_cao_tien_do
+tai_lieu_do_an |o--o| bao_cao_tien_do
+
+@enduml

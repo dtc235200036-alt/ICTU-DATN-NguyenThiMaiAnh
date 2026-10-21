@@ -1,0 +1,916 @@
+{
+ "ten": "kham pha",
+ "ghi_chu": "",
+ "buoc": [
+  {
+   "id": "k01-landing",
+   "mo_ta": "/",
+   "vai_tro": null,
+   "hanh_dong": [
+    {
+     "mo": "/"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k01-landing.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k02-login",
+   "mo_ta": "/dang-nhap",
+   "vai_tro": null,
+   "hanh_dong": [
+    {
+     "mo": "/dang-nhap"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k02-login.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k10-sv325-trang-chu",
+   "mo_ta": "/trang-chu",
+   "vai_tro": "DTC235200325",
+   "hanh_dong": [
+    {
+     "mo": "/trang-chu"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k10-sv325-trang-chu.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k11-sv325-de-tai-cua-toi",
+   "mo_ta": "/de-tai-cua-toi",
+   "vai_tro": "DTC235200325",
+   "hanh_dong": [
+    {
+     "mo": "/de-tai-cua-toi"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k11-sv325-de-tai-cua-toi.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k12-sv325-de-cuong",
+   "mo_ta": "/de-cuong",
+   "vai_tro": "DTC235200325",
+   "hanh_dong": [
+    {
+     "mo": "/de-cuong"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k12-sv325-de-cuong.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k13-sv325-tien-do",
+   "mo_ta": "/tien-do",
+   "vai_tro": "DTC235200325",
+   "hanh_dong": [
+    {
+     "mo": "/tien-do"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k13-sv325-tien-do.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k14-sv325-lich-su-nop",
+   "mo_ta": "/lich-su-nop",
+   "vai_tro": "DTC235200325",
+   "hanh_dong": [
+    {
+     "mo": "/lich-su-nop"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k14-sv325-lich-su-nop.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k15-sv325-bao-ve",
+   "mo_ta": "/bao-ve",
+   "vai_tro": "DTC235200325",
+   "hanh_dong": [
+    {
+     "mo": "/bao-ve"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k15-sv325-bao-ve.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k16-sv325-kho-do-an",
+   "mo_ta": "/kho-do-an",
+   "vai_tro": "DTC235200325",
+   "hanh_dong": [
+    {
+     "mo": "/kho-do-an"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k16-sv325-kho-do-an.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k20-svD-de-cuong",
+   "mo_ta": "/de-cuong",
+   "vai_tro": "DTC225290291",
+   "hanh_dong": [
+    {
+     "mo": "/de-cuong"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k20-svD-de-cuong.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k21-sv340-de-cuong",
+   "mo_ta": "/de-cuong",
+   "vai_tro": "DTC235200340",
+   "hanh_dong": [
+    {
+     "mo": "/de-cuong"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k21-sv340-de-cuong.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k22-sv078-bao-ve",
+   "mo_ta": "/bao-ve",
+   "vai_tro": "DTC235270078",
+   "hanh_dong": [
+    {
+     "mo": "/bao-ve"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k22-sv078-bao-ve.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k30-gv011-tong-quan",
+   "mo_ta": "/tong-quan",
+   "vai_tro": "GV011",
+   "hanh_dong": [
+    {
+     "mo": "/tong-quan"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k30-gv011-tong-quan.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k31-gv011-sinh-vien-huong-dan",
+   "mo_ta": "/sinh-vien-huong-dan",
+   "vai_tro": "GV011",
+   "hanh_dong": [
+    {
+     "mo": "/sinh-vien-huong-dan"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k31-gv011-sinh-vien-huong-dan.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k32-gv011-de-tai-cua-toi-gv-menu",
+   "mo_ta": "/de-tai/cua-toi-gv-menu",
+   "vai_tro": "GV011",
+   "hanh_dong": [
+    {
+     "mo": "/de-tai/cua-toi-gv-menu"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k32-gv011-de-tai-cua-toi-gv-menu.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k33-gv011-de-tai-de-xuat",
+   "mo_ta": "/de-tai/de-xuat",
+   "vai_tro": "GV011",
+   "hanh_dong": [
+    {
+     "mo": "/de-tai/de-xuat"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k33-gv011-de-tai-de-xuat.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k34-gv011-duyet-de-cuong",
+   "mo_ta": "/duyet-de-cuong",
+   "vai_tro": "GV011",
+   "hanh_dong": [
+    {
+     "mo": "/duyet-de-cuong"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k34-gv011-duyet-de-cuong.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k35-gv011-duyet-de-cuong-de_tai_id-34",
+   "mo_ta": "/duyet-de-cuong?de_tai_id=34",
+   "vai_tro": "GV011",
+   "hanh_dong": [
+    {
+     "mo": "/duyet-de-cuong?de_tai_id=34"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k35-gv011-duyet-de-cuong-de_tai_id-34.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k36-gv011-duyet-de-cuong-de_tai_id-35",
+   "mo_ta": "/duyet-de-cuong?de_tai_id=35",
+   "vai_tro": "GV011",
+   "hanh_dong": [
+    {
+     "mo": "/duyet-de-cuong?de_tai_id=35"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k36-gv011-duyet-de-cuong-de_tai_id-35.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k37-gv011-duyet-de-cuong-de_tai_id-30",
+   "mo_ta": "/duyet-de-cuong?de_tai_id=30",
+   "vai_tro": "GV011",
+   "hanh_dong": [
+    {
+     "mo": "/duyet-de-cuong?de_tai_id=30"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k37-gv011-duyet-de-cuong-de_tai_id-30.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k38-gv011-nhan-xet-tien-do",
+   "mo_ta": "/nhan-xet-tien-do",
+   "vai_tro": "GV011",
+   "hanh_dong": [
+    {
+     "mo": "/nhan-xet-tien-do"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k38-gv011-nhan-xet-tien-do.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k40-gv014-cham-diem",
+   "mo_ta": "/cham-diem",
+   "vai_tro": "GV014",
+   "hanh_dong": [
+    {
+     "mo": "/cham-diem"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k40-gv014-cham-diem.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k500-bm-tong-quan",
+   "mo_ta": "/tong-quan",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/tong-quan"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k500-bm-tong-quan.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k501-bm-tai-khoan",
+   "mo_ta": "/tai-khoan",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/tai-khoan"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k501-bm-tai-khoan.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k502-bm-dot-do-an",
+   "mo_ta": "/dot-do-an",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/dot-do-an"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k502-bm-dot-do-an.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k503-bm-phan-cong-gvhd",
+   "mo_ta": "/phan-cong-gvhd",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/phan-cong-gvhd"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k503-bm-phan-cong-gvhd.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k504-bm-dinh-huong",
+   "mo_ta": "/dinh-huong",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/dinh-huong"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k504-bm-dinh-huong.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k505-bm-de-tai",
+   "mo_ta": "/de-tai",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/de-tai"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k505-bm-de-tai.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k506-bm-duyet-de-cuong",
+   "mo_ta": "/duyet-de-cuong",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/duyet-de-cuong"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k506-bm-duyet-de-cuong.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k507-bm-duyet-de-cuong-de_tai_id-36",
+   "mo_ta": "/duyet-de-cuong?de_tai_id=36",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/duyet-de-cuong?de_tai_id=36"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k507-bm-duyet-de-cuong-de_tai_id-36.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k508-bm-duyet-de-cuong-de_tai_id-37",
+   "mo_ta": "/duyet-de-cuong?de_tai_id=37",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/duyet-de-cuong?de_tai_id=37"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k508-bm-duyet-de-cuong-de_tai_id-37.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k509-bm-tien-do-toan-khoa",
+   "mo_ta": "/tien-do-toan-khoa",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/tien-do-toan-khoa"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k509-bm-tien-do-toan-khoa.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k510-bm-hoi-dong",
+   "mo_ta": "/hoi-dong",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/hoi-dong"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k510-bm-hoi-dong.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k511-bm-kho-do-an",
+   "mo_ta": "/kho-do-an",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/kho-do-an"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k511-bm-kho-do-an.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  },
+  {
+   "id": "k512-bm-cau-hinh-nguong",
+   "mo_ta": "/cau-hinh-nguong",
+   "vai_tro": "bomon",
+   "hanh_dong": [
+    {
+     "mo": "/cau-hinh-nguong"
+    },
+    {
+     "cho": 2.5
+    },
+    {
+     "cho_on_dinh": true
+    },
+    {
+     "chup": "k512-bm-cau-hinh-nguong.png"
+    }
+   ],
+   "cho_phep_http": [
+    401,
+    403,
+    404,
+    409,
+    422
+   ]
+  }
+ ]
+}
