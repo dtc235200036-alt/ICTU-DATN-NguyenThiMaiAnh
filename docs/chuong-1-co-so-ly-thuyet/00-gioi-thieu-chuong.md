@@ -12,6 +12,6 @@ Các mục của chương:
 - **1.4. React, TypeScript, Vite, Ant Design và TanStack Query** — nền tảng xây dựng client Web.
 - **1.5. Apache HTTP Server, HTTPS/TLS và Docker Compose** — hạ tầng triển khai phía server.
 - **1.6. Xử lý ngôn ngữ tiếng Việt: tách từ và embedding câu** — nền tảng NLP cho tính năng kiểm tra tương đồng ngữ nghĩa.
-- **1.7. Tìm kiếm vector và phát hiện trùng lặp văn bản** — FAISS, MinHash và chiến lược phát hiện trùng lặp ở mức đoạn văn.
+- **1.7. Tìm kiếm vector và phát hiện trùng lặp văn bản** — FAISS, vân tay văn bản (winnowing) và chiến lược phát hiện trùng lặp ở mức đoạn văn.
 - **1.8. Công cụ mô hình hóa và thiết kế** — BPMN, UML/PlantUML, draw.io và HTML prototype thay Figma.
 - **1.9. Kết luận chương** — tổng hợp và danh mục tài liệu tham khảo.

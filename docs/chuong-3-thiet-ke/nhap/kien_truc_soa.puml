@@ -18,7 +18,7 @@ node "Máy chủ ứng dụng" {
 node "Máy chủ kiểm tra" {
   component "Dịch vụ kiểm tra tương đồng\n(Python)" as SVC {
     [Trích văn bản, hình ảnh] as Extract
-    [Lọc ứng viên MinHash/LSH] as LSH
+    [Lọc mẫu chung, tách câu] as Prep
     [Trùng nguyên văn – winnowing] as Winnow
     [Trùng ý nghĩa – embedding] as Embed
     [Trùng hình ảnh – pHash] as PHash
@@ -37,9 +37,9 @@ API --> Files : lưu file nộp
 API --> Queue : tạo tác vụ kiểm tra
 Queue --> SVC : nhận tác vụ
 Extract --> Files : đọc file
-Extract --> LSH
-LSH --> Winnow
-LSH --> Embed
+Extract --> Prep
+Prep --> Winnow
+Prep --> Embed
 Extract --> PHash
 Winnow --> Score
 Embed --> Score

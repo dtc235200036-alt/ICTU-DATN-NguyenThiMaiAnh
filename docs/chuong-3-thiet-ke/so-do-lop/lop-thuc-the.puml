@@ -111,6 +111,7 @@ enum LoaiThongBao {
 enum LoaiCauHinhNguong {
   NGUONG_TEN_DE_TAI
   NGUONG_TAI_LIEU
+  NGUONG_TONG_TAI_LIEU
   NGUONG_DOAN_TRUNG
 }
 
@@ -188,6 +189,7 @@ class KetQuaKiemTraTrungLap <<Entity>> {
   +soDoanLoaiTru : Integer
   +tyLeLoaiTru : Double
   +nguongApDung : Double
+  +nguongTongApDung : Double
   +doiTuongDuocKiemTra : String
   +thoiDiem : DateTime
 }

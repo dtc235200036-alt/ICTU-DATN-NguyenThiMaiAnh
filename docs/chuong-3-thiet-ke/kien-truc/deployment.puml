@@ -17,7 +17,7 @@ node "Máy chủ ứng dụng" as Server {
   node "Vùng nội bộ (không công bố cổng ra ngoài)" as Internal {
     node "Web API\n(FastAPI, Uvicorn)" as WebAPI
     node "Dịch vụ AI\n(FastAPI, Uvicorn)" as AIService {
-      artifact "Mô hình embedding,\nchỉ mục FAISS, MinHash" as AIModel
+      artifact "Mô hình embedding,\nchỉ mục FAISS, chỉ mục vân tay" as AIModel
     }
     node "MySQL 8" as MySQL {
       database "thesis_core" as SchemaCore

@@ -606,7 +606,7 @@ FR-AI-03 & \textit{Hiển thị kết quả.} Hiển thị tỷ lệ tương đ�
 \hline
 FR-AI-04 & \textit{Kiểm tra bất đồng bộ.} Kiểm tra tài liệu chạy nền với ba trạng thái \textit{Đang kiểm tra}, \textit{Hoàn tất}, \textit{Lỗi}; giảng viên và Bộ môn yêu cầu kiểm tra lại được. & Hệ thống, GV, Bộ môn & UC0.7 \\
 \hline
-FR-AI-05 & \textit{Cấu hình ngưỡng.} Bộ môn cấu hình ba ngưỡng: tên đề tài, tài liệu và đoạn trùng; ngưỡng mới áp dụng cho các lần kiểm tra sau khi lưu. & Bộ môn & UC0.4 \\
+FR-AI-05 & \textit{Cấu hình ngưỡng.} Bộ môn cấu hình bốn ngưỡng: tên đề tài, tài liệu theo một đồ án, tài liệu theo tổng mọi đồ án và đoạn trùng; ngưỡng mới áp dụng cho các lần kiểm tra sau khi lưu. & Bộ môn & UC0.4 \\
 \hline
 \end{longtable}
 }
@@ -775,10 +775,10 @@ Ngoại lệ & \bu{E1.}Ngày kết thúc trước ngày bắt đầu: hệ thố
 
 \begin{ucspec}{uc0-4}{UC0.4 -- Cấu hình ngưỡng trùng lặp}
 Tác nhân & Bộ môn \\ \hline
-Mô tả & Bộ môn cấu hình ba ngưỡng: ngưỡng tên đề tài (cảnh báo đề tài tương tự), ngưỡng tài liệu (cảnh báo tỷ lệ trùng tổng của một tài liệu) và ngưỡng đoạn trùng (mức tương đồng để một cặp đoạn được tính là trùng). \\ \hline
+Mô tả & Bộ môn cấu hình bốn ngưỡng: ngưỡng tên đề tài (cảnh báo đề tài tương tự), ngưỡng tài liệu (cảnh báo khi tài liệu trùng nhiều với một đồ án), ngưỡng tổng (cảnh báo khi tổng phần trùng với mọi đồ án lớn, kể cả khi không đồ án nào vượt ngưỡng tài liệu) và ngưỡng đoạn trùng (mức tương đồng để một cặp đoạn được tính là trùng). \\ \hline
 Tiền điều kiện & Bộ môn đã đăng nhập. \\ \hline
 Hậu điều kiện & Ngưỡng mới được lưu và áp dụng cho các lần kiểm tra sau; kết quả kiểm tra đã có không thay đổi. \\ \hline
-Luồng chính & \bu{1.}Bộ môn mở trang \textit{Cấu hình ngưỡng}; hệ thống hiển thị giá trị hiện tại của ba ngưỡng. \bu{2.}Bộ môn nhập giá trị mới, từ 0 đến 100\%, tối đa hai chữ số thập phân. \bu{3.}Hệ thống kiểm tra và lưu cấu hình. \\ \hline
+Luồng chính & \bu{1.}Bộ môn mở trang \textit{Cấu hình ngưỡng}; hệ thống hiển thị giá trị hiện tại của bốn ngưỡng. \bu{2.}Bộ môn nhập giá trị mới, từ 0 đến 100\%, tối đa hai chữ số thập phân. \bu{3.}Hệ thống kiểm tra và lưu cấu hình. \\ \hline
 Luồng thay thế & Không có. \\ \hline
 Ngoại lệ & \bu{E1.}Giá trị nằm ngoài khoảng 0--100 hoặc có quá hai chữ số thập phân: hệ thống từ chối lưu. \\ \hline
 \end{ucspec}
@@ -808,7 +808,7 @@ Tác nhân & Sinh viên (khởi phát khi nộp), Giảng viên và Bộ môn (k
 Mô tả & So khớp nội dung đề cương hoặc báo cáo cuối với các tài liệu trong kho, trả về tỷ lệ trùng tổng, danh sách đồ án nguồn và từng cặp đoạn trùng. Chạy nền, được bao hàm trong UC2.1 và UC4.1. \\ \hline
 Tiền điều kiện & Một phiên bản đề cương hoặc báo cáo cuối vừa được lưu. \\ \hline
 Hậu điều kiện & Kết quả kiểm tra được lưu với trạng thái \textit{Hoàn tất} hoặc \textit{Lỗi}. \\ \hline
-Luồng chính & \bu{1.}Web API tạo bản ghi kiểm tra ở trạng thái \textit{Đang kiểm tra} và trả kết quả nộp cho người dùng ngay. \bu{2.}Web API trích văn bản từ tệp DOCX/PDF và gửi sang dịch vụ AI. \bu{3.}Dịch vụ AI chuẩn hóa văn bản, loại phần mẫu chung (tiêu đề mẫu, mục lục, tài liệu tham khảo) và chia thành các đoạn. \bu{4.}Dịch vụ AI tìm ứng viên bằng MinHash/LSH và embedding, chấm điểm từng cặp đoạn, giữ các cặp vượt ngưỡng đoạn trùng. \bu{5.}Dịch vụ AI trả tỷ lệ trùng tổng, danh sách đồ án nguồn và các cặp đoạn trùng; Web API lưu kết quả và chuyển trạng thái sang \textit{Hoàn tất}. \bu{6.}Người xem mở kết quả: từng đoạn trùng đặt cạnh đoạn nguồn; tỷ lệ vượt ngưỡng tài liệu được tô cảnh báo. \\ \hline
+Luồng chính & \bu{1.}Web API tạo bản ghi kiểm tra ở trạng thái \textit{Đang kiểm tra} và trả kết quả nộp cho người dùng ngay. \bu{2.}Web API trích văn bản từ tệp DOCX/PDF và gửi sang dịch vụ AI. \bu{3.}Dịch vụ AI chuẩn hóa văn bản, loại phần mẫu chung (tiêu đề mẫu, mục lục, tài liệu tham khảo) và chia thành các đoạn. \bu{4.}Dịch vụ AI so từng câu với kho bằng vân tay văn bản (trùng nguyên văn) và embedding (trùng ngữ nghĩa), chấm điểm từng cặp đoạn, giữ các cặp vượt ngưỡng đoạn trùng. \bu{5.}Dịch vụ AI trả tỷ lệ trùng tổng, danh sách đồ án nguồn và các cặp đoạn trùng; Web API lưu kết quả và chuyển trạng thái sang \textit{Hoàn tất}. \bu{6.}Người xem mở kết quả: từng đoạn trùng đặt cạnh đoạn nguồn; tài liệu được tô cảnh báo khi tỷ lệ trùng với một đồ án vượt ngưỡng tài liệu hoặc tỷ lệ trùng tổng vượt ngưỡng tổng. \\ \hline
 Luồng thay thế & \bu{A1.}Không có đoạn nào vượt ngưỡng: kết quả \textit{Hoàn tất} với tỷ lệ 0\% và danh sách nguồn rỗng. \bu{A2.}Giảng viên hoặc Bộ môn yêu cầu kiểm tra lại một tài liệu; hệ thống chạy lại từ bước 1. \\ \hline
 Ngoại lệ & \bu{E1.}Dịch vụ AI lỗi hoặc vượt thời gian chờ (24 giây cộng 0,25 giây cho mỗi 1.000 ký tự, tối đa 240 giây): trạng thái chuyển \textit{Lỗi}; quy trình duyệt không bị chặn. \bu{E2.}Không trích được văn bản từ tệp: trạng thái chuyển \textit{Lỗi}. \\ \hline
 \end{ucspec}

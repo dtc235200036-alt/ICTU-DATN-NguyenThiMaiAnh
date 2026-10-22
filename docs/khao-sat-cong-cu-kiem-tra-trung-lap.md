@@ -90,7 +90,7 @@ Nhìn chung, ngưỡng ở VN thường **từ 20% đến 30%**. Nhiều trườ
 | **Winnowing** (Schleimer, Wilkerson, Aiken 2003, nền của MOSS) [19] | Trong mỗi cửa sổ w mã băm liên tiếp, chỉ giữ mã nhỏ nhất làm "vân tay". **Đảm bảo**: mọi đoạn khớp dài ≥ t = w + k − 1 đều được phát hiện, đoạn ngắn hơn k thì bỏ qua. | Giảm lượng vân tay lưu trữ (mật độ khoảng 2/(w+1)) mà không mất đoạn khớp dài. Đây là lựa chọn chuẩn. |
 | **Suffix array / suffix automaton** (LCS) | Dựng mảng hậu tố của chuỗi nối hai văn bản để tìm mọi chuỗi con chung tối đa có độ dài ≥ N. | Chính xác tuyệt đối, cho đoạn khớp tối đa. Phù hợp để **xác minh và mở rộng** một cặp tài liệu đã được lọc trước, ví dụ bằng `pydivsufsort` [29]. Không dùng để quét cả kho. |
 | **Greedy String Tiling** (Wise 1993, dùng trong JPlag) [21] | Lặp lại việc phủ "viên gạch" không chồng lấn, ưu tiên đoạn dài nhất trước, với độ dài tối thiểu MML | Chịu được việc đảo thứ tự các đoạn. Độ phức tạp cao hơn, phù hợp so từng cặp. |
-| **MinHash/LSH trên k-gram âm tiết** (hệ thống đang dùng) | Ước lượng hệ số Jaccard giữa hai tập k-gram | Tốt để **xếp hạng câu gần giống**, nhưng chỉ cho điểm xấp xỉ theo từng câu. **Không chỉ ra được chính xác đoạn ký tự nào trùng** và không đảm bảo "≥ N ký tự". |
+| **MinHash/LSH trên k-gram âm tiết** (hệ thống dùng trước đây, nay đã thay bằng winnowing — mục 5) | Ước lượng hệ số Jaccard giữa hai tập k-gram | Tốt để **xếp hạng câu gần giống**, nhưng chỉ cho điểm xấp xỉ theo từng câu. **Không chỉ ra được chính xác đoạn ký tự nào trùng** và không đảm bảo "≥ N ký tự". |
 
 **Cách cài đặt quy tắc "≥ N ký tự liên tiếp trùng" bằng Python (đề xuất):**
 
@@ -165,7 +165,7 @@ def winnow(hashes, w: int):
 
 ## 5. Hiện trạng hệ thống và khoảng trống
 
-Mô tả dựa trên mã nguồn `ai-service/app/` và `ai-service/README.md` (đọc ngày 14/10/2026):
+Mô tả dựa trên mã nguồn `ai-service/app/` và `ai-service/README.md` (đọc ngày 14/10/2026; cập nhật 22/10/2026 sau khi tín hiệu nguyên văn chuyển sang winnowing và Web API có thêm ngưỡng tổng):
 
 | Thành phần | Hiện trạng | Tệp |
 |---|---|---|
@@ -174,17 +174,17 @@ Mô tả dựa trên mã nguồn `ai-service/app/` và `ai-service/README.md` (�
 | Loại phần mẫu chung | Bìa, lời cam đoan, lời cảm ơn, mục lục, danh mục hình/bảng, tiêu đề, chú thích, tài liệu tham khảo, phụ lục, header/footer lặp lại. Danh sách hiện là **[ASSUMED]**, chờ mẫu chính thức. Có báo `ty_le_loai_tru`. | `app/nlp/boilerplate.py` |
 | Đơn vị so khớp | **Câu**: tách tại `. ! ? …`, bỏ câu < 6 âm tiết, cắt câu > 120 âm tiết. | `app/nlp/chunking.py` |
 | Tín hiệu ngữ nghĩa | Cosine tốt nhất qua FAISS `IndexFlatIP` (vector chuẩn hóa L2), ngưỡng `nguong_doan` = 67,7%. | `app/index.py`, `app/pipeline.py` |
-| Tín hiệu nguyên văn | MinHash (`datasketch`, 128 hoán vị) trên **4-gram âm tiết**, Jaccard tốt nhất **theo từng câu**, ngưỡng `nguong_nguyen_van` = 88,7%. | `app/minhash.py`, `app/pipeline.py` |
+| Tín hiệu nguyên văn | Vân tay **6-gram âm tiết** chọn bằng winnowing, w = 4, nên mọi đoạn chung ≥ t = 9 âm tiết đều được tìm thấy [19]. Chỉ mục ngược nằm trong RAM, dựng lại từ `chunk.noi_dung` lúc khởi động; câu ứng viên lấy bằng tra bảng, không quét cả kho. Điểm của câu = **độ phủ**: tỷ lệ âm tiết của câu nằm trong các đoạn chung ≥ t âm tiết với **một** câu của kho, bỏ qua k-gram phổ biến (có ở ≥ 4 đề tài; mọi phiên bản tài liệu của một đề tài tính là một nhóm, như "L-common" của Sorokina và cs. [37]). Ngưỡng `nguong_nguyen_van` = 56,0%. Trước đây: MinHash (`datasketch`, 128 hoán vị) trên 4-gram âm tiết, Jaccard theo câu, ngưỡng 88,7%. | `app/fingerprint.py`, `app/index.py`, `app/pipeline.py` |
 | Tỷ lệ tổng | `ty_le_tong` = **tỷ lệ ký tự của các câu bị gắn cờ** trên tổng ký tự câu nội dung. Mỗi câu bị gắn cờ được tính trọn cả câu, kể cả khi chỉ một phần câu trùng. Lưu ý: tỷ lệ này tính theo ký tự của câu, không phải "tỷ lệ đoạn bị gắn cờ" như mô tả ban đầu. | `pipeline.check_document` |
-| Quyết định cảnh báo | Web API so **tỷ lệ của nguồn cao nhất** (`ty_le_nguon_cao_nhat`) với `NGUONG_TAI_LIEU` cấu hình được (giá trị hiệu chỉnh đề xuất 10,4%, giá trị dự phòng 30%). **Không so `ty_le_tong` với 20%.** | `backend/app/services/document_check.py` |
+| Quyết định cảnh báo | Web API cảnh báo khi **tỷ lệ của nguồn cao nhất** (`ty_le_nguon_cao_nhat`) ≥ `NGUONG_TAI_LIEU` (giá trị hiệu chỉnh đề xuất 10,4%, giá trị dự phòng 30%) **hoặc** `ty_le_tong` ≥ `NGUONG_TONG_TAI_LIEU` (giá trị hiệu chỉnh đề xuất 14,8%, bắt bài ghép từ nhiều đồ án); cả hai cấu hình được. **Không so `ty_le_tong` với 20%.** | `backend/app/services/document_check.py` |
 | Phạm vi so | Chỉ kho đồ án của Khoa (PI 3.4) | — |
 
 **Khoảng trống so với yêu cầu mới của GVHD:**
 
-1. **Chưa có quy tắc "≥ N ký tự liên tiếp trùng".** MinHash cho điểm Jaccard xấp xỉ theo câu, không định vị được đoạn ký tự trùng và không đảm bảo độ dài tối thiểu.
+1. **Quy tắc "≥ N ký tự liên tiếp trùng" mới có một phần.** Winnowing bảo đảm tìm mọi đoạn chung ≥ 9 âm tiết và độ phủ chỉ tính các đoạn đó, nhưng độ dài tính theo âm tiết (không theo ký tự), đoạn chung chỉ xét trong phạm vi một câu và chưa được mở rộng thành đoạn khớp tối đa để tô trên giao diện.
 2. **% chưa tính theo độ phủ ký tự thật.** Một câu dài chỉ trùng một nửa vẫn bị tính cả câu, còn đoạn trùng nằm vắt qua ranh giới hai câu thì có thể bị lọt.
 3. **Chưa kiểm tra ảnh** (cả trích xuất lẫn so khớp).
-4. **Quy tắc ra quyết định khác chính sách của GVHD.** GVHD dùng tổng % > 20% thì cảnh báo, hệ thống đang dùng % của nguồn cao nhất so với ngưỡng hiệu chỉnh.
+4. **Quy tắc ra quyết định khác chính sách của GVHD.** GVHD dùng tổng % > 20% thì cảnh báo, hệ thống đang dùng % của nguồn cao nhất (10,4%) hoặc tổng % (14,8%), cả hai là ngưỡng hiệu chỉnh.
 5. Chưa loại trừ **trích dẫn trong ngoặc kép** (mới loại danh mục tài liệu tham khảo theo mục).
 
 ---
@@ -197,7 +197,7 @@ Mô tả dựa trên mã nguồn `ai-service/app/` và `ai-service/README.md` (�
 
 ```
 DOCX/PDF ──► Web API: trích văn bản + trích ảnh (mới) ──► AI service
-                                                            ├─ (1) Nguyên văn: winnowing k = N ký tự, mở rộng đoạn khớp tối đa  [MỚI]
+                                                            ├─ (1) Nguyên văn: winnowing k = N ký tự, mở rộng đoạn khớp tối đa  [ĐÃ LÀM một phần: k = 6 âm tiết, độ phủ theo câu]
                                                             ├─ (2) Diễn đạt lại: embedding bkai + FAISS (giữ nguyên)
                                                             └─ (3) Ảnh: SHA-256 + pHash/dHash, Hamming ≤ ngưỡng          [MỚI]
 Tổng hợp: ty_le_tong = |hợp khoảng ký tự bị gắn cờ bởi (1) ∪ câu bị gắn cờ bởi (2)| / tổng ký tự được kiểm tra
@@ -209,7 +209,7 @@ Báo cáo: % tổng; % nguyên văn và % diễn đạt lại; % theo từng ngu
 
 | Hạng mục | Cách làm | Thư viện (phiên bản trên PyPI, 14/10/2026) | Công sức ước lượng |
 |---|---|---|---|
-| Mô-đun nguyên văn | Chuẩn hóa (mục 4.1), winnowing với k = `MIN_KY_TU_TRUNG` (cấu hình, mặc định chọn sau khi hiệu chỉnh) và w = 4–8. Chỉ mục ngược dựng trong RAM lúc khởi động từ `chunk.noi_dung`, giống cách đang làm với MinHash. Mở rộng đoạn khớp, gộp khoảng. Lọc k-gram phổ biến (xuất hiện trong > 10% số tài liệu). | Thư viện chuẩn Python. `pydivsufsort` 0.0.20 để xác minh từng cặp (tùy chọn). `rapidfuzz` 3.14.x nếu cần so mờ | 3–4 ngày, gồm unit test |
+| Mô-đun nguyên văn | Chuẩn hóa (mục 4.1), winnowing với k = `MIN_KY_TU_TRUNG` (cấu hình, mặc định chọn sau khi hiệu chỉnh) và w = 4–8. Chỉ mục ngược dựng trong RAM lúc khởi động từ `chunk.noi_dung`. Mở rộng đoạn khớp, gộp khoảng. Lọc k-gram phổ biến (xuất hiện trong > 10% số tài liệu). **Đã làm (22/10/2026)** theo âm tiết thay cho ký tự: `VAN_TAY_K` = 6 âm tiết (AUC lớn nhất trong {3, 4, 5, 6}), `VAN_TAY_W` = 4, chỉ mục ngược trong RAM; lọc k-gram có ở ≥ `VAN_TAY_PHO_BIEN` = 4 đề tài thay cho mức 10% số tài liệu. Chưa làm: mở rộng đoạn khớp, gộp khoảng ký tự. | Thư viện chuẩn Python. `pydivsufsort` 0.0.20 để xác minh từng cặp (tùy chọn). `rapidfuzz` 3.14.x nếu cần so mờ | 3–4 ngày, gồm unit test |
 | Độ phủ ký tự | Ánh xạ khoảng ký tự (văn bản chuẩn hóa → văn bản gốc), hợp khoảng của tín hiệu (1) và các câu của tín hiệu (2), tính % tổng, % từng nguồn, % từng tín hiệu | — | 1–2 ngày |
 | Loại trừ trích dẫn | Bỏ đoạn trong `"…"`/`“…”` dài hơn một ngưỡng (giống Turnitin), giữ danh mục tài liệu tham khảo đã có | `re` | 0,5 ngày |
 | Mô-đun ảnh | Web API trích ảnh (DOCX `word/media`, PDF `extract_image`), bỏ ảnh < 64 px và ảnh mẫu (logo). Lưu SHA-256 + pHash + dHash vào bảng mới trong MySQL. Truy vấn bằng quét tuyến tính khoảng cách Hamming (vài nghìn ảnh thì dưới 1 giây). | `imagehash` 4.3.2, `Pillow` 12.x, `pymupdf` 1.28.x, `python-docx` 1.2.0 | 3–4 ngày (gồm migration và API) |
@@ -222,7 +222,7 @@ Báo cáo: % tổng; % nguyên văn và % diễn đạt lại; % theo từng ngu
 
 - **Winnowing** đáp ứng đúng yêu cầu "≥ N ký tự liên tiếp" với **bảo đảm toán học** (không bỏ sót đoạn khớp dài ≥ t) [19], đã được kiểm chứng qua MOSS, cài bằng thư viện chuẩn và chạy nhanh trên CPU. Nó cũng **chỉ ra chính xác đoạn trùng**, điều PI 3.4 yêu cầu.
 - **Giữ embedding** để bắt diễn đạt lại, việc mà các công cụ thương mại cũng làm. Đây là phần "AI" của đề tài và đã có số liệu hiệu chỉnh.
-- **MinHash** có thể giữ làm bộ lọc sơ bộ hoặc bỏ dần, vì winnowing thay thế nó cho tín hiệu nguyên văn. Đề xuất: giữ đến khi có số liệu so sánh trên seed, sau đó quyết định.
+- **MinHash** đã bỏ (cùng thư viện `datasketch`), winnowing thay hẳn cho tín hiệu nguyên văn. Trên tập hiệu chỉnh, AUC của tín hiệu nguyên văn là 0,9974 với k = 6 (ngưỡng 56,0%: TPR 0,978, FPR 0,019). Trên kho tổng hợp, so một báo cáo 1 500 câu với kho 150 000 câu mất 0,09 s, so với 34,5 s khi MinHash so câu với mọi câu của kho.
 - **pHash + SHA-256** đủ cho yêu cầu "hai ảnh giống nhau" (kể cả khi bị đổi cỡ hoặc nén lại), chạy nhẹ, và là điểm khác biệt mà Turnitin không có [4].
 - **Không làm bộ phát hiện văn bản AI**, vì lý do ở mục 4.4.
 
@@ -282,3 +282,4 @@ Ngày truy cập chung cho mọi mục: **14/10/2026**. Những mục ghi "(khô
 34. bkai-foundation-models/vietnamese-bi-encoder – model card. https://huggingface.co/bkai-foundation-models/vietnamese-bi-encoder
 35. Turnitin – Understanding false positives within our AI writing detection capabilities. https://www.turnitin.co.uk/blog/understanding-false-positives-within-our-ai-writing-detection-capabilities
 36. Liang W., Yuksekgonul M., Mao Y., Wu E., Zou J. (2023). GPT detectors are biased against non-native English writers. Patterns. https://arxiv.org/abs/2304.02819
+37. Sorokina D., Gehrke J., Warner S., Ginsparg P. (2006). Plagiarism Detection in arXiv. ICDM 2006 (Sixth International Conference on Data Mining). https://arxiv.org/abs/cs/0702012 (truy cập 22/10/2026)

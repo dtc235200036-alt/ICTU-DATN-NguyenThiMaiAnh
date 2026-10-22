@@ -56,6 +56,7 @@ class KetQuaKiemTraTrungLap <<Entity>> {
   +soDoanLoaiTru : Integer
   +tyLeLoaiTru : Decimal
   +nguongApDung : Decimal
+  +nguongTongApDung : Decimal
   +doiTuongDuocKiemTra : String
   +thoiDiem : DateTime
 }

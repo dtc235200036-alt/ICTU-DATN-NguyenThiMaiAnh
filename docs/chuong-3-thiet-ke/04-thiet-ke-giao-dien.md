@@ -229,7 +229,7 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 
 **Mục đích:** Cho GVHD xem nội dung đề cương mới nhất cùng kết quả kiểm tra trùng lặp ngay trên cùng màn hình, rồi quyết định duyệt hoặc yêu cầu sửa kèm nhận xét.
 
-**Vùng (regions):** Sider Giảng viên (mục "Duyệt đề cương" đang chọn); trái: tên đề tài, Select phiên bản, link tải file, tóm tắt nội dung trích xuất, TextArea "Nhận xét", nút "Yêu cầu sửa" / "Duyệt đề cương"; phải: panel "Kết quả kiểm tra trùng lặp" với `ant-progress-circle` (tỷ lệ tổng), tỷ lệ trùng với một đồ án cao nhất, ngưỡng áp dụng của Bộ môn (UC0.4) và nhãn "Vượt/Dưới ngưỡng cảnh báo" (so tỷ lệ trùng với một đồ án với ngưỡng — CR-01), bảng đồ án trùng nhiều nhất, nút "Xem chi tiết" mở MH-14.
+**Vùng (regions):** Sider Giảng viên (mục "Duyệt đề cương" đang chọn); trái: tên đề tài, Select phiên bản, link tải file, tóm tắt nội dung trích xuất, TextArea "Nhận xét", nút "Yêu cầu sửa" / "Duyệt đề cương"; phải: panel "Kết quả kiểm tra trùng lặp" với `ant-progress-circle` (tỷ lệ tổng), tỷ lệ trùng với một đồ án cao nhất, ngưỡng áp dụng của Bộ môn (UC0.4) và nhãn "Vượt/Dưới ngưỡng cảnh báo" (vượt khi tỷ lệ trùng với một đồ án ≥ ngưỡng theo một đồ án — CR-01 — hoặc tỷ lệ tổng ≥ ngưỡng tổng mọi đồ án, bài ghép từ nhiều nguồn), bảng đồ án trùng nhiều nhất, nút "Xem chi tiết" mở MH-14.
 
 **Trạng thái (states):**
 - Vòng tròn Progress đổi màu theo mức so với ngưỡng Bộ môn cấu hình (xanh khi dưới ngưỡng cảnh báo).

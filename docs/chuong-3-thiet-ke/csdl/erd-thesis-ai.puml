@@ -15,6 +15,7 @@ entity "chunk" as chunk {
   *thu_tu : INT
   *noi_dung : TEXT
   *bam_noi_dung : CHAR(64)
+  nhom : BIGINT
   ..UQ(loai_nguon, ma_nguon, thu_tu)..
   ..INDEX(loai_nguon, ma_nguon)..
 }

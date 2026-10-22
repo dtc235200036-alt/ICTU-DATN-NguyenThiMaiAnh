@@ -74,7 +74,7 @@ Các lớp trong nhóm:
     \item \textit{PhanCongHuongDan} ghi nhận việc Bộ môn gán sinh viên cho giảng viên hướng dẫn (GVHD) ở đầu đợt (UC0.8). Mỗi sinh viên có đúng một GVHD trong một đợt. Tập sinh viên được gán cho một giảng viên tạo thành \textit{lớp hướng dẫn} của giảng viên đó.
     \item \textit{DinhHuong} là danh mục định hướng đề tài do Bộ môn quản lý (UC0.9), mặc định gồm H01 (Phát triển ứng dụng) và H02 (Hệ thống AI và ứng dụng). Lớp này thay cho trường lĩnh vực nhập tự do. Mã định hướng là phần đầu của tên tệp đề cương theo mẫu \textless{}Mã định hướng\textgreater{}.\textless{}MSSV\textgreater{}.\textless{}Họ tên\textgreater{}.\textless{}Lớp\textgreater{}, nên hệ thống kiểm tra được tên tệp có khớp với định hướng của đề tài hay không.
     \item \textit{DeTai} do GVHD tạo cho một sinh viên trong lớp hướng dẫn của mình. Đề tài thuộc một đợt, có một định hướng, và ở một trong hai trạng thái: bản nháp hoặc đã phân công. Thuộc tính \path{sinh_vien_id_dang_hoat_dong} là thuộc tính dẫn xuất, dùng để bảo đảm mỗi sinh viên có tối đa một đề tài đang hoạt động (mục~\ref{subsec:c3-rang-buoc}).
-    \item \textit{CauHinhNguong} lưu ba ngưỡng cảnh báo trùng lặp do Bộ môn cấu hình (UC0.4): ngưỡng tên đề tài, ngưỡng tài liệu và ngưỡng từng đoạn.
+    \item \textit{CauHinhNguong} lưu bốn ngưỡng cảnh báo trùng lặp do Bộ môn cấu hình (UC0.4): ngưỡng tên đề tài, ngưỡng tài liệu theo một đồ án, ngưỡng tổng mọi đồ án và ngưỡng từng đoạn.
     \item \textit{ThongBao} là thông báo trong ứng dụng gửi tới một tài khoản, có loại, nội dung, liên kết tới màn hình liên quan và cờ đã đọc.
 \end{itemize}
 
@@ -115,7 +115,7 @@ Các lớp trong nhóm:
     \item \textit{HoiDong} là một hội đồng bảo vệ với ngày, giờ và phòng. \textit{ThanhVienHoiDong} gán giảng viên vào hội đồng với một vai trò: chủ tịch, thư ký hoặc ủy viên.
     \item \textit{LichBaoVe} xếp một sinh viên và đề tài vào một hội đồng theo thứ tự. Lớp giữ điểm trung bình và cờ đã chốt. \textit{DiemBaoVe} là điểm và nhận xét của một thành viên cho một lịch bảo vệ.
     \item \textit{DoAnKho} là một bản ghi trong kho đồ án. Bản ghi được tạo tự động khi Bộ môn chốt kết quả bảo vệ (nguồn hệ thống) hoặc nhập từ dữ liệu các khóa cũ (nguồn import). Bản ghi nhập từ khóa cũ có thể không gắn với tài khoản, nên lớp lưu thêm mã số và họ tên sinh viên dạng văn bản.
-    \item \textit{KetQuaKiemTraTrungLap} là kết quả một lần kiểm tra trùng lặp, cho tên đề tài hoặc cho một phiên bản tài liệu. Lớp lưu trạng thái, tỷ lệ tổng, tỷ lệ trùng với một nguồn cao nhất, phạm vi được kiểm tra và ngưỡng áp dụng tại thời điểm kiểm tra.
+    \item \textit{KetQuaKiemTraTrungLap} là kết quả một lần kiểm tra trùng lặp, cho tên đề tài hoặc cho một phiên bản tài liệu. Lớp lưu trạng thái, tỷ lệ tổng, tỷ lệ trùng với một nguồn cao nhất, phạm vi được kiểm tra và các ngưỡng áp dụng tại thời điểm kiểm tra.
     \item \textit{ChiTietTrungLap} là một dòng chi tiết của kết quả: đề tài hoặc đồ án trùng, tỷ lệ, đoạn trong tài liệu nộp, đoạn nguồn và vị trí.
 \end{itemize}
 
@@ -490,7 +490,7 @@ Bảng \path{de_tai} có thêm chỉ mục (\path{dot_do_an_id}, \path{trang_tha
 \hline
 \path{trang_thai} & \texttt{VARCHAR(20)} & NN, CHECK & \path{DANG_KIEM_TRA}, \path{HOAN_TAT} hoặc \path{LOI} \\
 \hline
-\path{ty_le_tong} & \texttt{DECIMAL(5,2)} & & Tỷ lệ ký tự bị gắn cờ trùng trên toàn văn bản (\%) \\
+\path{ty_le_tong} & \texttt{DECIMAL(5,2)} & & Tỷ lệ ký tự bị gắn cờ trùng trên toàn văn bản (\%); giá trị được so với ngưỡng tổng \\
 \hline
 \path{ty_le_nguon_cao_nhat} & \texttt{DECIMAL(5,2)} & & Tỷ lệ trùng với một nguồn cao nhất; giá trị được so với ngưỡng tài liệu \\
 \hline
@@ -501,6 +501,8 @@ Bảng \path{de_tai} có thêm chỉ mục (\path{dot_do_an_id}, \path{trang_tha
 \path{ty_le_loai_tru} & \texttt{DECIMAL(5,2)} & & Tỷ lệ ký tự bị loại như phần mẫu chung (\%) \\
 \hline
 \path{nguong_ap_dung} & \texttt{DECIMAL(5,2)} & NN & Ngưỡng tại thời điểm kiểm tra \\
+\hline
+\path{nguong_tong_ap_dung} & \texttt{DECIMAL(5,2)} & & Ngưỡng tổng mọi nguồn tại thời điểm kiểm tra tài liệu; rỗng ở kết quả trước khi có ngưỡng này \\
 \hline
 \path{doi_tuong_duoc_kiem_tra} & \texttt{VARCHAR(255)} & & Tên đề tài, hoặc loại, phiên bản và tên tệp \\
 \hline
@@ -676,7 +678,7 @@ Schema \texttt{thesis\_ai} thuộc riêng dịch vụ AI và gồm ba bảng (H�
 \textbf{Bảng} & \textbf{Cột chính} & \textbf{Ý nghĩa} \\
 \hline
 \endhead
-\path{chunk} & \path{loai_nguon}, \path{ma_nguon}, \path{thu_tu}, \path{noi_dung}, \path{bam_noi_dung} & Một đơn vị văn bản đã tách. Tên đề tài (\path{TOPIC}) và tên đồ án kho (\path{ARCHIVE}) là một đơn vị; tài liệu (\path{DOCUMENT}) gồm nhiều đơn vị mức câu sau khi lọc phần mẫu chung. \path{ma_nguon} là định danh logic bên \texttt{thesis\_core}, không phải khóa ngoại. \path{bam_noi_dung} là mã băm SHA-256, giúp bỏ qua việc mã hóa lại nội dung không đổi \\
+\path{chunk} & \path{loai_nguon}, \path{ma_nguon}, \path{thu_tu}, \path{noi_dung}, \path{bam_noi_dung}, \path{nhom} & Một đơn vị văn bản đã tách. Tên đề tài (\path{TOPIC}) và tên đồ án kho (\path{ARCHIVE}) là một đơn vị; tài liệu (\path{DOCUMENT}) gồm nhiều đơn vị mức câu sau khi lọc phần mẫu chung. \path{ma_nguon} là định danh logic bên \texttt{thesis\_core}, không phải khóa ngoại. \path{bam_noi_dung} là mã băm SHA-256, giúp bỏ qua việc mã hóa lại nội dung không đổi. \path{nhom} là mã đề tài của tài liệu, để mọi phiên bản của một đề tài chỉ tính là một nhóm khi đếm cụm phổ biến \\
 \hline
 \path{embedding} & \path{chunk_id}, \path{ten_model}, \path{so_chieu}, \path{vector} & Vector của một đơn vị theo một mô hình. \path{vector} là mảng \texttt{float32} lưu dạng \texttt{BLOB}. \path{ten_model} gồm tên kho mô hình và mã commit trọng số, nên đổi mô hình không làm lẫn vector cũ và mới. UQ (\path{chunk_id}, \path{ten_model}); xóa đơn vị thì vector bị xóa theo (\texttt{ON DELETE CASCADE}) \\
 \hline
@@ -689,7 +691,7 @@ Ba quy tắc chi phối dữ liệu của \texttt{thesis\_ai}:
 \begin{itemize}
     \item \textit{Ba không gian định danh.} Cặp (\path{loai_nguon}, \path{ma_nguon}) mới xác định một nguồn: cùng số 12 có thể là đề tài 12, bản ghi kho 12 hoặc tài liệu 12. Web API luôn ánh xạ ngược theo loại nguồn mà dịch vụ AI trả về.
     \item \textit{Ghi thay thế.} Gọi \texttt{/ingest} lại cho một nguồn sẽ xóa toàn bộ đơn vị cũ của nguồn đó rồi ghi đơn vị mới trong một transaction. Văn bản rỗng gỡ nguồn khỏi chỉ mục.
-    \item \textit{Dựng lại chỉ mục khi khởi động.} Chỉ mục FAISS~\cite{faiss2021} và ma trận MinHash~\cite{broder1997} nằm trong bộ nhớ, được dựng lại từ \path{chunk} và \path{embedding} khi dịch vụ khởi động, không phải mã hóa lại. Chữ ký MinHash không được lưu mà tính lại từ nội dung.
+    \item \textit{Dựng lại chỉ mục khi khởi động.} Chỉ mục FAISS~\cite{faiss2021} và chỉ mục vân tay~\cite{schleimer2003} nằm trong bộ nhớ, được dựng lại từ \path{chunk} và \path{embedding} khi dịch vụ khởi động, không phải mã hóa lại. Vân tay không được lưu mà tính lại từ nội dung.
 \end{itemize}
 
 %=====================================================================
@@ -734,7 +736,7 @@ Web API được chia thành các module theo phân hệ nghiệp vụ:
     \item \textit{AI client}: lớp duy nhất gọi dịch vụ AI. Lớp này gắn khóa API, đặt thời gian chờ theo từng loại lời gọi và chuyển mọi lỗi kết nối, hết thời gian chờ hay sai hợp đồng thành một kiểu lỗi chung để module nghiệp vụ xử lý.
 \end{itemize}
 
-Dịch vụ AI gồm bốn thành phần nối tiếp: API nội bộ; khâu tiền xử lý (chuẩn hóa NFC, lọc phần mẫu chung như mục lục và tài liệu tham khảo, tách câu, tách từ tiếng Việt bằng underthesea~\cite{underthesea}); mô hình embedding \path{vietnamese-bi-encoder}~\cite{bkaibiencoder}; chỉ mục FAISS cho so khớp ngữ nghĩa và MinHash cho so khớp nguyên văn. Chi tiết các kỹ thuật này đã trình bày ở mục 1.6 và 1.7.
+Dịch vụ AI gồm bốn thành phần nối tiếp: API nội bộ; khâu tiền xử lý (chuẩn hóa NFC, lọc phần mẫu chung như mục lục và tài liệu tham khảo, tách câu, tách từ tiếng Việt bằng underthesea~\cite{underthesea}); mô hình embedding \path{vietnamese-bi-encoder}~\cite{bkaibiencoder}; chỉ mục FAISS cho so khớp ngữ nghĩa và chỉ mục vân tay (winnowing) cho so khớp nguyên văn. Chi tiết các kỹ thuật này đã trình bày ở mục 1.6 và 1.7.
 
 \subsection{Sơ đồ triển khai}
 
@@ -806,7 +808,7 @@ Dịch vụ AI cung cấp năm endpoint (Bảng~\ref{tab:c3-api-ai}). Bốn endp
 \hline
 \texttt{POST} \path{/check-document} & \path{ref_id}, \path{text}, \path{top_k}, \path{nguong_doan}, \path{nguong_nguyen_van}, \path{loai_tru} & \path{ty_le_tong}, \path{do_an_trung}, \path{chi_tiet} (đoạn nguồn, đoạn trùng, vị trí, tín hiệu), \path{so_doan}, \path{so_doan_loai_tru}, \path{ty_le_loai_tru} & Tác vụ nền sau khi nộp tài liệu; thời gian chờ tăng theo độ dài văn bản, tối đa 240 giây \\
 \hline
-\texttt{POST} \path{/ingest} & \path{id}, \path{type} (\path{TOPIC}, \path{ARCHIVE} hoặc \path{DOCUMENT}), \path{text} & \path{chunk_count} & Tác vụ nền sau khi giao đề tài, sau khi kiểm tra tài liệu hoàn tất, khi thêm bản ghi kho \\
+\texttt{POST} \path{/ingest} & \path{id}, \path{type} (\path{TOPIC}, \path{ARCHIVE} hoặc \path{DOCUMENT}), \path{text}, \path{nhom} (mã đề tài, chỉ với \path{DOCUMENT}) & \path{chunk_count} & Tác vụ nền sau khi giao đề tài, sau khi kiểm tra tài liệu hoàn tất, khi thêm bản ghi kho \\
 \hline
 \texttt{POST} \path{/reindex} & Danh sách mục ingest (tùy chọn) & \path{indexed_count} & Nạp kho hàng loạt; mã hóa bổ sung vector còn thiếu sau khi đổi mô hình \\
 \hline
@@ -1147,7 +1149,7 @@ Các mục tiếp theo trình bày từng màn hình theo thứ tự của quy t
     \label{fig:c3-mh-09}
 \end{figure}
 
-\textbf{MH-14 -- Chi tiết kết quả kiểm tra trùng lặp} (Hình~\ref{fig:c3-mh-14}). Màn hình trình bày kết quả theo kiểu báo cáo của các công cụ kiểm tra đạo văn. Thanh tóm tắt gồm tỷ lệ tổng, tỷ lệ trùng với một đồ án cao nhất, ngưỡng và nhãn vượt hoặc dưới ngưỡng. Cột trái liệt kê các đồ án trùng và đóng vai trò bộ lọc. Hai cột bên phải đặt đoạn trong tài liệu nộp cạnh đoạn nguồn. Mỗi đoạn có nhãn chữ ghi mức độ (cao, trung bình, thấp) và tỷ lệ, không chỉ dựa vào màu.
+\textbf{MH-14 -- Chi tiết kết quả kiểm tra trùng lặp} (Hình~\ref{fig:c3-mh-14}). Màn hình trình bày kết quả theo kiểu báo cáo của các công cụ kiểm tra đạo văn. Thanh tóm tắt gồm tỷ lệ tổng, tỷ lệ trùng với một đồ án cao nhất, hai ngưỡng (theo một đồ án và tổng mọi đồ án) và nhãn vượt hoặc dưới ngưỡng; khi tài liệu chỉ vượt ngưỡng tổng, nhãn ghi rõ là trùng tổng với nhiều đồ án. Cột trái liệt kê các đồ án trùng và đóng vai trò bộ lọc. Hai cột bên phải đặt đoạn trong tài liệu nộp cạnh đoạn nguồn. Mỗi đoạn có nhãn chữ ghi mức độ (cao, trung bình, thấp) và tỷ lệ, không chỉ dựa vào màu.
 
 \begin{figure}[H]
     \centering

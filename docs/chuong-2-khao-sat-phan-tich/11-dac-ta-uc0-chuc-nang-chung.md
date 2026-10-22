@@ -191,7 +191,7 @@ UC0 – Chức năng chung gồm 8 UC con dùng chung bởi nhiều use case ch�
 1. Web API gọi endpoint check-document của dịch vụ AI (bất đồng bộ) kèm file vừa nộp và API key nội bộ; đánh dấu trạng thái kiểm tra "Đang kiểm tra".
 2. Dịch vụ AI trích xuất text từ DOCX (python-docx)/PDF (PyMuPDF), chuẩn hóa NFC.
 3. Dịch vụ AI loại bỏ các phần mẫu chung (tiêu đề mẫu, mục lục, tài liệu tham khảo) dựa trên tài liệu mẫu chính thức đã thu thập.
-4. Dịch vụ AI chia đoạn (paragraph-level), so sánh với các tài liệu khác trong kho bằng embedding + MinHash/LSH, tổng hợp tỷ lệ tương đồng tổng và danh sách đồ án trùng vượt ngưỡng đã cấu hình (UC0.4).
+4. Dịch vụ AI chia đoạn (paragraph-level), so sánh với các tài liệu khác trong kho bằng embedding (trùng ngữ nghĩa) + vân tay k-gram winnowing (trùng nguyên văn), tổng hợp tỷ lệ tương đồng tổng và danh sách đồ án trùng; tài liệu bị cảnh báo khi tỷ lệ trùng với một đồ án **hoặc** tỷ lệ tổng mọi nguồn vượt ngưỡng tương ứng đã cấu hình (UC0.4).
 5. Dịch vụ AI trả kết quả cho Web API; trạng thái chuyển "Hoàn tất"; MH-09 (khi GVHD duyệt đề cương) và MH-14 (chi tiết kết quả) hiển thị tỷ lệ tổng, danh sách đồ án trùng, và từng đoạn trùng highlight cạnh đoạn nguồn.
 
 **Luồng thay thế**

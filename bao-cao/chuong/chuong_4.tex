@@ -67,7 +67,7 @@ Dịch vụ AI & sentence-transformers 6.1, transformers 5.17, PyTorch 2.14 (CPU
 \hline
  & underthesea 9.5 & Tách từ tiếng Việt trước khi mã hóa~\cite{underthesea} \\
 \hline
- & faiss-cpu 1.15, datasketch 2.0 & Chỉ mục tìm kiếm vector~\cite{faiss2021}, chữ ký MinHash~\cite{datasketch} \\
+ & faiss-cpu 1.15, NumPy 2.5 & Chỉ mục tìm kiếm vector~\cite{faiss2021}; chỉ mục vân tay văn bản (winnowing~\cite{schleimer2003}) tự cài đặt trên NumPy \\
 \hline
  & \path{bkai-foundation-models/vietnamese-bi-encoder} & Mô hình embedding tiếng Việt~\cite{bkaibiencoder} \\
 \hline
@@ -91,8 +91,8 @@ Mã nguồn được quản lý bằng Git trong một kho duy nhất, mỗi th�
 \begin{Verbatim}[fontsize=\small]
 ntma/
 |-- backend/        Web API: app/{core, models, schemas, routers, services},
-|                   alembic/versions (16 migration), tests (pytest)
-|-- ai-service/     Dich vu AI: app/{nlp, pipeline, index, embedding, minhash},
+|                   alembic/versions (17 migration), tests (pytest)
+|-- ai-service/     Dich vu AI: app/{nlp, pipeline, index, embedding, fingerprint},
 |                   alembic (schema thesis_ai), calibration, tests
 |-- frontend/       Client Web: src/{features, layouts, api, stores, components}
 |-- deploy/         docker-compose.yml, apache/, mysql/, certs/,
@@ -204,8 +204,8 @@ Cả hai lần đều kết thúc thành công, không cần thao tác tay. Tron
 
 Một máy chủ MySQL chứa hai schema tách biệt theo nguyên tắc mỗi dịch vụ sở hữu dữ liệu của mình:
 \begin{itemize}
-    \item \texttt{thesis\_core}: dữ liệu nghiệp vụ do Web API sở hữu (tài khoản, đợt đồ án, phân công, đề tài, đề cương, tiến độ, hội đồng, kho đồ án, kết quả kiểm tra, cấu hình ngưỡng, thông báo). Schema được tạo và nâng cấp bằng 16 migration Alembic~\cite{alembic}, migration gần nhất (\texttt{0016}) bổ sung danh mục định hướng đề tài và luồng duyệt đề cương hai cấp.
-    \item \texttt{thesis\_ai}: dữ liệu của dịch vụ AI (văn bản nguồn đã chuẩn hóa, các đoạn câu, vector embedding và chữ ký MinHash). Schema có hai migration riêng, chạy bởi service \texttt{ai-migrate}.
+    \item \texttt{thesis\_core}: dữ liệu nghiệp vụ do Web API sở hữu (tài khoản, đợt đồ án, phân công, đề tài, đề cương, tiến độ, hội đồng, kho đồ án, kết quả kiểm tra, cấu hình ngưỡng, thông báo). Schema được tạo và nâng cấp bằng 17 migration Alembic~\cite{alembic}; hai migration gần nhất bổ sung danh mục định hướng đề tài cùng luồng duyệt đề cương hai cấp (\texttt{0016}) và ngưỡng cảnh báo theo tổng mọi nguồn (\texttt{0017}).
+    \item \texttt{thesis\_ai}: dữ liệu của dịch vụ AI (văn bản nguồn đã chuẩn hóa, các đoạn câu kèm nhóm đề tài, vector embedding). Schema có ba migration riêng, chạy bởi service \texttt{ai-migrate}.
 \end{itemize}
 
 Mỗi schema có tài khoản CSDL riêng. Web API dùng một tài khoản chỉ được cấp quyền trên \texttt{thesis\_core} và schema kiểm thử \texttt{thesis\_core\_test}. Dịch vụ AI dùng hai tài khoản: \texttt{thesis\_ai\_migrate} có quyền DDL, chỉ dùng lúc migration; \texttt{thesis\_ai} chỉ có quyền đọc ghi dữ liệu trên \texttt{thesis\_ai} khi phục vụ, và bị từ chối nếu truy cập \texttt{thesis\_core}. Mọi bảng, cột văn bản dùng \texttt{utf8mb4\_vietnamese\_ci}~\cite{mysqlutf8mb4}, nên tìm kiếm và sắp xếp tiếng Việt đúng thứ tự từ điển, không phân biệt hoa thường. Không có thao tác sửa schema bằng tay trên máy chủ: mọi thay đổi đi qua migration, và bước 4 của \path{install.sh} từ chối tiếp tục nếu schema chưa ở revision mới nhất.
@@ -406,7 +406,7 @@ Bộ môn quản lý danh mục dùng chung của hệ thống: tài khoản sin
     \label{fig:c4-dinh-huong}
 \end{figure}
 
-Màn hình cấu hình ngưỡng (Hình~\ref{fig:c4-nguong}) cho Bộ môn chỉnh ba ngưỡng cảnh báo: ngưỡng tên đề tài, ngưỡng cảnh báo tài liệu (tỷ lệ trùng với một đồ án) và ngưỡng đoạn trùng. Mỗi ngưỡng hiển thị giá trị đề xuất từ bước hiệu chỉnh (mục~\ref{sec:c4-kiem-thu}) và nút khôi phục giá trị đề xuất. Ngưỡng mới chỉ áp dụng cho các lần kiểm tra sau; kết quả cũ giữ nguyên ngưỡng tại thời điểm kiểm tra. Khi người dùng mở một chức năng không thuộc vai trò của mình, client hiển thị trang 403 (Hình~\ref{fig:c4-403}); nếu gọi thẳng API, Web API cũng trả mã 403.
+Màn hình cấu hình ngưỡng (Hình~\ref{fig:c4-nguong}) cho Bộ môn chỉnh bốn ngưỡng cảnh báo: ngưỡng tên đề tài, ngưỡng cảnh báo tài liệu (tỷ lệ trùng với một đồ án), ngưỡng tổng (tỷ lệ trùng tổng mọi đồ án) và ngưỡng đoạn trùng. Hình chụp trước khi bổ sung ngưỡng tổng nên mới có ba ngưỡng; ngưỡng tổng hiển thị cùng dạng với các ngưỡng còn lại. Mỗi ngưỡng hiển thị giá trị đề xuất từ bước hiệu chỉnh (mục~\ref{sec:c4-kiem-thu}) và nút khôi phục giá trị đề xuất. Ngưỡng mới chỉ áp dụng cho các lần kiểm tra sau; kết quả cũ giữ nguyên ngưỡng tại thời điểm kiểm tra. Khi người dùng mở một chức năng không thuộc vai trò của mình, client hiển thị trang 403 (Hình~\ref{fig:c4-403}); nếu gọi thẳng API, Web API cũng trả mã 403.
 
 \begin{figure}[H]
     \centering
@@ -652,12 +652,12 @@ Kiểm tra tài liệu được thực hiện cho đề cương và báo cáo cu
 \begin{enumerate}
     \item \textit{Loại phần mẫu chung.} Bìa, lời cam đoan, mục lục, danh mục hình và bảng, tài liệu tham khảo, phụ lục, tiêu đề chương mục, chú thích hình và bảng, số trang là phần mọi đồ án đều giống nhau nên bị loại khỏi phép so sánh. Để quy tắc này không thành chỗ giấu nội dung, các mục mẫu chỉ được bỏ ở phần đầu và phần cuối tài liệu, mỗi mục có trần độ dài, và kết quả luôn ghi số dòng, tỷ lệ nội dung đã loại.
     \item \textit{Tách câu và mã hóa.} Phần còn lại được nối thành một dòng chảy (để đoạn văn bị PDF ngắt dòng được nối lại) rồi tách thành câu, có xử lý các chữ viết tắt thường gặp như TS., ThS., v.v.; câu ngắn hơn 6 âm tiết bị bỏ qua, câu dài hơn 120 âm tiết được cắt nhỏ. Nhờ vậy cùng một nội dung ở dạng DOCX và PDF cho cùng các câu. Mọi câu được mã hóa trong một lần gọi mô hình, chia lô con 32 câu.
-    \item \textit{Tìm câu nguồn gần nhất theo hai tín hiệu.} Với mỗi câu, dịch vụ tìm câu gần nghĩa nhất trong chỉ mục tài liệu (tín hiệu ngữ nghĩa, cosine) và câu có độ trùng chữ cao nhất theo chữ ký MinHash (tín hiệu nguyên văn, ước lượng hệ số Jaccard trên tập 4 âm tiết liên tiếp, 128 hàm băm)~\cite{datasketch}. Các phiên bản trước của chính đề tài đó không tham gia so sánh, để sinh viên nộp lại không bị tính là tự trùng.
-    \item \textit{Gắn cờ.} Câu bị gắn cờ \textit{nguyên văn} khi điểm Jaccard đạt ngưỡng nguyên văn (88,7\%); nếu không, câu bị gắn cờ \textit{ngữ nghĩa} khi cosine đạt ngưỡng đoạn trùng (67,7\%) và thuộc một chuỗi ít nhất 2 câu liên tiếp cùng trùng một nguồn. Điều kiện chuỗi loại bỏ các câu đơn lẻ trùng ý ngẫu nhiên, vốn hay gặp ở văn phong mô tả hệ thống.
+    \item \textit{Tìm câu nguồn gần nhất theo hai tín hiệu.} Với mỗi câu, dịch vụ tìm câu gần nghĩa nhất trong chỉ mục tài liệu (tín hiệu ngữ nghĩa, cosine) và câu chung nhiều chữ nhất theo vân tay văn bản (tín hiệu nguyên văn)~\cite{schleimer2003,sorokina2006}. Mỗi câu được băm thành các cụm 6 âm tiết liên tiếp; kho chỉ giữ các vân tay chọn bằng winnowing (cửa sổ 4 cụm) trong một chỉ mục ngược, nên câu nguồn ứng viên được tìm bằng tra bảng chứ không quét toàn kho, và mọi đoạn chung dài từ 9 âm tiết trở lên đều được tìm thấy. Điểm nguyên văn của câu là \textit{độ phủ}: tỷ lệ âm tiết của câu nằm trong các đoạn chung dài từ 9 âm tiết với một câu nguồn. Chép cả câu cho 100\%, sửa một từ giữa câu vẫn còn khoảng 97\%, chép nửa câu khoảng 50\%. Cụm có mặt trong từ 4 đề tài khác nhau trở lên bị coi là cụm phổ biến và không được tính; mọi phiên bản của một đề tài tính là một nhóm, nên câu riêng của sinh viên không trở thành ``phổ biến'' chỉ vì được nộp nhiều lần. Các phiên bản trước của chính đề tài đó không tham gia so sánh, để sinh viên nộp lại không bị tính là tự trùng.
+    \item \textit{Gắn cờ.} Câu bị gắn cờ \textit{nguyên văn} khi độ phủ đạt ngưỡng nguyên văn (56\%); nếu không, câu bị gắn cờ \textit{ngữ nghĩa} khi cosine đạt ngưỡng đoạn trùng (67,7\%) và thuộc một chuỗi ít nhất 2 câu liên tiếp cùng trùng một nguồn. Điều kiện chuỗi loại bỏ các câu đơn lẻ trùng ý ngẫu nhiên, vốn hay gặp ở văn phong mô tả hệ thống.
     \item \textit{Tổng hợp.} Tỷ lệ trùng tổng là số ký tự của các câu bị gắn cờ chia cho tổng số ký tự đã so sánh. Tỷ lệ trùng với từng đồ án tính tương tự, chỉ đếm câu gắn cờ của đồ án đó. Các câu bị gắn cờ liên tiếp cùng nguồn được ghép thành một đoạn trùng (tối đa 6 câu), kèm vị trí, đoạn nguồn, điểm từng tín hiệu và loại trùng chiếm ưu thế.
 \end{enumerate}
 
-Web API lưu kết quả cùng ngưỡng đang áp dụng, rồi đánh dấu \textit{vượt ngưỡng} khi tỷ lệ trùng với \textit{một} đồ án nguồn cao nhất đạt ngưỡng cảnh báo tài liệu (10,4\%). Ngưỡng được so với tỷ lệ theo từng nguồn chứ không với tỷ lệ tổng, vì một tài liệu trích dẫn rải rác nhiều nguồn, mỗi nguồn một ít, khác với tài liệu chép phần lớn một đồ án. Chỉ sau khi kết quả đã ở trạng thái \textit{Hoàn tất}, tài liệu mới được đẩy vào chỉ mục để các lần nộp sau so được với nó; nhờ thứ tự này, tài liệu không bao giờ tự trùng với chính nó.
+Web API lưu kết quả cùng các ngưỡng đang áp dụng, rồi đánh dấu \textit{vượt ngưỡng} khi tỷ lệ trùng với \textit{một} đồ án nguồn cao nhất đạt ngưỡng cảnh báo tài liệu (10,4\%), hoặc khi tỷ lệ trùng tổng mọi nguồn đạt ngưỡng tổng (14,8\%). Ngưỡng thứ nhất bắt việc chép phần lớn một đồ án. Ngưỡng thứ hai bắt bài ghép từ nhiều đồ án, mỗi đồ án một ít, và được đặt cao hơn vì câu tự viết cùng lĩnh vực có thể khớp rải rác với nhiều đồ án. Kết quả ghi rõ lý do vượt ngưỡng (một đồ án hay tổng nhiều đồ án) để giảng viên biết cần xem gì. Chỉ sau khi kết quả đã ở trạng thái \textit{Hoàn tất}, tài liệu mới được đẩy vào chỉ mục để các lần nộp sau so được với nó; nhờ thứ tự này, tài liệu không bao giờ tự trùng với chính nó.
 
 Việc kiểm tra không bao giờ để bản ghi kẹt ở trạng thái \textit{Đang kiểm tra}: mọi lỗi trong tác vụ nền đều chuyển bản ghi sang \textit{Lỗi}; bản ghi quá 300 giây chưa xong cũng bị chuyển sang \textit{Lỗi} ở lần đọc kế tiếp. Văn bản dài hơn 800\,000 ký tự (khoảng 230 trang) không được gửi sang dịch vụ AI; việc nộp vẫn thành công, kết quả ghi rõ lý do. Nút \textit{Kiểm tra lại} chỉ xuất hiện khi kết quả ở trạng thái \textit{Lỗi}.
 
@@ -834,6 +834,8 @@ Tập lệnh \texttt{deploy/verify-all.sh -{}-report} chạy tuần tự 14 bư�
 
 Như vậy cả bốn bước không đạt đều do tập lệnh kiểm thử hoặc tài liệu chưa theo kịp thay đổi của luồng duyệt đề cương, không phát hiện lỗi của chức năng. Tuy vậy, các kịch bản E2E và kịch bản chụp màn hình cần được cập nhật trước lần kiểm thử chấp nhận tiếp theo.
 
+Sau khi thay tín hiệu nguyên văn bằng vân tay văn bản và thêm ngưỡng tổng (ngày 22/10/2026), hai bộ kiểm thử của bước 4 và bước 5 được chạy lại riêng trên CSDL kiểm thử: 68/68 ca của Web API (thêm ca cho cảnh báo theo tỷ lệ trùng tổng) và 15/15 ca của dịch vụ AI (thêm các ca cho bảo đảm của winnowing, độ phủ, cụm phổ biến theo nhóm đề tài) đều đạt. Toàn bộ 14 bước chưa được chạy lại sau thay đổi này.
+
 \subsection{Thử nghiệm mô hình AI}
 
 \textbf{Chọn mô hình embedding.} Hai mô hình ứng viên được so sánh trên 80 cặp văn bản gán nhãn tay (30 cặp tên đề tài, 30 cặp câu, 20 cặp đoạn), mỗi nhóm gồm cặp diễn đạt lại (trùng), cặp cùng lĩnh vực khác nội dung và cặp không liên quan (không trùng). Quy tắc chọn được viết ra trước khi chạy: chỉ chọn \texttt{multilingual-e5-base} khi AUC của nó vượt \texttt{vietnamese-bi-encoder} ít nhất 0,05 trên \textit{cả} tập câu và tập đoạn; ngược lại chọn \texttt{vietnamese-bi-encoder} vì nhỏ hơn, phù hợp máy chủ dùng chung bộ nhớ. Kết quả ở Bảng~\ref{tab:c4-so-sanh-mo-hinh}: trên tập câu hai mô hình bằng nhau, nên \texttt{vietnamese-bi-encoder} được chọn. Ngoài quy tắc, mô hình này còn trải điểm rộng hơn hẳn (chênh lệch cosine trung bình giữa cặp trùng và cặp không trùng 0,24--0,47, so với 0,06--0,09 của e5), giúp ngưỡng ít nhạy với sai số hiệu chỉnh.
@@ -866,7 +868,7 @@ Kích thước trọng số & khoảng 515 MiB & khoảng 1,06 GiB \\
 \end{longtable}
 }
 
-\textbf{Hiệu chỉnh ngưỡng.} Các ngưỡng được chọn trên tập hiệu chỉnh (17 cặp tài liệu, 56 truy vấn tên đề tài), sau đó kiểm chứng trên tập giữ riêng (8 cặp tài liệu, 24 truy vấn) không dùng khi hiệu chỉnh. Ngưỡng tên, đoạn và nguyên văn được chọn theo chỉ số Youden J trên đường ROC; ngưỡng tài liệu lấy trung điểm vì hai lớp tách biệt hoàn toàn (Bảng~\ref{tab:c4-nguong}). Ngưỡng tên, ngưỡng đoạn và ngưỡng tài liệu là giá trị đề xuất trên màn hình cấu hình của Bộ môn; ngưỡng nguyên văn là tham số kỹ thuật của dịch vụ AI, không sửa trên giao diện.
+\textbf{Hiệu chỉnh ngưỡng.} Các ngưỡng được chọn trên tập hiệu chỉnh (17 cặp tài liệu, 56 truy vấn tên đề tài), sau đó kiểm chứng trên tập giữ riêng (8 cặp tài liệu, 24 truy vấn) không dùng khi hiệu chỉnh. Ngưỡng tên, đoạn và nguyên văn được chọn theo chỉ số Youden J trên đường ROC; ngưỡng tài liệu và ngưỡng tổng lấy trung điểm vì hai lớp tách biệt hoàn toàn (Bảng~\ref{tab:c4-nguong}). Độ dài cụm của vân tay được chọn cùng lúc, theo AUC của tín hiệu nguyên văn với cụm 3, 4, 5 và 6 âm tiết (lần lượt 0,9859; 0,9962; 0,9969; 0,9974), nên hệ thống dùng cụm 6 âm tiết. Ngưỡng tên, ngưỡng đoạn, ngưỡng tài liệu và ngưỡng tổng là giá trị đề xuất trên màn hình cấu hình của Bộ môn; ngưỡng nguyên văn là tham số kỹ thuật của dịch vụ AI, không sửa trên giao diện.
 
 {\renewcommand{\arraystretch}{1.15}
 \begin{longtable}{|p{4.3cm}|p{1.7cm}|p{3.1cm}|p{1.6cm}|p{3cm}|}
@@ -883,14 +885,16 @@ Tên đề tài (cosine) & 67,8\% & Youden J & 0,9758 & 0,893 / 0,036 \\
 \hline
 Đoạn trùng ngữ nghĩa (cosine từng câu) & 67,7\% & Youden J & 0,7983 & 0,829 / 0,351 \\
 \hline
-Nguyên văn (Jaccard MinHash từng câu) & 88,7\% & Youden J & 0,9992 & 1,000 / 0,002 \\
+Nguyên văn (độ phủ vân tay từng câu) & 56,0\% & Youden J & 0,9974 & 0,978 / 0,019 \\
 \hline
 Tài liệu (tỷ lệ theo một đồ án) & 10,4\% & Trung điểm & 1,0000 & 1,000 / 0,000 \\
+\hline
+Tài liệu (tỷ lệ tổng mọi đồ án) & 14,8\% & Trung điểm & 1,0000 & 1,000 / 0,000 \\
 \hline
 \end{longtable}
 }
 
-\textbf{Kiểm chứng.} Bảng~\ref{tab:c4-kiem-chung} cho độ chính xác ở ba mức. Ở mức tài liệu, mọi cặp chép nguyên văn, diễn đạt lại và không liên quan đều được xử lý đúng trên cả hai tập. Cặp duy nhất sai là P19 (cùng lĩnh vực, tập kiểm chứng): bài nộp trùng ngữ nghĩa 22,81\% với một đồ án khác cùng chủ đề y tế trong kho nên bị cảnh báo, dù không phải đồ án nguồn của cặp. Ở mức câu, câu chép nguyên văn được phát hiện đầy đủ, nhưng câu diễn đạt lại chỉ được phát hiện 40--56\%; tài liệu diễn đạt lại vẫn bị cảnh báo đúng vì đủ nhiều câu trùng tập trung vào một nguồn. Ba cổng chất lượng đặt trước đều đạt: mọi cặp chép nguyên văn bị cảnh báo, mọi cặp không liên quan dưới ngưỡng, độ chính xác cặp trên tập kiểm chứng 0,875 (yêu cầu $\geq 0{,}85$).
+\textbf{Kiểm chứng.} Bảng~\ref{tab:c4-kiem-chung} cho độ chính xác ở ba mức. Ở mức tài liệu, mọi cặp chép nguyên văn, diễn đạt lại và không liên quan đều được xử lý đúng trên cả hai tập. Cặp duy nhất sai là P19 (cùng lĩnh vực, tập kiểm chứng): bài nộp trùng ngữ nghĩa 22,81\% với một đồ án khác cùng chủ đề y tế trong kho nên bị cảnh báo, dù không phải đồ án nguồn của cặp. Ở mức câu, câu chép nguyên văn được phát hiện đầy đủ, nhưng câu diễn đạt lại chỉ được phát hiện 40--56\%; tài liệu diễn đạt lại vẫn bị cảnh báo đúng vì đủ nhiều câu trùng tập trung vào một nguồn. Tỷ lệ câu tự viết bị gắn cờ nhầm là 5,6\% và 10,7\%, cao hơn một chút so với lần hiệu chỉnh dùng MinHash (4,1\% và 9,2\%), vì độ phủ tính cả những câu chỉ trùng một phần với câu cùng lĩnh vực; các câu này rải rác nên không đổi kết luận ở mức tài liệu. Ba cổng chất lượng đặt trước đều đạt: mọi cặp chép nguyên văn bị cảnh báo, mọi cặp không liên quan dưới ngưỡng, độ chính xác cặp trên tập kiểm chứng 0,875 (yêu cầu $\geq 0{,}85$).
 
 {\renewcommand{\arraystretch}{1.15}
 \begin{longtable}{|p{6.8cm}|p{3.8cm}|p{3.8cm}|}
@@ -921,7 +925,7 @@ Câu chép nguyên văn & 183/183 (1,000) & 110/110 (1,000) \\
 \hline
 Câu diễn đạt lại & 125/222 (0,563) & 22/55 (0,400) \\
 \hline
-Câu tự viết bị gắn cờ nhầm & 44/1064 (0,041) & 57/616 (0,092) \\
+Câu tự viết bị gắn cờ nhầm & 60/1064 (0,056) & 66/616 (0,107) \\
 \hline
 \multicolumn{3}{|l|}{\textit{Mức tên đề tài (truy vấn có nhãn)}} \\
 \hline
@@ -934,11 +938,13 @@ Cùng lĩnh vực không bị cảnh báo & 27/28 (0,964) & 11/12 (0,917) \\
 \end{longtable}
 }
 
-\textbf{Vai trò của bước loại phần mẫu chung.} Khi tắt bước này, tỷ lệ trùng tổng của 11 bài nộp cùng lĩnh vực hoặc không liên quan tăng trung bình 15,14 điểm phần trăm (thấp nhất 2,52, cao nhất 23,17), do bìa, lời cam đoan, mục lục, tài liệu tham khảo của mọi đồ án giống nhau. Nếu không loại, những bài hoàn toàn không sao chép này sẽ hiển thị tỷ lệ trùng tổng khoảng 10--26\%. Tỷ lệ theo từng đồ án của các bài này vẫn dưới 0,4\% nên không bị cảnh báo; tác dụng chính của bước này là giữ cho con số tỷ lệ tổng mà người dùng nhìn thấy có ý nghĩa.
+\textbf{Bài ghép từ nhiều nguồn.} Bộ dữ liệu không có loại bài này, nên một kịch bản được dựng thêm và không dùng để hiệu chỉnh: với bài tự viết của mỗi cặp trong 11 cặp cùng lĩnh vực hoặc không liên quan, chèn bốn khối câu chép nguyên văn từ bốn đồ án khác trong kho, mỗi khối khoảng 6\% bài gốc, rải đều trong bài. Phần chèn chiếm 19,9--22,5\% bài mới, và cả 284 câu chèn đều được gắn cờ nguyên văn. Ở 9 bài, tỷ lệ trùng với một đồ án cao nhất chỉ 5,2--6,1\%, dưới ngưỡng tài liệu, nên quy tắc chỉ xét từng nguồn chỉ cảnh báo 2/11 bài (hai bài có một đồ án vượt ngưỡng tài liệu, trong đó P19 vốn đã bị cảnh báo khi chưa chèn). Khi thêm ngưỡng tổng, cả 11/11 bài bị cảnh báo, với tỷ lệ tổng 20,3--39,3\%.
+
+\textbf{Vai trò của bước loại phần mẫu chung và bộ lọc cụm phổ biến.} Khi tắt bước loại phần mẫu chung ở cả kho lẫn bài nộp, tỷ lệ trùng tổng của 11 bài cùng lĩnh vực hoặc không liên quan tăng trung bình 8,02 điểm phần trăm (từ $-0{,}03$ đến 12,71), lên 9,1--23,9\%, và 3 bài vượt ngưỡng tổng. Mức tăng thấp hơn lần hiệu chỉnh dùng MinHash (15,14 điểm); khác biệt chính giữa hai lần là bộ lọc cụm phổ biến, vốn bỏ qua các cụm có trong nhiều đề tài như dòng bìa, lời cam đoan, mục lục giống hệt nhau. Ngược lại, giữ bước loại phần mẫu chung nhưng tắt bộ lọc cụm phổ biến thì tỷ lệ tổng của các bài này lên 7,6--35,0\% (P17 từ 8,41\% lên 25,66\%) và 6/11 bài vượt ngưỡng tổng, vì các câu theo khuôn chung của lĩnh vực bị tính là chép nguyên văn. Hai bước lọc vì vậy bổ sung cho nhau, và là điều kiện để dùng được ngưỡng tổng.
 
 \subsection{Đánh giá theo yêu cầu phi chức năng}
 
-Bảng~\ref{tab:c4-nfr} đối chiếu kết quả lần chạy ngày 21/10/2026 với 19 yêu cầu phi chức năng ở chương 2. Các phép đo thời gian chạy trên máy phát triển với dữ liệu thử nghiệm đầy đủ (308 vector tên đề tài, 2\,991 vector câu tài liệu), trong lúc máy còn chạy các việc khác.
+Bảng~\ref{tab:c4-nfr} đối chiếu kết quả lần chạy ngày 21/10/2026 với 19 yêu cầu phi chức năng ở chương 2. Các phép đo thời gian chạy trên máy phát triển với dữ liệu thử nghiệm đầy đủ (308 vector tên đề tài, 2\,991 vector câu tài liệu), trong lúc máy còn chạy các việc khác. Các phép đo này được thực hiện khi tín hiệu nguyên văn còn dùng MinHash quét toàn kho. Tín hiệu vân tay thay thế nhanh hơn nhiều: trên kho tổng hợp 150\,000 câu, so khớp nguyên văn cho một báo cáo 1\,500 câu mất 0,09 giây, so với 34,5 giây khi quét bằng MinHash.
 
 {\renewcommand{\arraystretch}{1.15}
 \begin{longtable}{|p{1.5cm}|p{4.2cm}|p{6.9cm}|p{1.6cm}|}
@@ -1105,7 +1111,7 @@ Chương này đã trình bày việc triển khai hệ thống quản lý đồ
 \textbf{Hạn chế.}
 \begin{itemize}
     \item \textit{Chữ ký số mới được kiểm tra về cấu trúc.} Hệ thống kiểm tra tệp PDF có chữ ký PKCS\#7, đọc được người ký, thời điểm ký và vùng ký phủ toàn bộ tệp, nhưng chưa xác minh giá trị mật mã của chữ ký và chưa kiểm tra chuỗi chứng thư tới tổ chức cấp chứng thư gốc. Một tệp có cấu trúc chữ ký hợp lệ nhưng chữ ký giả vẫn có thể được chấp nhận; trách nhiệm xác thực vẫn thuộc người phê duyệt.
-    \item \textit{Chất lượng AI được đo trên dữ liệu tổng hợp.} Kho đề tài và các cặp tài liệu do bộ sinh dữ liệu tạo ra; danh sách phần mẫu chung là giả định vì chưa có mẫu đề cương, báo cáo chính thức của Khoa. Ngưỡng cần được hiệu chỉnh lại khi có dữ liệu đồ án thật.
+    \item \textit{Chất lượng AI được đo trên dữ liệu tổng hợp.} Kho đề tài và các cặp tài liệu do bộ sinh dữ liệu tạo ra; danh sách phần mẫu chung là giả định vì chưa có mẫu đề cương, báo cáo chính thức của Khoa (bộ lọc cụm phổ biến bù được một phần, nhưng chỉ cho tín hiệu nguyên văn). Bộ dữ liệu không có câu chép rồi sửa nhẹ, nên độ dài cụm 6 âm tiết được chọn có thể hơi dài với văn bản thật: một từ bị sửa gần đầu hoặc cuối câu làm mất tới 8 âm tiết khỏi độ phủ. Ngưỡng tổng mới được kiểm tra bằng kịch bản ghép dựng thêm. Ngưỡng cần được hiệu chỉnh lại khi có dữ liệu đồ án thật.
     \item \textit{Phát hiện diễn đạt lại ở mức câu còn yếu}: chỉ 40--56\% câu diễn đạt lại được gắn cờ. Hệ thống vẫn cảnh báo đúng các tài liệu diễn đạt lại nhờ tổng hợp theo nguồn, nhưng một bài chỉ diễn đạt lại vài đoạn ngắn có thể không bị phát hiện. Ngược lại, khi kho có nhiều đồ án cùng chủ đề, có thể có cảnh báo sai như cặp P19.
     \item \textit{Báo cáo dài kiểm tra lâu}: thời gian tăng tuyến tính theo độ dài, khoảng 65 giây cho 350\,000 ký tự trên máy phát triển; văn bản trên 800\,000 ký tự không được kiểm tra tự động.
     \item \textit{Người dùng chưa tự đổi được mật khẩu}: mật khẩu khởi tạo do Bộ môn cấp và chỉ Bộ môn đặt lại được. Hệ thống chưa có sao lưu CSDL tự động; tài liệu OpenAPI vẫn truy cập được mà không cần đăng nhập (chỉ lộ danh sách API, không lộ dữ liệu).

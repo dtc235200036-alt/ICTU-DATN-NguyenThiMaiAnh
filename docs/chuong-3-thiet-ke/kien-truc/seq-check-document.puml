@@ -20,10 +20,10 @@ WebAPI ->> BgTask : Kích hoạt tác vụ nền
 BgTask -> AIService : POST /check-document (X-API-Key) {ref_id, text, nguong_doan, loai_tru}
 
 alt Thành công trong thời gian chờ
-  AIService -> AIService : Lọc mẫu chung, tách câu; so khớp MinHash và FAISS
+  AIService -> AIService : Lọc mẫu chung, tách câu; so khớp vân tay (winnowing) và FAISS
   AIService --> BgTask : 200 {ty_le_tong, do_an_trung, chi_tiet, phạm vi}
   BgTask -> DBCore : UPDATE ket_qua (HOAN_TAT); INSERT chi_tiet_trung_lap
-  BgTask -> AIService : POST /ingest {id, DOCUMENT, text}
+  BgTask -> AIService : POST /ingest {id, DOCUMENT, text, nhom = de_tai_id}
 else Hết thời gian chờ hoặc lỗi
   AIService --> BgTask : Không phản hồi / lỗi
   BgTask -> DBCore : UPDATE ket_qua (LOI)

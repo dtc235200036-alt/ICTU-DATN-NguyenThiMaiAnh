@@ -10,7 +10,7 @@ Thư mục này là phần "thử nghiệm và đánh giá" của dịch vụ AI
 |---|---|---|---|
 | [01-du-lieu-thu-nghiem.md](01-du-lieu-thu-nghiem.md) | Bộ dữ liệu: kho 300 đề tài khóa K18–K22, 50 tài liệu DOCX/PDF thành 25 cặp với phổ trùng lặp chủ đích (chép nguyên văn, diễn đạt lại, cùng lĩnh vực, không liên quan), tách tập hiệu chỉnh / kiểm chứng | 4.2 | DATA-02, DATA-03 |
 | [02-so-sanh-mo-hinh-embedding.md](02-so-sanh-mo-hinh-embedding.md) | So sánh `bkai-foundation-models/vietnamese-bi-encoder` (+ tách từ underthesea) với `intfloat/multilingual-e5-base`: độ tách (AUC, khoảng cách điểm) và độ trễ; lý do chốt bkai | 3.4 | AISV-03, AISV-04 |
-| [03-hieu-chinh-nguong.md](03-hieu-chinh-nguong.md) | Hiệu chỉnh ngưỡng tên đề tài, ngưỡng đoạn (ngữ nghĩa), ngưỡng nguyên văn (MinHash) và ngưỡng cảnh báo tài liệu trên tập hiệu chỉnh; kiểm chứng trên tập giữ lại; hạn chế | 3.4 | DATA-03, AISV-03, AISV-04 |
+| [03-hieu-chinh-nguong.md](03-hieu-chinh-nguong.md) | Hiệu chỉnh ngưỡng tên đề tài, ngưỡng đoạn (ngữ nghĩa), ngưỡng nguyên văn (độ phủ vân tay winnowing, kèm chọn k), ngưỡng cảnh báo tài liệu theo một đồ án và ngưỡng tổng mọi nguồn trên tập hiệu chỉnh; kiểm chứng trên tập giữ lại; kịch bản ghép từ nhiều nguồn; hạn chế | 3.4 | DATA-03, AISV-03, AISV-04 |
 | [04-hieu-nang-va-bao-mat.md](04-hieu-nang-va-bao-mat.md) | Đo trên stack chạy thật: cô lập dịch vụ AI (NFR-07), thời gian kiểm tra tên (NFR-08), nộp → hoàn tất (NFR-09), phản hồi nộp (NFR-10), một lần encode mỗi ingest (NFR-11), bộ nhớ | 3.4, 4.1 | AISV-01, AISV-02, AISV-03, AISV-06 |
 
 Các giá trị hiệu chỉnh ở trang 03 là giá trị **đề xuất** hiện trên màn hình cấu hình ngưỡng của Bộ môn (UC0.4, AISV-07); Bộ môn có thể sửa, lần kiểm tra kế tiếp áp dụng giá trị mới, kết quả cũ giữ ngưỡng lúc kiểm tra.

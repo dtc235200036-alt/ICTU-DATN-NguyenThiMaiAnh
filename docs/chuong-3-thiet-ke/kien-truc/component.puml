@@ -23,7 +23,7 @@ package "Dịch vụ AI kiểm tra trùng lặp (FastAPI)" {
   component "API nội bộ: /ingest, /check-title,\n/check-document, /reindex (yêu cầu X-API-Key);\n/health (kiểm tra sống)" as AI_API
   component "Chuẩn hóa NFC,\nlọc mẫu chung, tách câu" as AI_NLP
   component "Mô hình embedding\n(vietnamese-bi-encoder)" as AI_Embed
-  component "Chỉ mục FAISS\nvà MinHash" as AI_Index
+  component "Chỉ mục FAISS\nvà chỉ mục vân tay" as AI_Index
 }
 
 database "MySQL\nthesis_core" as DB_core
