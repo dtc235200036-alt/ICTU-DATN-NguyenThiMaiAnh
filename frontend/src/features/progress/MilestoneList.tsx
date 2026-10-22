@@ -2,6 +2,7 @@ import { App as AntApp, Button, Empty, List, Space, Tag, Typography } from 'antd
 
 import { DownloadError, downloadFile } from '../../api/download'
 import { formatDate } from '../../utils/format'
+import FilePreviewButton from '../documents/FilePreviewButton'
 import type { MilestoneStatus } from './api'
 import { DANH_GIA, TRANG_THAI_MOC, formatDay } from './constants'
 
@@ -76,7 +77,8 @@ export default function MilestoneList({ moc, selectedId, onSelect }: MilestoneLi
                       }}
                     >
                       {report.tep.ten_goc}
-                    </Button>
+                    </Button>{' '}
+                    <FilePreviewButton doc={report.tep} type="link" />
                   </Text>
                 )}
                 {report.nhan_xet && (

@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router'
 import { downloadFile, DownloadError } from '../../api/download'
 import { formatDate } from '../../utils/format'
 import CheckStatusTag from '../documents/CheckStatusTag'
+import FilePreviewButton from '../documents/FilePreviewButton'
 import type { OutlineTrangThai, OutlineVersion } from './api'
 
 export interface VersionHistoryProps {
@@ -75,6 +76,7 @@ export default function VersionHistory({ versions, trangThai, docLabel }: Versio
       key: 'hanh_dong',
       render: (_value, record) => (
         <Space>
+          <FilePreviewButton doc={record.tai_lieu} />
           <Button size="small" onClick={() => void handleDownload(record)}>
             Tải file
           </Button>
