@@ -117,9 +117,9 @@ def _ingest_one(task_db, client, doc_id: int) -> bool:
         or too_long_for_check(doc.noi_dung_trich_xuat)
     ):
         return False
-    text = doc.noi_dung_trich_xuat
+    text, nhom = doc.noi_dung_trich_xuat, doc.de_tai_id
     task_db.commit()  # không giữ transaction đọc trong lúc gọi AI
-    client.ingest(doc_id, LOAI_DOCUMENT, text)
+    client.ingest(doc_id, LOAI_DOCUMENT, text, nhom=nhom)
     task_db.execute(
         update(TaiLieuDoAn).where(TaiLieuDoAn.id == doc_id).values(da_index_luc=now_utc())
     )

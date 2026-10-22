@@ -13,7 +13,7 @@ if [ "${AI_MIGRATE_ON_START:-1}" = "1" ]; then
   alembic upgrade head
 fi
 
-# Đúng MỘT worker: chỉ mục FAISS và ma trận MinHash nằm trong bộ nhớ tiến
+# Đúng MỘT worker: chỉ mục FAISS và chỉ mục vân tay nằm trong bộ nhớ tiến
 # trình và /ingest sửa chúng tại chỗ — worker thứ hai sẽ phục vụ chỉ mục cũ.
 # 0.0.0.0 chỉ là bên trong container; plan 04-05 không publish cổng nào ra
 # host (mạng nội bộ compose, không có route Apache — AISV-01).

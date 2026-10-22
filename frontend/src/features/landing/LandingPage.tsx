@@ -288,7 +288,7 @@ function Bento() {
           <BentoCard
             className="lp-card--hero"
             title="Kiểm tra trùng lặp bằng AI"
-            text="So sánh ngữ nghĩa tên đề tài bằng mô hình nhúng tiếng Việt và dò trùng nguyên văn bằng MinHash, đối chiếu với kho đồ án của khoa."
+            text="So sánh ngữ nghĩa tên đề tài bằng mô hình nhúng tiếng Việt và dò trùng nguyên văn bằng vân tay cụm âm tiết, đối chiếu với kho đồ án của khoa."
           >
             <SimilarityVisual />
           </BentoCard>

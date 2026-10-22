@@ -3,7 +3,11 @@ import { AxiosError } from 'axios'
 
 import { api } from '../../api/client'
 
-export type ThresholdKey = 'NGUONG_TEN_DE_TAI' | 'NGUONG_TAI_LIEU' | 'NGUONG_DOAN_TRUNG'
+export type ThresholdKey =
+  | 'NGUONG_TEN_DE_TAI'
+  | 'NGUONG_TAI_LIEU'
+  | 'NGUONG_TONG_TAI_LIEU'
+  | 'NGUONG_DOAN_TRUNG'
 
 export interface ThresholdOut {
   loai: ThresholdKey

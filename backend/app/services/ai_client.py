@@ -51,8 +51,10 @@ class AiClient(Protocol):
         trước của cùng đề tài)."""
         ...
 
-    def ingest(self, ref_id: int, loai: str, text: str) -> dict:
-        """§3.3.5 /ingest: {chunk_count, indexed: true}."""
+    def ingest(self, ref_id: int, loai: str, text: str, nhom: int | None = None) -> dict:
+        """§3.3.5 /ingest: {chunk_count, indexed: true} — `nhom` (chỉ DOCUMENT)
+        = de_tai.id: mọi phiên bản của một đề tài là một nhóm khi dịch vụ AI
+        đếm cụm phổ biến của vân tay."""
         ...
 
 
@@ -205,7 +207,7 @@ class AiClientStub:
 
         return {"ty_le_tong": ty_le_tong, "do_an_trung": do_an_trung, "chi_tiet": chi_tiet}
 
-    def ingest(self, ref_id: int, loai: str, text: str) -> dict:
+    def ingest(self, ref_id: int, loai: str, text: str, nhom: int | None = None) -> dict:
         if self._mode == "loi":
             raise AiServiceError("Dịch vụ AI không phản hồi (mô phỏng AI_STUB_MODE=loi)")
 
@@ -321,10 +323,13 @@ class AiClientHttp:
             ("ty_le_tong", "do_an_trung", "chi_tiet"),
         )
 
-    def ingest(self, ref_id: int, loai: str, text: str) -> dict:
+    def ingest(self, ref_id: int, loai: str, text: str, nhom: int | None = None) -> dict:
+        payload = {"id": ref_id, "type": loai, "text": text}
+        if nhom is not None and loai == "DOCUMENT":
+            payload["nhom"] = nhom
         return self._post(
             "/ingest",
-            {"id": ref_id, "type": loai, "text": text},
+            payload,
             self._scaled(self._ingest_timeout, text) if loai == "DOCUMENT" else self._ingest_timeout,
             ("chunk_count", "indexed"),
         )

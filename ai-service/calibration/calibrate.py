@@ -32,10 +32,8 @@ import sys
 import tempfile
 import time
 import unicodedata
-from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import date
-from functools import partial
 from pathlib import Path
 
 SERVICE_DIR = Path(__file__).resolve().parents[1]
@@ -50,7 +48,7 @@ from sklearn.metrics import roc_auc_score, roc_curve  # noqa: E402
 from sqlalchemy import create_engine  # noqa: E402
 from sqlalchemy.orm import Session  # noqa: E402
 
-from app import minhash, pipeline  # noqa: E402
+from app import pipeline  # noqa: E402
 from app.core.config import Settings  # noqa: E402
 from app.embedding import Encoder  # noqa: E402
 from app.index import TAI_LIEU, TIEU_DE, CorpusIndex  # noqa: E402
@@ -73,9 +71,12 @@ L_DIEN_DAT = "DIEN_DAT"
 L_TU_VIET = "TU_VIET"  # đoạn nguon = null
 L_KHONG_KHOP = "KHONG_KHOP"  # câu không nằm trong đoạn nội dung nào (vd. dòng bìa còn sót)
 
-SHINGLE_CANDIDATES = (3, 4, 5)
-SHINGLE_TIE = 4
-NUM_PERM = Settings.model_fields["MINHASH_NUM_PERM"].default
+# Vân tay (app/fingerprint.py): k chọn theo AUC nguyên văn (hòa → K_TIE); w và
+# L (cụm phổ biến) giữ theo Settings.
+K_CANDIDATES = (3, 4, 5, 6)
+K_TIE = 4
+VAN_TAY_W = Settings.model_fields["VAN_TAY_W"].default
+PHO_BIEN = Settings.model_fields["VAN_TAY_PHO_BIEN"].default
 TITLE_TOP_K = 5
 ALL = 10**6  # top_k / chi_tiet_toi_da "không giới hạn" khi đo
 QUERY_REF_ID = 0  # B chưa được nạp: loại trừ {ref_id} = {0} như Web API
@@ -118,7 +119,7 @@ def load_profile(path: Path) -> dict:
 
 
 class CachingEncoder:
-    """Bọc Encoder thật: ghi nhớ vector theo văn bản để quét shingle / ablation
+    """Bọc Encoder thật: ghi nhớ vector theo văn bản để quét k / ablation
     không mã hóa lại cùng một câu B. Vector y hệt (mô hình tất định); KHÔNG
     dùng khi đo thời gian."""
 
@@ -213,7 +214,7 @@ def load_data(data_dir: Path) -> Data:
 class Corpus:
     session: Session
     index: CorpusIndex
-    shingle: int
+    k: int
     db_path: Path
 
 
@@ -226,31 +227,27 @@ def _migrate(db_path: Path) -> str:
     return url
 
 
-def _signer(shingle: int) -> Callable[[str], np.ndarray]:
-    # Giống app/main.py: partial(minhash.signature, k=MINHASH_SHINGLE, num_perm=...)
-    return partial(minhash.signature, k=shingle, num_perm=NUM_PERM)
-
-
-def build_corpus(data: Data, encoder, shingle: int, workdir: Path, tag: str = "kho") -> Corpus:
+def build_corpus(data: Data, encoder, k: int, workdir: Path, tag: str = "kho") -> Corpus:
     """SQLite tạm + alembic head; nạp 300 đề tài (ARCHIVE 1..300) và 25 tài
-    liệu A (DOCUMENT 1..25) qua pipeline.ingest_many — đường production."""
+    liệu A (DOCUMENT 1..25) qua pipeline.ingest_many — đường production. Mỗi
+    tài liệu A là một đề tài riêng (nhom = a_id), như Web API gửi de_tai_id."""
     db_path = workdir / f"thesis_ai-{tag}.db"
     url = _migrate(db_path)
     session = Session(create_engine(url))
-    index = CorpusIndex(encoder.dim, signer=_signer(shingle))
+    index = CorpusIndex(encoder.dim, van_tay=(k, VAN_TAY_W))
     items = [pipeline.IngestItem(LOAI_ARCHIVE, i, t) for i, t in enumerate(data.titles, start=1)]
-    items += [pipeline.IngestItem(LOAI_DOCUMENT, p.a_id, p.a_text) for p in data.pairs]
+    items += [pipeline.IngestItem(LOAI_DOCUMENT, p.a_id, p.a_text, nhom=p.a_id) for p in data.pairs]
     pipeline.ingest_many(session, index, encoder, items)
-    log(f"kho {tag}: {index.size(TIEU_DE)} tiêu đề, {index.size(TAI_LIEU)} câu tài liệu (shingle {shingle})")
-    return Corpus(session=session, index=index, shingle=shingle, db_path=db_path)
+    log(f"kho {tag}: {index.size(TIEU_DE)} tiêu đề, {index.size(TAI_LIEU)} câu tài liệu (vân tay k = {k})")
+    return Corpus(session=session, index=index, k=k, db_path=db_path)
 
 
-def with_shingle(corpus: Corpus, encoder, shingle: int) -> Corpus:
-    """Chỉ tính lại chữ ký MinHash: pipeline.rebuild nạp vector từ thesis_ai
-    (KHÔNG encode) vào một CorpusIndex có signer k mới."""
-    index = CorpusIndex(encoder.dim, signer=_signer(shingle))
+def with_k(corpus: Corpus, encoder, k: int) -> Corpus:
+    """Chỉ dựng lại vân tay: pipeline.rebuild nạp vector từ thesis_ai (KHÔNG
+    encode) vào một CorpusIndex có k mới."""
+    index = CorpusIndex(encoder.dim, van_tay=(k, VAN_TAY_W))
     pipeline.rebuild(corpus.session, index, encoder)
-    return Corpus(session=corpus.session, index=index, shingle=shingle, db_path=corpus.db_path)
+    return Corpus(session=corpus.session, index=index, k=k, db_path=corpus.db_path)
 
 
 def _norm(text: str) -> str:
@@ -283,15 +280,14 @@ class PairScore:
     labels: list[str] = field(default_factory=list)
 
 
-def score_pair(corpus: Corpus, encoder, pair: Pair, strip: bool = True) -> PairScore:
+def score_pair(corpus: Corpus, encoder, pair: Pair, strip: bool = True, pho_bien: int = PHO_BIEN) -> PairScore:
     scores = pipeline.score_document(
         corpus.index,
         encoder,
         pair.b_text,
         {QUERY_REF_ID},
         strip=strip,
-        shingle=corpus.shingle,
-        num_perm=NUM_PERM,
+        pho_bien=pho_bien,
     )
     return PairScore(pair, scores, label_sentences(scores.chunks, pair.b_doan))
 
@@ -304,6 +300,17 @@ def apply_thresholds(ps: PairScore, nguong_doan: float, nguong_nguyen_van: float
     # cặp — quy tắc triển khai là tỷ lệ theo nguồn CAO NHẤT >= ngưỡng tài liệu.
     top_share = res["do_an_trung"][0]["ty_le"] if res["do_an_trung"] else 0.0
     return {"res": res, "ty_le_nguon": share, "top_ref": top, "ty_le_nguon_cao_nhat": top_share}
+
+
+def canh_bao(top: float, tong: float, ntl: float, ntt: float | None) -> str | None:
+    """Quy tắc Web API (document_check.vuot_nguong): "NGUON" khi một đồ án ≥
+    ngưỡng tài liệu, "TONG" khi tổng mọi nguồn ≥ ngưỡng tổng (ghép từ nhiều
+    nguồn), None khi không cảnh báo."""
+    if top >= ntl:
+        return "NGUON"
+    if ntt is not None and tong >= ntt:
+        return "TONG"
+    return None
 
 
 def best_title(corpus: Corpus, encoder, text: str) -> tuple[float, int | None]:
@@ -394,13 +401,13 @@ def cmd_tune(args) -> int:
     encoder = Encoder(prof["profile"])
     cached = CachingEncoder(encoder)
     with tempfile.TemporaryDirectory(prefix="ntma-calib-") as tmp:
-        base = build_corpus(data, encoder, SHINGLE_TIE, Path(tmp))
+        base = build_corpus(data, encoder, K_TIE, Path(tmp))
 
-        # (a) kích thước shingle MinHash: AUC verb_score, dương = câu chép nguyên văn
+        # (a) k của vân tay: AUC verb_score (độ phủ), dương = câu chép nguyên văn
         per_k: dict[int, list[PairScore]] = {}
         auc_k: dict[int, float] = {}
-        for k in SHINGLE_CANDIDATES:
-            corpus = base if k == SHINGLE_TIE else with_shingle(base, encoder, k)
+        for k in K_CANDIDATES:
+            corpus = base if k == K_TIE else with_k(base, encoder, k)
             per_k[k] = [score_pair(corpus, cached, p) for p in pairs]
             y, s = [], []
             for ps in per_k[k]:
@@ -408,12 +415,10 @@ def cmd_tune(args) -> int:
                     y.append(1 if lab == L_NGUYEN_VAN else 0)
                     s.append(c.verb_score)
             auc_k[k] = round(float(roc_auc_score(y, s)), 6)
-            log(f"shingle {k}: AUC nguyên văn = {auc_k[k]}")
+            log(f"vân tay k = {k}: AUC nguyên văn = {auc_k[k]}")
         best_auc = max(auc_k.values())
-        shingle = SHINGLE_TIE if auc_k[SHINGLE_TIE] >= best_auc else max(
-            (k for k in SHINGLE_CANDIDATES if auc_k[k] == best_auc)
-        )
-        scored = per_k[shingle]
+        k_best = K_TIE if auc_k[K_TIE] >= best_auc else min(k for k in K_CANDIDATES if auc_k[k] == best_auc)
+        scored = per_k[k_best]
 
         verb_pos, verb_neg, sem_pos, sem_neg = [], [], [], []
         label_counts = {L_NGUYEN_VAN: 0, L_DIEN_DAT: 0, L_TU_VIET: 0, L_KHONG_KHOP: 0}
@@ -430,15 +435,19 @@ def cmd_tune(args) -> int:
         # (c) ngữ nghĩa: dương = câu diễn đạt lại, âm = câu tự viết (nguon null)
         f_sem = fit_threshold(sem_pos, sem_neg)
         # (d) ngưỡng tài liệu trên do_an_trung[A] với (b), (c) cố định
-        doc_pos, doc_neg, per_pair = [], [], []
+        # (d') ngưỡng tổng mọi nguồn trên ty_le_tong (cảnh báo ghép từ nhiều nguồn)
+        doc_pos, doc_neg, tong_pos, tong_neg, per_pair = [], [], [], [], []
         for ps in scored:
             r = apply_thresholds(ps, f_sem["nguong"], f_verb["nguong"])
-            (doc_pos if ps.pair.loai in (CHEP, DIEN) else doc_neg).append(r["ty_le_nguon"])
+            positive = ps.pair.loai in (CHEP, DIEN)
+            (doc_pos if positive else doc_neg).append(r["ty_le_nguon"])
+            (tong_pos if positive else tong_neg).append(r["res"]["ty_le_tong"])
             per_pair.append(
                 {"ma_cap": ps.pair.ma_cap, "loai": ps.pair.loai, "ty_le_nguon": r["ty_le_nguon"],
                  "ty_le_tong": r["res"]["ty_le_tong"]}
             )
         f_doc = fit_threshold(doc_pos, doc_neg)
+        f_tong = fit_threshold(tong_pos, tong_neg)
         # (e) tên đề tài: dương = truy vấn DIEN_DAT_LAI
         t_pos, t_neg = [], []
         for q in queries:
@@ -449,37 +458,43 @@ def cmd_tune(args) -> int:
     out = {
         "profile": prof["profile"],
         "ten_model": prof["ten_model"],
-        "minhash_shingle": shingle,
-        "minhash_num_perm": NUM_PERM,
+        "van_tay_k": k_best,
+        "van_tay_w": VAN_TAY_W,
+        "van_tay_pho_bien": PHO_BIEN,
         "nguong_ten_de_tai": f_title["nguong"],
         "nguong_doan": f_sem["nguong"],
         "nguong_nguyen_van": f_verb["nguong"],
         "nguong_tai_lieu": f_doc["nguong"],
+        "nguong_tong_tai_lieu": f_tong["nguong"],
         "phuong_phap": {
             "nguong_ten_de_tai": f_title["phuong_phap"],
             "nguong_doan": f_sem["phuong_phap"],
             "nguong_nguyen_van": f_verb["phuong_phap"],
             "nguong_tai_lieu": f_doc["phuong_phap"],
-            "minhash_shingle": "auc_lon_nhat",
+            "nguong_tong_tai_lieu": f_tong["phuong_phap"],
+            "van_tay_k": "auc_lon_nhat",
         },
         "auc": {
             "ten_de_tai": f_title["auc"],
             "ngu_nghia_cau": f_sem["auc"],
             "nguyen_van_cau": f_verb["auc"],
             "tai_lieu": f_doc["auc"],
-            "nguyen_van_theo_shingle": {str(k): v for k, v in auc_k.items()},
+            "tai_lieu_tong": f_tong["auc"],
+            "nguyen_van_theo_k": {str(k): v for k, v in auc_k.items()},
         },
         "so_mau": {
             "ten_de_tai": {"duong": f_title["so_duong"], "am": f_title["so_am"]},
             "ngu_nghia_cau": {"duong": f_sem["so_duong"], "am": f_sem["so_am"]},
             "nguyen_van_cau": {"duong": f_verb["so_duong"], "am": f_verb["so_am"]},
             "tai_lieu": {"duong": f_doc["so_duong"], "am": f_doc["so_am"]},
+            "tai_lieu_tong": {"duong": f_tong["so_duong"], "am": f_tong["so_am"]},
         },
         "chi_tiet_khop": {
             "ten_de_tai": f_title,
             "ngu_nghia_cau": f_sem,
             "nguyen_van_cau": f_verb,
             "tai_lieu": f_doc,
+            "tai_lieu_tong": f_tong,
             "tai_lieu_theo_cap": per_pair,
             "nhan_cau": label_counts,
         },
@@ -492,7 +507,8 @@ def cmd_tune(args) -> int:
     path.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     log(
         f"đã ghi {path}: tên đề tài {out['nguong_ten_de_tai']} | đoạn {out['nguong_doan']} | "
-        f"nguyên văn {out['nguong_nguyen_van']} | tài liệu {out['nguong_tai_lieu']} | shingle {shingle}"
+        f"nguyên văn {out['nguong_nguyen_van']} | tài liệu {out['nguong_tai_lieu']} | "
+        f"tổng {out['nguong_tong_tai_lieu']} | k {k_best}"
     )
     return 0
 
@@ -543,6 +559,73 @@ def sentence_rates(scored: list[PairScore], nd: float, nv: float) -> dict:
     return {lab: {"gan_co": a, "tong": b, "ty_le": round(a / b, 4)} for lab, (a, b) in sorted(counts.items())}
 
 
+GHEP_SO_NGUON = 4
+GHEP_PHAN_MOI_NGUON = 0.06  # ký tự chép từ mỗi nguồn / ký tự nội dung của bài gốc
+
+
+def mosaic_text(base: str, blocks: list[str]) -> str:
+    """Chèn các khối câu chép vào văn bản gốc, rải đều sau những dòng nội dung
+    (còn lại sau lọc mẫu chung) kết thúc bằng dấu câu."""
+    kept = {_norm(x) for x in pipeline.strip_boilerplate(base).lines}
+    lines = base.split("\n")
+    ends = [i for i, line in enumerate(lines)
+            if _norm(line) in kept and line.rstrip().endswith((".", "!", "?", "…"))]
+    if not ends:
+        raise SystemExit("mosaic_text: văn bản gốc không có dòng nội dung kết thúc câu")
+    at: dict[int, list[str]] = {}
+    for j, block in enumerate(blocks):
+        at.setdefault(ends[(j + 1) * len(ends) // (len(blocks) + 1)], []).append(block)
+    out = []
+    for i, line in enumerate(lines):
+        out.append(line)
+        out.extend(at.get(i, []))
+    return "\n".join(out)
+
+
+def mosaic_case(corpus: Corpus, encoder, data: Data, p: Pair, nd: float, nv: float, ntl: float,
+                ntt: float) -> dict:
+    """Bài B tự viết (cặp âm) + GHEP_SO_NGUON khối câu chép nguyên văn từ tài
+    liệu A của các cặp khác, mỗi khối ≈ GHEP_PHAN_MOI_NGUON nội dung của B:
+    mỗi nguồn dưới ngưỡng tài liệu nhưng tổng lớn (ghép từ nhiều nguồn)."""
+    base_chars = sum(len(x) for x in pipeline.chunk_texts(LOAI_DOCUMENT, p.b_text))
+    others = [q for q in data.pairs if q.a_id != p.a_id]
+    sources = [others[(p.a_id * 7 + j * 5) % len(others)] for j in range(GHEP_SO_NGUON)]
+    blocks, inserted = [], set()
+    for q in sources:
+        sents = pipeline.chunk_texts(LOAI_DOCUMENT, q.a_text)
+        taken, size = [], 0
+        for x in sents[len(sents) // 2:]:
+            if size >= GHEP_PHAN_MOI_NGUON * base_chars:
+                break
+            taken.append(x)
+            size += len(x)
+        blocks.append(" ".join(taken))
+        inserted.update(_norm(x) for x in taken)
+    scores = pipeline.score_document(corpus.index, encoder, mosaic_text(p.b_text, blocks), {QUERY_REF_ID},
+                                     pho_bien=PHO_BIEN)
+    res = pipeline.check_document(scores, nd, nv, ALL, ALL)
+    flagged = flagged_positions(res)
+    chen = [c for c in scores.chunks if _norm(c.text) in inserted]
+    total_chars = sum(len(c.text) for c in scores.chunks)
+    top = res["do_an_trung"][0]["ty_le"] if res["do_an_trung"] else 0.0
+    ly_do = canh_bao(top, res["ty_le_tong"], ntl, ntt)
+    return {
+        "ma_cap_goc": p.ma_cap,
+        "loai_goc": p.loai,
+        "tap": p.tap,
+        "nguon": [q.a_id for q in sources],
+        "so_cau_chen": len(inserted),
+        "so_cau_chen_bi_gan_co": sum(1 for c in chen if c.vi_tri in flagged),
+        "ty_le_chen": round(100 * sum(len(c.text) for c in chen) / max(total_chars, 1), 2),
+        "ty_le_tong": res["ty_le_tong"],
+        "ty_le_nguon_cao_nhat": top,
+        "do_an_trung": [{"ref_id": d["ref_id"], "ty_le": d["ty_le"]} for d in res["do_an_trung"][:6]],
+        "bi_canh_bao_chi_theo_nguon": top >= ntl,
+        "bi_canh_bao": ly_do is not None,
+        "ly_do_canh_bao": ly_do,
+    }
+
+
 def cmd_evaluate(args) -> int:
     nguong = json.loads((args.out / NGUONG_FILE).read_text(encoding="utf-8"))
     prof = load_profile(args.profile_from)
@@ -552,14 +635,15 @@ def cmd_evaluate(args) -> int:
         )
     nd, nv = nguong["nguong_doan"], nguong["nguong_nguyen_van"]
     nt, ntl = nguong["nguong_ten_de_tai"], nguong["nguong_tai_lieu"]
-    shingle = nguong["minhash_shingle"]
+    ntt = nguong["nguong_tong_tai_lieu"]
+    k = nguong["van_tay_k"]
     data = load_data(args.data)
 
     wait_for_memory()
     encoder = Encoder(prof["profile"])
     cached = CachingEncoder(encoder)
     with tempfile.TemporaryDirectory(prefix="ntma-calib-") as tmp:
-        corpus = build_corpus(data, encoder, shingle, Path(tmp))
+        corpus = build_corpus(data, encoder, k, Path(tmp))
         so_tieu_de, so_cau_kho = corpus.index.size(TIEU_DE), corpus.index.size(TAI_LIEU)
 
         # --- cặp tài liệu ---
@@ -568,9 +652,11 @@ def cmd_evaluate(args) -> int:
         for ps in scored:
             p, r = ps.pair, apply_thresholds(ps, nd, nv)
             res = r["res"]
-            # CR-01: đánh giá đúng quy tắc triển khai (tỷ lệ theo nguồn cao nhất,
-            # >=), không phải tỷ lệ tới A mà chỉ bộ dữ liệu có chủ đích mới biết.
-            flagged = r["ty_le_nguon_cao_nhat"] >= ntl
+            # CR-01: đánh giá đúng quy tắc triển khai (tỷ lệ theo nguồn cao nhất
+            # hoặc tỷ lệ tổng, >=), không phải tỷ lệ tới A mà chỉ bộ dữ liệu có
+            # chủ đích mới biết.
+            ly_do = canh_bao(r["ty_le_nguon_cao_nhat"], res["ty_le_tong"], ntl, ntt)
+            flagged = ly_do is not None
             cap.append(
                 {
                     "ma_cap": p.ma_cap,
@@ -588,6 +674,7 @@ def cmd_evaluate(args) -> int:
                     "so_doan_nguyen_van": sum(1 for d in res["chi_tiet"] if d["tin_hieu"] == pipeline.NGUYEN_VAN),
                     "so_doan_ngu_nghia": sum(1 for d in res["chi_tiet"] if d["tin_hieu"] == pipeline.NGU_NGHIA),
                     "bi_canh_bao": flagged,
+                    "ly_do_canh_bao": ly_do,
                     "ky_vong": bool(p.ky_vong),
                     "dat": flagged == bool(p.ky_vong),
                     "max_ngu_nghia_cau_tu_viet": round(
@@ -620,7 +707,7 @@ def cmd_evaluate(args) -> int:
         chep = [c for c in cap if c["loai"] == CHEP]
         khong = [c for c in cap if c["loai"] == KHONG]
         g1 = all(c["bi_canh_bao"] for c in chep)
-        g2 = all(c["ty_le_nguon_cao_nhat"] < ntl and c["ty_le_tong"] < ntl for c in khong)
+        g2 = all(not c["bi_canh_bao"] and c["ty_le_tong"] < ntl for c in khong)
         # CR-01: ngưỡng (khớp trên tỷ lệ tới A của tập hiệu chỉnh) có còn tách
         # được tập hiệu chỉnh theo thống kê triển khai không.
         hc = _split(cap, HIEU_CHINH)
@@ -664,10 +751,13 @@ def cmd_evaluate(args) -> int:
         original = pipeline.strip_boilerplate
         pipeline.strip_boilerplate = _no_strip
         try:
-            raw = build_corpus(data, cached, shingle, Path(tmp), tag="khong-loc")
+            raw = build_corpus(data, cached, k, Path(tmp), tag="khong-loc")
         finally:
             pipeline.strip_boilerplate = original
         both = {p.ma_cap: apply_thresholds(score_pair(raw, cached, p, strip=False), nd, nv) for p in abl_pairs}
+        # (iii) giữ bước lọc dòng, tắt lọc cụm phổ biến của vân tay (L = 0)
+        no_common = {p.ma_cap: apply_thresholds(score_pair(corpus, cached, p, pho_bien=0), nd, nv)
+                     for p in abl_pairs}
         by_code = {c["ma_cap"]: c for c in cap}
         for p in abl_pairs:
             c = by_code[p.ma_cap]
@@ -680,14 +770,20 @@ def cmd_evaluate(args) -> int:
                     "ty_le_tong_co_loc": c["ty_le_tong"],
                     "ty_le_tong_khong_loc_tai_lieu_nop": only_query[p.ma_cap]["res"]["ty_le_tong"],
                     "ty_le_tong_khong_loc_ca_kho": both[p.ma_cap]["res"]["ty_le_tong"],
+                    "ty_le_tong_khong_loc_cum_pho_bien": no_common[p.ma_cap]["res"]["ty_le_tong"],
                     "ty_le_nguon_co_loc": c["ty_le_nguon"],
                     "ty_le_nguon_khong_loc_ca_kho": both[p.ma_cap]["ty_le_nguon"],
                     "tang_them_khong_loc_ca_kho": round(
                         both[p.ma_cap]["res"]["ty_le_tong"] - c["ty_le_tong"], 2),
-                    "bi_canh_bao_khong_loc_ca_kho": both[p.ma_cap]["ty_le_nguon"] >= ntl,
+                    "bi_canh_bao_khong_loc_ca_kho": canh_bao(
+                        both[p.ma_cap]["ty_le_nguon_cao_nhat"], both[p.ma_cap]["res"]["ty_le_tong"], ntl, ntt
+                    ) is not None,
                 }
             )
         raw.session.close()
+
+        # --- kịch bản ghép từ nhiều nguồn (không có trong bộ dữ liệu; không khớp ngưỡng) ---
+        ghep = [mosaic_case(corpus, cached, data, p, nd, nv, ntl, ntt) for p in data.pairs if not p.ky_vong]
 
         # --- độ trễ trong tiến trình (encoder thật, không cache) ---
         pipeline.check_title(corpus.index, encoder, data.queries[-1]["ten_truy_van"], TITLE_TOP_K, nt)  # khởi động
@@ -699,8 +795,7 @@ def cmd_evaluate(args) -> int:
         t_doc = []
         for p in data.pairs[:20]:
             t0 = time.perf_counter()
-            s = pipeline.score_document(corpus.index, encoder, p.b_text, {QUERY_REF_ID},
-                                        shingle=shingle, num_perm=NUM_PERM)
+            s = pipeline.score_document(corpus.index, encoder, p.b_text, {QUERY_REF_ID}, pho_bien=PHO_BIEN)
             pipeline.check_document(s, nd, nv, Settings.model_fields["TOP_K_MAC_DINH"].default,
                                     Settings.model_fields["CHI_TIET_TOI_DA"].default)
             t_doc.append((time.perf_counter() - t0) * 1000)
@@ -708,7 +803,7 @@ def cmd_evaluate(args) -> int:
             "moi_truong": "trong tiến trình, máy phát triển (dùng chung), CPU; không gồm HTTP/Web API",
             "so_cpu": os.cpu_count(),
             "torch_threads": 4,
-            "kho": {"tieu_de": so_tieu_de, "cau_tai_lieu": so_cau_kho},
+            "kho": {"tieu_de": so_tieu_de, "cau_tai_lieu": so_cau_kho, "so_de_tai_tai_lieu": len(data.pairs)},
             "check_title_ms": {"n": len(t_title), "p50": round(float(np.median(t_title)), 1),
                                "p95": _p95(t_title), "max": round(max(t_title), 1)},
             "check_document_ms": {"n": len(t_doc), "p50": round(float(np.median(t_doc)), 1),
@@ -718,9 +813,10 @@ def cmd_evaluate(args) -> int:
         corpus.session.close()
 
     out = {
-        "nguong": {k: nguong[k] for k in ("profile", "ten_model", "minhash_shingle", "nguong_ten_de_tai",
-                                          "nguong_doan", "nguong_nguyen_van", "nguong_tai_lieu", "phuong_phap",
-                                          "auc", "so_mau", "ngay")},
+        "nguong": {key: nguong[key] for key in ("profile", "ten_model", "van_tay_k", "van_tay_w", "van_tay_pho_bien",
+                                                "nguong_ten_de_tai", "nguong_doan", "nguong_nguyen_van",
+                                                "nguong_tai_lieu", "nguong_tong_tai_lieu", "phuong_phap", "auc",
+                                                "so_mau", "ngay")},
         "gates": {
             "g1": g1,
             "g2": g2,
@@ -729,7 +825,7 @@ def cmd_evaluate(args) -> int:
             "accuracy_hieu_chinh": acc_hc["ty_le"],
             "mo_ta": {
                 "g1": "mọi cặp CHEP_NGUYEN_VAN bị cảnh báo (cứng)",
-                "g2": "mọi cặp KHONG_LIEN_QUAN có tỷ lệ theo nguồn cao nhất và tỷ lệ tổng < ngưỡng tài liệu (cứng)",
+                "g2": "mọi cặp KHONG_LIEN_QUAN không bị cảnh báo và có tỷ lệ tổng < ngưỡng tài liệu (cứng)",
                 "g3": "độ chính xác cặp trên KIEM_CHUNG ≥ 0.85 (mềm)",
             },
         },
@@ -740,6 +836,7 @@ def cmd_evaluate(args) -> int:
         "title_accuracy": title_acc,
         "cau": cau,
         "ablation": ablation,
+        "ghep_nhieu_nguon": ghep,
         "latency": latency,
         "ngay": date.today().isoformat(),
     }
@@ -781,8 +878,8 @@ def apply_defaults(nguong: dict) -> None:
                      rf"\g<1>{nguong['nguong_doan']}  {note}", text, "NGUONG_DOAN_MAC_DINH")
     text = _sub_once(r"^(\s*NGUONG_NGUYEN_VAN_MAC_DINH: float = )[0-9.]+.*$",
                      rf"\g<1>{nguong['nguong_nguyen_van']}  {note}", text, "NGUONG_NGUYEN_VAN_MAC_DINH")
-    text = _sub_once(r"^(\s*MINHASH_SHINGLE: int = )[0-9]+.*$",
-                     rf"\g<1>{nguong['minhash_shingle']}  {note}", text, "MINHASH_SHINGLE")
+    text = _sub_once(r"^(\s*VAN_TAY_K: int = )[0-9]+.*$",
+                     rf"\g<1>{nguong['van_tay_k']}  {note}", text, "VAN_TAY_K")
     cfg.write_text(text, encoding="utf-8")
 
     readme = SERVICE_DIR / "README.md"
@@ -793,12 +890,12 @@ def apply_defaults(nguong: dict) -> None:
         "NGUONG_DOAN_MAC_DINH": (f"`{nguong['nguong_doan']}`",
                                  f"Ngưỡng ngữ nghĩa (cosine×100) khi request không gửi; {src}"),
         "NGUONG_NGUYEN_VAN_MAC_DINH": (f"`{nguong['nguong_nguyen_van']}`",
-                                       f"Ngưỡng nguyên văn (Jaccard×100) khi request không gửi; {src}"),
-        "MINHASH_SHINGLE": (f"`{nguong['minhash_shingle']}`", f"k của k-gram âm tiết cho MinHash; {src}"),
+                                       f"Ngưỡng nguyên văn (độ phủ vân tay×100) khi request không gửi; {src}"),
+        "VAN_TAY_K": (f"`{nguong['van_tay_k']}`", f"k của k-gram âm tiết cho vân tay; {src}"),
     }
     for var, (val, desc) in rows.items():
         text = _sub_once(rf"^\| `{var}` \|[^\n]*$", f"| `{var}` | {val} | | {desc} |", text, f"dòng README {var}")
-    text = re.sub(r"k-gram âm tiết \(k = \d+, ", f"k-gram âm tiết (k = {nguong['minhash_shingle']}, ", text)
+    text = re.sub(r"vân tay k-gram âm tiết \(k = \d+, ", f"vân tay k-gram âm tiết (k = {nguong['van_tay_k']}, ", text)
     block = "\n".join(
         [
             README_START,
@@ -815,7 +912,12 @@ def apply_defaults(nguong: dict) -> None:
             "| `/check-document`; mặc định `NGUONG_NGUYEN_VAN_MAC_DINH` |",
             f"| `nguong_tai_lieu` | {nguong['nguong_tai_lieu']} | {nguong['phuong_phap']['nguong_tai_lieu']} "
             "| Web API: cảnh báo khi tỷ lệ theo một đồ án ≥ ngưỡng (plan 04-05) |",
-            f"| `MINHASH_SHINGLE` | {nguong['minhash_shingle']} | AUC lớn nhất trong {{3, 4, 5}} | chữ ký MinHash |",
+            f"| `nguong_tong_tai_lieu` | {nguong['nguong_tong_tai_lieu']} | "
+            f"{nguong['phuong_phap']['nguong_tong_tai_lieu']} "
+            "| Web API: cảnh báo khi tỷ lệ tổng mọi nguồn ≥ ngưỡng (ghép từ nhiều nguồn) |",
+            f"| `VAN_TAY_K` | {nguong['van_tay_k']} | AUC lớn nhất trong "
+            f"{{{', '.join(str(k) for k in K_CANDIDATES)}}} | vân tay (w = {nguong['van_tay_w']}, "
+            f"L = {nguong['van_tay_pho_bien']}) |",
             "",
             "Chạy lại (từ `ai-service/`, cần ≥ 3 GiB RAM trống, không cần docker/MySQL):",
             "",
@@ -859,6 +961,10 @@ def _pct(x: float | None) -> str:
     return "—" if x is None else f"{x:.2f}"
 
 
+def _ly_do(c: dict) -> str:
+    return {"NGUON": "Có (nguồn)", "TONG": "Có (tổng)"}.get(c["ly_do_canh_bao"], "Không")
+
+
 def _acc_str(a: dict) -> str:
     return "—" if not a["tong"] else f"{a['dat']}/{a['tong']} ({a['ty_le']:.3f})"
 
@@ -877,9 +983,9 @@ def render_report(nguong: dict, kq: dict) -> str:
     a("")
     a("### Mục tiêu")
     a("")
-    a("Dịch vụ AI cảnh báo trùng lặp dựa trên bốn ngưỡng: ngưỡng tên đề tài khi sinh viên đăng ký (AISV-03), "
-      "ngưỡng ngữ nghĩa và ngưỡng nguyên văn ở mức câu, và ngưỡng tài liệu quyết định một bài nộp có bị cảnh báo "
-      "trùng với một đồ án trong kho hay không (AISV-04). Theo quyết định D-04, giá trị mặc định của các ngưỡng "
+    a("Dịch vụ AI cảnh báo trùng lặp dựa trên năm ngưỡng: ngưỡng tên đề tài khi sinh viên đăng ký (AISV-03), "
+      "ngưỡng ngữ nghĩa và ngưỡng nguyên văn ở mức câu, ngưỡng tài liệu quyết định một bài nộp có bị cảnh báo "
+      "trùng với một đồ án trong kho hay không, và ngưỡng tổng bắt bài ghép từ nhiều đồ án (AISV-04). Theo quyết định D-04, giá trị mặc định của các ngưỡng "
       "**phải đến từ hiệu chỉnh** chứ không đặt theo cảm tính. Theo D-06, ngưỡng chỉ được khớp trên tập hiệu chỉnh "
       "(`HIEU_CHINH`) rồi giữ nguyên để kiểm chứng trên tập giữ lại (`KIEM_CHUNG`). Mục này cung cấp bảng kiểm chứng "
       "theo từng cặp tài liệu mà DATA-03 và tiêu chí thành công số 3 của Phase 4 yêu cầu.")
@@ -901,22 +1007,28 @@ def render_report(nguong: dict, kq: dict) -> str:
     a("")
     a("### Phương pháp")
     a("")
-    a("1. **Mức câu.** Mỗi câu của tài liệu B (sau khi lọc phần mẫu chung) có hai điểm: cosine embedding tốt nhất "
-      "(ngữ nghĩa) và Jaccard MinHash tốt nhất trên k-gram âm tiết (nguyên văn) so với mọi câu trong kho. Nhãn của câu "
-      "lấy từ nguồn gốc đoạn văn ghi trong manifest: *chép nguyên văn*, *diễn đạt lại* hoặc *tự viết*.")
+    a("1. **Mức câu.** Mỗi câu của tài liệu B (sau khi lọc phần mẫu chung) có hai điểm so với kho: cosine embedding "
+      "tốt nhất (ngữ nghĩa) và độ phủ vân tay tốt nhất (nguyên văn). Độ phủ = tỷ lệ âm tiết của câu nằm trong các "
+      "đoạn chung dài ≥ t = w + k − 1 âm tiết với một câu của kho, chỉ tính k-gram không phổ biến (k-gram có ở ≥ L "
+      "đề tài khác nhau là cụm khuôn mẫu, theo Sorokina và cs. 2006). Câu ứng viên được tra qua chỉ mục vân tay "
+      "winnowing (Schleimer và cs. 2003), không quét toàn kho. Nhãn của câu lấy từ nguồn gốc đoạn văn ghi trong "
+      "manifest: *chép nguyên văn*, *diễn đạt lại* hoặc *tự viết*.")
     a("2. **Ngưỡng nguyên văn**: dương = câu chép nguyên văn, âm = mọi câu còn lại (kể cả câu diễn đạt lại, vốn để "
       "tín hiệu ngữ nghĩa xử lý). **Ngưỡng đoạn (ngữ nghĩa)**: dương = câu diễn đạt lại, âm = câu tự viết.")
     a("3. **Ngưỡng tài liệu**: với hai ngưỡng câu đã cố định, `check_document` cho tỷ lệ ký tự của B bị gán cho "
       "đồ án nguồn A (*tỷ lệ theo đồ án nguồn*). Cặp bị cảnh báo khi tỷ lệ này ≥ ngưỡng tài liệu. Dương = cặp chép "
-      "nguyên văn và diễn đạt lại. *Tỷ lệ tổng* (phần của B khớp với bất kỳ tài liệu nào trong kho) được báo cáo kèm.")
+      "nguyên văn và diễn đạt lại. **Ngưỡng tổng** khớp theo cùng cách trên *tỷ lệ tổng* (phần của B khớp với bất "
+      "kỳ tài liệu nào trong kho): bài nộp bị cảnh báo khi tỷ lệ theo một đồ án ≥ ngưỡng tài liệu **hoặc** tỷ lệ "
+      "tổng ≥ ngưỡng tổng, để bài ghép từ nhiều đồ án (mỗi đồ án một ít) không lọt.")
     a("4. **Ngưỡng tên đề tài**: điểm cao nhất của `check_title` trên kho 300 đề tài; dương = truy vấn diễn đạt lại "
       "một đề tài có trong kho.")
     a("5. **Cách chọn ngưỡng**: `sklearn.metrics.roc_curve` và chỉ số **Youden J = TPR − FPR**. Mọi ngưỡng nằm "
       "giữa điểm đạt J lớn nhất và điểm liền dưới nó cho cùng một kết quả phân loại trên tập hiệu chỉnh, nên ngưỡng "
       "được đặt ở **trung điểm của khoảng đó** (cột *Khoảng chọn*). Khi tín hiệu tách hoàn toàn tập hiệu chỉnh, dùng "
       "**trung điểm** giữa điểm âm lớn nhất và điểm dương nhỏ nhất để có biên an toàn. Ngưỡng tính theo %, một chữ số "
-      "thập phân; gắn cờ khi điểm ≥ ngưỡng. Kích thước shingle MinHash chọn trong {3, 4, 5} theo AUC nguyên văn lớn "
-      "nhất (hòa → 4).")
+      "thập phân; gắn cờ khi điểm ≥ ngưỡng. k của vân tay chọn trong "
+      f"{{{', '.join(str(k) for k in K_CANDIDATES)}}} theo AUC nguyên văn lớn nhất (hòa → {K_TIE}); "
+      f"w = {nguong['van_tay_w']} và L = {nguong['van_tay_pho_bien']} giữ cố định.")
     a(f"6. **Luật đoạn cho tín hiệu ngữ nghĩa**: `check_document` chỉ giữ cờ ngữ nghĩa của một câu khi câu đó nằm trong "
       f"chuỗi ít nhất {pipeline.MIN_RUN_NGU_NGHIA} câu liên tiếp bị gắn cờ cùng một đồ án nguồn; cờ nguyên văn đứng "
       "một mình vẫn được giữ. Lý do (quan sát trên tập hiệu chỉnh): câu tự viết theo khuôn câu chung của lĩnh vực "
@@ -932,15 +1044,19 @@ def render_report(nguong: dict, kq: dict) -> str:
         ("nguong_doan", "ngu_nghia_cau", "Đoạn — ngữ nghĩa (câu)"),
         ("nguong_nguyen_van", "nguyen_van_cau", "Đoạn — nguyên văn (câu)"),
         ("nguong_tai_lieu", "tai_lieu", "Tài liệu (theo đồ án nguồn)"),
+        ("nguong_tong_tai_lieu", "tai_lieu_tong", "Tài liệu (tổng mọi nguồn)"),
     ):
         f = ck[sig]
         a(f"| {ten} (`{key}`) | {nguong[key]} | {TEN_PP[nguong['phuong_phap'][key]]} | {f['auc']:.4f} | "
           f"{f['so_duong']} / {f['so_am']} | {f['min_duong']:.2f} | {f['max_am']:.2f} | "
           f"({f['khoang_chon'][0]:.2f}; {f['khoang_chon'][1]:.2f}] | {f['tpr']:.3f} / {f['fpr']:.3f} |")
-    auc_k = nguong["auc"]["nguyen_van_theo_shingle"]
+    auc_k = nguong["auc"]["nguyen_van_theo_k"]
     a("")
-    a(f"Shingle MinHash: **k = {nguong['minhash_shingle']}** (AUC nguyên văn trên tập hiệu chỉnh: "
-      + ", ".join(f"k = {k}: {v:.4f}" for k, v in auc_k.items()) + f"; {nguong['minhash_num_perm']} hoán vị).")
+    a(f"Vân tay: **k = {nguong['van_tay_k']}** âm tiết (AUC nguyên văn trên tập hiệu chỉnh: "
+      + ", ".join(f"k = {k}: {v:.4f}" for k, v in auc_k.items())
+      + f"), cửa sổ winnowing w = {nguong['van_tay_w']}, đoạn chung tối thiểu "
+        f"t = {nguong['van_tay_w'] + nguong['van_tay_k'] - 1} âm tiết, cụm phổ biến khi có ở ≥ "
+        f"{nguong['van_tay_pho_bien']} đề tài.")
     nh = ck["nhan_cau"]
     a(f"Số câu B của tập hiệu chỉnh theo nhãn: chép nguyên văn {nh[L_NGUYEN_VAN]}, diễn đạt lại {nh[L_DIEN_DAT]}, "
       f"tự viết {nh[L_TU_VIET]}, không khớp đoạn nội dung nào {nh[L_KHONG_KHOP]}.")
@@ -948,12 +1064,13 @@ def render_report(nguong: dict, kq: dict) -> str:
     a("### Kết quả kiểm chứng theo cặp tài liệu (ngưỡng cố định)")
     a("")
     a(f"Ngưỡng áp dụng: đoạn {nguong['nguong_doan']} %, nguyên văn {nguong['nguong_nguyen_van']} %, "
-      f"tài liệu {nguong['nguong_tai_lieu']} %. Cột *Đoạn trùng* đếm các đoạn trùng mà `check_document` trả về "
+      f"tài liệu {nguong['nguong_tai_lieu']} %, tổng {nguong['nguong_tong_tai_lieu']} %. Cột *Đoạn trùng* đếm các đoạn trùng mà `check_document` trả về "
       "(nguyên văn / ngữ nghĩa).")
     a("")
     a("*Bị cảnh báo?* dùng **đúng quy tắc triển khai** (sửa lỗi review CR-01): tỷ lệ theo nguồn **cao nhất** "
-      f"(`do_an_trung[0]`, bất kỳ đồ án nào trong kho) ≥ {nguong['nguong_tai_lieu']} % — Web API không biết đồ án "
-      "nguồn A của cặp. Cột *theo đồ án nguồn A* là tỷ lệ tới A (thống kê dùng để khớp ngưỡng), chỉ để đối chiếu.")
+      f"(`do_an_trung[0]`, bất kỳ đồ án nào trong kho) ≥ {nguong['nguong_tai_lieu']} % *(nguồn)*, hoặc tỷ lệ tổng ≥ "
+      f"{nguong['nguong_tong_tai_lieu']} % *(tổng)* — Web API không biết đồ án nguồn A của cặp. Cột *theo đồ án "
+      "nguồn A* là tỷ lệ tới A (thống kê dùng để khớp ngưỡng), chỉ để đối chiếu.")
     kt = kq["khoang_tach_nguon_cao_nhat_hieu_chinh"]
     a("")
     a(f"Trên tập hiệu chỉnh, theo thống kê triển khai: âm lớn nhất {kt['am_lon_nhat']:.2f} %, dương nhỏ nhất "
@@ -971,7 +1088,7 @@ def render_report(nguong: dict, kq: dict) -> str:
             a(f"| {c['ma_cap']} | {TEN_LOAI[c['loai']]} | {c['tap']} | {c['dinh_dang']} | {_pct(c['ty_le_tong'])} | "
               f"{_pct(c['ty_le_nguon_cao_nhat'])} | "
               f"{_pct(c['ty_le_nguon'])} | {_yn(c['nguon_dung_dau'])} | {c['so_doan_nguyen_van']} / "
-              f"{c['so_doan_ngu_nghia']} | {_yn(c['bi_canh_bao'])} | {'Cảnh báo' if c['ky_vong'] else 'Không cảnh báo'} | "
+              f"{c['so_doan_ngu_nghia']} | {_ly_do(c)} | {'Cảnh báo' if c['ky_vong'] else 'Không cảnh báo'} | "
               f"{'Đạt' if c['dat'] else 'Không đạt'} |")
     a("")
     a("#### Độ chính xác theo tập và loại cặp")
@@ -1027,19 +1144,42 @@ def render_report(nguong: dict, kq: dict) -> str:
       "bước lọc. Ngưỡng giữ nguyên.")
     a("")
     a("| Mã cặp | Loại | Tập | Dòng bị lọc | Tỷ lệ tổng khi lọc (%) | Không lọc — chỉ tài liệu nộp (%) | "
-      "Không lọc — cả kho (%) | Tăng thêm (điểm %) | Tỷ lệ theo đồ án nguồn khi không lọc (%) | Bị cảnh báo khi không lọc? |")
-    a("|---|---|---|---:|---:|---:|---:|---:|---:|---|")
+      "Không lọc — cả kho (%) | Tăng thêm (điểm %) | Tỷ lệ theo đồ án nguồn khi không lọc (%) | Bị cảnh báo khi không lọc? "
+      "| Không lọc cụm phổ biến (%) |")
+    a("|---|---|---|---:|---:|---:|---:|---:|---:|---|---:|")
     for r in kq["ablation"]:
         a(f"| {r['ma_cap']} | {TEN_LOAI[r['loai']]} | {r['tap']} | {r['so_dong_loai_tru']} | "
           f"{_pct(r['ty_le_tong_co_loc'])} | {_pct(r['ty_le_tong_khong_loc_tai_lieu_nop'])} | "
           f"{_pct(r['ty_le_tong_khong_loc_ca_kho'])} | {r['tang_them_khong_loc_ca_kho']:+.2f} | "
-          f"{_pct(r['ty_le_nguon_khong_loc_ca_kho'])} | {_yn(r['bi_canh_bao_khong_loc_ca_kho'])} |")
+          f"{_pct(r['ty_le_nguon_khong_loc_ca_kho'])} | {_yn(r['bi_canh_bao_khong_loc_ca_kho'])} | "
+          f"{_pct(r['ty_le_tong_khong_loc_cum_pho_bien'])} |")
     extra = [r["tang_them_khong_loc_ca_kho"] for r in kq["ablation"]]
     a("")
     a(f"Trung bình tỷ lệ tổng tăng thêm khi không lọc: **{sum(extra) / len(extra):+.2f} điểm %** "
       f"(nhỏ nhất {min(extra):+.2f}, lớn nhất {max(extra):+.2f}). Đây là phần mà mẫu chung sẽ bị tính nhầm là trùng "
       "nếu không có bước lọc. Cột *chỉ tài liệu nộp* có thể thấp hơn cả khi lọc: kho đã được lọc nên phần mẫu chung "
-      "của bài nộp không khớp với gì mà chỉ làm tăng mẫu số, đồng thời có thể cắt ngang chuỗi câu trùng.")
+      "của bài nộp không khớp với gì mà chỉ làm tăng mẫu số, đồng thời có thể cắt ngang chuỗi câu trùng. Cột "
+      "*không lọc cụm phổ biến* giữ bước lọc dòng nhưng đặt L = 0 (mọi k-gram đều là bằng chứng nguyên văn).")
+    a("")
+    gh = kq["ghep_nhieu_nguon"]
+    a("### Kịch bản ghép từ nhiều nguồn")
+    a("")
+    a(f"Bộ dữ liệu không có bài ghép từ nhiều đồ án, nên mục này dựng thêm một kịch bản (không dùng để khớp ngưỡng): "
+      f"lấy bài B tự viết của {len(gh)} cặp âm (cùng lĩnh vực, không liên quan), chèn {GHEP_SO_NGUON} khối câu "
+      f"chép nguyên văn từ tài liệu A của {GHEP_SO_NGUON} cặp khác, mỗi khối khoảng "
+      f"{GHEP_PHAN_MOI_NGUON * 100:.0f} % nội dung của bài gốc, rải đều trong bài. Mỗi nguồn vì vậy đứng dưới ngưỡng "
+      "tài liệu, còn tổng phần chép thì lớn — đúng trường hợp quy tắc chỉ xét một nguồn bỏ sót.")
+    a("")
+    a("| Bài gốc | Loại | Tập | Câu chèn bị gắn cờ | Phần chèn (%) | Tỷ lệ tổng (%) | Theo nguồn cao nhất (%) "
+      "| Cảnh báo — chỉ theo nguồn | Cảnh báo — quy tắc hiện tại |")
+    a("|---|---|---|---|---:|---:|---:|---|---|")
+    for r in gh:
+        a(f"| {r['ma_cap_goc']} | {TEN_LOAI[r['loai_goc']]} | {r['tap']} | "
+          f"{r['so_cau_chen_bi_gan_co']}/{r['so_cau_chen']} | {_pct(r['ty_le_chen'])} | {_pct(r['ty_le_tong'])} | "
+          f"{_pct(r['ty_le_nguon_cao_nhat'])} | {_yn(r['bi_canh_bao_chi_theo_nguon'])} | {_ly_do(r)} |")
+    a("")
+    a(f"Cảnh báo theo quy tắc chỉ xét một nguồn: {sum(r['bi_canh_bao_chi_theo_nguon'] for r in gh)}/{len(gh)} bài; "
+      f"theo quy tắc hiện tại (thêm ngưỡng tổng): {sum(r['bi_canh_bao'] for r in gh)}/{len(gh)} bài.")
     a("")
     lat = kq["latency"]
     a("### Thời gian xử lý (trong tiến trình, máy phát triển)")
@@ -1060,9 +1200,15 @@ def render_report(nguong: dict, kq: dict) -> str:
     a("- **Dữ liệu tổng hợp.** Toàn bộ kho và tài liệu do chương trình sinh (mục 4.x.1), không phải đồ án thật của "
       "khoa. Cách diễn đạt lại và mẫu câu của bộ sinh có thể dễ hoặc khó hơn văn bản thật; ngưỡng cần được hiệu "
       "chỉnh lại khi có kho thật.")
-    a("- **[ASSUMED] Danh sách mẫu chung.** Bước lọc dùng danh sách mặc định (bìa, lời cam đoan, lời cảm ơn, mục lục, "
-      "tài liệu tham khảo, phụ lục…) vì mẫu đề cương/báo cáo chính thức của khoa chưa được thu thập. Khi có mẫu chính "
-      "thức phải cập nhật `app/nlp/boilerplate.py` rồi chạy lại `tune` và `evaluate`.")
+    a("- **[ASSUMED] Danh sách mẫu chung.** Bước lọc dòng dùng danh sách mặc định (bìa, lời cam đoan, lời cảm ơn, "
+      "mục lục, tài liệu tham khảo, phụ lục…) vì mẫu đề cương/báo cáo chính thức của khoa chưa được thu thập. Câu "
+      "khuôn mẫu lọt qua danh sách được bộ lọc cụm phổ biến của vân tay xử lý theo dữ liệu, nhưng bộ lọc này chỉ áp "
+      "cho tín hiệu nguyên văn; khi có mẫu chính thức vẫn nên cập nhật `app/nlp/boilerplate.py` rồi chạy lại `tune` "
+      "và `evaluate`.")
+    a(f"- **Cụm phổ biến cần kho đủ lớn.** Kho thử nghiệm chỉ có {kq['latency']['kho']['so_de_tai_tai_lieu']} đề tài có "
+      f"tài liệu; với L = {nguong['van_tay_pho_bien']}, một câu khuôn phải xuất hiện ở ≥ "
+      f"{nguong['van_tay_pho_bien']} đề tài mới bị coi là phổ biến. Kho thật lớn hơn nhiều nên bộ lọc mạnh hơn; L "
+      "cần được xem lại khi kho lớn lên.")
     a(f"- **Mẫu nhỏ.** Ngưỡng tài liệu được khớp trên {ck['tai_lieu']['so_duong'] + ck['tai_lieu']['so_am']} cặp; "
       f"tập kiểm chứng chỉ có {n_cap[KIEM_CHUNG]} cặp, nên mỗi cặp sai làm độ chính xác giảm "
       f"{1 / max(n_cap[KIEM_CHUNG], 1):.3f}.")
@@ -1071,10 +1217,12 @@ def render_report(nguong: dict, kq: dict) -> str:
     neg_pairs = [c for c in kq["cap"] if not c["ky_vong"]]
     worst = max(neg_pairs, key=lambda c: c["ty_le_tong"])
     spread = max(neg_pairs, key=lambda c: c["ty_le_tong"] - c["ty_le_nguon_cao_nhat"])
-    a(f"- **Cảnh báo theo từng đồ án, không theo tỷ lệ tổng.** Tỷ lệ tổng cộng mọi nguồn: cặp {spread['ma_cap']} "
-      f"({TEN_LOAI[spread['loai']].lower()}) có {spread['ty_le_tong']:.2f} % tổng nhưng chỉ "
-      f"{spread['ty_le_nguon_cao_nhat']:.2f} % với đồ án trùng nhiều nhất, vì các câu khớp rải rác trên nhiều đồ án. "
-      "Quyết định cảnh báo vì vậy dùng tỷ lệ theo nguồn cao nhất (`do_an_trung`), tỷ lệ tổng chỉ để hiển thị.")
+    a(f"- **Ngưỡng tổng và câu khớp rải rác.** Câu tự viết cùng lĩnh vực có thể khớp rải rác nhiều đồ án: cặp "
+      f"{spread['ma_cap']} ({TEN_LOAI[spread['loai']].lower()}) có {spread['ty_le_tong']:.2f} % tổng nhưng chỉ "
+      f"{spread['ty_le_nguon_cao_nhat']:.2f} % với đồ án trùng nhiều nhất. Vì vậy ngưỡng tổng "
+      f"({nguong['nguong_tong_tai_lieu']} %) cao hơn ngưỡng theo một đồ án ({nguong['nguong_tai_lieu']} %) và được "
+      "khớp riêng; tập dữ liệu chưa có bài ghép thật từ nhiều nguồn nên ngưỡng tổng mới chỉ được kiểm tra bằng kịch "
+      "bản dựng thêm ở trên.")
     a(f"- **Cặp cùng lĩnh vực có tỷ lệ tổng cao nhất** là {worst['ma_cap']} ({worst['tap']}): "
       f"{worst['ty_le_tong']:.2f} % tổng, {worst['ty_le_nguon_cao_nhat']:.2f} % với một đồ án khác trong kho "
       f"(tới đồ án nguồn A của cặp: {worst['ty_le_nguon']:.2f} %) — "
@@ -1102,6 +1250,9 @@ def render_report(nguong: dict, kq: dict) -> str:
             if c["ky_vong"]:
                 cause = ("tỷ lệ theo đồ án nguồn thấp hơn ngưỡng tài liệu: một phần câu diễn đạt lại có cosine dưới "
                          "ngưỡng đoạn nên không được tính")
+            elif c["ly_do_canh_bao"] == "TONG":
+                cause = ("tỷ lệ tổng vượt ngưỡng tổng dù không đồ án nào vượt ngưỡng tài liệu: câu tự viết cùng lĩnh "
+                         "vực khớp rải rác nhiều đồ án")
             else:
                 cause = ("câu tự viết cùng lĩnh vực có cosine cao với một đồ án khác cùng chủ đề (mẫu câu chung của "
                          "lĩnh vực) thành chuỗi ≥ 2 câu liên tiếp, đẩy tỷ lệ theo nguồn cao nhất vượt ngưỡng tài liệu")

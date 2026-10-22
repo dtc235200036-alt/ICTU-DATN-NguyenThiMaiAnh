@@ -186,9 +186,9 @@ def seed(data_dir: Path) -> int:
             if state == "da_co":
                 existing += 1
                 continue
-            text = db.get(TaiLieuDoAn, doc_id).noi_dung_trich_xuat
+            doc = db.get(TaiLieuDoAn, doc_id)
             try:
-                client.ingest(doc_id, LOAI_DOCUMENT, text)
+                client.ingest(doc_id, LOAI_DOCUMENT, doc.noi_dung_trich_xuat, nhom=doc.de_tai_id)
             except Exception as exc:  # noqa: BLE001 — backfill DOCUMENT sửa lại sau
                 ingest_failed.append(f"{ma_cap} ({type(exc).__name__})")
             seeded.append((ma_cap, cap["A"]["khoa"], dot_id, doc_id))

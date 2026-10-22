@@ -2,7 +2,7 @@
 
 - ingest / ingest_many : REPLACE theo (loai, ma_nguon), một lần encode cho cả lô
 - check_title          : tìm tiêu đề gần nghĩa trong phân vùng tieu_de
-- score_document       : điểm ngữ nghĩa + nguyên văn tốt nhất của từng câu
+- score_document       : điểm ngữ nghĩa + nguyên văn (độ phủ vân tay) tốt nhất của từng câu
 - check_document       : áp ngưỡng (theo request, D-04) → tỷ lệ, đồ án, đoạn trùng
 - reembed_missing      : encode (một lần) các chunk thiếu embedding cho mô hình hiện tại
 - rebuild              : dựng lại chỉ mục bộ nhớ từ thesis_ai, KHÔNG encode
@@ -16,11 +16,11 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 
 import numpy as np
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.orm import Session
 
 from app.embedding import Encoder
-from app import minhash
+from app.fingerprint import sentence_kgrams
 from app.index import TAI_LIEU, TIEU_DE, ChunkRow, CorpusIndex, partition_of
 from app.models import (
     LOAI_ARCHIVE,
@@ -106,26 +106,33 @@ class IngestItem:
     loai: str
     ma_nguon: int
     text: str
+    # Chỉ DOCUMENT: de_tai.id — các phiên bản của một đề tài là một nhóm khi
+    # đếm cụm phổ biến (fingerprint.py). None → nguồn là nhóm riêng.
+    nhom: int | None = None
 
 
-def _is_unchanged(session: Session, encoder: Encoder, loai: str, ma_nguon: int, hashes: list[str]) -> bool:
+def _is_unchanged(
+    session: Session, encoder: Encoder, loai: str, ma_nguon: int, hashes: list[str]
+) -> tuple[bool, int | None]:
+    """(văn bản không đổi và đủ embedding của mô hình hiện tại, nhóm đang lưu)."""
     stored = session.execute(
-        select(Chunk.id, Chunk.bam_noi_dung)
+        select(Chunk.id, Chunk.bam_noi_dung, Chunk.nhom)
         .where(Chunk.loai_nguon == loai, Chunk.ma_nguon == ma_nguon)
         .order_by(Chunk.thu_tu)
     ).all()
-    if [h for _, h in stored] != hashes:
-        return False
+    nhom = stored[0][2] if stored else None
+    if [h for _, h, _ in stored] != hashes:
+        return False, nhom
     if not stored:
-        return True
+        return True, nhom
     with_embedding = session.scalar(
         select(func.count(Embedding.id)).where(
-            Embedding.chunk_id.in_([cid for cid, _ in stored]),
+            Embedding.chunk_id.in_([cid for cid, _, _ in stored]),
             Embedding.ten_model == encoder.name,
             Embedding.so_chieu == encoder.dim,  # IN-05: cùng tiêu chí với rebuild
         )
     )
-    return with_embedding == len(stored)
+    return with_embedding == len(stored), nhom
 
 
 def _upsert_index_metadata(session: Session, ten_model: str) -> None:
@@ -147,10 +154,12 @@ def ingest_many(
 
     Ngữ nghĩa REPLACE theo (loai, ma_nguon): mọi chunk cũ của nguồn bị thay;
     văn bản không sinh chunk nào để lại nguồn rỗng. Nguồn không đổi (cùng
-    chuỗi băm + đã có embedding của mô hình hiện tại) → không encode.
+    chuỗi băm + đã có embedding của mô hình hiện tại) → không encode; nếu chỉ
+    nhóm (nhom) đổi thì cập nhật nhóm, không nạp lại.
     """
     with _WRITE_LOCK:
         planned: list[tuple[IngestItem, list[str]]] = []
+        regrouped: list[IngestItem] = []
         counts: list[int] = []
         # Mục cuối cùng thắng khi một lô lặp lại cùng nguồn.
         last_of: dict[tuple[str, int], int] = {}
@@ -162,9 +171,28 @@ def ingest_many(
             if last_of[(item.loai, item.ma_nguon)] != pos:
                 continue
             hashes = [_sha256(t) for t in texts]
-            if _is_unchanged(session, encoder, item.loai, item.ma_nguon, hashes):
+            unchanged, stored_nhom = _is_unchanged(session, encoder, item.loai, item.ma_nguon, hashes)
+            if unchanged:
+                if texts and stored_nhom != item.nhom:
+                    regrouped.append(item)
                 continue
             planned.append((item, texts))
+
+        if regrouped:
+            try:
+                for item in regrouped:
+                    session.execute(
+                        update(Chunk)
+                        .where(Chunk.loai_nguon == item.loai, Chunk.ma_nguon == item.ma_nguon)
+                        .values(nhom=item.nhom)
+                    )
+                session.commit()
+            except Exception:
+                session.rollback()
+                raise
+            for item in regrouped:
+                if item.loai == LOAI_DOCUMENT:
+                    index.set_group(item.ma_nguon, item.nhom)
 
         if not planned:
             return counts
@@ -207,6 +235,7 @@ def ingest_many(
                         thu_tu=i,
                         noi_dung=t,
                         bam_noi_dung=_sha256(t),
+                        nhom=item.nhom,
                     )
                     for i, t in enumerate(texts, start=1)
                 ]
@@ -223,7 +252,7 @@ def ingest_many(
                     )
                     for c, v in zip(chunks, item_vectors)
                 )
-                rows = [ChunkRow(c.id, c.loai_nguon, c.ma_nguon, c.thu_tu, c.noi_dung) for c in chunks]
+                rows = [ChunkRow(c.id, c.loai_nguon, c.ma_nguon, c.thu_tu, c.noi_dung, c.nhom) for c in chunks]
                 new_rows.append((item, rows, item_vectors))
             session.flush()
             _upsert_index_metadata(session, encoder.name)
@@ -240,10 +269,16 @@ def ingest_many(
 
 
 def ingest(
-    session: Session, index: CorpusIndex, encoder: Encoder, loai: str, ma_nguon: int, text: str
+    session: Session,
+    index: CorpusIndex,
+    encoder: Encoder,
+    loai: str,
+    ma_nguon: int,
+    text: str,
+    nhom: int | None = None,
 ) -> int:
     """Ingest một nguồn (REPLACE); trả số chunk. Đúng một encode khi có thay đổi."""
-    return ingest_many(session, index, encoder, [IngestItem(loai, ma_nguon, text)])[0]
+    return ingest_many(session, index, encoder, [IngestItem(loai, ma_nguon, text, nhom)])[0]
 
 
 def _ty_le(score: float) -> float:
@@ -298,6 +333,7 @@ def rebuild(session: Session, index: CorpusIndex, encoder: Encoder) -> RebuildSt
             Chunk.ma_nguon,
             Chunk.thu_tu,
             Chunk.noi_dung,
+            Chunk.nhom,
             Embedding.so_chieu,
             Embedding.vector,
         )
@@ -309,11 +345,11 @@ def rebuild(session: Session, index: CorpusIndex, encoder: Encoder) -> RebuildSt
 
     grouped: dict[str, tuple[list[ChunkRow], list[np.ndarray]]] = {}
     loaded = 0
-    for cid, loai, ma_nguon, thu_tu, noi_dung, so_chieu, blob in rows:
+    for cid, loai, ma_nguon, thu_tu, noi_dung, nhom, so_chieu, blob in rows:
         if so_chieu != encoder.dim:
             continue
         part_rows, part_vecs = grouped.setdefault(partition_of(loai), ([], []))
-        part_rows.append(ChunkRow(cid, loai, ma_nguon, thu_tu, noi_dung))
+        part_rows.append(ChunkRow(cid, loai, ma_nguon, thu_tu, noi_dung, nhom))
         part_vecs.append(np.frombuffer(blob, dtype="<f4"))
         loaded += 1
 
@@ -348,10 +384,8 @@ MAX_PASSAGE_SENTENCES = 6
 # theo khuôn câu chung của lĩnh vực đạt cosine cao với MỘT câu lẻ của đồ án
 # khác (bách phân vị 90 = 80,1 %) và làm tỷ lệ tổng của cặp không liên quan
 # lên 32–35 %; câu diễn đạt lại thì đi thành đoạn liền nhau cùng nguồn.
-# Cờ NGUYEN_VAN (MinHash) là bằng chứng mạnh nên đứng một mình vẫn giữ.
+# Cờ NGUYEN_VAN (vân tay) là bằng chứng mạnh nên đứng một mình vẫn giữ.
 MIN_RUN_NGU_NGHIA = 2
-# WR-02: số hàng ma trận MinHash so mỗi lượt (bộ nhớ tạm ≈ khối × num_perm byte).
-_MH_BLOCK = 32_768
 
 
 @dataclass(frozen=True)
@@ -383,15 +417,15 @@ def score_document(
     text: str,
     exclude_refs: set[int] | frozenset[int],
     strip: bool = True,
-    shingle: int = 4,
-    num_perm: int = 128,
+    pho_bien: int = 4,
     cache_ref: int | None = None,
 ) -> DocumentScores:
     """Điểm tốt nhất của từng câu so với kho DOCUMENT (không phụ thuộc ngưỡng).
 
     strip=False chỉ dành cho ablation của plan 04-04. Một lần encode cho mọi
-    câu; nguồn thuộc exclude_refs không bao giờ được so khớp. shingle/num_perm
-    phải trùng với signer của CorpusIndex (main.py truyền cùng Settings).
+    câu; nguồn thuộc exclude_refs không bao giờ được so khớp. Điểm nguyên văn
+    = độ phủ vân tay (fingerprint.py) với k, w của chỉ mục; k-gram có trong ≥
+    pho_bien nhóm đề tài khác (không kể nhóm bị loại trừ) bị bỏ qua.
     """
     ty_le_loai_tru = 0.0
     if strip:
@@ -409,14 +443,11 @@ def score_document(
     if strip and cache_ref:
         # CR-02: ingest DOCUMENT kế tiếp của cùng tài liệu dùng lại các vector này.
         RECENT.put(int(cache_ref), sents, vectors)
-    signatures = [minhash.signature(s, shingle, num_perm) for s in sents]
     excluded = frozenset(int(r) for r in exclude_refs)
-    excluded_arr = np.fromiter(excluded, dtype=np.int64, count=len(excluded))
 
-    # WR-02 (04-REVIEW): dưới index.lock chỉ tìm FAISS và chụp THAM CHIẾU tới
-    # ma trận MinHash (add/remove_source luôn thay mảng mới, không sửa tại
-    # chỗ) — không sao chép N×num_perm, và phần chấm MinHash chạy ngoài khóa
-    # để /check-title không phải chờ.
+    # WR-02 (04-REVIEW): dưới index.lock chỉ tìm FAISS và lấy ẢNH CHỤP bất
+    # biến của chỉ mục vân tay (biên dịch lại một lần sau mỗi ingest); phần
+    # so nguyên văn chạy ngoài khóa để /check-title không phải chờ.
     sem_rows: list[ChunkRow | None] = []
     sem_scores: list[float] = []
     with index.lock:
@@ -435,23 +466,14 @@ def score_document(
                     break
             sem_rows.append(sem_row)
             sem_scores.append(sem_score)
-        mh_matrix, mh_ids, mh_refs = part.mh_matrix, part.mh_ids, part.mh_refs
+        snapshot = part.van_tay.snapshot() if part.van_tay is not None else None
 
     best_ids: list[int | None] = [None] * len(sents)
     best_scores = [0.0] * len(sents)
-    if mh_matrix is not None and len(mh_ids) > 0:
-        allowed = ~np.isin(mh_refs, excluded_arr)
-        if allowed.any():
-            for pos, sig in enumerate(signatures):
-                best, best_score = -1, -1.0
-                for start in range(0, len(mh_ids), _MH_BLOCK):
-                    jac = minhash.jaccard_many(sig, mh_matrix[start : start + _MH_BLOCK])
-                    jac[~allowed[start : start + _MH_BLOCK]] = -1.0
-                    j = int(np.argmax(jac))
-                    if jac[j] > best_score:
-                        best, best_score = start + j, float(jac[j])
-                if best >= 0 and best_score >= 0:
-                    best_ids[pos], best_scores[pos] = int(mh_ids[best]), best_score
+    if snapshot is not None:
+        queries = [sentence_kgrams(s, snapshot.k) for s in sents]
+        for pos, (cid, score) in enumerate(snapshot.match(queries, excluded, pho_bien)):
+            best_ids[pos], best_scores[pos] = cid, score
 
     with index.lock:
         verb_rows = [part.rows.get(cid) if cid is not None else None for cid in best_ids]
@@ -496,8 +518,8 @@ def check_document(
 ) -> dict:
     """Áp ngưỡng lên điểm từng câu → phản hồi /check-document.
 
-    Câu bị gắn cờ NGUYEN_VAN khi Jaccard×100 ≥ nguong_nguyen_van (bằng chứng
-    mạnh hơn nên thắng), ngược lại NGU_NGHIA khi cosine×100 ≥ nguong_doan.
+    Câu bị gắn cờ NGUYEN_VAN khi độ phủ vân tay×100 ≥ nguong_nguyen_van (bằng
+    chứng mạnh hơn nên thắng), ngược lại NGU_NGHIA khi cosine×100 ≥ nguong_doan.
     Cờ NGU_NGHIA chỉ được giữ khi câu thuộc chuỗi ≥ min_run_ngu_nghia câu liên
     tiếp gắn cờ cùng một nguồn (bất kể tín hiệu). ty_le_tong = tỷ lệ ký tự bị
     gắn cờ; đoạn trùng = chuỗi câu liên tiếp gắn cờ cùng một nguồn (tối đa 6 câu).

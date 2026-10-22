@@ -3,7 +3,7 @@
 Dòng còn lại sau lọc mẫu chung được nối thành MỘT dòng chảy (cách nhau bởi
 khoảng trắng) nên đoạn bị PDF bẻ dòng được nối lại, rồi tách câu. DOCX (một
 dòng mỗi đoạn) và PDF (nhiều dòng mỗi đoạn) vì thế cho cùng các câu — điều
-kiện để MinHash bắt được bản chép nguyên văn giữa hai định dạng.
+kiện để vân tay bắt được bản chép nguyên văn giữa hai định dạng.
 Không chồng lấn giữa các câu → phép tính tỷ lệ theo ký tự là chính xác.
 
 CR-03 (04-REVIEW): văn bản do sinh viên kiểm soát → mọi bước phải TUYẾN TÍNH

@@ -10,6 +10,7 @@ import { useDocumentCheck, useRecheck } from './api'
 import type { CheckMatch } from './api'
 import { parseViTri } from './highlight'
 import { scopeText } from './scope'
+import { thresholdText, warningReason } from './warning'
 
 export interface CheckPanelProps {
   taiLieuId: number | undefined
@@ -117,9 +118,10 @@ export default function CheckPanel({ taiLieuId, canRecheck, pendingText }: Check
       />
     )
   } else {
-    // CR-01: quyết định vượt ngưỡng do Web API tính theo tỷ lệ trùng với một
-    // đồ án nguồn (đúng thống kê đã hiệu chỉnh), không so ty_le_tong ở đây.
+    // CR-01 + 0017: quyết định vượt ngưỡng do Web API tính (một đồ án nguồn
+    // hoặc tổng mọi nguồn), giao diện không tự so sánh lại.
     const overThreshold = data.vuot_nguong === true
+    const reason = warningReason(data)
     const soDoan = data.chi_tiet.length
     const soNguyenVan = data.chi_tiet.filter((seg) => parseViTri(seg.vi_tri).tinHieu === 'NGUYEN_VAN').length
     body = (
@@ -140,11 +142,17 @@ export default function CheckPanel({ taiLieuId, canRecheck, pendingText }: Check
         >
           Trùng nhiều nhất với một đồ án: <strong>{formatPercent(data.ty_le_nguon_cao_nhat)}</strong>
           {' · '}
-          Ngưỡng áp dụng của Bộ môn: <strong>{formatPercent(data.nguong_ap_dung)}</strong> (UC0.4)
+          Ngưỡng áp dụng của Bộ môn: <strong>{thresholdText(data)}</strong> (UC0.4)
           {' · '}
           <Tag color={overThreshold ? 'error' : 'success'}>
             {overThreshold ? 'Vượt ngưỡng cảnh báo' : 'Dưới ngưỡng cảnh báo'}
           </Tag>
+          {reason ? (
+            <>
+              <br />
+              {reason}
+            </>
+          ) : null}
         </p>
         <p style={{ textAlign: 'center', margin: '0 0 16px', fontSize: 13 }}>
           {`Số đoạn trùng: ${soDoan}`}

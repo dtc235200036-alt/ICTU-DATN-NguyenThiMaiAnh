@@ -1,28 +1,33 @@
 {
   "profile": "bkai",
   "ten_model": "bkai-foundation-models/vietnamese-bi-encoder",
-  "minhash_shingle": 4,
-  "minhash_num_perm": 128,
+  "van_tay_k": 6,
+  "van_tay_w": 4,
+  "van_tay_pho_bien": 4,
   "nguong_ten_de_tai": 67.8,
   "nguong_doan": 67.7,
-  "nguong_nguyen_van": 88.7,
+  "nguong_nguyen_van": 56.0,
   "nguong_tai_lieu": 10.4,
+  "nguong_tong_tai_lieu": 14.8,
   "phuong_phap": {
     "nguong_ten_de_tai": "youden",
     "nguong_doan": "youden",
     "nguong_nguyen_van": "youden",
     "nguong_tai_lieu": "trung_diem",
-    "minhash_shingle": "auc_lon_nhat"
+    "nguong_tong_tai_lieu": "trung_diem",
+    "van_tay_k": "auc_lon_nhat"
   },
   "auc": {
     "ten_de_tai": 0.9758,
     "ngu_nghia_cau": 0.7983,
-    "nguyen_van_cau": 0.9992,
+    "nguyen_van_cau": 0.9974,
     "tai_lieu": 1.0,
-    "nguyen_van_theo_shingle": {
-      "3": 0.999222,
-      "4": 0.999222,
-      "5": 0.999222
+    "tai_lieu_tong": 1.0,
+    "nguyen_van_theo_k": {
+      "3": 0.985927,
+      "4": 0.99618,
+      "5": 0.996902,
+      "6": 0.997402
     }
   },
   "so_mau": {
@@ -39,6 +44,10 @@
       "am": 1286
     },
     "tai_lieu": {
+      "duong": 10,
+      "am": 7
+    },
+    "tai_lieu_tong": {
       "duong": 10,
       "am": 7
     }
@@ -77,19 +86,19 @@
       ]
     },
     "nguyen_van_cau": {
-      "nguong": 88.7,
+      "nguong": 56.0,
       "phuong_phap": "youden",
-      "auc": 0.9992,
-      "youden_j": 0.9984,
-      "tpr": 1.0,
-      "fpr": 0.0016,
+      "auc": 0.9974,
+      "youden_j": 0.9587,
+      "tpr": 0.9781,
+      "fpr": 0.0194,
       "so_duong": 183,
       "so_am": 1286,
-      "min_duong": 100.0,
-      "max_am": 100.0,
+      "min_duong": 42.31,
+      "max_am": 81.82,
       "khoang_chon": [
-        77.34,
-        100.0
+        55.56,
+        56.52
       ]
     },
     "tai_lieu": {
@@ -108,6 +117,22 @@
         20.79
       ]
     },
+    "tai_lieu_tong": {
+      "nguong": 14.8,
+      "phuong_phap": "trung_diem",
+      "auc": 1.0,
+      "youden_j": 1.0,
+      "tpr": 1.0,
+      "fpr": 0.0,
+      "so_duong": 10,
+      "so_am": 7,
+      "min_duong": 21.23,
+      "max_am": 8.41,
+      "khoang_chon": [
+        8.41,
+        21.23
+      ]
+    },
     "tai_lieu_theo_cap": [
       {
         "ma_cap": "P01",
@@ -119,13 +144,13 @@
         "ma_cap": "P02",
         "loai": "CHEP_NGUYEN_VAN",
         "ty_le_nguon": 48.04,
-        "ty_le_tong": 48.04
+        "ty_le_tong": 50.61
       },
       {
         "ma_cap": "P04",
         "loai": "CHEP_NGUYEN_VAN",
         "ty_le_nguon": 44.89,
-        "ty_le_tong": 49.33
+        "ty_le_tong": 50.78
       },
       {
         "ma_cap": "P05",
@@ -154,7 +179,7 @@
       {
         "ma_cap": "P12",
         "loai": "DIEN_DAT_LAI",
-        "ty_le_nguon": 31.54,
+        "ty_le_nguon": 31.01,
         "ty_le_tong": 33.16
       },
       {
@@ -173,7 +198,7 @@
         "ma_cap": "P15",
         "loai": "CUNG_LINH_VUC",
         "ty_le_nguon": 0.0,
-        "ty_le_tong": 4.78
+        "ty_le_tong": 7.66
       },
       {
         "ma_cap": "P16",
@@ -185,7 +210,7 @@
         "ma_cap": "P17",
         "loai": "CUNG_LINH_VUC",
         "ty_le_nguon": 0.0,
-        "ty_le_tong": 0.0
+        "ty_le_tong": 8.41
       },
       {
         "ma_cap": "P20",
@@ -203,13 +228,13 @@
         "ma_cap": "P24",
         "loai": "KHONG_LIEN_QUAN",
         "ty_le_nguon": 0.0,
-        "ty_le_tong": 3.47
+        "ty_le_tong": 5.71
       },
       {
         "ma_cap": "P25",
         "loai": "KHONG_LIEN_QUAN",
         "ty_le_nguon": 0.0,
-        "ty_le_tong": 1.25
+        "ty_le_tong": 2.23
       }
     ],
     "nhan_cau": {
@@ -221,5 +246,5 @@
   },
   "don_vi": "phan_tram_mot_chu_so_thap_phan; gan_co_khi_diem >= nguong",
   "tap": "HIEU_CHINH",
-  "ngay": "2026-09-28"
+  "ngay": "2026-10-21"
 }

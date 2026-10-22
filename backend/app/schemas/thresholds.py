@@ -22,14 +22,15 @@ class ThresholdOut(BaseModel):
 
 
 class ThresholdUpdate(NFCModel):
-    """UC0.4 (D-04): Bộ môn gửi đủ ba ngưỡng một lần. T-04-30: 0–100, tối đa 2
+    """UC0.4 (D-04): Bộ môn gửi đủ bốn ngưỡng một lần. T-04-30: 0–100, tối đa 2
     chữ số thập phân (cột DECIMAL(5,2) + CHECK 0–100 ở DB là lớp chặn thứ hai)."""
 
     NGUONG_TEN_DE_TAI: Decimal
     NGUONG_TAI_LIEU: Decimal
+    NGUONG_TONG_TAI_LIEU: Decimal
     NGUONG_DOAN_TRUNG: Decimal
 
-    @field_validator("NGUONG_TEN_DE_TAI", "NGUONG_TAI_LIEU", "NGUONG_DOAN_TRUNG")
+    @field_validator("NGUONG_TEN_DE_TAI", "NGUONG_TAI_LIEU", "NGUONG_TONG_TAI_LIEU", "NGUONG_DOAN_TRUNG")
     @classmethod
     def _range(cls, v: Decimal) -> Decimal:
         if not v.is_finite() or v < 0 or v > 100:

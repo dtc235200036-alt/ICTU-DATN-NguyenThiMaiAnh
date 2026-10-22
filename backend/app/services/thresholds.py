@@ -1,7 +1,8 @@
 """UC0.4/AISV-07 (D-04): đọc và cập nhật ngưỡng cảnh báo trùng lặp.
 
 KHÔNG cache: title_check (NGUONG_TEN_DE_TAI) và document_check
-(NGUONG_TAI_LIEU khi tạo kết quả chờ, NGUONG_DOAN_TRUNG khi chạy) đọc lại chính
+(NGUONG_TAI_LIEU, NGUONG_TONG_TAI_LIEU khi tạo kết quả chờ, NGUONG_DOAN_TRUNG
+khi chạy) đọc lại chính
 các dòng cau_hinh_nguong này ở mỗi request — vì vậy "lần kiểm tra kế tiếp dùng
 giá trị mới", còn kết quả đã ghi giữ snapshot nguong_ap_dung của nó.
 """
@@ -17,6 +18,7 @@ from app.models.cau_hinh_nguong import (
     NGUONG_DOAN_TRUNG,
     NGUONG_TAI_LIEU,
     NGUONG_TEN_DE_TAI,
+    NGUONG_TONG_TAI_LIEU,
     CauHinhNguong,
 )
 from app.models.tai_khoan import TaiKhoan
@@ -31,9 +33,10 @@ class _Definition:
     gia_tri_de_xuat: float
 
 
-# Giá trị đề xuất = giá trị hiệu chỉnh ghi ở Alembic 0010, lấy từ
-# ai-service/calibration/nguong-de-xuat.json (tập HIEU_CHINH, profile bkai,
-# 2026-09-28 — plan 04-04). Hiệu chỉnh lại thì cập nhật cả hai nơi.
+# Giá trị đề xuất = giá trị hiệu chỉnh ghi ở Alembic 0010 và 0017, lấy từ
+# ai-service/calibration/nguong-de-xuat.json (tập HIEU_CHINH, profile bkai;
+# 0017 hiệu chỉnh lại ngày 2026-10-21 với tín hiệu vân tay — ba ngưỡng cũ không
+# đổi). Hiệu chỉnh lại thì cập nhật cả hai nơi.
 DEFINITIONS: tuple[_Definition, ...] = (
     _Definition(
         NGUONG_TEN_DE_TAI,
@@ -46,10 +49,17 @@ DEFINITIONS: tuple[_Definition, ...] = (
         NGUONG_TAI_LIEU,
         "Ngưỡng cảnh báo tài liệu (tỷ lệ trùng với một đồ án)",
         "Đề cương/báo cáo có phần trùng với MỘT đồ án nguồn chiếm từ giá trị này"
-        " trở lên được hiển thị \"Vượt ngưỡng cảnh báo\" cho GVHD và sinh viên."
-        " Tỷ lệ tổng (cộng mọi nguồn) chỉ để tham khảo: các câu khớp rải rác với"
-        " nhiều đồ án cùng lĩnh vực không bị coi là sao chép.",
+        " trở lên được hiển thị \"Vượt ngưỡng cảnh báo\" cho GVHD và sinh viên.",
         10.40,
+    ),
+    _Definition(
+        NGUONG_TONG_TAI_LIEU,
+        "Ngưỡng cảnh báo tài liệu (tỷ lệ trùng tổng mọi nguồn)",
+        "Đề cương/báo cáo có tổng phần trùng với mọi đồ án nguồn từ giá trị này trở"
+        " lên cũng bị \"Vượt ngưỡng cảnh báo\", kể cả khi không đồ án nào vượt ngưỡng"
+        " ở trên (bài ghép từ nhiều đồ án). Nên cao hơn ngưỡng theo một đồ án vì câu"
+        " tự viết cùng lĩnh vực có thể khớp rải rác nhiều đồ án.",
+        14.80,
     ),
     _Definition(
         NGUONG_DOAN_TRUNG,
@@ -86,7 +96,7 @@ def list_thresholds(db: Session) -> list[ThresholdOut]:
         row = rows.get(d.loai)
         if row is None:
             # IN-02 (04-REVIEW): dòng còn thiếu vẫn được liệt kê với giá trị đề
-            # xuất, để form có đủ ba trường và PUT (bắt buộc cả ba) chèn dòng.
+            # xuất, để form có đủ các trường và PUT (bắt buộc đủ) chèn dòng.
             out.append(
                 ThresholdOut(
                     loai=d.loai,
@@ -117,8 +127,9 @@ def list_thresholds(db: Session) -> list[ThresholdOut]:
 def update_thresholds(
     db: Session, user: CurrentUser, payload: ThresholdUpdate
 ) -> list[ThresholdOut]:
-    """Ghi đủ ba ngưỡng trong một commit, lưu người sửa và thời điểm (T-04-30,
-    chống chối bỏ). Thêm dòng NGUONG_DOAN_TRUNG nếu CSDL chưa có (trước 0010)."""
+    """Ghi đủ bốn ngưỡng trong một commit, lưu người sửa và thời điểm (T-04-30,
+    chống chối bỏ). Thêm dòng còn thiếu (NGUONG_DOAN_TRUNG trước 0010,
+    NGUONG_TONG_TAI_LIEU trước 0017)."""
     now = now_utc()
     rows = {
         row.loai: row

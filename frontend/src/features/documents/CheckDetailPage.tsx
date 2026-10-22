@@ -8,6 +8,7 @@ import ForbiddenPage from '../auth/ForbiddenPage'
 import { useDocumentCheck } from './api'
 import type { CheckMatch, CheckSegment } from './api'
 import { scopeText } from './scope'
+import { thresholdText, warningReason } from './warning'
 import CheckStatusTag from './CheckStatusTag'
 import { highlightOverlap, parseViTri } from './highlight'
 
@@ -31,7 +32,7 @@ function mucTrungTag(tyLe: number) {
 }
 
 // 04-06: tín hiệu kích hoạt lưu trong vi_tri — giải thích VÌ SAO đoạn bị gắn cờ
-// (nguyên văn: MinHash; ngữ nghĩa: embedding — có thể ít từ trùng).
+// (nguyên văn: vân tay cụm âm tiết; ngữ nghĩa: embedding — có thể ít từ trùng).
 function tinHieuTag(tinHieu: 'NGUYEN_VAN' | 'NGU_NGHIA' | null) {
   if (tinHieu === 'NGUYEN_VAN') return <Tag color="red">Trùng nguyên văn</Tag>
   if (tinHieu === 'NGU_NGHIA') return <Tag color="orange">Trùng ngữ nghĩa</Tag>
@@ -205,10 +206,18 @@ export default function CheckDetailPage() {
             {formatPercent(data.ty_le_nguon_cao_nhat)}
           </Descriptions.Item>
           <Descriptions.Item label="Ngưỡng áp dụng">
-            {formatPercent(data.nguong_ap_dung)}
+            {thresholdText(data)}
             {data.vuot_nguong !== null ? (
-              <Tag color={data.vuot_nguong ? 'error' : 'success'} style={{ marginLeft: 8 }}>
-                {data.vuot_nguong ? 'Vượt ngưỡng cảnh báo' : 'Dưới ngưỡng cảnh báo'}
+              <Tag
+                color={data.vuot_nguong ? 'error' : 'success'}
+                style={{ marginLeft: 8 }}
+                title={warningReason(data) ?? undefined}
+              >
+                {data.ly_do_vuot_nguong === 'TONG_NGUON'
+                  ? 'Vượt ngưỡng tổng nhiều đồ án'
+                  : data.vuot_nguong
+                    ? 'Vượt ngưỡng cảnh báo'
+                    : 'Dưới ngưỡng cảnh báo'}
               </Tag>
             ) : null}
           </Descriptions.Item>

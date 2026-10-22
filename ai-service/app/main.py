@@ -7,11 +7,10 @@ vụ. Chạy đúng một worker uvicorn: chỉ mục nằm trong bộ nhớ ti�
 import logging
 import time
 from contextlib import asynccontextmanager
-from functools import partial
 
 from fastapi import FastAPI, Request
 
-from app import minhash, pipeline
+from app import pipeline
 from app.api import router
 from app.core.body_limit import MaxBodySizeMiddleware
 from app.core.config import get_settings
@@ -33,10 +32,7 @@ async def lifespan(app: FastAPI):
     engine = make_engine(settings.DATABASE_URL)
     session_factory = make_session_factory(engine)
     encoder = Encoder(settings.AI_MODEL_PROFILE, settings.TORCH_THREADS)
-    signer = partial(
-        minhash.signature, k=settings.MINHASH_SHINGLE, num_perm=settings.MINHASH_NUM_PERM
-    )
-    index = CorpusIndex(encoder.dim, signer=signer)
+    index = CorpusIndex(encoder.dim, van_tay=(settings.VAN_TAY_K, settings.VAN_TAY_W))
     with session_factory() as session:
         stats = pipeline.rebuild(session, index, encoder)
     logger.info("Đã nạp %s và %s vector từ thesis_ai", encoder.name, stats.loaded)

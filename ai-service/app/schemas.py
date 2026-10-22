@@ -22,6 +22,9 @@ class IngestRequest(BaseModel):
     type: Literal["TOPIC", "ARCHIVE", "DOCUMENT"]
     # Rỗng hợp lệ: ngữ nghĩa REPLACE — nguồn còn lại không chunk nào.
     text: str = Field(max_length=_MAX_TEXT)
+    # Chỉ DOCUMENT: de_tai.id — mọi phiên bản của một đề tài là một nhóm khi
+    # đếm cụm phổ biến của tín hiệu nguyên văn. Bỏ qua với TOPIC/ARCHIVE.
+    nhom: int | None = Field(default=None, ge=1, le=_MAX_ID)
 
     @model_validator(mode="after")
     def _title_length(self) -> "IngestRequest":

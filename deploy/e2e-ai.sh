@@ -14,12 +14,14 @@
 #                 cặp chép nguyên văn -> HOAN_TAT, tỷ lệ >= NGUONG_TAI_LIEU,
 #                 đồ án trùng "{tên A} ({khóa})", đoạn nộp cạnh đoạn nguồn,
 #                 không đoạn khuôn mẫu; B của cặp không liên quan dưới ngưỡng;
-#                 GVHD thấy cùng kết quả; nộp lại không khớp chính đề tài mình.
+#                 hạ tạm ngưỡng một đồ án / ngưỡng tổng -> chỉ ngưỡng tổng gây
+#                 cảnh báo (TONG_NGUON); GVHD thấy cùng kết quả; nộp lại không
+#                 khớp chính đề tài mình.
 #   ai_threshold — ROADMAP SC4/AISV-07/UC0.4 (04-07): Bộ môn nâng
 #                 NGUONG_TEN_DE_TAI lên 99.99 -> lần kiểm tra tên kế tiếp của
 #                 một tên diễn đạt lại trả nguong 99.99 và không còn kết quả Kho;
 #                 đặt lại giá trị cũ -> kết quả Kho trở lại. Trap luôn khôi phục
-#                 ba ngưỡng gốc (kể cả người sửa/thời điểm) và FAIL nếu đọc lại
+#                 bốn ngưỡng gốc (kể cả người sửa/thời điểm) và FAIL nếu đọc lại
 #                 không khớp.
 # Dọn dẹp (trap, kể cả khi lỗi giữa chừng): purge vector TOPIC/ARCHIVE/DOCUMENT
 # đã tạo khỏi chỉ mục AI, xóa file đã nộp rồi xóa dữ liệu K97 theo thứ tự khóa
@@ -71,9 +73,10 @@ KHO_IDS=""
 # dùng lại (một SV chỉ được giữ một đề tài đang hoạt động).
 TOPIC_SV_A_ID=""
 SV_B_ID=""
-# ai_threshold: bản chụp ba dòng cau_hinh_nguong trước khi sửa (loai\tgia_tri\t
+# ai_threshold: bản chụp bốn dòng cau_hinh_nguong trước khi sửa (loai\tgia_tri\t
 # tai_khoan_id\tthoi_diem) — rỗng = chưa sửa gì, trap không cần khôi phục.
 THRESH_SNAPSHOT=""
+THRESH_LOAI="('NGUONG_TEN_DE_TAI','NGUONG_TAI_LIEU','NGUONG_TONG_TAI_LIEU','NGUONG_DOAN_TRUNG')"
 
 sql() {
   DB=thesis_core bash "${SCRIPT_DIR}/sql.sh" "$1"
@@ -97,13 +100,28 @@ PY
     [ -z "$loai" ] && continue
     sql "UPDATE cau_hinh_nguong SET gia_tri = ${gia_tri}, tai_khoan_id = ${tk}, thoi_diem_cap_nhat = '${td}' WHERE loai = '${loai}'" </dev/null >/dev/null 2>&1 || true
   done <<<"${THRESH_SNAPSHOT}"
-  now="$(sql "SELECT loai, gia_tri, IFNULL(tai_khoan_id,'NULL'), thoi_diem_cap_nhat FROM cau_hinh_nguong WHERE loai IN ('NGUONG_TEN_DE_TAI','NGUONG_TAI_LIEU','NGUONG_DOAN_TRUNG') ORDER BY loai" 2>/dev/null || true)"
+  now="$(sql "SELECT loai, gia_tri, IFNULL(tai_khoan_id,'NULL'), thoi_diem_cap_nhat FROM cau_hinh_nguong WHERE loai IN ${THRESH_LOAI} ORDER BY loai" 2>/dev/null || true)"
   if [ "$now" != "${THRESH_SNAPSHOT}" ]; then
     echo "FAIL: không khôi phục được ngưỡng gốc — hiện tại: ${now//$'\n'/ | } — gốc: ${THRESH_SNAPSHOT//$'\n'/ | }"
     return 1
   fi
-  echo "OK: đã khôi phục ba ngưỡng gốc (${THRESH_SNAPSHOT//$'\n'/ | })"
+  echo "OK: đã khôi phục bốn ngưỡng gốc (${THRESH_SNAPSHOT//$'\n'/ | })"
   THRESH_SNAPSHOT=""
+}
+
+# put_threshold_tam LOAI GIA_TRI — chụp bốn ngưỡng gốc (để trap khôi phục) rồi
+# PUT tạm một ngưỡng, ba ngưỡng còn lại giữ giá trị gốc.
+put_threshold_tam() {
+  local res
+  THRESH_SNAPSHOT="$(sql "SELECT loai, gia_tri, IFNULL(tai_khoan_id,'NULL'), thoi_diem_cap_nhat FROM cau_hinh_nguong WHERE loai IN ${THRESH_LOAI} ORDER BY loai")"
+  python3 - "${THRESH_SNAPSHOT}" "$1" "$2" > "$TMP/thresh-put.json" <<'PY'
+import json, sys
+body = {r.split("\t")[0]: float(r.split("\t")[1]) for r in sys.argv[1].splitlines() if r.strip()}
+body[sys.argv[2]] = float(sys.argv[3])
+print(json.dumps(body))
+PY
+  res="$(call PUT /api/thresholds "$(bash "${SCRIPT_DIR}/api-login.sh" bomon)" -H 'Content-Type: application/json' --data-binary "@$TMP/thresh-put.json")"
+  [ "${res%% *}" = "200" ] || fail "Bộ môn PUT /api/thresholds trả ${res%% *}: $(cat "$TMP/body")"
 }
 
 cleanup() {
@@ -315,11 +333,11 @@ ai_threshold() {
 
   code="$(call GET /api/thresholds "$token_bomon")"
   [ "${code%% *}" = "200" ] || fail "Bộ môn GET /api/thresholds trả ${code%% *}"
-  [ "$(jget '",".join(r["loai"] for r in d)')" = "NGUONG_TEN_DE_TAI,NGUONG_TAI_LIEU,NGUONG_DOAN_TRUNG" ] \
+  [ "$(jget '",".join(r["loai"] for r in d)')" = "NGUONG_TEN_DE_TAI,NGUONG_TAI_LIEU,NGUONG_TONG_TAI_LIEU,NGUONG_DOAN_TRUNG" ] \
     || fail "GET /api/thresholds thiếu ngưỡng: $(cat "$TMP/body")"
   cp "$TMP/body" "$TMP/thresh-before.json"
-  THRESH_SNAPSHOT="$(sql "SELECT loai, gia_tri, IFNULL(tai_khoan_id,'NULL'), thoi_diem_cap_nhat FROM cau_hinh_nguong WHERE loai IN ('NGUONG_TEN_DE_TAI','NGUONG_TAI_LIEU','NGUONG_DOAN_TRUNG') ORDER BY loai")"
-  [ "$(printf '%s\n' "${THRESH_SNAPSHOT}" | grep -c .)" = "3" ] || fail "Không chụp được ba dòng cau_hinh_nguong"
+  THRESH_SNAPSHOT="$(sql "SELECT loai, gia_tri, IFNULL(tai_khoan_id,'NULL'), thoi_diem_cap_nhat FROM cau_hinh_nguong WHERE loai IN ${THRESH_LOAI} ORDER BY loai")"
+  [ "$(printf '%s\n' "${THRESH_SNAPSHOT}" | grep -c .)" = "4" ] || fail "Không chụp được bốn dòng cau_hinh_nguong"
 
   # Cùng truy vấn dương đầu tiên của ai_title (diễn đạt lại, top-1 là Kho).
   ten="$(awk -F'\t' '$1=="POS"{print $4; exit}' "$TMP/queries.tsv")"
@@ -596,38 +614,50 @@ PY
     || fail "${khac_ma}-B (không liên quan) bị cảnh báo: tổng/nguồn/vượt = ${ty_b} với ngưỡng ${nguong}%"
   ok "${khac_ma}-B (không liên quan) HOAN_TAT: tổng/theo nguồn ${ty_b% *}% < ${nguong}%, không cảnh báo"
 
-  # (3b) CR-01: quyết định vượt ngưỡng theo tỷ lệ trùng với MỘT đồ án, không
-  # theo tỷ lệ tổng. Hạ tạm NGUONG_TAI_LIEU xuống giữa tỷ lệ theo nguồn cao
-  # nhất và tỷ lệ tổng của chính bài không liên quan ở (3) (khớp rải rác nhiều
-  # đồ án), nộp lại bài đó: tổng >= ngưỡng nhưng không nguồn nào tới ngưỡng
-  # -> "Dưới ngưỡng cảnh báo". Ngưỡng gốc được khôi phục (kể cả khi lỗi — trap).
-  local doc_c ty_c nguong_tam
+  # (3b) CR-01: ngưỡng tài liệu so với tỷ lệ trùng với MỘT đồ án, không với tỷ
+  # lệ tổng. Hạ tạm NGUONG_TAI_LIEU xuống giữa tỷ lệ theo nguồn cao nhất và tỷ
+  # lệ tổng của chính bài không liên quan ở (3) (khớp rải rác nhiều đồ án), nộp
+  # lại bài đó: tổng >= ngưỡng nhưng không nguồn nào tới ngưỡng, tổng vẫn dưới
+  # NGUONG_TONG_TAI_LIEU -> "Dưới ngưỡng cảnh báo".
+  # (3c) Ngưỡng tổng (0017): giữ NGUONG_TAI_LIEU gốc, hạ tạm NGUONG_TONG_TAI_LIEU
+  # xuống cùng mức, nộp lại -> "Vượt ngưỡng cảnh báo" với lý do TONG_NGUON (bài
+  # ghép từ nhiều đồ án). Ngưỡng gốc được khôi phục sau mỗi lần (kể cả khi lỗi — trap).
+  local doc_c ty_c doc_d ty_d nguong_tam
   nguong_tam="$(python3 -c "t, n, _ = '$ty_b'.split(); t, n = float(t), float(n); print(round((t + n) / 2, 2) if t - n >= 1 else '')")"
   if [ -n "$nguong_tam" ]; then
-    THRESH_SNAPSHOT="$(sql "SELECT loai, gia_tri, IFNULL(tai_khoan_id,'NULL'), thoi_diem_cap_nhat FROM cau_hinh_nguong WHERE loai IN ('NGUONG_TEN_DE_TAI','NGUONG_TAI_LIEU','NGUONG_DOAN_TRUNG') ORDER BY loai")"
-    python3 - "${THRESH_SNAPSHOT}" "$nguong_tam" > "$TMP/thresh-put.json" <<'PY'
-import json, sys
-body = {r.split("\t")[0]: float(r.split("\t")[1]) for r in sys.argv[1].splitlines() if r.strip()}
-body["NGUONG_TAI_LIEU"] = float(sys.argv[2])
-print(json.dumps(body))
-PY
-    res="$(call PUT /api/thresholds "$(bash "${SCRIPT_DIR}/api-login.sh" bomon)" -H 'Content-Type: application/json' --data-binary "@$TMP/thresh-put.json")"
-    [ "${res%% *}" = "200" ] || fail "Bộ môn PUT /api/thresholds trả ${res%% *}: $(cat "$TMP/body")"
+    put_threshold_tam NGUONG_TAI_LIEU "$nguong_tam"
     review_changes "$token_gv" "${topic_b}" "$doc_b"
     doc_c="$(submit_outline "$token_sv_b" "${topic_b}" "$khac_file")"
     wait_check "$token_sv_b" "$doc_c" "$TMP/check-c.json"
     restore_thresholds || fail "Khôi phục ngưỡng gốc thất bại"
     ty_c="$(python3 - "$TMP/check-c.json" <<'PY'
 import json, sys
-d = json.load(open(sys.argv[1], encoding="utf-8")); n = d["nguong_ap_dung"]
-ok = d["ty_le_tong"] >= n and d["ty_le_nguon_cao_nhat"] < n and d["vuot_nguong"] is False
-print(f"ngưỡng {n}%: tổng {d['ty_le_tong']}% >= ngưỡng, theo nguồn cao nhất {d['ty_le_nguon_cao_nhat']}% < ngưỡng, vuot_nguong {d['vuot_nguong']}")
+d = json.load(open(sys.argv[1], encoding="utf-8")); n, nt = d["nguong_ap_dung"], d["nguong_tong_ap_dung"]
+ok = (d["ty_le_tong"] >= n and d["ty_le_nguon_cao_nhat"] < n and nt is not None and d["ty_le_tong"] < nt
+      and d["vuot_nguong"] is False and d["ly_do_vuot_nguong"] is None)
+print(f"ngưỡng {n}%: tổng {d['ty_le_tong']}% >= ngưỡng (< ngưỡng tổng {nt}%), theo nguồn cao nhất {d['ty_le_nguon_cao_nhat']}% < ngưỡng, vuot_nguong {d['vuot_nguong']}")
 sys.exit(0 if ok else 1)
 PY
 )" || fail "${khac_ma}-B với ngưỡng tạm: ${ty_c}"
     ok "${khac_ma}-B nộp lại với ngưỡng tạm ${nguong_tam}%: ${ty_c} -> Dưới ngưỡng cảnh báo (CR-01)"
+
+    put_threshold_tam NGUONG_TONG_TAI_LIEU "$nguong_tam"
+    review_changes "$token_gv" "${topic_b}" "$doc_c"
+    doc_d="$(submit_outline "$token_sv_b" "${topic_b}" "$khac_file")"
+    wait_check "$token_sv_b" "$doc_d" "$TMP/check-d.json"
+    restore_thresholds || fail "Khôi phục ngưỡng gốc thất bại"
+    ty_d="$(python3 - "$TMP/check-d.json" <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1], encoding="utf-8")); n, nt = d["nguong_ap_dung"], d["nguong_tong_ap_dung"]
+ok = (nt is not None and d["ty_le_tong"] >= nt and d["ty_le_nguon_cao_nhat"] < n
+      and d["vuot_nguong"] is True and d["ly_do_vuot_nguong"] == "TONG_NGUON")
+print(f"ngưỡng tổng {nt}%: tổng {d['ty_le_tong']}% >= ngưỡng tổng, theo nguồn cao nhất {d['ty_le_nguon_cao_nhat']}% < {n}%, vuot_nguong {d['vuot_nguong']} ({d['ly_do_vuot_nguong']})")
+sys.exit(0 if ok else 1)
+PY
+)" || fail "${khac_ma}-B với ngưỡng tổng tạm: ${ty_d}"
+    ok "${khac_ma}-B nộp lại với ngưỡng tổng tạm ${nguong_tam}%: ${ty_d} -> Vượt ngưỡng cảnh báo (tổng nhiều đồ án)"
   else
-    echo "BỎ QUA (3b): ${khac_ma}-B không có chênh lệch tổng/theo nguồn đủ lớn (${ty_b})"
+    echo "BỎ QUA (3b, 3c): ${khac_ma}-B không có chênh lệch tổng/theo nguồn đủ lớn (${ty_b})"
   fi
 
   # (4) Nộp lại cùng file sau Yêu cầu sửa -> không khớp phiên bản trước của mình (loai_tru).

@@ -16,7 +16,12 @@ from app.core.db import SessionLocal
 from app.core.deps import CurrentUser
 from app.core.roles import VaiTro
 from app.core.timeutil import now_utc
-from app.models.cau_hinh_nguong import NGUONG_DOAN_TRUNG, NGUONG_TAI_LIEU, CauHinhNguong
+from app.models.cau_hinh_nguong import (
+    NGUONG_DOAN_TRUNG,
+    NGUONG_TAI_LIEU,
+    NGUONG_TONG_TAI_LIEU,
+    CauHinhNguong,
+)
 from app.models.de_cuong import LOAI_BAO_CAO_CUOI, LOAI_DE_CUONG, TaiLieuDoAn
 from app.models.de_tai import DeTai
 from app.models.kho import DoAnKho
@@ -78,6 +83,10 @@ def _optional_int(value) -> int | None:
     return int(value) if value is not None else None
 
 
+def _optional_float(value) -> float | None:
+    return float(value) if value is not None else None
+
+
 def _scope(ket_qua: KetQuaKiemTraTrungLap) -> dict:
     """CR-04: phạm vi được kiểm tra cho CheckSummary/CheckDetail."""
     ty_le = float(ket_qua.ty_le_loai_tru) if ket_qua.ty_le_loai_tru is not None else None
@@ -89,14 +98,35 @@ def _scope(ket_qua: KetQuaKiemTraTrungLap) -> dict:
     }
 
 
-def vuot_nguong(ket_qua: KetQuaKiemTraTrungLap) -> bool | None:
-    """CR-01: quyết định "Vượt ngưỡng cảnh báo" DUY NHẤT của Web API —
-    tỷ lệ trùng với một đồ án nguồn cao nhất >= ngưỡng áp dụng (định nghĩa
-    "từ giá trị này trở lên", cùng phép so sánh với hiệu chỉnh và title_check).
-    None khi chưa có kết quả."""
+LY_DO_MOT_NGUON = "MOT_NGUON"
+LY_DO_TONG_NGUON = "TONG_NGUON"
+
+
+def ly_do_vuot_nguong(ket_qua: KetQuaKiemTraTrungLap) -> str | None:
+    """CR-01 + 0017: quyết định "Vượt ngưỡng cảnh báo" DUY NHẤT của Web API
+    (định nghĩa "từ giá trị này trở lên", cùng phép so sánh với hiệu chỉnh):
+    MOT_NGUON khi tỷ lệ trùng với một đồ án nguồn cao nhất >= nguong_ap_dung;
+    TONG_NGUON khi tỷ lệ tổng mọi nguồn >= nguong_tong_ap_dung (bài ghép từ
+    nhiều đồ án, mỗi đồ án dưới ngưỡng). None khi không vượt hoặc chưa có kết
+    quả; kết quả cũ (nguong_tong_ap_dung NULL) chỉ xét một nguồn."""
     if ket_qua.trang_thai != HOAN_TAT or ket_qua.ty_le_nguon_cao_nhat is None:
         return None
-    return float(ket_qua.ty_le_nguon_cao_nhat) >= float(ket_qua.nguong_ap_dung)
+    if float(ket_qua.ty_le_nguon_cao_nhat) >= float(ket_qua.nguong_ap_dung):
+        return LY_DO_MOT_NGUON
+    if (
+        ket_qua.nguong_tong_ap_dung is not None
+        and ket_qua.ty_le_tong is not None
+        and float(ket_qua.ty_le_tong) >= float(ket_qua.nguong_tong_ap_dung)
+    ):
+        return LY_DO_TONG_NGUON
+    return None
+
+
+def vuot_nguong(ket_qua: KetQuaKiemTraTrungLap) -> bool | None:
+    """None khi chưa có kết quả, ngược lại ly_do_vuot_nguong có giá trị."""
+    if ket_qua.trang_thai != HOAN_TAT or ket_qua.ty_le_nguon_cao_nhat is None:
+        return None
+    return ly_do_vuot_nguong(ket_qua) is not None
 
 
 def _get_threshold(db: Session) -> float:
@@ -107,6 +137,15 @@ def _get_threshold(db: Session) -> float:
         return float(gia_tri)
     except NoResultFound:
         return _FALLBACK_NGUONG_TAI_LIEU
+
+
+def _get_total_threshold(db: Session) -> float | None:
+    """0017: NGUONG_TONG_TAI_LIEU hiện hành; thiếu dòng -> None (chỉ xét ngưỡng
+    theo một đồ án)."""
+    gia_tri = db.execute(
+        select(CauHinhNguong.gia_tri).where(CauHinhNguong.loai == NGUONG_TONG_TAI_LIEU)
+    ).scalar_one_or_none()
+    return float(gia_tri) if gia_tri is not None else None
 
 
 def _get_passage_threshold(db: Session) -> float | None:
@@ -155,6 +194,7 @@ def create_pending(db: Session, doc: TaiLieuDoAn) -> KetQuaKiemTraTrungLap:
         loai_kiem_tra=TAI_LIEU,
         trang_thai=DANG_KIEM_TRA,
         nguong_ap_dung=nguong,
+        nguong_tong_ap_dung=_get_total_threshold(db),
         doi_tuong_duoc_kiem_tra=doi_tuong,
         thoi_diem=now_utc(),
     )
@@ -367,6 +407,8 @@ def summary(ket_qua: KetQuaKiemTraTrungLap) -> CheckSummary:
         ),
         vuot_nguong=vuot_nguong(ket_qua),
         nguong_ap_dung=float(ket_qua.nguong_ap_dung),
+        nguong_tong_ap_dung=_optional_float(ket_qua.nguong_tong_ap_dung),
+        ly_do_vuot_nguong=ly_do_vuot_nguong(ket_qua),
         thoi_diem=ket_qua.thoi_diem,
         **_scope(ket_qua),
     )
@@ -494,6 +536,8 @@ def detail(db: Session, doc: TaiLieuDoAn, user: CurrentUser) -> CheckDetail:
         ),
         vuot_nguong=vuot_nguong(ket_qua) if ket_qua is not None else None,
         nguong_ap_dung=float(ket_qua.nguong_ap_dung) if ket_qua is not None else 0.0,
+        nguong_tong_ap_dung=_optional_float(ket_qua.nguong_tong_ap_dung) if ket_qua is not None else None,
+        ly_do_vuot_nguong=ly_do_vuot_nguong(ket_qua) if ket_qua is not None else None,
         thoi_diem=ket_qua.thoi_diem if ket_qua is not None else now_utc(),
         **(_scope(ket_qua) if ket_qua is not None else {}),
         tai_lieu=to_document_out(doc),

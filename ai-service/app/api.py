@@ -21,11 +21,17 @@ from app.schemas import (
 router = APIRouter(dependencies=[Depends(require_api_key)])
 
 
+def _nhom(body: IngestRequest) -> int | None:
+    return body.nhom if body.type == "DOCUMENT" else None
+
+
 @router.post("/ingest", response_model=IngestResponse)
 def ingest(body: IngestRequest, request: Request) -> IngestResponse:
     state = request.app.state
     with state.session_factory() as session:
-        count = pipeline.ingest(session, state.index, state.encoder, body.type, body.id, body.text)
+        count = pipeline.ingest(
+            session, state.index, state.encoder, body.type, body.id, body.text, _nhom(body)
+        )
     return IngestResponse(chunk_count=count, indexed=True)
 
 
@@ -46,8 +52,7 @@ def check_document(body: CheckDocumentRequest, request: Request) -> dict:
         state.encoder,
         body.text,
         exclude,
-        shingle=settings.MINHASH_SHINGLE,
-        num_perm=settings.MINHASH_NUM_PERM,
+        pho_bien=settings.VAN_TAY_PHO_BIEN,
         cache_ref=body.ref_id or None,
     )
     return pipeline.check_document(
@@ -66,7 +71,7 @@ def reindex(request: Request, body: ReindexRequest | None = None) -> ReindexResp
     state = request.app.state
     with state.session_factory() as session:
         if body is not None and body.items:
-            items = [pipeline.IngestItem(i.type, i.id, i.text) for i in body.items]
+            items = [pipeline.IngestItem(i.type, i.id, i.text, _nhom(i)) for i in body.items]
             pipeline.ingest_many(session, state.index, state.encoder, items)
             return ReindexResponse(indexed_count=len(items))
         stats = pipeline.reembed_missing(session, state.index, state.encoder)

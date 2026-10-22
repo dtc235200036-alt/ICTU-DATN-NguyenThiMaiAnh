@@ -107,13 +107,14 @@ def _prepare_database():
     alembic_cfg = Config(str(REPO_ROOT / "backend" / "alembic.ini"))
     alembic_cfg.set_main_option("script_location", str(REPO_ROOT / "backend" / "alembic"))
     command.upgrade(alembic_cfg, "head")
-    # Alembic 0010 ghi ngưỡng hiệu chỉnh thang cosine (67.8/10.4/67.7) cho dịch
-    # vụ AI thật; test chạy bộ giả lập (thang Jaccard trên âm tiết) nên đặt
-    # lại giá trị thang stub — test không được phụ thuộc hiệu chỉnh production.
+    # Alembic 0010/0017 ghi ngưỡng hiệu chỉnh (67.8/10.4/67.7/14.8) cho dịch vụ
+    # AI thật; test chạy bộ giả lập (thang Jaccard trên âm tiết) nên đặt lại
+    # giá trị thang stub — test không được phụ thuộc hiệu chỉnh production.
     with engine.begin() as conn:
         for loai, gia_tri in (
             ("NGUONG_TEN_DE_TAI", 50.00),
             ("NGUONG_TAI_LIEU", 30.00),
+            ("NGUONG_TONG_TAI_LIEU", 50.00),
             ("NGUONG_DOAN_TRUNG", 80.00),
         ):
             conn.execute(

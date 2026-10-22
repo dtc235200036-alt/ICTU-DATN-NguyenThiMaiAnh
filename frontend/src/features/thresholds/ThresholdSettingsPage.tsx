@@ -8,10 +8,11 @@ import ForbiddenPage from '../auth/ForbiddenPage'
 import { useSaveThresholds, useThresholds } from './api'
 import type { ThresholdOut, ThresholdUpdate } from './api'
 
-// Ngưỡng nguyên văn (MinHash Jaccard) là tham số kỹ thuật của dịch vụ AI, hiệu
-// chỉnh ở plan 04-04 (ai-service NGUONG_NGUYEN_VAN_MAC_DINH, calibration/
-// nguong-de-xuat.json) — chỉ hiển thị để tham khảo, không sửa từ màn hình này.
-const NGUONG_NGUYEN_VAN_KY_THUAT = '88.7%'
+// Ngưỡng nguyên văn (độ phủ vân tay k-gram) là tham số kỹ thuật của dịch vụ AI,
+// hiệu chỉnh cùng các ngưỡng khác (ai-service NGUONG_NGUYEN_VAN_MAC_DINH,
+// calibration/nguong-de-xuat.json) — chỉ hiển thị để tham khảo, không sửa từ
+// màn hình này.
+const NGUONG_NGUYEN_VAN_KY_THUAT = '56%'
 
 function ThresholdExtra({ item }: { item: ThresholdOut }) {
   return (
@@ -30,7 +31,7 @@ function ThresholdExtra({ item }: { item: ThresholdOut }) {
 }
 
 /**
- * UC0.4/AISV-07 (D-04): Bộ môn chỉnh ba ngưỡng cảnh báo trùng lặp. Web API gửi
+ * UC0.4/AISV-07 (D-04): Bộ môn chỉnh bốn ngưỡng cảnh báo trùng lặp. Web API gửi
  * ngưỡng hiện hành theo từng request nên thay đổi áp dụng cho lần kiểm tra kế
  * tiếp; kết quả đã ghi giữ ngưỡng lúc kiểm tra (nguong_ap_dung).
  */
@@ -104,7 +105,7 @@ export default function ThresholdSettingsPage() {
         showIcon
         style={{ marginBottom: 24 }}
         message="Ngưỡng mới chỉ áp dụng cho các lần kiểm tra tiếp theo"
-        description={`Các kết quả đã kiểm tra trước đó giữ nguyên ngưỡng tại thời điểm kiểm tra. Ngưỡng phát hiện sao chép nguyên văn (MinHash, độ trùng cụm từ ≥ ${NGUONG_NGUYEN_VAN_KY_THUAT}) là tham số kỹ thuật đã hiệu chỉnh của dịch vụ AI và không chỉnh tại đây.`}
+        description={`Các kết quả đã kiểm tra trước đó giữ nguyên ngưỡng tại thời điểm kiểm tra. Ngưỡng phát hiện sao chép nguyên văn (vân tay cụm âm tiết, từ ${NGUONG_NGUYEN_VAN_KY_THUAT} số âm tiết của câu nằm trong đoạn chép) là tham số kỹ thuật đã hiệu chỉnh của dịch vụ AI và không chỉnh tại đây.`}
       />
       <Form<ThresholdUpdate> form={form} layout="vertical" requiredMark={false}>
         {data.map((item) => (

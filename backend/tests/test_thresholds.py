@@ -1,7 +1,7 @@
 """UC0.4/AISV-07 (D-04, SC4): Bộ môn cấu hình ngưỡng — RBAC, kiểm tra miền giá
 trị (E1), lần kiểm tra KẾ TIẾP dùng giá trị mới, kết quả đã ghi giữ snapshot
 nguong_ap_dung. Test chạy trên bộ giả lập (thang Jaccard) và khôi phục nguyên
-trạng ba dòng cau_hinh_nguong trong finally (bảng này không bị TRUNCATE giữa
+trạng bốn dòng cau_hinh_nguong trong finally (bảng này không bị TRUNCATE giữa
 các test — conftest._TRUNCATE_EXCLUDE)."""
 from sqlalchemy import text
 
@@ -9,7 +9,8 @@ from app.core.db import engine
 from app.core.roles import VaiTro
 
 _DOCX_CT = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-_LOAI = ("NGUONG_TEN_DE_TAI", "NGUONG_TAI_LIEU", "NGUONG_DOAN_TRUNG")
+_LOAI = ("NGUONG_TEN_DE_TAI", "NGUONG_TAI_LIEU", "NGUONG_TONG_TAI_LIEU", "NGUONG_DOAN_TRUNG")
+_LOAI_SQL = "('NGUONG_TEN_DE_TAI','NGUONG_TAI_LIEU','NGUONG_TONG_TAI_LIEU','NGUONG_DOAN_TRUNG')"
 
 
 def _snapshot() -> list[tuple]:
@@ -18,7 +19,7 @@ def _snapshot() -> list[tuple]:
             conn.execute(
                 text(
                     "SELECT loai, gia_tri, tai_khoan_id, thoi_diem_cap_nhat FROM cau_hinh_nguong"
-                    " WHERE loai IN ('NGUONG_TEN_DE_TAI','NGUONG_TAI_LIEU','NGUONG_DOAN_TRUNG')"
+                    f" WHERE loai IN {_LOAI_SQL}"
                 )
             ).all()
         )
@@ -60,8 +61,12 @@ def test_thresholds_rbac_validation_and_next_check(
         before = {loai: rows[loai]["gia_tri"] for loai in _LOAI}
         assert rows["NGUONG_TEN_DE_TAI"]["gia_tri_de_xuat"] == 67.8
         assert rows["NGUONG_TAI_LIEU"]["gia_tri_de_xuat"] == 10.4
+        assert rows["NGUONG_TONG_TAI_LIEU"]["gia_tri_de_xuat"] == 14.8
         assert rows["NGUONG_DOAN_TRUNG"]["gia_tri_de_xuat"] == 67.7
 
+        # Thiếu ngưỡng tổng (client cũ gửi ba trường) -> 422.
+        three = {k: v for k, v in before.items() if k != "NGUONG_TONG_TAI_LIEU"}
+        assert client.put("/api/thresholds", headers=bm_h, json=three).status_code == 422
         # UC0.4 - E1: ngoài 0–100 -> 422, không dòng nào đổi.
         for bad in (120, -1):
             body = {**before, "NGUONG_TAI_LIEU": bad}
@@ -87,7 +92,8 @@ def test_thresholds_rbac_validation_and_next_check(
         assert resp.status_code == 200, resp.text
         assert resp.json()["matches"], resp.text
 
-        new = {"NGUONG_TEN_DE_TAI": 95.5, "NGUONG_TAI_LIEU": 42.25, "NGUONG_DOAN_TRUNG": 81}
+        new = {"NGUONG_TEN_DE_TAI": 95.5, "NGUONG_TAI_LIEU": 42.25, "NGUONG_TONG_TAI_LIEU": 60,
+               "NGUONG_DOAN_TRUNG": 81}
         resp = client.put("/api/thresholds", headers=bm_h, json=new)
         assert resp.status_code == 200, resp.text
         saved = {r["loai"]: r for r in resp.json()}
@@ -97,15 +103,13 @@ def test_thresholds_rbac_validation_and_next_check(
         with engine.connect() as conn:
             editors = conn.execute(
                 text(
-                    "SELECT DISTINCT tai_khoan_id FROM cau_hinh_nguong WHERE loai IN"
-                    " ('NGUONG_TEN_DE_TAI','NGUONG_TAI_LIEU','NGUONG_DOAN_TRUNG')"
+                    f"SELECT DISTINCT tai_khoan_id FROM cau_hinh_nguong WHERE loai IN {_LOAI_SQL}"
                 )
             ).scalars().all()
             fresh = conn.execute(
                 text(
                     "SELECT MIN(thoi_diem_cap_nhat) >= UTC_TIMESTAMP() - INTERVAL 1 MINUTE"
-                    " FROM cau_hinh_nguong WHERE loai IN"
-                    " ('NGUONG_TEN_DE_TAI','NGUONG_TAI_LIEU','NGUONG_DOAN_TRUNG')"
+                    f" FROM cau_hinh_nguong WHERE loai IN {_LOAI_SQL}"
                 )
             ).scalar_one()
         assert editors == [bomon.tai_khoan_id] and fresh == 1
@@ -113,6 +117,7 @@ def test_thresholds_rbac_validation_and_next_check(
         # Kết quả cũ giữ snapshot; lần nộp kế tiếp dùng giá trị mới.
         old = client.get(f"/api/documents/{a_doc}/check", headers=auth_headers(gv_a)).json()
         assert old["nguong_ap_dung"] == before["NGUONG_TAI_LIEU"]
+        assert old["nguong_tong_ap_dung"] == before["NGUONG_TONG_TAI_LIEU"]
         sv_b, gv_b = make_account(VaiTro.SINH_VIEN), make_account(VaiTro.GIANG_VIEN)
         topic_b = make_assigned_topic(sv_b, gv_b)
         resp = client.post(
@@ -123,7 +128,7 @@ def test_thresholds_rbac_validation_and_next_check(
         assert resp.status_code == 202, resp.text
         b_doc = resp.json()["phien_ban"][0]["tai_lieu"]["id"]
         nxt = client.get(f"/api/documents/{b_doc}/check", headers=auth_headers(gv_b)).json()
-        assert nxt["nguong_ap_dung"] == 42.25
+        assert nxt["nguong_ap_dung"] == 42.25 and nxt["nguong_tong_ap_dung"] == 60.0
 
         # Kiểm tra tên kế tiếp dùng ngưỡng mới (83% < 95.5% -> không còn cảnh báo) ...
         resp = client.post("/api/topics/check-title", headers=auth_headers(gv_a), json=query)

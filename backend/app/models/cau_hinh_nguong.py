@@ -12,6 +12,9 @@ NGUONG_TAI_LIEU = "NGUONG_TAI_LIEU"
 # D-04 (Phase 4, Alembic 0010): ngưỡng ngữ nghĩa từng đoạn/câu (cosine×100)
 # gửi sang /check-document dưới tên nguong_doan.
 NGUONG_DOAN_TRUNG = "NGUONG_DOAN_TRUNG"
+# Alembic 0017: tỷ lệ tổng mọi nguồn (ty_le_tong) từ giá trị này trở lên cũng là
+# "Vượt ngưỡng cảnh báo" — bài ghép từ nhiều đồ án, mỗi đồ án dưới NGUONG_TAI_LIEU.
+NGUONG_TONG_TAI_LIEU = "NGUONG_TONG_TAI_LIEU"
 
 
 class CauHinhNguong(Base):

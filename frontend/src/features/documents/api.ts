@@ -31,13 +31,20 @@ export type CheckStatus = 'DANG_KIEM_TRA' | 'HOAN_TAT' | 'LOI'
 export interface CheckSummary {
   id: number
   trang_thai: CheckStatus
-  /** Chỉ để hiển thị: tỷ lệ câu bị gắn cờ trên toàn tài liệu (mọi nguồn cộng lại) */
+  /** Tỷ lệ câu bị gắn cờ trên toàn tài liệu (mọi nguồn cộng lại) — so với nguong_tong_ap_dung */
   ty_le_tong: number | null
   /** CR-01: tỷ lệ trùng với MỘT đồ án nguồn cao nhất — thống kê được hiệu chỉnh */
   ty_le_nguon_cao_nhat: number | null
-  /** CR-01: Web API quyết định (ty_le_nguon_cao_nhat >= nguong_ap_dung); null khi chưa hoàn tất */
+  /**
+   * CR-01 + 0017: Web API quyết định (ty_le_nguon_cao_nhat >= nguong_ap_dung hoặc
+   * ty_le_tong >= nguong_tong_ap_dung); null khi chưa hoàn tất
+   */
   vuot_nguong: boolean | null
   nguong_ap_dung: number
+  /** 0017: ngưỡng tổng mọi nguồn lúc kiểm tra; null với kết quả cũ */
+  nguong_tong_ap_dung: number | null
+  /** 0017: lý do vượt ngưỡng; null khi không vượt */
+  ly_do_vuot_nguong: 'MOT_NGUON' | 'TONG_NGUON' | null
   thoi_diem: string
   /** CR-04: số câu được so sánh (null với bộ giả lập / kết quả cũ) */
   so_doan: number | null

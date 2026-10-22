@@ -20,16 +20,20 @@ class Settings(BaseSettings):
     APP_ENV: str = "production"
     DATABASE_URL: str
     AI_API_KEY: SecretStr
-    AI_MODEL_PROFILE: Literal["bkai", "e5", "fake"] = "bkai"  # hiệu chỉnh: calibration/nguong-de-xuat.json (2026-09-28)
+    AI_MODEL_PROFILE: Literal["bkai", "e5", "fake"] = "bkai"  # hiệu chỉnh: calibration/nguong-de-xuat.json (2026-10-21)
     TORCH_THREADS: int = 4
 
     MAX_TEXT_CHARS: int = 2_000_000
     MAX_BODY_BYTES: int = 8 * 1024 * 1024
 
-    NGUONG_DOAN_MAC_DINH: float = 67.7  # hiệu chỉnh: calibration/nguong-de-xuat.json (2026-09-28)
-    NGUONG_NGUYEN_VAN_MAC_DINH: float = 88.7  # hiệu chỉnh: calibration/nguong-de-xuat.json (2026-09-28)
-    MINHASH_SHINGLE: int = 4  # hiệu chỉnh: calibration/nguong-de-xuat.json (2026-09-28)
-    MINHASH_NUM_PERM: int = 128
+    NGUONG_DOAN_MAC_DINH: float = 67.7  # hiệu chỉnh: calibration/nguong-de-xuat.json (2026-10-21)
+    NGUONG_NGUYEN_VAN_MAC_DINH: float = 56.0  # hiệu chỉnh: calibration/nguong-de-xuat.json (2026-10-21)
+    # Vân tay nguyên văn (fingerprint.py): k-gram âm tiết, cửa sổ winnowing w
+    # (đoạn chung từ w + k − 1 âm tiết luôn được tìm thấy), cụm có trong từ
+    # VAN_TAY_PHO_BIEN nhóm đề tài trở lên là cụm phổ biến (Sorokina và cs. 2006: L = 4).
+    VAN_TAY_K: int = 6  # hiệu chỉnh: calibration/nguong-de-xuat.json (2026-10-21)
+    VAN_TAY_W: int = 4
+    VAN_TAY_PHO_BIEN: int = 4
     TOP_K_MAC_DINH: int = 5
     CHI_TIET_TOI_DA: int = 50
 

@@ -71,6 +71,9 @@ class Chunk(Base):
     bam_noi_dung: Mapped[str] = mapped_column(
         String(64).with_variant(CHAR(64), "mysql"), nullable=False
     )
+    # 0003: nhóm của nguồn DOCUMENT (de_tai.id, tham chiếu logic như ma_nguon)
+    # — đếm cụm phổ biến theo nhóm; NULL = nguồn là nhóm riêng.
+    nhom: Mapped[int | None] = mapped_column(BigInteger)
 
 
 class Embedding(Base):

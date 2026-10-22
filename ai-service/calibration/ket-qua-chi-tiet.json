@@ -2,27 +2,33 @@
   "nguong": {
     "profile": "bkai",
     "ten_model": "bkai-foundation-models/vietnamese-bi-encoder",
-    "minhash_shingle": 4,
+    "van_tay_k": 6,
+    "van_tay_w": 4,
+    "van_tay_pho_bien": 4,
     "nguong_ten_de_tai": 67.8,
     "nguong_doan": 67.7,
-    "nguong_nguyen_van": 88.7,
+    "nguong_nguyen_van": 56.0,
     "nguong_tai_lieu": 10.4,
+    "nguong_tong_tai_lieu": 14.8,
     "phuong_phap": {
       "nguong_ten_de_tai": "youden",
       "nguong_doan": "youden",
       "nguong_nguyen_van": "youden",
       "nguong_tai_lieu": "trung_diem",
-      "minhash_shingle": "auc_lon_nhat"
+      "nguong_tong_tai_lieu": "trung_diem",
+      "van_tay_k": "auc_lon_nhat"
     },
     "auc": {
       "ten_de_tai": 0.9758,
       "ngu_nghia_cau": 0.7983,
-      "nguyen_van_cau": 0.9992,
+      "nguyen_van_cau": 0.9974,
       "tai_lieu": 1.0,
-      "nguyen_van_theo_shingle": {
-        "3": 0.999222,
-        "4": 0.999222,
-        "5": 0.999222
+      "tai_lieu_tong": 1.0,
+      "nguyen_van_theo_k": {
+        "3": 0.985927,
+        "4": 0.99618,
+        "5": 0.996902,
+        "6": 0.997402
       }
     },
     "so_mau": {
@@ -41,9 +47,13 @@
       "tai_lieu": {
         "duong": 10,
         "am": 7
+      },
+      "tai_lieu_tong": {
+        "duong": 10,
+        "am": 7
       }
     },
-    "ngay": "2026-09-28"
+    "ngay": "2026-10-21"
   },
   "gates": {
     "g1": true,
@@ -53,7 +63,7 @@
     "accuracy_hieu_chinh": 1.0,
     "mo_ta": {
       "g1": "mọi cặp CHEP_NGUYEN_VAN bị cảnh báo (cứng)",
-      "g2": "mọi cặp KHONG_LIEN_QUAN có tỷ lệ theo nguồn cao nhất và tỷ lệ tổng < ngưỡng tài liệu (cứng)",
+      "g2": "mọi cặp KHONG_LIEN_QUAN không bị cảnh báo và có tỷ lệ tổng < ngưỡng tài liệu (cứng)",
       "g3": "độ chính xác cặp trên KIEM_CHUNG ≥ 0.85 (mềm)"
     }
   },
@@ -104,7 +114,7 @@
     }
   },
   "khoang_tach_nguon_cao_nhat_hieu_chinh": {
-    "am_lon_nhat": 3.69,
+    "am_lon_nhat": 8.41,
     "duong_nho_nhat": 20.79,
     "nguong_nam_trong": true
   },
@@ -125,6 +135,7 @@
       "so_doan_nguyen_van": 7,
       "so_doan_ngu_nghia": 0,
       "bi_canh_bao": true,
+      "ly_do_canh_bao": "NGUON",
       "ky_vong": true,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 81.69
@@ -137,14 +148,15 @@
       "dinh_dang": "PDF→DOCX",
       "so_cau": 62,
       "so_dong_loai_tru": 66,
-      "ty_le_tong": 48.04,
+      "ty_le_tong": 50.61,
       "ty_le_nguon": 48.04,
       "ty_le_nguon_cao_nhat": 48.04,
       "nguon_dung_dau": true,
-      "so_doan_trung": 5,
-      "so_doan_nguyen_van": 5,
+      "so_doan_trung": 7,
+      "so_doan_nguyen_van": 7,
       "so_doan_ngu_nghia": 0,
       "bi_canh_bao": true,
+      "ly_do_canh_bao": "NGUON",
       "ky_vong": true,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 84.0
@@ -157,14 +169,15 @@
       "dinh_dang": "DOCX→PDF",
       "so_cau": 168,
       "so_dong_loai_tru": 121,
-      "ty_le_tong": 51.03,
+      "ty_le_tong": 52.54,
       "ty_le_nguon": 49.32,
       "ty_le_nguon_cao_nhat": 49.32,
       "nguon_dung_dau": true,
-      "so_doan_trung": 17,
-      "so_doan_nguyen_van": 16,
+      "so_doan_trung": 20,
+      "so_doan_nguyen_van": 19,
       "so_doan_ngu_nghia": 1,
       "bi_canh_bao": true,
+      "ly_do_canh_bao": "NGUON",
       "ky_vong": true,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 90.65
@@ -177,14 +190,15 @@
       "dinh_dang": "PDF→DOCX",
       "so_cau": 49,
       "so_dong_loai_tru": 65,
-      "ty_le_tong": 49.33,
+      "ty_le_tong": 50.78,
       "ty_le_nguon": 44.89,
       "ty_le_nguon_cao_nhat": 44.89,
       "nguon_dung_dau": true,
-      "so_doan_trung": 5,
-      "so_doan_nguyen_van": 4,
+      "so_doan_trung": 6,
+      "so_doan_nguyen_van": 5,
       "so_doan_ngu_nghia": 1,
       "bi_canh_bao": true,
+      "ly_do_canh_bao": "NGUON",
       "ky_vong": true,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 88.88
@@ -205,6 +219,7 @@
       "so_doan_nguyen_van": 13,
       "so_doan_ngu_nghia": 0,
       "bi_canh_bao": true,
+      "ly_do_canh_bao": "NGUON",
       "ky_vong": true,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 91.02
@@ -217,14 +232,15 @@
       "dinh_dang": "PDF→DOCX",
       "so_cau": 63,
       "so_dong_loai_tru": 67,
-      "ty_le_tong": 49.74,
+      "ty_le_tong": 51.07,
       "ty_le_nguon": 46.93,
       "ty_le_nguon_cao_nhat": 46.93,
       "nguon_dung_dau": true,
-      "so_doan_trung": 6,
-      "so_doan_nguyen_van": 5,
+      "so_doan_trung": 7,
+      "so_doan_nguyen_van": 6,
       "so_doan_ngu_nghia": 1,
       "bi_canh_bao": true,
+      "ly_do_canh_bao": "NGUON",
       "ky_vong": true,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 85.25
@@ -245,6 +261,7 @@
       "so_doan_nguyen_van": 6,
       "so_doan_ngu_nghia": 3,
       "bi_canh_bao": true,
+      "ly_do_canh_bao": "NGUON",
       "ky_vong": true,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 87.06
@@ -265,6 +282,7 @@
       "so_doan_nguyen_van": 0,
       "so_doan_ngu_nghia": 5,
       "bi_canh_bao": true,
+      "ly_do_canh_bao": "NGUON",
       "ky_vong": true,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 95.07
@@ -277,14 +295,15 @@
       "dinh_dang": "PDF→DOCX",
       "so_cau": 52,
       "so_dong_loai_tru": 65,
-      "ty_le_tong": 17.38,
+      "ty_le_tong": 20.94,
       "ty_le_nguon": 13.36,
       "ty_le_nguon_cao_nhat": 13.36,
       "nguon_dung_dau": true,
-      "so_doan_trung": 4,
+      "so_doan_trung": 5,
       "so_doan_nguyen_van": 0,
-      "so_doan_ngu_nghia": 4,
+      "so_doan_ngu_nghia": 5,
       "bi_canh_bao": true,
+      "ly_do_canh_bao": "NGUON",
       "ky_vong": true,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 89.3
@@ -305,6 +324,7 @@
       "so_doan_nguyen_van": 0,
       "so_doan_ngu_nghia": 4,
       "bi_canh_bao": true,
+      "ly_do_canh_bao": "NGUON",
       "ky_vong": true,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 89.38
@@ -325,6 +345,7 @@
       "so_doan_nguyen_van": 0,
       "so_doan_ngu_nghia": 6,
       "bi_canh_bao": true,
+      "ly_do_canh_bao": "NGUON",
       "ky_vong": true,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 87.1
@@ -338,13 +359,14 @@
       "so_cau": 143,
       "so_dong_loai_tru": 117,
       "ty_le_tong": 33.16,
-      "ty_le_nguon": 31.54,
-      "ty_le_nguon_cao_nhat": 31.54,
+      "ty_le_nguon": 31.01,
+      "ty_le_nguon_cao_nhat": 31.01,
       "nguon_dung_dau": true,
-      "so_doan_trung": 14,
-      "so_doan_nguyen_van": 0,
-      "so_doan_ngu_nghia": 14,
+      "so_doan_trung": 15,
+      "so_doan_nguyen_van": 2,
+      "so_doan_ngu_nghia": 13,
       "bi_canh_bao": true,
+      "ly_do_canh_bao": "NGUON",
       "ky_vong": true,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 89.7
@@ -365,6 +387,7 @@
       "so_doan_nguyen_van": 0,
       "so_doan_ngu_nghia": 4,
       "bi_canh_bao": true,
+      "ly_do_canh_bao": "NGUON",
       "ky_vong": true,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 89.5
@@ -385,6 +408,7 @@
       "so_doan_nguyen_van": 0,
       "so_doan_ngu_nghia": 18,
       "bi_canh_bao": true,
+      "ly_do_canh_bao": "NGUON",
       "ky_vong": true,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 92.93
@@ -397,14 +421,15 @@
       "dinh_dang": "DOCX→PDF",
       "so_cau": 164,
       "so_dong_loai_tru": 121,
-      "ty_le_tong": 4.78,
+      "ty_le_tong": 7.66,
       "ty_le_nguon": 0.0,
-      "ty_le_nguon_cao_nhat": 3.69,
+      "ty_le_nguon_cao_nhat": 5.59,
       "nguon_dung_dau": false,
-      "so_doan_trung": 4,
-      "so_doan_nguyen_van": 0,
+      "so_doan_trung": 9,
+      "so_doan_nguyen_van": 5,
       "so_doan_ngu_nghia": 4,
       "bi_canh_bao": false,
+      "ly_do_canh_bao": null,
       "ky_vong": false,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 96.4
@@ -425,6 +450,7 @@
       "so_doan_nguyen_van": 0,
       "so_doan_ngu_nghia": 0,
       "bi_canh_bao": false,
+      "ly_do_canh_bao": null,
       "ky_vong": false,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 89.55
@@ -437,14 +463,15 @@
       "dinh_dang": "DOCX→PDF",
       "so_cau": 54,
       "so_dong_loai_tru": 108,
-      "ty_le_tong": 0.0,
+      "ty_le_tong": 8.41,
       "ty_le_nguon": 0.0,
-      "ty_le_nguon_cao_nhat": 0.0,
+      "ty_le_nguon_cao_nhat": 8.41,
       "nguon_dung_dau": false,
-      "so_doan_trung": 0,
-      "so_doan_nguyen_van": 0,
+      "so_doan_trung": 3,
+      "so_doan_nguyen_van": 3,
       "so_doan_ngu_nghia": 0,
       "bi_canh_bao": false,
+      "ly_do_canh_bao": null,
       "ky_vong": false,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 87.86
@@ -457,14 +484,15 @@
       "dinh_dang": "PDF→DOCX",
       "so_cau": 61,
       "so_dong_loai_tru": 65,
-      "ty_le_tong": 2.86,
-      "ty_le_nguon": 0.0,
+      "ty_le_tong": 4.4,
+      "ty_le_nguon": 1.54,
       "ty_le_nguon_cao_nhat": 2.86,
       "nguon_dung_dau": false,
-      "so_doan_trung": 1,
-      "so_doan_nguyen_van": 0,
+      "so_doan_trung": 2,
+      "so_doan_nguyen_van": 1,
       "so_doan_ngu_nghia": 1,
       "bi_canh_bao": false,
+      "ly_do_canh_bao": null,
       "ky_vong": false,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 98.56
@@ -485,6 +513,7 @@
       "so_doan_nguyen_van": 0,
       "so_doan_ngu_nghia": 14,
       "bi_canh_bao": true,
+      "ly_do_canh_bao": "NGUON",
       "ky_vong": false,
       "dat": false,
       "max_ngu_nghia_cau_tu_viet": 95.92
@@ -505,6 +534,7 @@
       "so_doan_nguyen_van": 0,
       "so_doan_ngu_nghia": 0,
       "bi_canh_bao": false,
+      "ly_do_canh_bao": null,
       "ky_vong": false,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 87.6
@@ -517,14 +547,15 @@
       "dinh_dang": "DOCX→PDF",
       "so_cau": 162,
       "so_dong_loai_tru": 116,
-      "ty_le_tong": 6.0,
+      "ty_le_tong": 6.87,
       "ty_le_nguon": 0.0,
       "ty_le_nguon_cao_nhat": 1.51,
       "nguon_dung_dau": false,
-      "so_doan_trung": 5,
-      "so_doan_nguyen_van": 0,
+      "so_doan_trung": 6,
+      "so_doan_nguyen_van": 1,
       "so_doan_ngu_nghia": 5,
       "bi_canh_bao": false,
+      "ly_do_canh_bao": null,
       "ky_vong": false,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 87.44
@@ -537,14 +568,15 @@
       "dinh_dang": "PDF→DOCX",
       "so_cau": 55,
       "so_dong_loai_tru": 65,
-      "ty_le_tong": 0.0,
+      "ty_le_tong": 2.62,
       "ty_le_nguon": 0.0,
-      "ty_le_nguon_cao_nhat": 0.0,
+      "ty_le_nguon_cao_nhat": 2.62,
       "nguon_dung_dau": false,
-      "so_doan_trung": 0,
-      "so_doan_nguyen_van": 0,
+      "so_doan_trung": 1,
+      "so_doan_nguyen_van": 1,
       "so_doan_ngu_nghia": 0,
       "bi_canh_bao": false,
+      "ly_do_canh_bao": null,
       "ky_vong": false,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 85.33
@@ -565,6 +597,7 @@
       "so_doan_nguyen_van": 0,
       "so_doan_ngu_nghia": 0,
       "bi_canh_bao": false,
+      "ly_do_canh_bao": null,
       "ky_vong": false,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 93.45
@@ -577,14 +610,15 @@
       "dinh_dang": "PDF→DOCX",
       "so_cau": 54,
       "so_dong_loai_tru": 64,
-      "ty_le_tong": 3.47,
+      "ty_le_tong": 5.71,
       "ty_le_nguon": 0.0,
-      "ty_le_nguon_cao_nhat": 3.47,
+      "ty_le_nguon_cao_nhat": 5.71,
       "nguon_dung_dau": false,
-      "so_doan_trung": 1,
-      "so_doan_nguyen_van": 0,
+      "so_doan_trung": 2,
+      "so_doan_nguyen_van": 1,
       "so_doan_ngu_nghia": 1,
       "bi_canh_bao": false,
+      "ly_do_canh_bao": null,
       "ky_vong": false,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 91.59
@@ -597,14 +631,15 @@
       "dinh_dang": "DOCX→PDF",
       "so_cau": 158,
       "so_dong_loai_tru": 117,
-      "ty_le_tong": 1.25,
+      "ty_le_tong": 2.23,
       "ty_le_nguon": 0.0,
       "ty_le_nguon_cao_nhat": 1.25,
       "nguon_dung_dau": false,
-      "so_doan_trung": 1,
-      "so_doan_nguyen_van": 0,
+      "so_doan_trung": 3,
+      "so_doan_nguyen_van": 2,
       "so_doan_ngu_nghia": 1,
       "bi_canh_bao": false,
+      "ly_do_canh_bao": null,
       "ky_vong": false,
       "dat": true,
       "max_ngu_nghia_cau_tu_viet": 95.24
@@ -1551,9 +1586,9 @@
         "ty_le": 1.0
       },
       "TU_VIET": {
-        "gan_co": 44,
+        "gan_co": 60,
         "tong": 1064,
-        "ty_le": 0.0414
+        "ty_le": 0.0564
       }
     },
     "KIEM_CHUNG": {
@@ -1568,9 +1603,9 @@
         "ty_le": 1.0
       },
       "TU_VIET": {
-        "gan_co": 57,
+        "gan_co": 66,
         "tong": 616,
-        "ty_le": 0.0925
+        "ty_le": 0.1071
       }
     }
   },
@@ -1580,12 +1615,13 @@
       "loai": "CUNG_LINH_VUC",
       "tap": "HIEU_CHINH",
       "so_dong_loai_tru": 121,
-      "ty_le_tong_co_loc": 4.78,
-      "ty_le_tong_khong_loc_tai_lieu_nop": 2.83,
-      "ty_le_tong_khong_loc_ca_kho": 11.86,
+      "ty_le_tong_co_loc": 7.66,
+      "ty_le_tong_khong_loc_tai_lieu_nop": 5.29,
+      "ty_le_tong_khong_loc_ca_kho": 11.67,
+      "ty_le_tong_khong_loc_cum_pho_bien": 22.08,
       "ty_le_nguon_co_loc": 0.0,
       "ty_le_nguon_khong_loc_ca_kho": 0.0,
-      "tang_them_khong_loc_ca_kho": 7.08,
+      "tang_them_khong_loc_ca_kho": 4.01,
       "bi_canh_bao_khong_loc_ca_kho": false
     },
     {
@@ -1595,10 +1631,11 @@
       "so_dong_loai_tru": 65,
       "ty_le_tong_co_loc": 0.0,
       "ty_le_tong_khong_loc_tai_lieu_nop": 0.0,
-      "ty_le_tong_khong_loc_ca_kho": 21.17,
+      "ty_le_tong_khong_loc_ca_kho": 10.35,
+      "ty_le_tong_khong_loc_cum_pho_bien": 7.92,
       "ty_le_nguon_co_loc": 0.0,
       "ty_le_nguon_khong_loc_ca_kho": 0.0,
-      "tang_them_khong_loc_ca_kho": 21.17,
+      "tang_them_khong_loc_ca_kho": 10.35,
       "bi_canh_bao_khong_loc_ca_kho": false
     },
     {
@@ -1606,25 +1643,27 @@
       "loai": "CUNG_LINH_VUC",
       "tap": "HIEU_CHINH",
       "so_dong_loai_tru": 108,
-      "ty_le_tong_co_loc": 0.0,
-      "ty_le_tong_khong_loc_tai_lieu_nop": 0.0,
-      "ty_le_tong_khong_loc_ca_kho": 23.17,
+      "ty_le_tong_co_loc": 8.41,
+      "ty_le_tong_khong_loc_tai_lieu_nop": 5.46,
+      "ty_le_tong_khong_loc_ca_kho": 19.62,
+      "ty_le_tong_khong_loc_cum_pho_bien": 25.66,
       "ty_le_nguon_co_loc": 0.0,
       "ty_le_nguon_khong_loc_ca_kho": 0.0,
-      "tang_them_khong_loc_ca_kho": 23.17,
-      "bi_canh_bao_khong_loc_ca_kho": false
+      "tang_them_khong_loc_ca_kho": 11.21,
+      "bi_canh_bao_khong_loc_ca_kho": true
     },
     {
       "ma_cap": "P18",
       "loai": "CUNG_LINH_VUC",
       "tap": "KIEM_CHUNG",
       "so_dong_loai_tru": 65,
-      "ty_le_tong_co_loc": 2.86,
-      "ty_le_tong_khong_loc_tai_lieu_nop": 0.0,
-      "ty_le_tong_khong_loc_ca_kho": 18.25,
-      "ty_le_nguon_co_loc": 0.0,
-      "ty_le_nguon_khong_loc_ca_kho": 0.0,
-      "tang_them_khong_loc_ca_kho": 15.39,
+      "ty_le_tong_co_loc": 4.4,
+      "ty_le_tong_khong_loc_tai_lieu_nop": 1.08,
+      "ty_le_tong_khong_loc_ca_kho": 13.0,
+      "ty_le_tong_khong_loc_cum_pho_bien": 13.66,
+      "ty_le_nguon_co_loc": 1.54,
+      "ty_le_nguon_khong_loc_ca_kho": 1.08,
+      "tang_them_khong_loc_ca_kho": 8.6,
       "bi_canh_bao_khong_loc_ca_kho": false
     },
     {
@@ -1634,11 +1673,12 @@
       "so_dong_loai_tru": 119,
       "ty_le_tong_co_loc": 23.96,
       "ty_le_tong_khong_loc_tai_lieu_nop": 17.65,
-      "ty_le_tong_khong_loc_ca_kho": 26.48,
+      "ty_le_tong_khong_loc_ca_kho": 23.93,
+      "ty_le_tong_khong_loc_cum_pho_bien": 34.97,
       "ty_le_nguon_co_loc": 0.0,
-      "ty_le_nguon_khong_loc_ca_kho": 0.39,
-      "tang_them_khong_loc_ca_kho": 2.52,
-      "bi_canh_bao_khong_loc_ca_kho": false
+      "ty_le_nguon_khong_loc_ca_kho": 0.0,
+      "tang_them_khong_loc_ca_kho": -0.03,
+      "bi_canh_bao_khong_loc_ca_kho": true
     },
     {
       "ma_cap": "P20",
@@ -1647,10 +1687,11 @@
       "so_dong_loai_tru": 64,
       "ty_le_tong_co_loc": 0.0,
       "ty_le_tong_khong_loc_tai_lieu_nop": 0.0,
-      "ty_le_tong_khong_loc_ca_kho": 22.51,
+      "ty_le_tong_khong_loc_ca_kho": 11.61,
+      "ty_le_tong_khong_loc_cum_pho_bien": 7.79,
       "ty_le_nguon_co_loc": 0.0,
       "ty_le_nguon_khong_loc_ca_kho": 0.0,
-      "tang_them_khong_loc_ca_kho": 22.51,
+      "tang_them_khong_loc_ca_kho": 11.61,
       "bi_canh_bao_khong_loc_ca_kho": false
     },
     {
@@ -1658,12 +1699,13 @@
       "loai": "KHONG_LIEN_QUAN",
       "tap": "KIEM_CHUNG",
       "so_dong_loai_tru": 116,
-      "ty_le_tong_co_loc": 6.0,
-      "ty_le_tong_khong_loc_tai_lieu_nop": 2.7,
-      "ty_le_tong_khong_loc_ca_kho": 11.58,
+      "ty_le_tong_co_loc": 6.87,
+      "ty_le_tong_khong_loc_tai_lieu_nop": 3.43,
+      "ty_le_tong_khong_loc_ca_kho": 9.13,
+      "ty_le_tong_khong_loc_cum_pho_bien": 14.61,
       "ty_le_nguon_co_loc": 0.0,
       "ty_le_nguon_khong_loc_ca_kho": 0.0,
-      "tang_them_khong_loc_ca_kho": 5.58,
+      "tang_them_khong_loc_ca_kho": 2.26,
       "bi_canh_bao_khong_loc_ca_kho": false
     },
     {
@@ -1671,13 +1713,14 @@
       "loai": "KHONG_LIEN_QUAN",
       "tap": "KIEM_CHUNG",
       "so_dong_loai_tru": 65,
-      "ty_le_tong_co_loc": 0.0,
-      "ty_le_tong_khong_loc_tai_lieu_nop": 0.0,
-      "ty_le_tong_khong_loc_ca_kho": 22.4,
+      "ty_le_tong_co_loc": 2.62,
+      "ty_le_tong_khong_loc_tai_lieu_nop": 1.73,
+      "ty_le_tong_khong_loc_ca_kho": 14.87,
+      "ty_le_tong_khong_loc_cum_pho_bien": 15.81,
       "ty_le_nguon_co_loc": 0.0,
       "ty_le_nguon_khong_loc_ca_kho": 0.0,
-      "tang_them_khong_loc_ca_kho": 22.4,
-      "bi_canh_bao_khong_loc_ca_kho": false
+      "tang_them_khong_loc_ca_kho": 12.25,
+      "bi_canh_bao_khong_loc_ca_kho": true
     },
     {
       "ma_cap": "P23",
@@ -1686,10 +1729,11 @@
       "so_dong_loai_tru": 112,
       "ty_le_tong_co_loc": 0.0,
       "ty_le_tong_khong_loc_tai_lieu_nop": 0.0,
-      "ty_le_tong_khong_loc_ca_kho": 21.66,
+      "ty_le_tong_khong_loc_ca_kho": 12.71,
+      "ty_le_tong_khong_loc_cum_pho_bien": 7.56,
       "ty_le_nguon_co_loc": 0.0,
       "ty_le_nguon_khong_loc_ca_kho": 0.0,
-      "tang_them_khong_loc_ca_kho": 21.66,
+      "tang_them_khong_loc_ca_kho": 12.71,
       "bi_canh_bao_khong_loc_ca_kho": false
     },
     {
@@ -1697,12 +1741,13 @@
       "loai": "KHONG_LIEN_QUAN",
       "tap": "HIEU_CHINH",
       "so_dong_loai_tru": 64,
-      "ty_le_tong_co_loc": 3.47,
-      "ty_le_tong_khong_loc_tai_lieu_nop": 0.0,
-      "ty_le_tong_khong_loc_ca_kho": 20.25,
+      "ty_le_tong_co_loc": 5.71,
+      "ty_le_tong_khong_loc_tai_lieu_nop": 1.5,
+      "ty_le_tong_khong_loc_ca_kho": 14.14,
+      "ty_le_tong_khong_loc_cum_pho_bien": 24.97,
       "ty_le_nguon_co_loc": 0.0,
       "ty_le_nguon_khong_loc_ca_kho": 0.0,
-      "tang_them_khong_loc_ca_kho": 16.78,
+      "tang_them_khong_loc_ca_kho": 8.43,
       "bi_canh_bao_khong_loc_ca_kho": false
     },
     {
@@ -1710,13 +1755,471 @@
       "loai": "KHONG_LIEN_QUAN",
       "tap": "HIEU_CHINH",
       "so_dong_loai_tru": 117,
-      "ty_le_tong_co_loc": 1.25,
-      "ty_le_tong_khong_loc_tai_lieu_nop": 1.03,
-      "ty_le_tong_khong_loc_ca_kho": 9.58,
+      "ty_le_tong_co_loc": 2.23,
+      "ty_le_tong_khong_loc_tai_lieu_nop": 1.45,
+      "ty_le_tong_khong_loc_ca_kho": 9.06,
+      "ty_le_tong_khong_loc_cum_pho_bien": 18.5,
       "ty_le_nguon_co_loc": 0.0,
       "ty_le_nguon_khong_loc_ca_kho": 0.0,
-      "tang_them_khong_loc_ca_kho": 8.33,
+      "tang_them_khong_loc_ca_kho": 6.83,
       "bi_canh_bao_khong_loc_ca_kho": false
+    }
+  ],
+  "ghep_nhieu_nguon": [
+    {
+      "ma_cap_goc": "P15",
+      "loai_goc": "CUNG_LINH_VUC",
+      "tap": "HIEU_CHINH",
+      "nguon": [
+        10,
+        16,
+        21,
+        1
+      ],
+      "so_cau_chen": 42,
+      "so_cau_chen_bi_gan_co": 42,
+      "ty_le_chen": 19.91,
+      "ty_le_tong": 26.53,
+      "ty_le_nguon_cao_nhat": 5.34,
+      "do_an_trung": [
+        {
+          "ref_id": 1,
+          "ty_le": 5.34
+        },
+        {
+          "ref_id": 10,
+          "ty_le": 5.3
+        },
+        {
+          "ref_id": 16,
+          "ty_le": 4.93
+        },
+        {
+          "ref_id": 21,
+          "ty_le": 4.82
+        },
+        {
+          "ref_id": 3,
+          "ty_le": 4.48
+        },
+        {
+          "ref_id": 4,
+          "ty_le": 1.66
+        }
+      ],
+      "bi_canh_bao_chi_theo_nguon": false,
+      "bi_canh_bao": true,
+      "ly_do_canh_bao": "TONG"
+    },
+    {
+      "ma_cap_goc": "P16",
+      "loai_goc": "CUNG_LINH_VUC",
+      "tap": "HIEU_CHINH",
+      "nguon": [
+        18,
+        23,
+        3,
+        8
+      ],
+      "so_cau_chen": 18,
+      "so_cau_chen_bi_gan_co": 18,
+      "ty_le_chen": 21.74,
+      "ty_le_tong": 21.74,
+      "ty_le_nguon_cao_nhat": 5.94,
+      "do_an_trung": [
+        {
+          "ref_id": 23,
+          "ty_le": 5.94
+        },
+        {
+          "ref_id": 3,
+          "ty_le": 5.92
+        },
+        {
+          "ref_id": 18,
+          "ty_le": 5.17
+        },
+        {
+          "ref_id": 8,
+          "ty_le": 4.71
+        }
+      ],
+      "bi_canh_bao_chi_theo_nguon": false,
+      "bi_canh_bao": true,
+      "ly_do_canh_bao": "TONG"
+    },
+    {
+      "ma_cap_goc": "P17",
+      "loai_goc": "CUNG_LINH_VUC",
+      "tap": "HIEU_CHINH",
+      "nguon": [
+        25,
+        5,
+        10,
+        15
+      ],
+      "so_cau_chen": 16,
+      "so_cau_chen_bi_gan_co": 16,
+      "ty_le_chen": 22.22,
+      "ty_le_tong": 29.72,
+      "ty_le_nguon_cao_nhat": 12.07,
+      "do_an_trung": [
+        {
+          "ref_id": 25,
+          "ty_le": 12.07
+        },
+        {
+          "ref_id": 10,
+          "ty_le": 6.3
+        },
+        {
+          "ref_id": 5,
+          "ty_le": 6.21
+        },
+        {
+          "ref_id": 15,
+          "ty_le": 5.13
+        }
+      ],
+      "bi_canh_bao_chi_theo_nguon": true,
+      "bi_canh_bao": true,
+      "ly_do_canh_bao": "NGUON"
+    },
+    {
+      "ma_cap_goc": "P18",
+      "loai_goc": "CUNG_LINH_VUC",
+      "tap": "KIEM_CHUNG",
+      "nguon": [
+        7,
+        12,
+        17,
+        23
+      ],
+      "so_cau_chen": 19,
+      "so_cau_chen_bi_gan_co": 19,
+      "ty_le_chen": 21.83,
+      "ty_le_tong": 25.27,
+      "ty_le_nguon_cao_nhat": 5.69,
+      "do_an_trung": [
+        {
+          "ref_id": 17,
+          "ty_le": 5.69
+        },
+        {
+          "ref_id": 7,
+          "ty_le": 5.68
+        },
+        {
+          "ref_id": 23,
+          "ty_le": 5.67
+        },
+        {
+          "ref_id": 12,
+          "ty_le": 4.78
+        },
+        {
+          "ref_id": 5,
+          "ty_le": 2.24
+        },
+        {
+          "ref_id": 18,
+          "ty_le": 1.2
+        }
+      ],
+      "bi_canh_bao_chi_theo_nguon": false,
+      "bi_canh_bao": true,
+      "ly_do_canh_bao": "TONG"
+    },
+    {
+      "ma_cap_goc": "P19",
+      "loai_goc": "CUNG_LINH_VUC",
+      "tap": "KIEM_CHUNG",
+      "nguon": [
+        14,
+        20,
+        25,
+        5
+      ],
+      "so_cau_chen": 40,
+      "so_cau_chen_bi_gan_co": 40,
+      "ty_le_chen": 20.13,
+      "ty_le_tong": 39.26,
+      "ty_le_nguon_cao_nhat": 18.22,
+      "do_an_trung": [
+        {
+          "ref_id": 15,
+          "ty_le": 18.22
+        },
+        {
+          "ref_id": 5,
+          "ty_le": 5.29
+        },
+        {
+          "ref_id": 20,
+          "ty_le": 5.09
+        },
+        {
+          "ref_id": 14,
+          "ty_le": 4.88
+        },
+        {
+          "ref_id": 25,
+          "ty_le": 4.87
+        },
+        {
+          "ref_id": 12,
+          "ty_le": 0.92
+        }
+      ],
+      "bi_canh_bao_chi_theo_nguon": true,
+      "bi_canh_bao": true,
+      "ly_do_canh_bao": "NGUON"
+    },
+    {
+      "ma_cap_goc": "P20",
+      "loai_goc": "CUNG_LINH_VUC",
+      "tap": "HIEU_CHINH",
+      "nguon": [
+        22,
+        2,
+        7,
+        12
+      ],
+      "so_cau_chen": 15,
+      "so_cau_chen_bi_gan_co": 15,
+      "ty_le_chen": 20.33,
+      "ty_le_tong": 20.33,
+      "ty_le_nguon_cao_nhat": 5.27,
+      "do_an_trung": [
+        {
+          "ref_id": 12,
+          "ty_le": 5.27
+        },
+        {
+          "ref_id": 22,
+          "ty_le": 5.17
+        },
+        {
+          "ref_id": 2,
+          "ty_le": 5.01
+        },
+        {
+          "ref_id": 7,
+          "ty_le": 4.88
+        }
+      ],
+      "bi_canh_bao_chi_theo_nguon": false,
+      "bi_canh_bao": true,
+      "ly_do_canh_bao": "TONG"
+    },
+    {
+      "ma_cap_goc": "P21",
+      "loai_goc": "KHONG_LIEN_QUAN",
+      "tap": "KIEM_CHUNG",
+      "nguon": [
+        4,
+        9,
+        14,
+        19
+      ],
+      "so_cau_chen": 43,
+      "so_cau_chen_bi_gan_co": 43,
+      "ty_le_chen": 20.21,
+      "ty_le_tong": 25.69,
+      "ty_le_nguon_cao_nhat": 5.93,
+      "do_an_trung": [
+        {
+          "ref_id": 14,
+          "ty_le": 5.93
+        },
+        {
+          "ref_id": 19,
+          "ty_le": 5.24
+        },
+        {
+          "ref_id": 4,
+          "ty_le": 4.98
+        },
+        {
+          "ref_id": 9,
+          "ty_le": 4.94
+        },
+        {
+          "ref_id": 8,
+          "ty_le": 1.2
+        },
+        {
+          "ref_id": 3,
+          "ty_le": 0.98
+        }
+      ],
+      "bi_canh_bao_chi_theo_nguon": false,
+      "bi_canh_bao": true,
+      "ly_do_canh_bao": "TONG"
+    },
+    {
+      "ma_cap_goc": "P22",
+      "loai_goc": "KHONG_LIEN_QUAN",
+      "tap": "KIEM_CHUNG",
+      "nguon": [
+        11,
+        16,
+        21,
+        2
+      ],
+      "so_cau_chen": 15,
+      "so_cau_chen_bi_gan_co": 15,
+      "ty_le_chen": 22.52,
+      "ty_le_tong": 24.56,
+      "ty_le_nguon_cao_nhat": 6.12,
+      "do_an_trung": [
+        {
+          "ref_id": 21,
+          "ty_le": 6.12
+        },
+        {
+          "ref_id": 11,
+          "ty_le": 5.54
+        },
+        {
+          "ref_id": 16,
+          "ty_le": 5.48
+        },
+        {
+          "ref_id": 2,
+          "ty_le": 5.39
+        },
+        {
+          "ref_id": 14,
+          "ty_le": 2.03
+        }
+      ],
+      "bi_canh_bao_chi_theo_nguon": false,
+      "bi_canh_bao": true,
+      "ly_do_canh_bao": "TONG"
+    },
+    {
+      "ma_cap_goc": "P23",
+      "loai_goc": "KHONG_LIEN_QUAN",
+      "tap": "HIEU_CHINH",
+      "nguon": [
+        18,
+        24,
+        4,
+        9
+      ],
+      "so_cau_chen": 17,
+      "so_cau_chen_bi_gan_co": 17,
+      "ty_le_chen": 20.55,
+      "ty_le_tong": 20.55,
+      "ty_le_nguon_cao_nhat": 5.7,
+      "do_an_trung": [
+        {
+          "ref_id": 9,
+          "ty_le": 5.7
+        },
+        {
+          "ref_id": 4,
+          "ty_le": 4.98
+        },
+        {
+          "ref_id": 24,
+          "ty_le": 4.98
+        },
+        {
+          "ref_id": 18,
+          "ty_le": 4.89
+        }
+      ],
+      "bi_canh_bao_chi_theo_nguon": false,
+      "bi_canh_bao": true,
+      "ly_do_canh_bao": "TONG"
+    },
+    {
+      "ma_cap_goc": "P24",
+      "loai_goc": "KHONG_LIEN_QUAN",
+      "tap": "HIEU_CHINH",
+      "nguon": [
+        1,
+        6,
+        11,
+        16
+      ],
+      "so_cau_chen": 16,
+      "so_cau_chen_bi_gan_co": 16,
+      "ty_le_chen": 21.72,
+      "ty_le_tong": 26.19,
+      "ty_le_nguon_cao_nhat": 5.58,
+      "do_an_trung": [
+        {
+          "ref_id": 11,
+          "ty_le": 5.58
+        },
+        {
+          "ref_id": 16,
+          "ty_le": 5.52
+        },
+        {
+          "ref_id": 6,
+          "ty_le": 5.37
+        },
+        {
+          "ref_id": 1,
+          "ty_le": 5.25
+        },
+        {
+          "ref_id": 5,
+          "ty_le": 4.47
+        }
+      ],
+      "bi_canh_bao_chi_theo_nguon": false,
+      "bi_canh_bao": true,
+      "ly_do_canh_bao": "TONG"
+    },
+    {
+      "ma_cap_goc": "P25",
+      "loai_goc": "KHONG_LIEN_QUAN",
+      "tap": "HIEU_CHINH",
+      "nguon": [
+        8,
+        13,
+        18,
+        23
+      ],
+      "so_cau_chen": 43,
+      "so_cau_chen_bi_gan_co": 43,
+      "ty_le_chen": 20.2,
+      "ty_le_tong": 21.98,
+      "ty_le_nguon_cao_nhat": 5.23,
+      "do_an_trung": [
+        {
+          "ref_id": 8,
+          "ty_le": 5.23
+        },
+        {
+          "ref_id": 13,
+          "ty_le": 5.11
+        },
+        {
+          "ref_id": 23,
+          "ty_le": 5.03
+        },
+        {
+          "ref_id": 18,
+          "ty_le": 4.84
+        },
+        {
+          "ref_id": 3,
+          "ty_le": 0.99
+        },
+        {
+          "ref_id": 1,
+          "ty_le": 0.78
+        }
+      ],
+      "bi_canh_bao_chi_theo_nguon": false,
+      "bi_canh_bao": true,
+      "ly_do_canh_bao": "TONG"
     }
   ],
   "latency": {
@@ -1725,24 +2228,25 @@
     "torch_threads": 4,
     "kho": {
       "tieu_de": 300,
-      "cau_tai_lieu": 2208
+      "cau_tai_lieu": 2208,
+      "so_de_tai_tai_lieu": 25
     },
     "check_title_ms": {
       "n": 20,
-      "p50": 38.0,
-      "p95": 49.0,
-      "max": 49.9
+      "p50": 57.9,
+      "p95": 78.7,
+      "max": 89.8
     },
     "check_document_ms": {
       "n": 20,
-      "p50": 1127.4,
-      "p95": 2710.3,
-      "max": 2737.6
+      "p50": 1456.9,
+      "p95": 3608.6,
+      "max": 3621.2
     },
     "nfr": {
       "NFR-08_check_title_p95_ms": 5000,
       "NFR-09_check_document_p95_ms": 30000
     }
   },
-  "ngay": "2026-09-28"
+  "ngay": "2026-10-21"
 }

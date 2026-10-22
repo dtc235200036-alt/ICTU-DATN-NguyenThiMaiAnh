@@ -37,7 +37,8 @@ class KetQuaKiemTraTrungLap(Base):
     trang_thai: Mapped[str] = mapped_column(String(20), nullable=False)
     ty_le_tong: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
     # CR-01 (04-REVIEW, 0012): tỷ lệ trùng với MỘT đồ án nguồn cao nhất — đúng
-    # thống kê NGUONG_TAI_LIEU được hiệu chỉnh; ty_le_tong chỉ để hiển thị.
+    # thống kê NGUONG_TAI_LIEU được hiệu chỉnh; ty_le_tong so với
+    # nguong_tong_ap_dung (0017).
     ty_le_nguon_cao_nhat: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
     # CR-04 (0013): phạm vi thực sự được kiểm tra — số câu so sánh, số dòng
     # và % ký tự bị loại như phần mẫu chung (Dịch vụ AI trả).
@@ -45,6 +46,9 @@ class KetQuaKiemTraTrungLap(Base):
     so_doan_loai_tru: Mapped[int | None] = mapped_column(Integer)
     ty_le_loai_tru: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
     nguong_ap_dung: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False)
+    # 0017: snapshot NGUONG_TONG_TAI_LIEU (so với ty_le_tong); NULL ở kết quả cũ
+    # -> chỉ xét ngưỡng theo một đồ án như lúc kiểm tra.
+    nguong_tong_ap_dung: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
     doi_tuong_duoc_kiem_tra: Mapped[str | None] = mapped_column(String(255))
     thoi_diem: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 

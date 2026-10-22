@@ -25,14 +25,15 @@ Khoa CNTT (AISV-01..05).
 | `APP_ENV` | `production` | | `test` bật `/docs` và cho phép profile `fake` |
 | `DATABASE_URL` | — (bắt buộc) | **có** | URL SQLAlchemy của `thesis_ai` (vd. `mysql+pymysql://ai:***@mysql/thesis_ai?charset=utf8mb4`) |
 | `AI_API_KEY` | — (bắt buộc, ≥ 32 ký tự) | **có** | Khóa nội bộ mà Web API gửi trong `X-API-Key` |
-| `AI_MODEL_PROFILE` | `bkai` | | `bkai` \| `e5` \| `fake` (chỉ khi `APP_ENV=test`); hiệu chỉnh — `calibration/nguong-de-xuat.json` (2026-09-28) |
+| `AI_MODEL_PROFILE` | `bkai` | | `bkai` \| `e5` \| `fake` (chỉ khi `APP_ENV=test`); hiệu chỉnh — `calibration/nguong-de-xuat.json` (2026-10-21) |
 | `TORCH_THREADS` | `4` | | Số luồng CPU của torch |
 | `MAX_TEXT_CHARS` | `2000000` | | Trần độ dài trường `text` (422 khi vượt); `text` của TOPIC/ARCHIVE (một tiêu đề) tối đa 1000 ký tự, mọi id/`ref_id`/`loai_tru[]` ≤ 2⁶³−1 (IN-03) |
 | `MAX_BODY_BYTES` | `8388608` | | Trần thân request (413 khi vượt, đếm byte thật) |
-| `NGUONG_DOAN_MAC_DINH` | `67.7` | | Ngưỡng ngữ nghĩa (cosine×100) khi request không gửi; hiệu chỉnh — `calibration/nguong-de-xuat.json` (2026-09-28) |
-| `NGUONG_NGUYEN_VAN_MAC_DINH` | `88.7` | | Ngưỡng nguyên văn (Jaccard×100) khi request không gửi; hiệu chỉnh — `calibration/nguong-de-xuat.json` (2026-09-28) |
-| `MINHASH_SHINGLE` | `4` | | k của k-gram âm tiết cho MinHash; hiệu chỉnh — `calibration/nguong-de-xuat.json` (2026-09-28) |
-| `MINHASH_NUM_PERM` | `128` | | Số hoán vị MinHash |
+| `NGUONG_DOAN_MAC_DINH` | `67.7` | | Ngưỡng ngữ nghĩa (cosine×100) khi request không gửi; hiệu chỉnh — `calibration/nguong-de-xuat.json` (2026-10-21) |
+| `NGUONG_NGUYEN_VAN_MAC_DINH` | `56.0` | | Ngưỡng nguyên văn (độ phủ vân tay×100) khi request không gửi; hiệu chỉnh — `calibration/nguong-de-xuat.json` (2026-10-21) |
+| `VAN_TAY_K` | `6` | | k của k-gram âm tiết cho vân tay; hiệu chỉnh — `calibration/nguong-de-xuat.json` (2026-10-21) |
+| `VAN_TAY_W` | `4` | | Cửa sổ winnowing; đoạn chung ≥ w + k − 1 âm tiết luôn được tìm thấy |
+| `VAN_TAY_PHO_BIEN` | `4` | | k-gram có ở ≥ ngần này nhóm đề tài là cụm phổ biến, không tính là bằng chứng (`0` = tắt) |
 | `TOP_K_MAC_DINH` | `5` | | `top_k` mặc định của `/check-document` |
 | `CHI_TIET_TOI_DA` | `50` | | Số đoạn trùng tối đa trả về |
 | `HF_HOME` | `/models` (image) | | Cache trọng số Hugging Face |
@@ -69,7 +70,7 @@ Không gian id (`ref_id`/`id`) theo loại nguồn:
 ### `POST /ingest`
 
 ```json
-{"id": 12, "type": "TOPIC" | "ARCHIVE" | "DOCUMENT", "text": "..."}
+{"id": 12, "type": "TOPIC" | "ARCHIVE" | "DOCUMENT", "text": "...", "nhom": 7}
 → {"chunk_count": 1, "indexed": true}
 ```
 
@@ -77,6 +78,11 @@ Ngữ nghĩa **REPLACE** theo `(type, id)`: ingest lại thay toàn bộ chunk c
 nguồn đó; `text` không sinh chunk nào (vd. chuỗi rỗng) để lại nguồn không còn
 chunk (xóa khỏi chỉ mục). Nội dung không đổi → không encode lại. Mỗi lần ingest
 có thay đổi = đúng một lần gọi mô hình cho mọi chunk mới (NFR-11).
+
+`nhom` (tùy chọn, chỉ dùng cho DOCUMENT) = `de_tai.id` của tài liệu: mọi phiên
+bản đề cương/báo cáo của cùng một đề tài là **một** nhóm khi đếm cụm phổ biến
+(thiếu → mỗi tài liệu một nhóm riêng). Văn bản không đổi nhưng `nhom` khác →
+chỉ cập nhật nhóm, không encode lại.
 
 ### `POST /check-title`
 
@@ -112,7 +118,7 @@ hơn; tìm trên TOPIC + ARCHIVE, mỗi nguồn một dòng (điểm cao nhất)
   (tối đa 6 câu/đoạn); `doan_nguon` là câu của tài liệu đang kiểm tra,
   `doan_trung` là các câu nguồn khớp (theo thứ tự trong nguồn), `vi_tri` là số
   thứ tự câu, `ty_le` là trung bình (trọng số ký tự) của điểm kích hoạt,
-  `tin_hieu` là `NGUYEN_VAN` khi ≥ nửa số ký tự bị gắn cờ do MinHash, ngược
+  `tin_hieu` là `NGUYEN_VAN` khi ≥ nửa số ký tự bị gắn cờ do vân tay, ngược
   lại `NGU_NGHIA`; `diem_ngu_nghia`/`diem_nguyen_van` là trung bình trọng số
   điểm tốt nhất từng tín hiệu (chỉ để giải thích). Sắp xếp theo `ty_le` giảm
   dần, tối đa `CHI_TIET_TOI_DA`.
@@ -165,14 +171,21 @@ khi đổi `AI_MODEL_PROFILE`), rồi dựng lại chỉ mục bộ nhớ; trả
    < 6 âm tiết, cắt câu > 120 âm tiết tại `; ` rồi `, `.
 4. **Hai tín hiệu** cho mỗi câu, so với kho DOCUMENT (trừ tập loại trừ):
    cosine tốt nhất qua FAISS `IndexFlatIP` (chính xác, vector chuẩn hóa L2) và
-   Jaccard MinHash tốt nhất trên k-gram âm tiết (k = 4, 128 hoán vị). Gắn cờ
-   `NGUYEN_VAN` khi Jaccard×100 ≥ `nguong_nguyen_van` (bằng chứng mạnh hơn nên
-   thắng), ngược lại `NGU_NGHIA` khi cosine×100 ≥ `nguong_doan`. Cờ
+   độ phủ tốt nhất của vân tay k-gram âm tiết (k = 6, w = 4; `app/fingerprint.py`,
+   theo Sorokina và cs. 2006 và winnowing của Schleimer và cs. 2003). Kho chỉ
+   giữ vân tay đã winnowing trong một chỉ mục ngược: câu ứng viên được tra
+   bảng, không quét toàn kho; mọi đoạn chung ≥ t = w + k − 1 âm tiết đều được
+   tìm thấy. Độ phủ = tỷ lệ âm tiết của câu nằm trong các đoạn chung ≥ t âm
+   tiết với MỘT câu của kho (chép cả câu → 100, sửa một từ vẫn ≈ 97, chép nửa
+   câu ≈ 50), bỏ qua k-gram phổ biến — có ở ≥ `VAN_TAY_PHO_BIEN` nhóm đề tài
+   khác, không kể nhóm bị loại trừ. Gắn cờ `NGUYEN_VAN` khi độ phủ×100 ≥
+   `nguong_nguyen_van` (bằng chứng mạnh hơn nên thắng), ngược lại `NGU_NGHIA`
+   khi cosine×100 ≥ `nguong_doan`. Cờ
    `NGU_NGHIA` chỉ được giữ khi câu nằm trong chuỗi ≥ 2 câu liên tiếp gắn cờ
    cùng một nguồn (`MIN_RUN_NGU_NGHIA`, plan 04-04): câu tự viết theo khuôn câu
    chung của lĩnh vực hay trùng ngữ nghĩa với một câu lẻ của đồ án khác, còn
    phần diễn đạt lại đi thành đoạn liền nhau. Cờ `NGUYEN_VAN` đứng lẻ vẫn giữ.
-5. Chỉ mục FAISS và ma trận MinHash nằm trong bộ nhớ, **dựng lại từ
+5. Chỉ mục FAISS và chỉ mục vân tay nằm trong bộ nhớ, **dựng lại từ
    `thesis_ai` lúc khởi động** (không encode lại; `index_metadata` phát hiện
    lệch); embedding chỉ tính khi ingest.
 
@@ -182,15 +195,16 @@ Khối dưới đây do `calibration/calibrate.py evaluate --apply` ghi lại �
 Kết quả kiểm chứng đầy đủ: `docs/chuong-4-trien-khai/thu-nghiem-ai/03-hieu-chinh-nguong.md`.
 
 <!-- hieu-chinh:start -->
-Giá trị do `calibration/calibrate.py tune` khớp trên tập HIEU_CHINH (2026-09-28, mô hình `bkai-foundation-models/vietnamese-bi-encoder`), kiểm chứng bằng `evaluate`:
+Giá trị do `calibration/calibrate.py tune` khớp trên tập HIEU_CHINH (2026-10-21, mô hình `bkai-foundation-models/vietnamese-bi-encoder`), kiểm chứng bằng `evaluate`:
 
 | Ngưỡng | Giá trị (%) | Phương pháp | Dùng ở |
 |---|---:|---|---|
 | `nguong_ten_de_tai` | 67.8 | youden | Web API gửi trong `/check-title` (`cau_hinh_nguong`, plan 04-05) |
 | `nguong_doan` | 67.7 | youden | `/check-document`; mặc định `NGUONG_DOAN_MAC_DINH` |
-| `nguong_nguyen_van` | 88.7 | youden | `/check-document`; mặc định `NGUONG_NGUYEN_VAN_MAC_DINH` |
+| `nguong_nguyen_van` | 56.0 | youden | `/check-document`; mặc định `NGUONG_NGUYEN_VAN_MAC_DINH` |
 | `nguong_tai_lieu` | 10.4 | trung_diem | Web API: cảnh báo khi tỷ lệ theo một đồ án ≥ ngưỡng (plan 04-05) |
-| `MINHASH_SHINGLE` | 4 | AUC lớn nhất trong {3, 4, 5} | chữ ký MinHash |
+| `nguong_tong_tai_lieu` | 14.8 | trung_diem | Web API: cảnh báo khi tỷ lệ tổng mọi nguồn ≥ ngưỡng (ghép từ nhiều nguồn) |
+| `VAN_TAY_K` | 6 | AUC lớn nhất trong {3, 4, 5, 6} | vân tay (w = 4, L = 4) |
 
 Chạy lại (từ `ai-service/`, cần ≥ 3 GiB RAM trống, không cần docker/MySQL):
 
@@ -214,8 +228,8 @@ uv run python calibration/calibrate.py evaluate --data ../seed-data \
   trình mà `/ingest` sửa tại chỗ — worker thứ hai sẽ phục vụ chỉ mục cũ.
 - **torch chỉ từ index CPU** (`[tool.uv.sources]` → `pytorch-cpu`, lock mang
   `torch 2.14.0+cpu`, không gói `nvidia-*`); torch mặc định trên PyPI kéo CUDA.
-- **datasketch 2.x** dùng lược đồ hoán vị `affine32` (giá trị băm khác 1.x) —
-  không ảnh hưởng vì chữ ký MinHash không được lưu, luôn dựng lại từ `chunk.noi_dung`.
+- **Vân tay không được lưu** xuống CSDL (chỉ `chunk.nhom`): băm k-gram ổn định
+  (blake2b) và luôn dựng lại từ `chunk.noi_dung` lúc khởi động.
 - **faiss-cpu ≥ 1.15** chỉ phát hành một wheel `cp310-abi3` (không có tên
   `cp312`) — bình thường.
 - Kích thước mô hình: bkai ≈ 515 MiB, multilingual-e5-base ≈ 1.06 GiB. Mục

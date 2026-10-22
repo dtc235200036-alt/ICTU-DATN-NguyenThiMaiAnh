@@ -32,10 +32,10 @@ class _RecordingAi:
             raise AiServiceError("Dịch vụ AI không phản hồi khi gọi /check-document (ConnectError)")
         return self.answer or {"ty_le_tong": 0.0, "do_an_trung": [], "chi_tiet": []}
 
-    def ingest(self, ref_id, loai, text):
+    def ingest(self, ref_id, loai, text, nhom=None):
         from app.services.ai_client import AiServiceError
 
-        self.calls.append(("ingest", ref_id, loai, text))
+        self.calls.append(("ingest", ref_id, loai, text, nhom))
         if self.fail_ingest:
             raise AiServiceError("Dịch vụ AI không phản hồi khi gọi /ingest (ReadTimeout)")
         return {"chunk_count": 1, "indexed": True}
@@ -98,7 +98,8 @@ def test_document_check_uses_ai_contract(
     fake.answer = {
         "ty_le_tong": 42.5,
         # CR-01: tổng 42.5 % (> ngưỡng stub 30) nhưng trải trên hai nguồn —
-        # không nguồn nào tới ngưỡng -> KHÔNG vượt ngưỡng (ca P19 của 04-04).
+        # không nguồn nào tới ngưỡng và tổng dưới ngưỡng tổng stub 50 -> KHÔNG
+        # vượt ngưỡng (ca P19 của 04-04).
         "do_an_trung": [{"ref_id": src_doc_id, "ty_le": 25.0}, {"ref_id": 999_999, "ty_le": 17.5}],
         # CR-04: phạm vi kiểm tra được lưu và báo khi hơn nửa văn bản bị loại.
         "so_doan": 40,
@@ -147,7 +148,8 @@ def test_document_check_uses_ai_contract(
     # Ingest đúng một lần, SAU kiểm tra, cùng văn bản đã trích xuất.
     assert len(ingests) == 1
     assert fake.calls.index(ingests[0]) > fake.calls.index(checks[0])
-    assert ingests[0][1:] == (v2_id, "DOCUMENT", checks[0][4])
+    # Nhóm = đề tài: mọi phiên bản của một đề tài là một nhóm khi AI đếm cụm phổ biến.
+    assert ingests[0][1:] == (v2_id, "DOCUMENT", checks[0][4], topic.id)
     assert v2_text in ingests[0][3]
 
     detail = check_of(v2_id, gv)
@@ -155,6 +157,7 @@ def test_document_check_uses_ai_contract(
     assert detail["ty_le_tong"] == 42.5
     assert detail["ty_le_nguon_cao_nhat"] == 25.0
     assert detail["nguong_ap_dung"] == 30.0 and detail["vuot_nguong"] is False
+    assert detail["nguong_tong_ap_dung"] == 50.0 and detail["ly_do_vuot_nguong"] is None
     assert (detail["so_doan"], detail["so_doan_loai_tru"], detail["ty_le_loai_tru"]) == (40, 12, 55.5)
     assert detail["loai_tru_nhieu"] is True
     by_vi_tri = {seg["vi_tri"]: seg for seg in detail["chi_tiet"]}
@@ -211,3 +214,52 @@ def test_document_check_uses_ai_contract(
     db.rollback()
     assert db.get(TaiLieuDoAn, v3_id).da_index_luc is not None
     assert ai_index.count_pending_documents(db) == 0
+
+
+
+def test_total_of_many_sources_exceeds_threshold(
+    client, make_account, auth_headers, make_assigned_topic, docx_bytes, monkeypatch, db
+):
+    """0017: bài ghép từ nhiều đồ án — mỗi nguồn dưới NGUONG_TAI_LIEU (stub 30)
+    nhưng tổng >= NGUONG_TONG_TAI_LIEU (stub 50) -> vượt ngưỡng, lý do
+    TONG_NGUON; tổng dưới ngưỡng tổng -> không vượt; một nguồn >= 30 -> MOT_NGUON."""
+    from app.models.de_cuong import TaiLieuDoAn
+    from app.services import ai_index, document_check, outline_checks
+
+    fake = _RecordingAi()
+    monkeypatch.setattr(document_check, "get_ai_client", lambda _db: fake)
+    monkeypatch.setattr(ai_index, "get_ai_client", lambda _db: fake)
+    gv = make_account(VaiTro.GIANG_VIEN)
+
+    def check(ty_le_tong, shares):
+        sv = make_account(VaiTro.SINH_VIEN)
+        topic = make_assigned_topic(sv, gv)
+        fake.answer = {
+            "ty_le_tong": ty_le_tong,
+            "do_an_trung": [{"ref_id": 900_000 + i, "ty_le": s} for i, s in enumerate(shares)],
+            "chi_tiet": [],
+        }
+        resp = client.post(
+            f"/api/outlines/{topic.id}/submit",
+            headers=auth_headers(sv),
+            files={"file": ("ghep.docx", docx_bytes(["Đề cương ghép từ nhiều đồ án khác nhau"]), _DOCX_CT)},
+        )
+        assert resp.status_code == 202, resp.text
+        doc_id = resp.json()["phien_ban"][0]["tai_lieu"]["id"]
+        resp = client.get(f"/api/documents/{doc_id}/check", headers=auth_headers(gv))
+        assert resp.status_code == 200, resp.text
+        return doc_id, resp.json()
+
+    doc_id, detail = check(55.0, [14.0, 13.5, 13.5, 14.0])
+    assert detail["ty_le_nguon_cao_nhat"] == 14.0 and detail["nguong_ap_dung"] == 30.0
+    assert detail["nguong_tong_ap_dung"] == 50.0
+    assert detail["vuot_nguong"] is True and detail["ly_do_vuot_nguong"] == "TONG_NGUON"
+    db.rollback()
+    item = outline_checks.kiem_tra_noi_dung(db.get(TaiLieuDoAn, doc_id))
+    assert item.dat is False and "tổng 55.0%" in item.chi_tiet and "ngưỡng tổng 50.0%" in item.chi_tiet
+
+    _, detail = check(49.99, [14.0, 13.5, 13.5, 9.0])
+    assert detail["vuot_nguong"] is False and detail["ly_do_vuot_nguong"] is None
+
+    _, detail = check(55.0, [30.0, 25.0])
+    assert detail["vuot_nguong"] is True and detail["ly_do_vuot_nguong"] == "MOT_NGUON"

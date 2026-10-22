@@ -146,6 +146,16 @@ def kiem_tra_noi_dung(doc: TaiLieuDoAn | None) -> CheckItem:
     if tom_tat.vuot_nguong is None:
         return CheckItem(ma="NOI_DUNG", ten=ten, dat=False, chi_tiet="Chưa có kết quả kiểm tra")
     ty_le = tom_tat.ty_le_nguon_cao_nhat or 0
+    if tom_tat.ly_do_vuot_nguong == document_check.LY_DO_TONG_NGUON:
+        return CheckItem(
+            ma="NOI_DUNG",
+            ten=ten,
+            dat=False,
+            chi_tiet=(
+                f"Vượt ngưỡng cảnh báo: trùng tổng {tom_tat.ty_le_tong or 0:.1f}% với nhiều đồ án"
+                f" (ngưỡng tổng {tom_tat.nguong_tong_ap_dung or 0:.1f}%)"
+            ),
+        )
     if tom_tat.vuot_nguong:
         return CheckItem(
             ma="NOI_DUNG",

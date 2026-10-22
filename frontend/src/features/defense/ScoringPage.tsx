@@ -28,6 +28,7 @@ import QueryErrorAlert from '../../components/QueryErrorAlert'
 import ForbiddenPage from '../auth/ForbiddenPage'
 import CheckStatusTag from '../documents/CheckStatusTag'
 import RecheckButton from '../documents/RecheckButton'
+import { thresholdText } from '../documents/warning'
 import { useMyCommittees, useScheduleForScoring, useScore } from './api'
 import type { MyCommittee, MyCommitteeRow, ScoringDetail } from './api'
 
@@ -45,14 +46,15 @@ function committeeLabel(item: Pick<MyCommittee, 'ten_hoi_dong' | 'ngay_bao_ve' |
 function CheckSummaryBlock({ detail }: { detail: ScoringDetail }) {
   const kiemTra = detail.kiem_tra
   if (kiemTra && kiemTra.trang_thai === 'HOAN_TAT' && detail.bao_cao_cuoi) {
-    // CR-01: vượt ngưỡng = tỷ lệ trùng với một đồ án nguồn >= ngưỡng (Web API tính).
+    // CR-01 + 0017: vượt ngưỡng do Web API tính (một đồ án hoặc tổng mọi nguồn).
     const over = kiemTra.vuot_nguong === true
+    const byTotal = kiemTra.ly_do_vuot_nguong === 'TONG_NGUON' ? ', do tổng trùng với nhiều đồ án' : ''
     return (
       <div>
         <Text>
           {`Tỷ lệ tổng ${formatPercent(kiemTra.ty_le_tong)}; trùng nhiều nhất với một đồ án ${formatPercent(
             kiemTra.ty_le_nguon_cao_nhat,
-          )} - ${over ? 'vượt' : 'dưới'} ngưỡng ${formatPercent(kiemTra.nguong_ap_dung)} của Bộ môn.`}
+          )} - ${over ? 'vượt' : 'dưới'} ngưỡng cảnh báo của Bộ môn (${thresholdText(kiemTra)})${byTotal}.`}
         </Text>{' '}
         <Link to={`/kiem-tra-trung-lap/${detail.bao_cao_cuoi.id}`}>Xem chi tiết</Link>
       </div>

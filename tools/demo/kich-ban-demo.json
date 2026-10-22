@@ -599,7 +599,7 @@
       "vai_tro": "bomon",
       "man_hinh": "—",
       "yeu_cau": "AISV-07",
-      "y_can_noi": "Ba ngưỡng đã hiệu chỉnh trên bộ dữ liệu thử; đổi ngưỡng chỉ áp dụng cho lần kiểm tra sau.",
+      "y_can_noi": "Bốn ngưỡng đã hiệu chỉnh trên bộ dữ liệu thử; ngưỡng tổng mọi nguồn bắt bài ghép từ nhiều đồ án; đổi ngưỡng chỉ áp dụng cho lần kiểm tra sau.",
       "hanh_dong": [
         {
           "mo": "/cau-hinh-nguong"
@@ -611,10 +611,13 @@
           "cho_chu": "Ngưỡng cảnh báo tài liệu"
         },
         {
+          "cho_chu": "tỷ lệ trùng tổng mọi nguồn"
+        },
+        {
           "chup": true
         }
       ],
-      "man_hinh_mong_doi": "Ba ngưỡng kèm giải thích, giá trị đề xuất, người cập nhật"
+      "man_hinh_mong_doi": "Bốn ngưỡng kèm giải thích, giá trị đề xuất, người cập nhật"
     },
     {
       "id": "B17",

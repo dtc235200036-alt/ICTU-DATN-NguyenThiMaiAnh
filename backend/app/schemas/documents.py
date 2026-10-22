@@ -28,8 +28,8 @@ class CheckSummary(BaseModel):
 
     CR-01 (04-REVIEW): `vuot_nguong` do Web API tính MỘT lần theo đúng quy tắc
     đã hiệu chỉnh — tỷ lệ trùng với một đồ án nguồn cao nhất
-    (`ty_le_nguon_cao_nhat`) >= `nguong_ap_dung`; `ty_le_tong` chỉ để hiển thị.
-    None khi chưa HOAN_TAT."""
+    (`ty_le_nguon_cao_nhat`) >= `nguong_ap_dung`, hoặc (0017) tỷ lệ tổng mọi
+    nguồn (`ty_le_tong`) >= `nguong_tong_ap_dung`. None khi chưa HOAN_TAT."""
 
     id: int
     trang_thai: str
@@ -37,6 +37,10 @@ class CheckSummary(BaseModel):
     ty_le_nguon_cao_nhat: float | None = None
     vuot_nguong: bool | None = None
     nguong_ap_dung: float
+    # 0017: ngưỡng tổng mọi nguồn chụp lúc kiểm tra (None ở kết quả cũ) và lý do
+    # vượt ngưỡng — MOT_NGUON | TONG_NGUON, None khi không vượt.
+    nguong_tong_ap_dung: float | None = None
+    ly_do_vuot_nguong: str | None = None
     thoi_diem: UtcDateTime
     # CR-04: phạm vi được kiểm tra; loai_tru_nhieu = hơn một nửa ký tự bị loại
     # như phần mẫu chung (GVHD nên xem trực tiếp tài liệu).
@@ -71,6 +75,10 @@ class CheckDetail(BaseModel):
     ty_le_nguon_cao_nhat: float | None = None
     vuot_nguong: bool | None = None
     nguong_ap_dung: float
+    # 0017: ngưỡng tổng mọi nguồn chụp lúc kiểm tra (None ở kết quả cũ) và lý do
+    # vượt ngưỡng — MOT_NGUON | TONG_NGUON, None khi không vượt.
+    nguong_tong_ap_dung: float | None = None
+    ly_do_vuot_nguong: str | None = None
     thoi_diem: UtcDateTime
     so_doan: int | None = None
     so_doan_loai_tru: int | None = None
