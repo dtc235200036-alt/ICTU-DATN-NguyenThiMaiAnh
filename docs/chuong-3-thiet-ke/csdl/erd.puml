@@ -68,6 +68,10 @@ entity "dinh_huong" as dinh_huong {
   ten : VARCHAR(255) <<NOT NULL>>
   mo_ta : TEXT
   hoat_dong : BOOLEAN <<NOT NULL>> = TRUE
+  tep_ten_goc : VARCHAR(255)
+  tep_ten_luu_tru : VARCHAR(255) <<UNIQUE>>
+  tep_kich_thuoc : BIGINT
+  tep_cap_nhat_luc : DATETIME
 }
 
 entity "de_tai" as de_tai {
@@ -173,8 +177,6 @@ entity "luot_duyet_bo_mon" as luot_duyet_bo_mon {
   nhan_xet : TEXT
   thoi_diem : DATETIME <<NOT NULL>>
   tai_lieu_ky_so_id : BIGINT <<FK>>
-  nguoi_ky : VARCHAR(255)
-  thoi_diem_ky : DATETIME
 }
 
 entity "luot_duyet_de_cuong" as luot_duyet_de_cuong {
@@ -319,7 +321,7 @@ tai_lieu_do_an ||--o| luot_duyet_de_cuong : "1 phiên bản có 0..1 lượt duy
 giang_vien ||--o{ luot_duyet_de_cuong : "1 GV duyệt nhiều lượt"
 de_cuong ||--o{ luot_duyet_bo_mon : "1 đề cương có nhiều lượt Bộ môn duyệt"
 tai_lieu_do_an ||--o{ luot_duyet_bo_mon : "phiên bản được nộp lên"
-tai_lieu_do_an |o--o| luot_duyet_bo_mon : "tai_lieu_ky_so_id (PDF ký số)"
+tai_lieu_do_an |o--o| luot_duyet_bo_mon : "tai_lieu_ky_so_id (bản PDF đã ký)"
 tai_khoan ||--o{ luot_duyet_bo_mon : "tài khoản Bộ môn thực hiện"
 de_tai ||--o{ bao_cao_tien_do : "1 đề tài nộp nhiều báo cáo"
 moc_tien_do ||--o{ bao_cao_tien_do : "1 mốc áp dụng nhiều báo cáo"

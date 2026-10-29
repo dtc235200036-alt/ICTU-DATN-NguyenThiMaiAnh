@@ -61,7 +61,7 @@ Web API & Python 3.12, FastAPI 0.141, Uvicorn 0.54, Pydantic 2.13 & Khung API, m
 \hline
  & PyJWT 2.15, bcrypt 5.0 & Ký JWT, băm mật khẩu \\
 \hline
- & python-docx 1.2, PyMuPDF 1.28, cryptography 50.0 & Trích xuất văn bản DOCX/PDF, đọc chữ ký số PKCS\#7 \\
+ & python-docx 1.2, PyMuPDF 1.28 & Trích xuất văn bản DOCX/PDF \\
 \hline
 Dịch vụ AI & sentence-transformers 6.1, transformers 5.17, PyTorch 2.14 (CPU) & Nạp mô hình và mã hóa câu thành vector \\
 \hline
@@ -91,7 +91,7 @@ Mã nguồn được quản lý bằng Git trong một kho duy nhất, mỗi th�
 \begin{Verbatim}[fontsize=\small]
 ntma/
 |-- backend/        Web API: app/{core, models, schemas, routers, services},
-|                   alembic/versions (17 migration), tests (pytest)
+|                   alembic/versions (19 migration), tests (pytest)
 |-- ai-service/     Dich vu AI: app/{nlp, pipeline, index, embedding, fingerprint},
 |                   alembic (schema thesis_ai), calibration, tests
 |-- frontend/       Client Web: src/{features, layouts, api, stores, components}
@@ -204,7 +204,7 @@ Cả hai lần đều kết thúc thành công, không cần thao tác tay. Tron
 
 Một máy chủ MySQL chứa hai schema tách biệt theo nguyên tắc mỗi dịch vụ sở hữu dữ liệu của mình:
 \begin{itemize}
-    \item \texttt{thesis\_core}: dữ liệu nghiệp vụ do Web API sở hữu (tài khoản, đợt đồ án, phân công, đề tài, đề cương, tiến độ, hội đồng, kho đồ án, kết quả kiểm tra, cấu hình ngưỡng, thông báo). Schema được tạo và nâng cấp bằng 17 migration Alembic~\cite{alembic}; hai migration gần nhất bổ sung danh mục định hướng đề tài cùng luồng duyệt đề cương hai cấp (\texttt{0016}) và ngưỡng cảnh báo theo tổng mọi nguồn (\texttt{0017}).
+    \item \texttt{thesis\_core}: dữ liệu nghiệp vụ do Web API sở hữu (tài khoản, đợt đồ án, phân công, đề tài, đề cương, tiến độ, hội đồng, kho đồ án, kết quả kiểm tra, cấu hình ngưỡng, thông báo). Schema được tạo và nâng cấp bằng 19 migration Alembic~\cite{alembic}; các migration gần nhất bổ sung danh mục định hướng đề tài cùng luồng duyệt đề cương hai cấp (\texttt{0016}), ngưỡng cảnh báo theo tổng mọi nguồn (\texttt{0017}), bỏ kiểm tra chữ ký số khi phê duyệt đề cương (\texttt{0018}) và tệp PDF mô tả định hướng (\texttt{0019}).
     \item \texttt{thesis\_ai}: dữ liệu của dịch vụ AI (văn bản nguồn đã chuẩn hóa, các đoạn câu kèm nhóm đề tài, vector embedding). Schema có ba migration riêng, chạy bởi service \texttt{ai-migrate}.
 \end{itemize}
 
@@ -239,7 +239,7 @@ Web API là ứng dụng FastAPI~\cite{fastapi} sở hữu toàn bộ nghiệp v
 \hline
 \path{/api/assignments} & Phân công GVHD, import phân công; lớp hướng dẫn của GV; GVHD của SV & Bộ môn, GV, SV \\
 \hline
-\path{/api/dinh-huong} & Danh mục định hướng đề tài (H01, H02,\ldots) & Bộ môn sửa; mọi vai trò xem \\
+\path{/api/dinh-huong} & Danh mục định hướng đề tài (H01, H02,\ldots); tải lên, thay, gỡ và xem tệp PDF mô tả định hướng & Bộ môn sửa, tải tệp lên; mọi vai trò xem \\
 \hline
 \path{/api/topics} & Tạo, sửa, giao đề tài; kiểm tra trùng tên; lịch sử & GV tạo và giao; mọi vai trò xem trong phạm vi \\
 \hline
@@ -315,7 +315,7 @@ UC0 -- Chức năng chung & UC0.1 đăng nhập, đăng xuất, làm mới phiê
 \hline
 UC1 -- Quản lý đề tài & UC1.1 GVHD tạo và giao đề tài cho sinh viên trong lớp hướng dẫn, kèm cảnh báo trùng tên theo ngữ nghĩa; UC1.2 xem, lọc danh sách đề tài; sinh viên xem đề tài được giao và lịch sử & GV, SV, Bộ môn & \ref{fig:c4-sv-cua-toi}--\ref{fig:c4-sv-de-tai} \\
 \hline
-UC2 -- Quản lý đề cương & UC2.1 sinh viên nộp đề cương (DOCX/PDF), kiểm tra tệp, tên tệp, định hướng và trùng lặp tự động; UC2.2 GVHD duyệt hoặc yêu cầu sửa; UC2.3 GVHD nộp lên Bộ môn, đổi tên tệp theo mẫu; UC2.4 Bộ môn phê duyệt bằng PDF ký số hoặc trả lại, xuất ZIP; UC2.5 lịch sử phiên bản và nhận xét & SV, GV, Bộ môn & \ref{fig:c4-sv-nop-de-cuong}--\ref{fig:c4-sv-da-phe-duyet} \\
+UC2 -- Quản lý đề cương & UC2.1 sinh viên nộp đề cương (DOCX/PDF), kiểm tra tệp, tên tệp, định hướng và trùng lặp tự động; UC2.2 GVHD duyệt hoặc yêu cầu sửa; UC2.3 GVHD nộp lên Bộ môn, đổi tên tệp theo mẫu; UC2.4 Bộ môn phê duyệt bằng bản PDF đề cương đã ký hoặc trả lại, xuất ZIP; UC2.5 lịch sử phiên bản và nhận xét & SV, GV, Bộ môn & \ref{fig:c4-sv-nop-de-cuong}--\ref{fig:c4-sv-da-phe-duyet} \\
 \hline
 UC3 -- Quản lý tiến độ thực hiện & UC3.1 Bộ môn thiết lập mốc; UC3.2 sinh viên nộp báo cáo theo mốc; UC3.3 GVHD nhận xét, đánh giá; UC3.4 Bộ môn theo dõi toàn khoa; lịch sử nộp của sinh viên & SV, GV, Bộ môn & \ref{fig:c4-sv-tien-do}--\ref{fig:c4-lich-su-nop} \\
 \hline
@@ -376,7 +376,7 @@ Trang tổng quan của giảng viên tập trung vào \textit{việc cần xử
     \label{fig:c4-bm-tong-quan}
 \end{figure}
 
-Bộ môn quản lý danh mục dùng chung của hệ thống: tài khoản sinh viên, giảng viên (thêm, sửa, khóa, mở khóa; Hình~\ref{fig:c4-tai-khoan}), đợt đồ án (Hình~\ref{fig:c4-dot-do-an}), phân công GVHD theo đợt, có thể sửa từng dòng, chọn nhiều dòng hoặc import CSV (Hình~\ref{fig:c4-phan-cong}), và danh mục định hướng đề tài H01, H02,\ldots (Hình~\ref{fig:c4-dinh-huong}). Mã định hướng là phần đầu tên tệp đề cương và được kiểm tra tự động khi GVHD nộp đề cương lên Bộ môn.
+Bộ môn quản lý danh mục dùng chung của hệ thống: tài khoản sinh viên, giảng viên (thêm, sửa, khóa, mở khóa; Hình~\ref{fig:c4-tai-khoan}), đợt đồ án (Hình~\ref{fig:c4-dot-do-an}), phân công GVHD theo đợt, có thể sửa từng dòng, chọn nhiều dòng hoặc import CSV (Hình~\ref{fig:c4-phan-cong}), và danh mục định hướng đề tài H01, H02,\ldots (Hình~\ref{fig:c4-dinh-huong}). Mã định hướng là phần đầu tên tệp đề cương và được kiểm tra tự động khi GVHD nộp đề cương lên Bộ môn. Bộ môn có thể đính kèm một tệp PDF mô tả cho mỗi định hướng; sinh viên và giảng viên xem tệp này ngay trên trình duyệt (trang \textit{Định hướng đề tài} và thông tin đề tài) hoặc tải về.
 
 \begin{figure}[H]
     \centering
@@ -460,7 +460,7 @@ Danh sách đề tài (Hình~\ref{fig:c4-ds-de-tai}) lọc được theo đợt,
 
 \subsection{UC2. Quản lý đề cương}
 
-Đề cương đi qua quy trình duyệt hai cấp: sinh viên nộp, GVHD duyệt, GVHD nộp lên Bộ môn, Lãnh đạo bộ môn phê duyệt bằng bản PDF có chữ ký số. Thanh tiến trình năm bước ở đầu trang \textit{Nộp đề cương} cho sinh viên biết đề cương đang ở bước nào. Trang này cũng nhắc quy tắc đặt tên tệp \textit{[Mã định hướng].[MSSV].[Họ tên].[Lớp].pdf} với tên mẫu đã điền sẵn thông tin của sinh viên. Sau khi nộp, phiên bản mới xuất hiện trong lịch sử với trạng thái \textit{Đang kiểm tra}, rồi chuyển sang \textit{Hoàn tất} kèm tỷ lệ trùng (Hình~\ref{fig:c4-sv-nop-de-cuong}).
+Đề cương đi qua quy trình duyệt hai cấp: sinh viên nộp, GVHD duyệt, GVHD nộp lên Bộ môn, Lãnh đạo bộ môn phê duyệt bằng bản PDF đề cương đã ký. Thanh tiến trình năm bước ở đầu trang \textit{Nộp đề cương} cho sinh viên biết đề cương đang ở bước nào. Trang này cũng nhắc quy tắc đặt tên tệp \textit{[Mã định hướng].[MSSV].[Họ tên].[Lớp].pdf} với tên mẫu đã điền sẵn thông tin của sinh viên. Sau khi nộp, phiên bản mới xuất hiện trong lịch sử với trạng thái \textit{Đang kiểm tra}, rồi chuyển sang \textit{Hoàn tất} kèm tỷ lệ trùng (Hình~\ref{fig:c4-sv-nop-de-cuong}).
 
 \begin{figure}[H]
     \centering
@@ -512,21 +512,21 @@ Khi tên tệp sai (Hình~\ref{fig:c4-gv-sai-ten}: họ tên trong tên tệp vi
     \label{fig:c4-gv-sai-ten}
 \end{figure}
 
-Ở cấp Bộ môn, Lãnh đạo bộ môn xem lại các mục kiểm tra, tải tệp đề cương, ký số bằng công cụ ký của mình (USB token, VNPT-CA, Adobe,\ldots) rồi tải bản PDF đã ký lên khung \textit{Phê duyệt và nộp về khoa} (Hình~\ref{fig:c4-bm-cho-duyet}). Web API chỉ nhận tệp PDF có chữ ký số PKCS\#7 nhúng trong tệp và vùng ký phủ toàn bộ tệp; tệp không có chữ ký hoặc bị sửa sau khi ký bị từ chối với mã 422. Bộ môn cũng có thể trả lại kèm nhận xét bắt buộc; khi đó đề cương về trạng thái \textit{Yêu cầu sửa}.
+Ở cấp Bộ môn, Lãnh đạo bộ môn xem lại các mục kiểm tra, tải tệp đề cương về và ký ngoài hệ thống (ký tay rồi quét thành PDF, hoặc ký bằng công cụ của mình), rồi tải bản PDF đã ký lên khung \textit{Phê duyệt và nộp về khoa} (Hình~\ref{fig:c4-bm-cho-duyet}). Web API chỉ yêu cầu tệp tải lên là PDF, qua cùng bước kiểm tra định dạng và dung lượng như mọi tệp khác; tệp không phải PDF bị từ chối với mã 422. Hệ thống không đọc hay xác minh chữ ký trong tệp. Bộ môn cũng có thể trả lại kèm nhận xét bắt buộc; khi đó đề cương về trạng thái \textit{Yêu cầu sửa}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.92\textwidth,height=0.6\textheight,keepaspectratio]{chuong_4/c2-bm-cho-phe-duyet.png}
-    \caption{Bộ môn phê duyệt đề cương bằng bản PDF đã ký số}
+    \caption{Bộ môn phê duyệt đề cương bằng bản PDF đã ký}
     \label{fig:c4-bm-cho-duyet}
 \end{figure}
 
-Sau khi phê duyệt, trang chi tiết hiển thị người ký, thời điểm ký đọc từ chữ ký trong tệp và liên kết tải bản đã ký (Hình~\ref{fig:c4-bm-da-duyet}); sinh viên thấy cùng thông tin trên trang của mình (Hình~\ref{fig:c4-sv-da-phe-duyet}). Bộ môn tải được toàn bộ đề cương đã ký số của một đợt dưới dạng một tệp ZIP để nộp về khoa.
+Sau khi phê duyệt, trang chi tiết hiển thị kết luận của Bộ môn, thời điểm phê duyệt, nhận xét kèm theo và liên kết tải bản đề cương đã ký (Hình~\ref{fig:c4-bm-da-duyet}); sinh viên thấy cùng thông tin trên trang của mình (Hình~\ref{fig:c4-sv-da-phe-duyet}). Bản đã ký được lưu vào thư mục đề cương của đợt; nút \textit{Tải thư mục đề cương đã ký} cho Bộ môn tải toàn bộ thư mục này dưới dạng một tệp ZIP để nộp về khoa.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.92\textwidth,height=0.6\textheight,keepaspectratio]{chuong_4/c2-bm-da-phe-duyet.png}
-    \caption{Đề cương đã được Bộ môn phê duyệt, kèm thông tin chữ ký số}
+    \caption{Đề cương đã được Bộ môn phê duyệt, kèm bản đề cương đã ký}
     \label{fig:c4-bm-da-duyet}
 \end{figure}
 
@@ -646,7 +646,7 @@ Kiểm tra trùng tên chạy đồng bộ, ngay khi GVHD nhập xong tên đề
 
 Kết quả chỉ là cảnh báo. Khi dịch vụ AI không phản hồi hoặc chưa có cấu hình ngưỡng, Web API trả trạng thái \textit{Lỗi} với danh sách rỗng, GVHD vẫn giao được đề tài. Khi GVHD giao đề tài, kết quả kiểm tra tại thời điểm đó (kể cả ngưỡng đã dùng) được lưu kèm đề tài để Bộ môn xem lại về sau. Tên đề tài vừa giao được đẩy ngay vào chỉ mục, nên lần kiểm tra kế tiếp đã so sánh được với nó.
 
-\subsection{Kiểm tra trùng lặp tài liệu bằng AI}
+\subsection{Kiểm tra trùng lặp tài liệu bằng AI}\label{sec:c4-ai-trung-lap}
 
 Kiểm tra tài liệu được thực hiện cho đề cương và báo cáo cuối. Theo yêu cầu, kết quả phải chỉ ra ba thông tin: tỷ lệ trùng của tài liệu, các đồ án bị trùng kèm tỷ lệ với từng đồ án, và các đoạn trùng cụ thể. Dịch vụ AI xử lý văn bản đã trích xuất như sau:
 \begin{enumerate}
@@ -657,7 +657,7 @@ Kiểm tra tài liệu được thực hiện cho đề cương và báo cáo cu
     \item \textit{Tổng hợp.} Tỷ lệ trùng tổng là số ký tự của các câu bị gắn cờ chia cho tổng số ký tự đã so sánh. Tỷ lệ trùng với từng đồ án tính tương tự, chỉ đếm câu gắn cờ của đồ án đó. Các câu bị gắn cờ liên tiếp cùng nguồn được ghép thành một đoạn trùng (tối đa 6 câu), kèm vị trí, đoạn nguồn, điểm từng tín hiệu và loại trùng chiếm ưu thế.
 \end{enumerate}
 
-Web API lưu kết quả cùng các ngưỡng đang áp dụng, rồi đánh dấu \textit{vượt ngưỡng} khi tỷ lệ trùng với \textit{một} đồ án nguồn cao nhất đạt ngưỡng cảnh báo tài liệu (10,4\%), hoặc khi tỷ lệ trùng tổng mọi nguồn đạt ngưỡng tổng (14,8\%). Ngưỡng thứ nhất bắt việc chép phần lớn một đồ án. Ngưỡng thứ hai bắt bài ghép từ nhiều đồ án, mỗi đồ án một ít, và được đặt cao hơn vì câu tự viết cùng lĩnh vực có thể khớp rải rác với nhiều đồ án. Kết quả ghi rõ lý do vượt ngưỡng (một đồ án hay tổng nhiều đồ án) để giảng viên biết cần xem gì. Chỉ sau khi kết quả đã ở trạng thái \textit{Hoàn tất}, tài liệu mới được đẩy vào chỉ mục để các lần nộp sau so được với nó; nhờ thứ tự này, tài liệu không bao giờ tự trùng với chính nó.
+Web API lưu kết quả cùng các ngưỡng đang áp dụng, rồi đánh dấu \textit{vượt ngưỡng} khi tỷ lệ trùng với \textit{một} đồ án nguồn cao nhất đạt ngưỡng cảnh báo tài liệu, hoặc khi tỷ lệ trùng tổng mọi nguồn đạt ngưỡng tổng. Ngưỡng thứ nhất bắt việc chép phần lớn một đồ án. Ngưỡng thứ hai bắt bài ghép từ nhiều đồ án, mỗi đồ án một ít; giá trị hiệu chỉnh của nó (14,8\%) cao hơn ngưỡng thứ nhất (10,4\%) vì câu tự viết cùng lĩnh vực có thể khớp rải rác với nhiều đồ án. Kết quả ghi rõ lý do vượt ngưỡng (một đồ án hay tổng nhiều đồ án) để giảng viên biết cần xem gì. Hai giá trị hiệu chỉnh là mặc định khi cài đặt; Bộ môn sửa được trên màn hình cấu hình ngưỡng. Trên máy chủ đang vận hành, từ ngày 29/10/2026 Bộ môn đặt cả hai ngưỡng là 25\%. Mỗi câu bị gắn cờ chỉ thuộc về một đồ án nguồn nên tỷ lệ theo một đồ án không vượt tỷ lệ tổng; với hai ngưỡng bằng nhau, hệ thống cảnh báo khi tỷ lệ trùng tổng đạt 25\%. Chỉ sau khi kết quả đã ở trạng thái \textit{Hoàn tất}, tài liệu mới được đẩy vào chỉ mục để các lần nộp sau so được với nó; nhờ thứ tự này, tài liệu không bao giờ tự trùng với chính nó.
 
 Việc kiểm tra không bao giờ để bản ghi kẹt ở trạng thái \textit{Đang kiểm tra}: mọi lỗi trong tác vụ nền đều chuyển bản ghi sang \textit{Lỗi}; bản ghi quá 300 giây chưa xong cũng bị chuyển sang \textit{Lỗi} ở lần đọc kế tiếp. Văn bản dài hơn 800\,000 ký tự (khoảng 230 trang) không được gửi sang dịch vụ AI; việc nộp vẫn thành công, kết quả ghi rõ lý do. Nút \textit{Kiểm tra lại} chỉ xuất hiện khi kết quả ở trạng thái \textit{Lỗi}.
 
@@ -687,7 +687,7 @@ Tài khoản, đợt, phân công GVHD, định hướng, ngưỡng & Xem GVHD c
 \hline
 Đề tài & Xem đề tài của mình & Tạo, giao cho SV mình hướng dẫn & Xem toàn khoa \\
 \hline
-Đề cương & Nộp, nộp lại & Duyệt, yêu cầu sửa, nộp lên Bộ môn, đổi tên tệp & Phê duyệt bằng PDF ký số, trả lại, xuất ZIP \\
+Đề cương & Nộp, nộp lại & Duyệt, yêu cầu sửa, nộp lên Bộ môn, đổi tên tệp & Phê duyệt bằng bản PDF đã ký, trả lại, xuất ZIP \\
 \hline
 Tiến độ & Nộp báo cáo theo mốc & Nhận xét SV mình hướng dẫn & Thiết lập mốc, theo dõi toàn khoa \\
 \hline
@@ -726,7 +726,7 @@ Phiên đăng nhập dùng hai JWT ký bằng khóa bí mật ngẫu nhiên 64 k
 
 Tệp đề cương, báo cáo bị kiểm tra theo nội dung chứ không theo phần mở rộng: tệp PDF phải bắt đầu bằng \texttt{\%PDF-}; tệp DOCX phải là tệp ZIP hợp lệ có \path{word/document.xml}. Kích thước tối đa là 20~MB ở Web API (thêm lớp chặn 25~MB ở Apache). Để chống tệp nén ``bom'', tổng dung lượng giải nén của DOCX không quá 25~MB và riêng \path{document.xml} không quá 15~MB. Tệp được lưu dưới tên \path{<loai>/<uuid>.<ext>} do máy chủ sinh; tên gốc chỉ được lưu trong CSDL, nên không thể dùng tên tệp để ghi đè hay leo thư mục.
 
-Với bản đề cương có chữ ký số, Web API đọc cấu trúc chữ ký PDF: tìm từ điển chữ ký (\texttt{/ByteRange}, \texttt{/Contents}), đọc chứng thư và tên người ký từ khối PKCS\#7, thời điểm ký, và kiểm tra vùng được ký phủ toàn bộ tệp (tệp bị nối thêm nội dung sau khi ký sẽ bị từ chối). Phiên bản hiện tại \textit{chưa} xác minh giá trị mật mã của chữ ký và chưa kiểm tra chuỗi chứng thư tới tổ chức cấp chứng thư gốc; hạn chế này được nêu lại ở phần kết luận chương.
+Bản đề cương đã ký mà Lãnh đạo bộ môn tải lên khi phê duyệt cũng đi qua đúng các bước kiểm tra trên, cộng thêm điều kiện phải là PDF. Web API không phân tích hay xác minh chữ ký trong tệp, nên không phụ thuộc vào cách ký (ký tay rồi quét hay ký bằng công cụ bên ngoài); hệ quả của lựa chọn này được nêu ở phần kết luận chương.
 
 \subsection{Bảo vệ dịch vụ AI và CSDL}
 
@@ -834,7 +834,7 @@ Tập lệnh \texttt{deploy/verify-all.sh -{}-report} chạy tuần tự 14 bư�
 
 Như vậy cả bốn bước không đạt đều do tập lệnh kiểm thử hoặc tài liệu chưa theo kịp thay đổi của luồng duyệt đề cương, không phát hiện lỗi của chức năng. Tuy vậy, các kịch bản E2E và kịch bản chụp màn hình cần được cập nhật trước lần kiểm thử chấp nhận tiếp theo.
 
-Sau khi thay tín hiệu nguyên văn bằng vân tay văn bản và thêm ngưỡng tổng (ngày 22/10/2026), hai bộ kiểm thử của bước 4 và bước 5 được chạy lại riêng trên CSDL kiểm thử: 68/68 ca của Web API (thêm ca cho cảnh báo theo tỷ lệ trùng tổng) và 15/15 ca của dịch vụ AI (thêm các ca cho bảo đảm của winnowing, độ phủ, cụm phổ biến theo nhóm đề tài) đều đạt. Toàn bộ 14 bước chưa được chạy lại sau thay đổi này.
+Sau khi thay tín hiệu nguyên văn bằng vân tay văn bản và thêm ngưỡng tổng (ngày 22/10/2026), hai bộ kiểm thử của bước 4 và bước 5 được chạy lại riêng trên CSDL kiểm thử: 68/68 ca của Web API (thêm ca cho cảnh báo theo tỷ lệ trùng tổng) và 15/15 ca của dịch vụ AI (thêm các ca cho bảo đảm của winnowing, độ phủ, cụm phổ biến theo nhóm đề tài) đều đạt. Ngày 29/10/2026, sau khi bỏ bước đọc chữ ký số lúc Bộ môn phê duyệt đề cương (bỏ một ca) và thêm file mô tả PDF cho định hướng đề tài (thêm bốn ca), bộ kiểm thử Web API còn 71 ca, chạy lại đều đạt. Toàn bộ 14 bước chưa được chạy lại sau các thay đổi này.
 
 \subsection{Thử nghiệm mô hình AI}
 
@@ -940,6 +940,8 @@ Cùng lĩnh vực không bị cảnh báo & 27/28 (0,964) & 11/12 (0,917) \\
 
 \textbf{Bài ghép từ nhiều nguồn.} Bộ dữ liệu không có loại bài này, nên một kịch bản được dựng thêm và không dùng để hiệu chỉnh: với bài tự viết của mỗi cặp trong 11 cặp cùng lĩnh vực hoặc không liên quan, chèn bốn khối câu chép nguyên văn từ bốn đồ án khác trong kho, mỗi khối khoảng 6\% bài gốc, rải đều trong bài. Phần chèn chiếm 19,9--22,5\% bài mới, và cả 284 câu chèn đều được gắn cờ nguyên văn. Ở 9 bài, tỷ lệ trùng với một đồ án cao nhất chỉ 5,2--6,1\%, dưới ngưỡng tài liệu, nên quy tắc chỉ xét từng nguồn chỉ cảnh báo 2/11 bài (hai bài có một đồ án vượt ngưỡng tài liệu, trong đó P19 vốn đã bị cảnh báo khi chưa chèn). Khi thêm ngưỡng tổng, cả 11/11 bài bị cảnh báo, với tỷ lệ tổng 20,3--39,3\%.
 
+\textbf{Ngưỡng đang áp dụng trên máy chủ.} Các số liệu trên dùng ngưỡng hiệu chỉnh. Máy chủ đang vận hành dùng cả hai ngưỡng tài liệu bằng 25\% do Bộ môn đặt (mục~\ref{sec:c4-ai-trung-lap}), tức cảnh báo khi tỷ lệ trùng tổng đạt 25\%. Tính lại trên cùng số liệu với quy tắc này: mọi cặp chép nguyên văn (tỷ lệ tổng từ 44\% trở lên) vẫn bị cảnh báo, nhưng ba cặp diễn đạt lại có tỷ lệ tổng khoảng 21\% không còn bị cảnh báo (P08 ở tập hiệu chỉnh; P09, P10 ở tập kiểm chứng). Ngược lại, cặp P19 (tỷ lệ tổng 23,96\%) không còn bị cảnh báo nhầm. Độ chính xác mức tài liệu thành 16/17 trên tập hiệu chỉnh và 6/8 trên tập kiểm chứng; kịch bản ghép bốn nguồn cảnh báo 6/11 bài. Ngưỡng cao hơn giảm cảnh báo cần giảng viên xem lại, đổi lại bỏ sót một phần bài diễn đạt lại hoặc ghép với tỷ lệ trùng dưới 25\%.
+
 \textbf{Vai trò của bước loại phần mẫu chung và bộ lọc cụm phổ biến.} Khi tắt bước loại phần mẫu chung ở cả kho lẫn bài nộp, tỷ lệ trùng tổng của 11 bài cùng lĩnh vực hoặc không liên quan tăng trung bình 8,02 điểm phần trăm (từ $-0{,}03$ đến 12,71), lên 9,1--23,9\%, và 3 bài vượt ngưỡng tổng. Mức tăng thấp hơn lần hiệu chỉnh dùng MinHash (15,14 điểm); khác biệt chính giữa hai lần là bộ lọc cụm phổ biến, vốn bỏ qua các cụm có trong nhiều đề tài như dòng bìa, lời cam đoan, mục lục giống hệt nhau. Ngược lại, giữ bước loại phần mẫu chung nhưng tắt bộ lọc cụm phổ biến thì tỷ lệ tổng của các bài này lên 7,6--35,0\% (P17 từ 8,41\% lên 25,66\%) và 6/11 bài vượt ngưỡng tổng, vì các câu theo khuôn chung của lĩnh vực bị tính là chép nguyên văn. Hai bước lọc vì vậy bổ sung cho nhau, và là điều kiện để dùng được ngưỡng tổng.
 
 \subsection{Đánh giá theo yêu cầu phi chức năng}
@@ -1035,7 +1037,7 @@ Mục này tóm tắt các thao tác chính theo từng vai trò. Mọi người
 \begin{enumerate}
     \item \textit{Xem GVHD và đề tài.} Trang chủ hiển thị GVHD được Bộ môn phân công và tiến độ chung. Sau khi GVHD giao đề tài trên hệ thống, đề tài xuất hiện ở menu \textit{Đề tài của tôi} (Hình~\ref{fig:c4-sv-de-tai}).
     \item \textit{Nộp đề cương.} Vào \textit{Nộp đề cương}, đặt tên tệp theo mẫu hiển thị trên trang (\textit{[Mã định hướng].[MSSV].[Họ tên].[Lớp].pdf}), chọn tệp PDF hoặc DOCX (tối đa 20~MB) rồi bấm \textit{Nộp đề cương}. Kết quả kiểm tra trùng lặp hiện sau vài giây (Hình~\ref{fig:c4-sv-nop-de-cuong}). Nếu GVHD hoặc Bộ môn yêu cầu sửa, đọc nhận xét trong lịch sử, sửa và nộp lại; mỗi lần nộp tạo một phiên bản mới.
-    \item \textit{Theo dõi phê duyệt.} Thanh tiến trình cho biết đề cương đang chờ GVHD, chờ Bộ môn hay đã được phê duyệt; khi đã phê duyệt, tải được bản PDF có chữ ký số (Hình~\ref{fig:c4-sv-da-phe-duyet}).
+    \item \textit{Theo dõi phê duyệt.} Thanh tiến trình cho biết đề cương đang chờ GVHD, chờ Bộ môn hay đã được phê duyệt; khi đã phê duyệt, tải được bản PDF đề cương đã ký (Hình~\ref{fig:c4-sv-da-phe-duyet}).
     \item \textit{Nộp báo cáo tiến độ.} Vào \textit{Báo cáo tiến độ}, chọn mốc, tải tệp báo cáo lên trước hạn; nhận xét và đánh giá của GVHD hiện ngay dưới mốc (Hình~\ref{fig:c4-sv-tien-do}).
     \item \textit{Nộp báo cáo cuối và xem kết quả bảo vệ.} Vào \textit{Lịch bảo vệ}, nộp báo cáo cuối trước khi được xếp lịch. Lịch, phòng, hội đồng và điểm (sau khi Bộ môn chốt) hiển thị trên cùng trang (Hình~\ref{fig:c4-ket-qua-bao-ve}).
     \item \textit{Tra cứu kho đồ án.} Vào \textit{Kho đồ án} để tìm đồ án các khóa trước theo từ khóa, khóa, GVHD.
@@ -1057,7 +1059,7 @@ Mục này tóm tắt các thao tác chính theo từng vai trò. Mọi người
 \begin{enumerate}
     \item \textit{Chuẩn bị đợt.} Tạo đợt đồ án ở \textit{Quản lý đợt đồ án} (Hình~\ref{fig:c4-dot-do-an}), kiểm tra danh mục định hướng (Hình~\ref{fig:c4-dinh-huong}), phân công GVHD cho sinh viên của đợt, từng dòng hoặc import CSV (Hình~\ref{fig:c4-phan-cong}), và thiết lập các mốc tiến độ.
     \item \textit{Quản lý tài khoản.} Thêm, sửa, khóa, mở khóa tài khoản và đặt lại mật khẩu ở menu \textit{Quản lý tài khoản} (Hình~\ref{fig:c4-tai-khoan}).
-    \item \textit{Phê duyệt đề cương.} Vào \textit{Duyệt đề cương}, chọn đề cương ở trạng thái \textit{Chờ Bộ môn duyệt}, tải tệp, ký số bằng công cụ ký của mình rồi tải bản PDF đã ký lên và bấm \textit{Phê duyệt} (Hình~\ref{fig:c4-bm-cho-duyet}); hoặc \textit{Trả lại} kèm nhận xét. Cuối đợt, dùng chức năng xuất để tải toàn bộ đề cương đã ký dưới dạng một tệp ZIP.
+    \item \textit{Phê duyệt đề cương.} Vào \textit{Duyệt đề cương}, chọn đề cương ở trạng thái \textit{Chờ Bộ môn duyệt}, tải tệp về, ký (ký tay rồi quét thành PDF, hoặc ký bằng công cụ của mình) rồi tải bản PDF đã ký lên và bấm \textit{Phê duyệt} (Hình~\ref{fig:c4-bm-cho-duyet}); hoặc \textit{Trả lại} kèm nhận xét. Cuối đợt, bấm \textit{Tải thư mục đề cương đã ký} để tải toàn bộ đề cương đã ký của đợt dưới dạng một tệp ZIP.
     \item \textit{Theo dõi tiến độ.} Trang \textit{Tổng quan} và \textit{Tiến độ toàn khoa} cho biết sinh viên chưa có đề tài, chưa nộp, trễ mốc.
     \item \textit{Tổ chức bảo vệ.} Vào \textit{Hội đồng \& lịch bảo vệ}, tạo hội đồng (3 đến 5 thành viên, một chủ tịch), chọn ngày, giờ, phòng, thêm sinh viên vào lịch (Hình~\ref{fig:c4-hoi-dong}). Khi các thành viên đã chấm đủ, bấm \textit{Chốt kết quả}; đồ án tự động vào kho.
     \item \textit{Quản lý kho và ngưỡng.} Import đồ án các khóa cũ từ CSV ở \textit{Kho đồ án} (Hình~\ref{fig:c4-kho-import}); điều chỉnh ngưỡng cảnh báo ở \textit{Ngưỡng trùng lặp} khi cần, có thể khôi phục giá trị đề xuất bất kỳ lúc nào (Hình~\ref{fig:c4-nguong}).
@@ -1101,7 +1103,7 @@ Chương này đã trình bày việc triển khai hệ thống quản lý đồ
 
 \textbf{Ưu điểm.}
 \begin{itemize}
-    \item Hệ thống bao phủ trọn quy trình đồ án của Bộ môn, từ phân công GVHD, giao đề tài, duyệt đề cương hai cấp có chữ ký số, theo dõi tiến độ, tổ chức bảo vệ tới lưu kho, thay cho việc trao đổi qua email, tệp Excel và giấy tờ.
+    \item Hệ thống bao phủ trọn quy trình đồ án của Bộ môn, từ phân công GVHD, giao đề tài, duyệt đề cương hai cấp kèm bản đã ký của Bộ môn, theo dõi tiến độ, tổ chức bảo vệ tới lưu kho, thay cho việc trao đổi qua email, tệp Excel và giấy tờ.
     \item Kiểm tra trùng lặp bằng AI chạy hoàn toàn trên máy chủ của Khoa, không gửi nội dung đồ án ra dịch vụ bên ngoài. Mô hình được chọn và ngưỡng được hiệu chỉnh bằng số liệu, theo quy tắc viết trước khi đo, có tập kiểm chứng riêng; kết quả chỉ rõ đồ án nguồn và từng đoạn trùng để giảng viên tự đánh giá.
     \item Các chỉ tiêu thời gian đạt với khoảng dư lớn: kiểm tra tên P95 dưới 0,12 giây, kiểm tra đề cương P95 dưới 5 giây so với chỉ tiêu 30 giây, nộp tệp dưới 0,1 giây nhờ kiểm tra chạy nền.
     \item Cài đặt và nâng cấp bằng một lệnh, dưới 10 phút; 14 bước kiểm thử tự động giúp kiểm tra lại toàn hệ thống sau mỗi thay đổi.
@@ -1110,7 +1112,7 @@ Chương này đã trình bày việc triển khai hệ thống quản lý đồ
 
 \textbf{Hạn chế.}
 \begin{itemize}
-    \item \textit{Chữ ký số mới được kiểm tra về cấu trúc.} Hệ thống kiểm tra tệp PDF có chữ ký PKCS\#7, đọc được người ký, thời điểm ký và vùng ký phủ toàn bộ tệp, nhưng chưa xác minh giá trị mật mã của chữ ký và chưa kiểm tra chuỗi chứng thư tới tổ chức cấp chứng thư gốc. Một tệp có cấu trúc chữ ký hợp lệ nhưng chữ ký giả vẫn có thể được chấp nhận; trách nhiệm xác thực vẫn thuộc người phê duyệt.
+    \item \textit{Hệ thống không xác thực chữ ký trên đề cương.} Khi phê duyệt, hệ thống chỉ kiểm tra bản tải lên là tệp PDF hợp lệ, không kiểm tra tệp có thực sự mang chữ ký của Lãnh đạo bộ môn hay không. Đây là lựa chọn có chủ đích để chấp nhận cả bản ký tay rồi quét lẫn bản ký bằng công cụ bên ngoài; trách nhiệm bảo đảm bản tải lên là bản đã ký thuộc về người phê duyệt.
     \item \textit{Chất lượng AI được đo trên dữ liệu tổng hợp.} Kho đề tài và các cặp tài liệu do bộ sinh dữ liệu tạo ra; danh sách phần mẫu chung là giả định vì chưa có mẫu đề cương, báo cáo chính thức của Khoa (bộ lọc cụm phổ biến bù được một phần, nhưng chỉ cho tín hiệu nguyên văn). Bộ dữ liệu không có câu chép rồi sửa nhẹ, nên độ dài cụm 6 âm tiết được chọn có thể hơi dài với văn bản thật: một từ bị sửa gần đầu hoặc cuối câu làm mất tới 8 âm tiết khỏi độ phủ. Ngưỡng tổng mới được kiểm tra bằng kịch bản ghép dựng thêm. Ngưỡng cần được hiệu chỉnh lại khi có dữ liệu đồ án thật.
     \item \textit{Phát hiện diễn đạt lại ở mức câu còn yếu}: chỉ 40--56\% câu diễn đạt lại được gắn cờ. Hệ thống vẫn cảnh báo đúng các tài liệu diễn đạt lại nhờ tổng hợp theo nguồn, nhưng một bài chỉ diễn đạt lại vài đoạn ngắn có thể không bị phát hiện. Ngược lại, khi kho có nhiều đồ án cùng chủ đề, có thể có cảnh báo sai như cặp P19.
     \item \textit{Báo cáo dài kiểm tra lâu}: thời gian tăng tuyến tính theo độ dài, khoảng 65 giây cho 350\,000 ký tự trên máy phát triển; văn bản trên 800\,000 ký tự không được kiểm tra tự động.

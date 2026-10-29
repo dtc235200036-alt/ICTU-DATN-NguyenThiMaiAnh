@@ -11,7 +11,7 @@ CHO_DUYET --> YEU_CAU_SUA : GVHD yêu cầu sửa\nkèm nhận xét (UC2.2)
 GVHD_DA_DUYET --> YEU_CAU_SUA : GVHD trả lại đề cương\nđã duyệt (ghi đè lượt duyệt)
 GVHD_DA_DUYET --> CHO_BO_MON_DUYET : GVHD nộp lên Bộ môn (UC2.3)\n(tên tệp và định hướng hợp lệ)
 
-CHO_BO_MON_DUYET --> DA_DUYET : Bộ môn phê duyệt,\ntải lên PDF đã ký số (UC2.4)
+CHO_BO_MON_DUYET --> DA_DUYET : Bộ môn phê duyệt,\ntải lên bản PDF đã ký (UC2.4)
 CHO_BO_MON_DUYET --> YEU_CAU_SUA : Bộ môn trả lại\nkèm nhận xét (UC2.4)
 
 YEU_CAU_SUA --> CHO_DUYET : SV nộp lại\n(TaiLieuDoAn phiên bản mới)
@@ -33,10 +33,10 @@ note right of GVHD_DA_DUYET
 end note
 
 note right of DA_DUYET
-  Trạng thái cuối. Tệp ký số lưu với loại
-  DE_CUONG_KY_SO; hệ thống kiểm tra tệp có chữ ký
-  số phủ toàn bộ nội dung. Tiến độ và bảo vệ chỉ
-  mở khi đề cương ở trạng thái này.
+  Trạng thái cuối. Bản PDF đề cương đã ký lưu với
+  loại DE_CUONG_KY_SO; hệ thống chỉ yêu cầu tệp là
+  PDF, không đọc hay xác minh chữ ký. Tiến độ và
+  bảo vệ chỉ mở khi đề cương ở trạng thái này.
 end note
 
 @enduml

@@ -70,8 +70,6 @@ entity "luot_duyet_bo_mon" as luot_duyet_bo_mon {
   nhan_xet : TEXT
   *thoi_diem : DATETIME
   tai_lieu_ky_so_id : BIGINT <<FK>>
-  nguoi_ky : VARCHAR(255)
-  thoi_diem_ky : DATETIME
 }
 
 entity "moc_tien_do" as moc_tien_do {

@@ -16,8 +16,8 @@ const FEATURES: { icon: ReactNode; title: string; text: string }[] = [
   },
   {
     icon: <Icon d="M6 3h9l3 3v15H6z M9 12l2 2 4-4" />,
-    title: 'Duyệt đề cương hai cấp, ký số',
-    text: 'GVHD duyệt và nộp lên Bộ môn; Lãnh đạo bộ môn phê duyệt bằng file đã ký số.',
+    title: 'Duyệt đề cương hai cấp',
+    text: 'GVHD duyệt và nộp lên Bộ môn; Lãnh đạo bộ môn phê duyệt bằng bản PDF đã ký.',
   },
   {
     icon: <Icon d="M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14z M16 16l4 4" />,

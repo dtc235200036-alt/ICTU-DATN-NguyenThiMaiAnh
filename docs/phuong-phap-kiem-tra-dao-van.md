@@ -36,7 +36,8 @@ Tài liệu này mô tả hệ thống kiểm tra một đề cương hoặc bá
      và tỷ lệ theo từng đồ án nguồn, ghép câu liền nhau thành đoạn trùng
                          │
                          ▼
- [6] Cảnh báo (Web API): một đồ án ≥ 10,4 %  HOẶC  tổng mọi nguồn ≥ 14,8 %
+ [6] Cảnh báo (Web API): một đồ án ≥ NGUONG_TAI_LIEU  HOẶC  tổng mọi nguồn ≥ NGUONG_TONG_TAI_LIEU
+     (hiệu chỉnh: 10,4 % / 14,8 %; máy chủ đang dùng 25 % / 25 %, mục 3.8)
                          │
                          ▼
  [7] Giảng viên xem từng đoạn trùng đặt cạnh đoạn nguồn và tự kết luận
@@ -161,10 +162,19 @@ So với [1]: Sorokina chỉ tách danh mục tài liệu tham khảo bằng cá
 
 Do Web API thực hiện (`backend/app/services/document_check.py`). Tài liệu bị đánh dấu **Vượt ngưỡng cảnh báo** khi:
 
-- tỷ lệ trùng với **một** đồ án nguồn cao nhất ≥ **10,4 %** (lý do `MOT_NGUON`): chép phần lớn từ một đồ án; **hoặc**
-- tỷ lệ trùng tổng mọi nguồn ≥ **14,8 %** (lý do `TONG_NGUON`): bài ghép từ nhiều đồ án, mỗi đồ án một ít.
+- tỷ lệ trùng với **một** đồ án nguồn cao nhất ≥ `NGUONG_TAI_LIEU` (lý do `MOT_NGUON`): chép phần lớn từ một đồ án; **hoặc**
+- tỷ lệ trùng tổng mọi nguồn ≥ `NGUONG_TONG_TAI_LIEU` (lý do `TONG_NGUON`): bài ghép từ nhiều đồ án, mỗi đồ án một ít.
 
-Ngưỡng tổng được đặt cao hơn vì câu tự viết cùng lĩnh vực có thể khớp rải rác với nhiều đồ án. Trên kịch bản ghép 4 nguồn, mỗi nguồn khoảng 6 %, quy tắc chỉ xét một đồ án chỉ cảnh báo được 2/11 bài; thêm ngưỡng tổng thì cảnh báo được cả 11/11.
+Hiệu chỉnh đề xuất **10,4 %** và **14,8 %** (mục 4); đây cũng là giá trị mặc định khi cài mới. Ngưỡng tổng được đặt cao hơn vì câu tự viết cùng lĩnh vực có thể khớp rải rác với nhiều đồ án. Trên kịch bản ghép 4 nguồn, mỗi nguồn khoảng 6 %, quy tắc chỉ xét một đồ án chỉ cảnh báo được 2/11 bài; thêm ngưỡng tổng thì cảnh báo được cả 11/11.
+
+**Giá trị đang áp dụng trên máy chủ:** từ 29/10/2026, Bộ môn đặt cả hai ngưỡng là **25 %** (màn hình cấu hình ngưỡng, UC0.4). Mỗi câu bị gắn cờ chỉ thuộc một đồ án nguồn, nên tỷ lệ theo một đồ án không bao giờ vượt tỷ lệ tổng; với hai ngưỡng bằng nhau, quy tắc thực chất là **tổng trùng ≥ 25 % thì cảnh báo**. Ngưỡng này cao hơn giá trị hiệu chỉnh nên hệ thống cảnh báo ít hơn. Tính lại trên số liệu ở `03-hieu-chinh-nguong.md` với quy tắc tổng ≥ 25 %:
+
+- mọi cặp chép nguyên văn (tỷ lệ tổng ≥ 44 %) vẫn bị cảnh báo;
+- tập hiệu chỉnh đúng 16/17 cặp: bỏ sót P08 (diễn đạt lại, tổng 21,23 %);
+- tập kiểm chứng đúng 6/8 cặp: bỏ sót P09 và P10 (diễn đạt lại, tổng khoảng 20,9 %); ngược lại, ca P19 (cùng lĩnh vực, tổng 23,96 %) không còn bị cảnh báo nhầm;
+- kịch bản ghép 4 nguồn (phần chèn khoảng 20–22 %) cảnh báo 6/11 bài, thay vì 11/11.
+
+Mỗi kết quả kiểm tra lưu lại ngưỡng lúc kiểm tra, nên kết quả cũ không đổi.
 
 Các quy tắc đi kèm:
 
@@ -187,7 +197,7 @@ Chi tiết ở [`chuong-4-trien-khai/thu-nghiem-ai/03-hieu-chinh-nguong.md`](chu
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Dữ liệu                        | 25 cặp tài liệu tổng hợp (chép nguyên văn, diễn đạt lại, cùng lĩnh vực, không liên quan), chia tập hiệu chỉnh và tập kiểm chứng giữ riêng |
 | Ngưỡng nguyên văn            | 56,0 % (Youden J; TPR 0,978, FPR 0,019)                                                                                                                             |
-| Ngưỡng tổng                   | 14,8 % (trung điểm giữa âm lớn nhất 8,41 % và dương nhỏ nhất 21,23 %)                                                                                    |
+| Ngưỡng tổng                   | 14,8 % (trung điểm giữa âm lớn nhất 8,41 % và dương nhỏ nhất 21,23 %); máy chủ đang dùng 25 % (mục 3.8)                                                 |
 | Độ chính xác mức tài liệu | Tập hiệu chỉnh 17/17, tập kiểm chứng 7/8. Ca sai là một bài cùng lĩnh vực trùng ngữ nghĩa nhiều với một đồ án cùng chủ đề                  |
 | Bài ghép nhiều nguồn         | Cả 284 câu chèn đều bị gắn cờ; 11/11 bài bị cảnh báo                                                                                                    |
 | Tốc độ so nguyên văn        | Kho 150.000 câu, báo cáo 1.500 câu: 0,09 giây (MinHash quét toàn kho: 34,5 giây)                                                                            |

@@ -116,7 +116,7 @@ def topic_history(db: Session, user: CurrentUser, topic_id: int) -> list[TopicEv
             select(LuotDuyetBoMon).where(LuotDuyetBoMon.de_cuong_id == de_cuong.id)
         ).scalars():
             if bm.ket_qua == KET_QUA_DA_DUYET:
-                noi_dung = "Bộ môn phê duyệt đề cương (đã ký số), nộp về khoa"
+                noi_dung = "Bộ môn phê duyệt đề cương, nộp về khoa"
             else:
                 noi_dung = "Bộ môn trả lại đề cương"
             if bm.nhan_xet:

@@ -21,8 +21,12 @@ const DOCX_OPTIONS: Partial<DocxOptions> = {
   renderAltChunks: false,
 }
 
-function fetchFile(id: number): Promise<Blob> {
-  return api.get<Blob>(`/documents/${id}/download`, { responseType: 'blob' }).then(({ data }) => data)
+function fetchFile(path: string): Promise<Blob> {
+  return api.get<Blob>(path, { responseType: 'blob' }).then(({ data }) => data)
+}
+
+function downloadPath(id: number): string {
+  return `/documents/${id}/download`
 }
 
 /** Liên kết trong DOCX do người nộp đặt: chỉ giữ liên kết nội bộ (#...) và
@@ -53,7 +57,21 @@ function fitWidth(host: HTMLElement, width: number) {
   if (needed > 0) wrapper.style.zoom = String(Math.min(1, width / needed))
 }
 
-function PdfView({ doc, height }: { doc: DocumentOut; height: PreviewHeight }) {
+/**
+ * Xem một file PDF lấy qua API có xác thực (`path` dưới `/api`, vd.
+ * `/documents/{id}/download`, `/dinh-huong/{id}/tep`): tải về dạng blob rồi
+ * hiển thị qua object URL trong khung PDF của trình duyệt (CSP cho phép
+ * frame-src blob:).
+ */
+export function PdfBlobView({
+  path,
+  title,
+  height = 640,
+}: {
+  path: string
+  title: string
+  height?: PreviewHeight
+}) {
   const [url, setUrl] = useState<string | null>(null)
   const [error, setError] = useState(false)
 
@@ -62,7 +80,7 @@ function PdfView({ doc, height }: { doc: DocumentOut; height: PreviewHeight }) {
     let cancelled = false
     setUrl(null)
     setError(false)
-    fetchFile(doc.id)
+    fetchFile(path)
       .then((data) => {
         if (cancelled) return
         objectUrl = URL.createObjectURL(new Blob([data], { type: 'application/pdf' }))
@@ -75,7 +93,7 @@ function PdfView({ doc, height }: { doc: DocumentOut; height: PreviewHeight }) {
       cancelled = true
       if (objectUrl) URL.revokeObjectURL(objectUrl)
     }
-  }, [doc.id])
+  }, [path])
 
   if (error) return <Alert type="error" showIcon message="Không tải được file để xem" />
   if (!url) {
@@ -85,7 +103,7 @@ function PdfView({ doc, height }: { doc: DocumentOut; height: PreviewHeight }) {
       </div>
     )
   }
-  return <iframe title={doc.ten_goc} src={url} style={{ ...FRAME_STYLE, height }} />
+  return <iframe title={title} src={url} style={{ ...FRAME_STYLE, height }} />
 }
 
 function DocxView({ doc, height }: { doc: DocumentOut; height: PreviewHeight }) {
@@ -102,7 +120,7 @@ function DocxView({ doc, height }: { doc: DocumentOut; height: PreviewHeight }) 
     let cancelled = false
     let observer: ResizeObserver | undefined
     setStatus('loading')
-    Promise.all([fetchFile(doc.id), import('docx-preview')])
+    Promise.all([fetchFile(downloadPath(doc.id)), import('docx-preview')])
       .then(async ([data, { renderAsync }]) => {
         if (cancelled) return
         await renderAsync(data, host, undefined, DOCX_OPTIONS)
@@ -174,7 +192,7 @@ function DocxView({ doc, height }: { doc: DocumentOut; height: PreviewHeight }) 
 export default function FilePreview({ doc, height = 640 }: { doc: DocumentOut | undefined; height?: PreviewHeight }) {
   if (!doc) return <Empty description="Chưa có file" />
   return doc.dinh_dang === 'PDF' ? (
-    <PdfView key={doc.id} doc={doc} height={height} />
+    <PdfBlobView key={doc.id} path={downloadPath(doc.id)} title={doc.ten_goc} height={height} />
   ) : (
     <DocxView key={doc.id} doc={doc} height={height} />
   )

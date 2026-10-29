@@ -169,6 +169,10 @@ class DinhHuong <<Entity>> {
   +ten : String
   +moTa : String
   +hoatDong : Boolean
+  +tepTenGoc : String
+  +tepTenLuuTru : String
+  +tepKichThuoc : Long
+  +tepCapNhatLuc : DateTime
 }
 
 class DeTai <<Entity>> {
@@ -245,8 +249,6 @@ class LuotDuyetBoMon <<Entity>> {
   +ketQua : KetQuaDuyetBoMon
   +nhanXet : String
   +thoiDiem : DateTime
-  +nguoiKy : String
-  +thoiDiemKy : DateTime
 }
 
 class BaoCaoTienDo <<Entity>> {
@@ -346,7 +348,7 @@ GiangVien "1" -- "*" LuotDuyetDeCuong : "duyệt"
 DeCuong "1" -- "*" LuotDuyetBoMon : "có các lượt phê duyệt của Bộ môn"
 TaiKhoan "1" -- "*" LuotDuyetBoMon : "Bộ môn phê duyệt"
 TaiLieuDoAn "1" -- "*" LuotDuyetBoMon : "phiên bản được nộp lên"
-TaiLieuDoAn "0..1" -- "0..1" LuotDuyetBoMon : "bản PDF đã ký số"
+TaiLieuDoAn "0..1" -- "0..1" LuotDuyetBoMon : "bản PDF đã ký"
 DeTai "1" -- "*" BaoCaoTienDo : "nộp báo cáo theo mốc"
 MocTienDo "1" -- "*" BaoCaoTienDo : "áp dụng cho"
 BaoCaoTienDo "0..1" -- "0..1" TaiLieuDoAn : "đính kèm"

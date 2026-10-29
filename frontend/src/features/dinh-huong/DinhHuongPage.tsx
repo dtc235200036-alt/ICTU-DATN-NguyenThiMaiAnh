@@ -1,20 +1,48 @@
 import { useState } from 'react'
-import { App as AntApp, Button, Card, Form, Input, Modal, Switch, Table, Tag } from 'antd'
+import {
+  App as AntApp,
+  Button,
+  Card,
+  Form,
+  Input,
+  Modal,
+  Popconfirm,
+  Space,
+  Switch,
+  Table,
+  Tag,
+  Typography,
+  Upload,
+} from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 
 import { getErrorMessage } from '../../api/client'
 import QueryErrorAlert from '../../components/QueryErrorAlert'
-import { useDinhHuong, useSaveDinhHuong } from './api'
+import { formatBytes, formatDateTime } from '../../utils/format'
+import {
+  useDeleteTepDinhHuong,
+  useDinhHuong,
+  useSaveDinhHuong,
+  useUploadTepDinhHuong,
+} from './api'
 import type { DinhHuongInput, DinhHuongOut } from './api'
+import TepMoTaButton from './TepMoTaButton'
+
+// Giới hạn phía client chỉ để trải nghiệm — server kiểm tra lại đuôi, magic
+// bytes và dung lượng (cùng mức 20 MB với các file nộp khác).
+const MAX_TEP_BYTES = 20 * 1024 * 1024
 
 /**
  * Bộ môn quản lý danh mục định hướng đề tài (thay cho "Lĩnh vực"). Mã định
- * hướng là phần đầu tên file đề cương: <Mã>.<MSSV>.<Họ tên>.<Lớp>.
+ * hướng là phần đầu tên file đề cương: <Mã>.<MSSV>.<Họ tên>.<Lớp>. Mỗi định
+ * hướng có thể kèm một file PDF mô tả (tải lên, thay, gỡ) để SV/GV xem.
  */
 export default function DinhHuongPage() {
   const { message } = AntApp.useApp()
   const { data, isLoading, isError, error, refetch } = useDinhHuong()
   const save = useSaveDinhHuong()
+  const uploadTep = useUploadTepDinhHuong()
+  const deleteTep = useDeleteTepDinhHuong()
   const [editing, setEditing] = useState<DinhHuongOut | 'new' | null>(null)
   const [form] = Form.useForm<DinhHuongInput>()
 
@@ -41,11 +69,88 @@ export default function DinhHuongPage() {
     }
   }
 
+  const handleUploadTep = (item: DinhHuongOut, file: File) => {
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+      message.error(`"${file.name}" không phải file PDF.`)
+      return false
+    }
+    if (file.size > MAX_TEP_BYTES) {
+      message.error(`"${file.name}" vượt quá dung lượng tối đa 20 MB.`)
+      return false
+    }
+    uploadTep
+      .mutateAsync({ id: item.id, file })
+      .then(() => message.success(`Đã tải lên file mô tả ${item.ma}`))
+      .catch((err: unknown) => message.error(getErrorMessage(err)))
+    // false: không tự upload theo cơ chế mặc định của antd — gửi qua axios ở trên.
+    return false
+  }
+
+  const handleDeleteTep = async (item: DinhHuongOut) => {
+    try {
+      await deleteTep.mutateAsync(item.id)
+      message.success(`Đã gỡ file mô tả ${item.ma}`)
+    } catch (err) {
+      message.error(getErrorMessage(err))
+    }
+  }
+
   const columns: ColumnsType<DinhHuongOut> = [
     { title: 'STT', key: 'stt', width: 60, render: (_v, _r, index) => index + 1 },
     { title: 'Mã', dataIndex: 'ma', width: 90 },
     { title: 'Tên định hướng', dataIndex: 'ten' },
     { title: 'Mô tả', dataIndex: 'mo_ta', render: (v: string | null) => v || '—' },
+    {
+      title: 'File mô tả (PDF)',
+      key: 'tep',
+      width: 280,
+      render: (_v, record) => (
+        <div>
+          {record.tep && (
+            <div style={{ marginBottom: 6 }}>
+              <div style={{ wordBreak: 'break-word' }}>{record.tep.ten_goc}</div>
+              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                {formatBytes(record.tep.kich_thuoc)} · cập nhật {formatDateTime(record.tep.cap_nhat_luc)}
+              </Typography.Text>
+            </div>
+          )}
+          <Space size={4} wrap>
+            <TepMoTaButton dinhHuong={record} />
+            <Upload
+              accept=".pdf"
+              maxCount={1}
+              showUploadList={false}
+              beforeUpload={(file) => handleUploadTep(record, file)}
+            >
+              <Button
+                size="small"
+                loading={uploadTep.isPending && uploadTep.variables?.id === record.id}
+              >
+                {record.tep ? 'Thay file' : 'Tải lên'}
+              </Button>
+            </Upload>
+            {record.tep && (
+              <Popconfirm
+                title="Gỡ file mô tả của định hướng này?"
+                description="Sinh viên và giảng viên sẽ không xem được file nữa."
+                okText="Gỡ"
+                cancelText="Hủy"
+                okButtonProps={{ danger: true }}
+                onConfirm={() => handleDeleteTep(record)}
+              >
+                <Button
+                  size="small"
+                  danger
+                  loading={deleteTep.isPending && deleteTep.variables === record.id}
+                >
+                  Gỡ
+                </Button>
+              </Popconfirm>
+            )}
+          </Space>
+        </div>
+      ),
+    },
     { title: 'Số đề tài', dataIndex: 'so_de_tai', width: 100 },
     {
       title: 'Trạng thái',

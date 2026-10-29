@@ -90,6 +90,22 @@ Lược đồ `thesis_core` gồm 22 bảng, khớp 1-1 với 22 lớp thực th
 
 Khi chuyển dữ liệu (Alembic 0015), mọi đề tài đang hoạt động đã có cả SV và GV sinh ra một dòng phân công tương ứng, và đề tài GV đề xuất mà SV đã đăng ký còn ở `CHO_DUYET` (bước Bộ môn xác nhận của luồng cũ) được chuyển thẳng sang `DA_PHAN_CONG`. Góp ý GVHD mục 1 (quick 261014-u0j) không thêm migration: lược đồ giữ nguyên, chỉ thay đổi hành vi ứng dụng.
 
+#### `dinh_huong`
+
+| Cột | Kiểu | Null | Khóa | Mô tả |
+|---|---|---|---|---|
+| id | BIGINT | Không | PK | Định danh định hướng |
+| ma | VARCHAR(10) | Không | UNIQUE (`uk_dinh_huong_ma`) | Mã định hướng dạng H + 2 chữ số (H01, H02, ...) — phần đầu tên file đề cương |
+| ten | VARCHAR(255) | Không | — | Tên định hướng |
+| mo_ta | TEXT | Có | — | Mô tả ngắn |
+| hoat_dong | BOOLEAN | Không | — | FALSE = ngừng sử dụng: ẩn khỏi form giao đề tài, đề tài cũ giữ nguyên (không xóa định hướng) |
+| tep_ten_goc | VARCHAR(255) | Có | — | Tên gốc file PDF mô tả định hướng do Bộ môn tải lên (Alembic 0019); NULL = chưa có file |
+| tep_ten_luu_tru | VARCHAR(255) | Có | UNIQUE (`uq_dinh_huong_tep_ten_luu_tru`) | Tên file do server sinh, `DINH_HUONG/<uuid>.pdf` dưới thư mục upload (không dùng tên gốc) |
+| tep_kich_thuoc | BIGINT | Có | — | Dung lượng (byte), ≤ 20 MB như mọi file tải lên (NFR-06) |
+| tep_cap_nhat_luc | DATETIME | Có | — | Lần tải lên/thay file gần nhất (UTC) |
+
+File mô tả không lưu ở `tai_lieu_do_an` vì bảng đó bắt buộc gắn với một đề tài. Mỗi định hướng có tối đa một file: tải lên lại là thay (file cũ chỉ bị xóa khỏi đĩa sau khi commit thành công), Bộ môn có thể gỡ file; SV, GV và Bộ môn xem trực tiếp trên trình duyệt qua `GET /api/dinh-huong/{id}/tep`.
+
 #### `de_tai`
 
 | Cột | Kiểu | Null | Khóa | Mô tả |
@@ -281,13 +297,13 @@ Khi chuyển dữ liệu (Alembic 0015), mọi đề tài đang hoạt động �
 | GiangVien | giang_vien | — |
 | DotDoAn | dot_do_an | — |
 | PhanCongHuongDan | phan_cong_huong_dan | Bổ sung ở Alembic 0015 (UC0.8) |
-| DinhHuong | dinh_huong | Bổ sung ở Alembic 0016 (UC0.9) |
+| DinhHuong | dinh_huong | Bổ sung ở Alembic 0016 (UC0.9); Alembic 0019 thêm bốn cột `tep_*` cho file PDF mô tả định hướng |
 | MocTienDo | moc_tien_do | — |
 | DeTai | de_tai | — |
 | DeCuong | de_cuong | — |
 | TaiLieuDoAn | tai_lieu_do_an | — |
 | LuotDuyetDeCuong | luot_duyet_de_cuong | — |
-| LuotDuyetBoMon | luot_duyet_bo_mon | Bổ sung ở Alembic 0016 (UC2.4) |
+| LuotDuyetBoMon | luot_duyet_bo_mon | Bổ sung ở Alembic 0016 (UC2.4); Alembic 0018 bỏ hai cột `nguoi_ky`, `thoi_diem_ky` (hệ thống không còn đọc chữ ký trong bản PDF phê duyệt) |
 | BaoCaoTienDo | bao_cao_tien_do | — |
 | HoiDong | hoi_dong | — |
 | ThanhVienHoiDong | thanh_vien_hoi_dong | — |

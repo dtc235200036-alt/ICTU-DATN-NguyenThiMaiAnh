@@ -58,7 +58,7 @@ function OutlineSteps({ detail }: { detail: OutlineDetail }) {
         { title: 'Nộp đề cương' },
         { title: 'GVHD duyệt' },
         { title: 'GVHD nộp lên Bộ môn' },
-        { title: 'Bộ môn phê duyệt, ký số' },
+        { title: 'Bộ môn phê duyệt' },
         { title: 'Đã nộp về khoa' },
       ]}
     />
@@ -214,7 +214,7 @@ export default function OutlinePage() {
                                   void handleDownload(r.tai_lieu_ky_so!.id, r.tai_lieu_ky_so!.ten_goc)
                                 }
                               >
-                                ⬇ Bản đề cương đã ký số
+                                ⬇ Bản đề cương đã ký
                               </Button>
                             )}
                           </div>

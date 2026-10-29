@@ -21,8 +21,9 @@ họ tên sinh viên thật nên không dùng cho báo cáo.
    duyệt, chờ `GVHD_DA_DUYET` rồi đặt đề cương sang `DA_DUYET` bằng SQL, vì script gốc chưa theo
    luồng hai cấp.
 6. `python3 dung-trang-thai-de-cuong.py` — dựng thêm 4 đề cương của luồng hai cấp qua API
-   (đúng mẫu tên chờ nộp, sai tên tệp, chờ Bộ môn, đã phê duyệt kèm PDF ký bằng chứng thư thử
-   nghiệm `backend/tests/pdf_sign_helper.py`). Mật khẩu đọc từ container, không in ra.
+   (đúng mẫu tên chờ nộp, sai tên tệp, chờ Bộ môn, đã phê duyệt kèm bản PDF đề cương đã ký; hệ thống
+   chỉ yêu cầu tệp PDF nên script dùng luôn tệp PDF hư cấu làm bản đã ký). Mật khẩu đọc từ container,
+   không in ra.
 
 ## Chụp
 

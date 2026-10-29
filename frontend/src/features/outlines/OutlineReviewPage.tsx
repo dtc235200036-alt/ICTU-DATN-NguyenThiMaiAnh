@@ -67,7 +67,7 @@ function versionLabel(version: OutlineVersion, isNewest: boolean): string {
  * - GVHD: duyệt/từ chối (yêu cầu sửa) phiên bản mới nhất, rồi "Nộp lên Bộ môn"
  *   khi tên file đúng quy tắc và định hướng khớp.
  * - Bộ môn: tab Tất cả/Chờ duyệt/Đã duyệt/Từ chối; phê duyệt bằng cách tải lên
- *   bản PDF đã ký số (lưu vào thư mục đề cương của đợt) hoặc trả lại.
+ *   bản PDF đề cương đã ký (lưu vào thư mục đề cương của đợt) hoặc trả lại.
  */
 export default function OutlineReviewPage() {
   const user = useAuthStore((state) => state.user)
@@ -257,7 +257,7 @@ function OutlineList({
           />
           {isBoMon && (
             <Button onClick={() => void handleExport()} disabled={dotDoAnId === undefined}>
-              Tải thư mục đề cương đã ký số
+              Tải thư mục đề cương đã ký
             </Button>
           )}
         </Space>
@@ -610,8 +610,8 @@ function ActionPanel({
           description={
             <ol style={{ margin: 0, paddingLeft: 18 }}>
               <li>Kiểm tra tên file, nội dung và định hướng (mục kiểm tra ở trên).</li>
-              <li>Tải file đề cương, ký số bằng công cụ ký số (USB token, VNPT-CA, Adobe…), lưu thành PDF.</li>
-              <li>Tải bản PDF đã ký lên đây — hệ thống kiểm tra chữ ký và lưu vào thư mục đề cương của đợt.</li>
+              <li>Tải file đề cương về, ký rồi lưu thành PDF.</li>
+              <li>Tải bản PDF đã ký lên đây — hệ thống lưu vào thư mục đề cương của đợt.</li>
             </ol>
           }
         />
@@ -627,7 +627,7 @@ function ActionPanel({
             signedFile ? [{ uid: '-1', name: signedFile.name, status: 'done', size: signedFile.size }] : []
           }
         >
-          <p className="ant-upload-text">Kéo thả bản PDF đã ký số hoặc bấm để chọn</p>
+          <p className="ant-upload-text">Kéo thả bản PDF đề cương đã ký hoặc bấm để chọn</p>
         </Upload.Dragger>
         <TextArea
           rows={3}
@@ -664,7 +664,7 @@ function ActionPanel({
                     file: signedFile,
                     nhanXet: nhanXet.trim() || undefined,
                   }),
-                'Đã phê duyệt và lưu đề cương đã ký số',
+                'Đã phê duyệt và lưu đề cương đã ký',
               )
             }
           >
@@ -698,19 +698,13 @@ function BoMonHistory({
           description={
             <div>
               {r.nhan_xet && <div>{r.nhan_xet}</div>}
-              {r.nguoi_ky && (
-                <div>
-                  Chữ ký số: {r.nguoi_ky}
-                  {r.thoi_diem_ky ? ` (${formatDateTime(r.thoi_diem_ky)})` : ''}
-                </div>
-              )}
               {r.tai_lieu_ky_so && (
                 <Button
                   type="link"
                   style={{ padding: 0 }}
                   onClick={() => void onDownload(r.tai_lieu_ky_so!.id, r.tai_lieu_ky_so!.ten_goc)}
                 >
-                  ⬇ Bản đề cương đã ký số
+                  ⬇ Bản đề cương đã ký
                 </Button>
               )}
             </div>

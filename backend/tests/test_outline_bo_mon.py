@@ -1,10 +1,9 @@
 """Góp ý GVHD: định hướng thay lĩnh vực, duyệt đề cương hai cấp (GVHD -> Lãnh
-đạo bộ môn), kiểm tra tên file/định hướng, phê duyệt kèm file đã ký số và
-thư mục đề cương ký số của đợt."""
+đạo bộ môn), kiểm tra tên file/định hướng, phê duyệt kèm bản PDF đã ký và thư
+mục đề cương đã ký của đợt."""
 import io
 import zipfile
 
-from pdf_sign_helper import sign_pdf
 from sqlalchemy import select
 
 from app.core.roles import VaiTro
@@ -14,6 +13,7 @@ from app.models.tai_khoan import SinhVien
 from app.services import outline_checks
 
 _PDF_CT = "application/pdf"
+_DOCX_CT = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 
 
 def _dinh_huong(db, ma="H01", ten="Phát triển ứng dụng") -> DinhHuong:
@@ -81,23 +81,6 @@ def test_ten_file_parsing():
         assert tach is not None and tach.lop == "Lop", ten
 
 
-def test_signature_detection(pdf_bytes):
-    base = pdf_bytes(["Signed outline"])
-    assert outline_checks.doc_chu_ky_so(base) is None
-
-    signed = sign_pdf(base, signer="Tran Van A")
-    chu_ky = outline_checks.doc_chu_ky_so(signed)
-    assert chu_ky is not None
-    assert chu_ky.nguoi_ky == "Tran Van A"
-    assert chu_ky.phu_toan_bo_file is True
-    # /M (D:20261018093000+07'00') -> 02:30 UTC
-    assert chu_ky.thoi_diem_ky is not None
-    assert (chu_ky.thoi_diem_ky.hour, chu_ky.thoi_diem_ky.minute) == (2, 30)
-
-    tampered = signed + b"\n% edited after signing\n"
-    assert outline_checks.doc_chu_ky_so(tampered).phu_toan_bo_file is False
-
-
 def test_dinh_huong_catalog_rbac(client, make_account, auth_headers):
     bm = make_account(VaiTro.BO_MON)
     gv = make_account(VaiTro.GIANG_VIEN)
@@ -138,7 +121,7 @@ def test_dinh_huong_catalog_rbac(client, make_account, auth_headers):
 
 
 def test_two_level_flow_and_signed_folder(
-    client, make_account, auth_headers, make_assigned_topic, pdf_bytes, db
+    client, make_account, auth_headers, make_assigned_topic, pdf_bytes, docx_bytes, db
 ):
     sv, gv, bm, topic, ten_file = _setup(db, make_account, make_assigned_topic)
     sv_h, gv_h, bm_h = auth_headers(sv), auth_headers(gv), auth_headers(bm)
@@ -175,22 +158,15 @@ def test_two_level_flow_and_signed_folder(
     notifs = client.get("/api/notifications", headers=bm_h).json()["items"]
     assert any(n["loai"] == "DE_CUONG_NOP_BO_MON" for n in notifs)
 
-    # Phê duyệt bằng PDF chưa ký -> 422; bản ký đã bị sửa -> 422.
-    unsigned = pdf_bytes(["Outline v1 da ky"])
+    # File phê duyệt phải là PDF; hệ thống không đọc hay kiểm tra chữ ký trong file.
     resp = client.post(
         f"/api/outlines/{topic.id}/bo-mon/approve",
         headers=bm_h,
-        files={"file": (ten_file, unsigned, _PDF_CT)},
+        files={"file": (ten_file[:-4] + ".docx", docx_bytes(["Outline v1 da ky"]), _DOCX_CT)},
     )
     assert resp.status_code == 422
-    assert "chữ ký số" in resp.json()["detail"]
-    signed = sign_pdf(unsigned, signer="Pham Bo Mon")
-    resp = client.post(
-        f"/api/outlines/{topic.id}/bo-mon/approve",
-        headers=bm_h,
-        files={"file": (ten_file, signed + b"\n%x\n", _PDF_CT)},
-    )
-    assert resp.status_code == 422
+    assert "PDF" in resp.json()["detail"]
+    signed = pdf_bytes(["Outline v1 da ky"])
 
     # GVHD không được phê duyệt thay Bộ môn.
     resp = client.post(
@@ -204,20 +180,20 @@ def test_two_level_flow_and_signed_folder(
         f"/api/outlines/{topic.id}/bo-mon/approve",
         headers=bm_h,
         files={"file": (ten_file, signed, _PDF_CT)},
-        data={"nhan_xet": "Đã ký số"},
+        data={"nhan_xet": "Đã ký"},
     )
     assert resp.status_code == 200, resp.text
     final = resp.json()
     assert final["trang_thai"] == "DA_DUYET"
     review = final["luot_duyet_bo_mon"][0]
     assert review["ket_qua"] == "DA_DUYET"
-    assert review["nguoi_ky"] == "Pham Bo Mon"
+    assert "nguoi_ky" not in review
     assert review["tai_lieu_ky_so"]["loai"] == "DE_CUONG_KY_SO"
 
     sv_notifs = client.get("/api/notifications", headers=sv_h).json()["items"]
     assert any(n["loai"] == "DE_CUONG_BO_MON_DUYET" for n in sv_notifs)
 
-    # Thư mục đề cương ký số của đợt: chỉ Bộ môn tải, ZIP chứa đúng file đã ký.
+    # Thư mục đề cương đã ký của đợt: chỉ Bộ môn tải, ZIP chứa đúng file đã tải lên.
     resp = client.get(
         f"/api/outlines/export-signed?dot_do_an_id={topic.dot_do_an_id}", headers=gv_h
     )

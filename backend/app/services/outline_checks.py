@@ -1,22 +1,12 @@
-"""Các kiểm tra tự động trước khi đề cương được nộp lên Bộ môn và khi Lãnh đạo
-bộ môn phê duyệt (góp ý GVHD, mục "Lưu ý"):
+"""Các kiểm tra tự động trước khi đề cương được nộp lên Bộ môn (góp ý GVHD,
+mục "Lưu ý"):
 
 - tên file đúng quy tắc <Mã định hướng>.<MSSV>.<Họ tên>.<Lớp>.<pdf|docx>;
 - định hướng trong tên file khớp định hướng của đề tài;
-- nội dung: kết quả kiểm tra trùng lặp của phiên bản;
-- file phê duyệt có chữ ký số (PDF, chữ ký PKCS#7 nhúng trong file).
-
-Kiểm tra chữ ký số chỉ xác định file CÓ chữ ký, đọc người ký/thời điểm ký và
-phạm vi ký phủ toàn bộ file (không bị sửa sau khi ký); không xác thực chuỗi
-chứng thư tới CA gốc."""
+- nội dung: kết quả kiểm tra trùng lặp của phiên bản."""
 import re
 import unicodedata
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
-
-from cryptography import x509
-from cryptography.hazmat.primitives.serialization import pkcs7
-from cryptography.x509.oid import NameOID
 
 from app.models.de_cuong import TaiLieuDoAn
 from app.models.de_tai import DeTai
@@ -169,104 +159,3 @@ def kiem_tra_noi_dung(doc: TaiLieuDoAn | None) -> CheckItem:
         dat=True,
         chi_tiet=f"Trùng cao nhất {ty_le:.1f}% (ngưỡng {tom_tat.nguong_ap_dung:.1f}%)",
     )
-
-
-# --- Chữ ký số PDF -----------------------------------------------------------
-
-_BYTE_RANGE_RE = re.compile(rb"/ByteRange\s*\[\s*(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s*\]")
-_M_RE = re.compile(rb"/M\s*\(D:(\d{14})(?:([Zz+\-])(\d{2})?'?(\d{2})?)?")
-
-
-@dataclass
-class ChuKySo:
-    nguoi_ky: str | None
-    thoi_diem_ky: datetime | None
-    phu_toan_bo_file: bool
-
-
-def _do_dai_der(data: bytes) -> int | None:
-    """Độ dài SEQUENCE DER ở đầu `data` (bỏ phần đệm 0 sau chữ ký)."""
-    if len(data) < 2 or data[0] != 0x30:
-        return None
-    first = data[1]
-    if first < 0x80:
-        return 2 + first
-    n = first & 0x7F
-    if n == 0 or n > 4 or len(data) < 2 + n:
-        return None
-    return 2 + n + int.from_bytes(data[2 : 2 + n], "big")
-
-
-def _ten_nguoi_ky(der: bytes) -> str | None:
-    try:
-        certs = pkcs7.load_der_pkcs7_certificates(der)
-    except ValueError:
-        return None
-    if not certs:
-        return None
-
-    def _la_ca(cert: x509.Certificate) -> bool:
-        try:
-            return cert.extensions.get_extension_for_class(x509.BasicConstraints).value.ca
-        except x509.ExtensionNotFound:
-            return False
-
-    cert = next((c for c in certs if not _la_ca(c)), certs[0])
-    cn = cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
-    return str(cn[0].value) if cn else cert.subject.rfc4514_string()
-
-
-def doc_chu_ky_so(content: bytes) -> ChuKySo | None:
-    """Chữ ký cuối cùng trong file PDF (None nếu không có chữ ký nào hợp lệ)."""
-    matches = list(_BYTE_RANGE_RE.finditer(content))
-    for m in reversed(matches):
-        a, b, c, d = (int(x) for x in m.groups())
-        if a != 0 or b <= 0 or c <= b or c + d > len(content):
-            continue
-        contents = content[b:c].strip()
-        if not (contents.startswith(b"<") and contents.endswith(b">")):
-            continue
-        try:
-            raw = bytes.fromhex(contents[1:-1].decode("ascii"))
-        except ValueError:
-            continue
-        do_dai = _do_dai_der(raw)
-        if do_dai is None or do_dai > len(raw):
-            continue
-        nguoi_ky = _ten_nguoi_ky(raw[:do_dai])
-        if nguoi_ky is None:
-            continue
-        thoi_diem = None
-        vung = content[max(0, m.start() - 4096) : m.end() + 4096]
-        m_time = _M_RE.search(vung)
-        if m_time is not None:
-            thoi_diem = _thoi_diem_utc(m_time)
-        return ChuKySo(
-            nguoi_ky=nguoi_ky,
-            thoi_diem_ky=thoi_diem,
-            phu_toan_bo_file=(c + d == len(content.rstrip(b"\r\n")) or c + d == len(content)),
-        )
-    return None
-
-
-def _thoi_diem_utc(m: re.Match) -> datetime | None:
-    """`/M (D:YYYYMMDDHHmmSS+07'00')` -> UTC naive (quy ước lưu thời điểm của hệ thống)."""
-    try:
-        local = datetime.strptime(m.group(1).decode(), "%Y%m%d%H%M%S")
-    except ValueError:
-        return None
-    dau = (m.group(2) or b"Z").decode()
-    if dau in ("Z", "z"):
-        return local
-    gio = int(m.group(3) or 0)
-    phut = int(m.group(4) or 0)
-    lech = timedelta(hours=gio, minutes=phut)
-    tz = timezone(lech if dau == "+" else -lech)
-    return local.replace(tzinfo=tz).astimezone(timezone.utc).replace(tzinfo=None)
-
-
-def mo_ta_chu_ky(chu_ky: ChuKySo) -> str:
-    parts = [f"Người ký: {chu_ky.nguoi_ky}"]
-    if chu_ky.thoi_diem_ky is not None:
-        parts.append(f"lúc {chu_ky.thoi_diem_ky:%d/%m/%Y %H:%M}")
-    return ", ".join(parts)

@@ -45,8 +45,6 @@ class LuotDuyetBoMon <<Entity>> {
   +ketQua : KetQuaDuyetBoMon
   +nhanXet : String
   +thoiDiem : DateTime
-  +nguoiKy : String
-  +thoiDiemKy : DateTime
 }
 
 class MocTienDo <<Entity>> {
@@ -70,7 +68,7 @@ TaiLieuDoAn "1" -- "0..1" LuotDuyetDeCuong : "phiên bản được duyệt"
 GiangVien "1" -- "*" LuotDuyetDeCuong : "thực hiện"
 DeCuong "1" -- "*" LuotDuyetBoMon : "Bộ môn phê duyệt"
 TaiLieuDoAn "1" -- "*" LuotDuyetBoMon : "phiên bản nộp lên"
-TaiLieuDoAn "0..1" -- "0..1" LuotDuyetBoMon : "bản PDF ký số"
+TaiLieuDoAn "0..1" -- "0..1" LuotDuyetBoMon : "bản PDF đã ký"
 TaiKhoan "1" -- "*" LuotDuyetBoMon : "thực hiện"
 DotDoAn "1" -- "*" MocTienDo : "định nghĩa mốc"
 DeTai "1" -- "*" BaoCaoTienDo : "nộp theo mốc"

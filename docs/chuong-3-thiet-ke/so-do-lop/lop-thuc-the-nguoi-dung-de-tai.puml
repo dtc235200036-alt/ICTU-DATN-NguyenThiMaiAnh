@@ -49,6 +49,10 @@ class DinhHuong <<Entity>> {
   +ten : String
   +moTa : String
   +hoatDong : Boolean
+  +tepTenGoc : String
+  +tepTenLuuTru : String
+  +tepKichThuoc : Long
+  +tepCapNhatLuc : DateTime
 }
 
 class DeTai <<Entity>> {

@@ -4,7 +4,7 @@
 
 \textit{Chương này trình bày thiết kế hệ thống dựa trên các yêu cầu đã phân tích ở chương 2. Các mục lần lượt trình bày sơ đồ lớp thực thể, thiết kế cơ sở dữ liệu, kiến trúc hướng dịch vụ mô tả bằng các sơ đồ UML và thiết kế giao diện cho ba vai trò.}
 
-Các sơ đồ trong chương dùng ký pháp UML 2.5.1~\cite{uml251} và được vẽ bằng PlantUML~\cite{plantuml} (mục 1.8). Thiết kế được đối chiếu với mã nguồn ở phiên bản cuối: schema \texttt{thesis\_core} sau 16 migration Alembic và schema \texttt{thesis\_ai} sau 2 migration. Mục~\ref{sec:c3-lop} trình bày mô hình miền gồm 22 lớp thực thể. Mục~\ref{sec:c3-csdl} ánh xạ các lớp này thành bảng và nêu các ràng buộc toàn vẹn. Mục~\ref{sec:c3-kien-truc} mô tả kiến trúc ba thành phần bằng sơ đồ thành phần, triển khai, tuần tự và trạng thái. Mục~\ref{sec:c3-giao-dien} trình bày 16 màn hình thiết kế.
+Các sơ đồ trong chương dùng ký pháp UML 2.5.1~\cite{uml251} và được vẽ bằng PlantUML~\cite{plantuml} (mục 1.8). Thiết kế được đối chiếu với mã nguồn ở phiên bản cuối: schema \texttt{thesis\_core} sau 19 migration Alembic và schema \texttt{thesis\_ai} sau 3 migration. Mục~\ref{sec:c3-lop} trình bày mô hình miền gồm 22 lớp thực thể. Mục~\ref{sec:c3-csdl} ánh xạ các lớp này thành bảng và nêu các ràng buộc toàn vẹn. Mục~\ref{sec:c3-kien-truc} mô tả kiến trúc ba thành phần bằng sơ đồ thành phần, triển khai, tuần tự và trạng thái. Mục~\ref{sec:c3-giao-dien} trình bày 16 màn hình thiết kế.
 
 %=====================================================================
 \section{Sơ đồ lớp thực thể}\label{sec:c3-lop}
@@ -53,7 +53,7 @@ Mô hình có bốn đặc điểm chính:
 \begin{itemize}
     \item \textit{Tách tài khoản khỏi hồ sơ.} TaiKhoan giữ thông tin đăng nhập và vai trò; SinhVien và GiangVien giữ hồ sơ (mã số, lớp, học vị). Mỗi tài khoản có tối đa một hồ sơ. Tài khoản Bộ môn không có hồ sơ riêng.
     \item \textit{Đề tài là trung tâm.} Đề cương, tài liệu nộp, báo cáo tiến độ, lịch bảo vệ, bản ghi kho và kết quả kiểm tra tên đều gắn với một DeTai.
-    \item \textit{Một lớp cho mọi tệp nộp.} TaiLieuDoAn biểu diễn một phiên bản tệp của bất kỳ loại nào: đề cương, đề cương đã ký số, báo cáo tiến độ, báo cáo cuối, tệp kho và tệp đính kèm đề tài. Nhờ đó việc lưu trữ, trích xuất văn bản và kiểm tra trùng lặp dùng chung một cách xử lý.
+    \item \textit{Một lớp cho mọi tệp nộp.} TaiLieuDoAn biểu diễn một phiên bản tệp của bất kỳ loại nào: đề cương, bản đề cương đã ký, báo cáo tiến độ, báo cáo cuối, tệp kho và tệp đính kèm đề tài. Nhờ đó việc lưu trữ, trích xuất văn bản và kiểm tra trùng lặp dùng chung một cách xử lý.
     \item \textit{Lớp liên kết tường minh.} Quan hệ nhiều--nhiều được mô hình hóa thành lớp riêng có thuộc tính: PhanCongHuongDan (sinh viên và giảng viên trong một đợt), ThanhVienHoiDong (giảng viên trong hội đồng, kèm vai trò) và DiemBaoVe (giảng viên chấm một lịch bảo vệ).
 \end{itemize}
 
@@ -72,7 +72,7 @@ Các lớp trong nhóm:
 \begin{itemize}
     \item \textit{DotDoAn} là một đợt đồ án của một khóa (ví dụ K22A), có ngày bắt đầu, ngày kết thúc và trạng thái đang mở hoặc đã đóng. Chỉ đợt đang mở mới nhận thao tác giao đề tài.
     \item \textit{PhanCongHuongDan} ghi nhận việc Bộ môn gán sinh viên cho giảng viên hướng dẫn (GVHD) ở đầu đợt (UC0.8). Mỗi sinh viên có đúng một GVHD trong một đợt. Tập sinh viên được gán cho một giảng viên tạo thành \textit{lớp hướng dẫn} của giảng viên đó.
-    \item \textit{DinhHuong} là danh mục định hướng đề tài do Bộ môn quản lý (UC0.9), mặc định gồm H01 (Phát triển ứng dụng) và H02 (Hệ thống AI và ứng dụng). Lớp này thay cho trường lĩnh vực nhập tự do. Mã định hướng là phần đầu của tên tệp đề cương theo mẫu \textless{}Mã định hướng\textgreater{}.\textless{}MSSV\textgreater{}.\textless{}Họ tên\textgreater{}.\textless{}Lớp\textgreater{}, nên hệ thống kiểm tra được tên tệp có khớp với định hướng của đề tài hay không.
+    \item \textit{DinhHuong} là danh mục định hướng đề tài do Bộ môn quản lý (UC0.9), mặc định gồm H01 (Phát triển ứng dụng) và H02 (Hệ thống AI và ứng dụng). Lớp này thay cho trường lĩnh vực nhập tự do. Mã định hướng là phần đầu của tên tệp đề cương theo mẫu \textless{}Mã định hướng\textgreater{}.\textless{}MSSV\textgreater{}.\textless{}Họ tên\textgreater{}.\textless{}Lớp\textgreater{}, nên hệ thống kiểm tra được tên tệp có khớp với định hướng của đề tài hay không. Mỗi định hướng có thể kèm một tệp PDF mô tả do Bộ môn tải lên để sinh viên và giảng viên xem trực tiếp trên trình duyệt.
     \item \textit{DeTai} do GVHD tạo cho một sinh viên trong lớp hướng dẫn của mình. Đề tài thuộc một đợt, có một định hướng, và ở một trong hai trạng thái: bản nháp hoặc đã phân công. Thuộc tính \path{sinh_vien_id_dang_hoat_dong} là thuộc tính dẫn xuất, dùng để bảo đảm mỗi sinh viên có tối đa một đề tài đang hoạt động (mục~\ref{subsec:c3-rang-buoc}).
     \item \textit{CauHinhNguong} lưu bốn ngưỡng cảnh báo trùng lặp do Bộ môn cấu hình (UC0.4): ngưỡng tên đề tài, ngưỡng tài liệu theo một đồ án, ngưỡng tổng mọi đồ án và ngưỡng từng đoạn.
     \item \textit{ThongBao} là thông báo trong ứng dụng gửi tới một tài khoản, có loại, nội dung, liên kết tới màn hình liên quan và cờ đã đọc.
@@ -94,7 +94,7 @@ Các lớp trong nhóm:
     \item \textit{DeCuong} là đề cương của một đề tài. Mỗi đề tài có tối đa một đề cương. Đề cương giữ trạng thái của quy trình duyệt hai cấp (mục~\ref{subsec:c3-trang-thai}) và kết quả gần nhất của Bộ môn.
     \item \textit{TaiLieuDoAn} là một phiên bản tệp. Mỗi lần sinh viên nộp đề cương tạo một phiên bản mới, phiên bản cũ được giữ nguyên để xem lại lịch sử (UC2.5). Lớp lưu tên tệp gốc, tên lưu trữ, định dạng, văn bản đã trích xuất và thời điểm tài liệu được đưa vào chỉ mục của dịch vụ AI.
     \item \textit{LuotDuyetDeCuong} là kết luận của GVHD cho một phiên bản đề cương: đã duyệt hoặc yêu cầu sửa, kèm nhận xét (UC2.2). Mỗi phiên bản có tối đa một lượt duyệt của GVHD.
-    \item \textit{LuotDuyetBoMon} là kết luận của Lãnh đạo bộ môn cho phiên bản GVHD đã nộp lên: phê duyệt hoặc trả lại (UC2.4). Khi phê duyệt, lượt duyệt tham chiếu tới bản PDF đã ký số (một TaiLieuDoAn loại \path{DE_CUONG_KY_SO}) cùng tên người ký và thời điểm ký đọc được từ chữ ký số.
+    \item \textit{LuotDuyetBoMon} là kết luận của Lãnh đạo bộ môn cho phiên bản GVHD đã nộp lên: phê duyệt hoặc trả lại (UC2.4). Khi phê duyệt, lượt duyệt tham chiếu tới bản PDF đề cương đã ký mà Lãnh đạo bộ môn tải lên (một TaiLieuDoAn loại \path{DE_CUONG_KY_SO}, tên loại giữ từ thiết kế ban đầu để tương thích dữ liệu). Hệ thống không đọc chữ ký trong tệp nên không lưu thông tin nào về người ký hay thời điểm ký.
     \item \textit{MocTienDo} là một mốc báo cáo của đợt, có thứ tự và hạn nộp (UC3.1).
     \item \textit{BaoCaoTienDo} là báo cáo của một đề tài tại một mốc, kèm nhận xét và đánh giá của GVHD (đạt, cần cải thiện, chưa đạt).
 \end{itemize}
@@ -165,7 +165,7 @@ LoaiNguon & \path{HE_THONG}, \path{IMPORT} & DoAnKho, nguon \\
 \hline
 TrangThaiIndex & \path{CHUA_INDEX}, \path{DA_INDEX} & DoAnKho, trang\_thai\_index \\
 \hline
-LoaiCauHinhNguong & \path{NGUONG_TEN_DE_TAI}, \path{NGUONG_TAI_LIEU}, \path{NGUONG_DOAN_TRUNG} & CauHinhNguong, loai \\
+LoaiCauHinhNguong & \path{NGUONG_TEN_DE_TAI}, \path{NGUONG_TAI_LIEU}, \path{NGUONG_TONG_TAI_LIEU}, \path{NGUONG_DOAN_TRUNG} & CauHinhNguong, loai \\
 \hline
 LoaiThongBao & \path{PHAN_CONG_GVHD}, \path{DE_TAI_PHAN_CONG}, \path{DE_CUONG_MOI}, \path{DE_CUONG_DUYET}, \path{DE_CUONG_YEU_CAU_SUA}, \path{DE_CUONG_NOP_BO_MON}, \path{DE_CUONG_BO_MON_DUYET}, \path{DE_CUONG_BO_MON_TRA_LAI}, \path{TIEN_DO_NHAN_XET}, \path{HOI_DONG_PHAN_CONG}, \path{LICH_BAO_VE}, \path{KET_QUA_BAO_VE}; giá trị cũ: \path{DE_TAI_CHO_DUYET}, \path{DE_TAI_DUYET}, \path{DE_TAI_TU_CHOI} & ThongBao, loai \\
 \hline
@@ -221,7 +221,7 @@ DotDoAn & \path{dot_do_an} & \\
 \hline
 PhanCongHuongDan & \path{phan_cong_huong_dan} & Bổ sung ở migration 0015 \\
 \hline
-DinhHuong & \path{dinh_huong} & Bổ sung ở migration 0016 \\
+DinhHuong & \path{dinh_huong} & Bổ sung ở migration 0016; bốn cột tệp mô tả thêm ở migration 0019 \\
 \hline
 MocTienDo & \path{moc_tien_do} & \\
 \hline
@@ -233,7 +233,7 @@ TaiLieuDoAn & \path{tai_lieu_do_an} & \\
 \hline
 LuotDuyetDeCuong & \path{luot_duyet_de_cuong} & \\
 \hline
-LuotDuyetBoMon & \path{luot_duyet_bo_mon} & Bổ sung ở migration 0016 \\
+LuotDuyetBoMon & \path{luot_duyet_bo_mon} & Bổ sung ở migration 0016; hai cột thông tin chữ ký bỏ ở migration 0018 \\
 \hline
 BaoCaoTienDo & \path{bao_cao_tien_do} & \\
 \hline
@@ -459,11 +459,7 @@ Bảng \path{de_tai} có thêm chỉ mục (\path{dot_do_an_id}, \path{trang_tha
 \hline
 \path{thoi_diem} & \texttt{DATETIME} & NN & Thời điểm phê duyệt hoặc trả lại \\
 \hline
-\path{tai_lieu_ky_so_id} & \texttt{BIGINT} & FK & Bản PDF đã ký số (tài liệu loại \path{DE_CUONG_KY_SO}) \\
-\hline
-\path{nguoi_ky} & \texttt{VARCHAR(255)} & & Tên người ký đọc từ chữ ký số \\
-\hline
-\path{thoi_diem_ky} & \texttt{DATETIME} & & Thời điểm ký đọc từ chữ ký số \\
+\path{tai_lieu_ky_so_id} & \texttt{BIGINT} & FK & Bản PDF đề cương đã ký khi phê duyệt (tài liệu loại \path{DE_CUONG_KY_SO}); NULL khi trả lại \\
 \hline
 \end{longtable}
 }
@@ -570,7 +566,7 @@ Ngưỡng áp dụng được lưu cùng kết quả, nên khi Bộ môn đổi 
 \hline
 \path{phan_cong_huong_dan} & \path{dot_do_an_id}, \path{sinh_vien_id}, \path{giang_vien_id}, \path{thoi_diem} & UQ (\path{dot_do_an_id}, \path{sinh_vien_id}) \\
 \hline
-\path{dinh_huong} & \path{ma} (H01, H02\ldots), \path{ten}, \path{mo_ta}, \path{hoat_dong} (ẩn định hướng ngừng dùng mà không xóa) & UQ \path{ma} \\
+\path{dinh_huong} & \path{ma} (H01, H02\ldots), \path{ten}, \path{mo_ta}, \path{hoat_dong} (ẩn định hướng ngừng dùng mà không xóa); \path{tep_ten_goc}, \path{tep_ten_luu_tru}, \path{tep_kich_thuoc}, \path{tep_cap_nhat_luc} (tệp PDF mô tả định hướng, rỗng khi chưa có) & UQ \path{ma}, UQ \path{tep_ten_luu_tru} \\
 \hline
 \path{moc_tien_do} & \path{dot_do_an_id}, \path{ten_moc}, \path{thu_tu}, \path{han_nop} & Chỉ mục (\path{dot_do_an_id}, \path{thu_tu}) \\
 \hline
@@ -651,6 +647,8 @@ Bảng~\ref{tab:c3-rang-buoc} tóm tắt các ràng buộc UNIQUE còn lại và
 \path{loai} & \path{cau_hinh_nguong} & Mỗi loại ngưỡng có đúng một giá trị hiện hành \\
 \hline
 \path{ma} & \path{dinh_huong} & Mã định hướng không trùng \\
+\hline
+\path{tep_ten_luu_tru} & \path{dinh_huong} & Hai định hướng không dùng chung một tệp mô tả \\
 \hline
 \end{longtable}
 }
@@ -868,7 +866,7 @@ Ba đối tượng có vòng đời quan trọng nhất là đề tài, đề c�
     \label{fig:c3-trang-thai-de-tai}
 \end{figure}
 
-\textbf{Đề cương} (Hình~\ref{fig:c3-trang-thai-de-cuong}). Đề cương đi qua hai cấp duyệt: GVHD duyệt nội dung, sau đó Lãnh đạo bộ môn phê duyệt bản đã ký số để nộp về khoa. Bảng~\ref{tab:c3-chuyen-de-cuong} liệt kê các bước chuyển trạng thái.
+\textbf{Đề cương} (Hình~\ref{fig:c3-trang-thai-de-cuong}). Đề cương đi qua hai cấp duyệt: GVHD duyệt nội dung, sau đó Lãnh đạo bộ môn phê duyệt bằng bản đề cương đã ký để nộp về khoa. Bảng~\ref{tab:c3-chuyen-de-cuong} liệt kê các bước chuyển trạng thái.
 
 \begin{figure}[H]
     \centering
@@ -899,7 +897,7 @@ Ba đối tượng có vòng đời quan trọng nhất là đề tài, đề c�
 \hline
 \path{GVHD_DA_DUYET} & \path{CHO_BO_MON_DUYET} & GVHD & Nộp lên Bộ môn (UC2.3) khi tên tệp đúng mẫu và mã định hướng khớp đề tài. Nếu lỗi duy nhất là tên tệp, GVHD có thể đổi tên theo mẫu rồi nộp \\
 \hline
-\path{CHO_BO_MON_DUYET} & \path{DA_DUYET} & Bộ môn & Phê duyệt (UC2.4): tải lên bản PDF có chữ ký số phủ toàn bộ nội dung tệp; bản này được lưu với loại \path{DE_CUONG_KY_SO} \\
+\path{CHO_BO_MON_DUYET} & \path{DA_DUYET} & Bộ môn & Phê duyệt (UC2.4): tải lên bản PDF đề cương đã ký, chỉ yêu cầu đúng định dạng PDF; bản này được lưu với loại \path{DE_CUONG_KY_SO} \\
 \hline
 \path{CHO_BO_MON_DUYET} & \path{YEU_CAU_SUA} & Bộ môn & Trả lại (UC2.4) kèm nhận xét bắt buộc \\
 \hline
@@ -908,7 +906,7 @@ Ba đối tượng có vòng đời quan trọng nhất là đề tài, đề c�
 \end{longtable}
 }
 
-\path{DA_DUYET} là trạng thái cuối. Báo cáo tiến độ và bảo vệ chỉ mở cho đề tài có đề cương ở trạng thái này. Khi kiểm tra chữ ký số, hệ thống xác nhận tệp có chữ ký và vùng ký phủ toàn bộ tệp, rồi đọc tên người ký và thời điểm ký; hệ thống không xác minh chuỗi chứng thư của tổ chức cấp chứng thư. Bộ môn có thể tải về toàn bộ đề cương đã ký số của một đợt dưới dạng một tệp nén để nộp về khoa (phần mở rộng của UC2.4).
+\path{DA_DUYET} là trạng thái cuối. Báo cáo tiến độ và bảo vệ chỉ mở cho đề tài có đề cương ở trạng thái này. Hệ thống không đọc hay xác minh chữ ký trong bản PDF tải lên khi phê duyệt; việc ký (ký tay rồi quét, hoặc ký bằng công cụ bên ngoài) thuộc trách nhiệm của Lãnh đạo bộ môn. Bộ môn có thể tải về toàn bộ đề cương đã ký của một đợt dưới dạng một tệp nén để nộp về khoa (phần mở rộng của UC2.4).
 
 \textbf{Kết quả kiểm tra trùng lặp} (Hình~\ref{fig:c3-trang-thai-kiem-tra}). Kết quả kiểm tra tài liệu bắt đầu ở \path{DANG_KIEM_TRA} và kết thúc ở \path{HOAN_TAT} hoặc \path{LOI}. Thiết kế giữ bất biến: bản ghi không ở mãi trạng thái đang kiểm tra. Tác vụ nền luôn kết thúc bằng một trong hai trạng thái cuối. Nếu tiến trình Web API khởi động lại giữa chừng, lần đọc kết quả kế tiếp sẽ chuyển bản ghi đã quá 300 giây sang \path{LOI}. Từ \path{LOI}, GVHD hoặc Bộ môn có thể yêu cầu kiểm tra lại. Kết quả kiểm tra tên được tạo thẳng ở \path{HOAN_TAT} hoặc \path{LOI} vì chạy đồng bộ.
 
@@ -1140,7 +1138,7 @@ Các mục tiếp theo trình bày từng màn hình theo thứ tự của quy t
     \label{fig:c3-mh-08}
 \end{figure}
 
-\textbf{MH-09 -- Duyệt đề cương} (Hình~\ref{fig:c3-mh-09}). Màn hình phục vụ cả hai cấp duyệt. Phần trên dành cho GVHD: nội dung tóm tắt của phiên bản mới nhất, bảng kiểm tra trước khi nộp lên khoa (tên tệp đúng mẫu, mã định hướng khớp đề tài, trích xuất được nội dung), ô nhận xét và hai nút yêu cầu sửa hoặc duyệt. Bên phải là kết quả kiểm tra trùng lặp với tỷ lệ tổng, ngưỡng áp dụng và các đồ án trùng nhiều nhất. Khối giữa minh họa trạng thái khi kết quả chưa có: GVHD vẫn duyệt được. Khối cuối minh họa hai trạng thái sau: GVHD nộp đề cương đã duyệt lên Bộ môn, và Lãnh đạo bộ môn tải lên bản PDF đã ký số để phê duyệt hoặc trả lại kèm nhận xét.
+\textbf{MH-09 -- Duyệt đề cương} (Hình~\ref{fig:c3-mh-09}). Màn hình phục vụ cả hai cấp duyệt. Phần trên dành cho GVHD: nội dung tóm tắt của phiên bản mới nhất, bảng kiểm tra trước khi nộp lên khoa (tên tệp đúng mẫu, mã định hướng khớp đề tài, trích xuất được nội dung), ô nhận xét và hai nút yêu cầu sửa hoặc duyệt. Bên phải là kết quả kiểm tra trùng lặp với tỷ lệ tổng, ngưỡng áp dụng và các đồ án trùng nhiều nhất. Khối giữa minh họa trạng thái khi kết quả chưa có: GVHD vẫn duyệt được. Khối cuối minh họa hai trạng thái sau: GVHD nộp đề cương đã duyệt lên Bộ môn, và Lãnh đạo bộ môn tải lên bản PDF đề cương đã ký để phê duyệt hoặc trả lại kèm nhận xét.
 
 \begin{figure}[H]
     \centering

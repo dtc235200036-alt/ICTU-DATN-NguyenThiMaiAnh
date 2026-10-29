@@ -3,15 +3,13 @@
 4 SV trong lớp hướng dẫn của GV011 (không thuộc 5 SV demo):
   A: tên file đúng mẫu, GVHD đã duyệt -> chờ GVHD nộp lên Bộ môn
   B: tên file sai họ tên (không dấu), GVHD đã duyệt -> chưa nộp được, có nút đổi tên
-  C: GVHD đã nộp lên Bộ môn -> chờ Bộ môn phê duyệt (tải PDF ký số)
-  D: Bộ môn đã phê duyệt kèm PDF ký số -> DA_DUYET
+  C: GVHD đã nộp lên Bộ môn -> chờ Bộ môn phê duyệt (tải bản PDF đề cương đã ký)
+  D: Bộ môn đã phê duyệt kèm bản PDF đề cương đã ký -> DA_DUYET
 Mật khẩu đọc từ container api, không in ra."""
-import json, os, ssl, subprocess, sys, time, uuid, urllib.request, urllib.error
+import json, os, ssl, subprocess, time, uuid, urllib.request, urllib.error
 L = os.environ["L"]
 BASE = f"https://localhost:{os.environ['HTTPS_PORT']}"
 CTX = ssl._create_unverified_context()
-sys.path.insert(0, f"{L}/backend/tests")
-from pdf_sign_helper import sign_pdf  # noqa: E402
 
 PW = subprocess.run(["docker", "compose", "-f", f"{L}/deploy/docker-compose.yml", "exec", "-T", "api",
                      "printenv", "SEED_DEFAULT_PASSWORD"], capture_output=True, text=True, cwd=L).stdout.strip()
@@ -85,8 +83,8 @@ for (key, ten, ma_dh, tep, kieu), sv in zip(plan, free):
     if key in ("C", "D"):
         s, d = req("POST", f"/api/outlines/{tid}/forward", gv); print(key, "nop Bo mon", s, (d or {}).get("detail") if s != 200 else "")
     if key == "D":
-        base = content
-        signed = sign_pdf(base, "Lãnh đạo Bộ môn (chứng thư thử nghiệm)")
+        # Hệ thống chỉ yêu cầu bản phê duyệt là PDF, không đọc chữ ký: dùng luôn tệp PDF hư cấu của SV.
+        signed = content
         s, d = req("POST", f"/api/outlines/{tid}/bo-mon/approve", bm, files={"file": (ten_file.rsplit('.', 1)[0] + ".pdf", signed, "application/pdf")}, fields={"nhan_xet": "Đồng ý phê duyệt."})
         print(key, "Bo mon phe duyet", s, (d or {}).get("detail") if s != 200 else "")
     out[key] = {"de_tai_id": tid, "ma_sv": ma}

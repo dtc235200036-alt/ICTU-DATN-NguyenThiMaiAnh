@@ -1,6 +1,14 @@
 from pydantic import BaseModel, Field
 
-from app.schemas.common import NFCModel
+from app.schemas.common import NFCModel, UtcDateTime
+
+
+class TepDinhHuongOut(BaseModel):
+    """0019: file PDF mô tả định hướng — xem/tải qua GET /api/dinh-huong/{id}/tep."""
+
+    ten_goc: str
+    kich_thuoc: int
+    cap_nhat_luc: UtcDateTime
 
 
 class DinhHuongOut(BaseModel):
@@ -10,6 +18,7 @@ class DinhHuongOut(BaseModel):
     mo_ta: str | None = None
     hoat_dong: bool
     so_de_tai: int = 0
+    tep: TepDinhHuongOut | None = None
 
 
 class DinhHuongIn(NFCModel):

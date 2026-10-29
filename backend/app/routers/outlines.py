@@ -51,7 +51,7 @@ def export_signed_outlines(
     _user: CurrentUser = Depends(require_role(VaiTro.BO_MON)),
     db: Session = Depends(get_db),
 ) -> Response:
-    """Thư mục đề cương đã ký số của đợt (ZIP) để nộp về khoa."""
+    """Thư mục đề cương đã ký của đợt (ZIP) để nộp về khoa."""
     ten_zip, data = outlines_service.export_signed_zip(db, dot_do_an_id)
     return Response(
         content=data,
@@ -125,7 +125,7 @@ def bo_mon_approve_outline(
     user: CurrentUser = Depends(require_role(VaiTro.BO_MON)),
     db: Session = Depends(get_db),
 ) -> OutlineDetail:
-    """Lãnh đạo bộ môn phê duyệt kèm bản PDF đã ký số."""
+    """Lãnh đạo bộ môn phê duyệt kèm bản PDF đề cương đã ký (chỉ kiểm tra là PDF)."""
     vf = documents.read_and_validate(file)
     return outlines_service.bo_mon_approve(db, user, de_tai_id, vf, nhan_xet)
 

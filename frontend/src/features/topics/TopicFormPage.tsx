@@ -9,6 +9,7 @@ import { useMyStudents } from '../assignments/api'
 import { useCohorts } from '../cohorts/api'
 import ForbiddenPage from '../auth/ForbiddenPage'
 import { dinhHuongLabel, useDinhHuong } from '../dinh-huong/api'
+import TepMoTaButton from '../dinh-huong/TepMoTaButton'
 import TitleCheckAlert from './TitleCheckAlert'
 import {
   useAttachTopicFile,
@@ -61,6 +62,8 @@ export default function TopicFormPage() {
   const checkTitleMutation = useCheckTitle()
   const attachMutation = useAttachTopicFile()
   const { data: dinhHuong, isLoading: dinhHuongLoading } = useDinhHuong(true)
+  const selectedDinhHuongId = Form.useWatch('dinh_huong_id', form)
+  const selectedDinhHuong = dinhHuong?.find((d) => d.id === selectedDinhHuongId)
   const [tepDinhKem, setTepDinhKem] = useState<File | null>(null)
 
   // UC0.6/FR-DT-02: kết quả kiểm tra trùng tên tức thời (chưa lưu — bản lưu
@@ -336,7 +339,14 @@ export default function TopicFormPage() {
         <Form.Item
           label="Định hướng"
           name="dinh_huong_id"
-          extra="Mã định hướng là phần đầu tên file đề cương của sinh viên (vd. H01.MSSV.Họ tên.Lớp)."
+          extra={
+            <>
+              Mã định hướng là phần đầu tên file đề cương của sinh viên (vd. H01.MSSV.Họ tên.Lớp).
+              {selectedDinhHuong?.tep && (
+                <TepMoTaButton dinhHuong={selectedDinhHuong} label="Xem file mô tả" type="link" />
+              )}
+            </>
+          }
           rules={[{ required: true, message: 'Vui lòng chọn định hướng' }]}
         >
           <Select

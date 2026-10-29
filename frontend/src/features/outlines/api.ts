@@ -62,8 +62,6 @@ export interface BoMonReviewOut {
   nguoi_duyet: string
   tai_lieu_id: number
   tai_lieu_ky_so: DocumentOut | null
-  nguoi_ky: string | null
-  thoi_diem_ky: string | null
 }
 
 export interface CheckItem {
@@ -207,7 +205,7 @@ export function useRenameOutlineFile() {
   })
 }
 
-/** Lãnh đạo bộ môn phê duyệt kèm bản PDF đã ký số. */
+/** Lãnh đạo bộ môn phê duyệt kèm bản PDF đề cương đã ký. */
 export function useBoMonApprove() {
   return useOutlineMutation(
     async ({ deTaiId, file, nhanXet }: { deTaiId: number; file: File; nhanXet?: string }) => {
@@ -232,7 +230,7 @@ export function useBoMonReturn() {
   })
 }
 
-/** Thư mục đề cương đã ký số của một đợt (ZIP) — nộp về khoa. */
+/** Thư mục đề cương đã ký của một đợt (ZIP) — nộp về khoa. */
 export function exportSignedOutlines(dotDoAnId: number) {
   return downloadFile(
     `/outlines/export-signed?dot_do_an_id=${dotDoAnId}`,

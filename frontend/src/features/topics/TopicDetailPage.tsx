@@ -16,7 +16,7 @@ import { getErrorMessage } from '../../api/client'
 import { DownloadError, downloadFile } from '../../api/download'
 import { formatBytes, formatDate } from '../../utils/format'
 import ForbiddenPage from '../auth/ForbiddenPage'
-import { dinhHuongLabel } from '../dinh-huong/api'
+import DinhHuongInfo from '../dinh-huong/DinhHuongInfo'
 import { TRANG_THAI_DE_TAI } from './constants'
 import { useSubmitTopic, useTopic } from './api'
 import type { SavedChiTietTrungLap } from './api'
@@ -99,7 +99,9 @@ export default function TopicDetailPage() {
         <Descriptions.Item label="Đợt đồ án">
           {topic.dot_do_an.ten_dot} ({topic.dot_do_an.khoa})
         </Descriptions.Item>
-        <Descriptions.Item label="Định hướng">{dinhHuongLabel(topic.dinh_huong)}</Descriptions.Item>
+        <Descriptions.Item label="Định hướng">
+          <DinhHuongInfo value={topic.dinh_huong} />
+        </Descriptions.Item>
         <Descriptions.Item label="Giảng viên hướng dẫn">
           {topic.giang_vien_huong_dan
             ? `${topic.giang_vien_huong_dan.ho_ten}${

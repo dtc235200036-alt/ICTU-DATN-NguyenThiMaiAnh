@@ -11,8 +11,8 @@ rectangle "UC2 – Quản lý đề cương" {
   usecase "UC2.2 – Duyệt hoặc yêu cầu sửa đề cương" as UC2_2
   usecase "UC2.3 – Nộp đề cương lên Bộ môn" as UC2_3
   usecase "Đổi tên tệp theo mẫu" as UC2_3X
-  usecase "UC2.4 – Phê duyệt (ký số) hoặc trả lại đề cương" as UC2_4
-  usecase "Xuất thư mục đề cương đã ký số" as UC2_4X
+  usecase "UC2.4 – Phê duyệt hoặc trả lại đề cương" as UC2_4
+  usecase "Xuất thư mục đề cương đã ký" as UC2_4X
   usecase "UC2.5 – Xem lịch sử phiên bản và nhận xét" as UC2_5
   usecase "UC0.7 – Kiểm tra trùng lặp tài liệu" as UC0_7
 }

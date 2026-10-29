@@ -572,7 +572,7 @@ html:has(.lp) {
   color: var(--lp-muted);
 }
 
-/* Chữ ký số */
+/* Phê duyệt đề cương */
 .lp-sign {
   display: flex;
   align-items: center;

@@ -19,7 +19,7 @@ const MARQUEE = [
   'Nộp đề cương',
   'Kiểm tra tên file',
   'Kiểm tra định hướng',
-  'Ký số PDF',
+  'Phê duyệt đề cương',
   'Báo cáo tiến độ',
   'Kiểm tra trùng lặp',
   'Hội đồng bảo vệ',
@@ -44,8 +44,8 @@ const STEPS: { title: string; text: string; who: string }[] = [
   },
   {
     who: 'Lãnh đạo bộ môn',
-    title: 'Phê duyệt bằng chữ ký số',
-    text: 'Tải lên bản PDF đã ký. Hệ thống đọc chữ ký, kiểm tra chữ ký phủ toàn bộ file rồi mới chấp nhận.',
+    title: 'Phê duyệt đề cương',
+    text: 'Tải lên bản PDF đề cương đã ký. Hệ thống lưu vào thư mục đề cương của đợt để nộp về khoa.',
   },
   {
     who: 'Khoa',
@@ -86,7 +86,7 @@ const ROLES: { key: string; name: string; tone: string; glyph: string; items: st
     glyph: 'M4 20h16 M6 20V10 M10 20V10 M14 20V10 M18 20V10 M3 10l9-6 9 6z',
     items: [
       'Phân công GVHD, quản lý đợt đồ án',
-      'Phê duyệt đề cương bằng chữ ký số',
+      'Phê duyệt đề cương, nộp thư mục đề cương về khoa',
       'Cấu hình ngưỡng cảnh báo trùng lặp',
       'Lập hội đồng, chốt điểm, quản lý kho đồ án',
     ],
@@ -94,7 +94,7 @@ const ROLES: { key: string; name: string; tone: string; glyph: string; items: st
 ]
 
 const REVEAL_TEXT =
-  'Mỗi đề cương đi qua hai cấp duyệt. Mỗi file được kiểm tra tên, định hướng và nội dung. Mỗi chữ ký số được đọc lại trước khi lưu về khoa. Không còn chuyển file qua email hay in ra để ký.'
+  'Mỗi đề cương đi qua hai cấp duyệt. Mỗi file được kiểm tra tên, định hướng và nội dung. Bản đã ký được lưu thẳng vào thư mục đề cương của đợt. Không còn chuyển file qua email.'
 
 function Icon({ d, size = 22 }: { d: string; size?: number }) {
   return (
@@ -194,7 +194,7 @@ function Hero() {
         </h1>
         <p className="lp-hero__lead">
           Sinh viên, giảng viên hướng dẫn và Bộ môn Khoa Công nghệ thông tin ICTU cùng làm việc
-          trên một quy trình: giao đề tài, duyệt đề cương hai cấp có ký số, theo dõi tiến độ và
+          trên một quy trình: giao đề tài, duyệt đề cương hai cấp, theo dõi tiến độ và
           kiểm tra trùng lặp bằng AI.
         </p>
         <div className="lp-hero__cta">
@@ -294,16 +294,16 @@ function Bento() {
           </BentoCard>
           <BentoCard
             className="lp-card--sign"
-            title="Chữ ký số được kiểm tra"
-            text="Đọc người ký, thời điểm ký và xác nhận chữ ký phủ toàn bộ file PDF."
+            title="Phê duyệt và nộp về khoa"
+            text="Bản PDF đề cương đã ký được gom vào thư mục của đợt, tải một lần để nộp về khoa."
           >
             <div className="lp-sign" aria-hidden>
               <span className="lp-sign__seal">
                 <Icon d={ICON_CHECK} size={28} />
               </span>
               <div>
-                <b>Đã ký số</b>
-                <span>Chữ ký phủ toàn bộ file</span>
+                <b>Đã phê duyệt</b>
+                <span>Lưu vào thư mục đề cương của đợt</span>
               </div>
             </div>
           </BentoCard>

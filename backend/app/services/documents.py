@@ -207,6 +207,21 @@ def remove_file_quietly(ten_luu_tru: str) -> None:
         pass
 
 
+def write_file(thu_muc: str, vf: ValidatedFile) -> str:
+    """Ghi file vào `{thu_muc}/{uuid4}.{ext}` dưới UPLOAD_DIR (ghi ra file tạm
+    rồi os.replace — không bao giờ để lại file ghi dở) và trả về tên lưu trữ.
+    Dùng chung cho store() và file mô tả định hướng (0019)."""
+    settings = get_settings()
+    ten_luu_tru = f"{thu_muc}/{uuid.uuid4().hex}.{vf.ext}"
+    dir_path = Path(settings.UPLOAD_DIR) / thu_muc
+    dir_path.mkdir(parents=True, exist_ok=True)
+    final_path = storage_path(ten_luu_tru)
+    tmp_path = dir_path / f".tmp-{uuid.uuid4().hex}"
+    tmp_path.write_bytes(vf.content)
+    os.replace(tmp_path, final_path)
+    return ten_luu_tru
+
+
 def store(
     db: Session,
     *,
@@ -219,7 +234,6 @@ def store(
     do server sinh (`{loai}/{uuid4}.{ext}`) — không bao giờ dùng tên gốc.
     `db.add` + `db.flush` — caller commit; nếu caller rollback, PHẢI gọi
     `remove_file_quietly(doc.ten_luu_tru)` để dọn file mồ côi."""
-    settings = get_settings()
     max_version = db.execute(
         select(func.coalesce(func.max(TaiLieuDoAn.so_phien_ban), 0))
         .where(TaiLieuDoAn.de_tai_id == de_tai_id)
@@ -227,13 +241,7 @@ def store(
     ).scalar_one()
     so_phien_ban = int(max_version) + 1
 
-    ten_luu_tru = f"{loai}/{uuid.uuid4().hex}.{vf.ext}"
-    dir_path = Path(settings.UPLOAD_DIR) / loai
-    dir_path.mkdir(parents=True, exist_ok=True)
-    final_path = storage_path(ten_luu_tru)
-    tmp_path = dir_path / f".tmp-{uuid.uuid4().hex}"
-    tmp_path.write_bytes(vf.content)
-    os.replace(tmp_path, final_path)
+    ten_luu_tru = write_file(loai, vf)
 
     text = vf.text if vf.text_extracted else extract_text(vf.content, vf.dinh_dang)
 

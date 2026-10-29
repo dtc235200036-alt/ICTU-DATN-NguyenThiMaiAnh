@@ -68,6 +68,10 @@ entity "dinh_huong" as dinh_huong {
   *ten : VARCHAR(255)
   mo_ta : TEXT
   *hoat_dong : BOOLEAN
+  tep_ten_goc : VARCHAR(255)
+  tep_ten_luu_tru : VARCHAR(255) <<UQ>>
+  tep_kich_thuoc : BIGINT
+  tep_cap_nhat_luc : DATETIME
 }
 
 entity "de_tai" as de_tai {

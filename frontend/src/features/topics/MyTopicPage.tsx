@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router'
 
 import { useCohorts } from '../cohorts/api'
 import { useSvDashboard } from '../dashboard/api'
-import { dinhHuongLabel } from '../dinh-huong/api'
+import DinhHuongInfo from '../dinh-huong/DinhHuongInfo'
 import { formatDate, formatDateTime } from '../../utils/format'
 import { TRANG_THAI_DE_TAI } from './constants'
 import { useTopic, useTopicHistory } from './api'
@@ -77,7 +77,9 @@ export default function MyTopicPage() {
             <Descriptions column={1} size="small">
               <Descriptions.Item label="Mã đề tài">DT{String(dashboard.de_tai.id).padStart(4, '0')}</Descriptions.Item>
               <Descriptions.Item label="Lớp">{dashboard.lop ?? '—'}</Descriptions.Item>
-              <Descriptions.Item label="Định hướng">{dinhHuongLabel(topic?.dinh_huong)}</Descriptions.Item>
+              <Descriptions.Item label="Định hướng">
+                <DinhHuongInfo value={topic?.dinh_huong} />
+              </Descriptions.Item>
               <Descriptions.Item label="Đợt đồ án">{topic?.dot_do_an.ten_dot ?? '—'}</Descriptions.Item>
               <Descriptions.Item label="Ngày giao đề tài">{formatDate(topic?.ngay_giao)}</Descriptions.Item>
               <Descriptions.Item label="Ngày kết thúc dự kiến">{formatDate(cohort?.ngay_ket_thuc)}</Descriptions.Item>

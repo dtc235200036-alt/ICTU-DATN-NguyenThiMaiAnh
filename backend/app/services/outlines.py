@@ -1,6 +1,6 @@
 """UC2 — Quản lý đề cương: SV nộp (CHUA_NOP->CHO_DUYET), GVHD duyệt
 (GVHD_DA_DUYET) hoặc yêu cầu sửa (YEU_CAU_SUA), GVHD nộp lên Bộ môn
-(CHO_BO_MON_DUYET), Lãnh đạo bộ môn phê duyệt kèm file đã ký số (DA_DUYET —
+(CHO_BO_MON_DUYET), Lãnh đạo bộ môn phê duyệt kèm bản PDF đã ký (DA_DUYET —
 trạng thái cuối) hoặc trả lại (YEU_CAU_SUA); xem chi tiết/lịch sử."""
 import io
 import zipfile
@@ -79,11 +79,7 @@ _NHAN_XET_REQUIRED_DETAIL = "Vui lòng nhập nhận xét khi yêu cầu sửa"
 _FORWARD_FORBIDDEN_DETAIL = "Chỉ GVHD của đề tài mới được nộp đề cương lên Bộ môn"
 _NOT_GVHD_APPROVED_DETAIL = "Đề cương chưa được GVHD duyệt hoặc đã nộp lên Bộ môn"
 _NOT_AT_BO_MON_DETAIL = "Đề cương không ở trạng thái Chờ Bộ môn duyệt"
-_SIGNED_NOT_PDF_DETAIL = "File phê duyệt phải là PDF đã ký số"
-_NO_SIGNATURE_DETAIL = "File PDF chưa có chữ ký số — hãy ký số rồi tải lên lại"
-_SIGNATURE_PARTIAL_DETAIL = (
-    "Chữ ký số không phủ toàn bộ file (file đã bị sửa sau khi ký) — hãy ký lại"
-)
+_SIGNED_NOT_PDF_DETAIL = "File phê duyệt phải là bản PDF đề cương đã ký"
 _GHI_CHU_MAX = 2000
 # Lọc tab "Từ chối" của Bộ môn: đề cương Bộ môn đã trả lại, đang chờ SV sửa.
 BO_MON_TRA_LAI_FILTER = "BO_MON_TRA_LAI"
@@ -342,8 +338,6 @@ def _bo_mon_reviews(db: Session, de_cuong_id: int) -> list[BoMonReviewOut]:
             nguoi_duyet=r.tai_khoan.ma_dang_nhap if r.tai_khoan is not None else "",
             tai_lieu_id=r.tai_lieu_do_an_id,
             tai_lieu_ky_so=to_document_out(r.tai_lieu_ky_so) if r.tai_lieu_ky_so else None,
-            nguoi_ky=r.nguoi_ky,
-            thoi_diem_ky=r.thoi_diem_ky,
         )
         for r in rows
     ]
@@ -764,17 +758,13 @@ def bo_mon_approve(
     vf: ValidatedFile,
     nhan_xet: str | None = None,
 ) -> OutlineDetail:
-    """Lãnh đạo bộ môn phê duyệt: tải lên bản PDF đã ký số -> lưu vào thư mục đề
-    cương của đợt (loai DE_CUONG_KY_SO) và chuyển đề cương sang DA_DUYET."""
+    """Lãnh đạo bộ môn phê duyệt: tải lên bản PDF đề cương đã ký -> lưu vào thư
+    mục đề cương của đợt (loai DE_CUONG_KY_SO) và chuyển đề cương sang DA_DUYET.
+    Chỉ yêu cầu file là PDF; hệ thống không đọc hay kiểm tra chữ ký trong file."""
     topic = _get_topic_or_404(db, de_tai_id)
     _de_cuong_at_bo_mon(db, de_tai_id)
     if vf.dinh_dang != PDF:
         raise HTTPException(status_code=422, detail=_SIGNED_NOT_PDF_DETAIL)
-    chu_ky = outline_checks.doc_chu_ky_so(vf.content)
-    if chu_ky is None:
-        raise HTTPException(status_code=422, detail=_NO_SIGNATURE_DETAIL)
-    if not chu_ky.phu_toan_bo_file:
-        raise HTTPException(status_code=422, detail=_SIGNATURE_PARTIAL_DETAIL)
 
     de_cuong = db.execute(
         select(DeCuong).where(DeCuong.de_tai_id == de_tai_id).with_for_update()
@@ -798,14 +788,12 @@ def bo_mon_approve(
                 nhan_xet=(nhan_xet or "").strip() or None,
                 thoi_diem=now_utc(),
                 tai_lieu_ky_so_id=doc.id,
-                nguoi_ky=(chu_ky.nguoi_ky or "")[:255] or None,
-                thoi_diem_ky=chu_ky.thoi_diem_ky,
             )
         )
         de_cuong.trang_thai = DC_DA_DUYET
         de_cuong.ket_qua_bo_mon = KET_QUA_DA_DUYET
 
-        noi_dung = f"Bộ môn đã phê duyệt đề cương (đã ký số): {topic.ten_de_tai}"
+        noi_dung = f"Bộ môn đã phê duyệt đề cương: {topic.ten_de_tai}"
         if topic.sinh_vien is not None:
             notifications.create(
                 db, topic.sinh_vien.tai_khoan_id, DE_CUONG_BO_MON_DUYET, noi_dung, lien_ket="/de-cuong"
@@ -869,7 +857,7 @@ def bo_mon_return(db: Session, user: CurrentUser, de_tai_id: int, nhan_xet: str)
 
 
 def export_signed_zip(db: Session, dot_do_an_id: int) -> tuple[str, bytes]:
-    """Thư mục đề cương đã ký số của một đợt (bản ký số mới nhất mỗi đề tài),
+    """Thư mục đề cương đã ký của một đợt (bản phê duyệt mới nhất mỗi đề tài),
     nén ZIP để nộp về khoa."""
     cohort = db.get(DotDoAn, dot_do_an_id)
     if cohort is None:

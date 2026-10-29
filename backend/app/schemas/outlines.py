@@ -25,7 +25,7 @@ class OutlineVersion(BaseModel):
 
 
 class BoMonReviewOut(BaseModel):
-    """Một lượt Lãnh đạo bộ môn phê duyệt (kèm file ký số) hoặc trả lại."""
+    """Một lượt Lãnh đạo bộ môn phê duyệt (kèm bản PDF đã ký) hoặc trả lại."""
 
     ket_qua: str
     nhan_xet: str | None = None
@@ -33,8 +33,6 @@ class BoMonReviewOut(BaseModel):
     nguoi_duyet: str
     tai_lieu_id: int
     tai_lieu_ky_so: DocumentOut | None = None
-    nguoi_ky: str | None = None
-    thoi_diem_ky: UtcDateTime | None = None
 
 
 class CheckItem(BaseModel):

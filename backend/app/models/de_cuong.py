@@ -8,7 +8,7 @@ from app.models.base import Base
 
 # §3.1.3/trang-thai-de-cuong.puml: trạng thái đề cương — một chiều
 # CHUA_NOP -> CHO_DUYET (chờ GVHD) -> GVHD_DA_DUYET -> CHO_BO_MON_DUYET
-# -> DA_DUYET (Lãnh đạo bộ môn phê duyệt, file ký số đã nộp về khoa).
+# -> DA_DUYET (Lãnh đạo bộ môn phê duyệt, bản đề cương đã ký nộp về khoa).
 # GVHD hoặc Bộ môn trả lại -> YEU_CAU_SUA -> CHO_DUYET -> ...
 # DA_DUYET luôn là trạng thái cuối — tiến độ/bảo vệ chỉ mở khi đã tới đây.
 # Tiền tố DC_ tránh trùng với hằng số CHO_DUYET/DA_DUYET của de_tai.py.
@@ -25,8 +25,9 @@ LOAI_DE_CUONG = "DE_CUONG"
 LOAI_BAO_CAO_TIEN_DO = "BAO_CAO_TIEN_DO"
 LOAI_BAO_CAO_CUOI = "BAO_CAO_CUOI"
 LOAI_KHO = "KHO"
-# 0016: bản đề cương đã ký số do Lãnh đạo bộ môn nộp về khoa; file đính kèm
-# GVHD gửi kèm khi giao đề tài.
+# 0016: bản PDF đề cương đã ký do Lãnh đạo bộ môn nộp về khoa (giữ tên định
+# danh DE_CUONG_KY_SO; từ 0018 hệ thống không đọc/kiểm tra chữ ký); file đính
+# kèm GVHD gửi kèm khi giao đề tài.
 LOAI_DE_CUONG_KY_SO = "DE_CUONG_KY_SO"
 LOAI_DE_TAI = "DE_TAI"
 
@@ -139,7 +140,7 @@ class LuotDuyetDeCuong(Base):
 
 
 class LuotDuyetBoMon(Base):
-    """Lãnh đạo bộ môn phê duyệt (kèm file đề cương đã ký số) hoặc trả lại một
+    """Lãnh đạo bộ môn phê duyệt (kèm bản PDF đề cương đã ký) hoặc trả lại một
     phiên bản đề cương GVHD đã nộp lên — mỗi lần nộp lên có một lượt."""
 
     __tablename__ = "luot_duyet_bo_mon"
@@ -166,8 +167,6 @@ class LuotDuyetBoMon(Base):
     tai_lieu_ky_so_id: Mapped[int | None] = mapped_column(
         BigInteger, ForeignKey("tai_lieu_do_an.id", name="fk_luot_duyet_bo_mon_ky_so")
     )
-    nguoi_ky: Mapped[str | None] = mapped_column(String(255))
-    thoi_diem_ky: Mapped[datetime | None] = mapped_column(DateTime)
 
     de_cuong = relationship("DeCuong")
     tai_lieu = relationship("TaiLieuDoAn", foreign_keys=[tai_lieu_do_an_id])
