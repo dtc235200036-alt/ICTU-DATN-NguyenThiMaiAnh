@@ -6,7 +6,7 @@ import { useParams } from 'react-router'
 import { formatDateTime, formatPercent } from '../../utils/format'
 import ForbiddenPage from '../auth/ForbiddenPage'
 import { useDocumentCheck } from './api'
-import type { CheckMatch, CheckSegment } from './api'
+import type { CheckMatch, CheckSegment, CheckSummary } from './api'
 import { scopeText } from './scope'
 import { thresholdText, warningReason } from './warning'
 import CheckStatusTag from './CheckStatusTag'
@@ -139,59 +139,31 @@ function SourceRow({
   )
 }
 
+export interface CheckResultData extends CheckSummary {
+  do_an_trung: CheckMatch[]
+  chi_tiet: CheckSegment[]
+}
+
 /**
- * MH-14/UC0.7/AISV-05: chi tiết kết quả kiểm tra trùng lặp — mỗi đoạn trùng
- * đặt cạnh đoạn nguồn, cụm từ dùng chung được tô (highlightOverlap), nhãn tín
- * hiệu "Trùng nguyên văn"/"Trùng ngữ nghĩa" giải thích lý do (04-07). Mở từ
- * CheckPanel ("Xem chi tiết") và từ cột "Kết quả kiểm tra" trong bảng lịch
- * sử phiên bản (Tag "Hoàn tất - N%").
+ * Phần hiển thị kết quả dùng chung: tài liệu đã nộp (CheckDetailPage) và tệp
+ * tải lên kiểm tra (features/upload-checks, 0020).
  */
-export default function CheckDetailPage() {
-  const params = useParams<{ taiLieuId: string }>()
-  const taiLieuId = params.taiLieuId !== undefined ? Number(params.taiLieuId) : undefined
+export function CheckResultView({
+  data,
+  subtitle,
+  loaiTaiLieu,
+}: {
+  data: CheckResultData
+  subtitle: string
+  loaiTaiLieu: string
+}) {
   const [selectedSource, setSelectedSource] = useState<string | null>(null)
   const { token } = theme.useToken()
 
-  const { data, isLoading, isError, error } = useDocumentCheck(taiLieuId)
-
   const filteredSegments = useMemo<CheckSegment[]>(() => {
-    if (!data) return []
     if (selectedSource === null) return data.chi_tiet
     return data.chi_tiet.filter((seg) => seg.doi_tuong_trung === selectedSource)
   }, [data, selectedSource])
-
-  if (isLoading) {
-    return (
-      <Card>
-        <Skeleton active />
-      </Card>
-    )
-  }
-
-  if (isError) {
-    const status = error instanceof AxiosError ? error.response?.status : undefined
-    if (status === 403) {
-      return <ForbiddenPage />
-    }
-    return (
-      <Card>
-        <Empty description="Không tìm thấy kết quả kiểm tra" />
-      </Card>
-    )
-  }
-
-  if (!data) {
-    return (
-      <Card>
-        <Empty description="Không tìm thấy kết quả kiểm tra" />
-      </Card>
-    )
-  }
-
-  const loaiLabel = LOAI_LABEL[data.tai_lieu.loai] ?? data.tai_lieu.loai
-  const subtitle = `${loaiLabel} v${data.tai_lieu.so_phien_ban} - ${
-    data.sinh_vien?.ho_ten ?? '—'
-  } - ${data.ten_de_tai}`
 
   return (
     <div>
@@ -231,7 +203,7 @@ export default function CheckDetailPage() {
             {formatDateTime(data.thoi_diem)}
           </Descriptions.Item>
           <Descriptions.Item label="Loại tài liệu">
-            {`${loaiLabel} (${data.tai_lieu.dinh_dang})`}
+            {loaiTaiLieu}
           </Descriptions.Item>
         </Descriptions>
       </Card>
@@ -316,5 +288,59 @@ export default function CheckDetailPage() {
         </Row>
       )}
     </div>
+  )
+}
+
+/**
+ * MH-14/UC0.7/AISV-05: chi tiết kết quả kiểm tra trùng lặp — mỗi đoạn trùng
+ * đặt cạnh đoạn nguồn, cụm từ dùng chung được tô (highlightOverlap), nhãn tín
+ * hiệu "Trùng nguyên văn"/"Trùng ngữ nghĩa" giải thích lý do (04-07). Mở từ
+ * CheckPanel ("Xem chi tiết") và từ cột "Kết quả kiểm tra" trong bảng lịch
+ * sử phiên bản (Tag "Hoàn tất - N%").
+ */
+export default function CheckDetailPage() {
+  const params = useParams<{ taiLieuId: string }>()
+  const taiLieuId = params.taiLieuId !== undefined ? Number(params.taiLieuId) : undefined
+  const { data, isLoading, isError, error } = useDocumentCheck(taiLieuId)
+
+  if (isLoading) {
+    return (
+      <Card>
+        <Skeleton active />
+      </Card>
+    )
+  }
+
+  if (isError) {
+    const status = error instanceof AxiosError ? error.response?.status : undefined
+    if (status === 403) {
+      return <ForbiddenPage />
+    }
+    return (
+      <Card>
+        <Empty description="Không tìm thấy kết quả kiểm tra" />
+      </Card>
+    )
+  }
+
+  if (!data) {
+    return (
+      <Card>
+        <Empty description="Không tìm thấy kết quả kiểm tra" />
+      </Card>
+    )
+  }
+
+  const loaiLabel = LOAI_LABEL[data.tai_lieu.loai] ?? data.tai_lieu.loai
+  const subtitle = `${loaiLabel} v${data.tai_lieu.so_phien_ban} - ${
+    data.sinh_vien?.ho_ten ?? '—'
+  } - ${data.ten_de_tai}`
+
+  return (
+    <CheckResultView
+      data={data}
+      subtitle={subtitle}
+      loaiTaiLieu={`${loaiLabel} (${data.tai_lieu.dinh_dang})`}
+    />
   )
 }

@@ -35,7 +35,14 @@ from app.models.trung_lap import (
     ChiTietTrungLap,
     KetQuaKiemTraTrungLap,
 )
-from app.schemas.documents import CheckDetail, CheckMatch, CheckSegment, CheckSummary
+from app.schemas.documents import (
+    CheckDetail,
+    CheckMatch,
+    CheckSegment,
+    CheckSummary,
+    UploadCheckDetail,
+    UploadCheckSummary,
+)
 from app.schemas.topics import PersonRef
 from app.services import ai_index
 from app.services.ai_client import get_ai_client
@@ -187,24 +194,35 @@ def _vi_tri_with_signal(vi_tri: str | None, tin_hieu: str | None) -> str | None:
     return f"{base}{suffix}".strip()
 
 
-def create_pending(db: Session, doc: TaiLieuDoAn) -> KetQuaKiemTraTrungLap:
-    """D-04: một dòng ket_qua_kiem_tra_trung_lap (DANG_KIEM_TRA) trong CÙNG
-    transaction với submit — caller commit, KHÔNG commit ở đây."""
-    nguong = _get_threshold(db)
-    doi_tuong = f"{doc.loai} v{doc.so_phien_ban} - {doc.ten_goc}"[:255]
+def _new_pending(db: Session, doi_tuong: str, **owner: int) -> KetQuaKiemTraTrungLap:
     ket_qua = KetQuaKiemTraTrungLap(
-        de_tai_id=doc.de_tai_id,
-        tai_lieu_do_an_id=doc.id,
+        **owner,
         loai_kiem_tra=TAI_LIEU,
         trang_thai=DANG_KIEM_TRA,
-        nguong_ap_dung=nguong,
+        nguong_ap_dung=_get_threshold(db),
         nguong_tong_ap_dung=_get_total_threshold(db),
-        doi_tuong_duoc_kiem_tra=doi_tuong,
+        doi_tuong_duoc_kiem_tra=doi_tuong[:255],
         thoi_diem=now_utc(),
     )
     db.add(ket_qua)
     db.flush()
     return ket_qua
+
+
+def create_pending(db: Session, doc: TaiLieuDoAn) -> KetQuaKiemTraTrungLap:
+    """D-04: một dòng ket_qua_kiem_tra_trung_lap (DANG_KIEM_TRA) trong CÙNG
+    transaction với submit — caller commit, KHÔNG commit ở đây."""
+    return _new_pending(
+        db,
+        f"{doc.loai} v{doc.so_phien_ban} - {doc.ten_goc}",
+        de_tai_id=doc.de_tai_id,
+        tai_lieu_do_an_id=doc.id,
+    )
+
+
+def create_upload_pending(db: Session, tai_khoan_id: int, ten_goc: str) -> KetQuaKiemTraTrungLap:
+    """0020: kiểm tra một tệp tải lên, không gắn đề tài — caller commit."""
+    return _new_pending(db, ten_goc, tai_khoan_id=tai_khoan_id)
 
 
 def _label_for(db: Session, loai: str, ref_id: int) -> str:
@@ -241,7 +259,7 @@ def _mark_loi(task_db: Session, ket_qua_id: int, stamp: datetime | None = None) 
     task_db.commit()
 
 
-def run(ket_qua_id: int) -> None:
+def run(ket_qua_id: int, upload_text: str | None = None) -> None:
     """Chạy nền sau response 202 — mở SessionLocal riêng, broad except cố ý:
     BẤT KỲ lỗi gì cũng phải chuyển bản ghi sang LOI, không bao giờ để lại
     DANG_KIEM_TRA (Pitfall 1, 03-RESEARCH.md).
@@ -252,34 +270,42 @@ def run(ket_qua_id: int) -> None:
     không (lần chạy đã hết hạn -> LOI, hoặc đã bị một lần kiểm tra lại thay
     thế) thì rollback — xóa/chèn chi tiết nằm CÙNG transaction ngắn đó, nên
     không bao giờ còn chi tiết trên bản ghi LOI hay chi tiết đan xen giữa hai
-    lần chạy. Lời gọi AI nằm ngoài transaction ghi."""
+    lần chạy. Lời gọi AI nằm ngoài transaction ghi.
+
+    0020: kết quả không gắn tài liệu (tệp tải lên) nhận văn bản qua
+    `upload_text` — router đã kiểm tra trích xuất và độ dài; ref_id 0 = không
+    thuộc kho, không loại trừ gì và không đưa vào chỉ mục."""
     task_db = SessionLocal()
     stamp: datetime | None = None
     completed_doc_id: int | None = None
     try:
         ket_qua = task_db.get(KetQuaKiemTraTrungLap, ket_qua_id)
-        if ket_qua is None or ket_qua.tai_lieu_do_an_id is None:
-            return
-        if ket_qua.trang_thai != DANG_KIEM_TRA:
+        if ket_qua is None or ket_qua.trang_thai != DANG_KIEM_TRA:
             return
         stamp = ket_qua.thoi_diem
-        doc = task_db.get(TaiLieuDoAn, ket_qua.tai_lieu_do_an_id)
-        if doc is None or doc.trich_xuat_loi or not doc.noi_dung_trich_xuat:
-            _mark_loi(task_db, ket_qua_id, stamp)
-            return
-        if too_long_for_check(doc.noi_dung_trich_xuat):
-            # WR-05: vượt trần của dịch vụ AI — không gọi (chắc chắn lỗi), LOI
-            # không thử lại được; MH-09 hiện lý do từ DocumentOut.qua_dai_kiem_tra.
-            _logger.warning(
-                "document_check.run: tài liệu %s quá dài (%s ký tự) — không gửi AI",
-                doc.id,
-                len(doc.noi_dung_trich_xuat),
-            )
-            _mark_loi(task_db, ket_qua_id, stamp)
-            return
-        doc_id, text = doc.id, doc.noi_dung_trich_xuat
+        if ket_qua.tai_lieu_do_an_id is None:
+            if not upload_text:
+                _mark_loi(task_db, ket_qua_id, stamp)
+                return
+            doc_id, text, loai_tru = 0, upload_text, []
+        else:
+            doc = task_db.get(TaiLieuDoAn, ket_qua.tai_lieu_do_an_id)
+            if doc is None or doc.trich_xuat_loi or not doc.noi_dung_trich_xuat:
+                _mark_loi(task_db, ket_qua_id, stamp)
+                return
+            if too_long_for_check(doc.noi_dung_trich_xuat):
+                # WR-05: vượt trần của dịch vụ AI — không gọi (chắc chắn lỗi), LOI
+                # không thử lại được; MH-09 hiện lý do từ DocumentOut.qua_dai_kiem_tra.
+                _logger.warning(
+                    "document_check.run: tài liệu %s quá dài (%s ký tự) — không gửi AI",
+                    doc.id,
+                    len(doc.noi_dung_trich_xuat),
+                )
+                _mark_loi(task_db, ket_qua_id, stamp)
+                return
+            doc_id, text = doc.id, doc.noi_dung_trich_xuat
+            loai_tru = _same_topic_versions(task_db, doc.de_tai_id)
         nguong_doan = _get_passage_threshold(task_db)
-        loai_tru = _same_topic_versions(task_db, doc.de_tai_id)
         # Kết thúc transaction đọc trước lời gọi AI (có thể tới hàng chục giây).
         task_db.commit()
 
@@ -351,7 +377,7 @@ def run(ket_qua_id: int) -> None:
             )
             return
         task_db.commit()
-        completed_doc_id = doc_id
+        completed_doc_id = doc_id or None  # 0 = tệp tải lên: không vào chỉ mục
     except Exception:
         task_db.rollback()
         try:
@@ -551,6 +577,75 @@ def detail(db: Session, doc: TaiLieuDoAn, user: CurrentUser) -> CheckDetail:
         do_an_trung=do_an_trung,
         chi_tiet=chi_tiet,
     )
+
+
+_UPLOAD_NOT_FOUND_DETAIL = "Không tìm thấy kết quả kiểm tra"
+# shortcut: chỉ trả 50 lần kiểm tra gần nhất, chưa phân trang — thêm phân trang khi cần xem cũ hơn.
+_UPLOAD_HISTORY_LIMIT = 50
+_UPLOAD_MAX_RUNNING = 2
+_UPLOAD_BUSY_DETAIL = (
+    f"Bạn đang có {_UPLOAD_MAX_RUNNING} lần kiểm tra chưa xong — chờ có kết quả rồi kiểm tra tiếp"
+)
+
+
+def upload_summary(ket_qua: KetQuaKiemTraTrungLap) -> UploadCheckSummary:
+    return UploadCheckSummary(
+        **summary(ket_qua).model_dump(), ten_tep=ket_qua.doi_tuong_duoc_kiem_tra or ""
+    )
+
+
+def upload_detail(ket_qua: KetQuaKiemTraTrungLap) -> UploadCheckDetail:
+    """0020: chỉ GV/Bộ môn dùng được nên không cần ẩn đoạn nguồn như với SV (WR-07)."""
+    rows = list(ket_qua.chi_tiet)
+    return UploadCheckDetail(
+        **upload_summary(ket_qua).model_dump(),
+        do_an_trung=_per_source_share(ket_qua, rows),
+        chi_tiet=[
+            CheckSegment(
+                doi_tuong_trung=row.doi_tuong_trung,
+                doan_nguon=row.doan_nguon,
+                doan_trung=row.doan_trung,
+                vi_tri=row.vi_tri,
+                ty_le=float(row.ty_le),
+            )
+            for row in rows
+        ],
+    )
+
+
+def list_uploads(db: Session, tai_khoan_id: int) -> list[KetQuaKiemTraTrungLap]:
+    rows = db.execute(
+        select(KetQuaKiemTraTrungLap)
+        .where(KetQuaKiemTraTrungLap.tai_khoan_id == tai_khoan_id)
+        .order_by(KetQuaKiemTraTrungLap.thoi_diem.desc(), KetQuaKiemTraTrungLap.id.desc())
+        .limit(_UPLOAD_HISTORY_LIMIT)
+    ).scalars().all()
+    for row in rows:
+        expire_if_stale(db, row)
+    return list(rows)
+
+
+def ensure_upload_quota(db: Session, tai_khoan_id: int) -> None:
+    """Mỗi người tối đa _UPLOAD_MAX_RUNNING lần kiểm tra đang chạy, để một
+    người không làm dịch vụ AI quá tải; hai request đồng thời có thể vượt 1."""
+    running = db.execute(
+        select(KetQuaKiemTraTrungLap)
+        .where(KetQuaKiemTraTrungLap.tai_khoan_id == tai_khoan_id)
+        .where(KetQuaKiemTraTrungLap.trang_thai == DANG_KIEM_TRA)
+    ).scalars().all()
+    for row in running:
+        expire_if_stale(db, row)
+    if sum(row.trang_thai == DANG_KIEM_TRA for row in running) >= _UPLOAD_MAX_RUNNING:
+        raise HTTPException(status_code=429, detail=_UPLOAD_BUSY_DETAIL)
+
+
+def get_upload_or_404(db: Session, user: CurrentUser, ket_qua_id: int) -> KetQuaKiemTraTrungLap:
+    """Chỉ người tải tệp lên xem được; kết quả của người khác trả 404, không lộ là có tồn tại."""
+    ket_qua = db.get(KetQuaKiemTraTrungLap, ket_qua_id)
+    if ket_qua is None or ket_qua.tai_khoan_id != user.tai_khoan_id:
+        raise HTTPException(status_code=404, detail=_UPLOAD_NOT_FOUND_DETAIL)
+    expire_if_stale(db, ket_qua)
+    return ket_qua
 
 
 def request_recheck(

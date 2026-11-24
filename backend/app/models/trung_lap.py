@@ -33,6 +33,10 @@ class KetQuaKiemTraTrungLap(Base):
         BigInteger,
         ForeignKey("tai_lieu_do_an.id", name="fk_ket_qua_kttl_tai_lieu_do_an"),
     )
+    # 0020: người tải tệp lên kiểm tra (tai_lieu_do_an_id NULL); chỉ người này xem được.
+    tai_khoan_id: Mapped[int | None] = mapped_column(
+        BigInteger, ForeignKey("tai_khoan.id", name="fk_ket_qua_kttl_tai_khoan")
+    )
     loai_kiem_tra: Mapped[str] = mapped_column(String(20), nullable=False)
     trang_thai: Mapped[str] = mapped_column(String(20), nullable=False)
     ty_le_tong: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))

@@ -90,3 +90,14 @@ class CheckDetail(BaseModel):
     sinh_vien: PersonRef | None = None
     do_an_trung: list[CheckMatch]
     chi_tiet: list[CheckSegment]
+
+
+class UploadCheckSummary(CheckSummary):
+    """0020: kiểm tra trùng lặp một tệp tải lên (không gắn đề tài)."""
+
+    ten_tep: str
+
+
+class UploadCheckDetail(UploadCheckSummary):
+    do_an_trung: list[CheckMatch]
+    chi_tiet: list[CheckSegment]
