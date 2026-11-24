@@ -33,7 +33,8 @@ docs/
 │   └── 04-thiet-ke-giao-dien.md        §3.4 Thiết kế giao diện (mockup)
 ├── chuong-4-trien-khai/               Chương 4 báo cáo: Triển khai & thử nghiệm
 │   └── thu-nghiem-ai/                 Trang đánh giá dịch vụ AI (Phase 4): dữ liệu, so sánh
-│                                       mô hình, hiệu chỉnh ngưỡng, hiệu năng & bảo mật (README.md = mục lục)
+│                                       mô hình, hiệu chỉnh ngưỡng, hiệu năng & bảo mật, đánh giá kiểu PAN
+│                                       (README.md = mục lục)
 └── (tai-lieu-goc/ nằm ở gốc repo, không phải trong docs/ — xem README riêng của nó)
 ```
 

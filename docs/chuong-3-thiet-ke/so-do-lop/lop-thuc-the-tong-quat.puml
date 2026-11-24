@@ -40,6 +40,7 @@ TaiKhoan "1" -- "0..1" SinhVien
 TaiKhoan "1" -- "0..1" GiangVien
 TaiKhoan "1" -- "*" ThongBao
 TaiKhoan "0..1" -- "*" CauHinhNguong
+TaiKhoan "0..1" -- "*" KetQuaKiemTraTrungLap
 
 DotDoAn "1" -- "*" PhanCongHuongDan
 SinhVien "1" -- "*" PhanCongHuongDan

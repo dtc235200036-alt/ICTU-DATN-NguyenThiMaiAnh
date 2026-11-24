@@ -9,10 +9,12 @@ class DeTai <<Entity>> #FFFFFF;line.dashed
 class SinhVien <<Entity>> #FFFFFF;line.dashed
 class GiangVien <<Entity>> #FFFFFF;line.dashed
 class TaiLieuDoAn <<Entity>> #FFFFFF;line.dashed
+class TaiKhoan <<Entity>> #FFFFFF;line.dashed
 hide DeTai members
 hide SinhVien members
 hide GiangVien members
 hide TaiLieuDoAn members
+hide TaiKhoan members
 
 class HoiDong <<Entity>> {
   +tenHoiDong : String
@@ -84,6 +86,7 @@ SinhVien "0..1" -- "*" DoAnKho : "của SV"
 GiangVien "0..1" -- "*" DoAnKho : "GVHD"
 DeTai "0..1" -- "*" KetQuaKiemTraTrungLap : "kiểm tra tên"
 TaiLieuDoAn "0..1" -- "0..1" KetQuaKiemTraTrungLap : "kiểm tra tài liệu"
+TaiKhoan "0..1" -- "*" KetQuaKiemTraTrungLap : "tải tệp lên kiểm tra"
 KetQuaKiemTraTrungLap "1" -- "*" ChiTietTrungLap : "gồm"
 
 @enduml

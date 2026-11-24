@@ -179,29 +179,37 @@ UC0 – Chức năng chung gồm 8 UC con dùng chung bởi nhiều use case ch�
 |---|---|
 | Mã UC | UC0.7 |
 | Tên UC | Kiểm tra trùng lặp tài liệu |
-| Tác nhân | Hệ thống (Dịch vụ AI) |
-| Mô tả | Khi Sinh viên nộp đề cương (UC2.1) hoặc báo cáo cuối (UC4.1), trích xuất text từ DOCX/PDF, loại bỏ phần mẫu chung (tiêu đề mẫu, mục lục, tài liệu tham khảo), so sánh với các tài liệu khác trong kho và trả về tỷ lệ tương đồng tổng, danh sách đồ án trùng, và từng đoạn trùng highlight cạnh đoạn nguồn. Chạy bất đồng bộ, có 3 trạng thái: **Đang kiểm tra → Hoàn tất** (hoặc **Lỗi** nếu dịch vụ AI gặp sự cố). |
-| Tiền điều kiện | UC2.1 hoặc UC4.1 vừa lưu một phiên bản tài liệu mới cần kiểm tra |
+| Tác nhân | Hệ thống (Dịch vụ AI); Giảng viên, Bộ môn (luồng A2) |
+| Mô tả | Khi Sinh viên nộp đề cương (UC2.1) hoặc báo cáo cuối (UC4.1), trích xuất text từ DOCX/PDF, loại bỏ phần mẫu chung (tiêu đề mẫu, mục lục, tài liệu tham khảo), so sánh với các tài liệu khác trong kho và trả về tỷ lệ tương đồng tổng, danh sách đồ án trùng, và từng đoạn trùng highlight cạnh đoạn nguồn. Chạy bất đồng bộ, có 3 trạng thái: **Đang kiểm tra → Hoàn tất** (hoặc **Lỗi** nếu dịch vụ AI gặp sự cố). Giảng viên và Bộ môn cũng tải được một tệp bất kỳ lên để kiểm tra riêng (A2, bổ sung 23/11/2026). |
+| Tiền điều kiện | UC2.1 hoặc UC4.1 vừa lưu một phiên bản tài liệu mới cần kiểm tra; hoặc (A2) Giảng viên/Bộ môn đã đăng nhập và tải một tệp lên |
 | Hậu điều kiện | Kết quả kiểm tra (tỷ lệ tổng, danh sách đồ án trùng, đoạn trùng) được lưu và hiển thị khi trạng thái chuyển "Hoàn tất" |
-| Yêu cầu liên quan | FR-AI-02, FR-AI-03, FR-AI-04 |
-| Màn hình | MH-09, MH-14 |
+| Yêu cầu liên quan | FR-AI-02, FR-AI-03, FR-AI-04, FR-AI-06 |
+| Màn hình | MH-09, MH-14; "Kiểm tra đạo văn" (A2, bổ sung sau thiết kế) |
 
 **Luồng sự kiện chính**
 
-1. Web API gọi endpoint check-document của dịch vụ AI (bất đồng bộ) kèm file vừa nộp và API key nội bộ; đánh dấu trạng thái kiểm tra "Đang kiểm tra".
-2. Dịch vụ AI trích xuất text từ DOCX (python-docx)/PDF (PyMuPDF), chuẩn hóa NFC.
+1. Khi nhận file, Web API trích xuất text từ DOCX (python-docx)/PDF (PyMuPDF), chuẩn hóa NFC và lưu cùng phiên bản tài liệu.
+2. Web API đánh dấu trạng thái kiểm tra "Đang kiểm tra" và gọi endpoint check-document của dịch vụ AI (bất đồng bộ) kèm text đã trích xuất và API key nội bộ.
 3. Dịch vụ AI loại bỏ các phần mẫu chung (tiêu đề mẫu, mục lục, tài liệu tham khảo) dựa trên tài liệu mẫu chính thức đã thu thập.
 4. Dịch vụ AI chia đoạn (paragraph-level), so sánh với các tài liệu khác trong kho bằng embedding (trùng ngữ nghĩa) + vân tay k-gram winnowing (trùng nguyên văn), tổng hợp tỷ lệ tương đồng tổng và danh sách đồ án trùng; tài liệu bị cảnh báo khi tỷ lệ trùng với một đồ án **hoặc** tỷ lệ tổng mọi nguồn vượt ngưỡng tương ứng đã cấu hình (UC0.4).
-5. Dịch vụ AI trả kết quả cho Web API; trạng thái chuyển "Hoàn tất"; MH-09 (khi GVHD duyệt đề cương) và MH-14 (chi tiết kết quả) hiển thị tỷ lệ tổng, danh sách đồ án trùng, và từng đoạn trùng highlight cạnh đoạn nguồn.
+5. Dịch vụ AI trả kết quả cho Web API; trạng thái chuyển "Hoàn tất"; MH-09 (khi GVHD duyệt đề cương) và MH-14 (chi tiết kết quả) hiển thị tỷ lệ tổng, danh sách đồ án trùng, và từng đoạn trùng highlight cạnh đoạn nguồn, kèm nhãn "Trùng nguyên văn", "Trùng sửa nhẹ" hoặc "Trùng ngữ nghĩa".
 
 **Luồng thay thế**
 
 - **A1**: Không phát hiện đoạn nào vượt ngưỡng → kết quả "Hoàn tất" với tỷ lệ tổng thấp/0% và danh sách đồ án trùng rỗng.
+- **A2 – GV/Bộ môn tải một tệp bất kỳ lên để kiểm tra** (bổ sung 23/11/2026 theo yêu cầu GVHD; không phải UC mới):
+  1. Giảng viên hoặc Bộ môn mở menu "Kiểm tra đạo văn" (`/kiem-tra-dao-van`) và chọn một tệp PDF/DOCX; màn hình ghi rõ tệp không được lưu, không được thêm vào kho, và đồ án dài có thể mất vài phút.
+  2. Web API (`POST /api/upload-checks`) kiểm tra tệp như khi nộp (≤ 20 MB, phần mở rộng + magic bytes), trích xuất text trong bộ nhớ, tạo bản ghi kết quả "Đang kiểm tra" gắn với người tải lên (`tai_khoan_id`, không gắn đề tài hay phiên bản tài liệu) và trả 202.
+  3. Tác vụ nền chạy các bước 2–4 của luồng chính với `ref_id` 0 (không thuộc kho) và không loại trừ nguồn nào; tệp **không** được ghi ra đĩa và **không** được đưa vào chỉ mục AI, nên không ảnh hưởng các lần kiểm tra bài của sinh viên sau đó.
+  4. Khi "Hoàn tất", trang chi tiết `/kiem-tra-dao-van/:id` hiển thị kết quả như MH-14 (tỷ lệ tổng, đồ án trùng cao nhất, đoạn trùng cạnh đoạn nguồn, nhãn nguyên văn / sửa nhẹ / ngữ nghĩa); trang tải lên liệt kê 50 lần kiểm tra gần nhất của người dùng. Nếu tệp chính là một tài liệu đã nộp trong hệ thống, kết quả trùng gần 100% với tài liệu đó.
 
 **Ngoại lệ**
 
-- **E1**: Dịch vụ AI lỗi trong lúc xử lý (file hỏng, không trích xuất được text) → trạng thái chuyển "Lỗi"; UC2.2/UC4.1 vẫn cho phép GVHD/Bộ môn xem tài liệu gốc và có thể yêu cầu kiểm tra lại, không bị chặn quy trình duyệt.
+- **E1**: Web API không trích xuất được text (file hỏng), hoặc dịch vụ AI lỗi trong lúc xử lý → trạng thái chuyển "Lỗi"; UC2.2/UC4.1 vẫn cho phép GVHD/Bộ môn xem tài liệu gốc và có thể yêu cầu kiểm tra lại, không bị chặn quy trình duyệt. Với A2, tệp không được lưu nên không có "Kiểm tra lại": người dùng tải tệp lên lại.
 - **E2**: Thời gian xử lý vượt ngưỡng NFR-09 (30 giây) nhiều lần liên tiếp → ghi nhận là vấn đề hiệu năng cần xem xét lại ở Phase 4 khi đo thực tế trên corpus seed, không phải lỗi nghiệp vụ.
+- **E3** (A2): Tệp không trích xuất được text (vd. PDF dạng ảnh quét), hoặc text dài hơn `AI_DOCUMENT_MAX_CHARS` → trả 422 ngay, không tạo bản ghi kết quả. Tệp quá 20 MB hoặc sai định dạng → 422 như khi nộp.
+- **E4** (A2): Người dùng đang có 2 lần kiểm tra chưa xong → lần thứ ba trả 429 "Bạn đang có 2 lần kiểm tra chưa xong…".
+- **E5** (A2): Người không phải người tải lên mở kết quả (`GET /api/upload-checks/{id}`) → 404, không lộ là kết quả có tồn tại; Sinh viên gọi các API này → 403.
 
 #### UC0.8 – Phân công GVHD
 
@@ -233,7 +241,7 @@ UC0 – Chức năng chung gồm 8 UC con dùng chung bởi nhiều use case ch�
 
 **Ngoại lệ**
 
-- **E1**: Sinh viên đã có đề tài "Đã phân công" trong đợt → hệ thống không cho đổi/gỡ GVHD của sinh viên đó (BR-PC-03); khi lưu từ màn hình, toàn bộ lần lưu bị từ chối kèm danh sách sinh viên vi phạm.
+- **E1**: Gỡ GVHD của sinh viên đã có đề tài "Đã phân công", hoặc đổi GVHD của sinh viên đã xếp lịch bảo vệ → hệ thống từ chối (BR-PC-03); khi lưu từ màn hình, toàn bộ lần lưu bị từ chối kèm danh sách sinh viên vi phạm.
 - **E2**: (đã bỏ — không còn trạng thái "Chờ duyệt" do hệ thống tạo ra; giá trị cũ chỉ giữ trong CSDL để tương thích dữ liệu.)
 - **E3**: Giảng viên được chọn không tồn tại hoặc tài khoản đã bị khóa → hệ thống từ chối dòng đó.
 - **E4**: Sinh viên, giảng viên gọi API phân công → hệ thống trả 403 (chỉ Bộ môn được phân công).
@@ -244,6 +252,6 @@ UC0 – Chức năng chung gồm 8 UC con dùng chung bởi nhiều use case ch�
 |---|---|
 | BR-PC-01 | Trong một đợt đồ án, mỗi sinh viên có tối đa một GVHD — bảo đảm bằng ràng buộc duy nhất `uk_phan_cong_sv_dot (dot_do_an_id, sinh_vien_id)` trên bảng `phan_cong_huong_dan` (§3.2). |
 | BR-PC-02 | Chỉ Bộ môn được tạo, đổi, gỡ phân công; giảng viên chỉ xem lớp hướng dẫn của mình, sinh viên chỉ xem GVHD của mình. |
-| BR-PC-03 | Không đổi hoặc gỡ GVHD của sinh viên đã có đề tài "Đã phân công" trong đợt, vì đề cương, tiến độ và bảo vệ đều gắn với GVHD của đề tài đó. |
+| BR-PC-03 | Đổi GVHD của sinh viên đã có đề tài "Đã phân công" thì đề tài chuyển theo GVHD mới (đề cương, tiến độ, bảo vệ đều gắn với GVHD của đề tài; lịch sử duyệt giữ nguyên). Không gỡ GVHD của sinh viên đó, và không đổi GVHD khi sinh viên đã xếp lịch bảo vệ (GVHD mới có thể là thành viên hội đồng). |
 | BR-PC-04 | (Không còn áp dụng) Trước đây không gỡ GVHD khi sinh viên có đề tài "Chờ duyệt"; trạng thái này không còn phát sinh nên quy tắc không còn tác dụng. |
 | BR-PC-05 | Khi đổi GVHD, bản nháp giảng viên cũ định giao cho sinh viên đó được gỡ sinh viên (GVHD mới chọn lại khi giao đề tài). |

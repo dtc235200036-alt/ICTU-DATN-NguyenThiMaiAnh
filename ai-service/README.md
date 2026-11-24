@@ -118,8 +118,10 @@ hơn; tìm trên TOPIC + ARCHIVE, mỗi nguồn một dòng (điểm cao nhất)
   (tối đa 6 câu/đoạn); `doan_nguon` là câu của tài liệu đang kiểm tra,
   `doan_trung` là các câu nguồn khớp (theo thứ tự trong nguồn), `vi_tri` là số
   thứ tự câu, `ty_le` là trung bình (trọng số ký tự) của điểm kích hoạt,
-  `tin_hieu` là `NGUYEN_VAN` khi ≥ nửa số ký tự bị gắn cờ do vân tay, ngược
-  lại `NGU_NGHIA`; `diem_ngu_nghia`/`diem_nguyen_van` là trung bình trọng số
+  `tin_hieu` là `NGUYEN_VAN` khi ≥ nửa số ký tự bị gắn cờ do vân tay, hạ
+  thành `SUA_NHE` khi tỷ lệ khớp chữ với đoạn nguồn < `NGUONG_SUA_NHE` (0,99, `pipeline.py`;
+  chỉ là nhãn — cờ và tỷ lệ không đổi), ngược lại
+  `NGU_NGHIA`; `diem_ngu_nghia`/`diem_nguyen_van` là trung bình trọng số
   điểm tốt nhất từng tín hiệu (chỉ để giải thích). Sắp xếp theo `ty_le` giảm
   dần, tối đa `CHI_TIET_TOI_DA`.
 - `so_doan` = số câu nội dung; `so_doan_loai_tru` = số dòng mẫu chung đã lọc;
@@ -149,16 +151,19 @@ khi đổi `AI_MODEL_PROFILE`), rồi dựng lại chỉ mục bộ nhớ; trả
 
 ## Phương pháp phát hiện
 
-1. **Chuẩn hóa** (AISV-02): NFC, bỏ NUL, gộp khoảng trắng; profile `bkai` tách
+1. **Chuẩn hóa** (AISV-02): NFC, `ƣ`/`Ƣ` (U+01A3/U+01A2 do font TCVN3 trong PDF cũ) → `ư`/`Ư`, bỏ NUL, gộp khoảng trắng; profile `bkai` tách
    từ bằng `underthesea.word_tokenize(format="text")`; profile `e5` thêm
    `"query: "` cho mọi đầu vào (so sánh đối xứng).
 2. **Lọc phần mẫu chung** (`app/nlp/boilerplate.py`, D-03): danh sách
    **[ASSUMED]** chung cho khuôn mẫu đồ án tiếng Việt (bìa, lời cam đoan, lời
-   cảm ơn, mục lục và dòng dẫn chấm, danh mục hình/bảng/từ viết tắt, tiêu đề
-   chương/mục, chú thích hình/bảng, tài liệu tham khảo, phụ lục, nhận xét GV)
-   **cộng** nhãn bìa "Đề tài:"/"Ngành:" (kể cả tên đề tài bị PDF bẻ dòng),
+   cảm ơn, mục lục và dòng dẫn chấm — kể cả dải chấm cách ". . . ." của PDF
+   LaTeX, danh mục hình/bảng/từ viết tắt, tiêu đề chương/mục, chú thích
+   hình/bảng, tài liệu tham khảo, phụ lục, nhận xét GV)
+   **cộng** dòng bìa (tiêu ngữ, nhãn "Giảng/Giáo viên hướng dẫn", "Đề tài:"/"Ngành:"
+   kể cả tên đề tài bị PDF bẻ dòng — không bao giờ nuốt tiêu đề; nhãn đứng
+   riêng một dòng ở phần đầu kéo theo đúng một dòng giá trị sau nó),
    bộ phát hiện dòng ngắn lặp ≥ 3 lần không kết thúc bằng dấu câu và số trang (header/footer mà
-   trích xuất PDF `page.get_text()` phía Web API để lọt). **Thay danh sách khi
+   trích xuất PDF phía Web API để lọt). **Thay danh sách khi
    có mẫu chính thức TL-04/TL-05.** Chống lạm dụng (CR-04): tiêu đề mục mẫu
    (Phụ lục, Tài liệu tham khảo, Lời cảm ơn…) chỉ bỏ nguyên mục khi nằm trước
    tiêu đề lớn đầu tiên hoặc sau tiêu đề lớn cuối cùng (MỞ ĐẦU/CHƯƠNG n/KẾT
@@ -175,9 +180,12 @@ khi đổi `AI_MODEL_PROFILE`), rồi dựng lại chỉ mục bộ nhớ; trả
    theo Sorokina và cs. 2006 và winnowing của Schleimer và cs. 2003). Kho chỉ
    giữ vân tay đã winnowing trong một chỉ mục ngược: câu ứng viên được tra
    bảng, không quét toàn kho; mọi đoạn chung ≥ t = w + k − 1 âm tiết đều được
-   tìm thấy. Độ phủ = tỷ lệ âm tiết của câu nằm trong các đoạn chung ≥ t âm
-   tiết với MỘT câu của kho (chép cả câu → 100, sửa một từ vẫn ≈ 97, chép nửa
-   câu ≈ 50), bỏ qua k-gram phổ biến — có ở ≥ `VAN_TAY_PHO_BIEN` nhóm đề tài
+   tìm thấy. Độ phủ của một nguồn = tỷ lệ âm tiết của câu thuộc HỢP các
+   đoạn chung ≥ t âm tiết với từng câu ứng viên của nguồn đó (tối đa 20 câu
+   ứng viên chung nhiều vân tay nhất; `VanTaySnapshot.match`, `covered_mask`);
+   điểm câu = độ phủ của nguồn tốt nhất (chép cả câu → 100, sửa một từ vẫn
+   ≈ 97, chép nửa câu ≈ 50, ghép hai câu của cùng nguồn → ≈ 100; mẩu < t của
+   các câu khác nhau không cộng thành đoạn), bỏ qua k-gram phổ biến — có ở ≥ `VAN_TAY_PHO_BIEN` nhóm đề tài
    khác, không kể nhóm bị loại trừ. Gắn cờ `NGUYEN_VAN` khi độ phủ×100 ≥
    `nguong_nguyen_van` (bằng chứng mạnh hơn nên thắng), ngược lại `NGU_NGHIA`
    khi cosine×100 ≥ `nguong_doan`. Cờ
@@ -188,6 +196,32 @@ khi đổi `AI_MODEL_PROFILE`), rồi dựng lại chỉ mục bộ nhớ; trả
 5. Chỉ mục FAISS và chỉ mục vân tay nằm trong bộ nhớ, **dựng lại từ
    `thesis_ai` lúc khởi động** (không encode lại; `index_metadata` phát hiện
    lệch); embedding chỉ tính khi ingest.
+
+## Đánh giá kiểu PAN (`evaluation/`)
+
+Đo phát hiện theo khung PAN-PC (Potthast và cs. 2010) trên đồ án thật: chèn
+đoạn chép đã biến đổi (7 kiểu: `nguyen_van`, `sua_nhe`, `dao_cau`, `gop_cau`,
+`tach_cau`, `xao_tron`, `llm`) vào đồ án thật rồi tính precision, recall,
+granularity, plagdet, recall theo kiểu và cảnh báo mức tài liệu. Dữ liệu là
+văn bản thật của sinh viên: `--out`/`--data` phải nằm **ngoài kho git**
+(`tao_bo` từ chối ghi vào repo). Phương pháp và kết quả:
+`docs/chuong-4-trien-khai/thu-nghiem-ai/05-danh-gia-kieu-pan.md`.
+
+```bash
+# 1. chọn nền/nguồn/đoạn từ gói nạp (manifest.json + PDF) → ke-hoach.json, can-llm.jsonl
+.venv/bin/python -m evaluation.tao_bo chon --goi <goi-nap> --out <dir>
+# 2. (tay) diễn đạt lại từng dòng can-llm.jsonl bằng LLM → <dir>/dien-dat-lai-llm.jsonl, mỗi dòng {"id", "text"}
+# 3. áp dụng biến đổi → nguon/, nghi-van/, nhan.json (tự kiểm offset)
+.venv/bin/python -m evaluation.tao_bo tao --out <dir>
+# 4. chạy pipeline trong tiến trình (SQLite tạm) và chấm → ket-qua-<ten>.json/.md
+.venv/bin/python -m evaluation.pan_eval --data <dir> --out <dir>/ket-qua --nhan <ten>
+```
+
+Vector câu lưu đệm ở `<dir>/cache-vector/`. `NGUONG_SUA_NHE` (0,99,
+`app/pipeline.py`) là ngưỡng tỷ lệ khớp chữ (`_ty_le_khop_chu`) của nhãn sửa nhẹ;
+`bien_sua_nhe` mà `pan_eval` in ra là biên Youden trên `diem_nguyen_van`, chỉ
+còn để tham khảo (nhãn bản 09/11 dùng 96,3 trên đại lượng này). Kiểm thử (profile `fake`): `uv run pytest tests/test_pan_metrics.py
+tests/test_obfuscate.py tests/test_pan_eval_smoke.py`.
 
 ## Ngưỡng đã hiệu chỉnh (plan 04-04)
 

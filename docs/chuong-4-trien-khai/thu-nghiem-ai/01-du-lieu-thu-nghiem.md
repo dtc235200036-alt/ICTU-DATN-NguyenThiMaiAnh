@@ -137,7 +137,8 @@ Lệnh `python -m datagen check` tự kiểm tra bộ dữ liệu trước khi d
   dạng NFC, điểm 0–10, mã giảng viên tồn tại, không trùng (khóa, tên đề tài), ≤ 2 MB và ≤ 2000 dòng; không ô
   nào bắt đầu bằng ký tự công thức.
 - **Round-trip trích xuất:** dùng đúng logic trích xuất của Web API (python-docx cho DOCX, PyMuPDF
-  `page.get_text()` cho PDF, chuẩn hóa NFC), mọi đoạn nội dung của cả 50 tệp đều còn nguyên văn; mọi tệp PDF đều
+  `page.get_text()` cho PDF, chuẩn hóa NFC; hàm trích xuất PDF mới ngày 09/11/2026, dựng lại dấu cách từ vị trí
+  ký tự, cho văn bản giống hệt trên 25 PDF này), mọi đoạn nội dung của cả 50 tệp đều còn nguyên văn; mọi tệp PDF đều
   lặp dòng đầu trang ít nhất 3 lần (tình huống dịch vụ AI phải lọc bỏ).
 - **Thống kê trùng lặp** bằng hệ số Jaccard trên tập 4-gram âm tiết ở mức câu:
 

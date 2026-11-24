@@ -16,6 +16,7 @@ enum TrangThaiKiemTra {
 }
 enum PhuongPhap {
   NGUYEN_VAN
+  SUA_NHE
   NGU_NGHIA
 }
 

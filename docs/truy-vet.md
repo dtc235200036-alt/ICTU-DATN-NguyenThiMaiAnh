@@ -80,3 +80,4 @@ Bảng này giúp GVHD kiểm tra tiến độ theo đúng tiêu chí PI của �
 | FR-AI-03 | UC0.7 | TB-DC-04 | KetQuaKiemTraTrungLap, ChiTietTrungLap | ket_qua_kiem_tra_trung_lap, chi_tiet_trung_lap | MH-14 |
 | FR-AI-04 | UC0.7 | TB-DC-03 | KetQuaKiemTraTrungLap | ket_qua_kiem_tra_trung_lap | MH-08 |
 | FR-AI-05 | UC0.4 | — | CauHinhNguong | cau_hinh_nguong | — |
+| FR-AI-06 | UC0.7 (A2) | — | KetQuaKiemTraTrungLap, ChiTietTrungLap, TaiKhoan | ket_qua_kiem_tra_trung_lap, chi_tiet_trung_lap | Kiểm tra đạo văn (bổ sung sau thiết kế, không có mã MH) |

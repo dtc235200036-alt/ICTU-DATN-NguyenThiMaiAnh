@@ -17,6 +17,9 @@ entity "sinh_vien" as sinh_vien #FFFFFF;line.dashed {
 entity "giang_vien" as giang_vien #FFFFFF;line.dashed {
   *id : BIGINT <<PK>>
 }
+entity "tai_khoan" as tai_khoan #FFFFFF;line.dashed {
+  *id : BIGINT <<PK>>
+}
 entity "tai_lieu_do_an" as tai_lieu_do_an #FFFFFF;line.dashed {
   *id : BIGINT <<PK>>
 }
@@ -81,6 +84,7 @@ entity "ket_qua_kiem_tra_trung_lap" as ket_qua_kiem_tra_trung_lap {
   --
   de_tai_id : BIGINT <<FK>>
   tai_lieu_do_an_id : BIGINT <<FK, UQ>>
+  tai_khoan_id : BIGINT <<FK>>
   *loai_kiem_tra : VARCHAR(20) <<CHECK>>
   *trang_thai : VARCHAR(20) <<CHECK>>
   ty_le_tong : DECIMAL(5,2)
@@ -120,6 +124,7 @@ sinh_vien |o--o{ do_an_kho
 giang_vien |o--o{ do_an_kho
 de_tai |o--o{ ket_qua_kiem_tra_trung_lap
 tai_lieu_do_an |o--o| ket_qua_kiem_tra_trung_lap
+tai_khoan |o--o{ ket_qua_kiem_tra_trung_lap
 ket_qua_kiem_tra_trung_lap ||--o{ chi_tiet_trung_lap
 
 @enduml

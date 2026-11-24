@@ -28,7 +28,7 @@ Sơ đồ lớp thực thể mô hình hóa toàn bộ dữ liệu nghiệp vụ
 | LichBaoVe | Lịch bảo vệ | Vị trí bảo vệ của một Sinh viên (và đề tài của SV đó) trong một hội đồng cụ thể, kèm điểm trung bình và trạng thái đã chốt | FR-BV-03, FR-BV-07 |
 | DiemBaoVe | Điểm bảo vệ | Điểm và nhận xét của từng thành viên hội đồng chấm cho một lịch bảo vệ | FR-BV-04, FR-BV-05, FR-BV-06 |
 | DoAnKho | Đồ án kho | Bản ghi kho dữ liệu đồ án: khóa, tên đề tài, SV, GVHD, từ khóa, điểm; nguồn Hệ thống (tự động khi chốt bảo vệ) hoặc Import (khóa cũ) | FR-KHO-01, FR-KHO-02, FR-KHO-03, FR-KHO-04 |
-| KetQuaKiemTraTrungLap | Kết quả kiểm tra trùng lặp | Bản ghi một lần gọi kiểm tra trùng lặp (tên đề tài hoặc tài liệu), lưu tỷ lệ tổng, ngưỡng áp dụng và đối tượng cụ thể được kiểm tra tại thời điểm đó | FR-DT-02, FR-AI-01, FR-AI-04 |
+| KetQuaKiemTraTrungLap | Kết quả kiểm tra trùng lặp | Bản ghi một lần gọi kiểm tra trùng lặp (tên đề tài, tài liệu, hoặc tệp GV/Bộ môn tải lên — khi đó gắn với `TaiKhoan` người tải lên), lưu tỷ lệ tổng, ngưỡng áp dụng và đối tượng cụ thể được kiểm tra tại thời điểm đó | FR-DT-02, FR-AI-01, FR-AI-04, FR-AI-06 |
 | ChiTietTrungLap | Chi tiết trùng lặp | Từng dòng chi tiết của một kết quả kiểm tra: đối tượng trùng, tỷ lệ, đoạn nguồn/đoạn trùng, vị trí tương ứng và nguồn trùng (không gian id `KhongGianNguon` + id) | FR-AI-02, FR-AI-03 |
 | ThongBao | Thông báo | Thông báo in-app gửi cho một tài khoản khi có sự kiện liên quan (phân công GVHD, đề tài chờ duyệt, duyệt/từ chối, nhận xét mới, phân công hội đồng, lịch bảo vệ...) | FR-TB-01 |
 | CauHinhNguong | Cấu hình ngưỡng | Ngưỡng cảnh báo trùng lặp do Bộ môn cấu hình, riêng cho tên đề tài và cho nội dung tài liệu | FR-AI-05 |
@@ -67,7 +67,7 @@ Mỗi lần vào lại `CHO_DUYET` (nộp lần đầu hoặc nộp lại) tạo
 
 | Từ | Sự kiện / tác nhân | Đến |
 |----|---------------------|-----|
-| (khởi tạo) | Web API tạo bản ghi kiểm tra, trả 202 (UC0.7 — nộp đề cương/báo cáo) | DANG_KIEM_TRA |
+| (khởi tạo) | Web API tạo bản ghi kiểm tra, trả 202 (UC0.7 — nộp đề cương/báo cáo, hoặc GV/Bộ môn tải tệp lên kiểm tra — A2) | DANG_KIEM_TRA |
 | DANG_KIEM_TRA | Dịch vụ AI trả kết quả thành công | HOAN_TAT |
 | DANG_KIEM_TRA | Timeout hoặc lỗi dịch vụ AI (NFR-09) | LOI |
 | LOI | GVHD/Bộ môn yêu cầu kiểm tra lại | DANG_KIEM_TRA |

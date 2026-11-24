@@ -318,6 +318,7 @@ TaiKhoan "1" -- "0..1" SinhVien : "là tài khoản của"
 TaiKhoan "1" -- "0..1" GiangVien : "là tài khoản của"
 TaiKhoan "1" -- "*" ThongBao : "nhận"
 TaiKhoan "1" -- "*" CauHinhNguong : "cập nhật"
+TaiKhoan "0..1" -- "*" KetQuaKiemTraTrungLap : "tải tệp lên kiểm tra"
 
 ' =====================================================================
 ' Associations — đề tài và kiểm tra trùng lặp

@@ -12,6 +12,7 @@ Thư mục này là phần "thử nghiệm và đánh giá" của dịch vụ AI
 | [02-so-sanh-mo-hinh-embedding.md](02-so-sanh-mo-hinh-embedding.md) | So sánh `bkai-foundation-models/vietnamese-bi-encoder` (+ tách từ underthesea) với `intfloat/multilingual-e5-base`: độ tách (AUC, khoảng cách điểm) và độ trễ; lý do chốt bkai | 3.4 | AISV-03, AISV-04 |
 | [03-hieu-chinh-nguong.md](03-hieu-chinh-nguong.md) | Hiệu chỉnh ngưỡng tên đề tài, ngưỡng đoạn (ngữ nghĩa), ngưỡng nguyên văn (độ phủ vân tay winnowing, kèm chọn k), ngưỡng cảnh báo tài liệu theo một đồ án và ngưỡng tổng mọi nguồn trên tập hiệu chỉnh; kiểm chứng trên tập giữ lại; kịch bản ghép từ nhiều nguồn; hạn chế | 3.4 | DATA-03, AISV-03, AISV-04 |
 | [04-hieu-nang-va-bao-mat.md](04-hieu-nang-va-bao-mat.md) | Đo trên stack chạy thật: cô lập dịch vụ AI (NFR-07), thời gian kiểm tra tên (NFR-08), nộp → hoàn tất (NFR-09), phản hồi nộp (NFR-10), một lần encode mỗi ingest (NFR-11), bộ nhớ | 3.4, 4.1 | AISV-01, AISV-02, AISV-03, AISV-06 |
+| [05-danh-gia-kieu-pan.md](05-danh-gia-kieu-pan.md) | Đánh giá kiểu PAN-PC trên đồ án thật (bộ v1 105 đồ án, bộ v2 104 đồ án sau bản sửa trích xuất PDF): 140 ca đạo văn chèn vào 20 đồ án (7 kiểu biến đổi theo ReParaphrased và PAN), 10 đồ án sạch; precision, recall, granularity, plagdet, recall theo kiểu, cảnh báo mức tài liệu; ngưỡng nhãn "Trùng sửa nhẹ". Dữ liệu nằm ngoài kho git | 3.4 | AISV-04, DATA-03 |
 
 Các giá trị hiệu chỉnh ở trang 03 là giá trị **đề xuất** hiện trên màn hình cấu hình ngưỡng của Bộ môn (UC0.4, AISV-07); Bộ môn có thể sửa, lần kiểm tra kế tiếp áp dụng giá trị mới, kết quả cũ giữ ngưỡng lúc kiểm tra.
 
@@ -58,5 +59,7 @@ Các giá trị hiệu chỉnh ở trang 03 là giá trị **đề xuất** hi�
    ```bash
    bash deploy/ai-nfr.sh --report docs/chuong-4-trien-khai/thu-nghiem-ai/04-hieu-nang-va-bao-mat.md
    ```
+
+7. Đánh giá kiểu PAN trên đồ án thật (cần gói nạp đồ án thật và một bước diễn đạt lại bằng mô hình ngôn ngữ lớn; dữ liệu và kết quả để ngoài kho git): xem mục "Chạy lại" của [05-danh-gia-kieu-pan.md](05-danh-gia-kieu-pan.md).
 
 `e2e-ai.sh` và `ai-nfr.sh` dùng chung tài khoản `DTC225200095` và `GV023` — **không chạy song song hai script**.

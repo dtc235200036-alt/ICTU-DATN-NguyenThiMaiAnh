@@ -125,6 +125,7 @@ Test pytest chạy trực tiếp trên máy host, kết nối tới MySQL của 
 | `e2e-uc1.sh` / `e2e-uc2-5.sh` | Kịch bản end-to-end UC1 và UC2–UC5 qua Apache (xem "Kiểm thử tự động") |
 | `seed-ai.sh` | Nạp kho cho dịch vụ AI (300 đề tài kho, 25 đồ án nguồn có báo cáo, backfill chỉ mục) — idempotent (xem "Dịch vụ AI kiểm tra trùng lặp") |
 | `e2e-ai.sh` / `ai-nfr.sh` | Kịch bản end-to-end dịch vụ AI thật (SC1–SC5) và đo NFR-07..NFR-11 — **không chạy song song** |
+| `tai-trich-xuat.py` | Trích xuất lại mọi PDF đã lưu bằng `extract_text` hiện hành; chạy trong container `api` (xem "Trích xuất lại PDF sau bản sửa dấu cách") |
 | `tools/check-erd-db.py` | Đối chiếu tên cột giữa `docs/chuong-3-thiet-ke/csdl/erd.puml` và schema `thesis_core` thật |
 | `install.sh` | Cài đặt / nâng cấp toàn bộ bằng một lệnh (xem "Cài đặt nhanh") |
 | `verify-all.sh [--quick] [--report]` | Chạy tuần tự mọi bộ kiểm thử + đo NFR, bảng kết quả, ghi `docs/chuong-4-trien-khai/ket-qua-kiem-thu/` |
@@ -220,7 +221,8 @@ tự (ROADMAP Phase 2, SC1–SC5):
 7. **Quyền (RBAC):** SV và Bộ môn gọi `POST /api/topics`, `PUT`/`submit`,
    `POST /api/topics/check-title` → 403; `POST /api/topics/{id}/register` và
    `/api/topic-approvals*` đã gỡ → 404 (không còn màn "Duyệt đề tài"). Sau khi
-   SV có đề tài "Đã phân công", Bộ môn không đổi được GVHD của SV đó.
+   SV có đề tài "Đã phân công", Bộ môn đổi GVHD thì đề tài chuyển theo GVHD
+   mới; không gỡ được GVHD của SV đó.
 8. **Danh sách lọc theo đợt/trạng thái/GVHD:** ở "Danh sách đề tài" (mọi vai
    trò), lọc theo Đợt đồ án, Trạng thái và Giảng viên hướng dẫn — bảng chỉ
    còn đúng các đề tài khớp bộ lọc.
@@ -406,6 +408,36 @@ docker compose -f deploy/docker-compose.yml exec -T api python -m app.services.a
 docker compose -f deploy/docker-compose.yml exec -T api python -c "import os,urllib.request as u; r=u.Request('http://ai:8002/reindex', data=b'{}', headers={'X-API-Key': os.environ['AI_API_KEY'], 'Content-Type': 'application/json'}); print(u.urlopen(r, timeout=1800).read().decode())"
 ```
 
+### Trích xuất lại PDF sau bản sửa dấu cách (một lần, 09/11/2026)
+
+Trước bản sửa này, PyMuPDF làm dính âm tiết sau các chữ ệ, ử, ế… trong PDF không có ký tự dấu cách (PDF sinh từ LaTeX, một số bản xuất từ Word): "hệthống", "sửdụng". Văn bản dính chữ làm sai vân tay khi so với bài nộp DOCX và làm kém embedding. Bản mới của `extract_text` (`backend/app/services/documents.py`) dựng lại dấu cách từ vị trí ký tự, nhưng **văn bản PDF đã lưu trong CSDL và các câu đã vào chỉ mục AI vẫn là bản cũ**. Trên máy chủ đã có dữ liệu, làm lần lượt:
+
+1. **Sao lưu CSDL** (cả `thesis_core` và `thesis_ai`):
+
+   ```bash
+   mkdir -p ~/ntma-backups
+   docker compose -f deploy/docker-compose.yml exec -T mysql sh -c \
+     'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysqldump -uroot --single-transaction --routines --triggers --databases thesis_core thesis_ai' \
+     | gzip > ~/ntma-backups/mysql-$(date +%F).sql.gz
+   ```
+
+2. **Triển khai bản mới:** `git pull --ff-only`, rồi `docker compose -f deploy/docker-compose.yml up -d --build --wait` (build lại `api` có hàm trích xuất mới, `ai` có độ phủ theo nguồn, nhãn "Trùng sửa nhẹ" và bộ lọc mẫu chung mới, `apache` có giao diện hiển thị nhãn mới). Trên máy chủ có dữ liệu thật, kiểm tra `SEED_ON_START=false` trong `deploy/.env` trước khi khởi động lại `api`.
+3. **Trích xuất lại mọi PDF đã lưu** bằng hàm mới (chỉ ghi khi văn bản đổi, không bao giờ ghi đè bằng rỗng; in số tài liệu cập nhật, giữ nguyên, thiếu tệp):
+
+   ```bash
+   docker compose -f deploy/docker-compose.yml exec -T api python - < deploy/tai-trich-xuat.py
+   ```
+
+4. **Nạp lại tài liệu vào chỉ mục AI** (thay toàn bộ câu cũ của từng tài liệu):
+
+   ```bash
+   docker compose -f deploy/docker-compose.yml exec -T api python -m app.services.ai_index backfill --loai DOCUMENT
+   ```
+
+5. **Kiểm tra lại các bài cần thiết** bằng nút **"Kiểm tra lại"**. Kết quả kiểm tra cũ không tự tính lại; các lần nộp sau đã so với kho mới. Lưu ý: nút này (và API `recheck`) chỉ có khi kết quả đang ở trạng thái *Lỗi* — tài liệu trước đây lỗi trích xuất mà nay có văn bản (bước 3 bỏ cờ `trich_xuat_loi`) kiểm tra lại được ngay, còn kết quả *Hoàn tất* cũ thì API trả 409 và hiện chưa có đường giao diện để tính lại.
+
+Trích xuất PDF chậm hơn khoảng 3,4 lần (trung vị 0,35 giây, lớn nhất 0,74 giây mỗi tệp trên 104 PDF đồ án thật), vẫn trong thời gian của tác vụ nền. 25 PDF của bộ dữ liệu hiệu chỉnh cho văn bản giống hệt, nên không cần hiệu chỉnh lại ngưỡng. Chi tiết: `docs/phuong-phap-kiem-tra-dao-van.md`, mục 3.1.
+
 Ngưỡng cảnh báo (tên đề tài, cảnh báo tài liệu, tổng mọi đồ án, đoạn trùng) do Bộ môn sửa ở menu **Ngưỡng trùng lặp** (`/cau-hinh-nguong`, UC0.4); giá trị đề xuất lấy từ hiệu chỉnh (`ai-service/calibration/nguong-de-xuat.json`, trang chương 4 `docs/chuong-4-trien-khai/thu-nghiem-ai/03-hieu-chinh-nguong.md`). Ngưỡng nguyên văn (độ phủ vân tay) là tham số kỹ thuật của dịch vụ AI, không sửa trên giao diện.
 
 ### Kiểm thử dịch vụ AI
@@ -429,6 +461,7 @@ bash deploy/sql.sh "SELECT COUNT(*) FROM dot_do_an WHERE khoa IN ('K96','K97','K
 - **Thời gian kiểm tra tăng theo độ dài tài liệu** (~0,12 s CPU / 1000 ký tự trên máy phát triển: báo cáo ~100 trang ≈ 40 s, vượt mức 30 s của NFR-09 vốn đo trên đề cương/báo cáo ngắn). Web API đặt timeout `/check-document` theo độ dài: `AI_DOCUMENT_TIMEOUT_SECONDS` (24) + `AI_DOCUMENT_TIMEOUT_PER_1K_CHARS` (0,25) × nghìn ký tự, trần `AI_DOCUMENT_TIMEOUT_MAX_SECONDS` (240, dưới `DOCUMENT_CHECK_TIMEOUT_SECONDS` = 300). Kiểm tra tên đề tài không bị chặn trong lúc đó (dịch vụ AI mã hóa theo lô con); `ai-nfr.sh` đo cả hai.
 - **Văn bản trích xuất dài hơn `AI_DOCUMENT_MAX_CHARS` (800 000 ký tự ≈ 230 trang) không được gửi sang dịch vụ AI** (WR-05): nộp vẫn thành công (UC0.7 E1), kết quả kiểm tra là "Lỗi" kèm lý do "Tài liệu quá dài để kiểm tra trùng lặp tự động", nút "Kiểm tra lại" bị ẩn (API trả 409 với cùng lý do) — cần nộp bản đã bỏ phụ lục/mã nguồn dài.
 
+- **Kiểm tra đạo văn một tệp tải lên** (23/11/2026, menu "Kiểm tra đạo văn" của GV/Bộ môn, `/api/upload-checks`): cùng giới hạn tệp và cùng `document_check.run` như tài liệu nộp; tệp không lưu đĩa, không vào chỉ mục AI (`ref_id` 0); chỉ người tải lên xem được kết quả; tối đa 2 lần đang chạy mỗi người (429); PDF ảnh quét hoặc dài hơn `AI_DOCUMENT_MAX_CHARS` → 422. Cột mới `ket_qua_kiem_tra_trung_lap.tai_khoan_id` (migration 0020) chạy tự động khi `api` khởi động (`alembic upgrade head`).
 - **Đưa tài liệu vào chỉ mục AI chạy nền sau kiểm tra** (WR-06): lần ingest thành công đóng dấu `tai_lieu_do_an.da_index_luc`; tài liệu lỡ ingest (dịch vụ AI tạm ngừng) còn NULL, được thử lại sau mỗi lần ingest thành công kế tiếp (tối đa 3 tài liệu/lần) và hiện ở ô "Tài liệu chưa vào chỉ mục AI" trên dashboard Bộ môn; thử lại ngay: `docker compose -f deploy/docker-compose.yml exec -T api python -m app.services.ai_index backfill --loai DOCUMENT --chua-index`.
 - **Gỡ vector khỏi chỉ mục AI chạy nền, lỗi chỉ ghi log** (WR-04): xóa bản ghi kho gỡ vector ARCHIVE của nó, chốt bảo vệ gỡ vector TOPIC của đề tài vừa vào kho (bản ghi ARCHIVE thay thế) — bằng `/ingest` văn bản rỗng. Nếu lần gỡ đó lỗi (dịch vụ AI tạm ngừng), kết quả vẫn đúng vì Web API bỏ qua `ref_id` không còn tồn tại; gỡ thủ công: `docker compose -f deploy/docker-compose.yml exec -T api python -m app.services.ai_index purge --loai ARCHIVE --ids <id>`.
 - **Danh sách phần mẫu chung là giả định `[ASSUMED]`** (bìa, lời cam đoan, mục lục, danh mục, tài liệu tham khảo, phụ lục…) cho tới khi có mẫu đề cương/báo cáo chính thức của Khoa — khi có mẫu, cập nhật `ai-service/app/nlp/boilerplate.py` rồi chạy lại hiệu chỉnh (`calibration/calibrate.py tune|evaluate`). Để danh sách này không thành chỗ giấu nội dung, tiêu đề mục mẫu chỉ bỏ nguyên mục ở phần đầu/phần cuối tài liệu và có trần độ dài; MH-09/MH-14 luôn ghi số câu đã so sánh, số dòng và % nội dung bị loại, và cảnh báo khi hơn 50 % nội dung bị loại (tài liệu seed tổng hợp ngắn bị loại tới 45 %).

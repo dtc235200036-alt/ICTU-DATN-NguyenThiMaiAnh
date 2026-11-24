@@ -67,6 +67,7 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 | MH-14 | Chi tiết kết quả kiểm tra trùng lặp | Giảng viên, Bộ môn | UC0.7 | [mh-14.html](mockup/mh-14.html) | [mh-14.png](mockup/mh-14.png) | Đã dựng |
 | MH-15 | Phân công GVHD | Bộ môn | UC0.8 | [mh-15.html](mockup/mh-15.html) | [mh-15.png](mockup/mh-15.png) | Đã dựng |
 | MH-16 | Sinh viên của tôi (lớp hướng dẫn) | Giảng viên | UC0.8, UC1.1 | [mh-16.html](mockup/mh-16.html) | [mh-16.png](mockup/mh-16.png) | Đã dựng |
+| — | Kiểm tra đạo văn: tải tệp lên + lịch sử (`/kiem-tra-dao-van`), chi tiết (`/kiem-tra-dao-van/:id`) | Giảng viên, Bộ môn | UC0.7 (A2) | — | — | Bổ sung sau thiết kế (23/11/2026), không có mockup, không tính vào 16 màn hình; menu "Kiểm tra đạo văn"; trang chi tiết dùng lại khung kết quả của MH-14 |
 
 ### 3.4.3. MH-01 – Đăng nhập
 
@@ -340,7 +341,7 @@ Phong cách chốt theo D-12: **Ant Design admin** — sider tối bên trái, h
 **Vùng (regions):** Sider Bộ môn (mục "Phân công GVHD" đang chọn); góc phải tiêu đề: Select đợt đồ án ("Đợt K22A — đang mở"), nút "Import CSV" và nút chính "Lưu phân công"; 4 thẻ `ant-statistic` (Tổng sinh viên, Đã phân công, Chưa phân công — tô đỏ, Giảng viên hướng dẫn); `ant-filter-bar` (Từ khóa — MSSV hoặc họ tên, GVHD, Tình trạng: Tất cả/Đã phân công/Chưa phân công); thanh thao tác hàng loạt "Đã chọn N sinh viên → Gán cho GVHD [Select] [Gán hàng loạt]"; bảng sinh viên (ô chọn, MSSV, Họ tên, Lớp, GVHD — Select ngay trên dòng hoặc "— Chọn GVHD —", Đề tài hiện tại — Tag "Chưa có"/"Chờ duyệt"/"Đã phân công") kèm `ant-pagination`; thẻ bên phải "Tải theo giảng viên" (Giảng viên, Số SV).
 
 **Trạng thái (states):**
-- Dòng sinh viên đã có đề tài "Đã phân công": Select GVHD bị khóa kèm ghi chú "Khóa — đã có đề tài Đã phân công" (BR-PC-03).
+- Dòng sinh viên đã có đề tài "Đã phân công": Select GVHD không có nút xóa, kèm ghi chú "đổi GVHD sẽ chuyển cả đề tài sang GVHD mới" (BR-PC-03).
 - Hộp thoại "Import phân công từ CSV" (minh họa trong `mockup-state-panel` dưới ảnh chính, UC0.8 - A1): hướng dẫn định dạng `ma_so_sinh_vien,ma_giang_vien` (dòng tiêu đề tùy chọn, dấu phẩy hoặc chấm phẩy), `ant-upload-dragger`, và `ant-alert-warning` kết quả "Đã lưu N dòng, M dòng lỗi" liệt kê từng dòng lỗi kèm số dòng và lý do.
 
 **Tương tác (interactions):**

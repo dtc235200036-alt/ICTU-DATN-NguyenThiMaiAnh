@@ -41,6 +41,8 @@ Số câu B của tập hiệu chỉnh theo nhãn: chép nguyên văn 183, diễ
 
 Ngưỡng áp dụng: đoạn 67.7 %, nguyên văn 56.0 %, tài liệu 10.4 %, tổng 14.8 %. Cột *Đoạn trùng* đếm các đoạn trùng mà `check_document` trả về (nguyên văn / ngữ nghĩa).
 
+> Ghi chú (09/11/2026, thêm tay — lần sinh lại trang bằng `calibrate.py evaluate --report` sẽ xóa dòng này): từ khi có nhãn đoạn "Trùng sửa nhẹ" (`SUA_NHE`, từ 24/11/2026 theo tỷ lệ khớp chữ ≥ 0,99; xem [05-danh-gia-kieu-pan.md](05-danh-gia-kieu-pan.md)), `calibrate.py` đếm vào cột *nguyên văn* mọi đoạn do vân tay, gồm cả đoạn mang nhãn sửa nhẹ. Số liệu trong trang được sinh ngày 21/10/2026, trước khi có nhãn này và trước khi độ phủ nguyên văn tính theo từng nguồn; 25 PDF của bộ dữ liệu cho văn bản giống hệt với hàm trích xuất PDF mới, nên bản sửa trích xuất không làm đổi các ngưỡng; trang này chưa được sinh lại sau bản sửa độ phủ.
+
 *Bị cảnh báo?* dùng **đúng quy tắc triển khai** (sửa lỗi review CR-01): tỷ lệ theo nguồn **cao nhất** (`do_an_trung[0]`, bất kỳ đồ án nào trong kho) ≥ 10.4 % *(nguồn)*, hoặc tỷ lệ tổng ≥ 14.8 % *(tổng)* — Web API không biết đồ án nguồn A của cặp. Cột *theo đồ án nguồn A* là tỷ lệ tới A (thống kê dùng để khớp ngưỡng), chỉ để đối chiếu.
 
 Trên tập hiệu chỉnh, theo thống kê triển khai: âm lớn nhất 8.41 %, dương nhỏ nhất 20.79 % — ngưỡng 10.4 % vẫn nằm trong khoảng tách.

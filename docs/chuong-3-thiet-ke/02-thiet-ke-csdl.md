@@ -238,7 +238,8 @@ File mô tả không lưu ở `tai_lieu_do_an` vì bảng đó bắt buộc gắ
 |---|---|---|---|---|
 | id | BIGINT | Không | PK | Định danh kết quả kiểm tra |
 | de_tai_id | BIGINT | Có | FK → de_tai | Đặt khi `loai_kiem_tra = TEN_DE_TAI` |
-| tai_lieu_do_an_id | BIGINT | Có | FK, UNIQUE → tai_lieu_do_an | Đặt khi `loai_kiem_tra = TAI_LIEU`; UNIQUE đảm bảo mỗi phiên bản tài liệu có đúng 1 kết quả (§3.2.5) |
+| tai_lieu_do_an_id | BIGINT | Có | FK, UNIQUE → tai_lieu_do_an | Đặt khi `loai_kiem_tra = TAI_LIEU`, trừ kiểm tra tệp tải lên (NULL); UNIQUE đảm bảo mỗi phiên bản tài liệu có đúng 1 kết quả (§3.2.5) |
+| tai_khoan_id | BIGINT | Có | FK → tai_khoan (`fk_ket_qua_kttl_tai_khoan`) | Người tải tệp lên kiểm tra đạo văn (UC0.7 A2, Alembic 0020): `loai_kiem_tra = TAI_LIEU`, `tai_lieu_do_an_id` và `de_tai_id` NULL; chỉ người này xem được kết quả. NULL với kết quả gắn tài liệu đã nộp hoặc tên đề tài |
 | loai_kiem_tra | VARCHAR(20) | Không | — | `TEN_DE_TAI` / `TAI_LIEU` |
 | trang_thai | VARCHAR(20) | Không | — | `DANG_KIEM_TRA`/`HOAN_TAT`/`LOI` (§3.1.4) |
 | ty_le_tong | DECIMAL(5,2) | Có | — | Tỷ lệ tương đồng tổng (%) — với kiểm tra tài liệu: phần ký tự của mọi câu bị gắn cờ (cộng mọi nguồn), so với `nguong_tong_ap_dung` để bắt bài ghép từ nhiều đồ án (Alembic 0017) |
@@ -248,7 +249,7 @@ File mô tả không lưu ở `tai_lieu_do_an` vì bảng đó bắt buộc gắ
 | ty_le_loai_tru | DECIMAL(5,2) | Có | — | Kiểm tra tài liệu: % ký tự bị lọc — phần **không** được kiểm tra; MH-09/MH-14 hiển thị và cảnh báo GVHD khi > 50 % |
 | nguong_ap_dung | DECIMAL(5,2) | Không | — | Ngưỡng cấu hình tại thời điểm kiểm tra (chụp lại từ `cau_hinh_nguong`) |
 | nguong_tong_ap_dung | DECIMAL(5,2) | Có | — | Kiểm tra tài liệu: `NGUONG_TONG_TAI_LIEU` tại thời điểm kiểm tra (chụp lại như `nguong_ap_dung`), so với `ty_le_tong`. NULL ở kết quả có trước Alembic 0017 → chỉ xét ngưỡng theo một đồ án (không hồi tố) |
-| doi_tuong_duoc_kiem_tra | VARCHAR(255) | Có | — | Mô tả đối tượng cụ thể được kiểm tra (tên đề tài nhập, hoặc số phiên bản tài liệu) |
+| doi_tuong_duoc_kiem_tra | VARCHAR(255) | Có | — | Mô tả đối tượng cụ thể được kiểm tra (tên đề tài nhập, số phiên bản tài liệu, hoặc tên tệp tải lên) |
 | thoi_diem | DATETIME | Không | — | Thời điểm tạo bản ghi |
 
 #### `chi_tiet_trung_lap`
