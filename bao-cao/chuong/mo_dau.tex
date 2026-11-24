@@ -6,9 +6,7 @@
 
 Mỗi đợt làm đồ án/khóa luận tốt nghiệp, Khoa Công nghệ thông tin phải điều phối nhiều sinh viên, giảng viên hướng dẫn và Bộ môn qua một chuỗi bước nối tiếp nhau: phân công giảng viên hướng dẫn, thống nhất và giao đề tài, nộp và duyệt đề cương, theo dõi tiến độ, nộp báo cáo, lập hội đồng và tổ chức bảo vệ. Mỗi bước sinh ra hồ sơ cần lưu lại, và kết quả của bước trước là điều kiện để bước sau bắt đầu. Khi các bước này chủ yếu được trao đổi trực tiếp giữa sinh viên và giảng viên, việc nắm được trạng thái chung của cả đợt trở nên khó khăn với mọi bên.
 
-Kết quả khảo sát 18 sinh viên Khoa Công nghệ thông tin (thực hiện ngày 01/10/2026, chi tiết ở mục 2.1) cho thấy rõ điều này. Trong 10 sinh viên đang làm đồ án, 8 bạn đăng ký đề tài trực tiếp với giảng viên. 10/18 sinh viên gặp khó khăn khi theo dõi trạng thái đề tài, đề cương. 16/18 sinh viên lo ngại đề tài hoặc nội dung của mình trùng với các đồ án đã thực hiện trước đó, và cũng 16/18 sinh viên đánh giá chức năng AI kiểm tra độ tương đồng trong phạm vi khoa là cần thiết. 15/18 sinh viên muốn khoa lưu lại các đồ án đã thực hiện để các khóa sau tra cứu.
-
-Việc kiểm tra mức độ tương đồng bằng phần mềm Turnitin theo quy định của trường được thực hiện trên bản cuối cùng nộp để bảo vệ. Ở các khâu sớm hơn như giao đề tài và duyệt đề cương, giảng viên chưa có công cụ để đối chiếu nhanh với các đồ án đã có của khoa, nên một đề tài trùng có thể chỉ bị phát hiện khi sinh viên đã làm gần xong.
+Kết quả khảo sát 18 sinh viên Khoa Công nghệ thông tin (ngày 01/10/2026, chi tiết ở Chương 2) cho thấy rõ điều này. Trong 10 sinh viên đang làm đồ án, 8 bạn đăng ký đề tài trực tiếp với giảng viên; 10/18 sinh viên gặp khó khăn khi theo dõi trạng thái đề tài, đề cương; 16/18 sinh viên lo ngại đề tài hoặc nội dung của mình trùng với các đồ án đã thực hiện trước đó và cũng 16/18 đánh giá chức năng AI kiểm tra độ tương đồng trong phạm vi khoa là cần thiết; 15/18 muốn khoa lưu lại các đồ án đã thực hiện để các khóa sau tra cứu. Trong khi đó, việc kiểm tra mức độ tương đồng bằng phần mềm Turnitin theo quy định của trường chỉ thực hiện trên bản cuối cùng nộp để bảo vệ; ở các khâu sớm hơn như giao đề tài và duyệt đề cương, giảng viên chưa có công cụ để đối chiếu nhanh với các đồ án đã có của khoa, nên một đề tài trùng có thể chỉ bị phát hiện khi sinh viên đã làm gần xong.
 
 Từ những lý do trên, em chọn đề tài \textit{``Phát triển hệ thống quản lý đồ án sinh viên Khoa Công nghệ thông tin -- Trường Đại học Công nghệ Thông tin và Truyền thông''}. Hệ thống số hóa toàn bộ quy trình đồ án trên một nền tảng chung, đồng thời tích hợp dịch vụ AI kiểm tra trùng lặp ngay từ khâu giao đề tài và nộp đề cương.
 
@@ -24,59 +22,42 @@ Từ những lý do trên, em chọn đề tài \textit{``Phát triển hệ th�
 
 \section*{Đối tượng và phạm vi nghiên cứu}
 
-\textbf{Đối tượng nghiên cứu} là quy trình quản lý đồ án/khóa luận tốt nghiệp tại Khoa Công nghệ thông tin, Trường Đại học Công nghệ Thông tin và Truyền thông, với ba nhóm người dùng: sinh viên, giảng viên (hướng dẫn và tham gia hội đồng) và Bộ môn/Khoa.
-
-\textbf{Phạm vi nghiên cứu} gồm:
+\textbf{Đối tượng nghiên cứu} là quy trình quản lý đồ án/khóa luận tốt nghiệp tại Khoa Công nghệ thông tin, Trường Đại học Công nghệ Thông tin và Truyền thông, với ba nhóm người dùng: sinh viên, giảng viên (hướng dẫn và tham gia hội đồng) và Bộ môn/Khoa. \textbf{Phạm vi nghiên cứu} gồm:
 \begin{itemize}
-    \item \textit{Nghiệp vụ:} phân công giảng viên hướng dẫn đầu đợt, tạo và giao đề tài, nộp và duyệt đề cương, báo cáo tiến độ, nộp báo cáo cuối, lập hội đồng và lịch bảo vệ, chấm và chốt điểm, lưu trữ và tra cứu kho đồ án.
-    \item \textit{Kiểm tra trùng lặp:} so sánh tên đề tài theo ngữ nghĩa và phát hiện đoạn nội dung trùng trong đề cương, báo cáo (định dạng DOCX và PDF). Phạm vi so sánh là các đồ án/khóa luận trong kho của Khoa Công nghệ thông tin. Tính năng này bổ sung, không thay thế việc kiểm tra bằng phần mềm Turnitin theo quy định của trường.
-    \item \textit{Nền tảng:} ứng dụng Web dùng trên trình duyệt, triển khai trên máy chủ sau Apache với HTTPS.
-    \item \textit{Dữ liệu thử nghiệm:} tối thiểu 100 bản ghi sinh viên, 30 bản ghi giảng viên, 200 đề tài các khóa và 50 tệp đề cương/báo cáo, trong đó có các cặp trùng lặp được tạo có chủ đích để kiểm chứng.
+    \item \textit{Nghiệp vụ:} phân công giảng viên hướng dẫn, tạo và giao đề tài, nộp và duyệt đề cương, báo cáo tiến độ, nộp báo cáo cuối, lập hội đồng và lịch bảo vệ, chấm và chốt điểm, lưu trữ và tra cứu kho đồ án.
+    \item \textit{Kiểm tra trùng lặp:} so sánh tên đề tài theo ngữ nghĩa và phát hiện đoạn nội dung trùng trong đề cương, báo cáo (DOCX, PDF) với các đồ án trong kho của Khoa; tính năng này bổ sung, không thay thế việc kiểm tra bằng Turnitin theo quy định của trường.
+    \item \textit{Nền tảng và dữ liệu thử nghiệm:} ứng dụng Web triển khai trên máy chủ sau Apache với HTTPS; tối thiểu 100 bản ghi sinh viên, 30 bản ghi giảng viên, 200 đề tài các khóa và 50 tệp đề cương/báo cáo, trong đó có các cặp trùng lặp tạo chủ đích để kiểm chứng.
 \end{itemize}
 
 \section*{Các điều chỉnh so với đề cương}
 
-Trong quá trình phân tích và thi công, một số nội dung của đề cương được điều chỉnh cho khớp với bài toán và quy trình thực tế của khoa:
+Một số nội dung của đề cương được điều chỉnh cho khớp với quy trình thực tế của khoa:
 \begin{itemize}
-    \item \textit{Các UC chính (PI 1.3).} Đề cương liệt kê năm UC ``Quản lý thông tin đơn vị, Quản lý thông tin nhân sự, Quản lý công việc, Quản lý đánh giá cán bộ, Quản lý dữ liệu''. Đây là nội dung của đề tài ví dụ (quản lý nhân sự) trong biểu mẫu định hướng H01, không phải của bài toán quản lý đồ án. Báo cáo dùng năm UC chính bám theo mô tả sản phẩm ở mục 7a của đề cương: Quản lý đề tài, Quản lý đề cương, Quản lý tiến độ thực hiện, Quản lý bảo vệ và Quản lý kho dữ liệu đồ án, cùng nhóm chức năng chung (đăng nhập, phân quyền, đợt đồ án, thông báo).
-    \item \textit{Thành phần client (PI 3.2).} Đề cương ghi client là ứng dụng Mobile, trong khi mục tiêu 2 ở mục 5 của đề cương xác định hệ thống gồm Web API và ứng dụng Web. Hệ thống được xây dựng với client Web, vì người dùng chính là giảng viên và Bộ môn làm việc trên máy tính, và người dùng không phải cài đặt ứng dụng.
-    \item \textit{Cách đăng ký đề tài (mục 7a, PI 3.4).} Đề cương mô tả sinh viên tự đề xuất, đăng ký đề tài và hệ thống kiểm tra trùng tên khi sinh viên đăng ký. Thực tế khảo sát cho thấy sinh viên thống nhất đề tài trực tiếp với giảng viên (8/10 sinh viên đang làm đồ án). Vì vậy, hệ thống để giảng viên hướng dẫn tạo và giao đề tài cho sinh viên mình hướng dẫn, và kiểm tra trùng tên đề tài theo ngữ nghĩa được thực hiện ngay khi giảng viên tạo hoặc giao đề tài.
-    \item \textit{Bổ sung theo góp ý của giảng viên hướng dẫn.} Đề cương được duyệt qua hai cấp: giảng viên hướng dẫn duyệt, sau đó Bộ môn phê duyệt bằng bản PDF đề cương đã được Lãnh đạo Bộ môn ký. Đề tài được gắn với định hướng đề tài (H01, H02,\ldots), và tên tệp đề cương được kiểm tra theo quy tắc đặt tên của khoa trước khi nộp lên Bộ môn.
+    \item \textit{Các UC chính (PI 1.3):} năm UC trong đề cương (Quản lý thông tin đơn vị, nhân sự, công việc\ldots) là của đề tài ví dụ trong biểu mẫu H01; báo cáo dùng năm UC bám theo mục 7a của đề cương: Quản lý đề tài, Quản lý đề cương, Quản lý tiến độ thực hiện, Quản lý bảo vệ, Quản lý kho dữ liệu đồ án, cùng nhóm chức năng chung.
+    \item \textit{Thành phần client (PI 3.2):} đề cương ghi client Mobile, nhưng mục tiêu 2 xác định hệ thống gồm Web API và ứng dụng Web; hệ thống dùng client Web vì người dùng chính là giảng viên và Bộ môn làm việc trên máy tính.
+    \item \textit{Cách đăng ký đề tài (mục 7a, PI 3.4):} khảo sát cho thấy sinh viên thống nhất đề tài trực tiếp với giảng viên, nên giảng viên hướng dẫn tạo và giao đề tài, và kiểm tra trùng tên đề tài chạy ngay khi giảng viên tạo hoặc giao đề tài.
+    \item \textit{Theo góp ý của giảng viên hướng dẫn:} đề cương được duyệt hai cấp (giảng viên hướng dẫn, sau đó Bộ môn phê duyệt bằng bản PDF đã được Lãnh đạo Bộ môn ký); đề tài gắn với định hướng (H01, H02,\ldots); tên tệp đề cương được kiểm tra theo quy tắc đặt tên của khoa.
 \end{itemize}
 
 \section*{Phương pháp nghiên cứu}
 
 \begin{itemize}
-    \item \textit{Khảo sát:} lấy ý kiến sinh viên bằng phiếu khảo sát trực tuyến; nghiên cứu các biểu mẫu và hướng dẫn của trường, khoa (mẫu đề cương H01, bảng định hướng đề tài CLO--PI, mẫu lời cam đoan kiểm tra mức độ tương đồng).
-    \item \textit{Phân tích và thiết kế:} mô hình hóa quy trình nghiệp vụ bằng BPMN; dùng UML cho sơ đồ UC, sơ đồ lớp, sơ đồ thành phần, sơ đồ triển khai và sơ đồ tuần tự; dựng prototype giao diện bằng HTML.
-    \item \textit{Thi công:} phát triển lặp theo từng UC, gồm Web API (FastAPI), client Web (React), dịch vụ AI kiểm tra trùng lặp tách riêng và CSDL MySQL.
+    \item \textit{Khảo sát:} phiếu khảo sát trực tuyến cho sinh viên; nghiên cứu biểu mẫu, hướng dẫn của trường, khoa (mẫu đề cương H01, bảng định hướng đề tài CLO--PI, mẫu lời cam đoan kiểm tra mức độ tương đồng).
+    \item \textit{Phân tích và thiết kế:} mô hình hóa quy trình bằng BPMN; dùng UML cho sơ đồ UC, lớp, thành phần, triển khai và tuần tự; dựng prototype giao diện bằng HTML.
+    \item \textit{Thi công và triển khai:} phát triển lặp theo từng UC, gồm Web API (FastAPI), client Web (React), dịch vụ AI tách riêng và CSDL MySQL; đóng gói bằng Docker Compose sau Apache với HTTPS.
     \item \textit{Kiểm thử và đánh giá:} kiểm thử tự động các API; thử nghiệm dịch vụ AI trên tập dữ liệu có các cặp trùng lặp tạo chủ đích; đo thời gian phản hồi trên máy chủ triển khai.
-    \item \textit{Triển khai:} đóng gói các thành phần bằng Docker Compose, đặt sau Apache làm reverse proxy với HTTPS.
 \end{itemize}
 
-\section*{Kế hoạch thực hiện}
-
-Khóa luận được thực hiện trong 10 tuần, từ ngày 28/09/2026 đến ngày 07/12/2026, theo tiến độ trong đề cương:
-\begin{itemize}
-    \item Tuần 1: khảo sát thực tế; kết quả là các biểu mẫu dữ liệu và sơ đồ BPMN.
-    \item Tuần 2--3: phân tích yêu cầu; kết quả là bảng yêu cầu chức năng, phi chức năng, sơ đồ UC và đặc tả UC.
-    \item Tuần 4: thiết kế dữ liệu và kiến trúc; kết quả là sơ đồ lớp thực thể, sơ đồ CSDL và thiết kế kiến trúc SOA.
-    \item Tuần 5: thiết kế giao diện và thu thập kho dữ liệu đồ án của khoa.
-    \item Tuần 6: thi công CSDL MySQL và các API chính.
-    \item Tuần 7: thi công năm UC chính trên ứng dụng Web.
-    \item Tuần 8: thi công tính năng AI kiểm tra trùng lặp tên đề tài, đề cương và báo cáo.
-    \item Tuần 9: triển khai lên máy chủ, tạo dữ liệu thử nghiệm và kiểm thử.
-    \item Tuần 10: hoàn thiện sản phẩm, quyển báo cáo và slide bảo vệ.
-\end{itemize}
+Khóa luận được thực hiện trong 10 tuần (28/09/2026--07/12/2026) theo tiến độ trong đề cương: tuần 1 khảo sát; tuần 2--3 phân tích yêu cầu; tuần 4 thiết kế dữ liệu và kiến trúc; tuần 5 thiết kế giao diện và thu thập kho đồ án; tuần 6--7 thi công CSDL, API và năm UC chính; tuần 8 thi công tính năng AI kiểm tra trùng lặp; tuần 9 triển khai, tạo dữ liệu thử nghiệm và kiểm thử; tuần 10 hoàn thiện sản phẩm, báo cáo và slide bảo vệ.
 
 \section*{Cấu trúc báo cáo}
 
 Ngoài phần Mở đầu, Kết luận và Tài liệu tham khảo, báo cáo gồm bốn chương theo cấu trúc quy định trong đề cương:
 \begin{itemize}
-    \item \textbf{Chương 1. Cơ sở lý thuyết:} trình bày những công nghệ chính sử dụng trong đồ án.
-    \item \textbf{Chương 2. Khảo sát và phân tích hệ thống:} trình bày kết quả khảo sát, quy trình nghiệp vụ bằng BPMN, yêu cầu chức năng và phi chức năng, sơ đồ UC và đặc tả UC.
-    \item \textbf{Chương 3. Thiết kế hệ thống:} trình bày sơ đồ lớp thực thể, thiết kế CSDL, kiến trúc SOA và thiết kế giao diện.
-    \item \textbf{Chương 4. Triển khai:} trình bày cách cài đặt, bảo vệ hệ thống, hoạt động thử nghiệm và tài liệu hướng dẫn sử dụng.
+    \item \textbf{Chương 1. Cơ sở lý thuyết:} các công nghệ chính và nền tảng của tính năng kiểm tra trùng lặp.
+    \item \textbf{Chương 2. Khảo sát và phân tích hệ thống:} kết quả khảo sát, quy trình nghiệp vụ BPMN, yêu cầu chức năng và phi chức năng, sơ đồ và đặc tả UC.
+    \item \textbf{Chương 3. Thiết kế hệ thống:} sơ đồ lớp thực thể, thiết kế CSDL, kiến trúc SOA và thiết kế giao diện.
+    \item \textbf{Chương 4. Triển khai:} cài đặt, bảo vệ hệ thống, thử nghiệm và hướng dẫn sử dụng.
 \end{itemize}
 
 \end{document}
