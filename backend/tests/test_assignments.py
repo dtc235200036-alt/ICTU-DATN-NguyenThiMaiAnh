@@ -1,15 +1,17 @@
-from datetime import date
+from datetime import date, time
 
 import pytest
 
 from app.core.roles import VaiTro
+from app.models.bao_ve import HoiDong, LichBaoVe
 from app.models.de_tai import NHAP, DeTai
 from app.models.dot_do_an import DANG_MO, DotDoAn
 from app.models.phan_cong import PhanCongHuongDan
 
 # UC0.8: Bộ môn gán mỗi SV cho đúng một GVHD trong đợt; đổi GVHD gỡ SV khỏi
-# bản nháp của GV cũ, bị chặn khi SV đã có đề tài Đã phân công; GV xem lớp của
-# mình, SV xem GVHD của mình; chỉ Bộ môn ghi được phân công.
+# bản nháp của GV cũ; SV đã có đề tài Đã phân công thì đề tài chuyển theo GVHD
+# mới (không gỡ được, chặn khi đã xếp lịch bảo vệ); GV xem lớp của mình, SV xem
+# GVHD của mình; chỉ Bộ môn ghi được phân công.
 
 
 def _cohort(db) -> DotDoAn:
@@ -144,16 +146,33 @@ def test_reassign_detaches_draft_and_blocks_assigned(
     assert assigned.status_code == 201
     assert assigned.json()["trang_thai"] == "DA_PHAN_CONG"
 
-    # Đã phân công: không đổi, cũng không gỡ được GVHD nữa.
+    # Đã phân công: đổi GVHD thì đề tài chuyển theo GVHD mới; không gỡ được.
+    topic_id = assigned.json()["id"]
     back = _put(client, auth_headers(bomon), cohort.id, [
         {"sinh_vien_id": sv.sinh_vien_id, "giang_vien_id": gv_old.giang_vien_id}
     ])
-    assert back.status_code == 409
-    assert "Đã phân công" in back.json()["detail"]
+    assert back.status_code == 200, back.text
+    db.rollback()
+    assert db.get(DeTai, topic_id).giang_vien_id == gv_old.giang_vien_id
     remove = _put(client, auth_headers(bomon), cohort.id, [
         {"sinh_vien_id": sv.sinh_vien_id, "giang_vien_id": None}
     ])
     assert remove.status_code == 409
+    assert "không gỡ được" in remove.json()["detail"]
+
+    # Đã xếp lịch bảo vệ: không đổi được nữa (GVHD mới có thể đang ngồi hội đồng, D-06).
+    hd = HoiDong(ten_hoi_dong="HĐ kiểm thử", ngay_bao_ve=date(2026, 12, 1), gio_bao_ve=time(8, 0), phong="A1")
+    db.add(hd)
+    db.flush()
+    db.add(LichBaoVe(hoi_dong_id=hd.id, de_tai_id=topic_id, sinh_vien_id=sv.sinh_vien_id))
+    db.commit()
+    locked = _put(client, auth_headers(bomon), cohort.id, [
+        {"sinh_vien_id": sv.sinh_vien_id, "giang_vien_id": gv_new.giang_vien_id}
+    ])
+    assert locked.status_code == 409
+    assert "xếp lịch bảo vệ" in locked.json()["detail"]
+    db.rollback()
+    assert db.get(DeTai, topic_id).giang_vien_id == gv_old.giang_vien_id
 
 
 def test_import_csv_reports_bad_lines(client, make_account, auth_headers, db):

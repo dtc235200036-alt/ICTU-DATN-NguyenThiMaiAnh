@@ -11,7 +11,8 @@ from app.schemas.topics import CohortRef, PersonRef
 
 class AssignmentRow(BaseModel):
     """MH-15: một dòng bảng phân công — SV, GVHD hiện tại (nếu có) và đề tài
-    đang hoạt động của SV trong đợt (để Bộ môn biết dòng nào còn đổi được)."""
+    đang hoạt động của SV trong đợt (đã Đã phân công thì đổi GVHD kéo theo đề
+    tài, không gỡ được)."""
 
     sinh_vien: PersonRef
     lop: str | None = None
@@ -19,7 +20,6 @@ class AssignmentRow(BaseModel):
     de_tai_id: int | None = None
     ten_de_tai: str | None = None
     trang_thai_de_tai: str | None = None
-    doi_duoc: bool = True
 
 
 class LecturerLoad(BaseModel):

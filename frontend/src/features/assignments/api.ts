@@ -10,7 +10,6 @@ export interface AssignmentRow {
   de_tai_id: number | null
   ten_de_tai: string | null
   trang_thai_de_tai: TopicOut['trang_thai'] | null
-  doi_duoc: boolean
 }
 
 export interface LecturerLoad {

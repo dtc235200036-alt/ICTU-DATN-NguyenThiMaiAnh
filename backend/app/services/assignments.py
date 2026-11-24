@@ -2,9 +2,10 @@
 (uk_phan_cong_sv_dot); từ đó chỉ GVHD của SV tạo và giao đề tài cho SV đó
 (góp ý GVHD mục 1: SV không tự đề xuất/đăng ký đề tài).
 
-Đổi/gỡ GVHD của một SV chỉ bị chặn khi SV đã có đề tài Đã phân công trong đợt
-(đề cương/tiến độ/bảo vệ đều bám de_tai.giang_vien_id). Bản nháp của GV cũ định
-giao cho SV đó được gỡ SV."""
+SV đã có đề tài Đã phân công: đổi GVHD thì đề tài chuyển theo GVHD mới (đề
+cương/tiến độ/bảo vệ đều bám de_tai.giang_vien_id, lịch sử duyệt giữ nguyên);
+không gỡ được GVHD, và không đổi được khi SV đã xếp lịch bảo vệ (D-06). Bản
+nháp của GV cũ định giao cho SV đó được gỡ SV."""
 import csv
 import io
 from collections import Counter
@@ -15,6 +16,7 @@ from sqlalchemy.orm import Session
 
 from app.core.deps import CurrentUser
 from app.core.timeutil import now_utc
+from app.models.bao_ve import LichBaoVe
 from app.models.de_tai import DA_PHAN_CONG, GIANG_VIEN, NHAP, DeTai
 from app.models.dot_do_an import DANG_MO, DotDoAn
 from app.models.phan_cong import PhanCongHuongDan
@@ -167,7 +169,6 @@ def list_for_cohort(
                 de_tai_id=topic.id if topic is not None else None,
                 ten_de_tai=topic.ten_de_tai if topic is not None else None,
                 trang_thai_de_tai=topic.trang_thai if topic is not None else None,
-                doi_duoc=topic is None or topic.trang_thai != DA_PHAN_CONG,
             )
         )
 
@@ -247,6 +248,10 @@ def _apply(
         ).scalars()
     }
     topics = _active_topics(db, cohort.id, sv_ids, lock=True)
+    # Đọc sau khi khóa đề tài: add_schedule khóa cùng dòng de_tai trước khi xếp lịch.
+    scheduled = set(
+        db.execute(select(LichBaoVe.sinh_vien_id).where(LichBaoVe.sinh_vien_id.in_(sv_ids))).scalars()
+    )
 
     errors: list[str] = []
     changed = 0
@@ -267,8 +272,13 @@ def _apply(
             continue
         topic = topics.get(sv_id)
         if topic is not None and topic.trang_thai == DA_PHAN_CONG:
-            errors.append(f"{label}: đã có đề tài Đã phân công — không đổi được GVHD")
-            continue
+            if gv_id is None:
+                errors.append(f"{label}: đã có đề tài Đã phân công — chỉ đổi được sang GVHD khác, không gỡ được")
+                continue
+            if sv_id in scheduled:
+                errors.append(f"{label}: đã xếp lịch bảo vệ — gỡ khỏi lịch rồi mới đổi GVHD")
+                continue
+            topic.giang_vien_id = gv_id  # đề tài (đề cương, tiến độ) chuyển theo GVHD mới
 
         # Nháp GV cũ định giao cho SV này gỡ SV (GVHD mới chọn lại khi giao đề tài).
         # Đề tài Chờ duyệt / nháp SV là trạng thái cũ, hệ thống không còn tạo ra.

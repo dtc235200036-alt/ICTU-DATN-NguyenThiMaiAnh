@@ -121,14 +121,15 @@ export default function AssignmentPage() {
       key: 'gv',
       width: 340,
       render: (_v, r) => {
+        const coDeTai = r.trang_thai_de_tai === 'DA_PHAN_CONG'
         const select = (
           <Select
             showSearch
-            allowClear
+            allowClear={!coDeTai}
             style={{ width: '100%' }}
             placeholder="Chưa phân công"
             value={r.giang_vien?.id}
-            disabled={!r.doi_duoc || updateMutation.isPending}
+            disabled={updateMutation.isPending}
             options={gvOptionsWithLoad}
             optionFilterProp="label"
             onChange={(value: number | undefined) =>
@@ -136,10 +137,10 @@ export default function AssignmentPage() {
             }
           />
         )
-        return r.doi_duoc ? (
-          select
+        return coDeTai ? (
+          <Tooltip title="Sinh viên đã có đề tài — đổi GVHD sẽ chuyển cả đề tài sang GVHD mới">{select}</Tooltip>
         ) : (
-          <Tooltip title="Sinh viên đã có đề tài Đã phân công — không đổi được GVHD">{select}</Tooltip>
+          select
         )
       },
     },
@@ -282,7 +283,6 @@ export default function AssignmentPage() {
           rowSelection={{
             selectedRowKeys: selected,
             onChange: (keys) => setSelected(keys as number[]),
-            getCheckboxProps: (r) => ({ disabled: !r.doi_duoc }),
           }}
           locale={{ emptyText: 'Không có sinh viên' }}
           pagination={{
