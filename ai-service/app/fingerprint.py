@@ -17,8 +17,12 @@ arXiv") và Schleimer và cs. (2003, "Winnowing"):
   bằng chứng sao chép.
 - Điểm nguyên văn của một câu = độ phủ: tỷ lệ âm tiết của câu nằm trong các
   đoạn chung (liên tiếp, ≥ min(t, số âm tiết của câu)) với MỘT câu của kho,
-  chỉ tính k-gram không phổ biến. Chép cả câu → 1,0; sửa một từ trong câu 30
-  âm tiết vẫn ≈ 0,97 (Jaccard MinHash rơi xuống ≈ 0,74); chép nửa câu → ≈ 0,5.
+  lấy hợp các đoạn đó trên mọi câu ứng viên của MỘT nguồn; chỉ tính k-gram
+  không phổ biến. Đoạn ngắn hơn t chung với các câu khác nhau, dù đứng liền
+  nhau, không cộng thành một đoạn.
+  Chép cả câu → 1,0; sửa một từ trong câu 30 âm tiết vẫn ≈ 0,97 (Jaccard
+  MinHash rơi xuống ≈ 0,74); chép nửa câu → ≈ 0,5; ghép hai câu của cùng một
+  nguồn thành một câu → ≈ 1,0 (so từng câu riêng chỉ ≈ 0,5).
 """
 import hashlib
 from functools import lru_cache
@@ -78,14 +82,15 @@ def winnow(hashes: np.ndarray, w: int) -> np.ndarray:
     return np.unique(hashes[pos])
 
 
-def coverage(matched: np.ndarray, k: int, n_syllables: int, min_run: int) -> float:
-    """Tỷ lệ âm tiết của câu nằm trong các đoạn chung đủ dài.
+def covered_mask(matched: np.ndarray, k: int, n_syllables: int, min_run: int) -> np.ndarray:
+    """Mặt nạ (theo âm tiết) các âm tiết của câu nằm trong đoạn chung đủ dài.
 
     matched[i] = k-gram thứ i của câu có trong câu so sánh (và không phổ biến).
     Một đoạn chung = dải âm tiết liên tiếp được phủ bởi các k-gram khớp; chỉ
     đoạn dài ≥ min(min_run, n_syllables) được tính."""
+    out = np.zeros(max(n_syllables, 0), dtype=bool)
     if n_syllables <= 0 or not matched.any():
-        return 0.0
+        return out
     width = min(k, n_syllables)
     starts = np.flatnonzero(matched)
     delta = np.zeros(n_syllables + 1, dtype=np.int32)
@@ -97,5 +102,13 @@ def coverage(matched: np.ndarray, k: int, n_syllables: int, min_run: int) -> flo
     run_starts = np.flatnonzero(edges == 1)
     run_ends = np.flatnonzero(edges == -1)
     lengths = run_ends - run_starts
-    need = min(min_run, n_syllables)
-    return float(lengths[lengths >= need].sum()) / n_syllables
+    # Các âm tiết được phủ theo thứ tự thuộc lần lượt từng dải, mỗi dải `lengths` âm tiết.
+    out[covered] = np.repeat(lengths >= min(min_run, n_syllables), lengths)
+    return out
+
+
+def coverage(matched: np.ndarray, k: int, n_syllables: int, min_run: int) -> float:
+    """Tỷ lệ âm tiết của câu nằm trong các đoạn chung đủ dài (covered_mask)."""
+    if n_syllables <= 0:
+        return 0.0
+    return float(covered_mask(matched, k, n_syllables, min_run).sum()) / n_syllables

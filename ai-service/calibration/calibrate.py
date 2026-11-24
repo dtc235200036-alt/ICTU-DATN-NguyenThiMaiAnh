@@ -671,7 +671,8 @@ def cmd_evaluate(args) -> int:
                     "ty_le_nguon_cao_nhat": r["ty_le_nguon_cao_nhat"],
                     "nguon_dung_dau": r["top_ref"] == p.a_id,
                     "so_doan_trung": len(res["chi_tiet"]),
-                    "so_doan_nguyen_van": sum(1 for d in res["chi_tiet"] if d["tin_hieu"] == pipeline.NGUYEN_VAN),
+                    # Đoạn do vân tay, gồm cả nhãn SUA_NHE (nhãn hiển thị tách từ cùng tín hiệu).
+                    "so_doan_nguyen_van": sum(1 for d in res["chi_tiet"] if d["tin_hieu"] != pipeline.NGU_NGHIA),
                     "so_doan_ngu_nghia": sum(1 for d in res["chi_tiet"] if d["tin_hieu"] == pipeline.NGU_NGHIA),
                     "bi_canh_bao": flagged,
                     "ly_do_canh_bao": ly_do,

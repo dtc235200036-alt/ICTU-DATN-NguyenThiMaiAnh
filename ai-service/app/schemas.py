@@ -76,7 +76,7 @@ class PassageDetail(BaseModel):
     doan_trung: str
     vi_tri: str
     ty_le: float
-    tin_hieu: Literal["NGUYEN_VAN", "NGU_NGHIA"]
+    tin_hieu: Literal["NGUYEN_VAN", "SUA_NHE", "NGU_NGHIA"]
     diem_ngu_nghia: float
     diem_nguyen_van: float
 

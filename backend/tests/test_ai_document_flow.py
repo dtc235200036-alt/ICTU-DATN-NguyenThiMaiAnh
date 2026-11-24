@@ -128,6 +128,16 @@ def test_document_check_uses_ai_contract(
                 "diem_ngu_nghia": 71.0,
                 "diem_nguyen_van": 12.0,
             },
+            {
+                "ref_id": src_doc_id,
+                "doan_nguon": "Câu chép có thay vài từ đồng nghĩa.",
+                "doan_trung": "Câu chép có đổi vài từ cùng nghĩa.",
+                "vi_tri": "Câu 10–12",
+                "ty_le": 88.0,
+                "tin_hieu": "SUA_NHE",
+                "diem_ngu_nghia": 95.0,
+                "diem_nguyen_van": 88.0,
+            },
         ],
     }
     fake.calls.clear()
@@ -161,7 +171,11 @@ def test_document_check_uses_ai_contract(
     assert (detail["so_doan"], detail["so_doan_loai_tru"], detail["ty_le_loai_tru"]) == (40, 12, 55.5)
     assert detail["loai_tru_nhieu"] is True
     by_vi_tri = {seg["vi_tri"]: seg for seg in detail["chi_tiet"]}
-    assert set(by_vi_tri) == {"Câu 3–4 · trùng nguyên văn", "Câu 7 · trùng ngữ nghĩa"}
+    assert set(by_vi_tri) == {
+        "Câu 3–4 · trùng nguyên văn",
+        "Câu 7 · trùng ngữ nghĩa",
+        "Câu 10–12 · trùng sửa nhẹ",
+    }
     assert by_vi_tri["Câu 3–4 · trùng nguyên văn"]["doi_tuong_trung"] == f"{topic_src.ten_de_tai} (KTEST)"
     assert by_vi_tri["Câu 7 · trùng ngữ nghĩa"]["doi_tuong_trung"] == (
         "Bản ghi kho có id trùng số với tài liệu (K20)"

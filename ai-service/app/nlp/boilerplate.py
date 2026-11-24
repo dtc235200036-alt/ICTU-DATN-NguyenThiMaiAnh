@@ -11,12 +11,18 @@ Quy tắc (so khớp trên dòng NFC, casefold, khoảng trắng đã gộp), th
     bỏ chính nó và mọi dòng tới tiêu đề lớn kế tiếp (MỞ ĐẦU, LỜI MỞ ĐẦU,
     CHƯƠNG n, KẾT LUẬN hoặc một tiêu đề trong danh sách trên);
 (b) dòng bìa: TRƯỜNG ĐẠI HỌC…, ĐẠI HỌC THÁI NGUYÊN, KHOA CÔNG NGHỆ THÔNG TIN,
-    ĐỒ ÁN TỐT NGHIỆP, ĐỀ CƯƠNG ĐỒ ÁN…, BÁO CÁO ĐỒ ÁN…, nhãn "Sinh viên thực
-    hiện", "Giảng viên hướng dẫn", "Mã sinh viên", "Lớp", "Ngành", "Đề tài:"
-    và "Thái Nguyên, … năm yyyy"; tên đề tài sau nhãn "Đề tài:" bị PDF bẻ sang
-    tối đa 2 dòng tiếp theo (≤ 20 âm tiết, không kết thúc bằng dấu câu) cũng
-    bị bỏ (plan 04-04: nếu sót, dòng bìa dính vào câu nội dung đầu tiên);
-(c) dòng mục lục: kết thúc bằng dải dấu chấm/… hoặc tab rồi số trang;
+    ĐỒ ÁN TỐT NGHIỆP, ĐỀ CƯƠNG ĐỒ ÁN…, BÁO CÁO ĐỒ ÁN…, tiêu ngữ "Độc lập - Tự
+    do - Hạnh phúc", nhãn "Sinh viên thực hiện", "Giảng/Giáo viên hướng dẫn",
+    "Mã sinh viên", "Lớp", "Ngành", "Đề tài:" và "Thái Nguyên, … năm yyyy";
+    tên đề tài sau nhãn "Đề tài:" bị PDF bẻ sang tối đa 2 dòng tiếp theo
+    (≤ 20 âm tiết, không kết thúc bằng dấu câu) cũng bị bỏ (plan 04-04: nếu
+    sót, dòng bìa dính vào câu nội dung đầu tiên); nhãn đứng riêng một dòng
+    ("Giảng viên hướng dẫn:") ở phần đầu thì dòng giá trị ngay sau (tên GVHD,
+    tên sinh viên, lớp) cũng bị bỏ — trang phụ bìa lặp bìa đúng 2 lần nên
+    quy tắc (e) không bắt, và tên GVHD trùng giữa các đồ án cùng GVHD;
+(c) dòng mục lục: kết thúc bằng dải dấu chấm/… hoặc tab rồi số trang, hoặc
+    kết thúc bằng dải chấm cách ". . . ." (PDF từ LaTeX) có/không kèm số
+    trang (số trang thường rơi xuống dòng sau), kể cả dòng chỉ có dải chấm;
 (d) dòng tiêu đề: "CHƯƠNG …", tiêu đề đánh số (^\\d+(\\.\\d+)*\\.?\\s) tối đa 15
     âm tiết không kết thúc bằng dấu câu, dòng VIẾT HOA TOÀN BỘ tối đa 20 âm
     tiết (tên đề tài trên bìa, MỞ ĐẦU, KẾT LUẬN…), chú thích "Hình/Bảng/Biểu
@@ -38,7 +44,9 @@ CR-04 (04-REVIEW) — quy tắc (a) không được dùng để giấu nội dun
   tối đa max(80 dòng, 40 % số dòng) — tài liệu không có tiêu đề lớn nào (vd.
   đề cương không chia chương) không thể bị xóa sạch bằng các dòng "Phụ lục";
 - dòng VIẾT HOA chỉ coi là tiêu đề khi không kết thúc bằng dấu câu (câu nội
-  dung viết hoa toàn bộ vẫn được kiểm tra).
+  dung viết hoa toàn bộ vẫn được kiểm tra);
+- dòng giá trị sau nhãn bìa đứng riêng chỉ bị bỏ ở phần đầu (như trên) và
+  mỗi nhãn chỉ kéo theo 1 dòng.
 """
 import re
 from collections import Counter
@@ -62,15 +70,23 @@ _MAJOR_RE = re.compile(r"^(?:(?:lời )?mở đầu|chương\s+(?:\d+|[ivxlc]+)\
 _COVER_RE = re.compile(
     r"^(?:trường đại học\b.*|đại học thái nguyên|khoa công nghệ thông tin"
     r"|đồ án tốt nghiệp|đề cương đồ án\b.*|báo cáo đồ án\b.*"
+    r"|độc lập [-–] tự ?do [-–] hạnh phúc"
     r"|thái nguyên,.*năm \d{4}\.?)$"
 )
-_LABEL_RE = re.compile(r"^(?:sinh viên thực hiện|giảng viên hướng dẫn|mã sinh viên|lớp)\b\s*(:)?")
+_LABEL_RE = re.compile(
+    r"^(?:sinh viên thực hiện|(?:giảng|giáo) viên hướng dẫn|mã sinh viên|lớp)\b\s*(:)?"
+)
 # Nhãn chỉ nhận dạng khi có dấu ':' (dòng PDF bắt đầu bằng "ngành …" có thể là nội dung).
 _LABEL_COLON_RE = re.compile(r"^(?:chuyên )?ngành\s*:")
 _COVER_TITLE_RE = re.compile(r"^(?:tên )?đề tài\s*:")
 _COVER_TITLE_MAX_CONT = 2
 
-_TOC_RE = re.compile(r"(?:\.{3,}|…+|\t)\s*(?:\d+|[ivxlc]+)$")
+# Lookbehind: chỉ thử khớp từ đầu mỗi dải chấm → tuyến tính theo độ dài dòng
+# (CR-03; bản cũ thử lại từ mọi vị trí trong dải, "." * 20000 + " y" mất ~9 s).
+_TOC_RE = re.compile(
+    r"(?:(?<!\.)\.{3,}|(?<!…)…+|\t)\s*(?:\d+|[ivxlc]+)$"
+    r"|(?<!\. )(?:\. ){3,}\.(?: (?:\d+|[ivxlc]+))?$"
+)
 _CHUONG_RE = re.compile(r"^chương\s+(?:\d+|[ivxlc]+)\b")
 _NUMBERED_RE = re.compile(r"^\d+(?:\.\d+)*\.?\s")
 _CAPTION_RE = re.compile(r"^(?:hình|bảng|biểu đồ|sơ đồ)\s+\d+(?:[.\-]\d+)*\b")
@@ -164,7 +180,7 @@ def strip_boilerplate(text: str) -> StripResult:
     removed = removed_chars = 0
     in_section = False
     section_used = sections_used = 0
-    title_cont = 0  # số dòng tiếp nối tên đề tài trên bìa còn được bỏ
+    title_cont = 0  # số dòng tiếp nối (tên đề tài / giá trị nhãn bìa) còn được bỏ
     for idx, (line, key, n_syl) in enumerate(zip(lines, keys, n_syls)):
         if title_cont:
             title_cont -= 1
@@ -173,6 +189,9 @@ def strip_boilerplate(text: str) -> StripResult:
                 and not key.endswith(_SENTENCE_END)
                 and not _LABEL_RE.match(key)
                 and not _LABEL_COLON_RE.match(key)
+                # CR-04: không nuốt tiêu đề — mục mẫu đang mở sẽ lan vào thân bài.
+                and not _is_major_heading(key, n_syl)
+                and not _is_section_heading(key, n_syl)
             ):
                 removed += 1
                 removed_chars += len(line)
@@ -180,6 +199,17 @@ def strip_boilerplate(text: str) -> StripResult:
             title_cont = 0
         if _COVER_TITLE_RE.match(key):
             title_cont = _COVER_TITLE_MAX_CONT
+            removed += 1
+            removed_chars += len(line)
+            continue
+        label = _LABEL_RE.match(key)
+        if (
+            label
+            and label.group(1)
+            and label.end() == len(key)
+            and (body_first is None or idx < body_first)
+        ):
+            title_cont = 1  # nhãn đứng riêng: giá trị nằm ở dòng sau
             removed += 1
             removed_chars += len(line)
             continue

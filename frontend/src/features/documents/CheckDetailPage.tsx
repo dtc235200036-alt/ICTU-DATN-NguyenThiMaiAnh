@@ -11,6 +11,7 @@ import { scopeText } from './scope'
 import { thresholdText, warningReason } from './warning'
 import CheckStatusTag from './CheckStatusTag'
 import { highlightOverlap, parseViTri } from './highlight'
+import type { TinHieu } from './highlight'
 
 const LOAI_LABEL: Record<string, string> = {
   DE_CUONG: 'Đề cương',
@@ -32,9 +33,11 @@ function mucTrungTag(tyLe: number) {
 }
 
 // 04-06: tín hiệu kích hoạt lưu trong vi_tri — giải thích VÌ SAO đoạn bị gắn cờ
-// (nguyên văn: vân tay cụm âm tiết; ngữ nghĩa: embedding — có thể ít từ trùng).
-function tinHieuTag(tinHieu: 'NGUYEN_VAN' | 'NGU_NGHIA' | null) {
+// (nguyên văn: vân tay cụm âm tiết; sửa nhẹ: vân tay nhưng chữ không khớp y hệt
+// đoạn nguồn; ngữ nghĩa: embedding — có thể ít từ trùng).
+function tinHieuTag(tinHieu: TinHieu | null) {
   if (tinHieu === 'NGUYEN_VAN') return <Tag color="red">Trùng nguyên văn</Tag>
+  if (tinHieu === 'SUA_NHE') return <Tag color="volcano">Trùng sửa nhẹ</Tag>
   if (tinHieu === 'NGU_NGHIA') return <Tag color="orange">Trùng ngữ nghĩa</Tag>
   return null
 }

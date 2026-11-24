@@ -51,7 +51,11 @@ _RECHECK_NO_TEXT_DETAIL = "Không trích xuất được nội dung file — hã
 
 # D-03 (04-06): tín hiệu của từng đoạn trùng (dịch vụ AI trả `tin_hieu`) được
 # ghi kèm vào vi_tri (VARCHAR(50)) — không cần cột mới.
-_TIN_HIEU_NHAN = {"NGUYEN_VAN": "trùng nguyên văn", "NGU_NGHIA": "trùng ngữ nghĩa"}
+_TIN_HIEU_NHAN = {
+    "NGUYEN_VAN": "trùng nguyên văn",
+    "SUA_NHE": "trùng sửa nhẹ",
+    "NGU_NGHIA": "trùng ngữ nghĩa",
+}
 _VI_TRI_MAX = 50
 # Số đồ án nguồn tối đa trong do_an_trung (trần top_k của /check-document):
 # CR-01 lưu tỷ lệ theo nguồn cho từng đoạn nên lấy đủ rộng để mọi nguồn có
@@ -171,7 +175,7 @@ def _same_topic_versions(db: Session, de_tai_id: int) -> list[int]:
 
 
 def _vi_tri_with_signal(vi_tri: str | None, tin_hieu: str | None) -> str | None:
-    """"Câu a–b" + " · trùng nguyên văn|ngữ nghĩa"; không có tín hiệu (bộ giả
+    """"Câu a–b" + " · trùng nguyên văn|sửa nhẹ|ngữ nghĩa"; không có tín hiệu (bộ giả
     lập) -> giữ nguyên."""
     nhan = _TIN_HIEU_NHAN.get(tin_hieu or "")
     if nhan is None:

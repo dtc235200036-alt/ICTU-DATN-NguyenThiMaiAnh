@@ -87,6 +87,62 @@ def test_same_group_counts_once():
     assert idx.snapshot().match(query, frozenset(), pho_bien=4)[0] == (None, 0.0)
 
 
+# Ghép hai câu (20 + 18 âm tiết) bằng liên từ: 40 âm tiết, mỗi câu nguồn chỉ phủ ≈ 0,5.
+MERGED = OTHER[0].rstrip(".") + ", đồng thời d" + OTHER[2][1:]
+
+
+def test_merged_sentences_of_one_source_scored_against_source():
+    """Độ phủ tính theo nguồn (hợp k-gram các câu ứng viên của nguồn), không theo
+    từng câu: ghép hai câu của một nguồn vẫn ≈ 1,0; từ hai nguồn khác nhau thì không."""
+    query = [sentence_kgrams(MERGED, K)]
+    assert _score(MERGED, OTHER[0]) <= 0.55  # hành vi cũ: so từng câu riêng
+    idx = VanTayIndex(K, W)
+    idx.add([ChunkRow(1 + i, "DOCUMENT", 10, 1 + i, s, 100) for i, s in enumerate([OTHER[0], OTHER[2], SRC])])
+    cid, score = idx.snapshot().match(query, frozenset(), pho_bien=4)[0]
+    assert cid == 1 and score >= 0.9  # câu hiển thị: độ phủ riêng cao nhất
+    assert idx.snapshot().match(query, frozenset({10}), pho_bien=4)[0] == (None, 0.0)
+
+    other = VanTayIndex(K, W)
+    other.add([ChunkRow(1, "DOCUMENT", 10, 1, OTHER[0], 100), ChunkRow(2, "DOCUMENT", 20, 1, OTHER[2], 200)])
+    cid, score = other.snapshot().match(query, frozenset(), pho_bien=4)[0]
+    assert cid == 1 and 0.4 <= score <= 0.55  # hợp chỉ trong MỘT nguồn
+
+
+def test_short_fragments_of_one_source_stay_low():
+    """Đoạn chung < t âm tiết với nhiều câu của cùng một nguồn không cộng thành độ phủ."""
+    rng = random.Random(11)
+    sents = [_words(20, rng) for _ in range(8)]
+    idx = VanTayIndex(K, W)
+    idx.add([ChunkRow(1 + i, "DOCUMENT", 10, i + 1, " ".join(s), 100) for i, s in enumerate(sents)])
+    parts: list[str] = []
+    for s in sents:  # mỗi câu góp T − 1 âm tiết, xen từ tự viết
+        parts += s[3 : 3 + T - 1] + _words(2, rng)
+    query = sentence_kgrams(" ".join(parts), K)
+    snap = idx.snapshot()
+    assert np.isin(snap.keys, query[0]).any()  # có ứng viên: bài kiểm tra không rỗng
+    assert snap.match([query], frozenset(), pho_bien=4)[0][1] == 0.0
+
+
+def test_adjacent_fragments_of_different_sentences_do_not_stitch():
+    """Cấu hình chạy thật k = 6, w = 4 (t = 9): bốn mẩu 6 âm tiết của bốn câu một
+    nguồn viết liền nhau. Hợp k-gram sẽ thành một dải 24 âm tiết; hợp các đoạn
+    ≥ t với TỪNG câu thì không có đoạn nào → độ phủ 0."""
+    k, w = 6, 4
+    rng = random.Random(3)
+    sents = [_words(20, rng) for _ in range(4)]
+    parts: list[str] = []
+    for s in sents:  # mẩu là một vân tay của câu → câu chắc chắn là ứng viên
+        h, _ = sentence_kgrams(" ".join(s), k)
+        i = int(np.flatnonzero(np.isin(h, winnow(h, w)))[0])
+        parts += s[i : i + k]
+    idx = VanTayIndex(k, w)
+    idx.add([ChunkRow(1 + i, "DOCUMENT", 10, i + 1, " ".join(s), 100) for i, s in enumerate(sents)])
+    q, n = sentence_kgrams(" ".join(parts), k)
+    union = np.concatenate([sentence_kgrams(" ".join(s), k)[0] for s in sents])
+    assert coverage(np.isin(q, union), k, n, w + k - 1) == 1.0  # quy tắc hợp k-gram sẽ gắn cờ
+    assert idx.snapshot().match([(q, n)], frozenset(), pho_bien=4)[0] == (None, 0.0)
+
+
 def _doc(*sentences: str) -> str:
     return "\n".join(["MỞ ĐẦU", *sentences])
 
@@ -115,8 +171,10 @@ def test_partial_and_edited_copies_are_flagged(client):
     half = " ".join(words[:18] + ["và", "kết", "quả", "được", "trình", "bày", "ở", "chương", "bốn", "của", "báo", "cáo", "này."])
     own = "Phần đánh giá dùng bộ dữ liệu do nhóm tự thu thập trong học kỳ vừa qua tại khoa."
     res = _check(client, _doc(edited, own))
-    assert [d["tin_hieu"] for d in res["chi_tiet"]] == ["NGUYEN_VAN"]
+    # Vẫn gắn cờ bằng vân tay; nhãn hiển thị là sửa nhẹ vì một từ đã bị đổi.
+    assert [d["tin_hieu"] for d in res["chi_tiet"]] == ["SUA_NHE"]
     assert res["chi_tiet"][0]["doan_nguon"] == edited
+    assert _check(client, _doc(SRC, own))["chi_tiet"][0]["tin_hieu"] == "NGUYEN_VAN"
     assert res["chi_tiet"][0]["diem_nguyen_van"] >= 90
     # Chép nửa câu: độ phủ ≈ 50 % — dưới ngưỡng 60, trên ngưỡng 40.
     assert _check(client, _doc(half, own))["chi_tiet"] == []

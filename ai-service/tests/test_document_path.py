@@ -135,6 +135,50 @@ def test_section_headings_cannot_hide_chapters():
     result = strip_boilerplate("\n".join(flat))
     assert len(result.lines) >= 0.55 * len(prose)  # trần tổng 40 % số dòng
 
+    # Nhãn bìa đứng riêng ngay trước tiêu đề lớn không được "nuốt" tiêu đề đó
+    # (nếu nuốt, mục LỜI CAM ĐOAN đang mở lan sang cả phần MỞ ĐẦU).
+    for label in ("Lớp:", "Đề tài:"):
+        doc = COVER + FRONT[:3] + [label, "MỞ ĐẦU", *P1, "KẾT LUẬN", *P2]
+        assert sentences(strip_boilerplate("\n".join(doc)).lines) == P1 + P2, label
+
+
+def test_spaced_dot_leaders_and_cover_values():
+    """pan-eval (105 đồ án): PDF từ LaTeX ghi mục lục/danh mục hình bằng dải chấm
+    cách ". . . ." (số trang thường rơi xuống dòng sau, có dòng chỉ có dải chấm);
+    bìa + phụ bìa đặt nhãn và giá trị trên hai dòng — tên GVHD, lớp chỉ lặp 2 lần
+    nên quy tắc (e) không bắt, và trùng nguyên văn giữa các đồ án cùng GVHD."""
+    cover = [
+        "KHOA CÔNG NGHỆ THÔNG TIN",
+        "Giảng viên hướng dẫn:", "TS. Lê Văn Cường",
+        "Sinh viên thực hiện:", "Phạm Thị Dung",
+        "Lớp:", "Kỹ thuật phần mềm K22B",
+    ]
+    front = cover + cover[:1] + ["Giáo viên hướng dẫn:"] + cover[2:] + [
+        "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM",
+        "Độc lập - Tự do - Hạnh phúc",
+        "MỤC LỤC",
+        # Số trang ở dòng sau: dòng chương trong mục lục bị coi là tiêu đề lớn,
+        # kết thúc mục (a) sớm → các dòng dưới chỉ còn quy tắc (c) chặn.
+        "CHƯƠNG 1. TỔNG QUAN", "1",
+        "1.1. Khảo sát hiện trạng thư viện . . . . . . . . . . . .",
+        "Quy trình mượn trả sách hiện tại . . . . . . . . . .", "2",
+        "1.2. Phân tích yêu cầu", ". . . . . . . . . . . . . .", "3",
+        "Biểu đồ hoạt động mượn sách . . . . . . . . 6",
+    ]
+    ellipsis = [
+        "Thủ thư quét mã vạch, chờ hệ thống tra cứu . . . rồi xác nhận lượt mượn.",
+        "Mã bản sao được đánh số 1, 2, . . . . , n theo thứ tự nhập kho.",
+        "Nếu quá hạn, hệ thống nhắc độc giả mỗi ngày cho tới khi trả sách . . .",
+    ]
+    body = [
+        "CHƯƠNG 1. TỔNG QUAN", *P1, *ellipsis,
+        # Nhãn bìa chèn vào thân bài không kéo theo dòng nội dung ngay sau nó.
+        "CHƯƠNG 2. THIẾT KẾ", "Giảng viên hướng dẫn:", *_wrap(P3, 7),
+        "KẾT LUẬN", *U2,
+    ]
+    kept = strip_boilerplate("\n".join(front + body))
+    assert sentences(kept.lines) == P1 + ellipsis + P3 + U2
+
 
 def test_chunking_is_linear_on_adversarial_text():
     """CR-03 (04-REVIEW): văn bản do sinh viên kiểm soát không được làm lọc +
@@ -151,6 +195,8 @@ def test_chunking_is_linear_on_adversarial_text():
         "chấm phẩy": "; " * (n // 2),
         "từ dài": "a-b" * (n // 3),
         "chuỗi chấm": "Nội dung " + "." * n + " x",
+        "chuỗi chấm không số trang": "Nội dung " + "." * n + " nội dung",
+        "chuỗi chấm cách": "Nội dung " + ". " * (n // 2) + "nội dung",
     }
     for name, text in cases.items():
         start = time.perf_counter()
@@ -248,6 +294,42 @@ def test_check_document_signals_exclusion_replace(client, db_path):
         after = set(conn.execute(text("SELECT id FROM embedding")).scalars().all())
     assert kept <= after and len(after - kept) == len(missing)
     assert _check(client, _pdf_like([P1], width=4))["chi_tiet"][0]["ref_id"] == 20
+
+
+def test_passage_labels_nguyen_van_sua_nhe_ngu_nghia():
+    """Nhãn đoạn: đa số ký tự gắn cờ vân tay → NGUYEN_VAN khi chữ khớp y hệt
+    đoạn nguồn (tỷ lệ khớp chữ ≥ NGUONG_SUA_NHE), SUA_NHE khi đã sửa; đa số
+    ngữ nghĩa → NGU_NGHIA. diem_nguyen_van thấp (mép câu) không đổi nhãn của
+    bản chép y hệt. SUA_NHE chỉ là nhãn hiển thị: cờ từng câu và tỷ lệ không đổi."""
+    from app.pipeline import ChunkScore, DocumentScores, check_document
+
+    goc = "Hệ thống quản lý đồ án tốt nghiệp giúp giảng viên theo dõi tiến độ của sinh viên hằng tuần."
+    sua = "Hệ thống quản trị đồ án tốt nghiệp giúp giảng viên giám sát tiến độ sinh viên hằng tuần."
+
+    def chunk(vi_tri: int, ref: int | None, verb: float, sem: float) -> ChunkScore:
+        text = {1: goc, 3: sua}.get(vi_tri, f"Câu thứ {vi_tri} của tài liệu đang được kiểm tra.")
+        src = (goc if vi_tri in (1, 3) else f"Câu thứ {vi_tri} của đồ án nguồn.") if ref else None
+        return ChunkScore(vi_tri=vi_tri, text=text, n_chars=len(text),
+                          sem_ref=ref, sem_text=src, sem_thu_tu=vi_tri if ref else None, sem_score=sem,
+                          verb_ref=ref, verb_text=src, verb_thu_tu=vi_tri if ref else None, verb_score=verb)
+
+    chunks = [
+        chunk(1, 1, 0.8, 0.99),  # chép y hệt, độ phủ hụt ở mép câu → vẫn nguyên văn
+        chunk(2, None, 0.0, 0.0),
+        chunk(3, 2, 0.9, 0.99),  # thay 2 từ, bỏ 1 hư từ → sửa nhẹ
+        chunk(4, None, 0.0, 0.0),
+        chunk(5, 3, 0.3, 0.9),  # độ phủ dưới ngưỡng nguyên văn, cosine đạt → ngữ nghĩa
+        chunk(6, 3, 0.3, 0.9),
+    ]
+    res = check_document(DocumentScores(chunks, 0), 80.0, 60.0, top_k=5, chi_tiet_toi_da=10)
+    by_vi_tri = {d["vi_tri"]: d for d in res["chi_tiet"]}
+    assert {k: d["tin_hieu"] for k, d in by_vi_tri.items()} == {
+        "Câu 1": "NGUYEN_VAN", "Câu 3": "SUA_NHE", "Câu 5–6": "NGU_NGHIA",
+    }
+    assert (by_vi_tri["Câu 1"]["diem_nguyen_van"], by_vi_tri["Câu 3"]["diem_nguyen_van"]) == (80.0, 90.0)
+    flagged = sum(c.n_chars for c in chunks if c.verb_ref)
+    assert res["ty_le_tong"] == round(100 * flagged / sum(c.n_chars for c in chunks), 2)
+    assert {d["ref_id"] for d in res["do_an_trung"]} == {1, 2, 3}
 
 
 def test_check_then_ingest_reuses_vectors(client):

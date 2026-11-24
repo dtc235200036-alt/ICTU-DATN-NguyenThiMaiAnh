@@ -77,18 +77,24 @@ export function highlightOverlap(text: string, other: string, n = 3): HighlightS
   return segments.length > 0 ? segments : [{ text, match: false }]
 }
 
-export type TinHieu = 'NGUYEN_VAN' | 'NGU_NGHIA'
+export type TinHieu = 'NGUYEN_VAN' | 'SUA_NHE' | 'NGU_NGHIA'
+
+// Hậu tố do Web API ghi (_TIN_HIEU_NHAN); kết quả lưu trước khi có SUA_NHE chỉ mang hai hậu tố còn lại.
+const HAU_TO_TIN_HIEU = new Map<string, TinHieu>([
+  ['trùng nguyên văn', 'NGUYEN_VAN'],
+  ['trùng sửa nhẹ', 'SUA_NHE'],
+  ['trùng ngữ nghĩa', 'NGU_NGHIA'],
+])
 
 /**
- * 04-06: vi_tri lưu dạng "Câu a–b · trùng nguyên văn|trùng ngữ nghĩa" (không
- * có hậu tố khi bộ giả lập không trả tín hiệu).
+ * 04-06: vi_tri lưu dạng "Câu a–b · trùng nguyên văn|trùng sửa nhẹ|trùng ngữ
+ * nghĩa" (không có hậu tố khi bộ giả lập không trả tín hiệu).
  */
 export function parseViTri(viTri: string | null): { viTri: string; tinHieu: TinHieu | null } {
   if (!viTri) return { viTri: '', tinHieu: null }
   const sep = viTri.lastIndexOf(' · ')
   if (sep < 0) return { viTri, tinHieu: null }
   const suffix = viTri.slice(sep + 3).trim()
-  const tinHieu: TinHieu | null =
-    suffix === 'trùng nguyên văn' ? 'NGUYEN_VAN' : suffix === 'trùng ngữ nghĩa' ? 'NGU_NGHIA' : null
+  const tinHieu = HAU_TO_TIN_HIEU.get(suffix) ?? null
   return tinHieu ? { viTri: viTri.slice(0, sep), tinHieu } : { viTri, tinHieu: null }
 }

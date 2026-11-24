@@ -7,6 +7,7 @@
 - reembed_missing      : encode (một lần) các chunk thiếu embedding cho mô hình hiện tại
 - rebuild              : dựng lại chỉ mục bộ nhớ từ thesis_ai, KHÔNG encode
 """
+import difflib
 import hashlib
 import logging
 import threading
@@ -32,7 +33,7 @@ from app.models import (
 )
 from app.nlp.boilerplate import strip_boilerplate
 from app.nlp.chunking import sentences
-from app.nlp.normalize import nfc, one_line
+from app.nlp.normalize import nfc, one_line, syllables
 
 logger = logging.getLogger("ai_service.pipeline")
 
@@ -377,7 +378,13 @@ def rebuild(session: Session, index: CorpusIndex, encoder: Encoder) -> RebuildSt
 # ---------------------------------------------------------------------------
 
 NGUYEN_VAN = "NGUYEN_VAN"
+SUA_NHE = "SUA_NHE"  # chỉ là nhãn đoạn: đoạn đa số ký tự do vân tay nhưng chữ không khớp y hệt nguồn
 NGU_NGHIA = "NGU_NGHIA"
+# Tỷ lệ khớp chữ (_ty_le_khop_chu) dưới mức này → SUA_NHE. Bản chép y hệt = 1;
+# 400 đoạn sửa nhẹ mô phỏng (evaluation/obfuscate.sua_nhe) có trung vị 0,958,
+# lớn nhất 0,99. Không dùng diem_nguyen_van: vân tay winnowing hụt tới w−1 âm
+# tiết ở mỗi mép câu nên đoạn chép y hệt chỉ đạt 72–96 % (kiểm thử 24/11/2026).
+NGUONG_SUA_NHE = 0.99
 MAX_PASSAGE_SENTENCES = 6
 # Cờ NGU_NGHIA cần chỗ dựa đoạn văn: câu phải nằm trong chuỗi ≥ 2 câu liên
 # tiếp gắn cờ cùng một nguồn (plan 04-04). Trên tập hiệu chỉnh, câu tự viết
@@ -508,24 +515,14 @@ def _weighted(values: list[tuple[float, int]]) -> float:
     return round(100 * sum(v * w for v, w in values) / total, 2)
 
 
-def check_document(
-    scores: DocumentScores,
+def flag_chunks(
+    chunks: list[ChunkScore],
     nguong_doan: float,
     nguong_nguyen_van: float,
-    top_k: int,
-    chi_tiet_toi_da: int,
     min_run_ngu_nghia: int = MIN_RUN_NGU_NGHIA,
-) -> dict:
-    """Áp ngưỡng lên điểm từng câu → phản hồi /check-document.
-
-    Câu bị gắn cờ NGUYEN_VAN khi độ phủ vân tay×100 ≥ nguong_nguyen_van (bằng
-    chứng mạnh hơn nên thắng), ngược lại NGU_NGHIA khi cosine×100 ≥ nguong_doan.
-    Cờ NGU_NGHIA chỉ được giữ khi câu thuộc chuỗi ≥ min_run_ngu_nghia câu liên
-    tiếp gắn cờ cùng một nguồn (bất kể tín hiệu). ty_le_tong = tỷ lệ ký tự bị
-    gắn cờ; đoạn trùng = chuỗi câu liên tiếp gắn cờ cùng một nguồn (tối đa 6 câu).
-    """
-    chunks = scores.chunks
-    total_chars = sum(c.n_chars for c in chunks)
+) -> list[tuple[ChunkScore, str, int, tuple[int, str], float] | None]:
+    """Cờ của từng câu (thẳng hàng với chunks, None = không gắn cờ) theo quy
+    tắc của check_document, đã bỏ cờ NGU_NGHIA đứng lẻ."""
     # (chunk, tín hiệu, ref, (thu_tu, câu nguồn), điểm kích hoạt)
     flags: list[tuple[ChunkScore, str, int, tuple[int, str], float] | None] = []
     for c in chunks:
@@ -550,6 +547,43 @@ def check_document(
                 if flags[k][1] == NGU_NGHIA:
                     flags[k] = None
         i = j + 1
+    return flags
+
+
+def _ty_le_khop_chu(doan: str, nguon: str) -> float:
+    """Phần âm tiết của đoạn nộp nằm trong các khối trùng liên tục với đoạn
+    nguồn, chia cho độ dài lớn hơn giữa đoạn nộp và phần nguồn được căn khớp —
+    nên cả thay từ lẫn bỏ từ đều làm giảm tỷ lệ; câu nguồn thừa ngoài phần căn
+    khớp thì không."""
+    q, s = syllables(doan), syllables(nguon)
+    blocks = [b for b in difflib.SequenceMatcher(None, q, s, autojunk=False).get_matching_blocks() if b.size]
+    if not blocks:
+        return 0.0
+    span = blocks[-1].b + blocks[-1].size - blocks[0].b
+    return sum(b.size for b in blocks) / max(len(q), span)
+
+
+def check_document(
+    scores: DocumentScores,
+    nguong_doan: float,
+    nguong_nguyen_van: float,
+    top_k: int,
+    chi_tiet_toi_da: int,
+    min_run_ngu_nghia: int = MIN_RUN_NGU_NGHIA,
+) -> dict:
+    """Áp ngưỡng lên điểm từng câu → phản hồi /check-document.
+
+    Câu bị gắn cờ NGUYEN_VAN khi độ phủ vân tay×100 ≥ nguong_nguyen_van (bằng
+    chứng mạnh hơn nên thắng), ngược lại NGU_NGHIA khi cosine×100 ≥ nguong_doan.
+    Cờ NGU_NGHIA chỉ được giữ khi câu thuộc chuỗi ≥ min_run_ngu_nghia câu liên
+    tiếp gắn cờ cùng một nguồn (bất kể tín hiệu). ty_le_tong = tỷ lệ ký tự bị
+    gắn cờ; đoạn trùng = chuỗi câu liên tiếp gắn cờ cùng một nguồn (tối đa 6 câu).
+    Đoạn có ≥ nửa ký tự gắn cờ nguyên văn mang nhãn SUA_NHE khi tỷ lệ khớp chữ
+    với đoạn nguồn < NGUONG_SUA_NHE, ngược lại NGUYEN_VAN; còn lại NGU_NGHIA.
+    """
+    chunks = scores.chunks
+    total_chars = sum(c.n_chars for c in chunks)
+    flags = flag_chunks(chunks, nguong_doan, nguong_nguyen_van, min_run_ngu_nghia)
 
     flagged_chars = sum(f[0].n_chars for f in flags if f)
     per_ref: dict[int, int] = {}
@@ -579,16 +613,25 @@ def check_document(
         sources = sorted({src for _, _, _, src, _ in run}, key=lambda s: s[0])
         run_chars = sum(c.n_chars for c, *_ in run)
         verbatim_chars = sum(c.n_chars for c, sig, *_ in run if sig == NGUYEN_VAN)
+        diem_nguyen_van = _weighted([(c.verb_score, c.n_chars) for c, *_ in run])
+        doan_nguon = " ".join(c.text for c, *_ in run)
+        doan_trung = " ".join(text for _, text in sources)
+        if 2 * verbatim_chars < run_chars:
+            tin_hieu = NGU_NGHIA
+        elif _ty_le_khop_chu(doan_nguon, doan_trung) < NGUONG_SUA_NHE:
+            tin_hieu = SUA_NHE
+        else:
+            tin_hieu = NGUYEN_VAN
         chi_tiet.append(
             {
                 "ref_id": run[0][2],
-                "doan_nguon": " ".join(c.text for c, *_ in run),
-                "doan_trung": " ".join(text for _, text in sources),
+                "doan_nguon": doan_nguon,
+                "doan_trung": doan_trung,
                 "vi_tri": f"Câu {first}" if first == last else f"Câu {first}–{last}",
                 "ty_le": _weighted([(trig, c.n_chars) for c, _, _, _, trig in run]),
-                "tin_hieu": NGUYEN_VAN if 2 * verbatim_chars >= run_chars else NGU_NGHIA,
+                "tin_hieu": tin_hieu,
                 "diem_ngu_nghia": _weighted([(max(c.sem_score, 0.0), c.n_chars) for c, *_ in run]),
-                "diem_nguyen_van": _weighted([(c.verb_score, c.n_chars) for c, *_ in run]),
+                "diem_nguyen_van": diem_nguyen_van,
                 "_first": first,
             }
         )

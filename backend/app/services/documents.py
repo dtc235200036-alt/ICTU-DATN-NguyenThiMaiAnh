@@ -165,6 +165,37 @@ def _extract_docx_text(content: bytes) -> str | None:
     return "\n".join(paragraphs)
 
 
+# Khoảng hở tối thiểu (tỉ lệ cỡ chữ) để coi là dấu cách bị thiếu; trên 104 PDF
+# kho thật 0,08/0,10/0,12 cho kết quả như nhau -> lấy giữa.
+_PDF_KHOANG_HO_TI_LE = 0.10
+
+
+def _pdf_page_text(page: fitz.Page) -> str:
+    """MuPDF không tự chèn dấu cách sau chữ khối U+1E00–U+1EFF (ệ, ử, ế…) khi
+    PDF không có ký tự dấu cách thật — khoảng cách giữa hai từ chỉ là vị trí
+    đặt chữ (LaTeX vntex, một số bản xuất từ Word) -> "Hệthống", "sửdụng".
+    Dựng lại từng dòng từ rawdict (cùng cờ, cùng thứ tự khối/dòng như
+    get_text()), chèn " " khi khoảng hở ngang vượt ngưỡng."""
+    out: list[str] = []
+    for block in page.get_text("rawdict", flags=fitz.TEXTFLAGS_TEXT)["blocks"]:
+        for line in block.get("lines", []):
+            buf: list[str] = []
+            x_max = float("-inf")
+            for span in line["spans"]:
+                nguong = _PDF_KHOANG_HO_TI_LE * span["size"]
+                for ch in span["chars"]:
+                    c, x0, x1 = ch["c"], ch["bbox"][0], ch["bbox"][2]
+                    # So với mép phải xa nhất đã gặp (không chỉ ký tự liền trước)
+                    # để dấu vẽ rời/glyph chồng nhau không bao giờ sinh dấu cách.
+                    if buf and x0 - x_max > nguong and not c.isspace() and not buf[-1].isspace():
+                        buf.append(" ")
+                    buf.append(c)
+                    x_max = max(x_max, x1)
+            if buf:
+                out.append("".join(buf) + "\n")
+    return "".join(out)
+
+
 def extract_text(content: bytes, dinh_dang: str) -> str | None:
     """D-03: trích xuất tốt nhất có thể (best-effort) — KHÔNG BAO GIỜ chặn
     việc nộp; mọi lỗi/kết quả rỗng trả về None (caller đánh dấu trich_xuat_loi)."""
@@ -175,7 +206,7 @@ def extract_text(content: bytes, dinh_dang: str) -> str | None:
                 return None
         elif dinh_dang == DINH_DANG_PDF:
             with fitz.open(stream=content, filetype="pdf") as pdf:
-                text = "\n".join(page.get_text() for page in pdf)
+                text = "\n".join(_pdf_page_text(page) for page in pdf)
         else:
             return None
     except Exception:

@@ -124,6 +124,13 @@ export default function CheckPanel({ taiLieuId, canRecheck, pendingText }: Check
     const reason = warningReason(data)
     const soDoan = data.chi_tiet.length
     const soNguyenVan = data.chi_tiet.filter((seg) => parseViTri(seg.vi_tri).tinHieu === 'NGUYEN_VAN').length
+    const soSuaNhe = data.chi_tiet.filter((seg) => parseViTri(seg.vi_tri).tinHieu === 'SUA_NHE').length
+    const soChep = [
+      soNguyenVan > 0 ? `${soNguyenVan} trùng nguyên văn` : '',
+      soSuaNhe > 0 ? `${soSuaNhe} trùng sửa nhẹ` : '',
+    ]
+      .filter(Boolean)
+      .join(', ')
     body = (
       <div>
         <div style={{ textAlign: 'center', marginBottom: 8 }}>
@@ -156,7 +163,7 @@ export default function CheckPanel({ taiLieuId, canRecheck, pendingText }: Check
         </p>
         <p style={{ textAlign: 'center', margin: '0 0 16px', fontSize: 13 }}>
           {`Số đoạn trùng: ${soDoan}`}
-          {soNguyenVan > 0 ? ` (${soNguyenVan} trùng nguyên văn)` : null}
+          {soChep ? ` (${soChep})` : null}
           {scopeText(data) ? (
             <>
               <br />

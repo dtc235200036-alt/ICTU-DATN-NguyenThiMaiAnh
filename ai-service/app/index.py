@@ -17,7 +17,7 @@ from dataclasses import dataclass
 import faiss
 import numpy as np
 
-from app.fingerprint import coverage, sentence_kgrams, winnow
+from app.fingerprint import covered_mask, sentence_kgrams, winnow
 from app.models import LOAI_ARCHIVE, LOAI_DOCUMENT, LOAI_TOPIC
 
 TIEU_DE = "tieu_de"
@@ -95,13 +95,18 @@ class VanTaySnapshot:
         max_candidates: int = 20,
         max_postings: int = 5000,
     ) -> list[tuple[int | None, float]]:
-        """Câu kho khớp nguyên văn tốt nhất cho từng câu truy vấn.
+        """Nguồn khớp nguyên văn tốt nhất cho từng câu truy vấn.
 
         queries[i] = (k-gram theo thứ tự, số âm tiết) của câu i. Bước 1 (tìm
         ứng viên): tra mọi k-gram không phổ biến của truy vấn trong bảng vân
-        tay — không quét cả kho. Bước 2 (so chi tiết): với tối đa
-        max_candidates câu chung nhiều vân tay nhất, tính độ phủ (coverage);
-        trả (chunk id, độ phủ) tốt nhất hoặc (None, 0.0)."""
+        tay — không quét cả kho. Bước 2 (so chi tiết): gom tối đa
+        max_candidates câu chung nhiều vân tay nhất theo nguồn (ma_nguon); độ
+        phủ của một nguồn = tỷ lệ âm tiết thuộc HỢP các đoạn chung ≥ t với
+        từng câu ứng viên của nguồn đó (covered_mask) — câu ghép từ nhiều câu
+        của một nguồn ("A, đồng thời b") vẫn ≈ 1,0, còn các mẩu < t của những
+        câu khác nhau đặt liền nhau không thành một đoạn.
+        Trả (chunk id, độ phủ) của nguồn tốt nhất — chunk id là câu ứng viên
+        của nguồn đó có độ phủ riêng cao nhất, để hiển thị — hoặc (None, 0.0)."""
         best: list[tuple[int | None, float]] = [(None, 0.0)] * len(queries)
         if not queries or len(self.keys) == 0:
             return best
@@ -128,12 +133,14 @@ class VanTaySnapshot:
         idx = np.arange(int(cnt.sum())) + np.repeat(lo - offsets, cnt)
         p_sent = np.repeat(sent[occ], cnt)
         p_chunk = self.chunks[idx]
+        p_ref = self.refs[idx]
         if excluded_refs:
-            allowed = ~np.isin(self.refs[idx], np.fromiter(excluded_refs, dtype=np.int64))
-            p_sent, p_chunk = p_sent[allowed], p_chunk[allowed]
+            allowed = ~np.isin(p_ref, np.fromiter(excluded_refs, dtype=np.int64))
+            p_sent, p_chunk, p_ref = p_sent[allowed], p_chunk[allowed], p_ref[allowed]
         if len(p_sent) == 0:
             return best
-        pairs, shared = np.unique(np.stack([p_sent, p_chunk], axis=1), axis=0, return_counts=True)
+        # Mỗi chunk thuộc đúng một nguồn: thêm cột ref không đổi các cặp (câu, chunk).
+        pairs, shared = np.unique(np.stack([p_sent, p_chunk, p_ref], axis=1), axis=0, return_counts=True)
         # Theo câu truy vấn, ứng viên chung nhiều vân tay trước, rồi id nhỏ trước.
         order = np.lexsort((pairs[:, 1], -shared, pairs[:, 0]))
         pairs, shared = pairs[order], shared[order]
@@ -142,15 +149,28 @@ class VanTaySnapshot:
             s = int(pairs[group[0], 0])
             hashes, n_syll = queries[s]
             q_common = common[q_start[s] : q_start[s] + len(hashes)]
-            top_id, top_score = None, 0.0
+            # ref -> [hợp mặt nạ đoạn chung đủ dài, chunk id, độ phủ riêng cao
+            # nhất]; thứ tự chèn theo thứ tự ứng viên → hòa điểm tất định.
+            by_ref: dict[int, list] = {}
             for g in group[:max_candidates]:
-                cand = self.kgrams.get(int(pairs[g, 1]))
+                chunk_id, ref = int(pairs[g, 1]), int(pairs[g, 2])
+                cand = self.kgrams.get(chunk_id)
                 if cand is None:  # nguồn vừa bị thay sau khi chụp ảnh
                     continue
-                matched = np.isin(hashes, cand) & ~q_common
-                score = coverage(matched, self.k, n_syll, self.min_run)
+                mask = covered_mask(np.isin(hashes, cand) & ~q_common, self.k, n_syll, self.min_run)
+                score = float(mask.sum()) / n_syll
+                acc = by_ref.get(ref)
+                if acc is None:
+                    by_ref[ref] = [mask, chunk_id, score]
+                    continue
+                acc[0] = acc[0] | mask
+                if score > acc[2]:
+                    acc[1], acc[2] = chunk_id, score
+            top_id, top_score = None, 0.0
+            for mask, chunk_id, _ in by_ref.values():
+                score = float(mask.sum()) / n_syll
                 if score > top_score:
-                    top_id, top_score = int(pairs[g, 1]), score
+                    top_id, top_score = chunk_id, score
             best[s] = (top_id, top_score)
         return best
 
