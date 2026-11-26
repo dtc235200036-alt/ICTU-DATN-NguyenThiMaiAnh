@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.models.cau_hinh_nguong import NGUONG_TEN_DE_TAI, CauHinhNguong
-from app.models.de_tai import DeTai
+from app.models.de_tai import NHAP, DeTai
 from app.models.kho import DoAnKho
 from app.models.trung_lap import (
     HOAN_TAT,
@@ -90,7 +90,8 @@ def _resolve_match(
     if exclude_id is not None and ref_id == exclude_id:
         return None
     topic = db.get(DeTai, ref_id)
-    if topic is None:
+    # Đề tài bị thu hồi về Nháp còn vector cũ trong chỉ mục AI — bỏ qua như kho từ vựng.
+    if topic is None or topic.trang_thai == NHAP:
         return None
     return (NGUON_DE_TAI, topic.id), TitleCheckMatch(
         de_tai_id=topic.id,

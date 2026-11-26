@@ -20,6 +20,8 @@ export interface CohortRef {
 export interface QuyenOut {
   sua: boolean
   gui: boolean
+  /** GVHD của đề tài hoặc Bộ môn, đề tài Đã phân công, đợt đang mở. */
+  thu_hoi: boolean
 }
 
 export type TitleCheckStatus = 'HOAN_TAT' | 'LOI'
@@ -209,6 +211,21 @@ export function useSubmitTopic() {
       return data
     },
     onSuccess: (_data, id) => {
+      void queryClient.invalidateQueries({ queryKey: [TOPIC_KEY, id] })
+      void queryClient.invalidateQueries({ queryKey: [TOPIC_KEY] })
+    },
+  })
+}
+
+/** Thu hồi đề tài Đã phân công về Nháp (server chặn nếu SV đã nộp đề cương/báo cáo). */
+export function useWithdrawTopic() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, ly_do }: { id: number; ly_do: string | null }) => {
+      const { data } = await api.post<TopicOut>(`/topics/${id}/withdraw`, { ly_do })
+      return data
+    },
+    onSuccess: (_data, { id }) => {
       void queryClient.invalidateQueries({ queryKey: [TOPIC_KEY, id] })
       void queryClient.invalidateQueries({ queryKey: [TOPIC_KEY] })
     },

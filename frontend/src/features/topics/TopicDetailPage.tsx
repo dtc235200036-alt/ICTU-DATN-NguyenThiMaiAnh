@@ -3,6 +3,8 @@ import {
   Button,
   Card,
   Descriptions,
+  Input,
+  Modal,
   Result,
   Skeleton,
   Table,
@@ -10,6 +12,7 @@ import {
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { AxiosError } from 'axios'
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import { getErrorMessage } from '../../api/client'
@@ -18,7 +21,7 @@ import { formatBytes, formatDate } from '../../utils/format'
 import ForbiddenPage from '../auth/ForbiddenPage'
 import DinhHuongInfo from '../dinh-huong/DinhHuongInfo'
 import { TRANG_THAI_DE_TAI } from './constants'
-import { useSubmitTopic, useTopic } from './api'
+import { useSubmitTopic, useTopic, useWithdrawTopic } from './api'
 import type { SavedChiTietTrungLap } from './api'
 
 const chiTietColumns: ColumnsType<SavedChiTietTrungLap> = [
@@ -38,7 +41,7 @@ function formatThoiDiem(iso: string): string {
  * MH-07 "Chi tiết đề tài được giao" (§3.4.7 "Xem", UC1.2): Đợt đồ án, Định hướng,
  * GVHD, Sinh viên, Mô tả, kết quả kiểm tra trùng tên đã lưu (UC0.6), cùng các
  * hành động Sửa / Giao đề tài cho sinh viên khi người xem là GVHD sở hữu và đề
- * tài còn ở Nháp.
+ * tài còn ở Nháp; Thu hồi đề tài (về Nháp) khi đề tài đã giao.
  */
 export default function TopicDetailPage() {
   const { id } = useParams()
@@ -48,6 +51,9 @@ export default function TopicDetailPage() {
 
   const { data: topic, isLoading, isError, error } = useTopic(topicId)
   const submitMutation = useSubmitTopic()
+  const withdrawMutation = useWithdrawTopic()
+  const [moThuHoi, setMoThuHoi] = useState(false)
+  const [lyDo, setLyDo] = useState('')
 
   if (isError) {
     // T-02-23/UC0.8: server trả 403 khi người xem không phải GVHD, Bộ môn hay
@@ -81,6 +87,18 @@ export default function TopicDetailPage() {
     try {
       await submitMutation.mutateAsync(topicId)
       message.success('Đã giao đề tài cho sinh viên')
+    } catch (err) {
+      message.error(getErrorMessage(err))
+    }
+  }
+
+  const handleWithdraw = async () => {
+    if (topicId === undefined) return
+    try {
+      await withdrawMutation.mutateAsync({ id: topicId, ly_do: lyDo.trim() || null })
+      message.success('Đã thu hồi đề tài — đề tài trở về Nháp')
+      setMoThuHoi(false)
+      setLyDo('')
     } catch (err) {
       message.error(getErrorMessage(err))
     }
@@ -176,7 +194,39 @@ export default function TopicDetailPage() {
             Giao đề tài cho sinh viên
           </Button>
         )}
+        {topic.quyen.thu_hoi && (
+          <Button danger onClick={() => setMoThuHoi(true)}>
+            Thu hồi đề tài
+          </Button>
+        )}
       </div>
+
+      <Modal
+        title="Thu hồi đề tài"
+        open={moThuHoi}
+        okText="Thu hồi"
+        cancelText="Hủy"
+        okButtonProps={{ danger: true }}
+        confirmLoading={withdrawMutation.isPending}
+        onOk={handleWithdraw}
+        onCancel={() => setMoThuHoi(false)}
+      >
+        <p>
+          Đề tài trở về <b>Nháp</b>
+          {topic.sinh_vien ? ` và sinh viên ${topic.sinh_vien.ho_ten}` : ''} không còn thấy đề tài này.
+          Sau đó GVHD sửa rồi giao lại, hoặc giao đề tài khác cho sinh viên. Không thu hồi được khi
+          sinh viên đã nộp đề cương hoặc báo cáo tiến độ.
+        </p>
+        <Input.TextArea
+          rows={3}
+          maxLength={500}
+          showCount
+          style={{ marginBottom: 24 }}
+          placeholder="Lý do (không bắt buộc) — gửi kèm thông báo cho sinh viên"
+          value={lyDo}
+          onChange={(e) => setLyDo(e.target.value)}
+        />
+      </Modal>
     </Card>
   )
 }

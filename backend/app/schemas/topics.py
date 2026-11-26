@@ -34,6 +34,12 @@ class TopicUpdate(NFCModel):
     sinh_vien_id: int
 
 
+class TopicWithdraw(NFCModel):
+    """GVHD/Bộ môn thu hồi đề tài Đã phân công về Nháp; lý do gửi kèm thông báo cho SV."""
+
+    ly_do: str | None = Field(default=None, max_length=500)
+
+
 class PersonRef(BaseModel):
     id: int
     ho_ten: str
@@ -72,6 +78,7 @@ class TepDinhKem(BaseModel):
 class QuyenOut(BaseModel):
     sua: bool
     gui: bool
+    thu_hoi: bool = False
 
 
 class TitleCheckRequest(NFCModel):

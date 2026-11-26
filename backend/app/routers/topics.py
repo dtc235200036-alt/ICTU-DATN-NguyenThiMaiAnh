@@ -16,6 +16,7 @@ from app.schemas.topics import (
     TopicListParams,
     TopicOut,
     TopicUpdate,
+    TopicWithdraw,
 )
 from app.schemas.history import TopicEvent
 from app.services import ai_index, documents, student_history
@@ -100,6 +101,18 @@ def submit_topic(
     # AISV-02 push-on-write: bản nháp vừa giao SV được index sau commit.
     background_tasks.add_task(ai_index.run_ingest_topic, out.id)
     return out
+
+
+@router.post("/{topic_id}/withdraw", response_model=TopicOut)
+def withdraw_topic(
+    topic_id: int,
+    payload: TopicWithdraw,
+    user: CurrentUser = Depends(require_role(VaiTro.GIANG_VIEN, VaiTro.BO_MON)),
+    db: Session = Depends(get_db),
+) -> TopicOut:
+    """GVHD (hoặc Bộ môn) thu hồi đề tài đã giao về Nháp để sửa và giao lại —
+    chỉ khi SV chưa nộp đề cương/báo cáo và chưa được xếp lịch bảo vệ."""
+    return topics_service.withdraw_topic(db, user, topic_id, payload.ly_do)
 
 
 @router.post("/check-title", response_model=TitleCheckResult)

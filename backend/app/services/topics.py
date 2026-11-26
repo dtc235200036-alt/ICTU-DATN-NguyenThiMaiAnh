@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.deps import CurrentUser
 from app.core.roles import VaiTro
-from app.models.de_cuong import LOAI_DE_TAI, TaiLieuDoAn
+from app.models.bao_ve import LichBaoVe
+from app.models.de_cuong import LOAI_DE_TAI, DeCuong, TaiLieuDoAn
 from app.models.de_tai import (
     DA_PHAN_CONG,
     DeTai,
@@ -15,7 +16,9 @@ from app.models.de_tai import (
 )
 from app.models.dinh_huong import DinhHuong
 from app.models.dot_do_an import DANG_MO, DotDoAn
+from app.models.kho import DoAnKho
 from app.models.tai_khoan import GiangVien, SinhVien
+from app.models.tien_do import BaoCaoTienDo
 from app.models.thong_bao import DE_TAI_PHAN_CONG
 from app.models.trung_lap import KetQuaKiemTraTrungLap
 from app.schemas.common import Page, nfc
@@ -54,6 +57,15 @@ _SUBMIT_NOT_DRAFT_DETAIL = "Đề tài không ở trạng thái Nháp"
 _SV_HAS_ACTIVE_TOPIC_DETAIL = "Sinh viên này đã có một đề tài đang hoạt động"
 _NOT_MY_STUDENT_DETAIL = "Sinh viên không thuộc lớp hướng dẫn của bạn trong đợt này"
 _DINH_HUONG_INVALID_DETAIL = "Định hướng không tồn tại hoặc đã ngừng sử dụng"
+_WITHDRAW_FORBIDDEN_DETAIL = "Chỉ GVHD của đề tài hoặc Bộ môn mới được thu hồi đề tài"
+_WITHDRAW_NOT_ASSIGNED_DETAIL = "Chỉ thu hồi được đề tài Đã phân công"
+# Thứ tự kiểm tra: việc SV đã làm trên đề tài -> lý do không thu hồi được.
+_WITHDRAW_BLOCKERS = (
+    (DeCuong, "Sinh viên đã nộp đề cương cho đề tài này — không thu hồi được"),
+    (BaoCaoTienDo, "Sinh viên đã nộp báo cáo tiến độ cho đề tài này — không thu hồi được"),
+    (LichBaoVe, "Đề tài đã được xếp lịch bảo vệ — không thu hồi được"),
+    (DoAnKho, "Đề tài đã được lưu vào kho đồ án — không thu hồi được"),
+)
 _ATTACH_FORBIDDEN_DETAIL = "Chỉ GVHD của đề tài mới được đính kèm file"
 _NO_STUDENT_ON_DRAFT_DETAIL = (
     "Đề tài nháp chưa chọn sinh viên được giao — hãy sửa và chọn sinh viên trước khi gửi"
@@ -213,7 +225,13 @@ def _to_out(db: Session, user: CurrentUser, topic: DeTai) -> TopicOut:
 
     owner = is_owner(user, topic)
     la_nhap = topic.trang_thai == NHAP
-    quyen = QuyenOut(sua=owner and la_nhap, gui=owner and la_nhap)
+    quyen = QuyenOut(
+        sua=owner and la_nhap,
+        gui=owner and la_nhap,
+        thu_hoi=(owner or user.vai_tro == VaiTro.BO_MON)
+        and topic.trang_thai == DA_PHAN_CONG
+        and topic.dot_do_an.trang_thai == DANG_MO,
+    )
 
     saved_check = _saved_title_check_out(title_check.latest_title_check(db, topic.id))
     attachment = latest_attachment(db, topic.id)
@@ -410,6 +428,41 @@ def submit_topic(db: Session, user: CurrentUser, topic_id: int) -> TopicOut:
             raise HTTPException(status_code=409, detail=_SUBMIT_NOT_DRAFT_DETAIL)
         raise HTTPException(status_code=409, detail=_COHORT_CLOSED_DETAIL)
 
+    return _to_out(db, user, _get_or_404(db, topic_id))
+
+
+def withdraw_topic(db: Session, user: CurrentUser, topic_id: int, ly_do: str | None) -> TopicOut:
+    """Thu hồi đề tài Đã phân công về Nháp (giữ nguyên SV) để GVHD sửa rồi giao
+    lại; SV mất đề tài đang hoạt động nên GVHD cũng có thể giao đề tài khác."""
+    topic = _get_or_404(db, topic_id)
+    if not (is_owner(user, topic) or user.vai_tro == VaiTro.BO_MON):
+        raise HTTPException(status_code=403, detail=_WITHDRAW_FORBIDDEN_DETAIL)
+    try:
+        _lock_open_cohort_or_error(db, topic.dot_do_an_id)
+        # Khóa hàng đề tài: hai lượt thu hồi/giao đồng thời không cùng đọc trạng thái cũ.
+        # shortcut: nộp đề cương không khóa hàng đề tài nên còn khe rất nhỏ nếu SV nộp
+        # đúng lúc thu hồi; thêm with_for_update ở outlines nếu cần chặt hơn.
+        topic = db.execute(
+            select(DeTai).where(DeTai.id == topic_id).with_for_update().execution_options(populate_existing=True)
+        ).scalar_one()
+        if topic.trang_thai != DA_PHAN_CONG:
+            raise HTTPException(status_code=409, detail=_WITHDRAW_NOT_ASSIGNED_DETAIL)
+        for model, detail in _WITHDRAW_BLOCKERS:
+            if db.scalar(select(model.id).where(model.de_tai_id == topic_id).limit(1)) is not None:
+                raise HTTPException(status_code=409, detail=detail)
+
+        topic.trang_thai = NHAP
+        nguoi = "Bộ môn" if user.vai_tro == VaiTro.BO_MON else f"GVHD {_gv_label(topic.giang_vien)}"
+        noi_dung = f"{nguoi} đã thu hồi đề tài '{topic.ten_de_tai}'" + (f". Lý do: {ly_do}" if ly_do else "")
+        nguoi_nhan = [topic.sinh_vien.tai_khoan_id]
+        if user.vai_tro == VaiTro.BO_MON and topic.giang_vien is not None:
+            nguoi_nhan.append(topic.giang_vien.tai_khoan_id)
+        for tai_khoan_id in nguoi_nhan:
+            notifications.create(db, tai_khoan_id, DE_TAI_PHAN_CONG, noi_dung)
+        db.commit()
+    except HTTPException:
+        db.rollback()
+        raise
     return _to_out(db, user, _get_or_404(db, topic_id))
 
 
