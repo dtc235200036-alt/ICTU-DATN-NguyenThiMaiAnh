@@ -159,8 +159,8 @@
         },
         {
           "go": {
-            "o": "Lĩnh vực",
-            "chu": "Hệ thống thông tin"
+            "o": "Định hướng",
+            "chu": "H01"
           }
         },
         {
@@ -209,7 +209,7 @@
     {
       "id": "B06",
       "thoi_diem": "04:15",
-      "mo_ta": "SV 011 mở Tổng quan — thấy đề tài được GVHD giao và mở chi tiết đề tài",
+      "mo_ta": "SV 011 mở Trang chủ — thấy đề tài được GVHD giao, mở Đề tài của tôi",
       "vai_tro": "DTC235200139",
       "man_hinh": "MH-02, MH-07",
       "yeu_cau": "TOPC-04, NOTF-01",
@@ -222,11 +222,17 @@
           "cho_chu": "Sử dụng SQL Server để hạch toán thu chi doanh nghiệp"
         },
         {
-          "bam": "Xem chi tiết đề tài"
+          "bam": {
+            "chu": "Đề tài của tôi",
+            "pham_vi": ".ant-menu"
+          }
         },
         {
           "cho_chu": "Đã phân công",
           "toi_da_giay": 15
+        },
+        {
+          "bam": "Xem chi tiết"
         },
         {
           "cho_chu": "Kết quả kiểm tra trùng tên"
@@ -262,7 +268,7 @@
           "cho_chu": "Đã chọn: P03-B.pdf"
         },
         {
-          "bam": "Nộp phiên bản mới"
+          "bam": "Nộp"
         },
         {
           "cho_chu": "hệ thống đang kiểm tra trùng lặp",
@@ -315,13 +321,16 @@
           }
         },
         {
-          "cho_chu": "Duyệt đề cương - Ngô Thị Thanh Hiền"
+          "cho_chu": "Chi tiết đề cương"
         },
         {
           "cho_chu": "Vượt ngưỡng cảnh báo"
         },
         {
           "cho_chu": "Ứng dụng PyTorch trong giải đáp thắc mắc tuyển sinh"
+        },
+        {
+          "cuon": "Kết quả kiểm tra trùng lặp"
         },
         {
           "chup": true
@@ -362,7 +371,7 @@
     {
       "id": "B10",
       "thoi_diem": "08:45",
-      "mo_ta": "GV011 yêu cầu 012 sửa đề cương kèm nhận xét",
+      "mo_ta": "GV011 từ chối đề cương của 012 kèm nhận xét yêu cầu sửa",
       "vai_tro": "GV011",
       "man_hinh": "MH-09",
       "yeu_cau": "OUTL-03, NOTF-01",
@@ -378,26 +387,26 @@
           }
         },
         {
-          "cho_chu": "Duyệt đề cương - Ngô Thị Thanh Hiền"
+          "cho_chu": "Chi tiết đề cương"
         },
         {
           "go": {
-            "o": "Nhận xét",
+            "o": "Nhận xét (bắt buộc khi từ chối)",
             "chu": "Đề cương trùng nguyên văn 48 % với đồ án K22 về trợ lý ảo tuyển sinh. Em viết lại phần tổng quan và mục tiêu theo đề tài của mình."
           }
         },
         {
-          "bam": "Yêu cầu sửa"
+          "bam": "Từ chối"
         },
         {
-          "cho_chu": "Đã yêu cầu sửa",
+          "cho_chu": "Đã từ chối",
           "toi_da_giay": 10
         },
         {
           "chup": true
         }
       ],
-      "man_hinh_mong_doi": "Thông báo 'Đã yêu cầu sửa'; đề cương 012 chuyển Yêu cầu sửa"
+      "man_hinh_mong_doi": "Thông báo 'Đã từ chối — sinh viên sẽ sửa và nộp lại'; đề cương 012 chuyển Yêu cầu sửa"
     },
     {
       "id": "B11",
@@ -412,13 +421,25 @@
           "mo": "/tien-do"
         },
         {
-          "cho_chu": "Nhận xét của GVHD"
+          "cho_chu": "Đánh giá GVHD"
         },
         {
           "cho_chu": "Mốc 2 – Cài đặt các chức năng chính"
         },
         {
+          "bam": {
+            "chu": "Xem",
+            "hang": "Mốc 1 – Phân tích"
+          }
+        },
+        {
+          "cho_chu": "Nhận xét của GVHD"
+        },
+        {
           "chup": true
+        },
+        {
+          "phim": "Escape"
         }
       ],
       "man_hinh_mong_doi": "Mốc 1 Đúng hạn + nhận xét Đạt, Mốc 2 Đúng hạn chờ nhận xét, Mốc 3 Chưa đến hạn"

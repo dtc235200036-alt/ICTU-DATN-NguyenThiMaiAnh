@@ -189,6 +189,7 @@ DELETE FROM thanh_vien_hoi_dong WHERE hoi_dong_id IN (${HD_IN});
 DELETE FROM hoi_dong WHERE id IN (${HD_IN});
 DELETE FROM do_an_kho WHERE de_tai_id IN (${T_IN});
 DELETE FROM bao_cao_tien_do WHERE de_tai_id IN (${T_IN});
+DELETE FROM luot_duyet_bo_mon WHERE de_cuong_id IN (SELECT id FROM de_cuong WHERE de_tai_id IN (${T_IN}));
 DELETE FROM luot_duyet_de_cuong WHERE de_cuong_id IN (SELECT id FROM de_cuong WHERE de_tai_id IN (${T_IN}));
 DELETE FROM chi_tiet_trung_lap WHERE ket_qua_id IN (SELECT id FROM ket_qua_kiem_tra_trung_lap WHERE de_tai_id IN (${T_IN}));
 DELETE FROM ket_qua_kiem_tra_trung_lap WHERE de_tai_id IN (${T_IN});
@@ -280,8 +281,14 @@ ok "Mốc tiến độ đợt K22: ${MOC[1]}, ${MOC[2]}, ${MOC[3]} (hạn +3/+17
 declare -A DE_TAI
 # Góp ý GVHD mục 1: SV thống nhất đề tài với GV ngoài hệ thống; GVHD GV011 tạo
 # và giao thẳng cho SV (kèm sinh_vien_id) -> Đã phân công, SV được thông báo.
+# Định hướng đầu tiên trong danh mục: GVHD chỉ nộp được đề cương lên Bộ môn khi
+# đề tài có định hướng và tên file theo mẫu (luồng duyệt hai cấp, 0016).
+read -r DH_ID DH_MA <<<"$(sql "SELECT id, ma FROM dinh_huong ORDER BY id LIMIT 1")"
+# Tên file theo mẫu <định hướng>.<MSSV>.<Họ tên>.<Lớp>.<đuôi> để nộp được lên Bộ môn.
+ten_mau() { printf '%s.%s' "$(sql "SELECT CONCAT('${DH_MA}.', ma_so_sinh_vien, '.', ho_ten, '.', lop) FROM sinh_vien WHERE id = ${SV_ID_OF[$1]}")" "${2##*.}"; }
+[ -n "$DH_ID" ] || fail "Danh mục định hướng trống — đã seed chưa?"
 giao_de_tai() {  # ma ten linh_vuc
-  json_req POST "${TOKEN[GV011]}" /api/topics "{'dot_do_an_id': ${DOT_ID}, 'ten_de_tai': '''$2''', 'linh_vuc': '''$3''', 'sinh_vien_id': ${SV_ID_OF[$1]}, 'gui': True}" 201
+  json_req POST "${TOKEN[GV011]}" /api/topics "{'dot_do_an_id': ${DOT_ID}, 'ten_de_tai': '''$2''', 'linh_vuc': '''$3''', 'dinh_huong_id': ${DH_ID}, 'sinh_vien_id': ${SV_ID_OF[$1]}, 'gui': True}" 201
   DE_TAI[$1]="$(jget "d['id']")"
   [ "$(jget "d['trang_thai'] + '|' + (d['giang_vien_huong_dan'] or {}).get('ma', '') + '|' + (d['sinh_vien'] or {}).get('ma', '')")" = "DA_PHAN_CONG|GV011|$1" ] \
     || fail "Đề tài giao cho $1 không Đã phân công / GVHD GV011: $(head -c 400 "$TMP/body")"
@@ -292,11 +299,11 @@ giao_de_tai DTC235200340 "Xây dựng hệ thống quản lý câu lạc bộ si
 giao_de_tai DTC235270078 "Phát triển ứng dụng di động theo dõi lịch tiêm chủng cho trẻ em tại trạm y tế phường Tân Thịnh" "Công nghệ phần mềm"
 ok "4 đề tài do GVHD GV011 giao (012..015, Đã phân công): ${DE_TAI[DTC235200258]}, ${DE_TAI[DTC235200325]}, ${DE_TAI[DTC235200340]}, ${DE_TAI[DTC235270078]}"
 
-# nop PATH_API TOKEN FILE -> id tài liệu; cho_kiem_tra TOKEN DOC_ID -> "ty_le|so_doan"
+# nop PATH_API TOKEN FILE [TÊN_GỬI] -> id tài liệu; cho_kiem_tra TOKEN DOC_ID -> "ty_le|so_doan"
 nop() {
   local ct="application/pdf" code
   case "$3" in *.docx) ct="application/vnd.openxmlformats-officedocument.wordprocessingml.document" ;; esac
-  code="$(call POST "$1" "$2" -F "file=@$3;type=${ct}")"
+  code="$(call POST "$1" "$2" -F "file=@$3;type=${ct}${4:+;filename=$4}")"
   [ "$code" = "202" ] || fail "POST $1 ($(basename "$3")) trả ${code}: $(head -c 300 "$TMP/body")"
   jget "d['phien_ban'][0]['tai_lieu']['id']"
 }
@@ -313,15 +320,21 @@ cho_kiem_tra() {
   cp "$TMP/body" "$TMP/check-$2.json"
   jget "f\"{d['ty_le_tong']}%\""
 }
-duyet_de_cuong() {  # ma doc_id
+duyet_de_cuong() {  # ma doc_id — GVHD duyệt, nộp Bộ môn, Bộ môn phê duyệt kèm PDF đã ký
   json_req POST "${TOKEN[GV011]}" "/api/outlines/${DE_TAI[$1]}/review" "{'tai_lieu_do_an_id': $2, 'ket_qua': 'DA_DUYET', 'nhan_xet': 'Đề cương rõ ràng, đồng ý cho thực hiện.'}" 200
+  [ "$(jget "d['trang_thai']")" = "GVHD_DA_DUYET" ] || fail "Đề cương của $1 không GVHD đã duyệt"
+  local code
+  code="$(call POST "/api/outlines/${DE_TAI[$1]}/forward" "${TOKEN[GV011]}")"
+  [ "$code" = "200" ] || fail "Nộp đề cương của $1 lên Bộ môn trả ${code}: $(head -c 300 "$TMP/body")"
+  code="$(call POST "/api/outlines/${DE_TAI[$1]}/bo-mon/approve" "${TOKEN[bomon]}" -F "file=@${REPO_ROOT}/seed-data/tai-lieu/P01-B.pdf;type=application/pdf")"
+  [ "$code" = "200" ] || fail "Bộ môn phê duyệt đề cương của $1 trả ${code}: $(head -c 300 "$TMP/body")"
   [ "$(jget "d['trang_thai']")" = "DA_DUYET" ] || fail "Đề cương của $1 không Đã duyệt"
 }
 
 declare -A DOC
 for ma in DTC235200258 DTC235200325 DTC235200340 DTC235270078; do
   k="DC${SO[$ma]}"
-  DOC[$k]="$(nop "/api/outlines/${DE_TAI[$ma]}/submit" "${TOKEN[$ma]}" "$(tep "$k")")"
+  DOC[$k]="$(nop "/api/outlines/${DE_TAI[$ma]}/submit" "${TOKEN[$ma]}" "$(tep "$k")" "$(ten_mau "$ma" "$(tep "$k")")")"
 done
 declare -A TL
 for ma in DTC235200258 DTC235200325 DTC235200340 DTC235270078; do
